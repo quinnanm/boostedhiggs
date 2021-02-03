@@ -14,3 +14,8 @@ pip install --user --editable .
 ```bash
 bash envSetup.sh
 ```
+
+## Location of ntuples (for 2017)
+```
+/eos/uscms/store/user/cmantill/PFNano/
+```
