@@ -1,14 +1,12 @@
 import os
 import numpy
 import logging
-import awkward
+import awkward as ak
 from coffea import processor, hist, util
 from coffea.lookup_tools.dense_lookup import dense_lookup
 from coffea.btag_tools import BTagScaleFactor
 
-
 logger = logging.getLogger(__name__)
-
 
 class BTagEfficiency(processor.ProcessorABC):
     btagWPs = {
@@ -98,10 +96,10 @@ class BTagCorrector:
         # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BTagSFMethods#1a_Event_reweighting_using_scale
         def combine(eff, sf):
             # tagged SF = SF*eff / eff = SF
-            tagged_sf = awkward.prod(sf[passbtag], axis=-1)
+            tagged_sf = ak.prod(sf[passbtag], axis=-1)
             # untagged SF = (1 - SF*eff) / (1 - eff)
-            untagged_sf = awkward.prod(((1 - sf*eff) / (1 - eff))[~passbtag], axis=-1)
-            return awkward.fill_none(tagged_sf * untagged_sf, 1.)  # TODO: move None guard to coffea
+            untagged_sf = ak.prod(((1 - sf*eff) / (1 - eff))[~passbtag], axis=-1)
+            return ak.fill_none(tagged_sf * untagged_sf, 1.)  # TODO: move None guard to coffea
 
         eff_nom = self.eff(jets.hadronFlavour, jets.pt, abseta)
         eff_statUp = self.eff_statUp(jets.hadronFlavour, jets.pt, abseta)
