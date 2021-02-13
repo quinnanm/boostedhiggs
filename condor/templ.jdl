@@ -8,7 +8,5 @@ Error = DIRECTORY/PREFIX_JOBID.stderr
 Log = DIRECTORY/PREFIX_JOBID.condor.log
 notification = Never
 request_memory = 4500
-use_x509userproxy = true
-x509userproxy = /uscms/home/cmantill/x509up_u49845/
 Queue 1
 
