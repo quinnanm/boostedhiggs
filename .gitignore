@@ -6,3 +6,8 @@ __pycache__
 *~
 *coffea
 binder/data/
+condor/docker_stderror
+condor/logs/
+*.tar.gz
+*.tgz
+coffeaenv/

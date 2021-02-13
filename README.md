@@ -1,16 +1,8 @@
 # boostedhiggs
 
-## Quickstart
+## Running Locally
 
-### Pre-requisites for cmslpc-sl7.fnal.gov:
-```bash
-# check your platform: CC7 shown below, for SL6 it would be "x86_64-slc6-gcc8-opt"
-source /cvmfs/sft.cern.ch/lcg/views/LCG_96python3/x86_64-centos7-gcc8-opt/setup.csh  # or .csh, etc.
-# might need for lpc
-pip install entrypoints==0.3.0 --user
-```
-
-### Pre-requisites (locally):
+### Pre-requisites
 Install miniconda (if you do not already have it):
 ```
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
@@ -66,3 +58,46 @@ scp cmslpc-sl7.fnal.gov:/eos/uscms/store/user/cmantill/PFNano/2017_preUL/BulkGra
 
 And then run the notebook:
 https://github.com/cmantill/boostedhiggs/blob/hhbbww_1l/binder/bbwwprocessor.ipynb
+
+## Condor setup (in bash shell)
+
+Setup environment:
+```
+source setup.sh
+```
+
+Copy to eos
+```
+cp coffeaenv.tar.gz  /eos/uscms/store/user/cmantill/coffeaenv.tar.gz
+```
+
+Replace username in submit script
+
+# To remake dataset input files
+```
+# connect to LPC with a port forward to access the jupyter notebook server
+ssh USERNAME@cmslpc-sl7.fnal.gov -L8xxx:localhost:8xxx
+
+# create a working directory and clone the repo (if have not done yet)
+cd nobackup/hww/
+git clone git@github.com:cmantill/boostedhiggs/
+cd boostedhiggs/condor/
+
+# this script sets up the python environment, only run once
+./setup.sh
+
+# this enables the environment, run it each login (csh users: use activate.csh)
+source egammaenv/bin/activate
+
+# this gives you permission to read CMS data via xrootd
+voms-proxy-init --voms cms --valid 100:00
+
+# in case you do not already have this in your .bashrc (or equivalent) please run
+source /cvmfs/cms.cern.ch/cmsset_default.sh
+
+jupyter notebook --no-browser --port 8xxx
+```
+There should be a link like `http://localhost:8xxx/?token=...` displayed in the output at this point, paste that into your browser. You should see a jupyter notebook with a directory listing.
+Open `filesetDAS.ipynb`.
+
+The .json files containing the datasets to be run should be saved in `infiles/`.
