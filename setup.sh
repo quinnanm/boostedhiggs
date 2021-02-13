@@ -13,7 +13,7 @@ source $NAME/bin/activate
 LOCALPATH=$(python -c 'import sys; print(f"{sys.prefix}/lib/python{sys.version_info.major}.{sys.version_info.minor}/site-packages")')
 export PYTHONPATH=${LOCALPATH}:$PYTHONPATH
 python -m pip install setuptools pip wheel --upgrade
-python -m pip install "coffea==0.7.0" 
+python -m pip install coffea awkward uproot4
 sed -i '1s/#!.*python$/#!\/usr\/bin\/env python/' $NAME/bin/*
 sed -i '40s/.*/VIRTUAL_ENV="$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}" )")" \&\& pwd)"/' $NAME/bin/activate
 sed -i "2a source ${LCG}/setup.sh" $NAME/bin/activate

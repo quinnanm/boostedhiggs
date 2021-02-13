@@ -6,6 +6,11 @@ import uproot
 import awkward as ak
 import numpy as np
 
+import argparse
+
+# How you would run this
+# e.g. python run.py --year 2017 --starti 0 --endi 1 --samples BulkGravTohhTohVVhbb_narrow_M-1000_TuneCP5_13TeV-madgraph-pythia8
+
 def main(year,samples,starti,endi):
 
     from coffea import processor, util, hist
@@ -13,18 +18,18 @@ def main(year,samples,starti,endi):
 
     p = HHbbWW(year=year)
     from coffea.nanoevents import NanoAODSchema
-    args = {
+    nargs = {
         "schema": NanoAODSchema,
     }
     NanoAODSchema.mixins["FatJetLS"] = "PtEtaPhiMLorentzVector"
 
     files = {}
-    with open('fileset_2017_das.json', 'r') as f:
+    with open('data/fileset_2017_das.json', 'r') as f:
         newfiles = json.load(f)
         files.update(newfiles)
 
     selfiles = {k: files[k][starti:endi] for k in samples}
-    out, metrics = processor.run_uproot_job(selfiles,"Events",p,processor.futures_executor,args,chunksize=50000)
+    out = processor.run_uproot_job(selfiles,"Events",p,processor.futures_executor,nargs,chunksize=50000)
 
     util.save(out, 'hhbbww.coffea')
 
