@@ -13,6 +13,7 @@ tar -zxvf boostedhiggs.tar.gz
 # run code
 mkdir test/
 cp boostedhiggs/SCRIPTNAME test/
+cd test/
 python SCRIPTNAME --year YEAR --starti STARTNUM --endi ENDNUM --samples SAMPLE 
 
 #move output to eos
