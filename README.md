@@ -101,3 +101,7 @@ There should be a link like `http://localhost:8xxx/?token=...` displayed in the 
 Open `filesetDAS.ipynb`.
 
 The .json files containing the datasets to be run should be saved in `infiles/`.
+
+```
+python run.py --year 2017 --starti 0 --endi 1 --samples BulkGravTohhTohVVhbb_narrow_M-1000_TuneCP5_13TeV-madgraph-pythia8
+```

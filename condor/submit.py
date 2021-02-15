@@ -56,9 +56,9 @@ samplelist = {
 
 
 # re-tar boostedhiggs files
-os.chdir('../../')
+os.chdir('../')
 if (len(args.settings) is 4):
-    os.system('tar -vzcf boostedhiggs.tar.gz boostedhiggs/ --exclude="*.root" --exclude="*.pdf" --exclude="*.pyc" --exclude=tmp --exclude="*.tgz" --exclude="*std*" --exclude="*sum*" --exclude-vcs --exclude-caches-all --exclude="*.sh" --exclude=coffeaenv --exclude=condor --exclude=*.tar.gz')
+    os.system('tar -zcf boostedhiggs.tar.gz . --exclude="*.root" --exclude="*.pdf" --exclude="*.pyc" --exclude=tmp --exclude="*.tgz" --exclude-vcs --exclude-caches-all --exclude=coffeaenv --exclude=condor')
     os.system('xrdcp -f boostedhiggs.tar.gz root://cmseos.fnal.gov//store/user/cmantill/boostedhiggs.tar.gz')
     os.system('rm boostedhiggs.tar.gz')
 os.chdir(loc_base)

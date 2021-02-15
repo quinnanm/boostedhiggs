@@ -14,10 +14,10 @@ import argparse
 def main(year,samples,starti,endi):
 
     from coffea import processor, util, hist
+    from coffea.nanoevents import NanoAODSchema
     from boostedhiggs.bbwwprocessor import HHbbWW
 
     p = HHbbWW(year=year)
-    from coffea.nanoevents import NanoAODSchema
     nargs = {
         "schema": NanoAODSchema,
     }
