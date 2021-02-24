@@ -1,0 +1,12 @@
+universe = vanilla
+Executable = DIRECTORY/PREFIX_JOBID.sh
+Requirements   =  OpSys == "LINUX" && (Arch != "DUMMY")
+Should_Transfer_Files = YES
+WhenToTransferOutput = ON_EXIT
+Output = DIRECTORY/PREFIX_JOBID.stdout
+Error = DIRECTORY/PREFIX_JOBID.stderr
+Log = DIRECTORY/PREFIX_JOBID.condor.log
+notification = Never
+request_memory = 4500
+Queue 1
+
