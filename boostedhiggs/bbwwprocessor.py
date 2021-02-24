@@ -173,9 +173,9 @@ class HHbbWW(processor.ProcessorABC):
         # good leptons
         good_leptons = ak.concatenate([good_muons, good_electrons], axis=1)
         good_leptons = good_leptons[ak.argsort(good_leptons.pt)]
-        selection.add('nleptons_e', ((ngood_electrons==1) & (ngood_muons==0)))
-        selection.add('nleptons_mu', ((ngood_electrons==0) & (ngood_muons==1)))
-        
+        selection.add('nleptons_e', ((ngood_electrons==1))) # & (ngood_muons==0)))
+        #selection.add('nleptons_mu', ((ngood_electrons==0) & (ngood_muons==1)))
+        selection.add('nleptons_mu', (ngood_muons==1))
         # lepton candidate
         candidatelep = ak.firsts(good_leptons)
                 
@@ -218,8 +218,8 @@ class HHbbWW(processor.ProcessorABC):
         # TODO: add ID
         # TODO: add 2 subjets w pt > 20 & eta<2.4 
         good_fatjetLS = (
-            (fatjetsLS.pt > 50)
-            & (fatjetsLS.delta_r(candidatelep) > 1.2)
+            (fatjetsLS.pt > 0)
+            #& (fatjetsLS.delta_r(candidatelep) > 1.2)
             )
         good_fatjetLSs = fatjetsLS[good_fatjetLS]
         
@@ -227,7 +227,12 @@ class HHbbWW(processor.ProcessorABC):
         mask_hww = (
             (good_fatjetLSs.mass > 10)
             )
+        candidateWjj = ak.firsts(fatjetsLS)
+        print(len(candidateWjj.pt))
+        print(candidateWjj.pt)
         candidateWjj = ak.firsts(good_fatjetLSs[mask_hww][ak.argmin(good_fatjetLSs[mask_hww].delta_r(candidatelep),axis=1,keepdims=True)])
+        print(len(candidateWjj.pt))
+        print(candidateWjj.pt)
         selection.add('hww_tau21_LP', (candidateWjj.tau2/candidateWjj.tau1 <= 0.75))
         selection.add('hww_tau21_HP', (candidateWjj.tau2/candidateWjj.tau1 <= 0.45))
         
@@ -254,12 +259,12 @@ class HHbbWW(processor.ProcessorABC):
 
         # hh system
         # TODO: verify HWW reconstruction and add neutrino.
-        candidateHH = candidateWjj + candidateHbb #+ candidateNeutrino
+        candidateHH = candidateWjj + candidateHbb + candidateNeutrino
         selection.add('hh_mass', (candidateHH.mass >= 700))
         selection.add('hh_centrality', (candidateHH.pt/candidateHH.mass >= 0.3))
                       
-        channels = {"e":["trigger_e","met_filters","nleptons_e","hbb_btag","hbb_vetobtagaway","hww_tau21_LP","hh_mass","hh_centrality"],
-                    "mu":["trigger_mu","met_filters","nleptons_mu","hbb_btag","hbb_vetobtagaway","hww_tau21_LP","hh_mass","hh_centrality"],
+        channels = {"e":["trigger_e","met_filters","nleptons_e","hbb_btag","hbb_vetobtagaway","hww_tau21_LP"], #,"hh_mass","hh_centrality"],
+                    "mu":["trigger_mu","met_filters","nleptons_mu","hbb_btag","hbb_vetobtagaway","hww_tau21_LP"], #,"hh_mass","hh_centrality"],
                     }
             
         # TODO: add gen info: true neutrino pt, true jet pt, true lep pt
@@ -276,7 +281,14 @@ class HHbbWW(processor.ProcessorABC):
                 allcuts_signal.add(cut)
                 output['cutflow_SR_%s'%channel][dataset][cut] += float(weights.weight()[selection.all(*allcuts_signal)].sum())
 
+        
         # fill histograms
+        def normalize(val, cut):
+             if cut is None:
+                 return ak.to_numpy(ak.fill_none(val, np.nan))
+             else:
+                 return ak.to_numpy(ak.fill_none(val[cut], np.nan))
+        
         def fill(channel, systematic, wmod=None):
             selections = channels[channel]
             cut = selection.all(*selections)
@@ -285,20 +297,25 @@ class HHbbWW(processor.ProcessorABC):
                 weight = weights.weight(modifier=systematic)[cut]
             else:
                 weight = weights.weight()[cut] * wmod[cut]
+            
             output['hbb_kinematics'].fill(
                 dataset=dataset,
                 channel=channel,
-                hbb_pt=candidateHbb.pt,
-                hbb_msd=candidateHbb.msd,
-                hbb_deepak8=candidateHbb.deepTagMD_ZHbbvsQCD,
+                hbb_pt=normalize(candidateHbb.pt,cut),
+                hbb_msd=normalize(candidateHbb.msoftdrop,cut),
+                hbb_deepak8=normalize(candidateHbb.deepTagMD_ZHbbvsQCD,cut),
             )
             output['hww_kinematics'].fill(
                 dataset=dataset,
                 channel=channel,
-                hwwls_pt=candidateWjj.pt,
-                hww_pt = (candidateWjj+candidateNeutrino).pt,
-                hww_mass = (candidateWjj+candidateNeutrino).mass,
+                hwwls_pt=normalize(candidateWjj.pt,cut),
+                hww_pt=normalize((candidateWjj+candidateNeutrino).pt,cut),
+                hww_mass=normalize((candidateWjj+candidateNeutrino).mass,cut),
             )
+
+        for channel,cuts in channels.items():
+            fill(channel, None, None)
+            
         return output
         
     def postprocess(self, accumulator):
