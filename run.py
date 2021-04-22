@@ -22,8 +22,7 @@ def main(year,samples,starti,endi):
     tic = time.time()
     cluster = LPCCondorCluster(ship_env=True)
     # minimum > 0: https://github.com/CoffeaTeam/coffea/issues/465
-    #cluster.adapt(minimum=1, maximum=50)
-    cluster.scale(jobs=50)
+    cluster.adapt(minimum=1, maximum=50)
     client = Client(cluster)
 
     nanoevents.NanoAODSchema.mixins["FatJetLS"] = "PtEtaPhiMLorentzVector"
