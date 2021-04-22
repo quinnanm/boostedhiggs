@@ -1,354 +1,54 @@
 {
-    "BulkGravTohhTohVVhbb_narrow_M-1000_TuneCP5_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/BulkGravTohhTohVVhbb_narrow_M-1000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002146/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/BulkGravTohhTohVVhbb_narrow_M-1000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002146/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/BulkGravTohhTohVVhbb_narrow_M-1000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002146/0000/nano_mc2017_3.root"
-    ],
-    "BulkGravTohhTohVVhbb_narrow_M-1400_TuneCP5_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/BulkGravTohhTohVVhbb_narrow_M-1400_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002209/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/BulkGravTohhTohVVhbb_narrow_M-1400_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002209/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/BulkGravTohhTohVVhbb_narrow_M-1400_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002209/0000/nano_mc2017_3.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/BulkGravTohhTohVVhbb_narrow_M-1400_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002209/0000/nano_mc2017_4.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/BulkGravTohhTohVVhbb_narrow_M-1400_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002209/0000/nano_mc2017_5.root"
-    ],
-    "BulkGravTohhTohVVhbb_narrow_M-1800_TuneCP5_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/BulkGravTohhTohVVhbb_narrow_M-1800_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002231/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/BulkGravTohhTohVVhbb_narrow_M-1800_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002231/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/BulkGravTohhTohVVhbb_narrow_M-1800_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002231/0000/nano_mc2017_3.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/BulkGravTohhTohVVhbb_narrow_M-1800_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002231/0000/nano_mc2017_4.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/BulkGravTohhTohVVhbb_narrow_M-1800_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002231/0000/nano_mc2017_5.root"
-    ],
-    "BulkGravTohhTohVVhbb_narrow_M-2000_TuneCP5_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/BulkGravTohhTohVVhbb_narrow_M-2000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002252/0000/nano_mc2017_1-1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/BulkGravTohhTohVVhbb_narrow_M-2000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002252/0000/nano_mc2017_1-2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/BulkGravTohhTohVVhbb_narrow_M-2000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002252/0000/nano_mc2017_1-3.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/BulkGravTohhTohVVhbb_narrow_M-2000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002252/0000/nano_mc2017_1-4.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/BulkGravTohhTohVVhbb_narrow_M-2000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002252/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/BulkGravTohhTohVVhbb_narrow_M-2000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002252/0000/nano_mc2017_3.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/BulkGravTohhTohVVhbb_narrow_M-2000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002252/0000/nano_mc2017_4.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/BulkGravTohhTohVVhbb_narrow_M-2000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002252/0000/nano_mc2017_5.root"
-    ],
-    "BulkGravTohhTohVVhbb_narrow_M-2500_TuneCP5_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/BulkGravTohhTohVVhbb_narrow_M-2500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002316/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/BulkGravTohhTohVVhbb_narrow_M-2500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002316/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/BulkGravTohhTohVVhbb_narrow_M-2500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002316/0000/nano_mc2017_3.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/BulkGravTohhTohVVhbb_narrow_M-2500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002316/0000/nano_mc2017_4.root"
-    ],
-    "BulkGravTohhTohVVhbb_narrow_M-4500_TuneCP5_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/BulkGravTohhTohVVhbb_narrow_M-4500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002340/0000/nano_mc2017_1-1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/BulkGravTohhTohVVhbb_narrow_M-4500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002340/0000/nano_mc2017_1-2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/BulkGravTohhTohVVhbb_narrow_M-4500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002340/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/BulkGravTohhTohVVhbb_narrow_M-4500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002340/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/BulkGravTohhTohVVhbb_narrow_M-4500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002340/0000/nano_mc2017_3.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/BulkGravTohhTohVVhbb_narrow_M-4500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002340/0000/nano_mc2017_4.root"
-    ],
-    "GluGluHToWWToLNuQQ_M125_NNPDF31_TuneCP5_PSweights_13TeV_powheg_JHUGen710_pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluHToWWToLNuQQ_M125_NNPDF31_TuneCP5_PSweights_13TeV_powheg_JHUGen710_pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/210202_003116/0000/nano_mc2017_1-1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluHToWWToLNuQQ_M125_NNPDF31_TuneCP5_PSweights_13TeV_powheg_JHUGen710_pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/210202_003116/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluHToWWToLNuQQ_M125_NNPDF31_TuneCP5_PSweights_13TeV_powheg_JHUGen710_pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/210202_003116/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluHToWWToLNuQQ_M125_NNPDF31_TuneCP5_PSweights_13TeV_powheg_JHUGen710_pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/210202_003116/0000/nano_mc2017_3.root"
-    ],
-    "GluGluToHHTo2B2VLNu2J_node_cHHH0_TuneCP5_PSWeights_13TeV-powheg-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2VLNu2J_node_cHHH0_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001250/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2VLNu2J_node_cHHH0_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001250/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2VLNu2J_node_cHHH0_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001250/0000/nano_mc2017_3.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2VLNu2J_node_cHHH0_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001250/0000/nano_mc2017_4.root"
-    ],
     "GluGluToHHTo2B2VLNu2J_node_cHHH1_TuneCP5_PSWeights_13TeV-powheg-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2VLNu2J_node_cHHH1_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001312/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2VLNu2J_node_cHHH1_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001312/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2VLNu2J_node_cHHH1_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001312/0000/nano_mc2017_3.root"
-    ],
-    "GluGluToHHTo2B2VLNu2J_node_cHHH2p45_TuneCP5_PSWeights_13TeV-powheg-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2VLNu2J_node_cHHH2p45_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001334/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2VLNu2J_node_cHHH2p45_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001334/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2VLNu2J_node_cHHH2p45_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001334/0000/nano_mc2017_3.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2VLNu2J_node_cHHH2p45_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001334/0000/nano_mc2017_4.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2VLNu2J_node_cHHH2p45_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001334/0000/nano_mc2017_5.root"
-    ],
-    "GluGluToHHTo2B2VLNu2J_node_cHHH5_TuneCP5_PSWeights_13TeV-powheg-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2VLNu2J_node_cHHH5_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001400/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2VLNu2J_node_cHHH5_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001400/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2VLNu2J_node_cHHH5_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001400/0000/nano_mc2017_3.root"
-    ],
-    "GluGluToHHTo2B2WToLNu2J_node_10_TuneCP5_PSWeights_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_10_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001448/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_10_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001448/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_10_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001448/0000/nano_mc2017_3.root"
-    ],
-    "GluGluToHHTo2B2WToLNu2J_node_11_TuneCP5_PSWeights_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_11_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001512/0000/nano_mc2017_1-1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_11_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001512/0000/nano_mc2017_1-2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_11_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001512/0000/nano_mc2017_1-3.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_11_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001512/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_11_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001512/0000/nano_mc2017_2.root"
-    ],
-    "GluGluToHHTo2B2WToLNu2J_node_12_TuneCP5_PSWeights_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_12_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001538/0000/nano_mc2017_1-1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_12_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001538/0000/nano_mc2017_1-2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_12_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001538/0000/nano_mc2017_1-3.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_12_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001538/0000/nano_mc2017_1-4.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_12_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001538/0000/nano_mc2017_1-5.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_12_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001538/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_12_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001538/0000/nano_mc2017_3.root"
-    ],
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2VLNu2J_node_cHHH1_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001312/0000/nano_mc2017_1.root", 
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2VLNu2J_node_cHHH1_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001312/0000/nano_mc2017_2.root", 
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2VLNu2J_node_cHHH1_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001312/0000/nano_mc2017_3.root"
+    ], 
     "GluGluToHHTo2B2WToLNu2J_node_1_TuneCP5_PSWeights_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_1_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/210202_001600/0000/nano_mc2017_1-1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_1_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/210202_001600/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_1_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/210202_001600/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_1_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/210202_001600/0000/nano_mc2017_4.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_1_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/210202_001600/0000/nano_mc2017_5.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_1_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/210202_001600/0000/nano_mc2017_6.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_1_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/210202_001600/0000/nano_mc2017_7.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_1_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/210202_001600/0000/nano_mc2017_8.root"
-    ],
-    "GluGluToHHTo2B2WToLNu2J_node_2_TuneCP5_PSWeights_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_2_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001628/0000/nano_mc2017_1-1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_2_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001628/0000/nano_mc2017_1-10.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_2_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001628/0000/nano_mc2017_1-11.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_2_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001628/0000/nano_mc2017_1-12.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_2_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001628/0000/nano_mc2017_1-13.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_2_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001628/0000/nano_mc2017_1-14.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_2_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001628/0000/nano_mc2017_1-2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_2_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001628/0000/nano_mc2017_1-3.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_2_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001628/0000/nano_mc2017_1-4.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_2_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001628/0000/nano_mc2017_1-5.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_2_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001628/0000/nano_mc2017_1-6.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_2_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001628/0000/nano_mc2017_1-7.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_2_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001628/0000/nano_mc2017_1-8.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_2_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001628/0000/nano_mc2017_1-9.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_2_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001628/0000/nano_mc2017_3.root"
-    ],
-    "GluGluToHHTo2B2WToLNu2J_node_3_TuneCP5_PSWeights_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_3_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001650/0000/nano_mc2017_1-1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_3_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001650/0000/nano_mc2017_1-2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_3_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001650/0000/nano_mc2017_1-4.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_3_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001650/0000/nano_mc2017_1-5.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_3_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001650/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_3_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001650/0000/nano_mc2017_2.root"
-    ],
-    "GluGluToHHTo2B2WToLNu2J_node_4_TuneCP5_PSWeights_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_4_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001712/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_4_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001712/0000/nano_mc2017_2.root"
-    ],
-    "GluGluToHHTo2B2WToLNu2J_node_5_TuneCP5_PSWeights_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_5_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001735/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_5_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001735/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_5_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001735/0000/nano_mc2017_3.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_5_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001735/0000/nano_mc2017_4.root"
-    ],
-    "GluGluToHHTo2B2WToLNu2J_node_6_TuneCP5_PSWeights_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_6_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001758/0000/nano_mc2017_1-1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_6_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001758/0000/nano_mc2017_1-2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_6_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001758/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_6_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001758/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_6_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001758/0000/nano_mc2017_3.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_6_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001758/0000/nano_mc2017_4.root"
-    ],
-    "GluGluToHHTo2B2WToLNu2J_node_7_TuneCP5_PSWeights_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_7_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001820/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_7_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001820/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_7_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001820/0000/nano_mc2017_3.root"
-    ],
-    "GluGluToHHTo2B2WToLNu2J_node_8_TuneCP5_PSWeights_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_8_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001843/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_8_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001843/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_8_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001843/0000/nano_mc2017_3.root"
-    ],
-    "GluGluToHHTo2B2WToLNu2J_node_9_TuneCP5_PSWeights_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_9_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001905/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_9_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001905/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_9_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001905/0000/nano_mc2017_3.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_9_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001905/0000/nano_mc2017_4.root"
-    ],
-    "GluGluToHHTo2B2WToLNu2J_node_SM_TuneCP5_PSWeights_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_SM_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/210202_001423/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_SM_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/210202_001423/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_SM_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/210202_001423/0000/nano_mc2017_3.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_SM_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/210202_001423/0000/nano_mc2017_4.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_SM_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/210202_001423/0000/nano_mc2017_5.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_SM_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/210202_001423/0000/nano_mc2017_6.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_SM_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/210202_001423/0000/nano_mc2017_7.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_SM_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/210202_001423/0000/nano_mc2017_8.root"
-    ],
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_1_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/210202_001600/0000/nano_mc2017_1-1.root", 
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_1_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/210202_001600/0000/nano_mc2017_1.root", 
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_1_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/210202_001600/0000/nano_mc2017_2.root", 
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_1_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/210202_001600/0000/nano_mc2017_4.root", 
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_1_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/210202_001600/0000/nano_mc2017_5.root", 
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_1_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/210202_001600/0000/nano_mc2017_6.root", 
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_1_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/210202_001600/0000/nano_mc2017_7.root", 
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/GluGluToHHTo2B2WToLNu2J_node_1_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/210202_001600/0000/nano_mc2017_8.root"
+    ], 
     "GluGluToHHTo4V_node_cHHH1_TuneCP5_PSWeights_13TeV-powheg-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo4V_node_cHHH1_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_000337/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo4V_node_cHHH1_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_000337/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo4V_node_cHHH1_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_000337/0000/nano_mc2017_3.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo4V_node_cHHH1_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_000337/0000/nano_mc2017_4.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo4V_node_cHHH1_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_000337/0000/nano_mc2017_5.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo4V_node_cHHH1_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_000337/0000/nano_mc2017_6.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo4V_node_cHHH1_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_000337/0000/nano_mc2017_7.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo4V_node_cHHH1_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_000337/0000/nano_mc2017_8.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluToHHTo4V_node_cHHH1_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_000337/0000/nano_mc2017_9.root"
-    ],
-    "GluGluZH_HToWW_M125_13TeV_powheg_pythia8_TuneCP5": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluZH_HToWW_M125_13TeV_powheg_pythia8_TuneCP5/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002923/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/GluGluZH_HToWW_M125_13TeV_powheg_pythia8_TuneCP5/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002923/0000/nano_mc2017_2.root"
-    ],
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/GluGluToHHTo4V_node_cHHH1_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_000337/0000/nano_mc2017_1.root", 
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/GluGluToHHTo4V_node_cHHH1_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_000337/0000/nano_mc2017_2.root", 
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/GluGluToHHTo4V_node_cHHH1_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_000337/0000/nano_mc2017_3.root", 
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/GluGluToHHTo4V_node_cHHH1_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_000337/0000/nano_mc2017_4.root", 
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/GluGluToHHTo4V_node_cHHH1_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_000337/0000/nano_mc2017_5.root", 
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/GluGluToHHTo4V_node_cHHH1_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_000337/0000/nano_mc2017_6.root", 
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/GluGluToHHTo4V_node_cHHH1_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_000337/0000/nano_mc2017_7.root", 
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/GluGluToHHTo4V_node_cHHH1_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_000337/0000/nano_mc2017_8.root", 
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/GluGluToHHTo4V_node_cHHH1_TuneCP5_PSWeights_13TeV-powheg-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_000337/0000/nano_mc2017_9.root"
+    ], 
     "HWminusJ_HToWW_M125_13TeV_powheg_pythia8_TuneCP5": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/HWminusJ_HToWW_M125_13TeV_powheg_pythia8_TuneCP5/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002944/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/HWminusJ_HToWW_M125_13TeV_powheg_pythia8_TuneCP5/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002944/0000/nano_mc2017_2.root"
-    ],
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/HWminusJ_HToWW_M125_13TeV_powheg_pythia8_TuneCP5/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002944/0000/nano_mc2017_1.root", 
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/HWminusJ_HToWW_M125_13TeV_powheg_pythia8_TuneCP5/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002944/0000/nano_mc2017_2.root"
+    ], 
     "HWplusJ_HToWW_M125_13TeV_powheg_pythia8_TuneCP5": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/HWplusJ_HToWW_M125_13TeV_powheg_pythia8_TuneCP5/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003009/0000/nano_mc2017_1-1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/HWplusJ_HToWW_M125_13TeV_powheg_pythia8_TuneCP5/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003009/0000/nano_mc2017_1-2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/HWplusJ_HToWW_M125_13TeV_powheg_pythia8_TuneCP5/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003009/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/HWplusJ_HToWW_M125_13TeV_powheg_pythia8_TuneCP5/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003009/0000/nano_mc2017_2.root"
-    ],
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/HWplusJ_HToWW_M125_13TeV_powheg_pythia8_TuneCP5/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003009/0000/nano_mc2017_1-1.root", 
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/HWplusJ_HToWW_M125_13TeV_powheg_pythia8_TuneCP5/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003009/0000/nano_mc2017_1-2.root", 
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/HWplusJ_HToWW_M125_13TeV_powheg_pythia8_TuneCP5/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003009/0000/nano_mc2017_1.root", 
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/HWplusJ_HToWW_M125_13TeV_powheg_pythia8_TuneCP5/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003009/0000/nano_mc2017_2.root"
+    ], 
     "HZJ_HToWW_M125_13TeV_powheg_jhugen714_pythia8_TuneCP5": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/HZJ_HToWW_M125_13TeV_powheg_jhugen714_pythia8_TuneCP5/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v4/210202_003031/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/HZJ_HToWW_M125_13TeV_powheg_jhugen714_pythia8_TuneCP5/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v4/210202_003031/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/HZJ_HToWW_M125_13TeV_powheg_jhugen714_pythia8_TuneCP5/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v4/210202_003031/0000/nano_mc2017_3.root"
-    ],
-    "Higgs0PHToWW_M125_13TeV_powheg2_JHUGenV710_pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Higgs0PHToWW_M125_13TeV_powheg2_JHUGenV710_pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003053/0000/nano_mc2017_1-1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Higgs0PHToWW_M125_13TeV_powheg2_JHUGenV710_pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003053/0000/nano_mc2017_1-2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Higgs0PHToWW_M125_13TeV_powheg2_JHUGenV710_pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003053/0000/nano_mc2017_1-3.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Higgs0PHToWW_M125_13TeV_powheg2_JHUGenV710_pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003053/0000/nano_mc2017_1-4.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Higgs0PHToWW_M125_13TeV_powheg2_JHUGenV710_pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003053/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Higgs0PHToWW_M125_13TeV_powheg2_JHUGenV710_pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003053/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Higgs0PHToWW_M125_13TeV_powheg2_JHUGenV710_pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003053/0000/nano_mc2017_3.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Higgs0PHToWW_M125_13TeV_powheg2_JHUGenV710_pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003053/0000/nano_mc2017_4.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Higgs0PHToWW_M125_13TeV_powheg2_JHUGenV710_pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003053/0000/nano_mc2017_5.root"
-    ],
-    "Radion_hh_hVVhbb_inclusive_narrow_M-1000_TuneCP5_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-1000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001927/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-1000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001927/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-1000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001927/0000/nano_mc2017_3.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-1000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001927/0000/nano_mc2017_4.root"
-    ],
-    "Radion_hh_hVVhbb_inclusive_narrow_M-1400_TuneCP5_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-1400_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001951/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-1400_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001951/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-1400_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001951/0000/nano_mc2017_3.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-1400_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_001951/0000/nano_mc2017_4.root"
-    ],
-    "Radion_hh_hVVhbb_inclusive_narrow_M-1800_TuneCP5_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-1800_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002015/0000/nano_mc2017_1-2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-1800_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002015/0000/nano_mc2017_1-3.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-1800_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002015/0000/nano_mc2017_1-4.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-1800_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002015/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-1800_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002015/0000/nano_mc2017_3.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-1800_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002015/0000/nano_mc2017_4.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-1800_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002015/0000/nano_mc2017_5.root"
-    ],
-    "Radion_hh_hVVhbb_inclusive_narrow_M-2000_TuneCP5_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-2000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002037/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-2000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002037/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-2000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002037/0000/nano_mc2017_3.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-2000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002037/0000/nano_mc2017_4.root"
-    ],
-    "Radion_hh_hVVhbb_inclusive_narrow_M-3000_TuneCP5_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-3000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002101/0000/nano_mc2017_1-1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-3000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002101/0000/nano_mc2017_1-10.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-3000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002101/0000/nano_mc2017_1-11.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-3000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002101/0000/nano_mc2017_1-12.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-3000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002101/0000/nano_mc2017_1-2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-3000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002101/0000/nano_mc2017_1-3.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-3000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002101/0000/nano_mc2017_1-4.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-3000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002101/0000/nano_mc2017_1-5.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-3000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002101/0000/nano_mc2017_1-6.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-3000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002101/0000/nano_mc2017_1-7.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-3000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002101/0000/nano_mc2017_1-8.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-3000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002101/0000/nano_mc2017_1-9.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-3000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002101/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-3000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002101/0000/nano_mc2017_5.root"
-    ],
-    "Radion_hh_hVVhbb_inclusive_narrow_M-4500_TuneCP5_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-4500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002124/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-4500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002124/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-4500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002124/0000/nano_mc2017_3.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_hVVhbb_inclusive_narrow_M-4500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002124/0000/nano_mc2017_4.root"
-    ],
-    "Radion_hh_htatahbb_inclusive_narrow_M1000_TuneCP5_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M1000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002402/0000/nano_mc2017_1-1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M1000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002402/0000/nano_mc2017_1-2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M1000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002402/0000/nano_mc2017_1-3.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M1000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002402/0000/nano_mc2017_1-4.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M1000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002402/0000/nano_mc2017_1-5.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M1000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002402/0000/nano_mc2017_1-8.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M1000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002402/0000/nano_mc2017_1.root"
-    ],
-    "Radion_hh_htatahbb_inclusive_narrow_M1200_TuneCP5_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M1200_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002428/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M1200_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002428/0000/nano_mc2017_2.root"
-    ],
-    "Radion_hh_htatahbb_inclusive_narrow_M1400_TuneCP5_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M1400_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002450/0000/nano_mc2017_1-1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M1400_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002450/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M1400_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002450/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M1400_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002450/0000/nano_mc2017_3.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M1400_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002450/0000/nano_mc2017_4.root"
-    ],
-    "Radion_hh_htatahbb_inclusive_narrow_M1600_TuneCP5_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M1600_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002514/0000/nano_mc2017_1-1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M1600_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002514/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M1600_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002514/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M1600_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002514/0000/nano_mc2017_3.root"
-    ],
-    "Radion_hh_htatahbb_inclusive_narrow_M1800_TuneCP5_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M1800_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002538/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M1800_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002538/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M1800_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002538/0000/nano_mc2017_3.root"
-    ],
-    "Radion_hh_htatahbb_inclusive_narrow_M2000_TuneCP5_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M2000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002600/0000/nano_mc2017_1-1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M2000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002600/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M2000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002600/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M2000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002600/0000/nano_mc2017_3.root"
-    ],
-    "Radion_hh_htatahbb_inclusive_narrow_M2500_TuneCP5_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M2500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002622/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M2500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002622/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M2500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002622/0000/nano_mc2017_3.root"
-    ],
-    "Radion_hh_htatahbb_inclusive_narrow_M3000_TuneCP5_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M3000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002646/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M3000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002646/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M3000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002646/0000/nano_mc2017_3.root"
-    ],
-    "Radion_hh_htatahbb_inclusive_narrow_M3500_TuneCP5_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M3500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002708/0000/nano_mc2017_1-1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M3500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002708/0000/nano_mc2017_1-2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M3500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002708/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M3500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002708/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M3500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002708/0000/nano_mc2017_3.root"
-    ],
-    "Radion_hh_htatahbb_inclusive_narrow_M4000_TuneCP5_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M4000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002730/0000/nano_mc2017_1-1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M4000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002730/0000/nano_mc2017_1-2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M4000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002730/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M4000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002730/0000/nano_mc2017_2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M4000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002730/0000/nano_mc2017_3.root"
-    ],
-    "Radion_hh_htatahbb_inclusive_narrow_M4500_TuneCP5_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M4500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002754/0000/nano_mc2017_1-1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M4500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002754/0000/nano_mc2017_1-2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M4500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002754/0000/nano_mc2017_1-3.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M4500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002754/0000/nano_mc2017_1-4.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M4500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002754/0000/nano_mc2017_1-6.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M4500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002754/0000/nano_mc2017_1-7.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M4500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002754/0000/nano_mc2017_1-8.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M4500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002754/0000/nano_mc2017_1-9.root"
-    ],
-    "Radion_hh_htatahbb_inclusive_narrow_M800_TuneCP5_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M800_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002838/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M800_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002838/0000/nano_mc2017_2.root"
-    ],
-    "Radion_hh_htatahbb_inclusive_narrow_M900_TuneCP5_13TeV-madgraph-pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M900_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002901/0000/nano_mc2017_1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/Radion_hh_htatahbb_inclusive_narrow_M900_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_002901/0000/nano_mc2017_2.root"
-    ],
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/HZJ_HToWW_M125_13TeV_powheg_jhugen714_pythia8_TuneCP5/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v4/210202_003031/0000/nano_mc2017_1.root", 
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/HZJ_HToWW_M125_13TeV_powheg_jhugen714_pythia8_TuneCP5/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v4/210202_003031/0000/nano_mc2017_2.root", 
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/HZJ_HToWW_M125_13TeV_powheg_jhugen714_pythia8_TuneCP5/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v4/210202_003031/0000/nano_mc2017_3.root"
+    ], 
     "VBFHToWWToLNuQQ_M125_NNPDF31_TuneCP5_PSweights_13TeV_powheg_JHUGen710_pythia8": [
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/VBFHToWWToLNuQQ_M125_NNPDF31_TuneCP5_PSweights_13TeV_powheg_JHUGen710_pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003138/0000/nano_mc2017_1-1.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/VBFHToWWToLNuQQ_M125_NNPDF31_TuneCP5_PSweights_13TeV_powheg_JHUGen710_pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003138/0000/nano_mc2017_1-2.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/VBFHToWWToLNuQQ_M125_NNPDF31_TuneCP5_PSweights_13TeV_powheg_JHUGen710_pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003138/0000/nano_mc2017_1-3.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/VBFHToWWToLNuQQ_M125_NNPDF31_TuneCP5_PSweights_13TeV_powheg_JHUGen710_pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003138/0000/nano_mc2017_1-4.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/VBFHToWWToLNuQQ_M125_NNPDF31_TuneCP5_PSweights_13TeV_powheg_JHUGen710_pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003138/0000/nano_mc2017_1-5.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/VBFHToWWToLNuQQ_M125_NNPDF31_TuneCP5_PSweights_13TeV_powheg_JHUGen710_pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003138/0000/nano_mc2017_1-6.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/VBFHToWWToLNuQQ_M125_NNPDF31_TuneCP5_PSweights_13TeV_powheg_JHUGen710_pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003138/0000/nano_mc2017_1-7.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/VBFHToWWToLNuQQ_M125_NNPDF31_TuneCP5_PSweights_13TeV_powheg_JHUGen710_pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003138/0000/nano_mc2017_1-8.root",
-        "root://cmseos.fnal.gov//store/user/cmantill/PFNano/2017_preUL/VBFHToWWToLNuQQ_M125_NNPDF31_TuneCP5_PSweights_13TeV_powheg_JHUGen710_pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003138/0000/nano_mc2017_1.root"
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/VBFHToWWToLNuQQ_M125_NNPDF31_TuneCP5_PSweights_13TeV_powheg_JHUGen710_pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003138/0000/nano_mc2017_1-1.root", 
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/VBFHToWWToLNuQQ_M125_NNPDF31_TuneCP5_PSweights_13TeV_powheg_JHUGen710_pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003138/0000/nano_mc2017_1-2.root", 
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/VBFHToWWToLNuQQ_M125_NNPDF31_TuneCP5_PSweights_13TeV_powheg_JHUGen710_pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003138/0000/nano_mc2017_1-3.root", 
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/VBFHToWWToLNuQQ_M125_NNPDF31_TuneCP5_PSweights_13TeV_powheg_JHUGen710_pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003138/0000/nano_mc2017_1-4.root", 
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/VBFHToWWToLNuQQ_M125_NNPDF31_TuneCP5_PSweights_13TeV_powheg_JHUGen710_pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003138/0000/nano_mc2017_1-5.root", 
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/VBFHToWWToLNuQQ_M125_NNPDF31_TuneCP5_PSweights_13TeV_powheg_JHUGen710_pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003138/0000/nano_mc2017_1-6.root", 
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/VBFHToWWToLNuQQ_M125_NNPDF31_TuneCP5_PSweights_13TeV_powheg_JHUGen710_pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003138/0000/nano_mc2017_1-7.root", 
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/VBFHToWWToLNuQQ_M125_NNPDF31_TuneCP5_PSweights_13TeV_powheg_JHUGen710_pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003138/0000/nano_mc2017_1-8.root", 
+        "root://cmseos.fnal.gov//store/user/lpcdihiggsboost/cmantill/PFNano/2017_preUL/VBFHToWWToLNuQQ_M125_NNPDF31_TuneCP5_PSweights_13TeV_powheg_JHUGen710_pythia8/RunIIFall17Jan22-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/210202_003138/0000/nano_mc2017_1.root"
     ]
 }

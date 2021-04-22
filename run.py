@@ -45,7 +45,7 @@ def main(year,samples,starti,endi):
     print("Waiting for at least one worker...")
     client.wait_for_workers(1)
     out, metrics = processor.run_uproot_job(
-        "data/fileset_2017_das.json",
+        "data/fileset_2017UL.json",
         treename="Events",
         processor_instance=p,
         executor=processor.dask_executor,
