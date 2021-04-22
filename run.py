@@ -20,7 +20,10 @@ def main(year,samples,starti,endi):
     from boostedhiggs.bbwwprocessor import HHbbWW
 
     tic = time.time()
-    cluster = LPCCondorCluster(ship_env=True)
+    cluster = LPCCondorCluster(
+        ship_env=True,
+        transfer_input_files="boostedhiggs",
+    )
     # minimum > 0: https://github.com/CoffeaTeam/coffea/issues/465
     cluster.adapt(minimum=1, maximum=50)
     client = Client(cluster)
