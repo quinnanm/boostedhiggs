@@ -3,6 +3,9 @@
 import os, sys
 import json
 import uproot
+import time
+from distributed import Client
+from lpcjobqueue import LPCCondorCluster
 import awkward as ak
 import numpy as np
 
@@ -13,23 +16,50 @@ import argparse
 
 def main(year,samples,starti,endi):
 
-    from coffea import processor, util, hist
-    from coffea.nanoevents import NanoAODSchema
+    from coffea import processor, util, hist, nanoevents
     from boostedhiggs.bbwwprocessor import HHbbWW
 
-    p = HHbbWW(year=year)
-    nargs = {
-        "schema": NanoAODSchema,
+    tic = time.time()
+    cluster = LPCCondorCluster(
+        ship_env=True,
+        transfer_input_files="boostedhiggs",
+    )
+    # minimum > 0: https://github.com/CoffeaTeam/coffea/issues/465
+    cluster.adapt(minimum=1, maximum=50)
+    client = Client(cluster)
+
+    nanoevents.NanoAODSchema.mixins["FatJetLS"] = "PtEtaPhiMLorentzVector"
+
+    def patch_fatjets():
+        from coffea import nanoevents
+        nanoevents.NanoAODSchema.mixins["FatJetLS"] = "PtEtaPhiMLorentzVector"
+
+    client.register_worker_callbacks(patch_fatjets)
+
+    exe_args = {
+        "client": client,
+        "savemetrics": True,
+        "schema": nanoevents.NanoAODSchema,
+        "align_clusters": True,
     }
-    NanoAODSchema.mixins["FatJetLS"] = "PtEtaPhiMLorentzVector"
 
-    files = {}
-    with open('data/fileset_2017_das.json', 'r') as f:
-        newfiles = json.load(f)
-        files.update(newfiles)
+    p = HHbbWW(year=year)
 
-    selfiles = {k: files[k][starti:endi] for k in samples}
-    out = processor.run_uproot_job(selfiles,"Events",p,processor.futures_executor,nargs,chunksize=50000)
+    print("Waiting for at least one worker...")
+    client.wait_for_workers(1)
+    out, metrics = processor.run_uproot_job(
+        "data/fileset_2017UL.json",
+        treename="Events",
+        processor_instance=p,
+        executor=processor.dask_executor,
+        executor_args=exe_args,
+    )
+
+    elapsed = time.time() - tic
+    print(f"Output: {out}")
+    print(f"Metrics: {metrics}")
+    print(f"Finished in {elapsed:.1f}s")
+    print(f"Events/s: {metrics['entries'] / elapsed:.0f}")
 
     util.save(out, 'hhbbww.coffea')
 
@@ -39,9 +69,6 @@ if __name__ == "__main__":
     #ex. python run.py --year 2018 --starti 0 --endi -1 --samples HHBBWW
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',       dest='year',       default='2017',       help="year",        type=str)
-    parser.add_argument('--starti',     dest='starti',     default=0,            help="start index", type=int)
-    parser.add_argument('--endi',       dest='endi',       default=-1,           help="end index",   type=int)
-    parser.add_argument('--samples',    dest='samples',    default=[],           help='samples',     nargs='+')
     args = parser.parse_args()
 
-    main(args.year,args.samples,args.starti,args.endi)
+    main(args.year,[],0,-1)
