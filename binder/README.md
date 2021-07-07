@@ -20,7 +20,7 @@ Verify the installation is successful by running conda info and check if the pat
 If you cannot run the conda command, check if you need to add the conda path to your PATH variable in your bashrc/zshrc file, e.g.,
 ```
 export PATH="$HOME/miniconda3/bin:$PATH"
-``
+```
 
 ### Set up a conda environment and install the required packages
 ```
