@@ -200,8 +200,8 @@ class HwwProcessor(processor.ProcessorABC):
             )
 
             selection.add('lep_miniIso', candidatelep.miniPFRelIso_all < 0.1)
-            selection.add('muon_kin', (leadinglep.pt > 25.) & (abs(leadinglep.eta) < 2.1))
-            selection.add('electron_kin', (leadinglep.pt > 25.) & (abs(leadinglep.eta) < 2.1))
+            selection.add('muon_kin', (candidatelep.pt > 25.) & (abs(candidatelep.eta) < 2.1))
+            selection.add('electron_kin', (candidatelep.pt > 25.) & (abs(candidatelep.eta) < 2.1))
 
             # taus
             if self._year=='2018':
