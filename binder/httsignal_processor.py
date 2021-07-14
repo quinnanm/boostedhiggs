@@ -71,6 +71,13 @@ class HttSignalProcessor(processor.ProcessorABC):
                 hist2.axis.IntCategory([0, 1, 4, 6], name='genHflavor', label='higgs matching'),
                 hist2.axis.Regular(100, 200, 1200, name='pt', label=r'Jet $p_T$'),
                 hist2.storage.Weight(),
+            ),
+            'signal_iso': hist2.Hist(
+                hist2.axis.Regular(25, 0, 1, name="eleminiIso", label="$e$ miniIso"),
+                hist2.axis.Regular(25, 0, 1, name="elerelIso", label="$e$ Rel Iso"),
+                hist2.axis.Regular(25, 0, 1, name="muminiIso", label="$\mu$ miniIso"),
+                hist2.axis.Regular(25, 0, 1, name="murelIso", label="$\mu$ Rel Iso"),
+                hist2.storage.Weight(),
             )
         }
         
@@ -167,6 +174,13 @@ class HttSignalProcessor(processor.ProcessorABC):
             genHflavor=normalize(htt_matched,dr_lep_jet_cut),
             pt = normalize(candidatefj.pt,dr_lep_jet_cut),
             weight=weights.weight()[dr_lep_jet_cut],
+        )
+        output['signal_iso'].fill(
+            eleminiIso = normalize(ele_miniIso,dr_lep_jet_cut),
+            elerelIso = normalize(ele_relIso,dr_lep_jet_cut),
+            muminiIso = normalize(mu_miniIso,dr_lep_jet_cut),
+            murelIso = normalize(mu_relIso,dr_lep_jet_cut),
+            weight=weights.weight()[dr_lep_jet_cut]
         )
 
         return {dataset: output}
@@ -266,3 +280,89 @@ for arbitration in ["pt", "met", "lep"]:
     )
     ax.legend(match, title="matched")
     fig.savefig(f"htt_matchvspt_{arbitration}.png")
+    
+    # electron and muon isolation
+                
+    fig, ax = plt.subplots(
+        figsize=(8,7), 
+        constrained_layout=True
+    )
+
+    out["Htt"]["signal_iso"][{"murelIso":sum, "elerelIso":sum, "eleminiIso":sum}].plot1d(ax=ax)
+
+    ax.set(
+        title=title,
+        ylabel="Events"
+    )
+    plt.savefig(f"htt_muminiIso_{arbitration}.png")
+    
+    fig, ax = plt.subplots(
+        figsize=(8,7), 
+        constrained_layout=True
+    )
+
+    out["Htt"]["signal_iso"][{"muminiIso":sum,"elerelIso":sum, "eleminiIso":sum}].plot1d(ax=ax)
+
+    ax.set(
+        title=title,
+        ylabel="Events"
+    )
+    plt.savefig(f"htt_murelIso_{arbitration}.png")
+                
+    fig, ax = plt.subplots(
+        figsize=(8,7), 
+        constrained_layout=True
+    )
+
+    out["Htt"]["signal_iso"][{"murelIso":sum,"elerelIso":sum, "eleminiIso":sum}].plot1d(ax=ax, label="mini")
+    out["Htt"]["signal_iso"][{"muminiIso":sum,"elerelIso":sum, "eleminiIso":sum}].plot1d(ax=ax, label="rel")
+
+    ax.set(
+        title=title,
+        ylabel="Events",
+        xlabel="$\mu$ Isolation",
+    )
+    ax.legend(title="Isolation")
+    plt.savefig(f"htt_muIso_{arbitration}.png")
+    
+    fig, ax = plt.subplots(
+        figsize=(8,7), 
+        constrained_layout=True
+    )
+
+    out["Htt"]["signal_iso"][{"elerelIso":sum,"murelIso":sum, "muminiIso":sum}].plot1d(ax=ax)
+
+    ax.set(
+        title=title,
+        ylabel="Events"
+    )
+    plt.savefig(f"htt_eleminiIso_{arbitration}.png")
+                
+    fig, ax = plt.subplots(
+        figsize=(8,7), 
+        constrained_layout=True
+    )
+
+    out["Htt"]["signal_iso"][{"eleminiIso":sum,"murelIso":sum, "muminiIso":sum}].plot1d(ax=ax)
+
+    ax.set(
+        title=title,
+        ylabel="Events"
+    )
+    plt.savefig(f"htt_elerelIso_{arbitration}.png")
+    
+    fig, ax = plt.subplots(
+        figsize=(8,7), 
+        constrained_layout=True
+    )
+
+    out["Htt"]["signal_iso"][{"elerelIso":sum,"murelIso":sum, "muminiIso":sum}].plot1d(ax=ax, label="mini")
+    out["Htt"]["signal_iso"][{"eleminiIso":sum,"murelIso":sum, "muminiIso":sum}].plot1d(ax=ax, label="rel")
+
+    ax.set(
+        title=title,
+        ylabel="Events",
+        xlabel="$e$ Isolation",
+    )
+    ax.legend(title="Isolation")
+    plt.savefig(f"htt_eleIso_{arbitration}.png")
