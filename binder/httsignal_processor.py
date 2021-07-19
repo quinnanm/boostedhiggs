@@ -7,7 +7,7 @@ hep.style.use(hep.style.CMS)
 import hist as hist2
 from coffea import processor
 from coffea.nanoevents.methods import candidate, vector
-from coffea.analysis_tools import Weights
+from coffea.analysis_tools import Weights, PackedSelection
 
 
 def getParticles(genparticles,lowid=22,highid=25,flags=['fromHardProcess', 'isLastCopy']):
@@ -69,20 +69,21 @@ class HttSignalProcessor(processor.ProcessorABC):
             'signal_kin': hist2.Hist(
                 hist2.axis.IntCategory([0, 3, 6, 8, 10, 12], name='genflavor', label='gen flavor'),
                 hist2.axis.IntCategory([0, 1, 4, 6], name='genHflavor', label='higgs matching'),
-                hist2.axis.Regular(100, 200, 1200, name='pt', label=r'Jet $p_T$'),
+                hist2.axis.Regular(100, 200, 1200, name='pt', label=r'Jet $p_T$ [GeV]'),
                 hist2.storage.Weight(),
             ),
-            'signal_iso': hist2.Hist(
-                hist2.axis.Regular(25, 0, 1, name="eleminiIso", label="$e$ miniIso"),
-                hist2.axis.Regular(25, 0, 1, name="elerelIso", label="$e$ Rel Iso"),
-                hist2.axis.Regular(25, 0, 1, name="muminiIso", label="$\mu$ miniIso"),
-                hist2.axis.Regular(25, 0, 1, name="murelIso", label="$\mu$ Rel Iso"),
+            "lep_kin": hist2.Hist(
+                hist2.axis.StrCategory(["hadmu_signal", "hadel_signal"], name="region", label="Region"),
+                hist2.axis.Regular(25, 0, 1, name="lepminiIso", label="lep miniIso"),
+                hist2.axis.Regular(25, 0, 1, name="leprelIso", label="lep Rel Iso"),
+                hist2.axis.Regular(100, 200, 1200, name='lep_pt', label=r'lep $p_T$ [GeV]'),
                 hist2.storage.Weight(),
-            )
+            ),
         }
         
     def process(self, events):
         dataset = events.metadata['dataset']
+        selection = PackedSelection()
         weights = Weights(len(events), storeIndividual=True)
         weights.add('genweight', events.genWeight)
         
@@ -115,6 +116,14 @@ class HttSignalProcessor(processor.ProcessorABC):
             & (events.Electron.cutBased >= events.Electron.LOOSE)
         )
         nlowptelectrons = ak.sum(lowptelectron, axis=1)
+        
+        goodtau = (
+            (events.Tau.pt > 20)
+            & (abs(events.Tau.eta) < 2.3)
+            & (events.Tau.idAntiEle >= 8)
+            & (events.Tau.idAntiMu >= 1)
+        )
+        ntaus = ak.sum(goodtau, axis=1)
 
         # concatenate leptons and select leading one
         goodleptons = ak.concatenate([events.Muon[goodmuon], events.Electron[goodelectron]], axis=1)
@@ -130,6 +139,10 @@ class HttSignalProcessor(processor.ProcessorABC):
             with_name="PtEtaPhiMCandidate",
             behavior=candidate.behavior,
         )
+        
+        # lepton isolation
+        lep_miniIso = candidatelep.miniPFRelIso_all
+        lep_relIso = candidatelep.pfRelIso03_all
         
         # met
         met = events.MET
@@ -155,6 +168,20 @@ class HttSignalProcessor(processor.ProcessorABC):
         # match and flavor htt 
         htt_flavor,htt_matched = match_Htt(events,candidatefj)
         
+        # select events with only electrons or muons
+        selection.add('onemuon', (nmuons == 1) & (nlowptmuons <= 1) & (nelectrons == 0) & (nlowptelectrons == 0) & (ntaus == 0))
+        selection.add('oneelectron', (nelectrons == 1) & (nlowptelectrons <= 1) & (nmuons == 0) & (nlowptmuons == 0) & (ntaus == 0))
+            
+        # select only leptons inside the jet
+        dr_lep_jet_cut = candidatefj.delta_r(candidatelep_p4) < 0.8
+        dr_lep_jet_cut = ak.fill_none(dr_lep_jet_cut, False)
+        selection.add("dr_lep_jet", dr_lep_jet_cut)
+        
+        regions = {
+            "hadmu_signal": ["onemuon", "dr_lep_jet"],
+            "hadel_signal": ["oneelectron", "dr_lep_jet"]
+        }
+        
         # function to normalize arrays after a cut or selection
         def normalize(val, cut=None):
             if cut is None:
@@ -164,23 +191,29 @@ class HttSignalProcessor(processor.ProcessorABC):
                 ar = ak.to_numpy(ak.fill_none(val[cut], np.nan))
                 return ar
 
-        # select only leptons within the jet
-        dr_lep_jet_cut = candidatefj.delta_r(candidatelep_p4) < 0.8
-        dr_lep_jet_cut = ak.fill_none(dr_lep_jet_cut, False)
         
-        # here we fill our histograms
+	# lepton kin
+        def fill(region):
+            selections = regions[region]
+            cut = selection.all(*selections)
+
+            output['lep_kin'].fill(
+                region=region,
+                lepminiIso=normalize(lep_miniIso,cut),
+                leprelIso=normalize(lep_relIso,cut),
+                lep_pt = normalize(candidatelep.pt,cut),
+                weight=weights.weight()[cut],
+            )
+            
+        for region in regions:
+            fill(region)
+        
+        # signal kin
         output['signal_kin'].fill(
-            genflavor=normalize(htt_flavor,dr_lep_jet_cut),
+            genflavor=normalize(htt_flavor, dr_lep_jet_cut),
             genHflavor=normalize(htt_matched,dr_lep_jet_cut),
             pt = normalize(candidatefj.pt,dr_lep_jet_cut),
             weight=weights.weight()[dr_lep_jet_cut],
-        )
-        output['signal_iso'].fill(
-            eleminiIso = normalize(ele_miniIso,dr_lep_jet_cut),
-            elerelIso = normalize(ele_relIso,dr_lep_jet_cut),
-            muminiIso = normalize(mu_miniIso,dr_lep_jet_cut),
-            murelIso = normalize(mu_relIso,dr_lep_jet_cut),
-            weight=weights.weight()[dr_lep_jet_cut]
         )
 
         return {dataset: output}
@@ -188,181 +221,3 @@ class HttSignalProcessor(processor.ProcessorABC):
 
     def postprocess(self, accumulator):
         return accumulator
-        
-
-# Dask client        
-from dask.distributed import Client
-
-client = Client("tls://daniel-2eocampo-2ehenao-40cern-2ech.dask.coffea.casa:8786")
-client
-
-
-# executing the processor for all arbitrations
-
-import warnings
-warnings.filterwarnings("ignore", message="Found duplicate branch ")
-
-fileset = {
-    "Htt": ["root://xcache/" + file for file in np.loadtxt("httdata.txt", dtype=str)] 
-}
-
-for arbitration in ["pt", "met", "lep"]:
-    out = processor.run_uproot_job(
-        fileset,
-        treename="Events",
-        processor_instance=HttSignalProcessor(jet_arbitration=arbitration),
-        executor=processor.dask_executor,
-        executor_args={
-            "schema": processor.NanoAODSchema,
-            "client": client,
-        },
-        maxchunks=30,
-    )
-    
-    title = f"arbitration: {'$p_T$' if arbitration=='pt' else arbitration}"
-    
-    # hWWlepqq_matched
-    gen_Hflavor = out["Htt"]["signal_kin"][{"genflavor": sum, "pt": sum}]
-    match = ["None", r"$H$", r"$Hl$", r"$Hll$"]
-
-    fig, ax = plt.subplots(
-        figsize=(8,7), 
-        constrained_layout=True
-    )
-    gen_Hflavor.plot1d(
-        ax=ax,
-        histtype="fill",
-        density=True
-    )
-    ax.set(
-        title=title,
-        ylabel="Events",
-        xlabel="Matched jets",
-        xticklabels=match
-    )
-    fig.savefig(f"htt_matched_{arbitration}.png")
-    
-    # hWWlepqq_flavor
-    gen_flavor = out["Htt"]["signal_kin"][{"genHflavor": sum, "pt": sum}]
-
-    fig, ax = plt.subplots(
-        figsize=(8,7),
-        constrained_layout=True
-    )
-    gen_flavor.plot1d(
-        ax=ax,
-        density=True,
-        histtype="fill",
-    )
-    ax.set(
-        title=title,
-        ylabel="Events",
-        xlabel="gen flavor",
-        xticklabels=["None",r"$\tau \tau$", r"$\tau e$", r"$\tau \mu$",r"$ee$",r"$\mu \mu$"]
-    )
-    fig.savefig(f"htt_genflavor_{arbitration}.png")
-    
-    # hWWlepqq_matched and jet pt
-    h = out["Htt"]["signal_kin"][{"genflavor":sum}]
-
-    fig, ax = plt.subplots(
-        figsize=(10,7),
-        constrained_layout=True
-    )
-    for i in range(4): 
-        h[i,:].plot1d(ax=ax)
-        
-    ax.set(
-        title=title,
-        ylabel="Events",
-        xlim=(180,600),
-        xlabel="jet $p_T$ [GeV]"
-    )
-    ax.legend(match, title="matched")
-    fig.savefig(f"htt_matchvspt_{arbitration}.png")
-    
-    # electron and muon isolation
-                
-    fig, ax = plt.subplots(
-        figsize=(8,7), 
-        constrained_layout=True
-    )
-
-    out["Htt"]["signal_iso"][{"murelIso":sum, "elerelIso":sum, "eleminiIso":sum}].plot1d(ax=ax)
-
-    ax.set(
-        title=title,
-        ylabel="Events"
-    )
-    plt.savefig(f"htt_muminiIso_{arbitration}.png")
-    
-    fig, ax = plt.subplots(
-        figsize=(8,7), 
-        constrained_layout=True
-    )
-
-    out["Htt"]["signal_iso"][{"muminiIso":sum,"elerelIso":sum, "eleminiIso":sum}].plot1d(ax=ax)
-
-    ax.set(
-        title=title,
-        ylabel="Events"
-    )
-    plt.savefig(f"htt_murelIso_{arbitration}.png")
-                
-    fig, ax = plt.subplots(
-        figsize=(8,7), 
-        constrained_layout=True
-    )
-
-    out["Htt"]["signal_iso"][{"murelIso":sum,"elerelIso":sum, "eleminiIso":sum}].plot1d(ax=ax, label="mini")
-    out["Htt"]["signal_iso"][{"muminiIso":sum,"elerelIso":sum, "eleminiIso":sum}].plot1d(ax=ax, label="rel")
-
-    ax.set(
-        title=title,
-        ylabel="Events",
-        xlabel="$\mu$ Isolation",
-    )
-    ax.legend(title="Isolation")
-    plt.savefig(f"htt_muIso_{arbitration}.png")
-    
-    fig, ax = plt.subplots(
-        figsize=(8,7), 
-        constrained_layout=True
-    )
-
-    out["Htt"]["signal_iso"][{"elerelIso":sum,"murelIso":sum, "muminiIso":sum}].plot1d(ax=ax)
-
-    ax.set(
-        title=title,
-        ylabel="Events"
-    )
-    plt.savefig(f"htt_eleminiIso_{arbitration}.png")
-                
-    fig, ax = plt.subplots(
-        figsize=(8,7), 
-        constrained_layout=True
-    )
-
-    out["Htt"]["signal_iso"][{"eleminiIso":sum,"murelIso":sum, "muminiIso":sum}].plot1d(ax=ax)
-
-    ax.set(
-        title=title,
-        ylabel="Events"
-    )
-    plt.savefig(f"htt_elerelIso_{arbitration}.png")
-    
-    fig, ax = plt.subplots(
-        figsize=(8,7), 
-        constrained_layout=True
-    )
-
-    out["Htt"]["signal_iso"][{"elerelIso":sum,"murelIso":sum, "muminiIso":sum}].plot1d(ax=ax, label="mini")
-    out["Htt"]["signal_iso"][{"eleminiIso":sum,"murelIso":sum, "muminiIso":sum}].plot1d(ax=ax, label="rel")
-
-    ax.set(
-        title=title,
-        ylabel="Events",
-        xlabel="$e$ Isolation",
-    )
-    ax.legend(title="Isolation")
-    plt.savefig(f"htt_eleIso_{arbitration}.png")

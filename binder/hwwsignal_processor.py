@@ -104,6 +104,7 @@ class HwwSignalProcessor(processor.ProcessorABC):
         
     def process(self, events):
         dataset = events.metadata['dataset']
+        selection = PackedSelection()
         weights = Weights(len(events), storeIndividual=True)
         weights.add('genweight', events.genWeight)
         
