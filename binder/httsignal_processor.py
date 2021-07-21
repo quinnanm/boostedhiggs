@@ -76,7 +76,7 @@ class HttSignalProcessor(processor.ProcessorABC):
                 hist2.axis.StrCategory(["hadmu_signal", "hadel_signal"], name="region", label="Region"),
                 hist2.axis.Regular(25, 0, 1, name="lepminiIso", label="lep miniIso"),
                 hist2.axis.Regular(25, 0, 1, name="leprelIso", label="lep Rel Iso"),
-                hist2.axis.Regular(100, 200, 1200, name='lep_pt', label=r'lep $p_T$ [GeV]'),
+                hist2.axis.Regular(40, 10, 800, name='lep_pt', label=r'lep $p_T$ [GeV]'),
                 hist2.storage.Weight(),
             ),
         }
