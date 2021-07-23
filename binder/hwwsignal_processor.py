@@ -1,9 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import awkward as ak
-import mplhep as hep
-hep.style.use(hep.style.CMS)
-
 import hist as hist2
 from coffea import processor
 from coffea.nanoevents.methods import candidate, vector
@@ -77,11 +73,19 @@ def match_HWWlepqq(genparticles,candidatefj):
     #  number of visible daughters
     hWWlepqq_nprongs = ak.sum(dr_daughters<0.8,axis=1)
     
-    return hWWlepqq_flavor,hWWlepqq_matched,hWWlepqq_nprongs
+    return hWWlepqq_flavor,hWWlepqq_matched,hWWlepqq_nprongs,matchedH
 
 class HwwSignalProcessor(processor.ProcessorABC):
-    def __init__(self,jet_arbitration='pt'):
+    def __init__(self,jet_arbitration='met'):
         self._jet_arbitration = jet_arbitration
+        self._regions = [
+            "hadlep_signal",
+            "hadmu_signal",
+            "hadel_signal",
+            "hadel_first",
+            "hadel_second",
+            "hadel_third",
+        ]
         
         # output
         self.make_output = lambda: {
@@ -93,11 +97,12 @@ class HwwSignalProcessor(processor.ProcessorABC):
                 hist2.axis.IntCategory([0, 1, 2, 3, 4], name='nprongs', label='Jet nprongs'),
                 hist2.storage.Weight(),
             ),
-  	    "lep_kin": hist2.Hist(
-                hist2.axis.StrCategory(["hadmu_signal", "hadel_signal"], name="region", label="Region"),
+            "lep_kin": hist2.Hist(
+                hist2.axis.StrCategory(self._regions, name="region", label="Region"),
                 hist2.axis.Regular(25, 0, 1, name="lepminiIso", label="lep miniIso"),
                 hist2.axis.Regular(25, 0, 1, name="leprelIso", label="lep Rel Iso"),
                 hist2.axis.Regular(40, 10, 800, name='lep_pt', label=r'lep $p_T$ [GeV]'),
+                hist2.axis.Regular(50, 10, 1000, name='higgs_pt', label=r'matchedH $p_T$ [GeV]'),
                 hist2.storage.Weight(),
             ),
         }
@@ -187,7 +192,7 @@ class HwwSignalProcessor(processor.ProcessorABC):
             raise RuntimeError("Unknown candidate jet arbitration")
     
         # match HWWlepqq 
-        hWWlepqq_flavor,hWWlepqq_matched,hWWlepqq_nprongs = match_HWWlepqq(events.GenPart,candidatefj)
+        hWWlepqq_flavor,hWWlepqq_matched,hWWlepqq_nprongs,matchedH = match_HWWlepqq(events.GenPart,candidatefj)
         
         
         # select only leptons inside the jet
@@ -199,9 +204,19 @@ class HwwSignalProcessor(processor.ProcessorABC):
         selection.add('onemuon', (nmuons == 1) & (nlowptmuons <= 1) & (nelectrons == 0) & (nlowptelectrons == 0) & (ntaus == 0))
         selection.add('oneelectron', (nelectrons == 1) & (nlowptelectrons <= 1) & (nmuons == 0) & (nlowptmuons == 0) & (ntaus == 0))
             
+        # select matched higgs bins
+        higgspt = ak.firsts(matchedH.pt)
+        selection.add("hfirst", (higgspt > 200) & (higgspt < 300))
+        selection.add("hsecond", (higgspt > 300) & (higgspt < 350))
+        selection.add("hthird", (higgspt > 350))
+
         regions = {
+            "hadlep_signal": ["dr_lep_jet"],
             "hadmu_signal": ["onemuon", "dr_lep_jet"],
-            "hadel_signal": ["oneelectron", "dr_lep_jet"]
+            "hadel_signal": ["oneelectron", "dr_lep_jet"],
+            "hadel_first": ["oneelectron", "hfirst", "dr_lep_jet"],
+            "hadel_second": ["oneelectron", "hsecond", "dr_lep_jet"],
+            "hadel_third": ["oneelectron", "hthird", "dr_lep_jet"],
         }
         
         # function to normalize arrays after a cut or selection
@@ -220,9 +235,10 @@ class HwwSignalProcessor(processor.ProcessorABC):
 
             output['lep_kin'].fill(
                 region=region,
-                lepminiIso=normalize(lep_miniIso,cut),
-                leprelIso=normalize(lep_relIso,cut),
-                lep_pt = normalize(candidatelep.pt,cut),
+                lepminiIso=normalize(lep_miniIso, cut),
+                leprelIso=normalize(lep_relIso, cut),
+                lep_pt = normalize(candidatelep.pt, cut),
+                higgs_pt=normalize(higgspt, cut),
                 weight=weights.weight()[cut],
             )
             
