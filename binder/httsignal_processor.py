@@ -1,9 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import awkward as ak
-import mplhep as hep
-hep.style.use(hep.style.CMS)
-
 import hist as hist2
 from coffea import processor
 from coffea.nanoevents.methods import candidate, vector
@@ -56,12 +52,20 @@ def match_Htt(events,candidatefj):
     # 1 (H only), 4 (H and one tau/electron or muon from tau), 6 (H and 2 taus/ele/mu)
     htt_matched = (ak.sum(matchedH.pt>0,axis=1)==1) + (ak.sum(dr_daughters<0.8,axis=1)==1)*3 + (ak.sum(dr_daughters<0.8,axis=1)==2)*5 
     
-    return htt_flavor,htt_matched
+    return htt_flavor,htt_matched,matchedH
 
 
 class HttSignalProcessor(processor.ProcessorABC):
     def __init__(self,jet_arbitration='pt'):
         self._jet_arbitration = jet_arbitration
+        self._regions = [
+            "hadlep_signal",
+            "hadmu_signal",
+            "hadel_signal",
+            "hadel_first",
+            "hadel_second",
+            "hadel_third",
+        ]
         
         # output
         self.make_output = lambda: {
@@ -73,10 +77,11 @@ class HttSignalProcessor(processor.ProcessorABC):
                 hist2.storage.Weight(),
             ),
             "lep_kin": hist2.Hist(
-                hist2.axis.StrCategory(["hadmu_signal", "hadel_signal"], name="region", label="Region"),
+                hist2.axis.StrCategory(self._regions, name="region", label="Region"),
                 hist2.axis.Regular(25, 0, 1, name="lepminiIso", label="lep miniIso"),
                 hist2.axis.Regular(25, 0, 1, name="leprelIso", label="lep Rel Iso"),
                 hist2.axis.Regular(40, 10, 800, name='lep_pt', label=r'lep $p_T$ [GeV]'),
+                hist2.axis.Regular(50, 10, 1000, name='higgs_pt', label=r'matchedH $p_T$ [GeV]'),
                 hist2.storage.Weight(),
             ),
         }
@@ -166,7 +171,7 @@ class HttSignalProcessor(processor.ProcessorABC):
             raise RuntimeError("Unknown candidate jet arbitration")
             
         # match and flavor htt 
-        htt_flavor,htt_matched = match_Htt(events,candidatefj)
+        htt_flavor, htt_matched, matchedH = match_Htt(events,candidatefj)
         
         # select events with only electrons or muons
         selection.add('onemuon', (nmuons == 1) & (nlowptmuons <= 1) & (nelectrons == 0) & (nlowptelectrons == 0) & (ntaus == 0))
@@ -177,9 +182,19 @@ class HttSignalProcessor(processor.ProcessorABC):
         dr_lep_jet_cut = ak.fill_none(dr_lep_jet_cut, False)
         selection.add("dr_lep_jet", dr_lep_jet_cut)
         
+        # select matched higgs pt bins
+        higgspt = ak.firsts(matchedH.pt)
+        selection.add("hfirst", (higgspt > 200) & (higgspt < 300))
+        selection.add("hsecond", (higgspt > 300) & (higgspt < 350))
+        selection.add("hthird", (higgspt > 350))
+        
         regions = {
+            "hadlep_signal": ["dr_lep_jet"],
             "hadmu_signal": ["onemuon", "dr_lep_jet"],
-            "hadel_signal": ["oneelectron", "dr_lep_jet"]
+            "hadel_signal": ["oneelectron", "dr_lep_jet"],
+            "hadel_first": ["oneelectron", "hfirst", "dr_lep_jet"],
+            "hadel_second": ["oneelectron", "hsecond", "dr_lep_jet"],
+            "hadel_third": ["oneelectron", "hthird", "dr_lep_jet"],
         }
         
         # function to normalize arrays after a cut or selection
@@ -199,9 +214,10 @@ class HttSignalProcessor(processor.ProcessorABC):
 
             output['lep_kin'].fill(
                 region=region,
-                lepminiIso=normalize(lep_miniIso,cut),
-                leprelIso=normalize(lep_relIso,cut),
-                lep_pt = normalize(candidatelep.pt,cut),
+                lepminiIso=normalize(lep_miniIso, cut),
+                leprelIso=normalize(lep_relIso, cut),
+                lep_pt = normalize(candidatelep.pt, cut),
+                higgs_pt=normalize(higgspt, cut),
                 weight=weights.weight()[cut],
             )
             
