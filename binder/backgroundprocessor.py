@@ -9,12 +9,17 @@ from coffea.analysis_tools import Weights, PackedSelection
 class BackgroundProcessor(processor.ProcessorABC):
     def __init__(self,jet_arbitration='pt'):
         self._jet_arbitration = jet_arbitration
+        self._regions = [
+            "hadlep_signal",
+            "hadmu_signal",
+            "hadel_signal",
+        ]
         
         # define an output
         self.make_output = lambda: {
             'sumw': 0.,
             "lep_kin": hist2.Hist(
-                hist2.axis.StrCategory(["hadmu_signal", "hadel_signal"], name="region", label="Region"),
+                hist2.axis.StrCategory(self._regions, name="region", label="Region"),
                 hist2.axis.Regular(25, 0, 1, name="lepminiIso", label="lep miniIso"),
                 hist2.axis.Regular(25, 0, 1, name="leprelIso", label="lep Rel Iso"),
                 hist2.axis.Regular(40, 10, 800, name='lep_pt', label=r'lep $p_T$ [GeV]'),
@@ -118,6 +123,7 @@ class BackgroundProcessor(processor.ProcessorABC):
         selection.add("dr_lep_jet", dr_lep_jet_cut)
         
         regions = {
+            "hadlep_signal": ["dr_lep_jet"],
             "hadmu_signal": ["onemuon", "dr_lep_jet"],
             "hadel_signal": ["oneelectron", "dr_lep_jet"]
         }
@@ -137,9 +143,9 @@ class BackgroundProcessor(processor.ProcessorABC):
 
             output['lep_kin'].fill(
                 region=region,
-                lepminiIso=normalize(lep_miniIso,cut),
-                leprelIso=normalize(lep_relIso,cut),
-                lep_pt = normalize(candidatelep.pt,cut),
+                lepminiIso=normalize(lep_miniIso, cut),
+                leprelIso=normalize(lep_relIso, cut),
+                lep_pt = normalize(candidatelep.pt, cut),
                 weight=weights.weight()[cut],
             )
             
