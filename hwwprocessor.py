@@ -84,8 +84,22 @@ def match_HWWlepqq(genparticles,candidatefj):
     # 1 (H only), 4(W), 6(W star), 9(H, W and Wstar)
     hWWlepqq_matched = (ak.sum(matchedH.pt>0,axis=1)==1)*1 + (ak.sum(ak.flatten(matchedW.pt>0,axis=2),axis=1)==1)*3 + (ak.sum(ak.flatten(matchedWstar.pt>0,axis=2),axis=1)==1)*5
     
+    # leptons matched
+    dr_leptons = ak.concatenate([dr_fj_electrons,dr_fj_muons], axis=1)
+    matched_leptons = dr_leptons < 0.8
     
-    return hWWlepqq_flavor,hWWlepqq_matched,hWWlepqq_nprongs,matchedH,higgs
+    leptons = ak.concatenate([prompt_electron, prompt_muon], axis=1)
+    leptons = leptons[matched_leptons]
+    
+    # leptons coming from W or W*
+    leptons_mass = ak.firsts(leptons.distinctParent.mass)
+    higgs_w_mass = ak.firsts(ak.flatten(higgs_w.mass))[ak.firsts(leptons.pt > 0)]
+    higgs_wstar_mass = ak.firsts(ak.flatten(higgs_wstar.mass))[ak.firsts(leptons.pt > 0)]
+
+    iswlepton = leptons_mass == higgs_w_mass
+    iswstarlepton = leptons_mass == higgs_wstar_mass
+    
+    return hWWlepqq_flavor,hWWlepqq_matched,hWWlepqq_nprongs,matchedH,higgs,iswlepton,iswstarlepton
 
 
 class HwwSignalProcessor(processor.ProcessorABC):
@@ -321,15 +335,17 @@ class HwwSignalProcessor(processor.ProcessorABC):
         #selection.add("btag_ophem", ak.max(bjets_ophem, axis=1, mask_identity=False))
 
         # match HWWlepqq 
-        hWWlepqq_flavor,hWWlepqq_matched,hWWlepqq_nprongs,matchedH,genH = match_HWWlepqq(events.GenPart,candidatefj)
+        hWWlepqq_flavor,hWWlepqq_matched,hWWlepqq_nprongs,matchedH,genH,iswlepton,iswstarlepton = match_HWWlepqq(events.GenPart,candidatefj)
     
         matchedH_pt = ak.firsts(matchedH.pt)
         selection.add("matchedH", matchedH_pt > 0)
 
 
         regions = {
-            "hadel": ["triggere", "oneelectron", "miniIso1"],
-            "hadmu": ["triggermu", "onemuon", "miniIso1"] ,
+            #"hadel": ["triggere", "oneelectron", "miniIso1"],
+            #"hadmu": ["triggermu", "onemuon", "miniIso1"] ,
+            "iswlepton": ["iswlepton"],
+            "iswstarlepton": ["iswstarlepton"]
         }
 
         # function to normalize arrays after a cut or selection
