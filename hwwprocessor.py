@@ -331,8 +331,10 @@ class HwwSignalProcessor(processor.ProcessorABC):
         dr_jet_fj = abs(jets.delta_r(candidatefj))
         
         # b-jets
-        bjets_ophem = ak.firsts(jets[dphi_jet_fj > np.pi / 2].btagDeepFlavC)
+        #bjets_ophem = ak.firsts(jets[dphi_jet_fj > np.pi / 2].btagDeepFlavC)
         #selection.add("btag_ophem", ak.max(bjets_ophem, axis=1, mask_identity=False))
+        bjets_ophem = ak.max(jets[dphi_jet_fj > np.pi / 2].btagDeepFlavC, axis=1)
+        selection.add("btag_ophem", bjets_ophem > 0)
 
         # match HWWlepqq 
         hWWlepqq_flavor,hWWlepqq_matched,hWWlepqq_nprongs,matchedH,genH,iswlepton,iswstarlepton = match_HWWlepqq(events.GenPart,candidatefj)
