@@ -110,6 +110,7 @@ class HwwProcessor(processor.ProcessorABC):
         output = self.make_output()
         if not isRealData:
             output['sumw'] = ak.sum(events.genWeight)
+            weights.add("genweight", events.genWeight)
             
         # trigger
         for channel in ["e","mu"]:
