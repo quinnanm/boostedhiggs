@@ -9,6 +9,9 @@ from coffea.lookup_tools.lookup_base import lookup_base
 from coffea import lookup_tools
 from coffea import util
 
+with gzip.open(os.path.join(os.path.dirname(__file__), 'data', 'corrections.pkl.gz')) as fin:
+    compiled = pickle.load(fin)
+
 class SoftDropWeight(lookup_base):
     def _evaluate(self, pt, eta):
         gpar = np.array([1.00626, -1.06161, 0.0799900, 1.20454])
@@ -21,12 +24,21 @@ class SoftDropWeight(lookup_base):
         weight = np.where(np.abs(eta) < 1.3, cenweight, forweight)
         return genw*weight
 
-
 _softdrop_weight = SoftDropWeight()
-
 
 def corrected_msoftdrop(fatjets):
     sf = _softdrop_weight(fatjets.pt, fatjets.eta)
     sf = np.maximum(1e-5, sf)
     dazsle_msd = (fatjets.subjets * (1 - fatjets.subjets.rawFactor)).sum()
     return dazsle_msd.mass * sf
+
+def build_lumimask(filename):
+    from coffea.lumi_tools import LumiMask
+    with importlib.resources.path("boostedhiggs.data", filename) as path:
+        return LumiMask(path)
+
+lumiMasks = {
+    '2016': build_lumimask('Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt'),
+    '2017': build_lumimask('Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON_v1.txt'),
+    '2018': build_lumimask('Cert_314472-325175_13TeV_17SeptEarlyReReco2018ABC_PromptEraD_Collisions18_JSON.txt'),
+}
