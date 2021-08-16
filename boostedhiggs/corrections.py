@@ -42,3 +42,11 @@ lumiMasks = {
     '2017': build_lumimask('Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON_v1.txt'),
     '2018': build_lumimask('Cert_314472-325175_13TeV_17SeptEarlyReReco2018ABC_PromptEraD_Collisions18_JSON.txt'),
 }
+
+def add_pileup_weight(weights, nPU, year='2017', dataset=None):
+    weights.add(
+        'pileup_weight',
+        compiled[f'{year}_pileupweight'](nPU),
+        compiled[f'{year}_pileupweight_puUp'](nPU),
+        compiled[f'{year}_pileupweight_puDown'](nPU),
+    )
