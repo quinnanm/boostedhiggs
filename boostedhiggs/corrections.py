@@ -1,8 +1,8 @@
+import os
 import numpy as np
 import awkward as ak
 import gzip
 import pickle
-import cloudpickle
 import importlib.resources
 import correctionlib
 from coffea.lookup_tools.lookup_base import lookup_base
