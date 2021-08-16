@@ -9,17 +9,6 @@ from coffea.lookup_tools.lookup_base import lookup_base
 from coffea import lookup_tools
 from coffea import util
 
-with importlib.resources.path("boostedhiggs.data", "corrections.pkl.gz") as path:
-    with gzip.open(path) as fin:
-        compiled = pickle.load(fin)
-
-# hotfix some crazy large weights
-compiled['2017_pileupweight']._values = np.minimum(5, compiled['2017_pileupweight']._values)
-compiled['2018_pileupweight']._values = np.minimum(5, compiled['2018_pileupweight']._values)
-
-with importlib.resources.path("boostedhiggs.data", 'powhegToMinloPtCC.coffea') as filename:
-    compiled['powheg_to_nnlops'] = util.load(filename)
-
 class SoftDropWeight(lookup_base):
     def _evaluate(self, pt, eta):
         gpar = np.array([1.00626, -1.06161, 0.0799900, 1.20454])
@@ -223,16 +212,3 @@ def add_jec_variables(jets, event_rho):
     jets["pt_gen"] = ak.values_astype(ak.fill_none(jets.matched_gen.pt, 0), np.float32)
     jets["event_rho"] = ak.broadcast_arrays(event_rho, jets.pt)[0]
     return jets
-
-
-def build_lumimask(filename):
-    from coffea.lumi_tools import LumiMask
-    with importlib.resources.path("boostedhiggs.data", filename) as path:
-        return LumiMask(path)
-
-
-lumiMasks = {
-    '2016': build_lumimask('Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt'),
-    '2017': build_lumimask('Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON_v1.txt'),
-    '2018': build_lumimask('Cert_314472-325175_13TeV_17SeptEarlyReReco2018ABC_PromptEraD_Collisions18_JSON.txt'),
-}
