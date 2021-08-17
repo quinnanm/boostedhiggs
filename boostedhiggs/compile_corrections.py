@@ -2,6 +2,7 @@
 import uproot 
 import numpy as np
 from coffea.lookup_tools import dense_lookup
+import importlib.resources
 
 corrections = {}
 
@@ -64,19 +65,19 @@ import gzip
 with gzip.open('data/corrections.pkl.gz', 'wb') as f:
     pickle.dump(corrections, f, -1)
 
+lumiMasks = {}
+
 def build_lumimask(filename):
     from functools import partial
     from coffea.lumi_tools import LumiMask
     def _lumimask(json, events):
         mask = LumiMask(json)(events.run, events.luminosityBlock)
         return events[mask]
-    return partial(_lumimask, filename)
 
-lumiMasks = {
-    '2016': build_lumimask('data/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt'),
-    '2017': build_lumimask('data/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt'),
-    '2018': build_lumimask('data/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt'),
-}
+    with importlib.resources.path("boostedhiggs.data", filename) as path:
+        return partial(_lumimask, path)
+    
+lumiMasks["2017"] = build_lumimask("Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt")
 
 from coffea.util import save
 save(lumiMasks, "data/lumimasks.coffea")
