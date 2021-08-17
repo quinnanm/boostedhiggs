@@ -173,8 +173,6 @@ class HwwProcessor(processor.ProcessorABC):
             goodelectron = ( goodelectron
                              & (events.Electron.mvaFall17V2noIso_WPL)
                          )
-        elif not self.el_wp:
-            continue
         else:
             raise RuntimeError("Unknown working point")
         nelectrons = ak.sum(goodelectron, axis=1)
@@ -236,8 +234,11 @@ class HwwProcessor(processor.ProcessorABC):
             raise RuntimeError("Unknown candidate jet arbitration")
             
         # lepton isolation
-        lep_miniIso = candidatelep.miniPFRelIso_all
-        lep_relIso = candidatelep.pfRelIso03_all
+        # check pfRelIso04 vs pfRelIso03
+        selection.add("mu_iso", ( ((candidatelep.pt < 55.) & (candidatelep.pfRelIso04_all < 0.25)) |
+                                  ((candidatelep.pt >= 55.) & (candidatelep.miniPFRelIso_all < 0.1)) ) )
+        selection.add("el_iso", ( ((candidatelep.pt < 120.) & (candidatelep.pfRelIso03_all < 0.25)) |
+                                  ((candidatelep.pt >= 120.) & (candidatelep.miniPFRelIso_all < 0.1)) ) )
                 
         # leptons within fatjet
         lep_in_fj = candidatefj.delta_r(candidatelep_p4) < 0.8
@@ -250,8 +251,7 @@ class HwwProcessor(processor.ProcessorABC):
             (jets.pt > 30) 
             & (abs(jets.eta) < 2.5) 
             & jets.isTight
-        ][:,:4]
-        
+        ]
         dphi_jet_fj = abs(jets.delta_phi(candidatefj))
         dr_jet_fj = abs(jets.delta_r(candidatefj))
         
@@ -277,14 +277,18 @@ class HwwProcessor(processor.ProcessorABC):
             
         selection.add("iswlepton", iswlepton)
         selection.add("iswstarlepton", iswstarlepton)
-        
+
         regions = {
-            "hadel": ["lep_in_fj", "triggere", "oneelectron"],
-            "hadmu": ["lep_in_fj", "triggermu", "onemuon"] ,
-            "iswlepton": ["lep_in_fj", "iswlepton"],
-            "iswstarlepton": ["lep_in_fj", "iswstarlepton"],
+            "hadel": ["lep_in_fj", "triggere", "oneelectron", "el_iso"],
+            "hadmu": ["lep_in_fj", "triggermu", "onemuon", "mu_iso"],
             "noselection": []
         }
+
+        if "HWW" in dataset:
+            regions["hadel_iswlepton"] = regions["hadel"] + ["iswlepton"]
+            regions["hadel_iswstarlepton"] = regions["hadel"] + ["iswstarlepton"]
+            regions["hadmu_iswlepton"] = regions["hadmu"] + ["iswlepton"]
+            regions["hadmu_iswstarlepton"] = regions["hadmu"] + ["iswstarlepton"]
 
         # function to normalize arrays after a cut or selection
         def normalize(val, cut=None):
