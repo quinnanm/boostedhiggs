@@ -9,13 +9,16 @@ import sys
 
 '''
  Submit condor jobs of processor
- Run as e.g.: python submit.py Jul1 run.py 20
+ Run as e.g.: python submit.py Aug15 run.py 20 2017
  Arguments:
   = [0]: tag of jobs and output dir in eos e.g. Jul1
   - [1]: script to run e.g. run.py (needs to be included in transfer_files in templ.jdl)
   - [2]: number of files per job e.g. 20
+  - [3]: year
 '''
 # Note: change username in `cmantill` in this script
+
+homedir = "/store/user/cmantill/boostedhiggs/"
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('settings', metavar='S', type=str, nargs='+', help='label scriptname (re-tar)')
@@ -28,94 +31,95 @@ if (not ((len(args.settings) == 3) or (len(args.settings) == 4))):
 label = args.settings[0]
 script = args.settings[1]  # should be run.py
 files_per_job = int(args.settings[2])
+year = args.settings[3]
 
 loc_base = os.environ['PWD']
-locdir = 'condor/' + label
-homedir = '/store/user/cmantill/boostedhiggs/'
-outdir = homedir + label + '/outfiles/'
-os.system('mkdir -p  /eos/uscms/%s' % outdir)
 
-# list of samples to run
-# TODO
-# totfiles = {}
-# with open('../data/fileset_2017preUL.json', 'r') as f:
-#     newfiles = json.load(f)
-#     totfiles.update(newfiles)
-# with open('../data/fileset_2017UL.json', 'r') as f:
-#     newfiles = json.load(f)
-#     totfiles.update(newfiles)
-# for sample in samplelist:
-#     totfiles[sample] = len(totfiles[sample])
+# list of samples to run and recos to use
+recos = ["UL","preUL"] 
 
-samplelist = {
-    'SingleMuon'
+# if empty run over all the datasets in both filesets
+samples = {
+    "UL": [
+        "GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8"
+        ],
+    "preUL": [],
 }
 
-with open('data/hwwdata.txt', 'r') as file:
-    filelist = [f[:-1] for f in file.readlines()]
-fileset = {'2017': filelist}
+# load files from datasets
+for reco in recos:
+    locdir = 'condor/' + label + '/' + reco
+    logdir = locdir + '/logs/'
+    os.system('mkdir -p  %s' % logdir)
 
-# name to give your output files
-prefix = label
+    outdir = homedir + label +'_' + reco + '/outfiles/'
+    os.system('mkdir -p  /eos/uscms/%s' % outdir)    
 
-# make local directory
-logdir = locdir + '/logs'
-os.system('mkdir -p  %s' % logdir)
+    totfiles = {}
+    with open('data/fileset_%s_%s_NANO.json'%(year,reco), 'r') as f:
+        newfiles = json.load(f)
+        totfiles.update(newfiles)
 
-# and condor directory
-print('CONDOR work dir: ' + outdir)
-os.system('mkdir -p /eos/uscms' + outdir)
+    samplelist = []
+    if reco in samples.keys():
+        samplelist = samples[reco]
+    else:
+        samplelist = totfiles.keys()
 
-# submit jobs
-nsubmit = 0
-for sample in samplelist:
+    # write json to metadata.json
+    with open("%s/metadata.json"%(locdir), 'w') as json_file:
+         json.dump(totfiles, json_file, indent=4, sort_keys=True)
 
-    ## FIXME!
-    prefix = sample + '_2017'
-    print('Submitting '+ prefix)
+    # copy script to locdir
+    os.system('cp %s %s'%(script,locdir))
 
-    njobs = int(len(fileset['2017']) / files_per_job) + 1
-    remainder = len(fileset['2017']) - int(files_per_job * (njobs - 1))
+    # submit jobs
+    nsubmit = 0
+    for sample in samplelist:    
+        prefix = sample + '_%s_%s'%(year,reco)
+        print('Submitting '+ prefix)
+        
+        njobs = int(len(totfiles[sample]) / files_per_job) + 1
+        remainder = len(totfiles[sample]) - int(files_per_job * (njobs - 1))
+        
+        for j in range(njobs):
+            condor_templ_file = open(loc_base + "/condor/submit.templ.jdl")
+            sh_templ_file     = open(loc_base + "/condor/submit.templ.sh")
 
-    for j in range(njobs):
+            localcondor = '%s/%s_%i.jdl'%(locdir,prefix,j)
+            condor_file = open(localcondor, "w")
+            for line in condor_templ_file:
+                line = line.replace('DIRECTORY', locdir)
+                line = line.replace('PREFIX', prefix)
+                line = line.replace('JOBID', str(j))
+                condor_file.write(line)
+            condor_file.close()
 
-        condor_templ_file = open(loc_base + "/condor/submit.templ.jdl")
-        sh_templ_file     = open(loc_base + "/condor/submit.templ.sh")
+            localsh = '%s/%s_%i.sh'%(locdir,prefix,j)
+            eosoutput = 'root://cmseos.fnal.gov/%s/%s_%i.hist'%(outdir,prefix,j)
+            sh_file = open(localsh, "w")
+            for line in sh_templ_file:
+                line = line.replace('SCRIPTNAME', script)
+                line = line.replace('FILENUM', str(j))
+                line = line.replace('YEAR', year)
+                line = line.replace('SAMPLE', sample)
+                line = line.replace('PROCESSOR', 'hww')
+                line = line.replace('STARTNUM', str(j * files_per_job))
+                line = line.replace('ENDNUM', str((j + 1) * files_per_job))
+                line = line.replace('EOSOUT', eosoutput)
+                line = line.replace('OUTDIR', outdir)
+                sh_file.write(line)
+            sh_file.close()
 
-        localcondor = f'{locdir}/{prefix}_{j}.jdl'
-        condor_file = open(localcondor, "w")
-        for line in condor_templ_file:
-            line = line.replace('DIRECTORY', locdir)
-            line = line.replace('PREFIX', prefix)
-            line = line.replace('JOBID', str(j))
-            condor_file.write(line)
-        condor_file.close()
+            os.system('chmod u+x %s'%localsh)
+            if (os.path.exists('%s.log' % localcondor)):
+                os.system('rm %s.log' % localcondor)
+            condor_templ_file.close()
+            sh_templ_file.close()
 
-        localsh = f'{locdir}/{prefix}_{j}.sh'
-        eosoutput = f'root://cmseos.fnal.gov/{outdir}/{prefix}_{j}.hist'
-        sh_file = open(localsh, "w")
-        for line in sh_templ_file:
-            line = line.replace('SCRIPTNAME', script)
-            line = line.replace('FILENUM', str(j))
-            line = line.replace('YEAR', '2017')
-            line = line.replace('SAMPLE', sample)
-            line = line.replace('PROCESSOR', 'trigger')
-            line = line.replace('STARTNUM', str(j * files_per_job))
-            line = line.replace('ENDNUM', str((j + 1) * files_per_job))
-            line = line.replace('EOSOUT', eosoutput)
-            line = line.replace('OUTDIR', outdir)
-            sh_file.write(line)
-        sh_file.close()
+            print('To submit ', localcondor)
+            # os.system('condor_submit %s' % localcondor)
 
-        os.system(f'chmod u+x {localsh}')
-        if (os.path.exists('%s.log' % localcondor)):
-            os.system('rm %s.log' % localcondor)
-        condor_templ_file.close()
-        sh_templ_file.close()
+            nsubmit = nsubmit + 1
 
-        print('To submit ', localcondor)
-        # os.system('condor_submit %s' % localcondor)
-
-        nsubmit = nsubmit + 1
-
-# print(nsubmit,"jobs submitted.")
+    print(nsubmit,"jobs submitted.")
