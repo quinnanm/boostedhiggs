@@ -50,6 +50,23 @@ def add_pileup_weight(weights, nPU, year='2017', dataset=None):
         compiled[f'{year}_pileupweight_puDown'](nPU),
     )
 
+lumiMasks = {}
+
+def build_lumimask(filename):
+    from functools import partial
+    from coffea.lumi_tools import LumiMask
+    def _lumimask(json, events):
+        mask = LumiMask(json)(events.run, events.luminosityBlock)
+        return events[mask]
+
+    with importlib.resources.path("boostedhiggs.data", filename) as path:
+        return partial(_lumimask, path)
+
+lumiMasks["2017"] = build_lumimask("Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt")
+
+from coffea.util import save
+save(lumiMasks, "data/lumimasks.coffea")
+
 with importlib.resources.path("boostedhiggs.data", "lumimasks.coffea") as path:
     from coffea.util import load
     lumiMasks = load(path)
