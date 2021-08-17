@@ -49,3 +49,7 @@ def add_pileup_weight(weights, nPU, year='2017', dataset=None):
         compiled[f'{year}_pileupweight_puUp'](nPU),
         compiled[f'{year}_pileupweight_puDown'](nPU),
     )
+
+with importlib.resources.path("boostedhiggs.data", "lumimasks.coffea") as path:
+    from coffea.util import load
+    lumiMasks = load(path)
