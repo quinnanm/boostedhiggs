@@ -16,11 +16,12 @@ def main(args):
     # TODO: get this to a json that can be identified by year and sample
     with open(args.fileset, 'r') as f:
         files = json.load(f)[args.sample]
-    fileset = files[args.starti:args.endi]
+    fileset = {}
+    fileset[args.sample] = ["root://cmsxrootd.fnal.gov/"+ f for f in files[args.starti:args.endi]]
 
     # define processor
     if args.processor == "hww":
-        from boostedhiggs import HwwProcessor
+        from boostedhiggs.hwwprocessor import HwwProcessor
         # TODO: add arguments to processor
         p = HwwProcessor()
     else:
@@ -43,8 +44,6 @@ def main(args):
             chunksize=10000,
         )
 
-        print(f"num: {out['num'].view(flow=True)}")
-        print(f"den: {out['den'].view(flow=True)}")
         print(f"Metrics: {metrics}")
 
         filehandler = open(f'outfiles/{args.year}_{args.sample}_{args.starti}-{args.endi}.hist', 'wb')

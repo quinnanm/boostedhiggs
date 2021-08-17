@@ -39,8 +39,8 @@ homedir = '/store/user/$USER/boostedhiggs/'
 ## Submitting jobs
 
 ```
-python condor/submit.py Aug11 run.py 20  # will need python3?
-for i in condor/Aug11/*.jdl; do condor_submit $i; done
+python condor/submit.py Aug17 run.py 5 2017
+for i in condor/Aug17/*/*.jdl; do condor_submit $i; done
 ```
 
 e.g.
