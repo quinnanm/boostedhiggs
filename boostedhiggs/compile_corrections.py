@@ -60,5 +60,6 @@ for year in pileup_corr.keys():
     corrections['%s_pileupweight_puDown'%year] = pileup_corr[year]["down"]
 
 import pickle
-with open('data/corrections.pkl.gz', 'wb') as f:
-    pickle.dump(corrections, f)
+import gzip
+with gzip.open('data/corrections.pkl.gz', 'wb') as f:
+    pickle.dump(corrections, f, -1)
