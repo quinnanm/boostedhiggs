@@ -3,7 +3,6 @@ import numpy as np
 import awkward as ak
 import gzip
 import pickle
-import importlib.resources
 import correctionlib
 from coffea.lookup_tools.lookup_base import lookup_base
 from coffea import lookup_tools
@@ -34,8 +33,8 @@ def corrected_msoftdrop(fatjets):
 
 def build_lumimask(filename):
     from coffea.lumi_tools import LumiMask
-    with importlib.resources.path("boostedhiggs.data", filename) as path:
-        return LumiMask(path)
+    path = os.path.join(os.path.dirname(__file__), 'data', filename)
+    return LumiMask(path)
 
 lumiMasks = {
     '2016': build_lumimask('Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt'),
