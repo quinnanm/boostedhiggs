@@ -59,7 +59,24 @@ for year in pileup_corr.keys():
     corrections['%s_pileupweight_puUp'%year] = pileup_corr[year]["up"]
     corrections['%s_pileupweight_puDown'%year] = pileup_corr[year]["down"]
 
-import _pickle as cPickle
+import pickle
 import gzip
 with gzip.open('data/corrections.pkl.gz', 'wb') as f:
-    cPickle.dump(corrections, f, -1)
+    pickle.dump(corrections, f, -1)
+
+def build_lumimask(filename):
+    from functools import partial
+    from coffea.lumi_tools import LumiMask
+    def _lumimask(json, events):
+        mask = LumiMask(json)(events.run, events.luminosityBlock)
+        return events[mask]
+    return partial(_lumimask, filename)
+
+lumiMasks = {
+    '2016': build_lumimask('data/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt'),
+    '2017': build_lumimask('data/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt'),
+    '2018': build_lumimask('data/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt'),
+}
+
+from coffea.util import save
+save(lumiMasks, "data/lumimasks.coffea")
