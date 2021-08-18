@@ -99,6 +99,12 @@ class HwwProcessor(processor.ProcessorABC):
 
         self.make_output = lambda: {
             'sumw': 0.,
+            'cutflow': hist2.Hist(
+                hist2.axis.StrCategory([], name="region", growth=True),
+                hist2.axis.IntCategory([0, 1], name="cut", label='Cut index', growth=True),
+                hist2.axis.IntCategory([0, 2, 4, 6, 8], name='genflavor', label='gen flavor'),
+                hist2.storage.Weight(),
+            ),
             'signal_kin': hist2.Hist(
                 hist2.axis.StrCategory([], name="region", growth=True),
                 hist2.axis.IntCategory([0, 2, 4, 6, 8], name='genflavor', label='gen flavor'),
@@ -374,6 +380,26 @@ class HwwProcessor(processor.ProcessorABC):
                     genHpt=normalize(genH_pt, cut),
                     weight=weights.weight()[cut],
                 )
+                
+            # cutflow
+            allcuts = set([])
+            cut = selection.all(*allcuts)
+            output["cutflow"].fill(
+                region=region,
+                cut=0,
+                genflavor=normalize(hWWlepqq_flavor, cut),
+                weight=weights.weight()[cut],
+            )
+            for i, cut in enumerate(regions[region]):
+                allcuts.add(cut)
+                cut = selection.all(*allcuts)
+                output["cutflow"].fill(
+                    region=region,
+                    cut=i + 1,
+                    genflavor=normalize(hWWlepqq_flavor, cut),
+                    weight=weights.weight()[cut],
+                )
+                
             
         for region in regions:
                 fill(region)
@@ -382,3 +408,4 @@ class HwwProcessor(processor.ProcessorABC):
             
     def postprocess(self, accumulator):
         return accumulator
+    
