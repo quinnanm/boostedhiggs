@@ -101,6 +101,7 @@ for reco in recos:
                 line = line.replace('DIRECTORY', locdir)
                 line = line.replace('PREFIX', prefix)
                 line = line.replace('JOBID', str(j))
+                line = line.replace('JSON', "%s/metadata.json"%(locdir))
                 condor_file.write(line)
             condor_file.close()
 
