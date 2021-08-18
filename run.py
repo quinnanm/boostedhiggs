@@ -46,20 +46,55 @@ def main(args):
 
         print(f"Metrics: {metrics}")
 
-        filehandler = open(f'outfiles/{args.year}_{args.sample}_{args.starti}-{args.endi}.hist', 'wb')
-        pickle.dump(out, filehandler)
-        filehandler.close()
-        
+    elif args.dask:
+        import time
+        from distributed import Client
+        from lpcjobqueue import LPCCondorCluster
+
+        tic = time.time()
+        cluster = LPCCondorCluster(
+        )
+        cluster.adapt(minimum=4, maximum=10)
+        client = Client(cluster)
+
+        exe_args = {
+            'client': client,
+            'savemetrics': True,
+            'schema': NanoAODSchema,
+            'align_clusters': True,
+        }
+
+        print("Waiting for at least one worker...")
+        client.wait_for_workers(1)
+
+        out, metrics = processor.run_uproot_job(
+            fileset,
+            treename="Events",
+            processor_instance=p,
+            executor=processor.dask_executor,
+            executor_args=exe_args,
+        )
+
+        elapsed = time.time() - tic
+        print(f"Metrics: {metrics}")
+        print(f"Finished in {elapsed:.1f}s")
+
+    filehandler = open(f'outfiles/{args.year}_{args.sample}_{args.starti}-{args.endi}.hist', 'wb')
+    pickle.dump(out, filehandler)
+    filehandler.close()
+
 if __name__ == "__main__":
     # e.g. 
-    # inside a condor job: python run.py --year 2017 --processor hww --condor --starti 0 --endi 1 --fileset fileset_2017_UL_NANO.json --sample GluGluHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8
+    # inside a condor job: python run.py --year 2017 --processor hww --condor --starti 0 --endi 1 --fileset metadata.json --sample GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8
+    # inside a dask job:  python run.py --year 2017 --processor hww --dask --fileset metadata.json --sample GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',       dest='year',       default='2017',       help="year", type=str)
     parser.add_argument('--starti',     dest='starti',     default=0,            help="start index of files", type=int)
     parser.add_argument('--endi',       dest='endi',       default=-1,           help="end index of files", type=int)
     parser.add_argument("--processor",  dest="processor",  default="hww",        help="HWW processor", type=str)
-    parser.add_argument("--condor",     dest="condor",     action="store_true",  default=True,  help="Run with condor")
+    parser.add_argument("--condor",     dest="condor",     action="store_true",  default=False, help="Run with condor")
+    parser.add_argument("--dask",       dest="dask",       action="store_true",  default=False, help="Run with dask")
     parser.add_argument("--fileset",    dest="fileset",    default=None,         help="Fileset", required=True)
     parser.add_argument('--sample',     dest='sample',     default=None,         help='sample name', required=True)
     args = parser.parse_args()
