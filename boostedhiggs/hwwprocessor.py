@@ -7,7 +7,10 @@ from coffea import processor
 from coffea.nanoevents.methods import candidate, vector
 from coffea.analysis_tools import Weights, PackedSelection
 
-from boostedhiggs.corrections import corrected_msoftdrop
+from boostedhiggs.corrections import (
+    corrected_msoftdrop,
+    add_pileup_weight,
+)
 from boostedhiggs.utils import (
     getParticles,
     match_HWWlepqq,
@@ -74,6 +77,26 @@ class HwwProcessor(processor.ProcessorABC):
                             "BadPFMuonFilter",
                         ]
 
+        # WPs for btagDeepFlavB (UL)
+        # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
+        self._btagWPs = {
+            '2016': {
+                'loose': 0.0614,
+                'medium': 0.3093,
+                'tight': 0.7221,
+            },
+            '2017': {
+                'loose': 0.0532,
+                'medium': 0.3040,
+                'tight': 0.7476,
+            },
+            '2018': {
+                'loose': 0.0490,
+                'medium': 0.2783,
+                'tight': 0.7100,
+            },
+        }
+
         self.make_output = lambda: {
             'sumw': 0.,
             'signal_kin': hist2.Hist(
@@ -86,7 +109,7 @@ class HwwProcessor(processor.ProcessorABC):
             "jet_kin": hist2.Hist(
                 hist2.axis.StrCategory([], name='region', growth=True),
                 hist2.axis.Regular(30, 200, 1000, name='jetpt', label=r'Jet $p_T$ [GeV]'),
-                hist2.axis.Regular(30, 0, 200, name="jetmsd", label="Jet $m_{sd}$ [GeV]"),
+                hist2.axis.Regular(30, 15, 200, name="jetmsd", label="Jet $m_{sd}$ [GeV]"),
                 hist2.axis.Regular(25, -20, 0, name="jetrho", label=r"Jet $\rho$"),
                 hist2.axis.Regular(20, 0, 1, name="btag", label="Jet btag (opphem)"),
                 hist2.storage.Weight(),
@@ -99,6 +122,11 @@ class HwwProcessor(processor.ProcessorABC):
                 hist2.axis.Regular(30, 0, 5, name="deltaR_lepjet", label="$\Delta R(l, Jet)$"),
                 hist2.storage.Weight(),
             ),
+            "met_kin": hist2.Hist(
+                hist2.axis.StrCategory([], name="region", growth=True),
+                hist2.axis.Regular(30, 0, 500, name="met", label=r"$p_T^{miss}$ [GeV]"),
+                hist2.storage.Weight(),
+            ),
             "higgs_kin": hist2.Hist(
                 hist2.axis.StrCategory([], name="region", growth=True),
                 hist2.axis.Regular(50, 10, 1000, name='matchedHpt', label=r'matched H $p_T$ [GeV]'),
@@ -107,11 +135,6 @@ class HwwProcessor(processor.ProcessorABC):
                     name='genHpt', 
                     label=r'genH $p_T$ [GeV]',
                 ),
-                hist2.storage.Weight(),
-            ),
-            "met_kin": hist2.Hist(
-                hist2.axis.StrCategory([], name="region", growth=True),
-                hist2.axis.Regular(30, 0, 500, name="met", label=r"$p_T^{miss}$ [GeV]"),
                 hist2.storage.Weight(),
             ),
         }
@@ -140,7 +163,13 @@ class HwwProcessor(processor.ProcessorABC):
             else:
                 selection.add('trigger'+channel, np.ones(nevents, dtype='bool'))
 
-        # TODO: add lumi masks (based on json files?) and MET filters
+        # TODO: add lumi masks (based on json files) 
+
+        # MET filters
+        met_filters = np.ones(nevents, dtype='bool')
+        for mf in self._metfilters:
+            met_filters = met_filters & events.Flag[mf]
+        selection.add('met_filters', met_filters)
 
         # muons
         goodmuon = (
@@ -212,6 +241,7 @@ class HwwProcessor(processor.ProcessorABC):
             
         # missing transverse energy
         met = events.MET
+        selection.add("met_20", met.pt > 20.)
 
         # fatjets
         fatjets = events.FatJet
@@ -220,6 +250,8 @@ class HwwProcessor(processor.ProcessorABC):
         
         candidatefj = fatjets[
             (fatjets.pt > 200)
+            & (abs(fatjets.eta) < 2.5)
+            & fatjets.isTight
         ]
         dphi_met_fj = abs(candidatefj.delta_phi(met))
         dr_lep_fj = candidatefj.delta_r(candidatelep_p4)
@@ -232,14 +264,18 @@ class HwwProcessor(processor.ProcessorABC):
             candidatefj = ak.firsts(candidatefj[ak.argmin(dr_lep_fj,axis=1,keepdims=True)])
         else:
             raise RuntimeError("Unknown candidate jet arbitration")
+
+        selection.add("fjmsd", candidatefj.msdcorr > 15.)
             
         # lepton isolation
         # check pfRelIso04 vs pfRelIso03
-        selection.add("mu_iso", ( ((candidatelep.pt < 55.) & (candidatelep.pfRelIso04_all < 0.25)) |
+        selection.add("mu_iso", ( ((candidatelep.pt < 55.) & (candidatelep.pfRelIso03_all < 0.25)) |
                                   ((candidatelep.pt >= 55.) & (candidatelep.miniPFRelIso_all < 0.1)) ) )
         selection.add("el_iso", ( ((candidatelep.pt < 120.) & (candidatelep.pfRelIso03_all < 0.25)) |
                                   ((candidatelep.pt >= 120.) & (candidatelep.miniPFRelIso_all < 0.1)) ) )
-                
+        lep_miniIso = candidatelep.miniPFRelIso_all
+        lep_relIso = candidatelep.pfRelIso03_all
+
         # leptons within fatjet
         lep_in_fj = candidatefj.delta_r(candidatelep_p4) < 0.8
         lep_in_fj = ak.fill_none(lep_in_fj, False)
@@ -257,7 +293,7 @@ class HwwProcessor(processor.ProcessorABC):
         
         # b-jets
         bjets_ophem = ak.max(jets[dphi_jet_fj > np.pi / 2].btagDeepFlavB, axis=1)
-        selection.add("btag_ophem", bjets_ophem > 0)
+        selection.add("btag_ophem_med", bjets_ophem < self._btagWPs[self._year]['medium'])
 
         # match HWW semi-lep dataset
         if "HWW" in dataset:
@@ -279,8 +315,8 @@ class HwwProcessor(processor.ProcessorABC):
         selection.add("iswstarlepton", iswstarlepton)
 
         regions = {
-            "hadel": ["lep_in_fj", "triggere", "oneelectron", "el_iso"],
-            "hadmu": ["lep_in_fj", "triggermu", "onemuon", "mu_iso"],
+            "hadel": ["triggere", "met_filters", "lep_in_fj", "fjmsd", "oneelectron", "el_iso", "btag_ophem_med", "met_20"],
+            "hadmu": ["triggermu", "met_filters", "lep_in_fj", "fjmsd", "onemuon", "mu_iso", "btag_ophem_med", "met_20"],
             "noselection": []
         }
 
@@ -326,17 +362,18 @@ class HwwProcessor(processor.ProcessorABC):
                 deltaR_lepjet=normalize(candidatefj.delta_r(candidatelep_p4), cut),
                 weight=weights.weight()[cut],
             )
-            output['higgs_kin'].fill(
-                region=region,
-                matchedHpt=normalize(matchedH_pt, cut),
-                genHpt=normalize(genH_pt, cut),
-                weight=weights.weight()[cut],
-            )
             output["met_kin"].fill(
                 region=region,
                 met=normalize(met.pt, cut),
                 weight=weights.weight()[cut],
             )
+            if "HWW" in dataset:
+                output['higgs_kin'].fill(
+                    region=region,
+                    matchedHpt=normalize(matchedH_pt, cut),
+                    genHpt=normalize(genH_pt, cut),
+                    weight=weights.weight()[cut],
+                )
             
         for region in regions:
                 fill(region)
