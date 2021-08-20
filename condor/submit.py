@@ -42,7 +42,7 @@ recos = ["UL","preUL"]
 samples = {
     "UL": [
         "GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8",
-        #"QCD_HT300to500_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8",
+        "QCD_HT300to500_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8",
         "QCD_HT500to700_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8",
         "QCD_HT700to1000_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8",
         "QCD_HT1000to1500_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8",
@@ -50,8 +50,13 @@ samples = {
         "QCD_HT2000toInf_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8",
         "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8",
         "SingleElectron",
-        #"SingleMuon",
-        ],
+        "SingleMuon",
+        "WJetsToLNu_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8",
+        "WJetsToLNu_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8",
+        "WJetsToLNu_HT-600To800_TuneCP5_13TeV-madgraphMLM-pythia8",
+        "WJetsToLNu_HT-800To1200_TuneCP5_13TeV-madgraphMLM-pythia8",
+        "WJetsToLNu_HT-1200To2500_TuneCP5_13TeV-madgraphMLM-pythia8",
+    ],
     "preUL": [],
 }
 
@@ -89,9 +94,8 @@ for reco in recos:
         print('Submitting '+ prefix)
         
         njobs = int(len(totfiles[sample]) / files_per_job) + 1
-        remainder = len(totfiles[sample]) - int(files_per_job * (njobs - 1))
         
-        for j in range(njobs):
+        for j in range(njobs-1):
             condor_templ_file = open(loc_base + "/condor/submit.templ.jdl")
             sh_templ_file     = open(loc_base + "/condor/submit.templ.sh")
 
@@ -128,7 +132,7 @@ for reco in recos:
             sh_templ_file.close()
 
             print('To submit ', localcondor)
-            # os.system('condor_submit %s' % localcondor)
+            os.system('condor_submit %s' % localcondor)
 
             nsubmit = nsubmit + 1
 
