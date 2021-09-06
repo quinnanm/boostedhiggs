@@ -182,18 +182,29 @@ where:
 - number of files per job: is usually 1
 - year: this determines which fileset to read.
 
+If you do not want to run over the full list of samples listed in the `fileset` json files, or you only want to run over one reconstrucion (e.g. Ultra Legacy UL ) make sure you edit the `samples` dictionary inside submit.py.
+
 The `run.py` script has different options to e.g. select a different processor, run over files that go from one starting index (starti) to the end (endi) in the `metadata.json` file.
 
 The `submit.py` creates the submission files and submits jobs afterwards by default.
 For testing purposes one can comment the `condor_submit` expression and do, e.g:
 ```
-python condor/submit.py Aug17 run.py 1 2017
-for i in condor/Aug17/*/*.jdl; do condor_submit $i; done
+python condor/submit.py Sep6 run.py 1 2017
+for i in condor/Sep6/*/*.jdl; do condor_submit $i; done
 ```
 or one can individually submit jobs with:
 ```
-condor_submit condor/Aug17/SingleMuon_2017_2.jdl
+condor_submit condor/Sep6/SingleMuon_2017_2.jdl
 ```
+
+You can check the status of your jobs with:
+```
+condor_q
+```
+If you see no jobs listed it means they have all finished.
+
+You can check the `logs` of condor (ending on `.stderr` and `.stdout`)  to check for errors in the job processing.
 
 ## Post-processing
 
+For post-processing the output of the jobs you can use [process_histograms.py](https://github.com/cmantill/boostedhiggs/blob/main/python/process_histograms.py) script. Make sure you edit the paths pointing to the output directory.
