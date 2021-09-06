@@ -1,10 +1,27 @@
 # boostedhiggs
 
+<!-- TOC -->
+
+- [boostedhiggs](#boostedhiggs)
+    - [Set up your environment](#setting-up-coffea-environments)
+        - [With conda](#with-conda)
+        - [With singularity shell](#with-singularity-shell)
+        - [With python environments](#with-python-environments)
+    - [Structure of the repository](#structure-of-the-repository)
+        - [Data fileset](#data-fileset)
+    - [Submitting condor jobs!](#submitting-condor-jobs)
+        - [First time setup](#first-time-setup)
+        - [Submit](#submitting-jobs)
+        - [Post-processing](#post-processing)
+
+<!-- /TOC -->
+
+
 ## Setting up coffea environments
 
-### With anaconda
+### With conda
 
-#### Install miniconda if you do not have it already
+#### Install miniconda (if you do not have it already)
 Preferably, in your `nobackup` area (in LPC) or in your local computer:
 ```
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
@@ -77,6 +94,17 @@ The main selection and histograms are defined in `boostedhiggs/hwwprocessor.py`.
 
 The corrections are imported from `boostedhiggs/corrections.py`
 
+To get started:
+```
+# clone the repository in a coffea setup:
+git clone git@github.com:cmantill/boostedhiggs/
+
+# install the repository:
+pip install . --user --editable
+```
+
+### Data fileset
+
 The fileset json files that contain a dictionary of the files per sample are in the `fileset` directory.
 
 <details><summary>Re-making the input dataset files with DAS</summary>
@@ -87,20 +115,21 @@ The fileset json files that contain a dictionary of the files per sample are in 
 ssh USERNAME@cmslpc-sl7.fnal.gov -L8xxx:localhost:8xxx
 
 # create a working directory and clone the repo (if you have not done yet)
-git clone git@github.com:cmantill/boostedhiggs/
-cd boostedhiggs/
+# git clone git@github.com:cmantill/boostedhiggs/
+# cd boostedhiggs/
+# or go into your working boostedhiggs directory
 
 # enable the coffea environment, either the python environment
 source coffeaenv/bin/activate
 
-# or the conda 
+# or the conda environment
 conda activate coffea-env
 
 # then activate your proxy
 voms-proxy-init --voms cms --valid 100:00
 
-# the json files are in the data directory
-cd data/
+# the json files are in the fileset directory
+cd fileset/
 jupyter notebook --no-browser --port 8xxx
 ```
 There should be a link looking like `http://localhost:8xxx/?token=...`, displayed in the output at this point, paste that into your browser. 
@@ -134,7 +163,7 @@ singularity exec -B ${PWD}:/srv -B /uscmst1b_scratch -B /eos/uscms/store/user/cm
 - Change output directory and username in `submit.py`, e.g.:
 ```
 homedir = '/store/user/$USER/boostedhiggs/'
-
+```
 ### Submitting jobs
 - Before submitting jobs, make sure you have a valid proxy:
 ```
@@ -153,17 +182,29 @@ where:
 - number of files per job: is usually 1
 - year: this determines which fileset to read.
 
+If you do not want to run over the full list of samples listed in the `fileset` json files, or you only want to run over one reconstrucion (e.g. Ultra Legacy UL ) make sure you edit the `samples` dictionary inside submit.py.
+
 The `run.py` script has different options to e.g. select a different processor, run over files that go from one starting index (starti) to the end (endi) in the `metadata.json` file.
 
-If the `submit.py` script does not submit jobs by default (for testing purposes), one can do e.g:
+The `submit.py` creates the submission files and submits jobs afterwards by default.
+For testing purposes one can comment the `condor_submit` expression and do, e.g:
 ```
-python condor/submit.py Aug17 run.py 5 2017
-for i in condor/Aug17/*/*.jdl; do condor_submit $i; done
+python condor/submit.py Sep6 run.py 1 2017
+for i in condor/Sep6/*/*.jdl; do condor_submit $i; done
 ```
 or one can individually submit jobs with:
 ```
-condor_submit condor/Aug17/SingleMuon_2017_2.jdl
+condor_submit condor/Sep6/SingleMuon_2017_2.jdl
 ```
 
-## Postprocessing of jobs
+You can check the status of your jobs with:
+```
+condor_q
+```
+If you see no jobs listed it means they have all finished.
 
+You can check the `logs` of condor (ending on `.stderr` and `.stdout`)  to check for errors in the job processing.
+
+## Post-processing
+
+For post-processing the output of the jobs you can use [process_histograms.py](https://github.com/cmantill/boostedhiggs/blob/main/python/process_histograms.py) script. Make sure you edit the paths pointing to the output directory.
