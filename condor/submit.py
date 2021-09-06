@@ -70,7 +70,7 @@ for reco in recos:
     os.system('mkdir -p  /eos/uscms/%s' % outdir)    
 
     totfiles = {}
-    with open('data/fileset_%s_%s_NANO.json'%(year,reco), 'r') as f:
+    with open('fileset/fileset_%s_%s_NANO.json'%(year,reco), 'r') as f:
         newfiles = json.load(f)
         totfiles.update(newfiles)
 

@@ -2,6 +2,7 @@ import numpy as np
 import awkward as ak
 import hist as hist2
 import json
+from copy import deepcopy
 
 from coffea import processor
 from coffea.nanoevents.methods import candidate, vector
@@ -9,7 +10,10 @@ from coffea.analysis_tools import Weights, PackedSelection
 
 from boostedhiggs.corrections import (
     corrected_msoftdrop,
+    add_pdf_weight,
     add_pileup_weight,
+    add_leptonSFs,
+    lumiMasks,
 )
 from boostedhiggs.utils import (
     getParticles,
@@ -69,14 +73,15 @@ class HwwProcessor(processor.ProcessorABC):
             '2018': "data/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt",
         }
 
-        self._metfilters = ["goodVertices",
-                            "globalSuperTightHalo2016Filter",
-                            "HBHENoiseFilter",
-                            "HBHENoiseIsoFilter",
-                            "EcalDeadCellTriggerPrimitiveFilter",
-                            "BadPFMuonFilter",
-                        ]
-
+        self._metfilters = [
+            "goodVertices",
+            "globalSuperTightHalo2016Filter",
+            "HBHENoiseFilter",
+            "HBHENoiseIsoFilter",
+            "EcalDeadCellTriggerPrimitiveFilter",
+            "BadPFMuonFilter",
+        ]
+        
         # WPs for btagDeepFlavB (UL)
         # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
         self._btagWPs = {
@@ -131,6 +136,7 @@ class HwwProcessor(processor.ProcessorABC):
             "met_kin": hist2.Hist(
                 hist2.axis.StrCategory([], name="region", growth=True),
                 hist2.axis.Regular(30, 0, 500, name="met", label=r"$p_T^{miss}$ [GeV]"),
+                hist2.axis.Regular(20, 0, 300, name="mt_lepmet", label=r"$m_{T}$ [GeV]"),
                 hist2.storage.Weight(),
             ),
             "higgs_kin": hist2.Hist(
@@ -155,7 +161,6 @@ class HwwProcessor(processor.ProcessorABC):
         output = self.make_output()
         if not isRealData:
             output['sumw'] = ak.sum(events.genWeight)
-            weights.add("genweight", events.genWeight)
             
         # trigger
         for channel in ["e","mu"]:
@@ -169,12 +174,22 @@ class HwwProcessor(processor.ProcessorABC):
             else:
                 selection.add('trigger'+channel, np.ones(nevents, dtype='bool'))
 
-        # TODO: add lumi masks (based on json files) 
+        # lumi mask
+        if isRealData:
+            selection.add('lumimask', lumiMasks[self._year](events.run, events.luminosityBlock))
+        else:
+            selection.add('lumimask', np.ones(len(events), dtype='bool'))
 
         # MET filters
         met_filters = np.ones(nevents, dtype='bool')
         for mf in self._metfilters:
             met_filters = met_filters & events.Flag[mf]
+        # only for data: 
+        if isRealData:
+             met_filters = met_filters & events.Flag["eeBadScFilter"]
+        # only for 2017 and 2018:
+        #if self._year=="2017" or self._year=="2018":
+        #    met_filters = met_filters & events.Flag["ecalBadCalibFilterV2"]
         selection.add('met_filters', met_filters)
 
         # muons
@@ -224,6 +239,8 @@ class HwwProcessor(processor.ProcessorABC):
             & (abs(events.Tau.eta) < 2.3)
             & (events.Tau.idAntiEle >= 8)
             & (events.Tau.idAntiMu >= 1)
+            #& ak.all(events.Tau.metric_table(events.Muon[goodmuon]) > 0.4, axis=2)
+            #& ak.all(events.Tau.metric_table(events.Electron[goodelectron]) > 0.4, axis=2)
         )
         ntaus = ak.sum(goodtau, axis=1)
             
@@ -244,11 +261,20 @@ class HwwProcessor(processor.ProcessorABC):
             with_name="PtEtaPhiMCandidate",
             behavior=candidate.behavior,
         )
-            
+
+        selection.add('muonkin', (candidatelep.pt > 30.) & abs(candidatelep.eta < 2.4))
+        selection.add('electronkin', (candidatelep.pt > 40.) & abs(candidatelep.eta < 2.4))
+
         # missing transverse energy
         met = events.MET
         selection.add("met_20", met.pt > 20.)
 
+        # transverse mass of lepton and MET
+        mt_lep_met = np.sqrt(
+            2.*candidatelep_p4.pt*met.pt*(ak.ones_like(met.pt) - np.cos(candidatelep_p4.delta_phi(met)))
+        )
+        selection.add("mt_lepmet", mt_lep_met < 80.)
+        
         # fatjets
         fatjets = events.FatJet
         fatjets["msdcorr"] = corrected_msoftdrop(fatjets)
@@ -271,14 +297,21 @@ class HwwProcessor(processor.ProcessorABC):
         else:
             raise RuntimeError("Unknown candidate jet arbitration")
 
+        selection.add("fjacc", (candidatefj.pt > 200) & (abs(candidatefj.eta) < 2.5) & (candidatefj.qcdrho > -6.) & (candidatefj.qcdrho < -1.4) )
         selection.add("fjmsd", candidatefj.msdcorr > 15.)
             
         # lepton isolation
         # check pfRelIso04 vs pfRelIso03
-        selection.add("mu_iso", ( ((candidatelep.pt < 55.) & (candidatelep.pfRelIso03_all < 0.25)) |
+        # selection.add("mu_iso", ( ((candidatelep.pt < 55.) & (candidatelep.pfRelIso03_all < 0.25)) |
+        #                           ((candidatelep.pt >= 55.) & (candidatelep.miniPFRelIso_all < 0.1)) ) )
+        # selection.add("el_iso", ( ((candidatelep.pt < 120.) & (candidatelep.pfRelIso03_all < 0.25)) |
+        #                           ((candidatelep.pt >= 120.) & (candidatelep.miniPFRelIso_all < 0.1)) ) )
+        # to cross check w Dylan:
+        selection.add("mu_iso", ( ((candidatelep.pt < 55.) & (candidatelep.pfRelIso03_all < 0.1)) |
                                   ((candidatelep.pt >= 55.) & (candidatelep.miniPFRelIso_all < 0.1)) ) )
-        selection.add("el_iso", ( ((candidatelep.pt < 120.) & (candidatelep.pfRelIso03_all < 0.25)) |
+        selection.add("el_iso", ( ((candidatelep.pt < 120.) & (candidatelep.pfRelIso03_all < 0.1)) |
                                   ((candidatelep.pt >= 120.) & (candidatelep.miniPFRelIso_all < 0.1)) ) )
+
         lep_miniIso = candidatelep.miniPFRelIso_all
         lep_relIso = candidatelep.pfRelIso03_all
 
@@ -316,13 +349,38 @@ class HwwProcessor(processor.ProcessorABC):
             genH_pt = ak.zeros_like(candidatefj.pt)
             iswlepton = ak.ones_like(candidatefj.pt, dtype=bool)
             iswstarlepton = ak.ones_like(candidatefj.pt, dtype=bool)
-            
         selection.add("iswlepton", iswlepton)
         selection.add("iswstarlepton", iswstarlepton)
+        
+        # add weights
+        if not isRealData:
+            weights.add("genweight", events.genWeight)
+            if "LHEPdfWeight" in events.fields:
+                add_pdf_weight(weights, events.LHEPdfWeight)
+            else:
+                add_pdf_weight(weights, None)
+            add_pileup_weight(weights, events.Pileup.nPU, self._year)
+            logger.debug("Weight statistics: %r" % weights.weightStatistics)
+            
+        # make dictionary of weights for different regions
+        weights_dict = {
+            "hadel": deepcopy(weights),
+            "hadmu": deepcopy(weights),
+            "noselection": deepcopy(weights),
+        }
+        # add channel specific weights
+        add_leptonSFs(weights_dict["hadel"], candidatelep, self._year, "elec")
+        add_leptonSFs(weights_dict["hadmu"], candidatelep, self._year, "muon")
 
+        # TODO:
+        # add lumimask
         regions = {
-            "hadel": ["triggere", "met_filters", "lep_in_fj", "fjmsd", "oneelectron", "el_iso", "btag_ophem_med", "met_20"],
-            "hadmu": ["triggermu", "met_filters", "lep_in_fj", "fjmsd", "onemuon", "mu_iso", "btag_ophem_med", "met_20"],
+            #"hadel": ["triggere", "met_filters", "lep_in_fj", "fjmsd", "oneelectron", "el_iso", "btag_ophem_med", "mt_lepmet"],
+            #"hadmu": ["triggermu", "met_filters", "lep_in_fj", "fjmsd", "onemuon", "mu_iso", "btag_ophem_med","mt_lepmet"],
+
+            "hadel": ["triggere", "met_filters", "oneelectron", "fjacc", "fjmsd", "btag_ophem_med", "met_20", "lep_in_fj", "mt_lepmet", "el_iso"],
+            "hadmu": ["triggere", "met_filters", "onemuon", "fjacc", "fjmsd", "btag_ophem_med", "met_20", "lep_in_fj", "mt_lepmet", "mu_iso"],
+
             "noselection": []
         }
 
@@ -344,13 +402,14 @@ class HwwProcessor(processor.ProcessorABC):
         def fill(region):
             selections = regions[region]
             cut = selection.all(*selections)
+            weights_region = weights_dict[region]
             
             output['signal_kin'].fill(
                 region=region,
                 genflavor=normalize(hWWlepqq_flavor, cut),
                 genHflavor=normalize(hWWlepqq_matched, cut),
                 nprongs=normalize(hWWlepqq_nprongs, cut),
-                weight = weights.weight()[cut],
+                weight = weights_region.weight()[cut],
             )
             output["jet_kin"].fill(
                 region=region,
@@ -358,7 +417,7 @@ class HwwProcessor(processor.ProcessorABC):
                 jetmsd=normalize(candidatefj.msdcorr, cut),
                 jetrho=normalize(candidatefj.qcdrho, cut),
                 btag=normalize(bjets_ophem, cut),
-                weight=weights.weight()[cut],
+                weight=weights_region.weight()[cut],
             )
             output['lep_kin'].fill(
                 region=region,
@@ -366,19 +425,20 @@ class HwwProcessor(processor.ProcessorABC):
                 leprelIso=normalize(lep_relIso, cut),
                 lep_pt=normalize(candidatelep.pt, cut),
                 deltaR_lepjet=normalize(candidatefj.delta_r(candidatelep_p4), cut),
-                weight=weights.weight()[cut],
+                weight=weights_region.weight()[cut],
             )
             output["met_kin"].fill(
                 region=region,
                 met=normalize(met.pt, cut),
-                weight=weights.weight()[cut],
+                mt_lepmet=normalize(mt_lep_met, cut),
+                weight=weights_region.weight()[cut],
             )
             if "HWW" in dataset:
                 output['higgs_kin'].fill(
                     region=region,
                     matchedHpt=normalize(matchedH_pt, cut),
                     genHpt=normalize(genH_pt, cut),
-                    weight=weights.weight()[cut],
+                    weight=weights_region.weight()[cut],
                 )
                 
             # cutflow
@@ -388,7 +448,7 @@ class HwwProcessor(processor.ProcessorABC):
                 region=region,
                 cut=0,
                 genflavor=normalize(hWWlepqq_flavor, cut),
-                weight=weights.weight()[cut],
+                weight=weights_region.weight()[cut],
             )
             for i, cut in enumerate(regions[region]):
                 allcuts.add(cut)
@@ -397,15 +457,13 @@ class HwwProcessor(processor.ProcessorABC):
                     region=region,
                     cut=i + 1,
                     genflavor=normalize(hWWlepqq_flavor, cut),
-                    weight=weights.weight()[cut],
+                    weight=weights_region.weight()[cut],
                 )
                 
-            
         for region in regions:
-                fill(region)
+            fill(region)
 
         return {dataset: output}
             
     def postprocess(self, accumulator):
         return accumulator
-    

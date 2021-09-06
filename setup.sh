@@ -13,13 +13,13 @@ source $NAME/bin/activate
 LOCALPATH=$(python -c 'import sys; prefix=sys.prefix.split("/")[-1]; print(f"./{prefix}/lib/python{sys.version_info.major}.{sys.version_info.minor}/site-packages")')
 export PYTHONPATH=${LOCALPATH}:$PYTHONPATH
 python -m pip install setuptools pip wheel --upgrade
-python -m pip install coffea awkward uproot4
+python -m pip install coffea awkward uproot4 correctionlib
 sed -i '1s/#!.*python$/#!\/usr\/bin\/env python/' $NAME/bin/*
 sed -i '40s/.*/VIRTUAL_ENV="$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}" )")" \&\& pwd)"/' $NAME/bin/activate
 sed -i "2a source ${LCG}/setup.sh" $NAME/bin/activate
 sed -i "3a export PYTHONPATH=${LOCALPATH}:\$PYTHONPATH" $NAME/bin/activate
 sed -i "4a source ${LCG}/setup.csh" $NAME/bin/activate.csh
 sed -i "5a setenv PYTHONPATH ${LOCALPATH}:\$PYTHONPATH" $NAME/bin/activate.csh
-rm ${NAME}.tar.gz
-tar -zcf ${NAME}.tar.gz ${NAME}
-ipython kernel install --user --name=$NAME
+#rm ${NAME}.tar.gz
+#tar -zcf ${NAME}.tar.gz ${NAME}
+#ipython kernel install --user --name=$NAME
