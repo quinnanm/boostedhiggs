@@ -50,7 +50,7 @@ samples = {
         "QCD_HT2000toInf_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8",
         "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8",
         "TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8",
-        "TTToHadronic_TuneCP5CR1_13TeV-powheg-pythia8",
+        "TTToHadronic_TuneCP5_13TeV-powheg-pythia8",
         "ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8",
         "ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8",
         "ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8",
@@ -138,7 +138,7 @@ for reco in recos:
                 os.system('rm %s.log' % localcondor)
             condor_templ_file.close()
             sh_templ_file.close()
-
+            
             print('To submit ', localcondor)
             os.system('condor_submit %s' % localcondor)
 

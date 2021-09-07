@@ -206,8 +206,21 @@ condor_q
 ```
 If you see no jobs listed it means they have all finished.
 
-You can check the `logs` of condor (ending on `.stderr` and `.stdout`)  to check for errors in the job processing.
+You can check the `logs` of condor (ending on `.err` and `.out`)  to check for errors in the job processing.
+
+Also one can use the `.log` file to look for errors:
+```
+# one can look for return values different than 0
+grep -r 'return value 2' condor/Sep6/UL/logs/
+
+# or look for removed and aborted jobs
+grep -r 'Job removed' condor/Sep6/UL/logs/
+grep -r 'aborted' condor/Sep6/UL/logs/
+```
 
 ## Post-processing
 
-For post-processing the output of the jobs you can use [process_histograms.py](https://github.com/cmantill/boostedhiggs/blob/main/python/process_histograms.py) script. Make sure you edit the paths pointing to the output directory.
+For post-processing the output of the jobs you can use [process_histograms.py](https://github.com/cmantill/boostedhiggs/blob/main/python/process_histograms.py) script. 
+
+- Make sure you edit the paths pointing to the output directory.
+
