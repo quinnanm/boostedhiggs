@@ -59,11 +59,12 @@ def plot_cutflow(data, sig, bkg, bkg_labels=None, region="hadel", odir="./", yea
     plt.gcf().savefig("%s/%s_%s_cutflow.png"%(odir,region,year))
 
 hist_labels = {
+    'jetpt': r"$p_T$ [GeV]",
     'mt': r"$m_T(l, p_T^{miss})$ [GeV]"
 }
 
-def plot_stack(data, sig, bkg, bkg_labels, sig_label="HWW (1700)", histname=None,
-               region="hadel", odir="./", year=None):
+def plot_stack(data, sig, bkg, bkg_labels, sig_label="HWW (1700)", 
+               axis_name=None, region="hadel", odir="./", year=None):
     """
     data: hist
     sig: hist
@@ -133,11 +134,11 @@ def plot_stack(data, sig, bkg, bkg_labels, sig_label="HWW (1700)", histname=None
         frameon=True,
     )
     rax.set(
-        xlabel=hist_labels[histname],
+        xlabel=hist_labels[axis_name],
         ylabel="Data/Pred",
         ylim=(0,2)
     )
     rax.yaxis.label.set_size(18)
 
     # save fig
-    fig.savefig("%s/%s_%s_%s.png"%(odir,region,year,histname))
+    fig.savefig("%s/%s_%s_%s.png"%(odir,region,year,axis_name))

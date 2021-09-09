@@ -1,5 +1,5 @@
 {
-  "hww": 0.9913,
+  "GluGluHToWWToLNuQQ": 0.9913,
   "QCD_HT50to100": 2.486e+08,
   "QCD_HT100to200": 27990000.0,
   "QCD_HT200to300": 1712000,
@@ -11,7 +11,7 @@
   "QCD_HT2000toInf": 25.24,
   "TTToHadronic": "670.3 * 1.24088 * 0.667 * 0.667",
   "TTToSemiLeptonic": "670.3 * 1.24088 * 2 * (0.667 * 0.333)",
-  "TTo2L2Nu": "670.3 * 1.24088 * 0.333 * 0.333",
+  "TTTo2L2Nu": "670.3 * 1.24088 * 0.333 * 0.333",
   "TT_Mtt-1000toInf": 76.61,
   "TT_Mtt-700to1000": 20.58,
   "ST_s-channel_4f_leptonDecays": 3.36,

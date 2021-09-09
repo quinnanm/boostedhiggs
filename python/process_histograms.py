@@ -10,10 +10,12 @@ import hist as hist2
 from coffea import processor
 
 # hists path
-path = "/eos/uscms/store/user/docampoh/boostedhiggs/Aug31_UL/outfiles/" 
+#path = "/eos/uscms/store/user/docampoh/boostedhiggs/Aug31_UL/outfiles/" 
+path = "/eos/uscms/store/user/cmantill/boostedhiggs/Sep6_UL/outfiles/"
 
 # xsec paths
-xsec_path = "/uscms/home/docampoh/nobackup/boostedhiggs/data/xsecs.json" 
+xsec_path = "fileset/xsecs.json"
+#xsec_path = "fileset/xsecs_dylan.json"
 
 def iter_flatten(iterable):
     """flatten nested lists"""
@@ -28,12 +30,26 @@ def iter_flatten(iterable):
 def read_hists(sample):
     files = os.listdir(path)
 
+    # make sample dictionary
+    # each key must be different for samples with different cross section
+    # must also match the sample in xsecs.json..?
     hww = {
-        "GluGluHToWWToLNuQQ": [file for file in files if "GluGluHToWWToLNuQQ" in file]
+        "GluGluHToWWToLNuQQ": [file for file in files if "GluGluHToWWToLNuQQ" in file],
     }
     tt = {
-        "TTToSemiLeptonic": [file for file in files if "TTToSemiLeptonic" in file]
+        "TTToSemiLeptonic": [file for file in files if "TTToSemiLeptonic" in file],
+        "TTToHadronic": [file for file in files if "TTToHadronic" in file],
+        "TTTo2L2Nu": [file for file in files if "TTTo2L2Nu" in file],
     }
+    # TODO: add st when xsections are included
+    # st = {
+    #     "ST_s-channel_4f": [file for file in files if "ST_s-channel_4f" in file],
+    #     "ST_tW_antitop_5f": [file for file in files if "ST_tW_antitop_5f" in file],
+    #     "ST_tW_top_5f": [file for file in files if "ST_tW_top_5f" in file],
+    #     "ST_t-channel_muDecays": [file for file in files if "ST_t-channel_muDecays" in file],
+    #     "ST_t-channel_eleDecays": [file for file in files if "ST_t-channel_eleDecays" in file],
+    #     "ST_t-channel_antitop_5f": [file for file in files if "ST_t-channel_antitop_5f" in file],
+    # }
     qcd = {
         "QCD_HT300to500": [file for file in files if "QCD_HT300to500" in file],
         "QCD_HT500to700": [file for file in files if "QCD_HT500to700" in file],
@@ -49,6 +65,9 @@ def read_hists(sample):
         "WJetsToLNu_HT-800To1200": [file for file in files if "WJetsToLNu_HT-800To1200" in file],
         "WJetsToLNu_HT-1200To2500": [file for file in files if "WJetsToLNu_HT-1200To2500" in file],
     }
+    # TODO: add dyjets
+    # dyjets = {        
+    # }
     singleElectron = {
         "SingleElectron": [file for file in files if "SingleElectron" in file]
     }
@@ -136,11 +155,11 @@ def main(args):
     sample_dic = read_hists(args.sample)
     sample_dic = load_hists(sample_dic, histograms)
     if args.sample not in ["electron", "muon"]:
-        output = scale_hists(sample_dic, args.lumi)
+        output = scale_hists(sample_dic, 41500)
     else:
         output = sample_dic
 
-    output_path = "/uscms/home/docampoh/nobackup/boostedhiggs/hists"
+    output_path = "hists/"
     output_name = ""
     for hist in histograms[1:]:
         output_name += "_" + hist

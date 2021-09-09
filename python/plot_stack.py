@@ -21,10 +21,8 @@ def main(args):
     map_proc = {
         "hww": "GluGluHToWWToLNuQQ",
         "qcd": "QCD",
-        "tt": "TTToSemiLeptonic",
+        "tt": "TTTo2L2Nu",
         "wjets": "WJetsToLNu",
-        "SingleMuon": "SingleMuon",
-        "SingleElectron": "SingleElectron",
     }
     
     paths_by_proc = {}
@@ -38,6 +36,7 @@ def main(args):
     else:
         print('Not a valid data channel')
         exit
+    map_proc['data'] = data_key
 
     paths_by_proc['hww'] = "%s/hww_%s.pkl"%(input_dir,args.hist_name)
 
@@ -46,10 +45,11 @@ def main(args):
         paths_by_proc[mc] = "%s/%s_%s.pkl"%(input_dir,mc,args.hist_name)
 
     hists_by_proc = {}
-    for key,path in hists_by_proc.items():
+    for key,path in paths_by_proc.items():
         with open(path, "rb") as f:
             pklf = cPickle.load(f)
         hists_by_proc[key] = pklf[map_proc[key]][args.hist_name][{"region":args.channel}].project(args.hist_axis)
+        print(key,hists_by_proc[key])
 
     if args.hist_name == "cutflow":
         from utils import plot_cutflow
