@@ -183,6 +183,7 @@ class HwwProcessor(processor.ProcessorABC):
         # MET filters
         met_filters = np.ones(nevents, dtype='bool')
         for mf in self._metfilters:
+            #if mf in events.Flag.fields:
             met_filters = met_filters & events.Flag[mf]
         # only for data: 
         if isRealData:
@@ -355,11 +356,11 @@ class HwwProcessor(processor.ProcessorABC):
         # add weights
         if not isRealData:
             weights.add("genweight", events.genWeight)
-            if "LHEPdfWeight" in events.fields:
-                add_pdf_weight(weights, events.LHEPdfWeight)
-            else:
-                add_pdf_weight(weights, None)
-            add_pileup_weight(weights, events.Pileup.nPU, self._year)
+            #if "LHEPdfWeight" in events.fields:
+            #    add_pdf_weight(weights, events.LHEPdfWeight)
+            #else:
+            #    add_pdf_weight(weights, None)
+            # add_pileup_weight(weights, events.Pileup.nPU, self._year)
             logger.debug("Weight statistics: %r" % weights.weightStatistics)
             
         # make dictionary of weights for different regions
@@ -369,8 +370,8 @@ class HwwProcessor(processor.ProcessorABC):
             "noselection": deepcopy(weights),
         }
         # add channel specific weights
-        add_leptonSFs(weights_dict["hadel"], candidatelep, self._year, "elec")
-        add_leptonSFs(weights_dict["hadmu"], candidatelep, self._year, "muon")
+        #add_leptonSFs(weights_dict["hadel"], candidatelep, self._year, "elec")
+        #add_leptonSFs(weights_dict["hadmu"], candidatelep, self._year, "muon")
 
         # TODO:
         # add lumimask
