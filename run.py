@@ -32,8 +32,8 @@ def main(args):
         uproot.open.defaults['xrootd_handler'] = uproot.source.xrootd.MultithreadedXRootDSource
 
         exe_args = {'savemetrics':True,
-                    'schema':NanoAODSchema,
-                    'retries': 1}
+                    'schema': NanoAODSchema,
+                    'retries': 3}
 
         out, metrics = processor.run_uproot_job(
             fileset,
