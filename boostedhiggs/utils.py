@@ -1,6 +1,5 @@
 import awkward as ak
 
-
 def getParticles(genparticles,lowid=22,highid=25,flags=['fromHardProcess', 'isLastCopy']):
     """
     returns the particle objects that satisfy a low id, 
@@ -72,3 +71,29 @@ def match_HWWlepqq(genparticles,candidatefj):
     iswstarlepton = leptons_mass == higgs_wstar_mass
     
     return hWWlepqq_flavor,hWWlepqq_matched,hWWlepqq_nprongs,matchedH,higgs,iswlepton,iswstarlepton
+
+def match_Htt(genparticles,candidatefj):
+    higgs = getParticles(genparticles,25)
+    is_htt = ak.all(abs(higgs.children.pdgId)==15,axis=2)
+
+    higgs = higgs[is_htt]
+    
+    fromtau_electron = getParticles(events.GenPart,11,11,['isDirectTauDecayProduct'])
+    fromtau_muon = getParticles(events.GenPart,13,13,['isDirectTauDecayProduct'])
+    tau_visible = events.GenVisTau
+    
+    n_visibletaus = ak.sum(tau_visible.pt>0,axis=1)
+    n_electrons_fromtaus = ak.sum(fromtau_electron.pt>0,axis=1)
+    n_muons_fromtaus = ak.sum(fromtau_muon.pt>0,axis=1)
+    # 3(elenuqq),6(munuqq),8(taunuqq)
+    htt_flavor = (n_quarks==2)*1 + (n_electrons==1)*3 + (n_muons==1)*5 + (n_taus==1)*7
+
+    matchedH = candidatefj.nearest(higgs, axis=1, threshold=0.8)
+    dr_fj_visibletaus = candidatefj.delta_r(tau_visible)
+    dr_fj_electrons = candidatefj.delta_r(fromtau_electron)
+    dr_fj_muons = candidatefj.delta_r(fromtau_muon)
+    dr_daughters = ak.concatenate([dr_fj_visibletaus,dr_fj_electrons,dr_fj_muons],axis=1)
+    # 1 (H only), 4 (H and one tau/electron or muon from tau), 5 (H and 2 taus/ele)
+    htt_matched = (ak.sum(matchedH.pt>0,axis=1)==1)*1 + (ak.sum(dr_daughters<0.8,axis=1)==1)*3 + (ak.sum(dr_daughters<0.8,axis=1)==2)*5 
+    
+    return htt_flavor,htt_matched,matchedH,higgs
