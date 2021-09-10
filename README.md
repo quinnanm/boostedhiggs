@@ -58,7 +58,7 @@ conda install -c conda-forge xrootd
 
 ### With singularity shell
 
-First, copy the executable script from `lpcjobqueue`.
+First, copy the executable script from `lpcjobqueue`: https://github.com/CoffeaTeam/lpcjobqueue
 ```
 curl -OL https://raw.githubusercontent.com/CoffeaTeam/lpcjobqueue/main/bootstrap.sh
 bash bootstrap.sh
