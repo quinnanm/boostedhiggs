@@ -7,6 +7,7 @@ from coffea.lookup_tools import extractor
 corrections = {}
 
 pu = {}
+pu["2016"] = {"central": "data/
 pu["2017"] = {"central": "data/PileupHistogram-goldenJSON-13tev-2017-69200ub-99bins.root",
               "up": "data/PileupHistogram-goldenJSON-13tev-2017-72400ub-99bins.root",
               "down": "data/PileupHistogram-goldenJSON-13tev-2017-66000ub-99bins.root",
@@ -21,7 +22,7 @@ for year,pdict in pu.items():
     for var,pfile in pdict.items():
         with uproot.open(pfile) as ifile:
             data_pu[var] = norm(ifile["pileup"].values())
-            data_pu_edges[var] = norm(ifile["pileup"].axis().edges())
+            data_pu_edges[var] = ifile["pileup"].axis().edges()
 
     # from mix.input.nbPileupEvents.probValue:
     # https://github.com/cms-sw/cmssw/blob/master/SimGeneral/MixingModule/python/mix_2017_25ns_UltraLegacy_PoissonOOTPU_cfi.py

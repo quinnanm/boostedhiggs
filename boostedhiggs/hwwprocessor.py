@@ -356,11 +356,11 @@ class HwwProcessor(processor.ProcessorABC):
         # add weights
         if not isRealData:
             weights.add("genweight", events.genWeight)
-            #if "LHEPdfWeight" in events.fields:
-            #    add_pdf_weight(weights, events.LHEPdfWeight)
-            #else:
-            #    add_pdf_weight(weights, None)
-            # add_pileup_weight(weights, events.Pileup.nPU, self._year)
+            if "LHEPdfWeight" in events.fields:
+                add_pdf_weight(weights, events.LHEPdfWeight)
+            else:
+                add_pdf_weight(weights, None)
+            add_pileup_weight(weights, events.Pileup.nPU, self._year)
             logger.debug("Weight statistics: %r" % weights.weightStatistics)
             
         # make dictionary of weights for different regions
@@ -370,8 +370,8 @@ class HwwProcessor(processor.ProcessorABC):
             "noselection": deepcopy(weights),
         }
         # add channel specific weights
-        #add_leptonSFs(weights_dict["hadel"], candidatelep, self._year, "elec")
-        #add_leptonSFs(weights_dict["hadmu"], candidatelep, self._year, "muon")
+        add_leptonSFs(weights_dict["hadel"], candidatelep, self._year, "elec")
+        add_leptonSFs(weights_dict["hadmu"], candidatelep, self._year, "muon")
 
         # TODO:
         # add lumimask
@@ -380,9 +380,8 @@ class HwwProcessor(processor.ProcessorABC):
             #"hadmu": ["triggermu", "met_filters", "lep_in_fj", "fjmsd", "onemuon", "mu_iso", "btag_ophem_med","mt_lepmet"],
 
             "hadel": ["triggere", "met_filters", "oneelectron", "fjacc", "fjmsd", "btag_ophem_med", "met_20", "lep_in_fj", "mt_lepmet", "el_iso"],
-            "hadmu": ["triggere", "met_filters", "onemuon", "fjacc", "fjmsd", "btag_ophem_med", "met_20", "lep_in_fj", "mt_lepmet", "mu_iso"],
-
-            "noselection": []
+            "hadmu": ["triggermu", "met_filters", "onemuon", "fjacc", "fjmsd", "btag_ophem_med", "met_20", "lep_in_fj", "mt_lepmet", "mu_iso"],
+            #"noselection": []
         }
 
         if "HWW" in dataset:
