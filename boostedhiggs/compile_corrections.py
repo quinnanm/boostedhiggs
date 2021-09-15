@@ -7,11 +7,18 @@ from coffea.lookup_tools import extractor
 corrections = {}
 
 pu = {}
-pu["2016"] = {"central": "data/
+pu["2016"] = {"central": "data/PileupHistogram-goldenJSON-13tev-2016-preVFP-69200ub-99bins.root",
+              "up": "data/PileupHistogram-goldenJSON-13tev-2016-preVFP-72400ub-99bins.root",
+              "down": "data/PileupHistogram-goldenJSON-13tev-2016-preVFP-66000ub-99bins.root",
+          }
 pu["2017"] = {"central": "data/PileupHistogram-goldenJSON-13tev-2017-69200ub-99bins.root",
               "up": "data/PileupHistogram-goldenJSON-13tev-2017-72400ub-99bins.root",
               "down": "data/PileupHistogram-goldenJSON-13tev-2017-66000ub-99bins.root",
-              }
+          }
+pu["2018"] = {"central": "data/PileupHistogram-goldenJSON-13tev-2018-69200ub-99bins.root",
+              "up": "data/PileupHistogram-goldenJSON-13tev-2018-72400ub-99bins.root",
+              "down": "data/PileupHistogram-goldenJSON-13tev-2018-66000ub-99bins.root"
+          }
               
 pileup_corr = {}
 norm = lambda x: x / x.sum()
