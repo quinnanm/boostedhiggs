@@ -6,7 +6,8 @@
 # Loading histograms
 
 # path to output
-hists_path="/eos/uscms/store/user/cmantill/boostedhiggs/Sep14_nopuw_UL/outfiles/"
+#hists_path="/eos/uscms/store/user/cmantill/boostedhiggs/Sep14_nopuw_UL/outfiles/"
+hists_path="/eos/uscms/store/user/cmantill/boostedhiggs/Sep15_wpuw_wmctrig_UL/outfiles/"
 
 # path to cross section json 
 xsecs_path="/uscms/home/docampoh/nobackup/boostedhiggs/fileset/xsecs.json"

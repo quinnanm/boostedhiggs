@@ -33,9 +33,8 @@ def plot_cutflow(data, sig, bkg, bkg_labels=None, region="hadel", odir="./", yea
     regions = {
             "hadel": ["none", "triggere", "met_filters", "oneelectron", "fjacc", "fjmsd", "btag_ophem_med", "met_20", "lep_in_fj", "mt_lep_met",\
  "el_iso"],
-            "hadmu": ["none", "triggermu", "met_filters", "onemuon", "fjacc", "fjmsd", "btag_ophem_med", "met_20", "lep_in_fj", "mt_lep_met", "el\
-_iso"],
-        }
+            "hadmu": ["none", "triggermu", "met_filters", "onemuon", "fjacc", "fjmsd", "btag_ophem_med", "met_20", "lep_in_fj", "mt_lep_met", "mu_iso"],
+}
 
     fig, ax = plt.subplots(
         figsize=(12,12),
