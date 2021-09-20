@@ -164,15 +164,16 @@ class HwwProcessor(processor.ProcessorABC):
             
         # trigger
         for channel in ["e","mu"]:
-            if isRealData:
-                trigger = np.zeros(len(events), dtype='bool')
-                for t in self._triggers[channel]:
-                    if t in events.HLT.fields:
-                        trigger = trigger | events.HLT[t]
-                selection.add('trigger'+channel, trigger)
-                del trigger
-            else:
-                selection.add('trigger'+channel, np.ones(nevents, dtype='bool'))
+            # apply trigger to both data and MC
+            #if isRealData:
+            trigger = np.zeros(len(events), dtype='bool')
+            for t in self._triggers[channel]:
+                if t in events.HLT.fields:
+                    trigger = trigger | events.HLT[t]
+            selection.add('trigger'+channel, trigger)
+            del trigger
+            #else:
+            #    selection.add('trigger'+channel, np.ones(nevents, dtype='bool'))
 
         # lumi mask
         if isRealData:
@@ -183,14 +184,15 @@ class HwwProcessor(processor.ProcessorABC):
         # MET filters
         met_filters = np.ones(nevents, dtype='bool')
         for mf in self._metfilters:
-            #if mf in events.Flag.fields:
-            met_filters = met_filters & events.Flag[mf]
+            if mf in events.Flag.fields:
+                met_filters = met_filters & events.Flag[mf]
         # only for data: 
         if isRealData:
              met_filters = met_filters & events.Flag["eeBadScFilter"]
         # only for 2017 and 2018:
-        #if self._year=="2017" or self._year=="2018":
-        #    met_filters = met_filters & events.Flag["ecalBadCalibFilterV2"]
+        if self._year=="2017" or self._year=="2018":
+            if "ecalBadCalibFilter" in events.Flag.fields:
+                met_filters = met_filters & events.Flag["ecalBadCalibFilter"]
         selection.add('met_filters', met_filters)
 
         # muons
