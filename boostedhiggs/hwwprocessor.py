@@ -149,6 +149,12 @@ class HwwProcessor(processor.ProcessorABC):
                 ),
                 hist2.storage.Weight(),
             ),
+            "jet_lep_kin": hist2.Hist(
+                hist2.axis.StrCategory([], name="region", growth=True),
+                hist2.axis.Regular(30, 15, 200, name="jetlepmass", label="(Jet - lep) $m$ [GeV]"),
+                hist2.axis.Regular(30, 15, 200, name="jetlepmsd", label="(Jet - lep) $m_{sd}$ [GeV]"),
+                hist2.storage.Weight(),
+            ),
         }
         
     def process(self, events):
@@ -301,6 +307,31 @@ class HwwProcessor(processor.ProcessorABC):
         selection.add("fjacc", (candidatefj.pt > 200) & (abs(candidatefj.eta) < 2.5) & (candidatefj.qcdrho > -6.) & (candidatefj.qcdrho < -1.4) )
         selection.add("fjmsd", candidatefj.msdcorr > 15.)
             
+        candidatefj_p4_mass = ak.zip(
+            {
+                "pt": candidatefj.pt,
+                "eta": candidatefj.eta,
+                "phi": candidatefj.phi,
+                "mass": candidatefj.mass,
+            },
+            with_name="PtEtaPhiMCandidate",
+            behavior=candidate.behavior
+        )
+        
+        candidatefj_p4_msd = ak.zip(
+            {
+                "pt": candidatefj.pt,
+                "eta": candidatefj.eta,
+                "phi": candidatefj.phi,
+                "mass": candidatefj.msdcorr
+            },
+            with_name="PtEtaPhiMCandidate",
+            behavior=candidate.behavior,
+        )
+        
+        jetlepmass = (candidatefj_p4_mass - candidatelep_p4).mass
+        jetlepmsd = (candidatefj_p4_msd - candidatelep_p4).mass
+
         # lepton isolation
         # check pfRelIso04 vs pfRelIso03
         # selection.add("mu_iso", ( ((candidatelep.pt < 55.) & (candidatelep.pfRelIso03_all < 0.25)) |
@@ -432,6 +463,12 @@ class HwwProcessor(processor.ProcessorABC):
                 met=normalize(met.pt, cut),
                 mt_lepmet=normalize(mt_lep_met, cut),
                 weight=weights_region.weight()[cut],
+            )
+            output["jet_lep_kin"].fill(
+                region=region,
+                jetlepmass=normalize(jetlepmass, cut),
+                jetlepmsd=normalize(jetlepmsd, cut),
+                weight = weights_region.weight()[cut],
             )
             if "HWW" in dataset:
                 output['higgs_kin'].fill(
