@@ -9,14 +9,6 @@ import copy
 import hist as hist2
 from coffea import processor
 
-# hists path
-#path = "/eos/uscms/store/user/docampoh/boostedhiggs/Aug31_UL/outfiles/" 
-path = "/eos/uscms/store/user/cmantill/boostedhiggs/Sep6_UL/outfiles/"
-
-# xsec paths
-xsec_path = "fileset/xsecs.json"
-#xsec_path = "fileset/xsecs_dylan.json"
-
 def iter_flatten(iterable):
     """flatten nested lists"""
     it = iter(iterable)
@@ -27,7 +19,7 @@ def iter_flatten(iterable):
         else:
             yield e
 
-def read_hists(sample):
+def read_hists(sample, path):
     files = os.listdir(path)
 
     # make sample dictionary
@@ -36,20 +28,7 @@ def read_hists(sample):
     hww = {
         "GluGluHToWWToLNuQQ": [file for file in files if "GluGluHToWWToLNuQQ" in file],
     }
-    tt = {
-        "TTToSemiLeptonic": [file for file in files if "TTToSemiLeptonic" in file],
-        "TTToHadronic": [file for file in files if "TTToHadronic" in file],
-        "TTTo2L2Nu": [file for file in files if "TTTo2L2Nu" in file],
-    }
-    # TODO: add st when xsections are included
-    # st = {
-    #     "ST_s-channel_4f": [file for file in files if "ST_s-channel_4f" in file],
-    #     "ST_tW_antitop_5f": [file for file in files if "ST_tW_antitop_5f" in file],
-    #     "ST_tW_top_5f": [file for file in files if "ST_tW_top_5f" in file],
-    #     "ST_t-channel_muDecays": [file for file in files if "ST_t-channel_muDecays" in file],
-    #     "ST_t-channel_eleDecays": [file for file in files if "ST_t-channel_eleDecays" in file],
-    #     "ST_t-channel_antitop_5f": [file for file in files if "ST_t-channel_antitop_5f" in file],
-    # }
+
     qcd = {
         "QCD_HT300to500": [file for file in files if "QCD_HT300to500" in file],
         "QCD_HT500to700": [file for file in files if "QCD_HT500to700" in file],
@@ -58,6 +37,15 @@ def read_hists(sample):
         "QCD_HT1500to2000": [file for file in files if "QCD_HT1500to2000" in file],
         "QCD_HT2000toInf": [file for file in files if "QCD_HT2000toInf" in file]
     }
+    tt_semileptonic = {
+        "TTToSemiLeptonic": [file for file in files if "TTToSemiLeptonic" in file],
+    }
+    tt_hadronic = {
+        "TTToHadronic": [file for file in files if "TTToHadronic" in file],
+    }
+    tt_dileptonic = {
+        "TTTo2L2Nu": [file for file in files if "TTTo2L2Nu" in file],
+    }
     wjets = {
         "WJetsToLNu_HT-200To400": [file for file in files if "WJetsToLNu_HT-200To400" in file],
         "WJetsToLNu_HT-400To600": [file for file in files if "WJetsToLNu_HT-400To600" in file],
@@ -65,9 +53,20 @@ def read_hists(sample):
         "WJetsToLNu_HT-800To1200": [file for file in files if "WJetsToLNu_HT-800To1200" in file],
         "WJetsToLNu_HT-1200To2500": [file for file in files if "WJetsToLNu_HT-1200To2500" in file],
     }
-    # TODO: add dyjets
-    # dyjets = {        
-    # }
+    st = {
+        "ST_s-channel_4f_leptonDecays": [file for file in files if "ST_s-channel_4f_leptonDecays" in file],
+        "ST_t-channel_eleDecays": [file for file in files if "ST_t-channel_eleDecays" in file],
+        "ST_t-channel_muDecays": [file for file in files if "ST_t-channel_muDecays" in file],
+        "ST_tW_antitop_5f_inclusiveDecays": [file for file in files if "ST_tW_antitop_5f_inclusiveDecays" in file],
+        "ST_tW_top_5f_inclusiveDecays": [file for file in files if "ST_tW_top_5f_inclusiveDecays" in file],
+    }
+    zjets = {
+        #"DYJetsToLL_Pt-50To100": [file for file in files if "DYJetsToLL_Pt-50To100" in file],
+        "DYJetsToLL_Pt-100To250": [file for file in files if "DYJetsToLL_Pt-100To250" in file],
+        "DYJetsToLL_Pt-250To400": [file for file in files if "DYJetsToLL_Pt-250To400" in file],
+        "DYJetsToLL_Pt-400To650": [file for file in files if "DYJetsToLL_Pt-400To650" in file],
+        "DYJetsToLL_Pt-650ToInf": [file for file in files if "DYJetsToLL_Pt-650ToInf" in file],
+    }
     singleElectron = {
         "SingleElectron": [file for file in files if "SingleElectron" in file]
     }
@@ -77,9 +76,13 @@ def read_hists(sample):
     
     samples_dics = {
         "hww": hww,
-        "tt": tt,
+        "tt_semileptonic": tt_semileptonic,
+        "tt_hadronic": tt_hadronic,
+        "tt_dileptonic": tt_dileptonic,
         "qcd": qcd,
         "wjets": wjets,
+        "st": st,
+        "zjets": zjets,
         "electron": singleElectron,
         "muon": singleMuon,
     }
@@ -88,7 +91,7 @@ def read_hists(sample):
 
 
 
-def load_hists(sample_dic, histograms):
+def load_hists(sample_dic, histograms, path):
     """load and accumulate histograms by sample"""
     
     hists = {key: [] for key in sample_dic}
@@ -115,7 +118,7 @@ def load_hists(sample_dic, histograms):
     return sample_dic
 
 
-def scale_hists(sample_dic, lumi):
+def scale_hists(sample_dic, xsec_path, lumi):
     """scale histograms to cross section"""
 
     with open(xsec_path) as f:
@@ -149,13 +152,12 @@ def scale_hists(sample_dic, lumi):
 
 def main(args):
     histograms = [hist for hist in iter_flatten(args.histogram)]
-    print(f"histogram: {histograms[1:][0]}")
     
-    start_time = time.time()
-    sample_dic = read_hists(args.sample)
-    sample_dic = load_hists(sample_dic, histograms)
+    sample_dic = read_hists(args.sample, args.hpath)
+    sample_dic = load_hists(sample_dic, histograms, args.hpath)
+
     if args.sample not in ["electron", "muon"]:
-        output = scale_hists(sample_dic, 41500)
+        output = scale_hists(sample_dic, args.xsecs, args.lumi)
     else:
         output = sample_dic
 
@@ -167,18 +169,16 @@ def main(args):
     os.system(f"mkdir -p {output_path}/{args.histogram[-1][0]}")
     with open(f"{output_path}/{args.histogram[-1][0]}/{args.sample}{output_name}.pkl", "wb") as f:
         cPickle.dump(output, f, protocol=-1)
-    
-    end_time = time.time()
-
-    print(f"{histograms[1:][0]} histograms processed in {end_time - start_time:.2f} seconds")
 
 
 if __name__ == "__main__":
-    
+
     parser = argparse.ArgumentParser()
-    parser.add_argument("--sample", dest="sample", type=str)
-    parser.add_argument("--histogram", dest="histogram", nargs="+", action="append", default=["sumw"], type=str)
-    parser.add_argument("--lumi", dest="lumi", default=41500, type=float)
+    parser.add_argument("--hpath",     dest="hpath",     default=None,      type=str,   help="path to histograms",         required=True)
+    parser.add_argument("--sample",    dest="sample",    default=None,      type=str,   help="sample to process (eg hww)", required=True)
+    parser.add_argument("--histogram", dest="histogram", default=["sumw"],  type=str,   help="histograms to process",      required=True, nargs="+", action="append")
+    parser.add_argument("--lumi",      dest="lumi",      default=None,      type=float, help="integrated luminosity",      required=True)
+    parser.add_argument("--xsecs",     dest="xsecs",     default=None,      type=str,   help="path to cross sections",     required=True)
     args = parser.parse_args()
 
     main(args)
