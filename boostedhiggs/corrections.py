@@ -145,3 +145,54 @@ def add_leptonSFs(weights, lepton, year, match):
                 nom[lep_pt<120.] = 1.
                 err[lep_pt<120.] = 0.
             weights.add(sf, nom, nom+err, nom-err)
+
+def is_overlap(events,dataset,triggers,year):
+    dataset_ordering = {
+        '2016':['SingleMuon','SingleElectron','MET','JetHT'],
+        '2017':['SingleMuon','SingleElectron','MET','JetHT'],
+        '2018':['SingleMuon','EGamma','MET','JetHT']
+    }
+    pd_to_trig = {
+        'SingleMuon': ['Mu50',
+                       'Mu55',
+                       'Mu15_IsoVVVL_PFHT600',
+                       'Mu15_IsoVVVL_PFHT450_PFMET50',
+                       ],
+        'SingleElectron': ['Ele50_CaloIdVT_GsfTrkIdT_PFJet165',
+                           'Ele115_CaloIdVT_GsfTrkIdT',
+                           'Ele15_IsoVVVL_PFHT600',
+                           'Ele35_WPTight_Gsf',
+                           'Ele15_IsoVVVL_PFHT450_PFMET50',
+                       ],
+        'JetHT': ['PFHT800',
+                  'PFHT900',
+                  'AK8PFJet360_TrimMass30',
+                  'AK8PFHT700_TrimR0p1PT0p03Mass50',
+                  'PFHT650_WideJetMJJ950DEtaJJ1p5',
+                  'PFHT650_WideJetMJJ900DEtaJJ1p5',
+                  'PFJet450',
+                  'PFHT1050',
+                  'PFJet500',
+                  'AK8PFJet400_TrimMass30',
+                  'AK8PFJet420_TrimMass30',
+                  'AK8PFHT800_TrimMass50'
+              ],
+        'MET': ['PFMETNoMu120_PFMHTNoMu120_IDTight',
+                'PFMETNoMu110_PFMHTNoMu110_IDTight',
+            ],
+    }
+    
+    overlap = np.ones(len(events), dtype='bool')
+    for p in dataset_ordering[year]:
+        if dataset.startswith(p):
+            pass_pd = np.zeros(len(events), dtype='bool')
+            for t in pd_to_trig[p]:
+                if t in events.HLT.fields:
+                    pass_pd = pass_pd | events.HLT[t]
+            overlap = overlap & pass_pd
+            break
+        else:
+            for t in pd_to_trig[p]:
+                if t in events.HLT.fields:
+                    overlap = overlap & np.logical_not(events.HLT[t])
+    return overlap
