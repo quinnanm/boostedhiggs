@@ -13,7 +13,6 @@ import warnings
 def main(args):
 
     # read samples to submit
-    # TODO: get this to a json that can be identified by year and sample
     with open(args.fileset, 'r') as f:
         files = json.load(f)[args.sample]
     fileset = {}
@@ -22,11 +21,12 @@ def main(args):
     # define processor
     if args.processor == "hww":
         from boostedhiggs.hwwprocessor import HwwProcessor
-        # TODO: add arguments to processor
-        p = HwwProcessor()
+        p = HwwProcessor(year=args.year, jet_arbitration='met', el_wp="wp80")
     else:
         warnings.warn('Warning: no processor declared')
         return
+
+    print(fileset)
 
     if args.condor:
         uproot.open.defaults['xrootd_handler'] = uproot.source.xrootd.MultithreadedXRootDSource
