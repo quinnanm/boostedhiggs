@@ -18,7 +18,7 @@ import sys
 '''
 # Note: change username in `cmantill` in this script
 
-homedir = "/store/user/cmantill/boostedhiggs/"
+homedir = "/store/user/fmokhtar/boostedhiggs/"
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('settings', metavar='S', type=str, nargs='+', help='label scriptname (re-tar)')
@@ -36,7 +36,7 @@ year = args.settings[3]
 loc_base = os.environ['PWD']
 
 # list of samples to run and recos to use
-recos = ["UL"] #,"preUL"] 
+recos = ["UL"] #,"preUL"]
 
 # if empty run over all the datasets in both filesets
 samples = {
@@ -79,7 +79,7 @@ for reco in recos:
     os.system('mkdir -p  %s' % logdir)
 
     outdir = homedir + label +'_' + reco + '/outfiles/'
-    os.system('mkdir -p  /eos/uscms/%s' % outdir)    
+    os.system('mkdir -p  /eos/uscms/%s' % outdir)
 
     totfiles = {}
     with open('fileset/fileset_%s_%s_NANO.json'%(year,reco), 'r') as f:
@@ -101,12 +101,12 @@ for reco in recos:
 
     # submit jobs
     nsubmit = 0
-    for sample in samplelist:    
+    for sample in samplelist:
         prefix = sample + '_%s_%s'%(year,reco)
         print('Submitting '+ prefix)
-        
+
         njobs = int(len(totfiles[sample]) / files_per_job) + 1
-        
+
         for j in range(njobs-1):
             condor_templ_file = open(loc_base + "/condor/submit.templ.jdl")
             sh_templ_file     = open(loc_base + "/condor/submit.templ.sh")
@@ -142,7 +142,7 @@ for reco in recos:
                 os.system('rm %s.log' % localcondor)
             condor_templ_file.close()
             sh_templ_file.close()
-            
+
             print('To submit ', localcondor)
             os.system('condor_submit %s' % localcondor)
 
