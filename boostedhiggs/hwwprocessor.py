@@ -392,8 +392,8 @@ class HwwProcessor(processor.ProcessorABC):
         selection.add("mtlepmet", mt_lep_met < 80.)
 
         regions = {
-            "hadel_noiso": ["triggere", "metfilters", "lumimask", "oneelectron", "fjacc", "fjmsd", "btag_ophem_med", "met20", "mtlepmet"],
-            "hadmu_noiso": ["triggermu", "metfilters", "lumimask", "onemuon", "fjacc", "fjmsd", "btag_ophem_med", "met20", "mtlepmet"],
+            #"hadel_noiso": ["triggere", "metfilters", "lumimask", "oneelectron", "fjacc", "fjmsd", "btag_ophem_med", "met20", "mtlepmet"],
+            #"hadmu_noiso": ["triggermu", "metfilters", "lumimask", "onemuon", "fjacc", "fjmsd", "btag_ophem_med", "met20", "mtlepmet"],
             "hadel": ["triggere", "metfilters", "lumimask", "oneelectron", "fjacc", "fjmsd", "btag_ophem_med", "met20", "lepinfj", "mtlepmet", "electroniso"],
             "hadmu": ["triggermu", "metfilters", "lumimask", "onemuon", "fjacc", "fjmsd", "btag_ophem_med", "met20", "lepinfj", "mtlepmet", "muoniso"],
             #"noselection": []
@@ -494,6 +494,9 @@ class HwwProcessor(processor.ProcessorABC):
                 )
                 
         for region in regions:
+            if isRealData:
+                if "SingleMuon" in dataset and "hadel" in region: continue
+                if "SingleElectron" in dataset and "hadmu" in region: continue
             fill(region)
 
         return {dataset: output}
