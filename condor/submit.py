@@ -18,7 +18,7 @@ import sys
 '''
 # Note: change username in `cmantill` in this script
 
-homedir = "/store/user/cmantill/boostedhiggs/"
+homedir = "/store/user/docampoh/boostedhiggs/"
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('settings', metavar='S', type=str, nargs='+', help='label scriptname (re-tar)')
@@ -36,7 +36,7 @@ year = args.settings[3]
 loc_base = os.environ['PWD']
 
 # list of samples to run and recos to use
-recos = ["UL","preUL"] 
+recos = ["UL"] #,"preUL"] 
 
 # if empty run over all the datasets in both filesets
 samples = {
@@ -62,6 +62,10 @@ samples = {
         "WJetsToLNu_HT-600To800_TuneCP5_13TeV-madgraphMLM-pythia8",
         "WJetsToLNu_HT-800To1200_TuneCP5_13TeV-madgraphMLM-pythia8",
         "WJetsToLNu_HT-1200To2500_TuneCP5_13TeV-madgraphMLM-pythia8",
+        "DYJetsToLL_Pt-100To250_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8",
+        "DYJetsToLL_Pt-250To400_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8",
+        "DYJetsToLL_Pt-400To650_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8",
+        "DYJetsToLL_Pt-650ToInf_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8",
         "SingleElectron",
         "SingleMuon",
     ],
