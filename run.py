@@ -13,7 +13,6 @@ import warnings
 def main(args):
 
     # read samples to submit
-    # TODO: get this to a json that can be identified by year and sample
     with open(args.fileset, 'r') as f:
         files = json.load(f)[args.sample]
     fileset = {}
@@ -22,64 +21,23 @@ def main(args):
     # define processor
     if args.processor == "hww":
         from boostedhiggs.hwwprocessor import HwwProcessor
-        # TODO: add arguments to processor
-        p = HwwProcessor()
+        p = HwwProcessor(year=args.year, jet_arbitration='met', el_wp="wp80")
     else:
         warnings.warn('Warning: no processor declared')
         return
 
+    print(fileset)
+
     if args.condor:
         uproot.open.defaults['xrootd_handler'] = uproot.source.xrootd.MultithreadedXRootDSource
 
-        exe_args = {'savemetrics':True,
-                    'schema': NanoAODSchema,
-                    'retries': 3}
+        executor = processor.FuturesExecutor(compression=1, status=True, workers=3)
 
-        out, metrics = processor.run_uproot_job(
-            fileset,
-            'Events',
-            p,
-            processor.futures_executor,
-            exe_args,
-            chunksize=10000,
-        )
+        run = processor.Runner(executor=executor,savemetrics=True,chunksize=10000,schema=NanoAODSchema)
+
+        out,metrics = run(fileset,'Events',processor_instance=p)
 
         print(f"Metrics: {metrics}")
-
-    elif args.dask:
-        import time
-        from distributed import Client
-        from lpcjobqueue import LPCCondorCluster
-
-        tic = time.time()
-        cluster = LPCCondorCluster(
-            ship_env=True,
-            transfer_input_files="boostedhiggs",
-        )
-        cluster.adapt(minimum=4, maximum=10)
-        client = Client(cluster)
-
-        exe_args = {
-            'client': client,
-            'savemetrics': True,
-            'schema': NanoAODSchema,
-            'align_clusters': True,
-        }
-
-        print("Waiting for at least one worker...")
-        client.wait_for_workers(1)
-
-        out, metrics = processor.run_uproot_job(
-            fileset,
-            treename="Events",
-            processor_instance=p,
-            executor=processor.dask_executor,
-            executor_args=exe_args,
-        )
-
-        elapsed = time.time() - tic
-        print(f"Metrics: {metrics}")
-        print(f"Finished in {elapsed:.1f}s")
 
     filehandler = open(f'outfiles/{args.year}_{args.sample}_{args.starti}-{args.endi}.hist', 'wb')
     pickle.dump(out, filehandler)
