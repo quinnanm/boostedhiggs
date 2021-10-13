@@ -80,14 +80,13 @@ def read_hists(sample, path):
     return samples_dics[sample]
 
 
-
 def load_hists(sample_dic, histogram, region, path):
-    """load and accumulate histograms by sample, histogram and region"""
+    """load and accumulate ouput dics by sample, histogram and region"""
     
     hists = {key:[] for key in sample_dic}
     
     for key, hist in sample_dic.items():
-        print(f"processing {key} histograms")
+        print(f"{key}")
         for h in hist:
             with open(f"{path}/{h}", "rb") as f:
                 # disable garbage collector
@@ -120,12 +119,15 @@ def load_hists(sample_dic, histogram, region, path):
 def scale_hists(sample_dic, xsec_path, lumi):
     """scale histograms to cross section"""
 
+    print(sample_dic)
+
     with open(xsec_path) as f:
         xsecs = json.load(f)
 
     out = []
     for sample in sample_dic:
     
+        
         hists = sample_dic[sample]
         sumw = sample_dic[sample]["sumw"]
         
@@ -150,9 +152,14 @@ def scale_hists(sample_dic, xsec_path, lumi):
 
 
 def main(args):
+    # loading and accumulating histograms
     sample_dic = read_hists(args.sample, args.hpath)
     sample_dic = load_hists(sample_dic, args.histogram, args.region, args.hpath)
 
+    # removing None histograms
+    sample_dic = {key:val for key,val in sample_dic.items() if val is not None}
+
+    # scaling to xsecs
     if args.sample not in ["electron", "muon"]:
         output = scale_hists(sample_dic, args.xsecs, args.lumi)
     else:
