@@ -28,7 +28,7 @@ axis_limits = {
     "lepminiIso": (None, None),
     "leprelIso": (None, None),
     "lep_pt": (None, None),
-    "deltaR_lepjet": (None, None),
+    "deltaR_lepjet": (None, 1),
     "jetlep_msd": (None, None),
     "jetlep_mass": (None, None),
 }
@@ -45,11 +45,11 @@ def data_label(region):
 
 
 def plot_cutflow(data, sig, bkg, bkg_labels=None, region="hadel", odir="./", year=2017):
+
     regions = {
-            "hadel": ["none", "triggere", "met_filters", "oneelectron", "fjacc", "fjmsd", "btag_ophem_med", "met_20", "lep_in_fj", "mt_lep_met",\
- "el_iso"],
-            "hadmu": ["none", "triggermu", "met_filters", "onemuon", "fjacc", "fjmsd", "btag_ophem_med", "met_20", "lep_in_fj", "mt_lep_met", "mu_iso"],
-}
+        "hadel": ["triggere", "metfilters", "lumimask", "oneelectron", "fjacc", "fjmsd", "btag_ophem_med", "met20", "lepinfj", "mtlepmet", "electroniso"],
+        "hadmu": ["triggermu", "metfilters", "lumimask", "onemuon", "fjacc", "fjmsd", "btag_ophem_med", "met20", "lepinfj", "mtlepmet", "muoniso"],
+    }
 
     fig, ax = plt.subplots(
         figsize=(12,12),
