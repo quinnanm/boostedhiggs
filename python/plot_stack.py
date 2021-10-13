@@ -30,8 +30,7 @@ def main(args):
         "st": "ST"
     }
     
-    paths_by_proc = {}
-    
+    paths_by_proc = {}    
     if args.channel=="hadmu":
         paths_by_proc['data'] = f"{input_dir}/muon_{args.hist_name}.pkl"
         data_key = "SingleMuon"
@@ -44,7 +43,7 @@ def main(args):
 
     map_proc['data'] = data_key
     paths_by_proc['hww'] = f"{input_dir}/hww_{args.hist_name}.pkl"
-
+    
     mc_procs = ["tt_semileptonic", "tt_hadronic", "tt_dileptonic", "qcd", "wjets", "zjets", "st"]
     for mc in mc_procs:
         paths_by_proc[mc] = f"{input_dir}/{mc}_{args.hist_name}.pkl"
@@ -53,7 +52,7 @@ def main(args):
     for key,path in paths_by_proc.items():
         with open(path, "rb") as f:
             pklf = cPickle.load(f)
-        hists_by_proc[key] = pklf[map_proc[key]][args.hist_name][{"region":args.channel}].project(args.hist_axis)
+        hists_by_proc[key] = pklf[map_proc[key]][args.hist_name].project(args.hist_axis)
 
     print(f"generating {args.channel}_{args.hist_axis} plot")
 
