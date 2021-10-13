@@ -13,7 +13,7 @@ axis_labels = {
     "lepminiIso": r"lep miniIso",
     "leprelIso": "lep Rel Iso",
     "lep_pt": r'lep $p_T$ [GeV]',
-    "deltaR_lepjet": r"$\Delta R(l, Jet)$")
+    "deltaR_lepjet": r"$\Delta R(l, Jet)$"
 }
 
 axis_limits = {
