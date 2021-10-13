@@ -119,8 +119,6 @@ def load_hists(sample_dic, histogram, region, path):
 def scale_hists(sample_dic, xsec_path, lumi):
     """scale histograms to cross section"""
 
-    print(sample_dic)
-
     with open(xsec_path) as f:
         xsecs = json.load(f)
 
