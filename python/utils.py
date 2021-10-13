@@ -25,7 +25,7 @@ axis_limits = {
     "mt_lepmet": (None, None),
     "lepminiIso": (None, None),
     "leprelIso": (None, None),
-    "lep_pt": (None, None)
+    "lep_pt": (None, None),
     "deltaR_lepjet": (None, None),
 }
 
