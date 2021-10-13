@@ -17,7 +17,7 @@ For cutflow stack plots:
 
 def main(args):
 
-    input_dir = args.idir + '/' + args.hist_name
+    input_dir = args.idir + '/' + args.channel + '/' + args.hist_name
 
     map_proc = {
         "hww": "GluGluHToWWToLNuQQ",
