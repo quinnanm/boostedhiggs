@@ -47,8 +47,8 @@ def data_label(region):
 def plot_cutflow(data, sig, bkg, bkg_labels=None, region="hadel", odir="./", year=2017):
 
     regions = {
-        "hadel": ["triggere", "metfilters", "lumimask", "oneelectron", "fjacc", "fjmsd", "btag_ophem_med", "met20", "lepinfj", "mtlepmet", "electroniso"],
-        "hadmu": ["triggermu", "metfilters", "lumimask", "onemuon", "fjacc", "fjmsd", "btag_ophem_med", "met20", "lepinfj", "mtlepmet", "muoniso"],
+        "hadel": ["none", "triggere", "metfilters", "lumimask", "oneelectron", "fjacc", "fjmsd", "btag_ophem_med", "met20", "lepinfj", "mtlepmet", "electroniso"],
+        "hadmu": ["none", "triggermu", "metfilters", "lumimask", "onemuon", "fjacc", "fjmsd", "btag_ophem_med", "met20", "lepinfj", "mtlepmet", "muoniso"],
     }
 
     fig, ax = plt.subplots(
