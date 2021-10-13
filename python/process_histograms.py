@@ -9,15 +9,6 @@ import copy
 import hist as hist2
 from coffea import processor
 
-def iter_flatten(iterable):
-    """flatten nested lists"""
-    it = iter(iterable)
-    for e in it:
-        if isinstance(e, (list, tuple)):
-            for f in iter_flatten(e):
-                yield f
-        else:
-            yield e
 
 def read_hists(sample, path):
     files = os.listdir(path)
@@ -102,14 +93,19 @@ def load_hists(sample_dic, histogram, region, path):
                 # disable garbage collector
                 gc.disable()
                 
-                # load and save histograms
+                # load and save histograms by region
                 H = cPickle.load(f)
                 k = [key for key in H][0]
 
                 histos = dict()
-                histos[histogram] = H[k][histogram][{"region":region}]
-                histos["sumw"] = H[k]["sumw"]
-                
+                try:
+                    histos[histogram] = H[k][histogram][{"region":region}]
+                except:
+                    gc.enable()
+                    continue
+
+                histos["sumw"] = H[k]["sumw"]                
+
                 hists[key].append(histos)
          
                 # enable garbage collector again
