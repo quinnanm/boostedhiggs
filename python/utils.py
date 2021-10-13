@@ -8,7 +8,12 @@ axis_labels = {
     "jetmsd": r"Jet $m_{sd} [GeV]$",
     "jetrho": r"$\rho$",
     "btag": "btagFlavB (opphem)",
-    "met": r"$p_T^{miss}$ [GeV]"
+    "met": r"$p_T^{miss}$ [GeV]",
+    "mt_lepmet": r"$m_T(lep, p_T^{miss})$ [GeV]",
+    "lepminiIso": r"lep miniIso",
+    "leprelIso": "lep Rel Iso",
+    "lep_pt": r'lep $p_T$ [GeV]',
+    "deltaR_lepjet": r"$\Delta R(l, Jet)$")
 }
 
 axis_limits = {
@@ -17,7 +22,13 @@ axis_limits = {
     "jetrho": (-6, -1),
     "btag": (-0.02, 0.3),
     "met": (None, None),
+    "mt_lepmet": (None, None),
+    "lepminiIso": (None, None),
+    "leprelIso": (None, None),
+    "lep_pt": (None, None)
+    "deltaR_lepjet": (None, None),
 }
+
 
 def data_label(region):
     if region=="hadel":
