@@ -13,7 +13,9 @@ axis_labels = {
     "lepminiIso": r"lep miniIso",
     "leprelIso": "lep Rel Iso",
     "lep_pt": r'lep $p_T$ [GeV]',
-    "deltaR_lepjet": r"$\Delta R(l, Jet)$"
+    "deltaR_lepjet": r"$\Delta R(l, Jet)$",
+    "jetlep_msd": '(Jet - Lep) mass (SD) [GeV]',
+    "jetlep_mass": '(Jet - Lep) mass [GeV]',
 }
 
 axis_limits = {
@@ -27,6 +29,8 @@ axis_limits = {
     "leprelIso": (None, None),
     "lep_pt": (None, None),
     "deltaR_lepjet": (None, None),
+    "jetlep_msd": (None, None),
+    "jetlep_mass": (None, None),
 }
 
 
