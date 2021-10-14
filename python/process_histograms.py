@@ -9,16 +9,6 @@ import copy
 import hist as hist2
 from coffea import processor
 
-def iter_flatten(iterable):
-    """flatten nested lists"""
-    it = iter(iterable)
-    for e in it:
-        if isinstance(e, (list, tuple)):
-            for f in iter_flatten(e):
-                yield f
-        else:
-            yield e
-
 def read_hists(sample, path):
     files = os.listdir(path)
 
@@ -28,9 +18,8 @@ def read_hists(sample, path):
     hww = {
         "GluGluHToWWToLNuQQ": [file for file in files if "GluGluHToWWToLNuQQ" in file],
     }
-
     qcd = {
-        "QCD_HT300to500": [file for file in files if "QCD_HT300to500" in file],
+        #"QCD_HT300to500": [file for file in files if "QCD_HT300to500" in file],
         "QCD_HT500to700": [file for file in files if "QCD_HT500to700" in file],
         "QCD_HT700to1000": [file for file in files if "QCD_HT700to1000" in file],
         "QCD_HT1000to1500": [file for file in files if "QCD_HT1000to1500" in file],
@@ -73,7 +62,7 @@ def read_hists(sample, path):
     singleMuon = {
         "SingleMuon": [file for file in files if "SingleMuon" in file]
     }
-    
+
     samples_dics = {
         "hww": hww,
         "tt_semileptonic": tt_semileptonic,
@@ -90,23 +79,31 @@ def read_hists(sample, path):
     return samples_dics[sample]
 
 
-
-def load_hists(sample_dic, histograms, path):
-    """load and accumulate histograms by sample"""
+def load_hists(sample_dic, histogram, region, path):
+    """load and accumulate ouput dics by sample, histogram and region"""
     
-    hists = {key: [] for key in sample_dic}
+    hists = {key:[] for key in sample_dic}
     
     for key, hist in sample_dic.items():
-        print(f"processing {key} histograms")
+        print(f"{key}")
         for h in hist:
             with open(f"{path}/{h}", "rb") as f:
                 # disable garbage collector
                 gc.disable()
                 
-                # load and save histograms
+                # load and save histograms by region
                 H = cPickle.load(f)
-                k = [key for key in H]
-                histos = {key:val for key, val in H[k[0]].items() if key in histograms}
+                k = [key for key in H][0]
+
+                histos = dict()
+                try:
+                    histos[histogram] = H[k][histogram][{"region":region}]
+                except:
+                    gc.enable()
+                    continue
+
+                histos["sumw"] = H[k]["sumw"]                
+
                 hists[key].append(histos)
          
                 # enable garbage collector again
@@ -114,7 +111,7 @@ def load_hists(sample_dic, histograms, path):
 
     for key in sample_dic:
         sample_dic[key] = processor.accumulate(hists[key])
-
+    
     return sample_dic
 
 
@@ -127,6 +124,7 @@ def scale_hists(sample_dic, xsec_path, lumi):
     out = []
     for sample in sample_dic:
     
+        
         hists = sample_dic[sample]
         sumw = sample_dic[sample]["sumw"]
         
@@ -151,23 +149,23 @@ def scale_hists(sample_dic, xsec_path, lumi):
 
 
 def main(args):
-    histograms = [hist for hist in iter_flatten(args.histogram)]
-    
+    # loading and accumulating histograms
     sample_dic = read_hists(args.sample, args.hpath)
-    sample_dic = load_hists(sample_dic, histograms, args.hpath)
+    sample_dic = load_hists(sample_dic, args.histogram, args.region, args.hpath)
 
+    # removing None histograms
+    sample_dic = {key:val for key,val in sample_dic.items() if val is not None}
+
+    # scaling to xsecs
     if args.sample not in ["electron", "muon"]:
         output = scale_hists(sample_dic, args.xsecs, args.lumi)
     else:
         output = sample_dic
 
-    output_path = "hists/"
-    output_name = ""
-    for hist in histograms[1:]:
-        output_name += "_" + hist
+    output_path = "hists"
 
-    os.system(f"mkdir -p {output_path}/{args.histogram[-1][0]}")
-    with open(f"{output_path}/{args.histogram[-1][0]}/{args.sample}{output_name}.pkl", "wb") as f:
+    os.system(f'mkdir -p {output_path}/{args.region}/{args.histogram}')
+    with open(f'{output_path}/{args.region}/{args.histogram}/{args.sample}_{args.histogram}.pkl', 'wb') as f:
         cPickle.dump(output, f, protocol=-1)
 
 
@@ -177,6 +175,7 @@ if __name__ == "__main__":
     parser.add_argument("--hpath",     dest="hpath",     default=None,      type=str,   help="path to histograms",         required=True)
     parser.add_argument("--sample",    dest="sample",    default=None,      type=str,   help="sample to process (eg hww)", required=True)
     parser.add_argument("--histogram", dest="histogram", default=["sumw"],  type=str,   help="histograms to process",      required=True, nargs="+", action="append")
+    parser.add_argument("--region",    dest="region",    default=None,      type=str,   help="region to process",          required=True)
     parser.add_argument("--lumi",      dest="lumi",      default=None,      type=float, help="integrated luminosity",      required=True)
     parser.add_argument("--xsecs",     dest="xsecs",     default=None,      type=str,   help="path to cross sections",     required=True)
     args = parser.parse_args()

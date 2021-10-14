@@ -17,7 +17,7 @@ For cutflow stack plots:
 
 def main(args):
 
-    input_dir = args.idir + '/' + args.hist_name
+    input_dir = args.idir + '/' + args.channel + '/' + args.hist_name
 
     map_proc = {
         "hww": "GluGluHToWWToLNuQQ",
@@ -30,8 +30,7 @@ def main(args):
         "st": "ST"
     }
     
-    paths_by_proc = {}
-    
+    paths_by_proc = {}    
     if args.channel=="hadmu":
         paths_by_proc['data'] = f"{input_dir}/muon_{args.hist_name}.pkl"
         data_key = "SingleMuon"
@@ -53,7 +52,7 @@ def main(args):
     for key,path in paths_by_proc.items():
         with open(path, "rb") as f:
             pklf = cPickle.load(f)
-        hists_by_proc[key] = pklf[map_proc[key]][args.hist_name][{"region":args.channel}].project(args.hist_axis)
+        hists_by_proc[key] = pklf[map_proc[key]][args.hist_name].project(args.hist_axis)
 
     print(f"generating {args.channel}_{args.hist_axis} plot")
 

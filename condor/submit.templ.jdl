@@ -6,7 +6,7 @@ transfer_input_files    = boostedhiggs,run.py,JSON
 when_to_transfer_output = ON_EXIT_OR_EVICT
 request_memory          = 6000
 use_x509userproxy       = true
-x509userproxy           = /uscms/home/cmantill/x509up_u49845
+x509userproxy           = /uscms/home/docampoh/x509up_u58201
 
 output                  = DIRECTORY/logs/PREFIX_JOBID.out
 error                   = DIRECTORY/logs/PREFIX_JOBID.err
