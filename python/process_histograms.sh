@@ -2,9 +2,9 @@
 
 # path to output
 #hists_path="/eos/uscms/store/user/cmantill/boostedhiggs/Sep29_fixedweightsdata_lepmj_UL/outfiles/"
-hists_path="/eos/uscms/store/user/cmantill/boostedhiggs/Oct6_fixedweightsdata_lepmj_UL/outfiles"
+hists_path="/eos/uscms/store/user/fmokhtar/boostedhiggs/Sep6_UL/outfiles"
 
-# path to cross section json 
+# path to cross section json
 xsecs_path="/uscms/home/docampoh/nobackup/boostedhiggs/fileset/xsecs.json"
 
 # samples, histograms and regions to read
