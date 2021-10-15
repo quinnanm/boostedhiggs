@@ -18,11 +18,7 @@ import sys
 '''
 # Note: change username in `cmantill` in this script
 
-<<<<<<< HEAD
 homedir = "/store/user/fmokhtar/boostedhiggs/"
-=======
-homedir = "/store/user/docampoh/boostedhiggs/"
->>>>>>> 142a1bd72b00ee13b737dd37137b6306e77e252b
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('settings', metavar='S', type=str, nargs='+', help='label scriptname (re-tar)')
@@ -40,7 +36,7 @@ year = args.settings[3]
 loc_base = os.environ['PWD']
 
 # list of samples to run and recos to use
-recos = ["UL"] #,"preUL"]
+recos = ["UL"]  # ,"preUL"]
 
 # if empty run over all the datasets in both filesets
 samples = {
@@ -82,11 +78,11 @@ for reco in recos:
     logdir = locdir + '/logs/'
     os.system('mkdir -p  %s' % logdir)
 
-    outdir = homedir + label +'_' + reco + '/outfiles/'
+    outdir = homedir + label + '_' + reco + '/outfiles/'
     os.system('mkdir -p  /eos/uscms/%s' % outdir)
 
     totfiles = {}
-    with open('fileset/fileset_%s_%s_NANO.json'%(year,reco), 'r') as f:
+    with open('fileset/fileset_%s_%s_NANO.json' % (year, reco), 'r') as f:
         newfiles = json.load(f)
         totfiles.update(newfiles)
 
@@ -97,36 +93,36 @@ for reco in recos:
         samplelist = totfiles.keys()
 
     # write json to metadata.json
-    with open("%s/metadata.json"%(locdir), 'w') as json_file:
-         json.dump(totfiles, json_file, indent=4, sort_keys=True)
+    with open("%s/metadata.json" % (locdir), 'w') as json_file:
+        json.dump(totfiles, json_file, indent=4, sort_keys=True)
 
     # copy script to locdir
-    os.system('cp %s %s'%(script,locdir))
+    os.system('cp %s %s' % (script, locdir))
 
     # submit jobs
     nsubmit = 0
     for sample in samplelist:
-        prefix = sample + '_%s_%s'%(year,reco)
-        print('Submitting '+ prefix)
+        prefix = sample + '_%s_%s' % (year, reco)
+        print('Submitting ' + prefix)
 
         njobs = int(len(totfiles[sample]) / files_per_job) + 1
 
-        for j in range(njobs-1):
+        for j in range(njobs - 1):
             condor_templ_file = open(loc_base + "/condor/submit.templ.jdl")
-            sh_templ_file     = open(loc_base + "/condor/submit.templ.sh")
+            sh_templ_file = open(loc_base + "/condor/submit.templ.sh")
 
-            localcondor = '%s/%s_%i.jdl'%(locdir,prefix,j)
+            localcondor = '%s/%s_%i.jdl' % (locdir, prefix, j)
             condor_file = open(localcondor, "w")
             for line in condor_templ_file:
                 line = line.replace('DIRECTORY', locdir)
                 line = line.replace('PREFIX', prefix)
                 line = line.replace('JOBID', str(j))
-                line = line.replace('JSON', "%s/metadata.json"%(locdir))
+                line = line.replace('JSON', "%s/metadata.json" % (locdir))
                 condor_file.write(line)
             condor_file.close()
 
-            localsh = '%s/%s_%i.sh'%(locdir,prefix,j)
-            eosoutput = 'root://cmseos.fnal.gov/%s/%s_%i.hist'%(outdir,prefix,j)
+            localsh = '%s/%s_%i.sh' % (locdir, prefix, j)
+            eosoutput = 'root://cmseos.fnal.gov/%s/%s_%i.hist' % (outdir, prefix, j)
             sh_file = open(localsh, "w")
             for line in sh_templ_file:
                 line = line.replace('SCRIPTNAME', script)
@@ -141,7 +137,7 @@ for reco in recos:
                 sh_file.write(line)
             sh_file.close()
 
-            os.system('chmod u+x %s'%localsh)
+            os.system('chmod u+x %s' % localsh)
             if (os.path.exists('%s.log' % localcondor)):
                 os.system('rm %s.log' % localcondor)
             condor_templ_file.close()
@@ -152,4 +148,4 @@ for reco in recos:
 
             nsubmit = nsubmit + 1
 
-    print(nsubmit,"jobs submitted.")
+    print(nsubmit, "jobs submitted.")
