@@ -157,6 +157,13 @@ class HwwProcessor(processor.ProcessorABC):
                 ),
                 hist2.storage.Weight(),
             ),
+            "jet_lep_kin": hist2.Hist(
+                hist2.axis.StrCategory([], name="region", growth=True),
+                hist2.axis.Regular(30, 15, 200, name="jetlepmass", label="(Jet - lep) $m$ [GeV]"),
+                hist2.axis.Regular(30, 15, 200, name="jetlepmsd", label="(Jet - lep) $m_{sd}$ [GeV]"),
+                hist2.storage.Weight(),
+            ),
+
         }
         
     def process(self, events):
@@ -494,9 +501,9 @@ class HwwProcessor(processor.ProcessorABC):
                 )
                 
         for region in regions:
-            if isRealData:
-                if "SingleMuon" in dataset and "hadel" in region: continue
-                if "SingleElectron" in dataset and "hadmu" in region: continue
+            #if isRealData:
+            #    if "SingleMuon" in dataset and "hadel" in region: continue
+            #    if "SingleElectron" in dataset and "hadmu" in region: continue
             fill(region)
 
         return {dataset: output}

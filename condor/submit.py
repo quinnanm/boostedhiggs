@@ -18,7 +18,11 @@ import sys
 '''
 # Note: change username in `cmantill` in this script
 
+<<<<<<< HEAD
 homedir = "/store/user/fmokhtar/boostedhiggs/"
+=======
+homedir = "/store/user/docampoh/boostedhiggs/"
+>>>>>>> 142a1bd72b00ee13b737dd37137b6306e77e252b
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('settings', metavar='S', type=str, nargs='+', help='label scriptname (re-tar)')
