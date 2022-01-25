@@ -4,7 +4,7 @@
 Splits the total fileset and creates condor job submission files for the specified run script.
 Author(s): Cristina Mantill, Raghav Kansal
 """
-
+import json
 import argparse
 import os
 from math import ceil
