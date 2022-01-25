@@ -20,7 +20,7 @@ def main(args):
         
     # define processor
     from boostedhiggs.hwwprocessor import HwwProcessor
-    p = HwwProcessor(year=args.year, jet_arbitration='met', el_wp="wp80")
+    p = HwwProcessor(year=args.year)
 
     if args.executor == "dask":
         import time
