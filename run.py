@@ -9,14 +9,6 @@ import pickle
 import argparse
 import warnings
 
-
-def get_fileset(ptype, samples, starti, endi):
-    with open("binder/fileset_2017_UL_NANO.json", "r") as file:
-        filelist = [f[:-1] for f in file.readlines()]
-
-    files = {"2017": filelist}
-    fileset = {k: files[k][starti:endi] for k in files.keys()}
-    return fileset
     
 def main(args):
 
@@ -25,10 +17,7 @@ def main(args):
         files = json.load(f)[args.sample]
     fileset = {}
     fileset[args.sample] = ["root://cmsxrootd.fnal.gov/"+ f for f in files[args.starti:args.endi]]
-
-    
-    fileset = get_fileset(args.processor, args.samples, args.starti, args.endi)
-    
+        
     # define processor
     from boostedhiggs.hwwprocessor import HwwProcessor
     p = HwwProcessor(year=args.year, jet_arbitration='met', el_wp="wp80")
@@ -101,7 +90,7 @@ if __name__ == "__main__":
     parser.add_argument('--endi',       dest='endi',       default=-1,           help="end index of files", type=int)
     parser.add_argument("--processor",  dest="processor",  default="hww",        help="HWW processor", type=str)
     parser.add_argument("--dask",       dest="dask",       action="store_true",  default=False, help="Run with dask")
-    parser.add_argument("--fileset",    dest="fileset",    default=None,         help="Fileset", required=True)
+    parser.add_argument("--fileset",    dest="fileset",    default=None,         help="Fileset", required=True)    
     parser.add_argument('--sample',     dest='sample',     default=None,         help='sample name', required=True)
     parser.add_argument("--chunksize", type=int, default=2750, help="chunk size in processor")
     parser.add_argument(
