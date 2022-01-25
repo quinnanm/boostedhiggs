@@ -10,6 +10,14 @@ import argparse
 import warnings
 
 
+def get_fileset(ptype, samples, starti, endi):
+    with open("binder/fileset_2017_UL_NANO.json", "r") as file:
+        filelist = [f[:-1] for f in file.readlines()]
+
+    files = {"2017": filelist}
+    fileset = {k: files[k][starti:endi] for k in files.keys()}
+    return fileset
+    
 def main(args):
 
     # read samples to submit
@@ -18,6 +26,9 @@ def main(args):
     fileset = {}
     fileset[args.sample] = ["root://cmsxrootd.fnal.gov/"+ f for f in files[args.starti:args.endi]]
 
+    
+    fileset = get_fileset(args.processor, args.samples, args.starti, args.endi)
+    
     # define processor
     from boostedhiggs.hwwprocessor import HwwProcessor
     p = HwwProcessor(year=args.year, jet_arbitration='met', el_wp="wp80")
