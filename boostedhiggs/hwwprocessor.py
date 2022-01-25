@@ -100,10 +100,10 @@ from coffea.processor import ProcessorABC, column_accumulator
 from coffea.nanoevents.methods import candidate, vector
 from coffea.analysis_tools import Weights, PackedSelection
     
-class TriggerEfficienciesProcessor(ProcessorABC):
+class HwwProcessor(ProcessorABC):
     """ Accumulates histograms from all input events: 1) before triggers, and 2) after triggers """
     def __init__(self, year=2017):
-        super(TriggerEfficienciesProcessor, self).__init__()
+        super(HwwProcessor, self).__init__()
         self._year = year
         self._trigger_dict = {
             2017:{
