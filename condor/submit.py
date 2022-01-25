@@ -12,9 +12,6 @@ from math import ceil
 
 def main(args):
 
-    with open("fileset_2017_UL_NANO.json", 'r') as f:
-        fileset = json.load(f)
-    
     locdir = "condor/" + args.tag
     homedir = f"/store/user/fmokhtar/boostedhiggs/"
     outdir = homedir + args.tag + "/"
@@ -27,36 +24,10 @@ def main(args):
     print("CONDOR work dir: " + outdir)
     os.system(f"mkdir -p /eos/uscms/{outdir}")
 
-    samples = [
-        "GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8",
-        # "QCD_HT300to500_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8",
-        # "QCD_HT500to700_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8",
-        # "QCD_HT700to1000_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8",
-        # "QCD_HT1000to1500_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8",
-        # "QCD_HT1500to2000_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8",
-        # "QCD_HT2000toInf_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8",
-        # "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8",
-        # "TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8",
-        # "TTToHadronic_TuneCP5_13TeV-powheg-pythia8",
-        # "ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8",
-        # "ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8",
-        # "ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8",
-        # "ST_t-channel_muDecays_TuneCP5_13TeV-comphep-pythia8",
-        # "ST_t-channel_eleDecays_TuneCP5_13TeV-comphep-pythia8",
-        # "ST_t-channel_antitop_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8",
-        # "WJetsToLNu_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8",
-        # "WJetsToLNu_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8",
-        # "WJetsToLNu_HT-600To800_TuneCP5_13TeV-madgraphMLM-pythia8",
-        # "WJetsToLNu_HT-800To1200_TuneCP5_13TeV-madgraphMLM-pythia8",
-        # "WJetsToLNu_HT-1200To2500_TuneCP5_13TeV-madgraphMLM-pythia8",
-        # "DYJetsToLL_Pt-100To250_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8",
-        # "DYJetsToLL_Pt-250To400_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8",
-        # "DYJetsToLL_Pt-400To650_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8",
-        # "DYJetsToLL_Pt-650ToInf_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8",
-        # "SingleElectron",
-        # "SingleMuon",
-    ]
-    
+    with open("fileset_2017_UL_NANO.json", 'r') as f:
+        fileset = json.load(f)
+    samples = ["GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8"]
+
     # directories for every sample
     for sample in samples:
         os.system(f"mkdir -p /eos/uscms/{outdir}/{sample}")
