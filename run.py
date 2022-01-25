@@ -46,7 +46,7 @@ def main(args):
             executor=executor, savemetrics=True, schema=nanoevents.NanoAODSchema, chunksize=100000
         )
         out, metrics = run(
-            {key: fileset[key] for key in args.samples}, "Events", processor_instance=p
+            {key: fileset[key] for key in args.sample}, "Events", processor_instance=p
         )
         elapsed = time.time() - tic
         print(f"Metrics: {metrics}")
@@ -66,7 +66,7 @@ def main(args):
         }
 
         out, metrics = processor.run_uproot_job(
-            {key: fileset[key] for key in args.samples},
+            {key: fileset[key] for key in args.sample},
             treename="Events",
             processor_instance=p,
             executor=executor,
