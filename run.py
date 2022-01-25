@@ -19,29 +19,65 @@ def main(args):
     fileset[args.sample] = ["root://cmsxrootd.fnal.gov/"+ f for f in files[args.starti:args.endi]]
 
     # define processor
-    if args.processor == "hww":
-        from boostedhiggs.hwwprocessor import HwwProcessor
-        p = HwwProcessor(year=args.year, jet_arbitration='met', el_wp="wp80")
-    else:
-        warnings.warn('Warning: no processor declared')
-        return
+    from boostedhiggs.hwwprocessor import HwwProcessor
+    p = HwwProcessor(year=args.year, jet_arbitration='met', el_wp="wp80")
 
-    print(fileset)
+    if args.executor == "dask":
+        import time
+        from distributed import Client
+        from lpcjobqueue import LPCCondorCluster
 
-    if args.condor:
-        uproot.open.defaults['xrootd_handler'] = uproot.source.xrootd.MultithreadedXRootDSource
+        tic = time.time()
+        cluster = LPCCondorCluster(
+            ship_env=True,
+            transfer_input_files="src/HHbbVV",
+        )
+        client = Client(cluster)
+        nanoevents_plugin = NanoeventsSchemaPlugin()
+        client.register_worker_plugin(nanoevents_plugin)
+        cluster.adapt(minimum=1, maximum=30)
 
-        executor = processor.FuturesExecutor(compression=1, status=True, workers=3)
+        print("Waiting for at least one worker")
+        client.wait_for_workers(1)
 
-        run = processor.Runner(executor=executor,savemetrics=True,chunksize=10000,schema=NanoAODSchema)
-
-        out,metrics = run(fileset,'Events',processor_instance=p)
-
+        # does treereduction help?
+        executor = processor.DaskExecutor(status=True, client=client, treereduction=2)
+        run = processor.Runner(
+            executor=executor, savemetrics=True, schema=nanoevents.NanoAODSchema, chunksize=100000
+        )
+        out, metrics = run(
+            {key: fileset[key] for key in args.samples}, "Events", processor_instance=p
+        )
+        elapsed = time.time() - tic
         print(f"Metrics: {metrics}")
+        print(f"Finished in {elapsed:.1f}s")
+    else:
+        uproot.open.defaults["xrootd_handler"] = uproot.source.xrootd.MultithreadedXRootDSource
 
-    filehandler = open(f'outfiles/{args.year}_{args.sample}_{args.starti}-{args.endi}.hist', 'wb')
+        executor = (
+            processor.futures_executor
+            if args.executor == "futures"
+            else processor.iterative_executor
+        )
+
+        exe_args = {
+            "savemetrics": True,
+            "schema": nanoevents.NanoAODSchema,
+        }
+
+        out, metrics = processor.run_uproot_job(
+            {key: fileset[key] for key in args.samples},
+            treename="Events",
+            processor_instance=p,
+            executor=executor,
+            executor_args=exe_args,
+            chunksize=args.chunksize,
+        )
+
+    filehandler = open(f"outfiles/{args.starti}-{args.endi}.pkl", "wb")
     pickle.dump(out, filehandler)
     filehandler.close()
+
 
 if __name__ == "__main__":
     # e.g. 
@@ -53,10 +89,18 @@ if __name__ == "__main__":
     parser.add_argument('--starti',     dest='starti',     default=0,            help="start index of files", type=int)
     parser.add_argument('--endi',       dest='endi',       default=-1,           help="end index of files", type=int)
     parser.add_argument("--processor",  dest="processor",  default="hww",        help="HWW processor", type=str)
-    parser.add_argument("--condor",     dest="condor",     action="store_true",  default=False, help="Run with condor")
     parser.add_argument("--dask",       dest="dask",       action="store_true",  default=False, help="Run with dask")
     parser.add_argument("--fileset",    dest="fileset",    default=None,         help="Fileset", required=True)
     parser.add_argument('--sample',     dest='sample',     default=None,         help='sample name', required=True)
+    parser.add_argument("--chunksize", type=int, default=2750, help="chunk size in processor")
+    parser.add_argument(
+        "--executor",
+        type=str,
+        default="futures",
+        choices=["futures", "iterative", "dask"],
+        help="type of processor executor",
+    )
     args = parser.parse_args()
 
     main(args)
+
