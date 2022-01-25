@@ -13,7 +13,7 @@ import warnings
 def main(args):
 
     # read samples to submit
-    with open(args.fileset, 'r') as f:
+    with open("fileset_2017_UL_NANO.json", 'r') as f:
         files = json.load(f)[args.sample]
     fileset = {}
     fileset[args.sample] = ["root://cmsxrootd.fnal.gov/"+ f for f in files[args.starti:args.endi]]
@@ -30,7 +30,7 @@ def main(args):
         tic = time.time()
         cluster = LPCCondorCluster(
             ship_env=True,
-            transfer_input_files="src/HHbbVV",
+            transfer_input_files="src/hww",
         )
         client = Client(cluster)
         nanoevents_plugin = NanoeventsSchemaPlugin()
@@ -81,8 +81,8 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. 
-    # inside a condor job: python run.py --year 2017 --processor hww --starti 0 --endi 1 --fileset fileset_2017_UL_NANO.json --sample 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8' --dask=False
-    # inside a dask job:  python run.py --year 2017 --processor hww --starti 0 --endi 1 --fileset fileset_2017_UL_NANO.json --sample 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8' --dask=True
+    # inside a condor job: python run.py --year 2017 --processor hww --starti 0 --endi 1 --sample 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8' --dask=False
+    # inside a dask job:  python run.py --year 2017 --processor hww --starti 0 --endi 1 --sample 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8' --dask=True
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',       dest='year',       default='2017',       help="year", type=str)
@@ -90,7 +90,6 @@ if __name__ == "__main__":
     parser.add_argument('--endi',       dest='endi',       default=-1,           help="end index of files", type=int)
     parser.add_argument("--processor",  dest="processor",  default="hww",        help="HWW processor", type=str)
     parser.add_argument("--dask",       dest="dask",       action="store_true",  default=False, help="Run with dask")
-    parser.add_argument("--fileset",    dest="fileset",    default=None,         help="Fileset", required=True)    
     parser.add_argument('--sample',     dest='sample',     default=None,         help='sample name', required=True)
     parser.add_argument("--chunksize", type=int, default=2750, help="chunk size in processor")
     parser.add_argument(
