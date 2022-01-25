@@ -9,8 +9,6 @@ import pickle
 
 import argparse
 import warnings
-
-from distributed.diagnostics.plugin import WorkerPlugin
     
 def main(args):
 
