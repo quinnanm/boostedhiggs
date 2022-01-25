@@ -11,6 +11,10 @@ from math import ceil
 
 
 def main(args):
+
+    with open("fileset_2017_UL_NANO.json", 'r') as f:
+        fileset = json.load(f)
+    
     locdir = "condor/" + args.tag
     homedir = f"/store/user/fmokhtar/boostedhiggs/"
     outdir = homedir + args.tag + "/"
