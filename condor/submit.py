@@ -68,11 +68,13 @@ def main(args):
             for line in sh_templ_file:
                 line = line.replace("SCRIPTNAME", args.script)
                 line = line.replace("YEAR", args.year)
-                line = line.replace("SAMPLE", sample)
                 line = line.replace("PROCESSOR", args.processor)
                 line = line.replace("STARTNUM", str(j * args.files_per_job))
                 line = line.replace("ENDNUM", str((j + 1) * args.files_per_job))
                 line = line.replace("EOSOUTPKL", eosoutput_pkl)
+                line = line.replace("NAME", dataset_name)
+                line = line.replace("FILESET", dataset_name)
+
                 sh_file.write(line)
             sh_file.close()
             sh_templ_file.close()
