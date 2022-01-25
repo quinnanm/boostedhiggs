@@ -24,7 +24,7 @@ def main(args):
     print("CONDOR work dir: " + outdir)
     os.system(f"mkdir -p /eos/uscms/{outdir}")
 
-    with open("fileset_2017_UL_NANO.json", 'r') as f:
+    with open("data/fileset_2017_UL_NANO.json", 'r') as f:
         fileset = json.load(f)
     samples = ["GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8"]
 

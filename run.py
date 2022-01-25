@@ -13,7 +13,7 @@ import warnings
 def main(args):
 
     # read samples to submit
-    with open("fileset_2017_UL_NANO.json", 'r') as f:
+    with open("data/fileset_2017_UL_NANO.json", 'r') as f:
         files = json.load(f)[args.sample]
     fileset = {}
     fileset[args.sample] = ["root://cmsxrootd.fnal.gov/"+ f for f in files[args.starti:args.endi]]
