@@ -10,26 +10,6 @@ import os
 from math import ceil
 
 
-def get_fileset(ptype, samples=[]):
-    if ptype == "trigger":
-        with open("binder/fileset_2017_UL_NANO.txt", "r") as file:
-            filelist = [f[:-1] for f in file.readlines()]
-
-        files = {"2017": filelist}
-        fileset = {k: files[k] for k in files.keys()}
-        return fileset
-
-    dataset_name = "GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8"
-    with open("binder/fileset_2017_UL_NANO.json", 'r') as f:
-        files = json.load(f)[dataset_name]
-
-    fileset = {}
-    # need to define the fileset but call them with xcache
-    fileset[dataset_name] = ["root://xcache/"+ f for f in files]
-    
-    return fileset
-
-
 def main(args):
     locdir = "condor/" + args.tag
     homedir = f"/store/user/fmokhtar/boostedhiggs/"
@@ -43,8 +23,14 @@ def main(args):
     print("CONDOR work dir: " + outdir)
     os.system(f"mkdir -p /eos/uscms/{outdir}")
 
-    fileset = get_fileset(args.processor, args.samples)
+    dataset_name = "GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8"
+    with open("binder/fileset_2017_UL_NANO.json", 'r') as f:
+        files = json.load(f)[dataset_name]
 
+    fileset = {}
+    # need to define the fileset but call them with xcache
+    fileset[dataset_name] = ["root://xcache/"+ f for f in files]
+    
     # directories for every sample
     for sample in fileset:
         os.system(f"mkdir -p /eos/uscms/{outdir}/{sample}")

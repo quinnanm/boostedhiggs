@@ -17,7 +17,7 @@ def main(args):
         files = json.load(f)[args.sample]
     fileset = {}
     fileset[args.sample] = ["root://cmsxrootd.fnal.gov/"+ f for f in files[args.starti:args.endi]]
-    
+
     # define processor
     from boostedhiggs.hwwprocessor import HwwProcessor
     p = HwwProcessor(year=int(args.year))
@@ -81,8 +81,8 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. 
-    # inside a condor job: python run.py --year 2017 --processor hww --condor --starti 0 --endi 1 --fileset fileset_2017_UL_NANO.json --sample GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8
-    # inside a dask job:  python run.py --year 2017 --processor hww --dask --fileset fileset_2017_UL_NANO.json --sample GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8
+    # inside a condor job: python run.py --year 2017 --processor hww --starti 0 --endi 1 --fileset fileset_2017_UL_NANO.json --sample 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8' --dask=False
+    # inside a dask job:  python run.py --year 2017 --processor hww --starti 0 --endi 1 --fileset fileset_2017_UL_NANO.json --sample 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8' --dask=True
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',       dest='year',       default='2017',       help="year", type=str)
