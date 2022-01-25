@@ -17,7 +17,7 @@ def main(args):
         files = json.load(f)[args.sample]
     fileset = {}
     fileset[args.sample] = ["root://cmsxrootd.fnal.gov/"+ f for f in files[args.starti:args.endi]]
-        
+    
     # define processor
     from boostedhiggs.hwwprocessor import HwwProcessor
     p = HwwProcessor(year=int(args.year))
@@ -46,7 +46,7 @@ def main(args):
             executor=executor, savemetrics=True, schema=nanoevents.NanoAODSchema, chunksize=100000
         )
         out, metrics = run(
-            {key: fileset[key] for key in args.sample}, "Events", processor_instance=p
+            fileset, "Events", processor_instance=p
         )
         elapsed = time.time() - tic
         print(f"Metrics: {metrics}")
@@ -66,7 +66,7 @@ def main(args):
         }
 
         out, metrics = processor.run_uproot_job(
-            {key: fileset[key] for key in args.sample},
+            fileset,
             treename="Events",
             processor_instance=p,
             executor=executor,
