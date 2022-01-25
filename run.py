@@ -3,12 +3,14 @@
 import json
 import uproot
 from coffea.nanoevents import NanoEventsFactory, NanoAODSchema, BaseSchema
+from coffea import nanoevents
 from coffea import processor
 import pickle
 
 import argparse
 import warnings
 
+from distributed.diagnostics.plugin import WorkerPlugin
     
 def main(args):
 
