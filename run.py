@@ -22,7 +22,7 @@ def main(args):
     # define processor
     if args.processor == 'hww':
         from boostedhiggs.hwwprocessor import HwwProcessor
-        p = HwwProcessor(year=int(args.year))
+        p = HwwProcessor(year=args.year)
     else:
         from boostedhiggs.trigger_efficiencies_processor import TriggerEfficienciesProcessor
         p = TriggerEfficienciesProcessor(year=int(args.year))
