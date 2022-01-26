@@ -79,9 +79,10 @@ def main(args):
             chunksize=args.chunksize,
         )
 
-    filehandler = open(f"outfiles/{args.starti}-{args.endi}.pkl", "wb")
-    pickle.dump(out, filehandler)
-    filehandler.close()
+    if args.processor == 'hww':
+        filehandler = open(f"outfiles/{args.starti}-{args.endi}.pkl", "wb")
+        pickle.dump(out, filehandler)
+        filehandler.close()
 
 
 if __name__ == "__main__":
