@@ -185,19 +185,21 @@ where:
 - number of files per job: is usually 1
 - year: this determines which fileset to read.
 
-If you do not want to run over the full list of samples listed in the `fileset` json files, or you only want to run over one reconstrucion (e.g. Ultra Legacy UL ) make sure you edit the `samples` dictionary inside submit.py.
+So for example:
+```
+python condor/submit.py --tag Jan25 --script run.py --files-per-job=1
+```
 
-The `run.py` script has different options to e.g. select a different processor, run over files that go from one starting index (starti) to the end (endi) in the `metadata.json` file.
+The `run.py` script has different options to e.g. select a different processor, run over files that go from one starting index (starti) to the end (endi).
 
-The `submit.py` creates the submission files and submits jobs afterwards by default.
+The `submit.py` creates the submission files **and submits jobs afterwards by default.**
 For testing purposes one can comment the `condor_submit` expression and do, e.g:
 ```
-python condor/submit.py Sep6 run.py 1 2017
-for i in condor/Sep6/*/*.jdl; do condor_submit $i; done
+for i in condor/Jan25/*/*.jdl; do condor_submit $i; done
 ```
 or one can individually submit jobs with:
 ```
-condor_submit condor/Sep6/SingleMuon_2017_2.jdl
+condor_submit condor/Jan25/GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8_0.jdl
 ```
 
 You can check the status of your jobs with:
@@ -216,6 +218,21 @@ grep -r 'return value 2' condor/Sep6/UL/logs/
 # or look for removed and aborted jobs
 grep -r 'Job removed' condor/Sep6/UL/logs/
 grep -r 'aborted' condor/Sep6/UL/logs/
+```
+
+One can remove condor jobs in this way:
+```
+condor_rm $ID -n $NAME
+```
+
+And can inquire more about held jobs in this way:
+```
+condor_q ID --long -n $NAME
+```
+
+#### Submitting jobs locally
+```
+python run.py --year 2017 --starti 0 --endi 1 --processor hww --sample GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8
 ```
 
 ## Post-processing
