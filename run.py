@@ -9,18 +9,23 @@ import pickle
 
 import argparse
 import warnings
-    
+
+
 def main(args):
 
     # read samples to submit
     with open("data/fileset_2017_UL_NANO.json", 'r') as f:
         files = json.load(f)[args.sample]
     fileset = {}
-    fileset[args.sample] = ["root://cmsxrootd.fnal.gov/"+ f for f in files[args.starti:args.endi]]
+    fileset[args.sample] = ["root://cmsxrootd.fnal.gov/" + f for f in files[args.starti:args.endi]]
 
     # define processor
-    from boostedhiggs.hwwprocessor import HwwProcessor
-    p = HwwProcessor(year=int(args.year))
+    if args.processor == 'hww':
+        from boostedhiggs.hwwprocessor import HwwProcessor
+        p = HwwProcessor(year=args.year)
+    else:
+        from boostedhiggs.trigger_efficiencies_processor import TriggerEfficienciesProcessor
+        p = TriggerEfficienciesProcessor(year=int(args.year))
 
     if args.executor == "dask":
         import time
@@ -80,9 +85,8 @@ def main(args):
 
 
 if __name__ == "__main__":
-    # e.g. 
-    # inside a condor job: python run.py --year 2017 --processor hww --starti 0 --endi 1 --sample 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8' --dask=False
-    # inside a dask job:  python run.py --year 2017 --processor hww --starti 0 --endi 1 --sample 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8' --dask=True
+    # e.g.
+    # run locally as: python run.py --year 2017 --processor hww --starti 0 --endi 1 --sample 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8'
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',       dest='year',       default='2017',       help="year", type=str)
@@ -102,4 +106,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main(args)
-
