@@ -36,6 +36,7 @@ def pad_val(
 
 
 class HwwProcessor(processor.ProcessorABC):
+
     def __init__(self, year="2017", yearmod="", channels=["ele", "mu", "had"], output_location="./"):
         self._year = year
         self._yearmod = yearmod
@@ -45,12 +46,10 @@ class HwwProcessor(processor.ProcessorABC):
         # define variables to save for each channel
         self._skimvars = {
             'ele': [
-                "lepton_pt",
-                "lep_isolation"
+                "lepton_pt"
             ],
             'mu': [
                 "lepton_pt",
-                "lep_isolation"
             ],
             'had': [
                 "fatjet_pt",
@@ -201,20 +200,86 @@ class HwwProcessor(processor.ProcessorABC):
     def accumulator(self):
         return self._accumulator
 
-    def save_dfs_parquet(self, fname, dfs_dict, ch, isMC, dataset, sumgenweight, cutflows):
+    def h5store(self, store: pd.HDFStore, df: pd.DataFrame, fname: str, gname: str, **kwargs: float) -> None:
+        store.put(gname, df)
+        store.get_storer(gname).attrs.metadata = kwargs
+
+    def save_dfs(self, fname, dfs_dict, isMC, dataset, sumgenweight, cutflows):
+        subdirs = []
+        store = pd.HDFStore(fname)
         if self._output_location is not None:
-            table = pa.Table.from_pandas(dfs_dict)
-            pq.write_table(table, './outfiles/' + ch + '/parquet/' + fname + '.parquet')
+            for gname, out in dfs_dict.items():
+                if isMC:
+                    metadata = dict(sumgenweight=sumgenweight, year=self._year, mc=isMC, dataset=dataset, cutflow=cutflows[gname])
+                else:
+                    metadata = dict(year=self._year, mc=isMC, dataset=dataset, cutflows=cutflows)
+                store_fin = self.h5store(store, out, fname, gname, **metadata)
+            store.close()
+            self.dump_table(fname, self._output_location, subdirs)
+        else:
+            print("self._output_location is None")
+            store.close()
 
-            if isMC:
-                metadata = dict(sumgenweight=sumgenweight, year=self._year, mc=isMC, dataset=dataset, cutflow=cutflows[ch])
+    def dump_table(self, fname: str, location: str, subdirs: Optional[List[str]] = None) -> None:
+        """
+        Saves locally first, then:
+        if ``location`` starts with "root://", will xrdcp to ``location``/``[subdirs]``/.
+        else will copy normally to ``location``/``[subdirs]``/.
+        """
+
+        subdirs = subdirs or []
+        xrd_prefix = "root://"
+        pfx_len = len(xrd_prefix)
+        xrootd = False
+        if xrd_prefix in location:
+            try:
+                import XRootD
+                import XRootD.client
+
+                xrootd = True
+            except ImportError:
+                raise ImportError(
+                    "Install XRootD python bindings with: conda install -c conda-forge xroot"
+                )
+        local_file = (
+            os.path.abspath(os.path.join(".", fname))
+            if xrootd
+            else os.path.join(".", fname)
+        )
+        merged_subdirs = "/".join(subdirs) if xrootd else os.path.sep.join(subdirs)
+        destination = (
+            location + merged_subdirs + f"/{fname}"
+            if xrootd
+            else os.path.join(location, os.path.join(merged_subdirs, fname))
+        )
+        if xrootd:
+            copyproc = XRootD.client.CopyProcess()
+            copyproc.add_job(local_file, destination)
+            copyproc.prepare()
+            copyproc.run()
+            client = XRootD.client.FileSystem(
+                location[: location[pfx_len:].find("/") + pfx_len]
+            )
+            status = client.locate(
+                destination[destination[pfx_len:].find("/") + pfx_len + 1:],
+                XRootD.client.flags.OpenFlags.READ,
+            )
+            assert status[0].ok
+            del client
+            del copyproc
+        else:
+            dirname = os.path.dirname(destination)
+            if not os.path.exists(dirname):
+                pathlib.Path(dirname).mkdir(parents=True, exist_ok=True)
+            # TODO: need to fix this
+            if not os.path.samefile(local_file, destination):
+                shutil.copy2(local_file, destination)
             else:
-                metadata = dict(year=self._year, mc=isMC, dataset=dataset, cutflows=cutflows)
-
-            # saves metadata
-            file = open('./outfiles/' + ch + '/pkl/' + fname + '.pkl', 'wb')
-            pkl.dump(metadata, file)
-            file.close()
+                fname = "condor_" + fname
+                destination = os.path.join(location, os.path.join(merged_subdirs, fname))
+                shutil.copy2(local_file, destination)
+            assert os.path.isfile(destination)
+        pathlib.Path(local_file).unlink()
 
     def ak_to_pandas(self, output_collection: ak.Array) -> pd.DataFrame:
         output = pd.DataFrame()
@@ -225,7 +290,7 @@ class HwwProcessor(processor.ProcessorABC):
     def add_selection(self, name: str, sel: np.ndarray, channel: str = None):
         """Adds selection to PackedSelection object and the cutflow dictionary"""
         channels = [channel] if channel else self._channels
-        for ch in channels:
+        for ch in self._channels:
             self.selections[ch].add(name, sel)
             self.cutflows[ch][name] = np.sum(self.selections[ch].all(*self.selections[ch].names))
 
@@ -313,34 +378,6 @@ class HwwProcessor(processor.ProcessorABC):
             behavior=candidate.behavior,
         )
 
-        # define isolation
-        ele_iso = ak.where(candidatelep.pt >= 120., candidatelep.pfRelIso03_all, candidatelep.pfRelIso03_all)
-        mu_iso = ak.where(candidatelep.pt >= 55., candidatelep.miniPFRelIso_all, candidatelep.pfRelIso03_all)
-
-        # add electron selections
-        self.add_selection(
-            name='oneelectron',
-            sel=(nmuons == 0) & (nelectrons == 1),
-            channel='ele'
-        )
-        self.add_selection(
-            name='electronkin',
-            sel=(candidatelep.pt > 30.) & abs(candidatelep.eta < 2.4),
-            channel='ele'
-        )
-
-        # add muon selections
-        self.add_selection(
-            name='onemuon',
-            sel=(nmuons == 1) & (nelectrons == 0),
-            channel='mu'
-        )
-        self.add_selection(
-            name='muonkin',
-            sel=(candidatelep.pt > 27.) & abs(candidatelep.eta < 2.4),
-            channel='ele'
-        )
-
         # initialize pandas dataframe
         output = {}
         for ch in self._channels:
@@ -348,15 +385,9 @@ class HwwProcessor(processor.ProcessorABC):
             for var in self._skimvars[ch]:
                 if var == "lepton_pt":
                     value = pad_val(candidatelep.pt, 0)
-                    out[var] = value
-                if var == "lep_isolation":
-                    if ch == 'ele':
-                        value = pad_val(ele_iso, 0)
-                    elif ch == 'mu':
-                        value = pad_val(mu_iso, 0)
-                    out[var] = value
                 else:
                     continue
+                out[var] = value
 
             # print arrays and selections to debug
             # print(out)
@@ -372,16 +403,8 @@ class HwwProcessor(processor.ProcessorABC):
                 output[ch] = self.ak_to_pandas(output[ch])
 
         # now save pandas dataframes
-        fname = events.behavior["__events_factory__"]._partition_key.replace("/", "_")
-        fname = 'condor_' + fname
-        for ch in self._channels:
-            if not os.path.exists('./outfiles/' + ch):  # creating a directory for each channel
-                os.makedirs('./outfiles/' + ch)
-            if not os.path.exists('./outfiles/' + ch + '/parquet'):  # creating a directory for each channel
-                os.makedirs('./outfiles/' + ch + '/parquet')
-            if not os.path.exists('./outfiles/' + ch + '/pkl'):  # creating a directory for each channel
-                os.makedirs('./outfiles/' + ch + '/pkl')
-            self.save_dfs_parquet(fname, output[ch], ch, isMC, dataset, sumgenweight, self.cutflows)
+        fname = events.behavior["__events_factory__"]._partition_key.replace("/", "_") + "-out.hdf5"
+        self.save_dfs(fname, output, isMC, dataset, sumgenweight, self.cutflows)
 
         return {}
 
