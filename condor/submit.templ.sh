@@ -12,4 +12,4 @@ python SCRIPTNAME --year YEAR --starti STARTNUM --endi ENDNUM --processor PROCES
 
 #move output to eos
 # xrdcp -f outfiles/* EOSOUTPKL
-xrdcp -f outfiles/* EOSOUTPKL
+xrdcp -r -f outfiles/ EOSOUTPKL
