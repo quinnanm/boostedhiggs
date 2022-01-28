@@ -221,7 +221,7 @@ class HwwProcessor(processor.ProcessorABC):
     def accumulator(self):
         return self._accumulator
 
-    def save_dfs_parquet(self, fname, dfs_dict, ch)
+    def save_dfs_parquet(self, fname, dfs_dict, ch):
         if self._output_location is not None:
             table = pa.Table.from_pandas(dfs_dict)
             pq.write_table(table, './outfiles/' + ch + '/parquet/' + fname + '.parquet')
@@ -460,10 +460,10 @@ class HwwProcessor(processor.ProcessorABC):
 
         # return dictionary with cutflows
         return {
-            dataset: {'mc': isMC, 
-                      self._year: {'sumgenweight': sumgenweight, 
+            dataset: {'mc': isMC,
+                      self._year: {'sumgenweight': sumgenweight,
                                    'cutflows': self.cutflows}
-                     }
+                      }
         }
 
     def postprocess(self, accumulator):
