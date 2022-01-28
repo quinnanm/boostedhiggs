@@ -9,9 +9,14 @@ import pickle
 
 import argparse
 import warnings
+import pyarrow as pa
+import pyarrow.parquet as pq
+import pickle as pkl
 
 
 def main(args):
+
+    channels = ["ele", "mu", "had"]
 
     # read samples to submit
     with open("data/fileset_2017_UL_NANO.json", 'r') as f:
@@ -22,7 +27,7 @@ def main(args):
     # define processor
     if args.processor == 'hww':
         from boostedhiggs.hwwprocessor import HwwProcessor
-        p = HwwProcessor(year=args.year)
+        p = HwwProcessor(year=args.year, channels=channels)
     else:
         from boostedhiggs.trigger_efficiencies_processor import TriggerEfficienciesProcessor
         p = TriggerEfficienciesProcessor(year=int(args.year))
@@ -80,6 +85,11 @@ def main(args):
         )
 
     if args.processor == 'hww':
+        # merge parquet
+        for ch in channels:
+            data = pd.read_parquet('./outfiles/' + ch + '/parquet')
+            data.to_parquet('./outfiles/' + ch + '/' + ch + '_df.parquet')
+    else:
         filehandler = open(f"outfiles/{args.starti}-{args.endi}.pkl", "wb")
         pickle.dump(out, filehandler)
         filehandler.close()

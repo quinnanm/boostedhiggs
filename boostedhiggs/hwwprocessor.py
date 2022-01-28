@@ -1,3 +1,4 @@
+from collections import defaultdict
 import pickle as pkl
 import pyarrow as pa
 import awkward as ak
@@ -16,6 +17,14 @@ from coffea.analysis_tools import Weights, PackedSelection
 
 import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
+
+
+def dsum(*dicts):
+    ret = defaultdict(int)
+    for d in dicts:
+        for k, v in d.items():
+            ret[k] += v
+    return dict(ret)
 
 
 def pad_val(
@@ -222,10 +231,17 @@ class HwwProcessor(processor.ProcessorABC):
             else:
                 metadata = dict(year=self._year, mc=isMC, dataset=dataset, cutflows=cutflows)
 
-            # saves metadata
-            file = open('./outfiles/' + ch + '/pkl/' + fname + '.pkl', 'wb')
-            pkl.dump(metadata, file)
-            file.close()
+            if not os.path.exists('./outfiles/' + ch + '/' + ch + '_metadata.pkl'):
+                file = open('./outfiles/' + ch + '/' + ch + '_metadata.pkl', 'wb')
+                pkl.dump(metadata, file)
+            else:
+                file = open('./outfiles/' + ch + '/' + ch + '_metadata.pkl', 'rb')
+                metadata_all = pkl.load(file)
+
+                metadata_all['cutflow'] = (dsum(metadata_all['cutflow'], metadata['cutflow']))
+
+                file = open('./outfiles/' + ch + '/' + ch + '_metadata.pkl', 'wb')
+                pkl.dump(metadata_all, file)
 
     def ak_to_pandas(self, output_collection: ak.Array) -> pd.DataFrame:
         output = pd.DataFrame()
@@ -277,15 +293,15 @@ class HwwProcessor(processor.ProcessorABC):
         self.add_selection("metfilters", metfilters)
 
         # define muon objects
-        muon = (
+        loose_muons = (
             (((events.Muon.pt > 30) & (events.Muon.pfRelIso04_all < 0.25)) |
              (events.Muon.pt > 55))
             & (np.abs(events.Muon.eta) < 2.4)
             & (events.Muon.looseId)
         )
-        n_loose_muons = ak.sum(muon, axis=1)
+        n_loose_muons = ak.sum(loose_muons, axis=1)
 
-        goodmuon = (
+        good_muons = (
             (events.Muon.pt > 28)
             & (np.abs(events.Muon.eta) < 2.4)
             & (np.abs(events.Muon.dz) < 0.1)
@@ -293,18 +309,18 @@ class HwwProcessor(processor.ProcessorABC):
             & (events.Muon.sip3d <= 4.0)
             & events.Muon.mediumId
         )
-        nmuons = ak.sum(goodmuon, axis=1)
+        n_good_muons = ak.sum(good_muons, axis=1)
 
         # define electron objects
-        electron = (
+        loose_electrons = (
             (((events.Electron.pt > 38) & (events.Electron.pfRelIso03_all < 0.25)) |
              (events.Electron.pt > 120))
             & ((np.abs(events.Electron.eta) < 1.44) | (np.abs(events.Electron.eta) > 1.57))
             & (events.Electron.cutBased >= events.Electron.LOOSE)
         )
-        n_loose_electrons = ak.sum(electron, axis=1)
+        n_loose_electrons = ak.sum(loose_electrons, axis=1)
 
-        goodelectron = (
+        good_electrons = (
             (events.Electron.pt > 38)
             & ((np.abs(events.Electron.eta) < 1.44) | (np.abs(events.Electron.eta) > 1.57))
             & (np.abs(events.Electron.dz) < 0.1)
@@ -312,10 +328,10 @@ class HwwProcessor(processor.ProcessorABC):
             & (events.Electron.sip3d <= 4.0)
             & (events.Electron.mvaFall17V2noIso_WP90)
         )
-        nelectrons = ak.sum(goodelectron, axis=1)
+        n_good_electrons = ak.sum(good_electrons, axis=1)
 
         # leading lepton
-        goodleptons = ak.concatenate([events.Muon[goodmuon], events.Electron[goodelectron]], axis=1)
+        goodleptons = ak.concatenate([events.Muon[good_muons], events.Electron[good_electrons]], axis=1)
         goodleptons = goodleptons[ak.argsort(goodleptons.pt, ascending=False)]
         candidatelep = ak.firsts(goodleptons)
 
@@ -375,7 +391,7 @@ class HwwProcessor(processor.ProcessorABC):
         )
         self.add_selection(
             name='oneLepton',
-            sel=(nmuons == 1) & (nelectrons == 0) & (n_loose_electrons == 0),
+            sel=(n_good_muons == 1) & (n_good_electrons == 0) & (n_loose_electrons == 0),
             channel=['mu']
         )
         self.add_selection('leptonIsolation', sel=(
@@ -398,7 +414,7 @@ class HwwProcessor(processor.ProcessorABC):
         )
         self.add_selection(
             name='oneLepton',
-            sel=(n_loose_muons == 0) & (nmuons == 0) & (nelectrons == 1),
+            sel=(n_good_muons == 0) & (n_loose_muons == 0) & (n_good_electrons == 1),
             channel=['ele']
         )
         self.add_selection('leptonIsolation', sel=(
@@ -411,7 +427,8 @@ class HwwProcessor(processor.ProcessorABC):
         ), channel=['ele'])
 
         # TODO add selection for had
-        # TODO different names per job, and 1 parquet file per chanenl
+
+        # TODO different names per job, and 1 parquet file per channel
 
         # initialize pandas dataframe
         output = {}
@@ -460,8 +477,6 @@ class HwwProcessor(processor.ProcessorABC):
                 os.makedirs('./outfiles/' + ch)
             if not os.path.exists('./outfiles/' + ch + '/parquet'):  # creating a directory for each channel
                 os.makedirs('./outfiles/' + ch + '/parquet')
-            if not os.path.exists('./outfiles/' + ch + '/pkl'):  # creating a directory for each channel
-                os.makedirs('./outfiles/' + ch + '/pkl')
             self.save_dfs_parquet(fname, output[ch], ch, isMC, dataset, sumgenweight, self.cutflows)
 
         return {}
