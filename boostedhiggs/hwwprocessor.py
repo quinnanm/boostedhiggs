@@ -439,10 +439,6 @@ class HwwProcessor(processor.ProcessorABC):
                 else:
                     continue
 
-            # print arrays and selections to debug
-            # print(out)
-            # print(selections[ch].all(*selections[ch].names))
-
             # apply selections
             output[ch] = {
                 key: value[self.selections[ch].all(*self.selections[ch].names)] for (key, value) in out.items()
@@ -463,7 +459,12 @@ class HwwProcessor(processor.ProcessorABC):
             self.save_dfs_parquet(fname, output[ch], ch)
 
         # return dictionary with cutflows
-        return dict(sumgenweight=sumgenweight, year=self._year, mc=isMC, dataset=dataset, cutflow=self.cutflows)
+        return {
+            dataset: {'mc': isMC, 
+                      self._year: {'sumgenweight': sumgenweight, 
+                                   'cutflows': self.cutflows}
+                     }
+        }
 
     def postprocess(self, accumulator):
         return accumulator
