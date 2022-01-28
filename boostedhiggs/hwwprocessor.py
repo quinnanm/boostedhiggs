@@ -48,11 +48,20 @@ class HwwProcessor(processor.ProcessorABC):
         self._skimvars = {
             'ele': [
                 "lepton_pt",
-                "lep_isolation"
+                "lep_isolation",
+                "met",
+                "ht",
+                "mt_lep_met",
+                "dr_jet_candlep",
             ],
             'mu': [
                 "lepton_pt",
-                "lep_isolation"
+                "lep_isolation",
+                "met",
+                "ht",
+                "mt_lep_met",
+                "dr_jet_candlep",
+                "mu_mvaId"
             ],
             'had': [
                 "fatjet_pt",
@@ -224,9 +233,9 @@ class HwwProcessor(processor.ProcessorABC):
             output[field] = ak.to_numpy(output_collection[field])
         return output
 
-    def add_selection(self, name: str, sel: np.ndarray, channel: str = None):
+    def add_selection(self, name: str, sel: np.ndarray, channel: list = None):
         """Adds selection to PackedSelection object and the cutflow dictionary"""
-        channels = [channel] if channel else self._channels
+        channels = channel if channel else self._channels
         for ch in channels:
             self.selections[ch].add(name, sel)
             self.cutflows[ch][name] = np.sum(self.selections[ch].all(*self.selections[ch].names))
@@ -257,7 +266,7 @@ class HwwProcessor(processor.ProcessorABC):
                 for t in self._HLTs[ch]:
                     if t in events.HLT.fields:
                         trigger = trigger | events.HLT[t]
-            self.add_selection("trigger", trigger, ch)
+            self.add_selection("trigger", trigger, [ch])
             del trigger
 
         # metfilters
@@ -267,42 +276,50 @@ class HwwProcessor(processor.ProcessorABC):
                 metfilters = metfilters & events.Flag[mf]
         self.add_selection("metfilters", metfilters)
 
-        # muons
-        goodmuon = (
-            (events.Muon.pt > 25)
+        # define muon objects
+        muon = (
+            (((events.Muon.pt > 30) & (events.Muon.pfRelIso04_all < 0.25)) |
+             (events.Muon.pt > 55))
             & (np.abs(events.Muon.eta) < 2.4)
-            & (np.abs(events.Muon.dz) < 0.5)
-            & (np.abs(events.Muon.dxy) < 0.2)
+            & (events.Muon.looseId)
+        )
+        n_loose_muons = ak.sum(muon, axis=1)
+
+        goodmuon = (
+            (events.Muon.pt > 28)
+            & (np.abs(events.Muon.eta) < 2.4)
+            & (np.abs(events.Muon.dz) < 0.1)
+            & (np.abs(events.Muon.dxy) < 0.05)
+            & (events.Muon.sip3d <= 4.0)
             & events.Muon.mediumId
         )
         nmuons = ak.sum(goodmuon, axis=1)
-        lowptmuon = (
-            (events.Muon.pt > 10)
-            & (abs(events.Muon.eta) < 2.4)
-            & (np.abs(events.Muon.dz) < 0.5)
-            & (np.abs(events.Muon.dxy) < 0.2)
-            & events.Muon.looseId
-        )
-        nlowptmuons = ak.sum(lowptmuon, axis=1)
 
-        # electrons
+        # define electron objects
+        electron = (
+            (((events.Electron.pt > 38) & (events.Electron.pfRelIso03_all < 0.25)) |
+             (events.Electron.pt > 120))
+            & ((np.abs(events.Electron.eta) < 1.44) | (np.abs(events.Electron.eta) > 1.57))
+            & (events.Electron.cutBased >= events.Electron.LOOSE)
+        )
+        n_loose_electrons = ak.sum(electron, axis=1)
+
         goodelectron = (
-            (events.Electron.pt > 25)
-            & (abs(events.Electron.eta) < 2.5)
-            & ((1.44 < np.abs(events.Electron.eta)) | (np.abs(events.Electron.eta) > 1.57))
+            (events.Electron.pt > 38)
+            & ((np.abs(events.Electron.eta) < 1.44) | (np.abs(events.Electron.eta) > 1.57))
+            & (np.abs(events.Electron.dz) < 0.1)
+            & (np.abs(events.Electron.dxy) < 0.05)
+            & (events.Electron.sip3d <= 4.0)
             & (events.Electron.mvaFall17V2noIso_WP90)
         )
         nelectrons = ak.sum(goodelectron, axis=1)
-        lowptelectron = (
-            (events.Electron.pt > 10)
-            & ((1.44 < np.abs(events.Electron.eta)) | (np.abs(events.Electron.eta) > 1.57))
-            & (np.abs(events.Electron.eta) < 2.4)
-            & (events.Electron.cutBased >= events.Electron.LOOSE)
-        )
-        nlowptelectrons = ak.sum(lowptelectron, axis=1)
 
+        # leading lepton
         goodleptons = ak.concatenate([events.Muon[goodmuon], events.Electron[goodelectron]], axis=1)
-        candidatelep = ak.firsts(goodleptons[ak.argsort(goodleptons.pt)])
+        goodleptons = goodleptons[ak.argsort(goodleptons.pt, ascending=False)]
+        candidatelep = ak.firsts(goodleptons)
+
+        # candidate leptons
         candidatelep_p4 = ak.zip(
             {
                 "pt": candidatelep.pt,
@@ -315,33 +332,86 @@ class HwwProcessor(processor.ProcessorABC):
             behavior=candidate.behavior,
         )
 
-        # define isolation
-        ele_iso = ak.where(candidatelep.pt >= 120., candidatelep.pfRelIso03_all, candidatelep.pfRelIso03_all)
-        mu_iso = ak.where(candidatelep.pt >= 55., candidatelep.miniPFRelIso_all, candidatelep.pfRelIso03_all)
+        # relative isolation
+        lep_reliso = candidatelep.pfRelIso04_all if hasattr(candidatelep, "pfRelIso04_all") else candidatelep.pfRelIso03_all
 
-        # add electron selections
-        self.add_selection(
-            name='oneelectron',
-            sel=(nmuons == 0) & (nelectrons == 1),
-            channel='ele'
-        )
-        self.add_selection(
-            name='electronkin',
-            sel=(candidatelep.pt > 30.) & abs(candidatelep.eta < 2.4),
-            channel='ele'
-        )
+        # mini isolation
+        mu_miso = candidatelep.miniPFRelIso_all
 
-        # add muon selections
+        # MVA-ID
+        mu_mvaId = candidatelep.mvaId if hasattr(candidatelep, "mvaId") else np.zeros(nevents)
+
+        # FATJETS
+        fatjets = events.FatJet
+        candidatefj = fatjets[
+            (fatjets.pt > 200)
+            & (abs(fatjets.eta) < 2.5)
+            & fatjets.isTight
+            # & fatjets.puId==7   #### TODO field not found
+        ]
+        candidatefj_lep = ak.firsts(candidatefj[ak.argmin(candidatefj.delta_r(candidatelep_p4), axis=1, keepdims=True)])
+
+        # deltaR
+        dr_jet_candlep = candidatefj_lep.delta_r(candidatelep_p4)
+
+        # MET
+        met = events.MET
+        mt_lep_met = np.sqrt(
+            2. * candidatelep_p4.pt * met.pt * (ak.ones_like(met.pt) - np.cos(candidatelep_p4.delta_phi(met)))
+        )
+        # JETS
+        goodjet = events.Jet[
+            (events.Jet.pt > 30)
+            & (abs(events.Jet.eta) < 2.5)
+            & events.Jet.isTight
+        ]
+        ht = ak.sum(goodjet.pt, axis=1)
+
+        # event selections
         self.add_selection(
-            name='onemuon',
-            sel=(nmuons == 1) & (nelectrons == 0),
-            channel='mu'
+            name='leptonKin',
+            sel=(candidatelep.pt > 30),
+            channel=['mu']
         )
         self.add_selection(
-            name='muonkin',
-            sel=(candidatelep.pt > 27.) & abs(candidatelep.eta < 2.4),
-            channel='ele'
+            name='oneLepton',
+            sel=(nmuons == 1) & (nelectrons == 0) & (n_loose_electrons == 0),
+            channel=['mu']
         )
+        self.add_selection('leptonIsolation', sel=(
+            ((candidatelep.pt > 30)
+             & (candidatelep.pt < 55)
+             & (lep_reliso < 0.25)
+             )
+            | ((candidatelep.pt >= 55)
+               & (candidatelep.miniPFRelIso_all < 0.2))
+        ), channel=['mu'])
+        self.add_selection('leptonInJet', sel=(dr_jet_candlep < 0.8), channel=['mu', 'ele'])
+        self.add_selection('ht', sel=(ht > 200), channel=['mu', 'ele'])
+        self.add_selection('mt', sel=(mt_lep_met < 100), channel=['mu', 'ele'])
+
+        # selections for electrons
+        self.add_selection(
+            name='leptonKin',
+            sel=(candidatelep.pt > 40),
+            channel=['ele']
+        )
+        self.add_selection(
+            name='oneLepton',
+            sel=(n_loose_muons == 0) & (nmuons == 0) & (nelectrons == 1),
+            channel=['ele']
+        )
+        self.add_selection('leptonIsolation', sel=(
+            ((candidatelep.pt > 30)
+             & (candidatelep.pt < 120)
+             & (lep_reliso < 0.3)
+             )
+            | ((candidatelep.pt >= 120)
+               & (candidatelep.miniPFRelIso_all < 0.2))
+        ), channel=['ele'])
+
+        # TODO add selection for had
+        # TODO different names per job, and 1 parquet file per chanenl
 
         # initialize pandas dataframe
         output = {}
@@ -351,11 +421,20 @@ class HwwProcessor(processor.ProcessorABC):
                 if var == "lepton_pt":
                     value = pad_val(candidatelep.pt, 0)
                     out[var] = value
+                if var == "dr_jet_candlep":
+                    value = pad_val(dr_jet_candlep, 0)
+                    out[var] = value
+                if var == "mt_lep_met":
+                    value = pad_val(mt_lep_met, 0)
+                    out[var] = value
+                if var == "ht":
+                    value = pad_val(ht, 0)
+                    out[var] = value
+                if var == "met":
+                    value = pad_val(met.pt, 0)
+                    out[var] = value
                 if var == "lep_isolation":
-                    if ch == 'ele':
-                        value = pad_val(ele_iso, 0)
-                    elif ch == 'mu':
-                        value = pad_val(mu_iso, 0)
+                    value = pad_val(lep_reliso, -1)
                     out[var] = value
                 else:
                     continue
