@@ -43,8 +43,8 @@ def data_label(region):
         datalabel="Data"
     return datalabel
 
-
-def plot_cutflow(data, sig, bkg, bkg_labels=None, region="hadel", odir="./", year=2017):
+# stack cutflow plot
+def plot_cutflow(data, sig, bkg, bkg_labels=None, region="hadel", odir="./", year=2017, histtype="fill"):
 
     regions = {
         "hadel": ["none", "triggere", "metfilters", "lumimask", "oneelectron", "fjacc", "fjmsd", "btag_ophem_med", "met20", "lepinfj", "mtlepmet", "electroniso"],
@@ -61,24 +61,26 @@ def plot_cutflow(data, sig, bkg, bkg_labels=None, region="hadel", odir="./", yea
         ax=ax,
         stack=True,
         edgecolor="k",
-        histtype="fill",
+        histtype=histtype,
         label=bkg_labels
     )
     hep.histplot(
         sig.values(),
         ax=ax,
         color="cyan",
-        label="H(WW)"
+        label="H(WW^{*})"
     )
 
-    hep.histplot(
-        data.values(),
-        ax=ax,
-        histtype="errorbar",
-        color="k",
-        yerr=True,
-        label=data_label(region),
-    )
+    if data is not None:
+        hep.histplot(
+            data.values(),
+            ax=ax,
+            histtype="errorbar",
+            color="k",
+            yerr=True,
+            label=data_label(region),
+        )
+
     # axes labels, limits and ticks
     plt.xticks(
         ticks=np.arange(len(regions[region])),
@@ -100,13 +102,13 @@ def plot_cutflow(data, sig, bkg, bkg_labels=None, region="hadel", odir="./", yea
         loc="lower left"
     )
 
-    hep.cms.lumitext("2017 (13 TeV)", ax=ax)
+    hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
     hep.cms.text("Work in Progress", ax=ax)
     
     #save fig
     fig.savefig(f"{odir}/{region}_{year}_cutflow.png")
 
-
+# stack plot
 def plot_stack(data, sig, bkg, bkg_labels, sig_label="HWW (1000)", 
                axis_name=None, region="hadel", odir="./", year=2017):
 
@@ -184,3 +186,36 @@ def plot_stack(data, sig, bkg, bkg_labels, sig_label="HWW (1000)",
 
     # save fig
     fig.savefig(f"{odir}/{region}_{year}_{axis_name}.png")
+
+# plot mc unstacked processes
+def plot_unstack(mc,mc_labels, density=True,
+                 axis_name=None, region="hadel", odir="./", year=2017):
+    fig, ax = plt.subplots(
+        figsize=(12,12),
+        tight_layout=True,
+    )
+    hep.histplot(
+        mc,
+        ax=ax,
+        density=density,
+        histtype="step",
+        edgecolor="k",
+        alpha=0.8,
+        label=mc_labels,
+    )
+    ax.set(
+        ylabel="Events",
+        xlabel=None,
+        xlim=axis_limits[axis_name]
+    )
+    ax.legend(
+        loc="best",
+        frameon=True,
+    )
+    hep.cms.lumitext("2017 (13 TeV)", ax=ax)
+    hep.cms.text("Work in Progress", ax=ax)
+    
+    if density:
+        fig.savefig(f"{odir}/unstack_{region}_{year}_{axis_name}_norm.png")
+    else:
+        fig.savefig(f"{odir}/unstack_{region}_{year}_{axis_name}.png")
