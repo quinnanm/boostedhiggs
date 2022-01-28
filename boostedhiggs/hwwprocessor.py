@@ -221,27 +221,10 @@ class HwwProcessor(processor.ProcessorABC):
     def accumulator(self):
         return self._accumulator
 
-    def save_dfs_parquet(self, fname, dfs_dict, ch, isMC, dataset, sumgenweight, cutflows):
+    def save_dfs_parquet(self, fname, dfs_dict, ch)
         if self._output_location is not None:
             table = pa.Table.from_pandas(dfs_dict)
             pq.write_table(table, './outfiles/' + ch + '/parquet/' + fname + '.parquet')
-
-            if isMC:
-                metadata = dict(sumgenweight=sumgenweight, year=self._year, mc=isMC, dataset=dataset, cutflow=cutflows[ch])
-            else:
-                metadata = dict(year=self._year, mc=isMC, dataset=dataset, cutflows=cutflows)
-
-            if not os.path.exists('./outfiles/' + ch + '/' + ch + '_metadata.pkl'):
-                file = open('./outfiles/' + ch + '/' + ch + '_metadata.pkl', 'wb')
-                pkl.dump(metadata, file)
-            else:
-                file = open('./outfiles/' + ch + '/' + ch + '_metadata.pkl', 'rb')
-                metadata_all = pkl.load(file)
-
-                metadata_all['cutflow'] = (dsum(metadata_all['cutflow'], metadata['cutflow']))
-
-                file = open('./outfiles/' + ch + '/' + ch + '_metadata.pkl', 'wb')
-                pkl.dump(metadata_all, file)
 
     def ak_to_pandas(self, output_collection: ak.Array) -> pd.DataFrame:
         output = pd.DataFrame()
@@ -477,9 +460,10 @@ class HwwProcessor(processor.ProcessorABC):
                 os.makedirs('./outfiles/' + ch)
             if not os.path.exists('./outfiles/' + ch + '/parquet'):  # creating a directory for each channel
                 os.makedirs('./outfiles/' + ch + '/parquet')
-            self.save_dfs_parquet(fname, output[ch], ch, isMC, dataset, sumgenweight, self.cutflows)
+            self.save_dfs_parquet(fname, output[ch], ch)
 
-        return {}
+        # return dictionary with cutflows
+        return dict(sumgenweight=sumgenweight, year=self._year, mc=isMC, dataset=dataset, cutflow=self.cutflows)
 
     def postprocess(self, accumulator):
         return accumulator

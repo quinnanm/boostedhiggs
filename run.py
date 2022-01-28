@@ -85,17 +85,15 @@ def main(args):
             chunksize=args.chunksize,
         )
 
-    if args.processor == 'hww':
-        # merge parquet
-        for ch in channels:
-            data = pd.read_parquet('./outfiles/' + ch + '/parquet')
-            data.to_parquet('./outfiles/' + ch + '/' + ch + '_df.parquet')
-    else:
-        filehandler = open(f"outfiles/{args.starti}-{args.endi}.pkl", "wb")
-        pickle.dump(out, filehandler)
-        filehandler.close()
+    filehandler = open(f"outfiles/{args.starti}-{args.endi}.pkl", "wb")
+    pickle.dump(out, filehandler)
+    filehandler.close()
 
-
+    # merge parquet
+    for ch in channels:
+        data = pd.read_parquet('./outfiles/' + ch + '/parquet')
+        data.to_parquet('./outfiles/' + ch + '_{args.starti}-{args.endi}.parquet')
+        
 if __name__ == "__main__":
     # e.g.
     # run locally as: python run.py --year 2017 --processor hww --starti 0 --endi 1 --sample 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8'

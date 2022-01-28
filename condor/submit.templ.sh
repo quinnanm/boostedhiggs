@@ -12,5 +12,4 @@ python SCRIPTNAME --year YEAR --starti STARTNUM --endi ENDNUM --processor PROCES
 rm -r outfiles/*/parquet/
 
 #move output to eos
-# xrdcp -f outfiles/* EOSOUTPKL
 xrdcp -r -f outfiles/ EOSOUTPKL
