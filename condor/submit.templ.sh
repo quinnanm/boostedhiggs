@@ -5,8 +5,12 @@ python3 -m pip install correctionlib==2.0.0rc6
 # make dir for output
 mkdir outfiles
 
-# run code (e.g. for run.py)
-python SCRIPTNAME --year YEAR --starti STARTNUM --endi ENDNUM --sample SAMPLE --processor PROCESSOR --condor --fileset metadata.json 
+# run code
+# pip install --user onnxruntime
+python SCRIPTNAME --year YEAR --starti STARTNUM --endi ENDNUM --processor PROCESSOR --sample SAMPLE
+
+rm -r outfiles/*/parquet/
 
 #move output to eos
-xrdcp -f outfiles/*.hist EOSOUT
+# xrdcp -f outfiles/* EOSOUTPKL
+xrdcp -r -f outfiles/ EOSOUTPKL
