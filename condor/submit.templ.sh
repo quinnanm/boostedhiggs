@@ -9,6 +9,7 @@ mkdir outfiles
 # pip install --user onnxruntime
 python SCRIPTNAME --year YEAR --starti STARTNUM --endi ENDNUM --processor PROCESSOR --sample SAMPLE
 
+rm -r outfiles/*/parquet/
 
 #move output to eos
 # xrdcp -f outfiles/* EOSOUTPKL

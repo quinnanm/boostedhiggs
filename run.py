@@ -12,6 +12,7 @@ import warnings
 import pyarrow as pa
 import pyarrow.parquet as pq
 import pickle as pkl
+import pandas as pd
 
 
 def main(args):
