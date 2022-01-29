@@ -26,7 +26,7 @@ def main(args):
 
     with open("data/fileset_2017_UL_NANO.json", 'r') as f:
         fileset = json.load(f)
-    samples = ["QCD_Pt_1000to1400_TuneCP5_13TeV_pythia8"]
+    samples = ["QCD_HT1000to1500_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8"]
 
     # directories for every sample
     for sample in samples:
