@@ -92,8 +92,9 @@ def main(args):
     # merge parquet
     for ch in channels:
         data = pd.read_parquet('./outfiles/' + ch + '/parquet')
-        data.to_parquet('./outfiles/' + ch + '_{args.starti}-{args.endi}.parquet')
-        
+        data.to_parquet('./outfiles/' + ch + '.parquet')
+
+
 if __name__ == "__main__":
     # e.g.
     # run locally as: python run.py --year 2017 --processor hww --starti 0 --endi 1 --sample 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8'
