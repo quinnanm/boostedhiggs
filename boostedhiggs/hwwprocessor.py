@@ -228,7 +228,7 @@ class HwwProcessor(processor.ProcessorABC):
     def accumulator(self):
         return self._accumulator
 
-    def save_dfs_parquet(self, fname, dfs_dict, ch):
+    def save_dfs_parquet(self, fname, dfs_dict, ch, folder_name):
         if self._output_location is not None:
             table = pa.Table.from_pandas(dfs_dict)
             pq.write_table(table, './outfiles/' + ch + folder_name + '/parquet/' + fname + '.parquet')
@@ -538,7 +538,7 @@ class HwwProcessor(processor.ProcessorABC):
             if not os.path.exists('./outfiles/' + ch + self.folder_name + '/parquet'):  # creating a directory for each channel
                 os.makedirs('./outfiles/' + ch + self.folder_name + '/parquet')
 
-            self.save_dfs_parquet(fname, output[ch], ch)
+            self.save_dfs_parquet(fname, output[ch], ch, self.folder_name)
 
         # return dictionary with cutflows
         return {
