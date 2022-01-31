@@ -84,6 +84,10 @@ def main(args):
         run = processor.Runner(
             executor=executor, savemetrics=True, schema=nanoevents.NanoAODSchema,
         )
+        exe_args = {
+            "savemetrics": True,
+            "schema": nanoevents.NanoAODSchema,
+        }
 
     out, metrics = processor.run_uproot_job(
         fileset,
