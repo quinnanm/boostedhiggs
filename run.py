@@ -13,11 +13,17 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import pickle as pkl
 import pandas as pd
+import os
 
 
 def main(args):
 
+    # make directory for output
+    if not os.path.exists('./outfiles'):
+        os.makedirs('./outfiles')
+
     channels = ["ele", "mu", "had"]
+    job_name = '/' + str(args.starti) + '-' + str(args.endi)
 
     samples = args.sample.split(',')
 
@@ -44,7 +50,7 @@ def main(args):
     # define processor
     if args.processor == 'hww':
         from boostedhiggs.hwwprocessor import HwwProcessor
-        p = HwwProcessor(year=args.year, channels=channels)
+        p = HwwProcessor(year=args.year, channels=channels, folder_name=job_name)
     else:
         from boostedhiggs.trigger_efficiencies_processor import TriggerEfficienciesProcessor
         p = TriggerEfficienciesProcessor(year=int(args.year))
@@ -98,9 +104,10 @@ def main(args):
 
     # merge parquet
     for ch in channels:
-        data = pd.read_parquet('./outfiles/' + ch + '/parquet')
-        data.to_parquet('./outfiles/' + ch + '_{args.starti}-{args.endi}.parquet')
-        
+        data = pd.read_parquet('./outfiles/' + ch + job_name + '/parquet')
+        data.to_parquet('./outfiles/' + job_name + '_' + ch + '.parquet')
+
+
 if __name__ == "__main__":
     # e.g.
     # run locally as: python run.py --year 2017 --processor hww --starti 0 --endi 1 --sample GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8

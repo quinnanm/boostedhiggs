@@ -47,7 +47,7 @@ def pad_val(
 
 
 class HwwProcessor(processor.ProcessorABC):
-    def __init__(self, year="2017", yearmod="", channels=["ele", "mu", "had"], output_location="./"):
+    def __init__(self, year="2017", yearmod="", channels=["ele", "mu", "had"], output_location="./", folder_name=''):
         self._year = year
         self._yearmod = yearmod
         self._channels = channels
@@ -73,7 +73,13 @@ class HwwProcessor(processor.ProcessorABC):
                 "mu_mvaId"
             ],
             'had': [
-                "fatjet_pt",
+                "leadingfj_pt",
+                "leadingfj_msoftdrop",
+                "secondfj_pt",
+                "secondfj_msoftdrop",
+                "met",
+                "ht",
+                "bjets_ophem_leadingfj"
             ],
         }
 
@@ -221,7 +227,7 @@ class HwwProcessor(processor.ProcessorABC):
     def accumulator(self):
         return self._accumulator
 
-    def save_dfs_parquet(self, fname, dfs_dict, ch)
+    def save_dfs_parquet(self, fname, dfs_dict, ch):
         if self._output_location is not None:
             table = pa.Table.from_pandas(dfs_dict)
             pq.write_table(table, './outfiles/' + ch + '/parquet/' + fname + '.parquet')
@@ -333,22 +339,45 @@ class HwwProcessor(processor.ProcessorABC):
 
         # relative isolation
         lep_reliso = candidatelep.pfRelIso04_all if hasattr(candidatelep, "pfRelIso04_all") else candidatelep.pfRelIso03_all
-
         # mini isolation
         mu_miso = candidatelep.miniPFRelIso_all
-
         # MVA-ID
         mu_mvaId = candidatelep.mvaId if hasattr(candidatelep, "mvaId") else np.zeros(nevents)
 
+        # JETS
+        goodjets = events.Jet[
+            (events.Jet.pt > 30)
+            & (abs(events.Jet.eta) < 2.5)
+            & events.Jet.isTight
+        ]
+        ht = ak.sum(goodjets.pt, axis=1)
+
         # FATJETS
         fatjets = events.FatJet
-        candidatefj = fatjets[
+        fatjets["qcdrho"] = 2 * np.log(fatjets.msoftdrop / fatjets.pt)
+
+        good_fatjets = (
             (fatjets.pt > 200)
             & (abs(fatjets.eta) < 2.5)
             & fatjets.isTight
             # & fatjets.puId==7   #### TODO field not found
-        ]
-        candidatefj_lep = ak.firsts(candidatefj[ak.argmin(candidatefj.delta_r(candidatelep_p4), axis=1, keepdims=True)])
+        )
+        n_fatjets = ak.sum(good_fatjets, axis=1)
+
+        good_fatjets = fatjets[good_fatjets]
+        good_fatjets = good_fatjets[ak.argsort(good_fatjets.pt, ascending=False)]
+        leadingfj = ak.firsts(good_fatjets)
+        secondfj = ak.pad_none(good_fatjets, 2, axis=1)[:, 1]
+
+        candidatefj_lep = ak.firsts(good_fatjets[ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)])
+        # lepton and fatjet mass
+        lep_fj_m = (candidatefj_lep - candidatelep_p4).mass
+
+        dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj_lep))  # ele and mu
+        dphi_jet_leadingfj = abs(goodjets.delta_phi(leadingfj))  # had
+
+        bjets_ophem_lepfj = ak.max(goodjets[dphi_jet_lepfj > np.pi / 2].btagDeepFlavB, axis=1)  # in event, pick highest b score in opposite direction from signal
+        bjets_ophem_leadingfj = ak.max(goodjets[dphi_jet_leadingfj > np.pi / 2].btagDeepFlavB, axis=1)
 
         # deltaR
         dr_jet_candlep = candidatefj_lep.delta_r(candidatelep_p4)
@@ -358,13 +387,6 @@ class HwwProcessor(processor.ProcessorABC):
         mt_lep_met = np.sqrt(
             2. * candidatelep_p4.pt * met.pt * (ak.ones_like(met.pt) - np.cos(candidatelep_p4.delta_phi(met)))
         )
-        # JETS
-        goodjet = events.Jet[
-            (events.Jet.pt > 30)
-            & (abs(events.Jet.eta) < 2.5)
-            & events.Jet.isTight
-        ]
-        ht = ak.sum(goodjet.pt, axis=1)
 
         # event selections
         self.add_selection(
@@ -388,7 +410,11 @@ class HwwProcessor(processor.ProcessorABC):
         self.add_selection('leptonInJet', sel=(dr_jet_candlep < 0.8), channel=['mu', 'ele'])
         self.add_selection('ht', sel=(ht > 200), channel=['mu', 'ele'])
         self.add_selection('mt', sel=(mt_lep_met < 100), channel=['mu', 'ele'])
-
+        # self.add_selection(
+        #     name='bjet_tag',
+        #     sel=(bjets_ophem_lepfj > self._btagWPs["medium"]),
+        #     channel=['mu', 'ele']
+        # )
         # selections for electrons
         self.add_selection(
             name='leptonKin',
@@ -409,9 +435,32 @@ class HwwProcessor(processor.ProcessorABC):
                & (candidatelep.miniPFRelIso_all < 0.2))
         ), channel=['ele'])
 
-        # TODO add selection for had
-
-        # TODO different names per job, and 1 parquet file per channel
+        # had selection
+        self.add_selection(
+            name='oneFatjet',
+            sel=(n_fatjets >= 1) & (n_good_muons == 0) & (n_loose_muons == 0) & (n_good_electrons == 0) & (n_loose_electrons == 0),
+            channel=['had']
+        )
+        self.add_selection(
+            name='leadingJet',
+            sel=leadingfj.pt > 450,
+            channel=['had']
+        )
+        self.add_selection(
+            name='softdrop',
+            sel=leadingfj.msoftdrop > 30,
+            channel=['had']
+        )
+        self.add_selection(
+            name='qcdrho',
+            sel=(leadingfj.qcdrho > -7) & (leadingfj.qcdrho < -2.0),
+            channel=['had']
+        )
+#         self.add_selection(
+#             name='bjet_tag',
+#             sel=(bjets_ophem_leadingfj > self._btagWPs["medium"]),
+#             channel=['had']
+#         )
 
         # initialize pandas dataframe
         output = {}
@@ -419,30 +468,61 @@ class HwwProcessor(processor.ProcessorABC):
             out = {}
             for var in self._skimvars[ch]:
                 if var == "lepton_pt":
-                    value = pad_val(candidatelep.pt, 0)
+                    value = pad_val(candidatelep.pt, -1)
                     out[var] = value
                 if var == "dr_jet_candlep":
-                    value = pad_val(dr_jet_candlep, 0)
+                    value = pad_val(dr_jet_candlep, -1)
                     out[var] = value
                 if var == "mt_lep_met":
-                    value = pad_val(mt_lep_met, 0)
+                    value = pad_val(mt_lep_met, -1)
                     out[var] = value
                 if var == "ht":
-                    value = pad_val(ht, 0)
+                    value = pad_val(ht, -1)
                     out[var] = value
                 if var == "met":
-                    value = pad_val(met.pt, 0)
+                    value = pad_val(met.pt, -1)
                     out[var] = value
                 if var == "lep_isolation":
                     value = pad_val(lep_reliso, -1)
                     out[var] = value
+                if var == "lepfj_m":
+                    value = pad_val(lep_fj_m, -1)
+                    out[var] = value
+                if var == "candidatefj_lep_pt":
+                    value = pad_val(candidatefj_lep.pt, -1)
+                    out[var] = value
+                if var == "leadingfj_pt":
+                    value = pad_val(leadingfj.pt, -1)
+                    out[var] = value
+                if var == "leadingfj_msoftdrop":
+                    value = pad_val(leadingfj.msoftdrop, -1)
+                    out[var] = value
+                if var == "secondfj_pt":
+                    value = pad_val(secondfj.pt, -1)
+                    out[var] = value
+                if var == "secondfj_msoftdrop":
+                    value = pad_val(secondfj.msoftdrop, -1)
+                    out[var] = value
+                if var == "bjets_ophem_lepfj":
+                    value = pad_val(bjets_ophem_lepfj, -1)
+                    out[var] = value
+                if var == "bjets_ophem_leadingfj":
+                    value = pad_val(bjets_ophem_leadingfj, -1)
+                    out[var] = value
                 else:
                     continue
 
+            # print arrays and selections to debug
+            # print(out)
+            # print(selections[ch].all(*selections[ch].names))
+
             # apply selections
-            output[ch] = {
-                key: value[self.selections[ch].all(*self.selections[ch].names)] for (key, value) in out.items()
-            }
+            if np.sum(self.selections[ch].all(*self.selections[ch].names)) > 0:
+                output[ch] = {
+                    key: value[self.selections[ch].all(*self.selections[ch].names)] for (key, value) in out.items()
+                }
+            else:
+                output[ch] = {}
 
             # convert arrays to pandas
             if not isinstance(output[ch], pd.DataFrame):
@@ -454,16 +534,17 @@ class HwwProcessor(processor.ProcessorABC):
         for ch in self._channels:
             if not os.path.exists('./outfiles/' + ch):  # creating a directory for each channel
                 os.makedirs('./outfiles/' + ch)
-            if not os.path.exists('./outfiles/' + ch + '/parquet'):  # creating a directory for each channel
-                os.makedirs('./outfiles/' + ch + '/parquet')
+            if not os.path.exists('./outfiles/' + ch + folder_name + '/parquet'):  # creating a directory for each channel
+                os.makedirs('./outfiles/' + ch + folder_name + '/parquet')
+
             self.save_dfs_parquet(fname, output[ch], ch)
 
         # return dictionary with cutflows
         return {
-            dataset: {'mc': isMC, 
-                      self._year: {'sumgenweight': sumgenweight, 
+            dataset: {'mc': isMC,
+                      self._year: {'sumgenweight': sumgenweight,
                                    'cutflows': self.cutflows}
-                     }
+                      }
         }
 
     def postprocess(self, accumulator):
