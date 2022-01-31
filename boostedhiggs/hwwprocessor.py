@@ -535,8 +535,8 @@ class HwwProcessor(processor.ProcessorABC):
         for ch in self._channels:
             if not os.path.exists('./outfiles/' + ch):  # creating a directory for each channel
                 os.makedirs('./outfiles/' + ch)
-            if not os.path.exists('./outfiles/' + ch + folder_name + '/parquet'):  # creating a directory for each channel
-                os.makedirs('./outfiles/' + ch + folder_name + '/parquet')
+            if not os.path.exists('./outfiles/' + ch + self.folder_name + '/parquet'):  # creating a directory for each channel
+                os.makedirs('./outfiles/' + ch + self.folder_name + '/parquet')
 
             self.save_dfs_parquet(fname, output[ch], ch)
 
