@@ -35,7 +35,7 @@ def main(args):
         if args.pfnano:
             files = json.load(f)[args.year]
             for subdir in files.keys():
-                for key,flist in files[subdir].items():
+                for key, flist in files[subdir].items():
                     if key in samples:
                         fileset[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist[args.starti:args.endi]]
         else:
@@ -46,7 +46,7 @@ def main(args):
     # define processor
     if args.processor == 'hww':
         from boostedhiggs.hwwprocessor import HwwProcessor
-        p = HwwProcessor(year=args.year, channels=channels, folder_name='./outfiles'+job_name)
+        p = HwwProcessor(year=args.year, channels=channels, output_location='./outfiles' + job_name)
     else:
         from boostedhiggs.trigger_efficiencies_processor import TriggerEfficienciesProcessor
         p = TriggerEfficienciesProcessor(year=int(args.year))
@@ -88,7 +88,7 @@ def main(args):
     out, metrics = run(
         fileset, "Events", processor_instance=p
     )
-        
+
     elapsed = time.time() - tic
     print(f"Metrics: {metrics}")
     print(f"Finished in {elapsed:.1f}s")
@@ -105,6 +105,7 @@ def main(args):
 
     # remove old parquet files
     os.system('rm -rf ./outfiles/{job_name}{ch}/')
+
 
 if __name__ == "__main__":
     # e.g.
