@@ -19,11 +19,27 @@ def main(args):
 
     channels = ["ele", "mu", "had"]
 
+    samples = args.sample.split(',')
+
     # read samples to submit
-    with open("data/fileset_2017_UL_NANO.json", 'r') as f:
-        files = json.load(f)[args.sample]
     fileset = {}
-    fileset[args.sample] = ["root://cmsxrootd.fnal.gov/" + f for f in files[args.starti:args.endi]]
+    if args.pfnano:
+        fname = f"data/pfnanoindex_{args.year}.json"
+    else:
+        fname = f"data/fileset_{args.year}_UL_NANO.json"
+    with open(fname, 'r') as f:
+        if args.pfnano:
+            files = json.load(f)[args.year]
+            for subdir in files.keys():
+                for key,flist in files[subdir].items():
+                    if key in samples:
+                        fileset[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist[args.starti:args.endi]]
+        else:
+            files = json.load(f)
+            for s in samples:
+                fileset[s] = files[s]
+
+    # print(fileset)
 
     # define processor
     if args.processor == 'hww':
@@ -41,7 +57,7 @@ def main(args):
         tic = time.time()
         cluster = LPCCondorCluster(
             ship_env=True,
-            transfer_input_files="src/hww",
+            transfer_input_files="boostedhiggs",
         )
         client = Client(cluster)
         nanoevents_plugin = NanoeventsSchemaPlugin()
@@ -56,35 +72,26 @@ def main(args):
         run = processor.Runner(
             executor=executor, savemetrics=True, schema=nanoevents.NanoAODSchema, chunksize=100000
         )
-        out, metrics = run(
-            fileset, "Events", processor_instance=p
-        )
-        elapsed = time.time() - tic
-        print(f"Metrics: {metrics}")
-        print(f"Finished in {elapsed:.1f}s")
     else:
         uproot.open.defaults["xrootd_handler"] = uproot.source.xrootd.MultithreadedXRootDSource
 
-        executor = (
-            processor.futures_executor
-            if args.executor == "futures"
-            else processor.iterative_executor
+        if args.executor == "futures":
+            executor = processor.FuturesExecutor(status=False)
+        else:
+            executor = processor.IterativeExecutor(status=True)
+        run = processor.Runner(
+            executor=executor, savemetrics=True, schema=nanoevents.NanoAODSchema, chunksize=args.chunksize
         )
 
-        exe_args = {
-            "savemetrics": True,
-            "schema": nanoevents.NanoAODSchema,
-        }
+    out, metrics = run(
+        fileset, "Events", processor_instance=p
+    )
+        
+    elapsed = time.time() - tic
+    print(f"Metrics: {metrics}")
+    print(f"Finished in {elapsed:.1f}s")
 
-        out, metrics = processor.run_uproot_job(
-            fileset,
-            treename="Events",
-            processor_instance=p,
-            executor=executor,
-            executor_args=exe_args,
-            chunksize=args.chunksize,
-        )
-
+    # dump to pickle
     filehandler = open(f"outfiles/{args.starti}-{args.endi}.pkl", "wb")
     pickle.dump(out, filehandler)
     filehandler.close()
@@ -96,7 +103,8 @@ def main(args):
         
 if __name__ == "__main__":
     # e.g.
-    # run locally as: python run.py --year 2017 --processor hww --starti 0 --endi 1 --sample 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8'
+    # run locally as: python run.py --year 2017 --processor hww --starti 0 --endi 1 --sample GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8
+    # or for pfnano: python run.py --year 2017 --processor hww --starti 0 --endi 1 --sample GluGluHToWWToLNuQQ
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',       dest='year',       default='2017',       help="year", type=str)
@@ -105,7 +113,8 @@ if __name__ == "__main__":
     parser.add_argument("--processor",  dest="processor",  default="hww",        help="HWW processor", type=str)
     parser.add_argument("--dask",       dest="dask",       action="store_true",  default=False, help="Run with dask")
     parser.add_argument('--sample',     dest='sample',     default=None,         help='sample name', required=True)
-    parser.add_argument("--chunksize", type=int, default=2750, help="chunk size in processor")
+    parser.add_argument("--pfnano",     dest='pfnano',     action="store_true",  default=False, help="Run with pfnano")
+    parser.add_argument("--chunksize",  dest='chuncksize', type=int, default=2750, help="chunk size in processor")
     parser.add_argument(
         "--executor",
         type=str,
