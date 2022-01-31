@@ -24,9 +24,8 @@ def main(args):
     channels = ["ele", "mu", "had"]
     job_name = '/' + str(args.starti) + '-' + str(args.endi)
 
-    samples = args.sample.split(',')
-
     # read samples to submit
+    samples = args.sample.split(',')
     fileset = {}
     if args.pfnano:
         fname = f"data/pfnanoindex_{args.year}.json"
@@ -44,12 +43,10 @@ def main(args):
             for s in samples:
                 fileset[s] = files[s]
 
-    # print(fileset)
-
     # define processor
     if args.processor == 'hww':
         from boostedhiggs.hwwprocessor import HwwProcessor
-        p = HwwProcessor(year=args.year, channels=channels, folder_name=job_name)
+        p = HwwProcessor(year=args.year, channels=channels, folder_name='./outfiles'+job_name)
     else:
         from boostedhiggs.trigger_efficiencies_processor import TriggerEfficienciesProcessor
         p = TriggerEfficienciesProcessor(year=int(args.year))
@@ -103,9 +100,11 @@ def main(args):
 
     # merge parquet
     for ch in channels:
-        data = pd.read_parquet('./outfiles/' + ch + job_name + '/parquet')
+        data = pd.read_parquet('./outfiles/' + job_name + ch + '/parquet')
         data.to_parquet('./outfiles/' + job_name + '_' + ch + '.parquet')
 
+    # remove old parquet files
+    os.system('rm -rf ./outfiles/{job_name}{ch}/')
 
 if __name__ == "__main__":
     # e.g.
