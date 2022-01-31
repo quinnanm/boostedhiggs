@@ -52,6 +52,7 @@ class HwwProcessor(processor.ProcessorABC):
         self._yearmod = yearmod
         self._channels = channels
         self._output_location = output_location
+        self.folder_name = folder_name
 
         # define variables to save for each channel
         self._skimvars = {
@@ -227,10 +228,10 @@ class HwwProcessor(processor.ProcessorABC):
     def accumulator(self):
         return self._accumulator
 
-    def save_dfs_parquet(self, fname, dfs_dict, ch):
+    def save_dfs_parquet(self, fname, dfs_dict, ch, folder_name):
         if self._output_location is not None:
             table = pa.Table.from_pandas(dfs_dict)
-            pq.write_table(table, './outfiles/' + ch + '/parquet/' + fname + '.parquet')
+            pq.write_table(table, './outfiles/' + ch + folder_name + '/parquet/' + fname + '.parquet')
 
     def ak_to_pandas(self, output_collection: ak.Array) -> pd.DataFrame:
         output = pd.DataFrame()
@@ -534,10 +535,10 @@ class HwwProcessor(processor.ProcessorABC):
         for ch in self._channels:
             if not os.path.exists('./outfiles/' + ch):  # creating a directory for each channel
                 os.makedirs('./outfiles/' + ch)
-            if not os.path.exists('./outfiles/' + ch + folder_name + '/parquet'):  # creating a directory for each channel
-                os.makedirs('./outfiles/' + ch + folder_name + '/parquet')
+            if not os.path.exists('./outfiles/' + ch + self.folder_name + '/parquet'):  # creating a directory for each channel
+                os.makedirs('./outfiles/' + ch + self.folder_name + '/parquet')
 
-            self.save_dfs_parquet(fname, output[ch], ch)
+            self.save_dfs_parquet(fname, output[ch], ch, self.folder_name)
 
         # return dictionary with cutflows
         return {
