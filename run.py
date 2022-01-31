@@ -77,26 +77,25 @@ def main(args):
     else:
         uproot.open.defaults["xrootd_handler"] = uproot.source.xrootd.MultithreadedXRootDSource
 
-        if args.executor == "futures":
-            executor = processor.FuturesExecutor(status=False)
-        else:
-            executor = processor.IterativeExecutor(status=True)
-        run = processor.Runner(
-            executor=executor, savemetrics=True, schema=nanoevents.NanoAODSchema,
+        executor = (
+            processor.futures_executor
+            if args.executor == "futures"
+            else processor.iterative_executor
         )
+
         exe_args = {
             "savemetrics": True,
             "schema": nanoevents.NanoAODSchema,
         }
 
-    out, metrics = processor.run_uproot_job(
-        fileset,
-        treename="Events",
-        processor_instance=p,
-        executor=executor,
-        executor_args=exe_args,
-        chunksize=args.chunksize,
-    )
+        out, metrics = processor.run_uproot_job(
+            fileset,
+            treename="Events",
+            processor_instance=p,
+            executor=executor,
+            executor_args=exe_args,
+            chunksize=args.chunksize,
+        )
 
     elapsed = time.time() - tic
     print(f"Metrics: {metrics}")
