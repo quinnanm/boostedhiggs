@@ -13,6 +13,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import pickle as pkl
 import pandas as pd
+import os
 
 
 def main(args):
