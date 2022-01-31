@@ -41,7 +41,8 @@ def main(args):
         else:
             files = json.load(f)
             for s in samples:
-                fileset[s] = files[s]
+                # fileset[s] = files[s]
+                fileset[s] = ["root://cmsxrootd.fnal.gov/" + f for f in files[s][args.starti:args.endi]]
 
     # define processor
     if args.processor == 'hww':
