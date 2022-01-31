@@ -231,7 +231,7 @@ class HwwProcessor(processor.ProcessorABC):
     def save_dfs_parquet(self, fname, dfs_dict, ch):
         if self._output_location is not None:
             table = pa.Table.from_pandas(dfs_dict)
-            pq.write_table(table, './outfiles/' + ch + '/parquet/' + fname + '.parquet')
+            pq.write_table(table, './outfiles/' + ch + folder_name + '/parquet/' + fname + '.parquet')
 
     def ak_to_pandas(self, output_collection: ak.Array) -> pd.DataFrame:
         output = pd.DataFrame()
