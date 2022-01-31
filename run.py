@@ -5,7 +5,6 @@ import uproot
 from coffea.nanoevents import NanoEventsFactory, NanoAODSchema, BaseSchema
 from coffea import nanoevents
 from coffea import processor
-import pickle
 
 import argparse
 import warnings
@@ -92,7 +91,7 @@ def main(args):
         )
 
     filehandler = open(f"outfiles/{args.starti}-{args.endi}.pkl", "wb")
-    pickle.dump(out, filehandler)
+    pkl.dump(out, filehandler)
     filehandler.close()
 
     # merge parquet
