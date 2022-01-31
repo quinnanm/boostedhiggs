@@ -82,11 +82,16 @@ def main(args):
         else:
             executor = processor.IterativeExecutor(status=True)
         run = processor.Runner(
-            executor=executor, savemetrics=True, schema=nanoevents.NanoAODSchema, chunksize=args.chunksize
+            executor=executor, savemetrics=True, schema=nanoevents.NanoAODSchema,
         )
 
-    out, metrics = run(
-        fileset, "Events", processor_instance=p
+    out, metrics = processor.run_uproot_job(
+        fileset,
+        treename="Events",
+        processor_instance=p,
+        executor=executor,
+        executor_args=exe_args,
+        chunksize=args.chunksize,
     )
 
     elapsed = time.time() - tic
