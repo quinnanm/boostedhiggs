@@ -79,7 +79,7 @@ def main(args):
         uproot.open.defaults["xrootd_handler"] = uproot.source.xrootd.MultithreadedXRootDSource
 
         if args.executor == "futures":
-            executor = processor.FuturesExecutor(status=False)
+            executor = processor.FuturesExecutor(status=True)
         else:
             executor = processor.IterativeExecutor(status=True)
         run = processor.Runner(
