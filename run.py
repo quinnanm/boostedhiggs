@@ -89,7 +89,7 @@ def main(args):
     pickle.dump(out, filehandler)
     filehandler.close()
 
-    # merge parquet
+    # merge parquet (each job different name) TODO
     for ch in channels:
         data = pd.read_parquet('./outfiles/' + ch + '/parquet')
         data.to_parquet('./outfiles/' + ch + '.parquet')

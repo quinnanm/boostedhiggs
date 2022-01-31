@@ -73,7 +73,13 @@ class HwwProcessor(processor.ProcessorABC):
                 "mu_mvaId"
             ],
             'had': [
-                "fatjet_pt",
+                "leadingfj_pt",
+                "leadingfj_msoftdrop",
+                "secondfj_pt",
+                "secondfj_msoftdrop",
+                "met",
+                "ht",
+                "bjets_ophem_leadingfj"
             ],
         }
 
