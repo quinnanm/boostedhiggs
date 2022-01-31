@@ -52,6 +52,7 @@ class HwwProcessor(processor.ProcessorABC):
         self._yearmod = yearmod
         self._channels = channels
         self._output_location = output_location
+        self.folder_name = folder_name
 
         # define variables to save for each channel
         self._skimvars = {
