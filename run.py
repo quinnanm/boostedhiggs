@@ -17,7 +17,12 @@ import pandas as pd
 
 def main(args):
 
+    # make directory for output
+    if not os.path.exists('./outfiles'):
+        os.makedirs('./outfiles')
+
     channels = ["ele", "mu", "had"]
+    job_name = '/' + str(args.starti) + '-' + str(args.endi)
 
     # read samples to submit
     with open("data/fileset_2017_UL_NANO.json", 'r') as f:
@@ -28,7 +33,7 @@ def main(args):
     # define processor
     if args.processor == 'hww':
         from boostedhiggs.hwwprocessor import HwwProcessor
-        p = HwwProcessor(year=args.year, channels=channels)
+        p = HwwProcessor(year=args.year, channels=channels, folder_name=job_name)
     else:
         from boostedhiggs.trigger_efficiencies_processor import TriggerEfficienciesProcessor
         p = TriggerEfficienciesProcessor(year=int(args.year))
@@ -89,10 +94,10 @@ def main(args):
     pickle.dump(out, filehandler)
     filehandler.close()
 
-    # merge parquet (each job different name) TODO
+    # merge parquet
     for ch in channels:
-        data = pd.read_parquet('./outfiles/' + ch + '/parquet')
-        data.to_parquet('./outfiles/' + ch + '.parquet')
+        data = pd.read_parquet('./outfiles/' + ch + job_name + '/parquet')
+        data.to_parquet('./outfiles/' + job_name + '_' + ch + '.parquet')
 
 
 if __name__ == "__main__":
