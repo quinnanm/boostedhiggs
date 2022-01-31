@@ -47,12 +47,11 @@ def pad_val(
 
 
 class HwwProcessor(processor.ProcessorABC):
-    def __init__(self, year="2017", yearmod="", channels=["ele", "mu", "had"], output_location="./", folder_name=''):
+    def __init__(self, year="2017", yearmod="", channels=["ele", "mu", "had"], output_location="./outfiles/"):
         self._year = year
         self._yearmod = yearmod
         self._channels = channels
         self._output_location = output_location
-        self.folder_name = folder_name
 
         # define variables to save for each channel
         self._skimvars = {
@@ -228,10 +227,10 @@ class HwwProcessor(processor.ProcessorABC):
     def accumulator(self):
         return self._accumulator
 
-    def save_dfs_parquet(self, fname, dfs_dict, ch, folder_name):
+    def save_dfs_parquet(self, fname, dfs_dict, ch):
         if self._output_location is not None:
             table = pa.Table.from_pandas(dfs_dict)
-            pq.write_table(table, './outfiles/' + ch + folder_name + '/parquet/' + fname + '.parquet')
+            pq.write_table(table, self._output_location + ch + '/parquet/' + fname + '.parquet')
 
     def ak_to_pandas(self, output_collection: ak.Array) -> pd.DataFrame:
         output = pd.DataFrame()
@@ -533,12 +532,12 @@ class HwwProcessor(processor.ProcessorABC):
         fname = events.behavior["__events_factory__"]._partition_key.replace("/", "_")
         fname = 'condor_' + fname
         for ch in self._channels:
-            if not os.path.exists('./outfiles/' + ch):  # creating a directory for each channel
-                os.makedirs('./outfiles/' + ch)
-            if not os.path.exists('./outfiles/' + ch + self.folder_name + '/parquet'):  # creating a directory for each channel
-                os.makedirs('./outfiles/' + ch + self.folder_name + '/parquet')
+            if not os.path.exists(self._output_location + ch):  # creating a directory for each channel
+                os.makedirs(self._output_location + ch)
+            if not os.path.exists(self._output_location + ch + '/parquet'):  # creating a directory for each channel
+                os.makedirs(self._output_location + ch + '/parquet')
 
-            self.save_dfs_parquet(fname, output[ch], ch, self.folder_name)
+            self.save_dfs_parquet(fname, output[ch], ch)
 
         # return dictionary with cutflows
         return {

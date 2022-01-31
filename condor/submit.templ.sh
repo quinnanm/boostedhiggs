@@ -9,10 +9,5 @@ mkdir outfiles
 # pip install --user onnxruntime
 python SCRIPTNAME --year YEAR --starti STARTNUM --endi ENDNUM --processor PROCESSOR --sample SAMPLE
 
-# the star denotes the 3 folders (1 for each channel)... this will remove the single parquet files
-export STARTNUM = STARTNUM
-export ENDNUM = ENDNUM
-rm -r outfiles/*/$STARTNUM-$ENDNUM/
-
 #move output to eos
 xrdcp -r -f outfiles/ EOSOUTPKL
