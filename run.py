@@ -53,12 +53,11 @@ def main(args):
         from boostedhiggs.trigger_efficiencies_processor import TriggerEfficienciesProcessor
         p = TriggerEfficienciesProcessor(year=int(args.year))
 
+    tic = time.time()
     if args.executor == "dask":
-        import time
         from distributed import Client
         from lpcjobqueue import LPCCondorCluster
 
-        tic = time.time()
         cluster = LPCCondorCluster(
             ship_env=True,
             transfer_input_files="boostedhiggs",
