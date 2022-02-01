@@ -96,7 +96,7 @@ def main(args):
     print(f"Finished in {elapsed:.1f}s")
 
     # dump to pickle
-    filehandler = open(f"outfiles/{args.starti}-{args.endi}.pkl", "wb")
+    filehandler = open('./outfiles/' + job_name + '.pkl', "wb")
     pkl.dump(out, filehandler)
     filehandler.close()
 
@@ -106,7 +106,7 @@ def main(args):
         data.to_parquet('./outfiles/' + job_name + '_' + ch + '.parquet')
 
         # remove old parquet files
-        os.system('rm -rf ./outfiles' + job_name + ch)
+        os.system('rm -rf ./outfiles/' + job_name + ch + '/parquet')
 
 
 if __name__ == "__main__":
