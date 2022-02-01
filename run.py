@@ -18,13 +18,13 @@ import os
 
 def main(args):
 
-    # # make directory for output
-    # if not os.path.exists('./outfiles'):
-    #     os.makedirs('./outfiles')
-    #
-    # channels = ["ele", "mu", "had"]
-    # job_name = '/' + str(args.starti) + '-' + str(args.endi)
-    #
+    # make directory for output
+    if not os.path.exists('./outfiles'):
+        os.makedirs('./outfiles')
+
+    channels = ["ele", "mu", "had"]
+    job_name = '/' + str(args.starti) + '-' + str(args.endi)
+
     # # read samples to submit
     # samples = args.sample.split(',')
     # fileset = {}
