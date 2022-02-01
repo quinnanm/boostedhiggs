@@ -24,9 +24,24 @@ def main(args):
     print("CONDOR work dir: " + outdir)
     os.system(f"mkdir -p /eos/uscms/{outdir}")
 
-    with open("data/fileset_2017_UL_NANO.json", 'r') as f:
-        fileset = json.load(f)
-    samples = ["GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8"]
+    # read samples
+    samples = args.sample.split(',')
+    fileset = {}
+    if args.pfnano:
+        fname = f"data/pfnanoindex_{args.year}.json"
+    else:
+        fname = f"data/fileset_{args.year}_UL_NANO.json"
+    with open(fname, 'r') as f:
+        if args.pfnano:
+            files = json.load(f)[args.year]
+            for subdir in files.keys():
+                for key, flist in files[subdir].items():
+                    if key in samples:
+                        fileset[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist[args.starti:args.endi]]
+        else:
+            files = json.load(f)
+            for s in samples:
+                fileset[s] = files[s]
 
     # directories for every sample
     for sample in samples:
@@ -85,7 +100,8 @@ def main(args):
                 os.system("rm %s.log" % localcondor)
 
             print("To submit ", localcondor)
-            # os.system('condor_submit %s' % localcondor)
+            if args.submit:
+                os.system('condor_submit %s' % localcondor)
 
             nsubmit = nsubmit + 1
 
@@ -94,14 +110,16 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--script", default="run.py", help="script to run", type=str)
-    parser.add_argument("--test", default=False, help="test run or not - test run means only 2 jobs per sample will be created", type=bool)
-    parser.add_argument("--year", dest="year", default="2017", help="year", type=str)
-    parser.add_argument("--tag", dest="tag", default="Test", help="process tag", type=str)
-    parser.add_argument("--outdir", dest="outdir", default="outfiles", help="directory for output files", type=str)
+    parser.add_argument("--script",    dest="script", default="run.py", help="script to run", type=str)
+    parser.add_argument("--test",      dest="test", default=False, help="test run or not - test run means only 2 jobs per sample will be created", type=bool)
+    parser.add_argument("--year",      dest="year", default="2017", help="year", type=str)
+    parser.add_argument("--tag",       dest="tag", default="Test", help="process tag", type=str)
+    parser.add_argument("--outdir",    dest="outdir", default="outfiles", help="directory for output files", type=str)
     parser.add_argument("--processor", dest="processor", default="hww", help="which processor", type=str, choices=["hww"])
-    parser.add_argument("--samples", dest="samples", default=[], help="which samples to run, default will be all samples", nargs="*")
+    parser.add_argument('--sample',    dest='sample',default=None, help='sample name', required=True)
+    parser.add_argument("--pfnano",    dest='pfnano',action="store_true",  default=False, help="Run with pfnano")
     parser.add_argument("--files-per-job", default=20, help="# files per condor job", type=int)
+    parser.add_argument("--submit",    dest="submit", default=False, help="submit jobs when created")
     args = parser.parse_args()
 
     main(args)

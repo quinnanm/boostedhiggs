@@ -187,7 +187,7 @@ where:
 
 So for example:
 ```
-python condor/submit.py --tag Jan25 --script run.py --files-per-job=1
+python condor/submit.py --tag Jan25 --script run.py --files-per-job=1 --sample GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8
 ```
 
 The `run.py` script has different options to e.g. select a different processor, run over files that go from one starting index (starti) to the end (endi).
