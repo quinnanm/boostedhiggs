@@ -106,7 +106,7 @@ def main(args):
         data.to_parquet('./outfiles/' + job_name + '_' + ch + '.parquet')
 
     # remove old parquet files
-    os.system('rm -rf ./outfiles/{job_name}{ch}/')
+    os.system('rm -rf ./outfiles' + 'job_name' + ch)
 
 
 if __name__ == "__main__":
