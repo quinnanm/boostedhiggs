@@ -102,8 +102,8 @@ def main(args):
 
     # # merge parquet
     for ch in channels:
-            data = pd.read_parquet('./outfiles/' + job_name + ch + '/parquet')
-            data.to_parquet('./outfiles/' + job_name + '_' + ch + '.parquet')
+        data = pd.read_parquet('./outfiles/' + job_name + ch + '/parquet')
+        data.to_parquet('./outfiles/' + job_name + '_' + ch + '.parquet')
 
         # remove old parquet files
         os.system('rm -rf ./outfiles' + job_name + ch)
