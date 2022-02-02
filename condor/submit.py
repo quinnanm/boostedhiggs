@@ -90,7 +90,10 @@ def main(args):
                 line = line.replace("ENDNUM", str((j + 1) * args.files_per_job))
                 line = line.replace("EOSOUTPKL", eosoutput_pkl)
                 line = line.replace("SAMPLE", sample)
-
+                if args.pfnano:
+                    line = line.replace("PFNANO", "--pfnano")
+                else:
+                    line = line.replace("PFNANO", "")
                 sh_file.write(line)
             sh_file.close()
             sh_templ_file.close()
