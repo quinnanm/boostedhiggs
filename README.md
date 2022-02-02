@@ -108,8 +108,8 @@ pip install . --user --editable
 The fileset json files that contain a dictionary of the files per sample are in the `fileset` directory.
 
 <details><summary>Re-making the input dataset files with DAS</summary>
-<p> 
-  
+<p>
+
 ```bash
 # connect to LPC with a port forward to access the jupyter notebook server
 ssh USERNAME@cmslpc-sl7.fnal.gov -L8xxx:localhost:8xxx
@@ -127,7 +127,7 @@ conda activate coffea-env
 
 # then activate your proxy
 voms-proxy-init --voms cms --valid 100:00
-    
+
 # activate cmsset
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 
@@ -135,7 +135,7 @@ source /cvmfs/cms.cern.ch/cmsset_default.sh
 cd fileset/
 jupyter notebook --no-browser --port 8xxx
 ```
-There should be a link looking like `http://localhost:8xxx/?token=...`, displayed in the output at this point, paste that into your browser. 
+There should be a link looking like `http://localhost:8xxx/?token=...`, displayed in the output at this point, paste that into your browser.
 You should see a jupyter notebook with a directory listing.
 Open `filesetDAS.ipynb`.
 
@@ -150,7 +150,7 @@ The condor setup uses the coffea singularity so make sure you have setup an scri
 
 ### First time setup
 
-- Change the singularity shell executable to have your eos directory. 
+- Change the singularity shell executable to have your eos directory.
 In order to be able to write to eos with condor jobs add the following line (replacing $USER with your username):
 ```-B /eos/uscms/store/user/$USER/boostedhiggs:/myeosdir```
 in the shell executable.
@@ -173,7 +173,7 @@ homedir = '/store/user/$USER/boostedhiggs/'
 voms-proxy-init --voms cms --valid 168:00
 ```
 
-We use the `submit.py` script to submit jobs. 
+We use the `submit.py` script to submit jobs.
 
 The arguments are:
 ```
@@ -232,12 +232,11 @@ condor_q ID --long -n $NAME
 
 #### Submitting jobs locally
 ```
-python run.py --year 2017 --starti 0 --endi 1 --processor hww --sample GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8
+python run.py --year 2017 --starti 0 --endi 1 --processor hww --sample GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8 --chunksize 10000
 ```
 
 ## Post-processing
 
-For post-processing the output of the jobs you can use [process_histograms.py](https://github.com/cmantill/boostedhiggs/blob/main/python/process_histograms.py) script. 
+For post-processing the output of the jobs you can use [process_histograms.py](https://github.com/cmantill/boostedhiggs/blob/main/python/process_histograms.py) script.
 
 - Make sure you edit the paths pointing to the output directory.
-
