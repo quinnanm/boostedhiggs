@@ -14,6 +14,6 @@ binder/plots/*
 
 run_local.py
 data.root
-
+data2.root
 
 outfiles/
