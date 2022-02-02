@@ -62,6 +62,7 @@ class HwwProcessor(processor.ProcessorABC):
                 "ht",
                 "mt_lep_met",
                 "dr_jet_candlep",
+                "weight",
             ],
             'mu': [
                 "lepton_pt",
@@ -70,7 +71,8 @@ class HwwProcessor(processor.ProcessorABC):
                 "ht",
                 "mt_lep_met",
                 "dr_jet_candlep",
-                "mu_mvaId"
+                "mu_mvaId",
+                "weight",
             ],
             'had': [
                 "leadingfj_pt",
@@ -79,7 +81,8 @@ class HwwProcessor(processor.ProcessorABC):
                 "secondfj_msoftdrop",
                 "met",
                 "ht",
-                "bjets_ophem_leadingfj"
+                "bjets_ophem_leadingfj",
+                "weight",
             ],
         }
 
@@ -509,6 +512,9 @@ class HwwProcessor(processor.ProcessorABC):
                     out[var] = value
                 if var == "bjets_ophem_leadingfj":
                     value = pad_val(bjets_ophem_leadingfj, -1)
+                    out[var] = value
+                if var == "weight":
+                    value = pad_val(events.genWeight, -1)
                     out[var] = value
                 else:
                     continue

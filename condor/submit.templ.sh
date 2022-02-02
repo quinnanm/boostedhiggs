@@ -9,5 +9,10 @@ mkdir outfiles
 # pip install --user onnxruntime
 python SCRIPTNAME --year YEAR --starti STARTNUM --endi ENDNUM --processor PROCESSOR --sample SAMPLE
 
+# remove incomplete jobs
+rm -r outfiles/*had
+rm -r outfiles/*mu
+rm -r outfiles/*ele
+
 #move output to eos
 xrdcp -r -f outfiles/ EOSOUTPKL
