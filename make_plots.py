@@ -64,7 +64,7 @@ def main(args):
         event_weight = {}
         for ch in ['ele', 'mu']:
             leppt[ch] = data_all[ch]['lepton_pt'].to_numpy()
-            event_weight[ch] = data_all[ch]['weight'].to_numpy()
+            # event_weight[ch] = data_all[ch]['weight'].to_numpy()
 
         # now we can make histograms for higgspt, jetpt, leptonpt
         import hist as hist2
@@ -80,12 +80,14 @@ def main(args):
         hists.fill(
             channel="ele",
             leppt=leppt['ele'],
-            weight=event_weight['ele'] * xsec_weight[sample],
+            # weight=event_weight['ele'] * xsec_weight[sample],
+            weight=xsec_weight[sample],
         )
         hists.fill(
             channel="mu",
             leppt=leppt['mu'],
-            weight=event_weight['mu'] * xsec_weight[sample],
+            # weight=event_weight['mu'] * xsec_weight[sample],
+            weight=xsec_weight[sample],
         )
 
         # now we plot trigger efficiency as function of jetpt
