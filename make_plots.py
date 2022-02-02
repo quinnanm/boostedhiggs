@@ -115,7 +115,11 @@ def main(args):
                      )
         # ax.set_ylim(0,1)
         ax.legend()
-        plt.savefig(f'{sample}.pdf')
+
+        if not os.path.exists('hists'):
+            os.makedirs('hists')
+
+        plt.savefig(f'hists/{sample}.pdf')
 
 
 if __name__ == "__main__":
