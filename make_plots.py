@@ -37,7 +37,7 @@ def main(args):
 
         for ch in channels:
             for i in range(num_jobs):
-                tmp = pq.read_table(f'./outfiles/{i}-{i+1}_{ch}.parquet')
+                tmp = pq.read_table(f'./{sample}/outfiles/{i}-{i+1}_{ch}.parquet')
                 tmp = tmp.to_pandas()
                 if i == 0:
                     data = tmp
@@ -46,7 +46,7 @@ def main(args):
 
             data_all[ch] = data
             # load and sum the sumgenweight of each
-            with open(f'./outfiles/{i}-{i+1}.pkl', 'rb') as f:
+            with open(f'./{sample}/outfiles/{i}-{i+1}.pkl', 'rb') as f:
                 metadata = pkl.load(f)
             sum_sumgenweight[sample] = sum_sumgenweight[sample] + metadata[sample][year]['sumgenweight']
 
