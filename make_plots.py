@@ -46,6 +46,7 @@ def main(args):
                 try:
                     tmp = pq.read_table(f'./results/{sample}/outfiles/{j}-{j+1}_{ch}.parquet')
                     j = j + 1
+                    print('j', j)
                 except:
                     i = i - 1
                     j = j + 1
