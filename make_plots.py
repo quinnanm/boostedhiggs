@@ -26,7 +26,7 @@ def main(args):
     # load result of 2 jobs
     samples = args.sample.split(',')
     year = args.year
-    num_jobs = args.endi - args.starti
+    # num_jobs = args.endi - args.starti
 
     channels = ['ele', 'mu', 'had']
 
@@ -36,8 +36,14 @@ def main(args):
         data_all = {}
 
         for ch in channels:
+
+            num_jobs = os.system("ls ./results/{sample}/outfiles/*.pkl | wc -l")  # number of pkl files in the library
+
             for i in range(num_jobs):
-                tmp = pq.read_table(f'./{sample}/outfiles/{i}-{i+1}_{ch}.parquet')
+                try:
+                    tmp = pq.read_table(f'./results/{sample}/outfiles/{i}-{i+1}_{ch}.parquet')
+                except:
+                    continue
                 tmp = tmp.to_pandas()
                 if i == 0:
                     data = tmp
@@ -46,7 +52,7 @@ def main(args):
 
             data_all[ch] = data
             # load and sum the sumgenweight of each
-            with open(f'./{sample}/outfiles/{i}-{i+1}.pkl', 'rb') as f:
+            with open(f'./results/{sample}/outfiles/{i}-{i+1}.pkl', 'rb') as f:
                 metadata = pkl.load(f)
             sum_sumgenweight[sample] = sum_sumgenweight[sample] + metadata[sample][year]['sumgenweight']
 
