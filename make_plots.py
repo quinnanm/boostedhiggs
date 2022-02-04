@@ -35,7 +35,8 @@ def main(args):
         sum_sumgenweight[sample] = 0
         data_all = {}
 
-        num_jobs = os.system(f"ls ./results/{sample}/outfiles/*.pkl | wc -l")  # number of pkl files in the library
+        num_jobs = int(os.popen(f"ls ./results/{sample}/outfiles/*.pkl | wc -l").read())  # number of pkl files in the library
+
         print('sample', sample)
         print('num_jobs', num_jobs)
 
