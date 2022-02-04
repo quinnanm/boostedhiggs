@@ -48,9 +48,8 @@ def main(args):
                     tmp = pq.read_table(f'./results/{sample}/outfiles/{i}-{i+1}_{ch}.parquet').to_pandas()
                 except:
                     continue
-                print('used file', j)
-                i = i + 1
                 print('i', i)
+                i = i + 1
 
                 if i == 0:
                     data = tmp
@@ -58,7 +57,7 @@ def main(args):
                     data = pd.concat([data, tmp], ignore_index=True)
 
                 # load and sum the sumgenweight of each
-                with open(f'./results/{sample}/outfiles/{j}-{j+1}.pkl', 'rb') as f:
+                with open(f'./results/{sample}/outfiles/{i}-{i+1}.pkl', 'rb') as f:
                     metadata = pkl.load(f)
                 sum_sumgenweight[sample] = sum_sumgenweight[sample] + metadata[sample][year]['sumgenweight']
 
