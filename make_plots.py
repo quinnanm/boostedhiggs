@@ -51,8 +51,10 @@ def main(args):
                 except:
                     continue
                 print('used file', j)
-                print('i', i)
-                if i == -1:
+                i = i + 1
+                # print('i', i)
+
+                if i == 0:
                     data = tmp
                 else:
                     data = pd.concat([data, tmp], ignore_index=True)
