@@ -52,7 +52,7 @@ def main(args):
                     continue
                 print('used file', j)
                 i = i + 1
-                # print('i', i)
+                print('i', i)
 
                 if i == 0:
                     data = tmp
