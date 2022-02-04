@@ -51,7 +51,6 @@ def main(args):
                 except:
                     continue
                 i = i + 1
-                print('i', i)
                 # print('used file', j)
 
                 tmp = tmp.to_pandas()
