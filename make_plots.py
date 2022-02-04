@@ -36,8 +36,8 @@ def main(args):
         data_all = {}
 
         num_jobs = os.system(f"ls ./results/{sample}/outfiles/*.pkl | wc -l")  # number of pkl files in the library
-        print(sample)
-        print(num_jobs)
+        print('sample', sample)
+        print('num_jobs', num_jobs)
 
         for ch in channels:
             for i in range(num_jobs):
