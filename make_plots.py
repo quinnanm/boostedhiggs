@@ -35,10 +35,11 @@ def main(args):
         sum_sumgenweight[sample] = 0
         data_all = {}
 
+        num_jobs = os.system("ls ./results/{sample}/outfiles/*.pkl | wc -l")  # number of pkl files in the library
+        print(sample)
+        print(num_jobs)
+
         for ch in channels:
-
-            num_jobs = os.system("ls ./results/{sample}/outfiles/*.pkl | wc -l")  # number of pkl files in the library
-
             for i in range(num_jobs):
                 # try:
                 tmp = pq.read_table(f'./results/{sample}/outfiles/{i}-{i+1}_{ch}.parquet')
