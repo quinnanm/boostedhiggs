@@ -53,7 +53,7 @@ def main(args):
                 print('used file', j)
 
                 tmp = tmp.to_pandas()
-                if i == 0:
+                if i == -1:
                     data = tmp
                 else:
                     data = pd.concat([data, tmp], ignore_index=True)
