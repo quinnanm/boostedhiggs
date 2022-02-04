@@ -40,10 +40,10 @@ def main(args):
             num_jobs = os.system("ls ./results/{sample}/outfiles/*.pkl | wc -l")  # number of pkl files in the library
 
             for i in range(num_jobs):
-                try:
-                    tmp = pq.read_table(f'./results/{sample}/outfiles/{i}-{i+1}_{ch}.parquet')
-                except:
-                    continue
+                # try:
+                tmp = pq.read_table(f'./results/{sample}/outfiles/{i}-{i+1}_{ch}.parquet')
+                # except:
+                #     continue
                 tmp = tmp.to_pandas()
                 if i == 0:
                     data = tmp
