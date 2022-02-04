@@ -43,8 +43,8 @@ def main(args):
         for ch in channels:
             j = 0
             for i in range(num_jobs):
-                print('j', j)
                 try:
+                    print('j', j)
                     tmp = pq.read_table(f'./results/{sample}/outfiles/{j}-{j+1}_{ch}.parquet')
                     j = j + 1
                 except:
