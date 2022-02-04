@@ -49,7 +49,7 @@ def main(args):
                 except:
                     i = i - 1
                     continue
-
+                print('i', i)
                 print('used file', j)
 
                 tmp = tmp.to_pandas()
@@ -59,7 +59,7 @@ def main(args):
                     data = pd.concat([data, tmp], ignore_index=True)
 
                 # load and sum the sumgenweight of each
-                with open(f'./results/{sample}/outfiles/{i}-{i+1}.pkl', 'rb') as f:
+                with open(f'./results/{sample}/outfiles/{j}-{j+1}.pkl', 'rb') as f:
                     metadata = pkl.load(f)
                 sum_sumgenweight[sample] = sum_sumgenweight[sample] + metadata[sample][year]['sumgenweight']
 
