@@ -47,12 +47,11 @@ def main(args):
                 j = j + 1
                 i = i - 1
                 try:
-                    tmp = pq.read_table(f'./results/{sample}/outfiles/{j}-{j+1}_{ch}.parquet')
+                    tmp = pq.read_table(f'./results/{sample}/outfiles/{j}-{j+1}_{ch}.parquet').to_pandas()
                 except:
                     continue
                 print('used file', j)
-
-                tmp = tmp.to_pandas()
+                print('i', i)
                 if i == -1:
                     data = tmp
                 else:
