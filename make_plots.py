@@ -43,10 +43,10 @@ def main(args):
         for ch in channels:
             j = 0
             for i in range(num_jobs):
+                print('j', j)
                 try:
                     tmp = pq.read_table(f'./results/{sample}/outfiles/{j}-{j+1}_{ch}.parquet')
                     j = j + 1
-                    print('j', j)
                 except:
                     i = i - 1
                     j = j + 1
@@ -57,11 +57,12 @@ def main(args):
                 else:
                     data = pd.concat([data, tmp], ignore_index=True)
 
+                # load and sum the sumgenweight of each
+                with open(f'./results/{sample}/outfiles/{i}-{i+1}.pkl', 'rb') as f:
+                    metadata = pkl.load(f)
+                sum_sumgenweight[sample] = sum_sumgenweight[sample] + metadata[sample][year]['sumgenweight']
+
             data_all[ch] = data
-            # load and sum the sumgenweight of each
-            with open(f'./results/{sample}/outfiles/{i}-{i+1}.pkl', 'rb') as f:
-                metadata = pkl.load(f)
-            sum_sumgenweight[sample] = sum_sumgenweight[sample] + metadata[sample][year]['sumgenweight']
 
         xsec = {}
         xsec[sample] = 2
