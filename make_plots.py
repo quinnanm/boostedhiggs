@@ -29,6 +29,7 @@ def main(args):
     # num_jobs = args.endi - args.starti
 
     channels = ['ele', 'mu', 'had']
+    channels = ['ele']
 
     for sample in samples:
         sum_sumgenweight = {}
@@ -45,13 +46,11 @@ def main(args):
             for i in range(num_jobs):
                 j = j + 1
                 i = i - 1
-                print('i', i)
                 try:
                     tmp = pq.read_table(f'./results/{sample}/outfiles/{j}-{j+1}_{ch}.parquet')
                 except:
                     continue
-                i = i + 1
-                # print('used file', j)
+                print('used file', j)
 
                 tmp = tmp.to_pandas()
                 if i == 0:
