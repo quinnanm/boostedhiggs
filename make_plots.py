@@ -49,7 +49,6 @@ def main(args):
                 except:
                     continue
                 print('i', i)
-                i = i + 1
 
                 if i == 0:
                     data = tmp
@@ -60,6 +59,8 @@ def main(args):
                 with open(f'./results/{sample}/outfiles/{i}-{i+1}.pkl', 'rb') as f:
                     metadata = pkl.load(f)
                 sum_sumgenweight[sample] = sum_sumgenweight[sample] + metadata[sample][year]['sumgenweight']
+
+                i = i + 1
 
             data_all[ch] = data
 
