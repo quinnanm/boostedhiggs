@@ -42,12 +42,10 @@ def main(args):
         print('num_jobs', num_jobs)
 
         for ch in channels:
-            j = -1
-            for i in range(num_jobs):
-                j = j + 1
-                i = i - 1
+            i = 0
+            while i < num_jobs:
                 try:
-                    tmp = pq.read_table(f'./results/{sample}/outfiles/{j}-{j+1}_{ch}.parquet').to_pandas()
+                    tmp = pq.read_table(f'./results/{sample}/outfiles/{i}-{i+1}_{ch}.parquet').to_pandas()
                 except:
                     continue
                 print('used file', j)
