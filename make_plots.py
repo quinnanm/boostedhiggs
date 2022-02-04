@@ -44,11 +44,12 @@ def main(args):
             j = -1
             for i in range(num_jobs):
                 j = j + 1
+                i = i - 1
                 try:
                     tmp = pq.read_table(f'./results/{sample}/outfiles/{j}-{j+1}_{ch}.parquet')
                 except:
-                    i = i - 1
                     continue
+                i = i + 1
                 print('i', i)
                 print('used file', j)
 
