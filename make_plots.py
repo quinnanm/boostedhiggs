@@ -43,7 +43,7 @@ def main(args):
         for ch in channels:
             for i in range(num_jobs):
                 try:
-                tmp = pq.read_table(f'./results/{sample}/outfiles/{i}-{i+1}_{ch}.parquet')
+                    tmp = pq.read_table(f'./results/{sample}/outfiles/{i}-{i+1}_{ch}.parquet')
                 except:
                     continue
                 tmp = tmp.to_pandas()
