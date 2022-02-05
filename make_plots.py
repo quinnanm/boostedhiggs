@@ -41,7 +41,7 @@ def main(args):
         print('sample', sample)
 
         for ch in channels:
-            files = os.listdir('./results/{sample}/outfiles/*_{ch}.parquet')
+            files = os.listdir(f'./results/{sample}/outfiles/*_{ch}.parquet')
             for i, file in enumerate(files):
                 tmp = pq.read_table(file).to_pandas()
                 if i == 0:
