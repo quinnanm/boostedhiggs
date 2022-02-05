@@ -74,6 +74,7 @@ def main(args):
 
         # now we can make histograms for higgspt, jetpt, leptonpt
         import hist as hist2
+        print('Making histograms...')
         channel_cat = hist2.axis.StrCategory([], name='channel', growth=True)
 
         leppt_axis = hist2.axis.Regular(25, 10, 400, name='leppt', label=r'Lepton $p_T$ [GeV]')
