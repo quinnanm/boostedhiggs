@@ -42,18 +42,20 @@ def main(args):
         print('sample', sample)
 
         for ch in channels:
-            files = glob.glob(f'./results/{sample}/outfiles/*_{ch}.parquet')
-            # files = os.listdir(f'./results/{sample}/outfiles/*_{ch}.parquet')
-            for i, file in enumerate(files):
-                print('file', file)
-                tmp = pq.read_table(file).to_pandas()
+            parquet_files = glob.glob(f'./results/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that need to be processed
+            pkl_files = glob.glob(f'./results/{sample}/outfiles/*.pkl')  # get list of metadata pkl files that need to be processed
+            for i, parquet_file in enumerate(parquet_files):
+                tmp = pq.read_table(parquet_file).to_pandas()
                 if i == 0:
                     data = tmp
                 else:
                     data = pd.concat([data, tmp], ignore_index=True)
+                print(parquet_file)
+                print(pkl_files[i])
+                print('------------')
 
                 # load and sum the sumgenweight of each
-                with open(file, 'rb') as f:
+                with open(pkl_files[i], 'rb') as f:
                     metadata = pkl.load(f)
                 sum_sumgenweight[sample] = sum_sumgenweight[sample] + metadata[sample][year]['sumgenweight']
 
