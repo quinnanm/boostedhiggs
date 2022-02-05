@@ -30,18 +30,15 @@ def main(args):
     # num_jobs = args.endi - args.starti
 
     channels = ['ele', 'mu', 'had']
-    channels = ['ele']
 
     for sample in samples:
+        print('Processing sample', sample)
         sum_sumgenweight = {}
         sum_sumgenweight[sample] = 0
         data_all = {}
 
-        # num_jobs = int(os.popen(f"ls ./results/{sample}/outfiles/*.pkl | wc -l").read())  # number of pkl files in the library
-
-        print('sample', sample)
-
         for ch in channels:
+            print('Processing channel', ch)
             parquet_files = glob.glob(f'./results/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that need to be processed
             pkl_files = glob.glob(f'./results/{sample}/outfiles/*.pkl')  # get list of metadata pkl files that need to be processed
             for i, parquet_file in enumerate(parquet_files):
@@ -50,9 +47,6 @@ def main(args):
                     data = tmp
                 else:
                     data = pd.concat([data, tmp], ignore_index=True)
-                print(parquet_file)
-                print(pkl_files[i])
-                print('------------')
 
                 # load and sum the sumgenweight of each
                 with open(pkl_files[i], 'rb') as f:
