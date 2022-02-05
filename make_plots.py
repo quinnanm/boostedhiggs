@@ -45,6 +45,7 @@ def main(args):
             files = glob.glob(f'./results/{sample}/outfiles/*_{ch}.parquet')
             # files = os.listdir(f'./results/{sample}/outfiles/*_{ch}.parquet')
             for i, file in enumerate(files):
+                print('file', file)
                 tmp = pq.read_table(file).to_pandas()
                 if i == 0:
                     data = tmp
