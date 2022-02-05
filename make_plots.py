@@ -36,35 +36,26 @@ def main(args):
         sum_sumgenweight[sample] = 0
         data_all = {}
 
-        num_jobs = int(os.popen(f"ls ./results/{sample}/outfiles/*.pkl | wc -l").read())  # number of pkl files in the library
+        # num_jobs = int(os.popen(f"ls ./results/{sample}/outfiles/*.pkl | wc -l").read())  # number of pkl files in the library
 
         print('sample', sample)
         print('num_jobs', num_jobs)
 
         for ch in channels:
-            i = 0
-            j = -1
-            while i < num_jobs:
-                j = j + 1
-                try:
-                    tmp = pq.read_table(f'./results/{sample}/outfiles/{j}-{j+1}_{ch}.parquet').to_pandas()
-                except:
-                    continue
-                print('i', i)
-                print('used file', j)
-
+            files = os.listdir('./results/{sample}/outfiles/*_{ch}.parquet')
+            for i, file in enumerate(files):
+                tmp = pq.read_table(file).to_pandas()
                 if i == 0:
                     data = tmp
                 else:
                     data = pd.concat([data, tmp], ignore_index=True)
 
                 # load and sum the sumgenweight of each
-                with open(f'./results/{sample}/outfiles/{j}-{j+1}.pkl', 'rb') as f:
+                with open(file, 'rb') as f:
                     metadata = pkl.load(f)
                 sum_sumgenweight[sample] = sum_sumgenweight[sample] + metadata[sample][year]['sumgenweight']
 
-                i = i + 1
-
+            print('# of files processed is', i)
             data_all[ch] = data
 
         xsec = {}
