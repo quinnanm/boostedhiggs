@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import json
 import os
+import glob
 import shutil
 import pathlib
 from typing import List, Optional
@@ -41,7 +42,8 @@ def main(args):
         print('sample', sample)
 
         for ch in channels:
-            files = os.listdir(f'./results/{sample}/outfiles/*_{ch}.parquet')
+            files = glob.glob(f'./results/{sample}/outfiles/*_{ch}.parquet')
+            # files = os.listdir(f'./results/{sample}/outfiles/*_{ch}.parquet')
             for i, file in enumerate(files):
                 tmp = pq.read_table(file).to_pandas()
                 if i == 0:
