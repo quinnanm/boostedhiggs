@@ -388,9 +388,9 @@ class HwwProcessor(processor.ProcessorABC):
 
         # MET
         met = events.MET
-        mt_lep_met = np.sqrt(
-            2. * candidatelep_p4.pt * met.pt * (ak.ones_like(met.pt) - np.cos(candidatelep_p4.delta_phi(met)))
-        )
+        # mt_lep_met = np.sqrt(
+        #     2. * candidatelep_p4.pt * met.pt * (ak.ones_like(met.pt) - np.cos(candidatelep_p4.delta_phi(met)))
+        # )
 
         # event selections
         self.add_selection(
@@ -413,7 +413,7 @@ class HwwProcessor(processor.ProcessorABC):
         ), channel=['mu'])
         self.add_selection('leptonInJet', sel=(dr_jet_candlep < 0.8), channel=['mu', 'ele'])
         self.add_selection('ht', sel=(ht > 200), channel=['mu', 'ele'])
-        self.add_selection('mt', sel=(mt_lep_met < 100), channel=['mu', 'ele'])
+        # self.add_selection('mt', sel=(mt_lep_met < 100), channel=['mu', 'ele'])
         # self.add_selection(
         #     name='bjet_tag',
         #     sel=(bjets_ophem_lepfj > self._btagWPs["medium"]),
@@ -477,9 +477,9 @@ class HwwProcessor(processor.ProcessorABC):
                 if var == "dr_jet_candlep":
                     value = pad_val(dr_jet_candlep, -1)
                     out[var] = value
-                if var == "mt_lep_met":
-                    value = pad_val(mt_lep_met, -1)
-                    out[var] = value
+                # if var == "mt_lep_met":
+                #     value = pad_val(mt_lep_met, -1)
+                #     out[var] = value
                 if var == "ht":
                     value = pad_val(ht, -1)
                     out[var] = value
