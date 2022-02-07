@@ -373,24 +373,24 @@ class HwwProcessor(processor.ProcessorABC):
         leadingfj = ak.firsts(good_fatjets)
         secondfj = ak.pad_none(good_fatjets, 2, axis=1)[:, 1]
 
-        # candidatefj_lep = ak.firsts(good_fatjets[ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)])
-        # # lepton and fatjet mass
-        # lep_fj_m = (candidatefj_lep - candidatelep_p4).mass
-        #
-        # dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj_lep))  # ele and mu
-        # dphi_jet_leadingfj = abs(goodjets.delta_phi(leadingfj))  # had
-        #
-        # bjets_ophem_lepfj = ak.max(goodjets[dphi_jet_lepfj > np.pi / 2].btagDeepFlavB, axis=1)  # in event, pick highest b score in opposite direction from signal
-        # bjets_ophem_leadingfj = ak.max(goodjets[dphi_jet_leadingfj > np.pi / 2].btagDeepFlavB, axis=1)
+        candidatefj_lep = ak.firsts(good_fatjets[ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)])
+        # lepton and fatjet mass
+        lep_fj_m = (candidatefj_lep - candidatelep_p4).mass
+
+        dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj_lep))  # ele and mu
+        dphi_jet_leadingfj = abs(goodjets.delta_phi(leadingfj))  # had
+
+        bjets_ophem_lepfj = ak.max(goodjets[dphi_jet_lepfj > np.pi / 2].btagDeepFlavB, axis=1)  # in event, pick highest b score in opposite direction from signal
+        bjets_ophem_leadingfj = ak.max(goodjets[dphi_jet_leadingfj > np.pi / 2].btagDeepFlavB, axis=1)
 
         # deltaR
-        # dr_jet_candlep = candidatefj_lep.delta_r(candidatelep_p4)
+        dr_jet_candlep = candidatefj_lep.delta_r(candidatelep_p4)
 
         # MET
         met = events.MET
-        # mt_lep_met = np.sqrt(
-        #     2. * candidatelep_p4.pt * met.pt * (ak.ones_like(met.pt) - np.cos(candidatelep_p4.delta_phi(met)))
-        # )
+        mt_lep_met = np.sqrt(
+            2. * candidatelep_p4.pt * met.pt * (ak.ones_like(met.pt) - np.cos(candidatelep_p4.delta_phi(met)))
+        )
 
         # event selections
         self.add_selection(
@@ -411,7 +411,7 @@ class HwwProcessor(processor.ProcessorABC):
             | ((candidatelep.pt >= 55)
                & (candidatelep.miniPFRelIso_all < 0.2))
         ), channel=['mu'])
-        # self.add_selection('leptonInJet', sel=(dr_jet_candlep < 0.8), channel=['mu', 'ele'])
+        self.add_selection('leptonInJet', sel=(dr_jet_candlep < 0.8), channel=['mu', 'ele'])
         self.add_selection('ht', sel=(ht > 200), channel=['mu', 'ele'])
         # self.add_selection('mt', sel=(mt_lep_met < 100), channel=['mu', 'ele'])
         # self.add_selection(
@@ -474,12 +474,12 @@ class HwwProcessor(processor.ProcessorABC):
                 if var == "lepton_pt":
                     value = pad_val(candidatelep.pt, -1)
                     out[var] = value
-                # if var == "dr_jet_candlep":
-                #     value = pad_val(dr_jet_candlep, -1)
-                #     out[var] = value
-                # if var == "mt_lep_met":
-                #     value = pad_val(mt_lep_met, -1)
-                #     out[var] = value
+                if var == "dr_jet_candlep":
+                    value = pad_val(dr_jet_candlep, -1)
+                    out[var] = value
+                if var == "mt_lep_met":
+                    value = pad_val(mt_lep_met, -1)
+                    out[var] = value
                 if var == "ht":
                     value = pad_val(ht, -1)
                     out[var] = value
@@ -489,12 +489,12 @@ class HwwProcessor(processor.ProcessorABC):
                 if var == "lep_isolation":
                     value = pad_val(lep_reliso, -1)
                     out[var] = value
-                # if var == "lepfj_m":
-                #     value = pad_val(lep_fj_m, -1)
-                #     out[var] = value
-                # if var == "candidatefj_lep_pt":
-                #     value = pad_val(candidatefj_lep.pt, -1)
-                #     out[var] = value
+                if var == "lepfj_m":
+                    value = pad_val(lep_fj_m, -1)
+                    out[var] = value
+                if var == "candidatefj_lep_pt":
+                    value = pad_val(candidatefj_lep.pt, -1)
+                    out[var] = value
                 if var == "leadingfj_pt":
                     value = pad_val(leadingfj.pt, -1)
                     out[var] = value
@@ -507,12 +507,12 @@ class HwwProcessor(processor.ProcessorABC):
                 if var == "secondfj_msoftdrop":
                     value = pad_val(secondfj.msoftdrop, -1)
                     out[var] = value
-                # if var == "bjets_ophem_lepfj":
-                #     value = pad_val(bjets_ophem_lepfj, -1)
-                #     out[var] = value
-                # if var == "bjets_ophem_leadingfj":
-                #     value = pad_val(bjets_ophem_leadingfj, -1)
-                #     out[var] = value
+                if var == "bjets_ophem_lepfj":
+                    value = pad_val(bjets_ophem_lepfj, -1)
+                    out[var] = value
+                if var == "bjets_ophem_leadingfj":
+                    value = pad_val(bjets_ophem_leadingfj, -1)
+                    out[var] = value
                 if var == "weight":
                     value = pad_val(events.genWeight, -1)
                     out[var] = value
