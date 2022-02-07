@@ -411,7 +411,7 @@ class HwwProcessor(processor.ProcessorABC):
             | ((candidatelep.pt >= 55)
                & (candidatelep.miniPFRelIso_all < 0.2))
         ), channel=['mu'])
-        self.add_selection('leptonInJet', sel=(dr_jet_candlep < 0.8), channel=['mu', 'ele'])
+        # self.add_selection('leptonInJet', sel=(dr_jet_candlep < 0.8), channel=['mu', 'ele'])
         self.add_selection('ht', sel=(ht > 200), channel=['mu', 'ele'])
         # self.add_selection('mt', sel=(mt_lep_met < 100), channel=['mu', 'ele'])
         # self.add_selection(
@@ -474,9 +474,9 @@ class HwwProcessor(processor.ProcessorABC):
                 if var == "lepton_pt":
                     value = pad_val(candidatelep.pt, -1)
                     out[var] = value
-                if var == "dr_jet_candlep":
-                    value = pad_val(dr_jet_candlep, -1)
-                    out[var] = value
+                # if var == "dr_jet_candlep":
+                #     value = pad_val(dr_jet_candlep, -1)
+                #     out[var] = value
                 # if var == "mt_lep_met":
                 #     value = pad_val(mt_lep_met, -1)
                 #     out[var] = value
