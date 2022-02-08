@@ -38,8 +38,8 @@ def main(args):
         data_all = {}
         pkl_files = glob.glob(f'./results/{sample}/outfiles/*.pkl')  # get list of metadata pkl files that need to be processed
         if not pkl_files:  # skip samples which were not processed
+            print('No processed files found... skipping sample...')
             continue
-        print('lol')
 
         for ch in channels:
             print('Processing channel', ch)
