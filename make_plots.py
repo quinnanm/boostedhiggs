@@ -59,6 +59,7 @@ def main(args):
 
         if not parquet_files:  # skip samples which were not processed
             continue
+        print('lol')
 
         xsec = {}
         xsec[sample] = 2
