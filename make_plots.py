@@ -36,12 +36,14 @@ def main(args):
         sum_sumgenweight = {}
         sum_sumgenweight[sample] = 0
         data_all = {}
+        pkl_files = glob.glob(f'./results/{sample}/outfiles/*.pkl')  # get list of metadata pkl files that need to be processed
+        if not pkl_files:  # skip samples which were not processed
+            continue
+        print('lol')
 
         for ch in channels:
             print('Processing channel', ch)
             parquet_files = glob.glob(f'./results/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that need to be processed
-            pkl_files = glob.glob(f'./results/{sample}/outfiles/*.pkl')  # get list of metadata pkl files that need to be processed
-
             for i, parquet_file in enumerate(parquet_files):
                 tmp = pq.read_table(parquet_file).to_pandas()
                 if i == 0:
@@ -56,10 +58,6 @@ def main(args):
 
             print('# of files processed is', i + 1)
             data_all[ch] = data
-
-        if not parquet_files:  # skip samples which were not processed
-            continue
-        print('lol')
 
         xsec = {}
         xsec[sample] = 2
