@@ -54,7 +54,7 @@ def main(args):
                     metadata = pkl.load(f)
                 sum_sumgenweight[sample] = sum_sumgenweight[sample] + metadata[sample][year]['sumgenweight']
 
-            print('# of files processed is', i)
+            print('# of files processed is', i + 1)
             data_all[ch] = data
 
         if not parquet_files:  # skip samples which were not processed
