@@ -195,7 +195,7 @@ The `run.py` script has different options to e.g. select a different processor, 
 The `submit.py` creates the submission files **and submits jobs afterwards by default.**
 For testing purposes one can comment the `condor_submit` expression and do, e.g:
 ```
-for i in condor/Jan25/*/*.jdl; do condor_submit $i; done
+for i in condor/Jan25/*.jdl; do condor_submit $i; done
 ```
 or one can individually submit jobs with:
 ```

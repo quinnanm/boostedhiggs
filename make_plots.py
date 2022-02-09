@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import json
 import os
+import glob
 import shutil
 import pathlib
 from typing import List, Optional
@@ -26,29 +27,37 @@ def main(args):
     # load result of 2 jobs
     samples = args.sample.split(',')
     year = args.year
-    num_jobs = args.endi - args.starti
+    # num_jobs = args.endi - args.starti
 
     channels = ['ele', 'mu', 'had']
 
     for sample in samples:
+        print('Processing sample', sample)
         sum_sumgenweight = {}
         sum_sumgenweight[sample] = 0
         data_all = {}
+        pkl_files = glob.glob(f'./results/{sample}/outfiles/*.pkl')  # get list of metadata pkl files that need to be processed
+        if not pkl_files:  # skip samples which were not processed
+            print('No processed files found... skipping sample...')
+            continue
 
         for ch in channels:
-            for i in range(num_jobs):
-                tmp = pq.read_table(f'./outfiles/{i}-{i+1}_{ch}.parquet')
-                tmp = tmp.to_pandas()
+            print('Processing channel', ch)
+            parquet_files = glob.glob(f'./results/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that need to be processed
+            for i, parquet_file in enumerate(parquet_files):
+                tmp = pq.read_table(parquet_file).to_pandas()
                 if i == 0:
                     data = tmp
                 else:
                     data = pd.concat([data, tmp], ignore_index=True)
 
+                # load and sum the sumgenweight of each
+                with open(pkl_files[i], 'rb') as f:
+                    metadata = pkl.load(f)
+                sum_sumgenweight[sample] = sum_sumgenweight[sample] + metadata[sample][year]['sumgenweight']
+
+            print('# of files processed is', i + 1)
             data_all[ch] = data
-            # load and sum the sumgenweight of each
-            with open(f'./outfiles/{i}-{i+1}.pkl', 'rb') as f:
-                metadata = pkl.load(f)
-            sum_sumgenweight[sample] = sum_sumgenweight[sample] + metadata[sample][year]['sumgenweight']
 
         xsec = {}
         xsec[sample] = 2
@@ -68,6 +77,7 @@ def main(args):
 
         # now we can make histograms for higgspt, jetpt, leptonpt
         import hist as hist2
+        print('Making histograms...')
         channel_cat = hist2.axis.StrCategory([], name='channel', growth=True)
 
         leppt_axis = hist2.axis.Regular(25, 10, 400, name='leppt', label=r'Lepton $p_T$ [GeV]')
@@ -81,11 +91,13 @@ def main(args):
             channel="ele",
             leppt=leppt['ele'],
             weight=event_weight['ele'] * xsec_weight[sample],
+            # weight=xsec_weight[sample],
         )
         hists.fill(
             channel="mu",
             leppt=leppt['mu'],
             weight=event_weight['mu'] * xsec_weight[sample],
+            # weight=xsec_weight[sample],
         )
 
         # now we plot trigger efficiency as function of jetpt
@@ -112,22 +124,23 @@ def main(args):
                      # density=True
                      )
         # ax.set_ylim(0,1)
+        ax.set_title(f'{sample}')
         ax.legend()
-        plt.savefig(f'{sample}.pdf')
+
+        if not os.path.exists('hists'):
+            os.makedirs('hists')
+
+        plt.savefig(f'hists/{sample}.pdf')
 
 
 if __name__ == "__main__":
-    # e.g. to run over the 2 parquet results of 0-1 and 1-2 do this
-    # run locally as: python make_plots.py --year 2017 --starti 0 --endi 2 --sample GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8
+    # e.g.
+    # run locally as: python make_plots.py --year 2017 --sample GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8,QCD_HT1000to1500_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',       dest='year',       default='2017',       help="year", type=str)
-    parser.add_argument('--starti',     dest='starti',     default=0,            help="start index of files", type=int)
-    parser.add_argument('--endi',       dest='endi',       default=-1,           help="end index of files", type=int)
-    parser.add_argument("--processor",  dest="processor",  default="hww",        help="HWW processor", type=str)
-    parser.add_argument("--dask",       dest="dask",       action="store_true",  default=False, help="Run with dask")
+    # parser.add_argument('--starti',     dest='starti',     default=0,            help="start index of files", type=int)
+    # parser.add_argument('--endi',       dest='endi',       default=-1,           help="end index of files", type=int)
     parser.add_argument('--sample',     dest='sample',     default=None,         help='sample name', required=True)
-    parser.add_argument("--pfnano",     dest='pfnano',     action="store_true",  default=False, help="Run with pfnano")
-    parser.add_argument("--chunksize",  dest='chunksize',  type=int, default=2750, help="chunk size in processor")
     parser.add_argument(
         "--executor",
         type=str,
