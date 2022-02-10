@@ -121,3 +121,6 @@ def make_stacked_hists(variable_name, bin_width, low, high, channels, samples, d
         hep.cms.lumitext("2017 (13 TeV)", ax=ax)
         hep.cms.text("Work in Progress", ax=ax)
         plt.savefig(f'hists/hists_{year}/{variable_name}_{ch}.pdf')
+
+        with open(f'hists/hists_{year}/hists.pkl', 'wb') as f:  # saves a variable that contains the xsec weight of the sample
+            pkl.dump(hists, f)
