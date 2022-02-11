@@ -43,10 +43,9 @@ def main(args):
     import uproot
     for sample in fileset:
         for file in fileset[sample]:
-            print(file)
-            # d = uproot.open(file)
+            d = uproot.open(file)
 
-        # print()
+            print(d["Events"].num_entries)
 
 
 if __name__ == "__main__":
