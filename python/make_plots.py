@@ -148,7 +148,7 @@ def main(args):
 
                         variable = data[var].to_numpy()
                         event_weight = data['weight'].to_numpy()
-
+                        print('labels', labels[year][ch][var])
                         # filling histograms
                         if sample == signal:  # keep the signal seperate from the other "background" samples
                             hists[year][ch][var].fill(
@@ -184,11 +184,7 @@ def main(args):
                                 weight=event_weight * xsec_weight,
                             )
                             if get_simplified_label(sample) not in labels[year][ch][var]:
-                                print('get_simplified_label(sample)', get_simplified_label(sample))
-                                print('labels[year][ch][var]', labels[year][ch][var])
                                 labels[year][ch][var].append(get_simplified_label(sample))
-                                print('after labels[year][ch][var]', labels[year][ch][var])
-
                                 hist_samples[year][ch][var].append(hists[year][ch][var][{"samples": sample}])
 
     # store the hists variable
