@@ -184,7 +184,8 @@ def main(args):
                                 weight=event_weight * xsec_weight,
                             )
                             if get_simplified_label(sample) not in labels[year][ch][var]:
-                                print('lol', sample)
+                                print('get_simplified_label(sample)', get_simplified_label(sample))
+                                print('labels[year][ch][var]', labels[year][ch][var])
                                 labels[year][ch][var].append(get_simplified_label(sample))
                                 hist_samples[year][ch][var].append(hists[year][ch][var][{"samples": sample}])
 
