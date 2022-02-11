@@ -61,8 +61,53 @@ def get_sum_sumgenweight(idir, year, sample):
         sum_sumgenweight = sum_sumgenweight + metadata[sample][year]['sumgenweight']
     return sum_sumgenweight
 
-def make_hist(idir,odir,vars_to_plot,samples,years,channels): # makes histograms and saves in pkl file
-    hists = {}  # define a placeholder for all histograms 
+# <<<<<<< main
+# def make_hist(idir,odir,vars_to_plot,samples,years,channels): # makes histograms and saves in pkl file
+#     hists = {}  # define a placeholder for all histograms 
+# =======
+
+# def get_axis(var):  # define the axes for the different variables to be plotted
+#     if var == 'lepton_pt':
+#         return hist2.axis.Regular(50, 0, 400, name='var', label=var)
+#     elif var == 'lep_isolation':
+#         return hist2.axis.Regular(20, 0, 3.5, name='var', label=var)
+#     elif var == 'ht':
+#         return hist2.axis.Regular(20, 180, 1500, name='var', label=var)
+#     elif var == 'dr_jet_candlep':
+#         return hist2.axis.Regular(520, 0, 1.5, name='var', label=var)
+#     elif var == 'met':
+#         return hist2.axis.Regular(50, 0, 400, name='var', label=var)
+#     else:
+#         return hist2.axis.Regular(50, 0, 400, name='var', label=var)
+
+
+# def main(args):
+#     if not os.path.exists(f'hists/'):
+#         os.makedirs(f'hists/')
+
+#     # get variables to plot
+#     if args.var == None:  # plot all variables if none is specefied
+#         vars = ['lepton_pt', 'lep_isolation', 'ht', 'dr_jet_candlep', 'met']
+#     else:
+#         vars = args.var.split(',')
+
+#     years = args.years.split(',')
+
+#     f = open(args.samples)
+#     json_samples = json.load(f)
+#     f.close()
+
+#     # get samples to make histograms
+#     samples = []
+#     for key, value in json_samples.items():
+#         if value == 1:
+#             samples.append(key)
+
+#     signal = 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8'
+#     channels = ['ele', 'mu', 'had']
+
+#     hists = {}  # define a placeholder for all histograms
+# >>>>>>> main
 
     for year in years:
         # Get luminosity of year
@@ -208,21 +253,29 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as: 
-    # python make_plots.py --year 2017 --sample GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8,TTToHadronic_TuneCP5_13TeV-powheg-pythia8 --idir ../results/ --odir TAG --var met,ht --channel ele,mu,had
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--year',    dest='year',       default='2017',       help="year", type=str)
-    parser.add_argument('--sample',  dest='sample',     default=None,         help='sample name', required=True)
-    parser.add_argument('--channel', dest='channel',    default='ele,mu,had', help='channels for which to plot this variable', required=True)
-    parser.add_argument('--odir',    dest='odir',       default='',           help="tag for output directory", type=str)
-    parser.add_argument('--idir',    dest='idir',       default='../results/',           help="input directory with results", type=str)
-    parser.add_argument('--var',     dest='var',        required=True, 
-                        choices=["met","ht" # common for all channels
-                                 "lepton_pt","lep_isolation","met","ht","mt_lep_met","dr_jet_candlep", # common for ele and mu channels
-                                 "mu_mvaId", # mu channel only
-                                 "leadingfj_pt","leadingfj_msoftdrop","secondfj_pt","secondfj_msoftdrop","bjets_ophem_leadingfj" # had channel only
-                             ],
-                        help='variable to plot')
+# <<<<<<< main
+#     # run locally as: 
+#     # python make_plots.py --year 2017 --sample GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8,TTToHadronic_TuneCP5_13TeV-powheg-pythia8 --idir ../results/ --odir TAG --var met,ht --channel ele,mu,had
+#     parser = argparse.ArgumentParser()
+#     parser.add_argument('--year',    dest='year',       default='2017',       help="year", type=str)
+#     parser.add_argument('--sample',  dest='sample',     default=None,         help='sample name', required=True)
+#     parser.add_argument('--channel', dest='channel',    default='ele,mu,had', help='channels for which to plot this variable', required=True)
+#     parser.add_argument('--odir',    dest='odir',       default='',           help="tag for output directory", type=str)
+#     parser.add_argument('--idir',    dest='idir',       default='../results/',           help="input directory with results", type=str)
+#     parser.add_argument('--var',     dest='var',        required=True, 
+#                         choices=["met","ht" # common for all channels
+#                                  "lepton_pt","lep_isolation","met","ht","mt_lep_met","dr_jet_candlep", # common for ele and mu channels
+#                                  "mu_mvaId", # mu channel only
+#                                  "leadingfj_pt","leadingfj_msoftdrop","secondfj_pt","secondfj_msoftdrop","bjets_ophem_leadingfj" # had channel only
+#                              ],
+#                         help='variable to plot')
+# =======
+#     # run locally as: python make_plots.py --year 2017 --samples samples.json
+#     parser = argparse.ArgumentParser()
+#     parser.add_argument('--years',       dest='years',       default='2017',       help="year", type=str)
+#     parser.add_argument('--samples',     dest='samples',     default="samples.json",         help='path to json with samples to be plotted', required=True)
+#     parser.add_argument('--var',     dest='var',     default=None,         help='variable to plot')
+# >>>>>>> main
     args = parser.parse_args()
 
     main(args)

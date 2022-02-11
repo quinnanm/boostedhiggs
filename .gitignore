@@ -20,7 +20,3 @@ outfiles/
 lpc/
 hists/
 results/
-
-
-make_plots_old.py
-make_stacked_hists_old.py
