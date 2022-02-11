@@ -42,10 +42,11 @@ def main(args):
             fileset[s] = ["root://cmsxrootd.fnal.gov/" + f for f in files[s]]
     import uproot
     for sample in fileset:
+        c = 0
         for file in fileset[sample]:
-            d = uproot.open(file)
-
-            print(d["Events"].num_entries)
+            f = uproot.open(file)
+            c = c + f["Events"].num_entries
+        print(f'{sample} has {c} events')
 
 
 if __name__ == "__main__":
