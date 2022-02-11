@@ -32,25 +32,14 @@ def main(args):
         os.makedirs('./outfiles')
 
     channels = ["ele", "mu", "had"]
-    job_name = '/' + str(args.starti) + '-' + str(args.endi)
 
     # read samples to submit
     fileset = {}
-    if args.pfnano:
-        fname = f"data/pfnanoindex_{args.year}.json"
-    else:
-        fname = f"data/fileset_{args.year}_UL_NANO.json"
+    fname = f"data/fileset_{args.year}_UL_NANO.json"
     with open(fname, 'r') as f:
-        if args.pfnano:
-            files = json.load(f)[args.year]
-            for subdir in files.keys():
-                for key, flist in files[subdir].items():
-                    if key in samples:
-                        fileset[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist[args.starti:args.endi]]
-        else:
-            files = json.load(f)
-            for s in samples:
-                fileset[s] = ["root://cmsxrootd.fnal.gov/" + f for f in files[s][args.starti:args.endi]]
+        files = json.load(f)
+        for s in samples:
+            fileset[s] = ["root://cmsxrootd.fnal.gov/" + f for f in files[s]]]
 
     for sample in fileset:
         print(sample)
