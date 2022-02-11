@@ -104,7 +104,7 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels):  # makes hist
             sum_sumgenweight = get_sum_sumgenweight(idir, year, sample)
 
             # Get overall weighting of events
-            xsec_weight = (xsec * luminosity[year]) / (sum_sumgenweight)
+            xsec_weight = (xsec * luminosity[year]) / (sum_sumgenweight)  # each event has (possibly a different) genweight... sumgenweight sums over events in a chunk... sum_sumgenweight sums over chunks
 
             for ch in channels:
                 parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
@@ -184,6 +184,7 @@ def make_stack(odir, vars_to_plot, years, channels):
                              color='red'
                              )
                 ax.set_yscale('log')
+                ax.set_ylim(0.1)
                 ax.set_title(f'{ch} channel')
                 ax.legend()
 

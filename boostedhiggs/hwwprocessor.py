@@ -344,7 +344,7 @@ class HwwProcessor(processor.ProcessorABC):
         # relative isolation
         lep_reliso = candidatelep.pfRelIso04_all if hasattr(candidatelep, "pfRelIso04_all") else candidatelep.pfRelIso03_all
         # mini isolation
-        mu_miso = candidatelep.miniPFRelIso_all
+        lep_miso = candidatelep.miniPFRelIso_all
         # MVA-ID
         mu_mvaId = candidatelep.mvaId if hasattr(candidatelep, "mvaId") else np.zeros(nevents)
 
@@ -392,7 +392,7 @@ class HwwProcessor(processor.ProcessorABC):
             2. * candidatelep_p4.pt * met.pt * (ak.ones_like(met.pt) - np.cos(candidatelep_p4.delta_phi(met)))
         )
 
-        # event selections
+        # event selections for muon channel
         self.add_selection(
             name='leptonKin',
             sel=(candidatelep.pt > 30),
@@ -419,7 +419,8 @@ class HwwProcessor(processor.ProcessorABC):
         #     sel=(bjets_ophem_lepfj > self._btagWPs["medium"]),
         #     channel=['mu', 'ele']
         # )
-        # selections for electrons
+
+        # event selections for electrons
         self.add_selection(
             name='leptonKin',
             sel=(candidatelep.pt > 40),
@@ -439,7 +440,7 @@ class HwwProcessor(processor.ProcessorABC):
                & (candidatelep.miniPFRelIso_all < 0.2))
         ), channel=['ele'])
 
-        # had selection
+        # had selection   (# TODO: add taus and check signal in hadronic channel plots)
         self.add_selection(
             name='oneFatjet',
             sel=(n_fatjets >= 1) & (n_good_muons == 0) & (n_loose_muons == 0) & (n_good_electrons == 0) & (n_loose_electrons == 0),
