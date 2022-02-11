@@ -39,7 +39,7 @@ def main(args):
     with open(fname, 'r') as f:
         files = json.load(f)
         for s in samples:
-            fileset[s] = ["root://cmsxrootd.fnal.gov/" + f for f in files[s]]]
+            fileset[s] = ["root://cmsxrootd.fnal.gov/" + f for f in files[s]]
 
     for sample in fileset:
         print(sample)
