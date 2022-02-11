@@ -29,7 +29,7 @@ import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
-def get_simplified_label(sample):
+def get_simplified_label(sample):   # get simplified "alias" names of the samples for plotting purposes
     f = open('../data/simplified_labels.json')
     name = json.load(f)
     f.close()
@@ -38,8 +38,9 @@ def get_simplified_label(sample):
 
 def get_sum_sumgenweight(year, sample):
 
+    pkl_files = glob.glob(f'../results/{sample}/outfiles/*.pkl')  # get the pkl metadata of the pkl files that were processed
     sum_sumgenweight = 0
-    pkl_files = glob.glob(f'../results/{sample}/outfiles/*.pkl')  # get list of parquet files that need to be processed
+
     for file in pkl_files:
         # load and sum the sumgenweight of each
         with open(file, 'rb') as f:
@@ -48,7 +49,7 @@ def get_sum_sumgenweight(year, sample):
     return sum_sumgenweight
 
 
-def get_axis(var):
+def get_axis(var):  # define the axes for the different variables to be plotted
     if var == 'lepton_pt':
         return hist2.axis.Regular(50, 0, 400, name='var', label=var)
     elif var == 'lep_isolation':
@@ -117,7 +118,7 @@ def main(args):
         for i, sample in enumerate(samples):
 
             print('Processing sample', sample)
-            pkl_files = glob.glob(f'../results/{sample}/outfiles/*.pkl')  # get list of metadata pkl files that need to be processed
+            pkl_files = glob.glob(f'../results/{sample}/outfiles/*.pkl')  # get list of files that were processed
             if not pkl_files:  # skip samples which were not processed
                 print('- No processed files found... skipping sample...')
                 continue
@@ -148,6 +149,7 @@ def main(args):
                         variable = data[var].to_numpy()
                         event_weight = data['weight'].to_numpy()
 
+                        # filling histograms
                         if sample == signal:  # keep the signal seperate from the other "background" samples
                             hists[year][ch][var].fill(
                                 samples=sample,
@@ -209,7 +211,7 @@ def main(args):
                              # yerr=get_yerr(num_nom),
                              ax=ax,
                              stack=True,
-                             label=labels[year][ch][var],
+                             label="GluGluHToWW",
                              color='red'
                              # density=True
                              )
