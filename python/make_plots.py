@@ -201,7 +201,6 @@ def make_stack(odir, vars_to_plot, years, channels):
                 fig, ax = plt.subplots(1, 1)
                 # TODO: Add data
                 # plot the background stacked
-                print(hists[year][ch][var].axes[0])
                 hep.histplot([x for x in hists[year][ch][var].stack(0)[1:]],   # the [1:] is there to skip the signal sample which is usually given first in the samples list
                              ax=ax,
                              stack=True,
@@ -220,7 +219,7 @@ def make_stack(odir, vars_to_plot, years, channels):
                 ax.set_title(f'{ch} channel')
                 ax.legend()
 
-                hep.cms.lumitext("{year} (13 TeV)", ax=ax)
+                hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
                 hep.cms.text("Work in Progress", ax=ax)
                 plt.savefig(f'{odir}/hists_{year}/{var}_{ch}.pdf')
                 plt.close()
