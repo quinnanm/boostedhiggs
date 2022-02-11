@@ -73,17 +73,8 @@ def main(args):
     else:
         vars = args.var.split(',')
 
-    years = args.years.split(',')
-
-    f = open(args.samples)
-    json_samples = json.load(f)
-    f.close()
-
-    # get samples to make histograms
-    samples = []
-    for key, value in json_samples.items():
-        if value == 1:
-            samples.append(key)
+    years = args.year.split(',')
+    samples = args.sample.split(',')
 
     signal = 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8'
     channels = ['ele', 'mu', 'had']
@@ -207,10 +198,10 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as: python make_plots.py --year 2017 --samples samples.json
+    # run locally as: python make_plots.py --year 2017 --sample GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8,TTToHadronic_TuneCP5_13TeV-powheg-pythia8
     parser = argparse.ArgumentParser()
-    parser.add_argument('--years',       dest='years',       default='2017',       help="year", type=str)
-    parser.add_argument('--samples',     dest='samples',     default="samples.json",         help='path to json with samples to be plotted', required=True)
+    parser.add_argument('--year',       dest='year',       default='2017',       help="year", type=str)
+    parser.add_argument('--sample',     dest='sample',     default=None,         help='sample name', required=True)
     parser.add_argument('--var',     dest='var',     default=None,         help='variable to plot')
     args = parser.parse_args()
 
