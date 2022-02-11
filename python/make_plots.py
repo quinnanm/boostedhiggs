@@ -98,7 +98,6 @@ def main(args):
             hists[year][ch] = {}
 
             for var in vars:
-
                 sample_axis = hist2.axis.StrCategory([], name='samples', growth=True)
 
                 hists[year][ch][var] = hist2.Hist(
@@ -140,6 +139,7 @@ def main(args):
 
                         variable = data[var].to_numpy()
                         event_weight = data['weight'].to_numpy()
+
                         # filling histograms
                         if "QCD" in sample:
                             hists[year][ch][var].fill(
@@ -178,7 +178,7 @@ def main(args):
                              ax=ax,
                              stack=True,
                              histtype="fill",
-                             label=[x for x in hists[year][ch][var].axes[0]],
+                             label=[x for x in hists[year][ch][var].axes[0]][1:],
                              )
                 # plot the signal seperately on the same plot
                 hep.histplot(hists[year][ch][var][{"samples": get_simplified_label(signal)}],
