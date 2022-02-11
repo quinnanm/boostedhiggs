@@ -110,7 +110,7 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels):  # makes hist
                 parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
 
                 for parquet_file in parquet_files:
-                    data = pq.read_table(parquet_file).to_pandas()
+                    data = pq.read_table(parquet_file).to_pandas()  # we can make further selections on the hists here
 
                     for var in vars_to_plot:
                         if var not in data.keys():
@@ -126,12 +126,12 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels):  # makes hist
                                 var=variable,
                                 weight=event_weight * xsec_weight,
                             )
-                        # elif "WJetsToLNu" in sample:  # combining all WJetsToLNu events under one name "WJetsToLNu"
-                        #     hists[year][ch][var].fill(
-                        #         samples="WJetsToLNu",
-                        #         var=variable,
-                        #         weight=event_weight * xsec_weight,
-                        #     )
+                        elif "WJetsToLNu" in sample:  # combining all WJetsToLNu events under one name "WJetsToLNu"
+                            hists[year][ch][var].fill(
+                                samples="WJetsToLNu",
+                                var=variable,
+                                weight=event_weight * xsec_weight,
+                            )
                         else:
                             hists[year][ch][var].fill(
                                 samples=get_simplified_label(sample),
