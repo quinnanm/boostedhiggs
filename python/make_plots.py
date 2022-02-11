@@ -183,8 +183,9 @@ def main(args):
                                 var=variable,
                                 weight=event_weight * xsec_weight,
                             )
-                            labels[year][ch][var].append(get_simplified_label(sample))
-                            hist_samples[year][ch][var].append(hists[year][ch][var][{"samples": sample}])
+                            if get_simplified_label(sample) not in labels[year][ch][var]:
+                                labels[year][ch][var].append(get_simplified_label(sample))
+                                hist_samples[year][ch][var].append(hists[year][ch][var][{"samples": sample}])
 
     # store the hists variable
     with open(f'hists/hists_{year}.pkl', 'wb') as f:  # saves the hists object
@@ -223,7 +224,6 @@ def main(args):
                 hep.cms.text("Work in Progress", ax=ax)
                 plt.savefig(f'hists/hists_{year}/{var}_{ch}.pdf')
                 plt.close()
-                return
 
 
 if __name__ == "__main__":
