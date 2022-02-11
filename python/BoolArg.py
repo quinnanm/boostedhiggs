@@ -14,10 +14,6 @@ import pathlib
 from typing import List, Optional
 
 import argparse
-from coffea import processor
-from coffea.nanoevents.methods import candidate, vector
-from coffea.analysis_tools import Weights, PackedSelection
-from make_stacked_hists import make_stacked_hists
 
 import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
