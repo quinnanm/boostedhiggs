@@ -62,39 +62,7 @@ def get_sum_sumgenweight(idir, year, sample):
         sum_sumgenweight = sum_sumgenweight + metadata[sample][year]['sumgenweight']
     return sum_sumgenweight
 
-# =======
 
-# def get_axis(var):  # define the axes for the different variables to be plotted
-#     if var == 'lepton_pt':
-#         return hist2.axis.Regular(50, 0, 400, name='var', label=var)
-#     elif var == 'lep_isolation':
-#         return hist2.axis.Regular(20, 0, 3.5, name='var', label=var)
-#     elif var == 'ht':
-#         return hist2.axis.Regular(20, 180, 1500, name='var', label=var)
-#     elif var == 'dr_jet_candlep':
-#         return hist2.axis.Regular(520, 0, 1.5, name='var', label=var)
-#     elif var == 'met':
-#         return hist2.axis.Regular(50, 0, 400, name='var', label=var)
-#     else:
-#         return hist2.axis.Regular(50, 0, 400, name='var', label=var)
-
-
-# def main(args):
-#     if not os.path.exists(f'hists/'):
-#         os.makedirs(f'hists/')
-
-#     # get variables to plot
-#     if args.var == None:  # plot all variables if none is specefied
-#         vars = ['lepton_pt', 'lep_isolation', 'ht', 'dr_jet_candlep', 'met']
-#     else:
-#         vars = args.var.split(',')
-
-#     years = args.years.split(',')
-
-#     channels = ['ele', 'mu', 'had']
-
-#     hists = {}  # define a placeholder for all histograms
-# >>>>>>> main
 def make_hist(idir, odir, vars_to_plot, samples, years, channels):  # makes histograms and saves in pkl file
     hists = {}  # define a placeholder for all histograms
     for year in years:
