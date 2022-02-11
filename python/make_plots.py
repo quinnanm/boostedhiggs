@@ -81,8 +81,6 @@ def main(args):
     channels = ['ele', 'mu', 'had']
 
     hists = {}  # define a placeholder for all histograms
-    hist_samples = {}
-    labels = {}
 
     for year in years:
         # Get luminosity of year
@@ -95,13 +93,9 @@ def main(args):
             os.makedirs(f'hists/hists_{year}')
 
         hists[year] = {}
-        hist_samples[year] = {}
-        labels[year] = {}
 
         for ch in channels:  # initialize the histograms
             hists[year][ch] = {}
-            hist_samples[year][ch] = {}
-            labels[year][ch] = {}
 
             for var in vars:
 
@@ -111,8 +105,6 @@ def main(args):
                     sample_axis,
                     get_axis(var),
                 )
-                hist_samples[year][ch][var] = []
-                labels[year][ch][var] = []
 
         # loop over the processed files and fill the histograms
         for i, sample in enumerate(samples):
@@ -144,28 +136,18 @@ def main(args):
 
                     for var in vars:
                         if var not in data.keys():
+                            hists[year][ch][var] = None
                             continue
 
                         variable = data[var].to_numpy()
                         event_weight = data['weight'].to_numpy()
-                        print('labels', labels[year][ch][var])
                         # filling histograms
-                        if sample == signal:  # keep the signal seperate from the other "background" samples
-                            hists[year][ch][var].fill(
-                                samples=sample,
-                                var=variable,
-                                weight=event_weight * xsec_weight,
-                            )
-
-                        elif "QCD" in sample:
+                        if "QCD" in sample:
                             hists[year][ch][var].fill(
                                 samples="QCD",  # combining all QCD events under one name "QCD"
                                 var=variable,
                                 weight=event_weight * xsec_weight,
                             )
-                            if "QCD" not in labels[year][ch][var]:
-                                labels[year][ch][var].append("QCD")
-                                hist_samples[year][ch][var].append(hists[year][ch][var][{"samples": "QCD"}])
 
                         elif "WJetsToLNu" in sample:  # combining all WJetsToLNu events under one name "WJetsToLNu"
                             hists[year][ch][var].fill(
@@ -173,19 +155,13 @@ def main(args):
                                 var=variable,
                                 weight=event_weight * xsec_weight,
                             )
-                            if "WJetsToLNu" not in labels[year][ch][var]:
-                                labels[year][ch][var].append("WJetsToLNu")
-                                hist_samples[year][ch][var].append(hists[year][ch][var][{"samples": "WJetsToLNu"}])
 
                         else:
                             hists[year][ch][var].fill(
-                                samples=sample,
+                                samples=get_simplified_label(sample),
                                 var=variable,
                                 weight=event_weight * xsec_weight,
                             )
-                            if get_simplified_label(sample) not in labels[year][ch][var]:
-                                labels[year][ch][var].append(get_simplified_label(sample))
-                                hist_samples[year][ch][var].append(hists[year][ch][var][{"samples": sample}])
 
     # store the hists variable
     with open(f'hists/hists_{year}.pkl', 'wb') as f:  # saves the hists object
@@ -195,26 +171,22 @@ def main(args):
     for year in years:
         for ch in channels:
             for var in vars:
-                if len(hist_samples[year][ch][var]) == 0:
+                if hists[year][ch][var] == None:
                     continue
                 fig, ax = plt.subplots(1, 1)
                 # plot the background stacked
-                hep.histplot(hist_samples[year][ch][var],
-                             # yerr=get_yerr(num_nom),
+                hep.histplot([x for x in hists[year][ch][var].stack(0)[1:]],   # the [1:] is there to skip the signal sample which is usually given first in the samples list
                              ax=ax,
                              stack=True,
                              histtype="fill",
-                             label=labels[year][ch][var],
-                             # density=True
+                             label=[x for x in hists[year][ch][var].axes[0]],
                              )
                 # plot the signal seperately on the same plot
-                hep.histplot(hists[year][ch][var][{"samples": signal}],
-                             # yerr=get_yerr(num_nom),
+                hep.histplot(hists[year][ch][var][{"samples": get_simplified_label(signal)}],
                              ax=ax,
                              stack=True,
-                             label="GluGluHToWW",
+                             label=get_simplified_label(signal),
                              color='red'
-                             # density=True
                              )
                 ax.set_yscale('log')
                 ax.set_title(f'{ch} channel')
