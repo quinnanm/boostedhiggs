@@ -177,15 +177,15 @@ def main(args):
                                 labels[year][ch][var].append("WJetsToLNu")
                                 hist_samples[year][ch][var].append(hists[year][ch][var][{"samples": "WJetsToLNu"}])
 
-                        else:
-                            hists[year][ch][var].fill(
-                                samples=sample,
-                                var=variable,
-                                weight=event_weight * xsec_weight,
-                            )
-                            if get_simplified_label(sample) not in labels[year][ch][var]:
-                                labels[year][ch][var].append(get_simplified_label(sample))
-                                hist_samples[year][ch][var].append(hists[year][ch][var][{"samples": sample}])
+                        # else:
+                        #     hists[year][ch][var].fill(
+                        #         samples=sample,
+                        #         var=variable,
+                        #         weight=event_weight * xsec_weight,
+                        #     )
+                        #     if get_simplified_label(sample) not in labels[year][ch][var]:
+                        #         labels[year][ch][var].append(get_simplified_label(sample))
+                        #         hist_samples[year][ch][var].append(hists[year][ch][var][{"samples": sample}])
 
     # store the hists variable
     with open(f'hists/hists_{year}.pkl', 'wb') as f:  # saves the hists object
