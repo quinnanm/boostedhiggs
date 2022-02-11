@@ -215,15 +215,15 @@ def main(args):
                              color='red'
                              # density=True
                              )
-
-                ax.set_yscale('log')
-                ax.set_title(f'{ch} channel')
-                ax.legend()
-
-                hep.cms.lumitext("2017 (13 TeV)", ax=ax)
-                hep.cms.text("Work in Progress", ax=ax)
-                plt.savefig(f'hists/hists_{year}/{var}_{ch}.pdf')
-                plt.close()
+                return
+                # ax.set_yscale('log')
+                # ax.set_title(f'{ch} channel')
+                # ax.legend()
+                #
+                # hep.cms.lumitext("2017 (13 TeV)", ax=ax)
+                # hep.cms.text("Work in Progress", ax=ax)
+                # plt.savefig(f'hists/hists_{year}/{var}_{ch}.pdf')
+                # plt.close()
 
 
 if __name__ == "__main__":
