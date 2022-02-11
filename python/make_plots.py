@@ -52,7 +52,7 @@ def get_axis(var):
     if var == 'lepton_pt':
         return hist2.axis.Regular(50, 0, 400, name='var', label=var)
     elif var == 'lep_isolation':
-        return hist2.axis.Regular(20, 0, 3.5, , name='var', label=var)
+        return hist2.axis.Regular(20, 0, 3.5, name='var', label=var)
     elif var == 'ht':
         return hist2.axis.Regular(20, 180, 1500, name='var', label=var)
     elif var == 'dr_jet_candlep':
