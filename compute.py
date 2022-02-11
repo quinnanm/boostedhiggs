@@ -42,7 +42,7 @@ def main(args):
             fileset[s] = ["root://cmsxrootd.fnal.gov/" + f for f in files[s]]
 
     for sample in fileset:
-        print(sample)
+        print(fileset[sample])
 
 
 if __name__ == "__main__":
