@@ -187,6 +187,8 @@ def main(args):
                                 print('get_simplified_label(sample)', get_simplified_label(sample))
                                 print('labels[year][ch][var]', labels[year][ch][var])
                                 labels[year][ch][var].append(get_simplified_label(sample))
+                                print('after labels[year][ch][var]', labels[year][ch][var])
+
                                 hist_samples[year][ch][var].append(hists[year][ch][var][{"samples": sample}])
 
     # store the hists variable
