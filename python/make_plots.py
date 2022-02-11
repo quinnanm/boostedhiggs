@@ -126,12 +126,12 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels):  # makes hist
                                 var=variable,
                                 weight=event_weight * xsec_weight,
                             )
-                        elif "WJetsToLNu" in sample:  # combining all WJetsToLNu events under one name "WJetsToLNu"
-                            hists[year][ch][var].fill(
-                                samples="WJetsToLNu",
-                                var=variable,
-                                weight=event_weight * xsec_weight,
-                            )
+                        # elif "WJetsToLNu" in sample:  # combining all WJetsToLNu events under one name "WJetsToLNu"
+                        #     hists[year][ch][var].fill(
+                        #         samples="WJetsToLNu",
+                        #         var=variable,
+                        #         weight=event_weight * xsec_weight,
+                        #     )
                         else:
                             hists[year][ch][var].fill(
                                 samples=get_simplified_label(sample),
@@ -145,10 +145,10 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels):  # makes hist
 
 
 def make_stack(odir, vars_to_plot, years, channels):
-    # signal_by_ch = {'ele': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',
-    #                 'mu': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',
-    #                 'had': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',  # NOTE: need to change this file
-    #                 }
+    signal_by_ch = {'ele': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',
+                    'mu': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',
+                    'had': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',  # NOTE: need to change this file
+                    }
 
     signal = 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8'
 
@@ -234,7 +234,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',      dest='years',       default='2017',                     help="year", type=str)
     parser.add_argument('--samples',    dest='samples',     default="configs/samples.json",     help='path to json with samples to be plotted', required=True)
-    parser.add_argument('--vars',       dest='vars',        default="configs/vars.json",        help='path to json with samples to be plotted', required=True)
+    parser.add_argument('--vars',       dest='vars',        default="configs/vars.json",        help='path to json with variables to be plotted', required=True)
     parser.add_argument('--channels',   dest='channels',    default='ele,mu,had',               help='channels for which to plot this variable', required=True)
     parser.add_argument('--odir',       dest='odir',        default='hists',                    help="tag for output directory", type=str)
     parser.add_argument('--idir',       dest='idir',        default='../results/',              help="input directory with results", type=str)
