@@ -20,111 +20,208 @@ from coffea.nanoevents.methods import candidate, vector
 from coffea.analysis_tools import Weights, PackedSelection
 from make_stacked_hists import make_stacked_hists
 
+import hist as hist2
+import matplotlib.pyplot as plt
+import mplhep as hep
+from hist.intervals import clopper_pearson_interval
+
 import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
-def main(args):
-    years = args.year.split(',')
+def get_simplified_label(sample):
+    f = open('../data/simplified_labels.json')
+    name = json.load(f)
+    f.close()
+    return name[sample]
 
-    # preprocessing step before making histograms
-    # combines the parquet files while keeping track of the metadata and saves it as pkl files
-    if args.combine_processed_files:
 
-        samples = args.sample.split(',')
+def get_sum_sumgenweight(year, sample):
 
-        channels = ['ele', 'mu', 'had']
-        years = ['2017']
-        luminosity = {}
+    sum_sumgenweight = 0
+    pkl_files = glob.glob(f'../results/{sample}/outfiles/*.pkl')  # get list of parquet files that need to be processed
+    for file in pkl_files:
+        # load and sum the sumgenweight of each
+        with open(file, 'rb') as f:
+            metadata = pkl.load(f)
+        sum_sumgenweight = sum_sumgenweight + metadata[sample][year]['sumgenweight']
+    return sum_sumgenweight
 
-        for year in years:
 
-            if not os.path.exists(f'hists/'):
-                os.makedirs(f'hists/')
-
-            if not os.path.exists(f'hists/hists_{year}'):
-                os.makedirs(f'hists/hists_{year}')
-
-            # Get luminosity of year
-            f = open('../data/luminosity.json')
-            luminosity = json.load(f)
-            f.close()
-            print(f'Processing samples from year {year} with luminosity {luminosity[year]}')
-
-            xsec = {}
-            xsec_weight = {}
-
-            data_all = {}
-
-            for sample in samples:
-                print('Processing sample', sample)
-                pkl_files = glob.glob(f'../results/{sample}/outfiles/*.pkl')  # get list of metadata pkl files that need to be processed
-                if not pkl_files:  # skip samples which were not processed
-                    print('- No processed files found... skipping sample...')
-                    continue
-
-                # Get xsection of sample
-                f = open('../data/xsecs.json')
-                data = json.load(f)
-                f.close()
-                xsec[sample] = eval(str((data[sample])))  # because some xsections are given as string formulas in the xsecs.json
-                print('- xsection of sample is', xsec[sample])
-
-                # define some initializers
-                sum_sumgenweight = {}
-                sum_sumgenweight[sample] = 0
-                data_all[sample] = {}
-
-                for ch in channels:
-                    parquet_files = glob.glob(f'../results/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that need to be processed
-                    for i, parquet_file in enumerate(parquet_files):
-                        tmp = pq.read_table(parquet_file).to_pandas()
-                        if i == 0:
-                            data = tmp
-                        else:
-                            data = pd.concat([data, tmp], ignore_index=True)
-
-                        # load and sum the sumgenweight of each
-                        with open(pkl_files[i], 'rb') as f:
-                            metadata = pkl.load(f)
-                        sum_sumgenweight[sample] = sum_sumgenweight[sample] + metadata[sample][year]['sumgenweight']
-                    data_all[sample][ch] = data
-
-                print('- # of files processed is', i + 1)
-
-                xsec_weight[sample] = (xsec[sample] * luminosity[year]) / (sum_sumgenweight[sample])
-
-            with open(f'hists/hists_{year}/samples.pkl', 'wb') as f:  # save a list of the samples covered
-                pkl.dump(samples, f)
-            with open(f'hists/hists_{year}/data_all.pkl', 'wb') as f:  # save a variable that contains all the events post selection
-                pkl.dump(data_all, f)
-            with open(f'hists/hists_{year}/xsec_weight.pkl', 'wb') as f:  # saves a variable that contains the xsec weight of the sample
-                pkl.dump(xsec_weight, f)
-
+def get_axis(var):
+    if var == 'lepton_pt':
+        return hist2.axis.Regular(50, 0, 400, name='var', label=var)
+    elif var == 'lep_isolation':
+        return hist2.axis.Regular(20, 0, 3.5, , name='var', label=var)
+    elif var == 'ht':
+        return hist2.axis.Regular(20, 180, 1500, name='var', label=var)
+    elif var == 'dr_jet_candlep':
+        return hist2.axis.Regular(520, 0, 1.5, name='var', label=var)
+    elif var == 'met':
+        return hist2.axis.Regular(50, 0, 400, name='var', label=var)
     else:
-        for year in years:
-            with open(f'hists/hists_{year}/samples.pkl', 'rb') as f:
-                samples = pkl.load(f)
-            with open(f'hists/hists_{year}/data_all.pkl', 'rb') as f:
-                data_all = pkl.load(f)
-            with open(f'hists/hists_{year}/xsec_weight.pkl', 'rb') as f:
-                xsec_weight = pkl.load(f)
+        return hist2.axis.Regular(50, 0, 400, name='var', label=var)
 
-            if args.var == None:  # plot all variables if none is specefied
-                vars = ['lepton_pt', 'lep_isolation', 'ht', 'dr_jet_candlep', 'met']
-            else:
-                vars = args.var.split(',')
+
+def main(args):
+    if not os.path.exists(f'hists/'):
+        os.makedirs(f'hists/')
+
+    # get variables to plot
+    if args.var == None:  # plot all variables if none is specefied
+        vars = ['lepton_pt', 'lep_isolation', 'ht', 'dr_jet_candlep', 'met']
+    else:
+        vars = args.var.split(',')
+
+    years = args.year.split(',')
+    samples = args.sample.split(',')
+
+    signal = 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8'
+    channels = ['ele', 'mu', 'had']
+
+    hists = {}  # define a placeholder for all histograms
+    hist_samples = {}
+    labels = {}
+
+    for year in years:
+        # Get luminosity of year
+        f = open('../data/luminosity.json')
+        luminosity = json.load(f)
+        f.close()
+        print(f'Processing samples from year {year} with luminosity {luminosity[year]}')
+
+        if not os.path.exists(f'hists/hists_{year}'):
+            os.makedirs(f'hists/hists_{year}')
+
+        hists[year] = {}
+        hist_samples[year] = {}
+        labels[year] = {}
+
+        for ch in channels:  # initialize the histograms
+            hists[year][ch] = {}
+            hist_samples[year][ch] = {}
+            labels[year][ch] = {}
+
             for var in vars:
-                if var == 'lepton_pt':
-                    make_stacked_hists('lepton_pt', 50, 0, 400, ['ele', 'mu'], samples, data_all, xsec_weight, year, r'Lepton $p_T$ [GeV]')
-                if var == 'lep_isolation':
-                    make_stacked_hists('lep_isolation', 20, 0, 3.5, ['ele', 'mu'], samples, data_all, xsec_weight, year, r'Lepton isolation')
-                if var == 'ht':
-                    make_stacked_hists('ht', 20, 180, 1500, ['had'], samples, data_all, xsec_weight, year, r'HT [GeV]')
-                if var == 'dr_jet_candlep':
-                    make_stacked_hists('dr_jet_candlep', 20, 0, 1.5, ['ele', 'mu'], samples, data_all, xsec_weight, year, r'dr_jet_candlep')
-                if var == 'met':
-                    make_stacked_hists('met', 20, 0, 1.5, ['ele', 'mu', 'had'], samples, data_all, xsec_weight, year, r'dr_jet_candlep')
+
+                sample_axis = hist2.axis.StrCategory([], name='samples', growth=True)
+
+                hists[year][ch][var] = hist2.Hist(
+                    sample_axis,
+                    get_axis(var),
+                )
+                hist_samples[year][ch][var] = []
+                labels[year][ch][var] = []
+
+        # loop over the processed files and fill the histograms
+        for i, sample in enumerate(samples):
+
+            print('Processing sample', sample)
+            pkl_files = glob.glob(f'../results/{sample}/outfiles/*.pkl')  # get list of metadata pkl files that need to be processed
+            if not pkl_files:  # skip samples which were not processed
+                print('- No processed files found... skipping sample...')
+                continue
+
+            # Get xsection of sample
+            f = open('../data/xsecs.json')
+            xsec = json.load(f)
+            f.close()
+            xsec = eval(str((xsec[sample])))  # because some xsections are given as string formulas in the xsecs.json
+            print('- xsection of sample is', xsec)
+
+            # Get sum_sumgenweight of sample
+            sum_sumgenweight = get_sum_sumgenweight(year, sample)
+
+            # Get overall weighting of events
+            xsec_weight = (xsec * luminosity[year]) / (sum_sumgenweight)
+
+            for ch in channels:
+                parquet_files = glob.glob(f'../results/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
+
+                for i, parquet_file in enumerate(parquet_files):
+                    data = pq.read_table(parquet_file).to_pandas()
+
+                    for var in vars:
+                        if var not in data.keys():
+                            continue
+
+                        variable = data[var].to_numpy()
+                        event_weight = data['weight'].to_numpy()
+
+                        if sample == signal:  # keep the signal seperate from the other "background" samples
+                            hists[year][ch][var].fill(
+                                samples=sample,
+                                var=variable,
+                                weight=event_weight * xsec_weight,
+                            )
+
+                        elif "QCD" in sample:
+                            hists[year][ch][var].fill(
+                                samples="QCD",  # combining all QCD events under one name "QCD"
+                                var=variable,
+                                weight=event_weight * xsec_weight,
+                            )
+                            if "QCD" not in labels[year][ch][var]:
+                                labels[year][ch][var].append("QCD")
+                                hist_samples[year][ch][var].append(hists[year][ch][var][{"samples": "QCD"}])
+
+                        elif "WJetsToLNu" in sample:  # combining all WJetsToLNu events under one name "WJetsToLNu"
+                            hists[year][ch][var].fill(
+                                samples="WJetsToLNu",
+                                var=variable,
+                                weight=event_weight * xsec_weight,
+                            )
+                            if "WJetsToLNu" not in labels[year][ch][var]:
+                                labels[year][ch][var].append("WJetsToLNu")
+                                hist_samples[year][ch][var].append(hists[year][ch][var][{"samples": "WJetsToLNu"}])
+
+                        else:
+                            hists[year][ch][var].fill(
+                                samples=sample,
+                                var=variable,
+                                weight=event_weight * xsec_weight,
+                            )
+                            labels[year][ch][var].append(get_simplified_label(sample))
+                            hist_samples[year][ch][var].append(hists[year][ch][var][{"samples": sample}])
+
+    # store the hists variable
+    with open(f'hists/hists_{year}.pkl', 'wb') as f:  # saves the hists object
+        pkl.dump(hists, f)
+
+    # make the histogram plots
+    for year in years:
+        for ch in channels:
+            for var in vars:
+                if len(hist_samples[year][ch][var]) == 0:
+                    continue
+                fig, ax = plt.subplots(1, 1)
+                # plot the background stacked
+                hep.histplot(hist_samples[year][ch][var],
+                             # yerr=get_yerr(num_nom),
+                             ax=ax,
+                             stack=True,
+                             histtype="fill",
+                             label=labels[year][ch][var],
+                             # density=True
+                             )
+                # plot the signal seperately on the same plot
+                hep.histplot(hists[year][ch][var][{"samples": signal}],
+                             # yerr=get_yerr(num_nom),
+                             ax=ax,
+                             stack=True,
+                             label=labels[year][ch][var],
+                             color='red'
+                             # density=True
+                             )
+
+                ax.set_yscale('log')
+                ax.set_title(f'{ch} channel')
+                ax.legend()
+
+                hep.cms.lumitext("2017 (13 TeV)", ax=ax)
+                hep.cms.text("Work in Progress", ax=ax)
+                plt.savefig(f'hists/hists_{year}/{var}_{ch}.pdf')
+                plt.close()
 
 
 if __name__ == "__main__":
