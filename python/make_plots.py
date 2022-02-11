@@ -136,7 +136,6 @@ def main(args):
 
                     for var in vars:
                         if var not in data.keys():
-                            hists[year][ch][var] = None
                             continue
 
                         variable = data[var].to_numpy()
@@ -171,7 +170,7 @@ def main(args):
     for year in years:
         for ch in channels:
             for var in vars:
-                if hists[year][ch][var] == None:
+                if hists[year][ch][var].shape[0] == 0:     # skip empty histograms (such as lepton_pt for hadronic channel)
                     continue
                 fig, ax = plt.subplots(1, 1)
                 # plot the background stacked
