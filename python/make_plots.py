@@ -177,10 +177,12 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels):  # makes hist
 
 
 def make_stack(odir, vars_to_plot, years, channels):
-    signal_by_ch = {'ele': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',
-                    'mu': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',
-                    'had': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',  # NOTE: need to change this file
-                    }
+    # signal_by_ch = {'ele': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',
+    #                 'mu': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',
+    #                 'had': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',  # NOTE: need to change this file
+    #                 }
+
+    signal = 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8'
 
     # load the hists
     with open(f'{odir}/hists.pkl', 'rb') as f:
@@ -199,17 +201,19 @@ def make_stack(odir, vars_to_plot, years, channels):
                 fig, ax = plt.subplots(1, 1)
                 # TODO: Add data
                 # plot the background stacked
+                print(hists[year][ch][var].axes[0])
                 hep.histplot([x for x in hists[year][ch][var].stack(0)[1:]],   # the [1:] is there to skip the signal sample which is usually given first in the samples list
                              ax=ax,
                              stack=True,
+                             sort='yield',
                              histtype="fill",
                              label=[x for x in hists[year][ch][var].axes[0]][1:],
                              )
                 # plot the signal separately on the same plot
-                hep.histplot(hists[year][ch][var][{"samples": get_simplified_label(signal_by_ch[ch])}],
+                hep.histplot(hists[year][ch][var][{"samples": get_simplified_label(signal)}],
                              ax=ax,
                              stack=True,
-                             label=get_simplified_label(signal_by_ch[ch]),
+                             label=get_simplified_label(signal),
                              color='red'
                              )
                 ax.set_yscale('log')
