@@ -40,9 +40,13 @@ def main(args):
         files = json.load(f)
         for s in samples:
             fileset[s] = ["root://cmsxrootd.fnal.gov/" + f for f in files[s]]
-
+    import uproot
     for sample in fileset:
-        print(fileset[sample][0])
+        for file in fileset[sample]:
+            print(file)
+            # d = uproot.open(file)
+
+        # print()
 
 
 if __name__ == "__main__":
