@@ -94,7 +94,7 @@ def main(args):
 
         hists[year] = {}
 
-        for ch in channels:  # initialize the histograms
+        for ch in channels:  # initialize the histograms for the different channels and different variables
             hists[year][ch] = {}
 
             for var in vars:
@@ -106,8 +106,7 @@ def main(args):
                 )
 
         # loop over the processed files and fill the histograms
-        for i, sample in enumerate(samples):
-
+        for sample in samples:
             print('Processing sample', sample)
             pkl_files = glob.glob(f'../results/{sample}/outfiles/*.pkl')  # get list of files that were processed
             if not pkl_files:  # skip samples which were not processed
@@ -130,7 +129,7 @@ def main(args):
             for ch in channels:
                 parquet_files = glob.glob(f'../results/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
 
-                for i, parquet_file in enumerate(parquet_files):
+                for parquet_file in parquet_files:
                     data = pq.read_table(parquet_file).to_pandas()
 
                     for var in vars:
@@ -163,7 +162,7 @@ def main(args):
                             )
 
     # store the hists variable
-    with open(f'hists/hists_{year}.pkl', 'wb') as f:  # saves the hists object
+    with open(f'hists/hists.pkl', 'wb') as f:  # saves the hists objects per year
         pkl.dump(hists, f)
 
     # make the histogram plots
@@ -191,7 +190,8 @@ def main(args):
                 ax.set_title(f'{ch} channel')
                 ax.legend()
 
-                hep.cms.lumitext("2017 (13 TeV)", ax=ax)
+                if year == '2017':
+                    hep.cms.lumitext("2017 (13 TeV)", ax=ax)
                 hep.cms.text("Work in Progress", ax=ax)
                 plt.savefig(f'hists/hists_{year}/{var}_{ch}.pdf')
                 plt.close()
@@ -203,7 +203,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',       dest='year',       default='2017',       help="year", type=str)
     parser.add_argument('--sample',     dest='sample',     default=None,         help='sample name', required=True)
-    parser.add_argument("--combine",  dest='combine_processed_files',  action=BoolArg, default=True, help="combine the processed files to make histograms")
     parser.add_argument('--var',     dest='var',     default=None,         help='variable to plot')
     args = parser.parse_args()
 
