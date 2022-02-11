@@ -32,7 +32,7 @@ axis_dict = {
     'lepton_pt': hist2.axis.Regular(50, 20, 500, name='var', label=r'Lepton $p_T$ [GeV]'),
     'lep_isolation': hist2.axis.Regular(20, 0, 3.5, name='var', label=r'Lepton iso'),
     'ht':  hist2.axis.Regular(20, 180, 1500, name='var', label='HT [GeV]'),
-    'dr_jet_candlep': hist2.axis.Regular(520, 0, 1.5, name='var', label=r'$\Delta R(l, Jet)$'),
+    'dr_jet_candlep': hist2.axis.Regular(20, 0, 1.5, name='var', label=r'$\Delta R(l, Jet)$'),
     'met':  hist2.axis.Regular(50, 0, 400, name='var', label='MET [GeV]'),
     'mt_lep_met':  hist2.axis.Regular(20, 0, 300, name='var', label=r'$m_T(lep, p_T^{miss})$ [GeV]'),
     'mu_mvaId': hist2.axis.Regular(20, -1, 1, name='var', label='Muon MVAID'),
@@ -114,6 +114,7 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels):  # makes hist
 
                     for var in vars_to_plot:
                         if var not in data.keys():
+                            print(f'- No {var} for {year}/{ch} - skipping')
                             continue
 
                         variable = data[var].to_numpy()
@@ -144,13 +145,11 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels):  # makes hist
         pkl.dump(hists, f)
 
 
-def make_stack(odir, vars_to_plot, years, channels):
-    # signal_by_ch = {'ele': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',
-    #                 'mu': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',
-    #                 'had': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',  # NOTE: need to change this file
-    #                 }
-
-    signal = 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8'
+def make_stack(odir, vars_to_plot, years, channels,logy=True,add_data=False):
+    signal_by_ch = {'ele': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',
+                    'mu': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',
+                    'had': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',  # NOTE: need to change this file
+    }
 
     # load the hists
     with open(f'{odir}/hists.pkl', 'rb') as f:
@@ -166,8 +165,27 @@ def make_stack(odir, vars_to_plot, years, channels):
             for var in vars_to_plot:
                 if hists[year][ch][var].shape[0] == 0:     # skip empty histograms (such as lepton_pt for hadronic channel)
                     continue
-                fig, ax = plt.subplots(1, 1)
                 # TODO: Add data
+                if add_data:
+                    fig, (ax, rax) = plt.subplots(nrows=2,
+                                                  ncols=1,
+                                                  figsize=(8,8),
+                                                  tight_layout=True,
+                                                  gridspec_kw={"height_ratios": (3, 1)},
+                                                  sharex=True
+                                              )
+                    fig.subplots_adjust(hspace=.07)
+                    data = hists[year][ch][var][{"samples": get_simplified_label(data_label)}]
+                    hep.histplot(data,
+                                 ax=ax,
+                                 histtype="errorbar", 
+                                 color="k",
+                                 yerr=True,
+                                 label=get_simplified_label(data)
+                                 )
+                else:
+                    fig, ax = plt.subplots(1, 1)
+
                 # plot the background stacked
                 hep.histplot([x for x in hists[year][ch][var].stack(0)[1:]],   # the [1:] is there to skip the signal sample which is usually given first in the samples list
                              ax=ax,
@@ -177,13 +195,26 @@ def make_stack(odir, vars_to_plot, years, channels):
                              label=[x for x in hists[year][ch][var].axes[0]][1:],
                              )
                 # plot the signal separately on the same plot
-                hep.histplot(hists[year][ch][var][{"samples": get_simplified_label(signal)}],
+                signal = hists[year][ch][var][{"samples": get_simplified_label(signal_by_ch[ch])}]
+                # if not logy then scale the signal by 10 (?)
+                if not logy:
+                    signal = signal*10
+                hep.histplot(signal,
                              ax=ax,
                              stack=True,
-                             label=get_simplified_label(signal),
+                             label=get_simplified_label(signal_by_ch[ch]),
                              color='red'
-                             )
-                ax.set_yscale('log')
+                )
+                # add ratio plot if we have data
+                if add_data: 
+                    rax.errorbar(
+                        x=[data.axes.value(i)[0] for i in range(len(data.values()))],
+                        y=data.values() / np.sum([b.values() for b in bkg], axis=0),
+                        fmt="ko",
+                    )
+                    
+                if logy:
+                    ax.set_yscale('log')
                 ax.set_title(f'{ch} channel')
                 ax.legend()
 
@@ -192,6 +223,25 @@ def make_stack(odir, vars_to_plot, years, channels):
                 plt.savefig(f'{odir}/hists_{year}/{var}_{ch}.pdf')
                 plt.close()
 
+def make_norm(idir, vars_to_plot, years, channels,logy=True):
+    for year in years:
+        if not os.path.exists(f'{odir}/hists_{year}'):
+            os.makedirs(f'{odir}/hists_{year}')
+        for ch in channels:
+            for var in vars_to_plot:
+                if hists[year][ch][var].shape[0] == 0:
+                    continue
+
+                fig, ax = plt.subplots(1, 1)
+                hep.histplot([x for x in hists[year][ch][var].stack(0)[1:]],
+                             ax=ax,
+                             stack=False,
+                             density=True,
+                             )
+                hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
+                hep.cms.text("Work in Progress", ax=ax)
+                plt.savefig(f'{odir}/hists_{year}/{var}_{ch}_density.pdf')
+                plt.close()
 
 def main(args):
     odir = args.odir
@@ -233,9 +283,9 @@ if __name__ == "__main__":
     # run locally as: python make_plots.py --year 2017 --samples configs/samples.json  --vars configs/vars.json --channels ele,mu,had --idir ../results/ --odir hists
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',      dest='years',       default='2017',                     help="year", type=str)
-    parser.add_argument('--samples',    dest='samples',     default="configs/samples.json",     help='path to json with samples to be plotted', required=True)
-    parser.add_argument('--vars',       dest='vars',        default="configs/vars.json",        help='path to json with samples to be plotted', required=True)
-    parser.add_argument('--channels',   dest='channels',    default='ele,mu,had',               help='channels for which to plot this variable', required=True)
+    parser.add_argument('--samples',    dest='samples',     default="configs/samples.json",     help='path to json with samples to be plotted')
+    parser.add_argument('--vars',       dest='vars',        default="configs/vars.json",        help='path to json with samples to be plotted')
+    parser.add_argument('--channels',   dest='channels',    default='ele,mu,had',               help='channels for which to plot this variable')
     parser.add_argument('--odir',       dest='odir',        default='hists',                    help="tag for output directory", type=str)
     parser.add_argument('--idir',       dest='idir',        default='../results/',              help="input directory with results", type=str)
     args = parser.parse_args()
