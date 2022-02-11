@@ -104,13 +104,13 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels):  # makes hist
             sum_sumgenweight = get_sum_sumgenweight(idir, year, sample)
 
             # Get overall weighting of events
-            xsec_weight = (xsec * luminosity[year]) / (sum_sumgenweight)
+            xsec_weight = (xsec * luminosity[year]) / (sum_sumgenweight)  # each event has (possibly a different) genweight... sumgenweight sums over events in a chunk... sum_sumgenweight sums over chunks
 
             for ch in channels:
                 parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
 
                 for parquet_file in parquet_files:
-                    data = pq.read_table(parquet_file).to_pandas()
+                    data = pq.read_table(parquet_file).to_pandas()  # we can make further selections on the hists here
 
                     for var in vars_to_plot:
                         if var not in data.keys():
@@ -150,6 +150,7 @@ def make_stack(odir, vars_to_plot, years, channels,logy=True,add_data=False):
                     'mu': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',
                     'had': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',  # NOTE: need to change this file
     }
+
 
     # load the hists
     with open(f'{odir}/hists.pkl', 'rb') as f:
@@ -215,6 +216,7 @@ def make_stack(odir, vars_to_plot, years, channels,logy=True,add_data=False):
                     
                 if logy:
                     ax.set_yscale('log')
+                    ax.set_ylim(0.1)
                 ax.set_title(f'{ch} channel')
                 ax.legend()
 
@@ -284,7 +286,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',      dest='years',       default='2017',                     help="year", type=str)
     parser.add_argument('--samples',    dest='samples',     default="configs/samples.json",     help='path to json with samples to be plotted')
-    parser.add_argument('--vars',       dest='vars',        default="configs/vars.json",        help='path to json with samples to be plotted')
+    parser.add_argument('--vars',       dest='vars',        default="configs/vars.json",        help='path to json with variables to be plotted')
     parser.add_argument('--channels',   dest='channels',    default='ele,mu,had',               help='channels for which to plot this variable')
     parser.add_argument('--odir',       dest='odir',        default='hists',                    help="tag for output directory", type=str)
     parser.add_argument('--idir',       dest='idir',        default='../results/',              help="input directory with results", type=str)

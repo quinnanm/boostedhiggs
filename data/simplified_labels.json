@@ -1,5 +1,5 @@
 {
-  "GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8": "GluGluHToWW",
+  "GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8": "GluGluHToWWToLNuQQ",
   "QCD_HT1000to1500_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8": "QCD_HT1000to1500",
   "QCD_HT1500to2000_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8": "QCD_HT1500to2000",
   "QCD_HT2000toInf_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8": "QCD_HT2000toInf",
