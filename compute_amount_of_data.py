@@ -46,12 +46,13 @@ def main(args):
         for file in fileset[sample]:
             f = uproot.open(file)
             c = c + f["Events"].num_entries
+            print(c)
         print(f'{sample} has {c} events')
 
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as: python compute.py --year 2017 --sample ../
+    # run locally as: python compute_amount_of_data.py --year 2017
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',       dest='year',       default='2017',       help="year", type=str)

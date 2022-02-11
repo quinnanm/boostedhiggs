@@ -420,7 +420,7 @@ class HwwProcessor(processor.ProcessorABC):
         #     channel=['mu', 'ele']
         # )
 
-        # event selections for electrons
+        # event selections for electron channel
         self.add_selection(
             name='leptonKin',
             sel=(candidatelep.pt > 40),
@@ -439,11 +439,14 @@ class HwwProcessor(processor.ProcessorABC):
             | ((candidatelep.pt >= 120)
                & (candidatelep.miniPFRelIso_all < 0.2))
         ), channel=['ele'])
+        # TODO: add taus and check signal in hadronic channel plots)
 
-        # had selection   (# TODO: add taus and check signal in hadronic channel plots)
+        # event selections for hadronic channel
         self.add_selection(
             name='oneFatjet',
-            sel=(n_fatjets >= 1) & (n_good_muons == 0) & (n_loose_muons == 0) & (n_good_electrons == 0) & (n_loose_electrons == 0),
+            sel=(n_fatjets >= 1) &
+                (n_good_muons == 0) & (n_loose_muons == 0) &
+                (n_good_electrons == 0) & (n_loose_electrons == 0),
             channel=['had']
         )
         self.add_selection(
