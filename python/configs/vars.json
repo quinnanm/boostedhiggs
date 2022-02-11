@@ -1,0 +1,14 @@
+{
+  "lepton_pt": 1,
+  "lep_isolation": 0,
+  "ht": 1,
+  "dr_jet_candlep": 1,
+  "met": 1,
+  "mt_lep_met": 1,
+  "mu_mvaId": 1,
+  "leadingfj_pt": 1,
+  "leadingfj_msoftdrop": 1,
+  "secondfj_pt": 1,
+  "secondfj_msoftdrop": 1,
+  "bjets_ophem_leadingfj": 1
+}
