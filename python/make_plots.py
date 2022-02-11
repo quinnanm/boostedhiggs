@@ -33,7 +33,7 @@ def get_simplified_label(sample):   # get simplified "alias" names of the sample
     f = open('../data/simplified_labels.json')
     name = json.load(f)
     f.close()
-    return name[sample]
+    return str(name[sample])
 
 
 def get_sum_sumgenweight(year, sample):
