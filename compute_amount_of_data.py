@@ -32,7 +32,7 @@ def main(args):
             samples.append(key)
 
     for year in years:
-
+        d = 0
         for sample in samples:
             c = 0
             pkl_files = glob.glob(f'{idir}/{sample}/outfiles/*.pkl')  # get list of files that were processed
@@ -46,6 +46,8 @@ def main(args):
                     f.close()
                 c = c + variable[sample][year]['cutflows']['ele']['all']
             print(f'{sample} has {c} events')
+            d = d + c
+        print(f'Total # of events is {d}')
 
 
 if __name__ == "__main__":
