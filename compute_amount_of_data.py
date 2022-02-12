@@ -26,7 +26,7 @@ def main(args):
                 continue
             for file in pkl_files:
                 # store the hists variable
-                with open(f'{file}, 'rb') as f:  # saves the hists objects
+                with open(f'{file}', 'rb') as f:
                     variable = pkl.load(f)
 
                 print(variable[sample][year]['cutflows']['ele']['all'])
