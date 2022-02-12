@@ -20,7 +20,7 @@ import os
 def main(args):
 
     years = args.years.split(',')
-    idir = args.indir
+    idir = args.idir
 
     f = open(args.samples)
     json_samples = json.load(f)
