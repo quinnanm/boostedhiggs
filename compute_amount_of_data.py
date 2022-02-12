@@ -17,6 +17,18 @@ import os
 
 
 def main(args):
+
+    years = args.years.split(',')
+    # get samples to make histograms
+    f = open(args.samples)
+    json_samples = json.load(f)
+    f.close()
+
+    samples = []
+    for key, value in json_samples.items():
+        if value == 1:
+            samples.append(key)
+
     for year in years:
         # loop over the processed files and fill the histograms
         for sample in samples:
