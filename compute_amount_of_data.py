@@ -17,37 +17,19 @@ import os
 
 
 def main(args):
-    # get samples to make histograms
-    f = open(args.samples)
-    json_samples = json.load(f)
-    f.close()
+    for year in years:
+        # loop over the processed files and fill the histograms
+        for sample in samples:
+            pkl_files = glob.glob(f'{idir}/{sample}/outfiles/*.pkl')  # get list of files that were processed
+            if not pkl_files:  # skip samples which were not processed
+                print('- No processed files found... skipping sample...')
+                continue
+            for file in pkl_files:
+                # store the hists variable
+                with open(f'{file}, 'rb') as f:  # saves the hists objects
+                    variable = pkl.load(f)
 
-    samples = []
-    for key, value in json_samples.items():
-        if value == 1:
-            samples.append(key)
-
-    # make directory for output
-    if not os.path.exists('./outfiles'):
-        os.makedirs('./outfiles')
-
-    channels = ["ele", "mu", "had"]
-
-    # read samples to submit
-    fileset = {}
-    fname = f"data/fileset_{args.year}_UL_NANO.json"
-    with open(fname, 'r') as f:
-        files = json.load(f)
-        for s in samples:
-            fileset[s] = ["root://cmsxrootd.fnal.gov/" + f for f in files[s]]
-    import uproot
-    for sample in fileset:
-        c = 0
-        for file in fileset[sample]:
-            f = uproot.open(file)
-            c = c + f["Events"].num_entries
-            print(c)
-        print(f'{sample} has {c} events')
+                print(variable[sample][year]['cutflows']['ele']['all'])
 
 
 if __name__ == "__main__":
