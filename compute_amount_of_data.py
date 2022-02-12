@@ -20,7 +20,8 @@ import os
 def main(args):
 
     years = args.years.split(',')
-    # get samples to make histograms
+    idir = args.indir
+
     f = open(args.samples)
     json_samples = json.load(f)
     f.close()
@@ -52,6 +53,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',       dest='years',       default='2017',       help="year", type=str)
     parser.add_argument('--samples',    dest='samples',     default="python/configs/samples.json",     help='path to json with samples to be plotted')
+    parser.add_argument('--idir',       dest='idir',        default='results/',              help="input directory with results", type=str)
     args = parser.parse_args()
 
     main(args)
