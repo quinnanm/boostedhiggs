@@ -32,8 +32,9 @@ def main(args):
             samples.append(key)
 
     for year in years:
-        # loop over the processed files and fill the histograms
+
         for sample in samples:
+            c = 0
             pkl_files = glob.glob(f'{idir}/{sample}/outfiles/*.pkl')  # get list of files that were processed
             if not pkl_files:  # skip samples which were not processed
                 print('- No processed files found... skipping sample...')
@@ -42,8 +43,9 @@ def main(args):
                 # store the hists variable
                 with open(f'{file}', 'rb') as f:
                     variable = pkl.load(f)
-
-                print(variable[sample][year]['cutflows']['ele']['all'])
+                    f.close()
+                c = c + variable[sample][year]['cutflows']['ele']['all']
+            print(f'{sample} has {c} events')
 
 
 if __name__ == "__main__":
