@@ -17,6 +17,13 @@ import pandas as pd
 import os
 
 
+def get_simplified_label(sample):   # get simplified "alias" names of the samples for plotting purposes
+    f = open('data/simplified_labels.json')
+    name = json.load(f)
+    f.close()
+    return str(name[sample])
+
+
 def main(args):
 
     years = args.years.split(',')
@@ -45,7 +52,7 @@ def main(args):
                     variable = pkl.load(f)
                     f.close()
                 c = c + variable[sample][year]['cutflows']['ele']['all']
-            print(f'{sample} has {c} events')
+            print(f'{get_simplified_label(sample)} has {c} events')
             d = d + c
         print(f'Total # of events is {d}')
 
