@@ -49,7 +49,7 @@ if __name__ == "__main__":
     # run locally as: python compute_amount_of_data.py --year 2017
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--year',       dest='year',       default='2017',       help="year", type=str)
+    parser.add_argument('--years',       dest='years',       default='2017',       help="year", type=str)
     parser.add_argument('--samples',    dest='samples',     default="python/configs/samples.json",     help='path to json with samples to be plotted')
     args = parser.parse_args()
 
