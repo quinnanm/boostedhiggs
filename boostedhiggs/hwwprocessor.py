@@ -14,7 +14,7 @@ import pyarrow.parquet as pq
 from coffea import processor
 from coffea.nanoevents.methods import candidate, vector
 from coffea.analysis_tools import Weights, PackedSelection
-from utils import match_HWW
+from boostedhiggs.utils import match_HWW
 
 import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
