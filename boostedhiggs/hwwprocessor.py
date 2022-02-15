@@ -380,7 +380,7 @@ class HwwProcessor(processor.ProcessorABC):
         dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj_lep))  # ele and mu
         dphi_jet_leadingfj = abs(goodjets.delta_phi(leadingfj))  # had
 
-        bjets_ophem_lepfj = ak.max(goodjets[dphi_jet_lepfj > np.pi / 2].btagDeepFlavB, axis=1)  # in event, pick highest b score in opposite direction from signal
+        bjets_ophem_lepfj = ak.max(goodjets[dphi_jet_lepfj > np.pi / 2].btagDeepFlavB, axis=1)  # in event, pick highest b score in opposite direction from signal (we will make cut here to avoid tt background events producing bjets)
         bjets_ophem_leadingfj = ak.max(goodjets[dphi_jet_leadingfj > np.pi / 2].btagDeepFlavB, axis=1)
 
         # deltaR
@@ -414,11 +414,12 @@ class HwwProcessor(processor.ProcessorABC):
         self.add_selection('leptonInJet', sel=(dr_jet_candlep < 0.8), channel=['mu', 'ele'])
         # self.add_selection('ht', sel=(ht > 200), channel=['mu', 'ele'])
         # self.add_selection('mt', sel=(mt_lep_met < 100), channel=['mu', 'ele'])
-        # self.add_selection(
-        #     name='bjet_tag',
-        #     sel=(bjets_ophem_lepfj > self._btagWPs["medium"]),
-        #     channel=['mu', 'ele']
-        # )
+
+        self.add_selection(
+            name='bjet_tag',
+            sel=(bjets_ophem_lepfj > self._btagWPs["medium"]),
+            channel=['mu', 'ele']
+        )
 
         # event selections for electron channel
         self.add_selection(
