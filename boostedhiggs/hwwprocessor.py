@@ -412,7 +412,7 @@ class HwwProcessor(processor.ProcessorABC):
                & (candidatelep.miniPFRelIso_all < 0.2))
         ), channel=['mu'])
         self.add_selection('leptonInJet', sel=(dr_jet_candlep < 0.8), channel=['mu', 'ele'])
-        self.add_selection('ht', sel=(ht > 200), channel=['mu', 'ele'])
+        # self.add_selection('ht', sel=(ht > 200), channel=['mu', 'ele'])
         # self.add_selection('mt', sel=(mt_lep_met < 100), channel=['mu', 'ele'])
         # self.add_selection(
         #     name='bjet_tag',
