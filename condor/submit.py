@@ -13,7 +13,7 @@ from math import ceil
 def main(args):
 
     locdir = "condor/" + args.tag
-    homedir = f"/store/user/fmokhtar/boostedhiggs/"
+    homedir = "/store/user/fmokhtar/boostedhiggs/"
     outdir = homedir + args.tag + "/"
 
     # make local directory
@@ -119,8 +119,8 @@ if __name__ == "__main__":
     parser.add_argument("--tag",       dest="tag", default="Test", help="process tag", type=str)
     parser.add_argument("--outdir",    dest="outdir", default="outfiles", help="directory for output files", type=str)
     parser.add_argument("--processor", dest="processor", default="hww", help="which processor", type=str, choices=["hww"])
-    parser.add_argument('--sample',    dest='sample',default=None, help='sample name', required=True)
-    parser.add_argument("--pfnano",    dest='pfnano',action="store_true",  default=False, help="Run with pfnano")
+    parser.add_argument('--sample',    dest='sample', default=None, help='sample name', required=True)
+    parser.add_argument("--pfnano",    dest='pfnano', action="store_true",  default=False, help="Run with pfnano")
     parser.add_argument("--files-per-job", default=20, help="# files per condor job", type=int)
     parser.add_argument("--submit",    dest="submit", default=False, help="submit jobs when created")
     args = parser.parse_args()
