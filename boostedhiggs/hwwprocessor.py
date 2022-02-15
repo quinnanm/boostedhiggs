@@ -14,6 +14,7 @@ import pyarrow.parquet as pq
 from coffea import processor
 from coffea.nanoevents.methods import candidate, vector
 from coffea.analysis_tools import Weights, PackedSelection
+from utils import match_HWW
 
 import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
@@ -62,7 +63,11 @@ class HwwProcessor(processor.ProcessorABC):
                 "ht",
                 "mt_lep_met",
                 "dr_jet_candlep",
+                "bjets_ophem_lepfj",
                 "weight",
+                "fj_lep_msoftdrop",
+                "fj_lep_pt",
+                "lep_fj_m"
             ],
             'mu': [
                 "lepton_pt",
@@ -72,7 +77,11 @@ class HwwProcessor(processor.ProcessorABC):
                 "mt_lep_met",
                 "dr_jet_candlep",
                 "mu_mvaId",
+                "bjets_ophem_lepfj",
                 "weight",
+                "fj_lep_msoftdrop",
+                "fj_lep_pt",
+                "lep_fj_m"
             ],
             'had': [
                 "leadingfj_pt",
@@ -373,6 +382,10 @@ class HwwProcessor(processor.ProcessorABC):
         leadingfj = ak.firsts(good_fatjets)
         secondfj = ak.pad_none(good_fatjets, 2, axis=1)[:, 1]
 
+        # for hadronic
+        candidatefj = leadingfj
+
+        # for leptonic
         candidatefj_lep = ak.firsts(good_fatjets[ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)])
         # lepton and fatjet mass
         lep_fj_m = (candidatefj_lep - candidatelep_p4).mass
@@ -391,6 +404,14 @@ class HwwProcessor(processor.ProcessorABC):
         mt_lep_met = np.sqrt(
             2. * candidatelep_p4.pt * met.pt * (ak.ones_like(met.pt) - np.cos(candidatelep_p4.delta_phi(met)))
         )
+
+        # # TODO: if signal and save x
+        # # # TODO: only run it for signal hadronic channel and save x
+        # x = match_HWW(events.GenPart, candidatefj)
+        # # # TODO: only run it for signal leptonic channel and save x
+        # x = match_HWW(events.GenPart, candidatefj_lep)
+
+        # save: match_HWW, hWW_nprongs (for add leptonic iswlepton, iswstarlepton as well)
 
         # event selections for muon channel
         self.add_selection(
@@ -412,14 +433,13 @@ class HwwProcessor(processor.ProcessorABC):
                & (candidatelep.miniPFRelIso_all < 0.2))
         ), channel=['mu'])
         self.add_selection('leptonInJet', sel=(dr_jet_candlep < 0.8), channel=['mu', 'ele'])
-        # self.add_selection('ht', sel=(ht > 200), channel=['mu', 'ele'])
-        # self.add_selection('mt', sel=(mt_lep_met < 100), channel=['mu', 'ele'])
-
         self.add_selection(
             name='bjet_tag',
-            sel=(bjets_ophem_lepfj > self._btagWPs["medium"]),
+            sel=(bjets_ophem_lepfj < self._btagWPs["medium"]),
             channel=['mu', 'ele']
         )
+        # self.add_selection('ht', sel=(ht > 200), channel=['mu', 'ele'])
+        # self.add_selection('mt', sel=(mt_lep_met < 100), channel=['mu', 'ele'])
 
         # event selections for electron channel
         self.add_selection(
@@ -465,17 +485,17 @@ class HwwProcessor(processor.ProcessorABC):
             sel=(leadingfj.qcdrho > -7) & (leadingfj.qcdrho < -2.0),
             channel=['had']
         )
-#         self.add_selection(
-#             name='bjet_tag',
-#             sel=(bjets_ophem_leadingfj > self._btagWPs["medium"]),
-#             channel=['had']
-#         )
+        self.add_selection(
+            name='bjet_tag',
+            sel=(bjets_ophem_leadingfj < self._btagWPs["medium"]),
+            channel=['had']
+        )
 
         # initialize pandas dataframe
         output = {}
         for ch in self._channels:
             out = {}
-            for var in self._skimvars[ch]:
+            for var in self._skimvars[ch]:  # # TODO: make more generic
                 if var == "lepton_pt":
                     value = pad_val(candidatelep.pt, -1)
                     out[var] = value
@@ -521,6 +541,17 @@ class HwwProcessor(processor.ProcessorABC):
                 if var == "weight":
                     value = pad_val(events.genWeight, -1)
                     out[var] = value
+
+                if var == "fj_lep_msoftdrop":
+                    value = pad_val(candidatefj_lep.msoftdrop, -1)
+                    out[var] = value
+                if var == "fj_lep_pt":
+                    value = pad_val(candidatefj_lep.pt, -1)  # pt of fatjet which contains lepton
+                    out[var] = value
+                if var == "lep_fj_m":
+                    value = pad_val(lep_fj_m, -1)   # mass of fatjet without lepton
+                    out[var] = value
+
                 else:
                     continue
 
