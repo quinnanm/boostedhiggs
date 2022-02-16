@@ -71,7 +71,14 @@ def match_HWW(genparticles, candidatefj):
     iswlepton = (leptons_mass == higgs_w_mass)
     iswstarlepton = (leptons_mass == higgs_wstar_mass)
 
-    return hWW_flavor, hWW_matched, hWW_nprongs, matchedH, iswlepton, iswstarlepton
+    ret = {"hWW_flavor": hWW_flavor,
+           "hWW_matched": hWW_matched,
+           "hWW_nprongs": hWW_nprongs,
+           "matchedH": matchedH,
+           "iswlepton": iswlepton,
+           "iswstarlepton": iswstarlepton}
+
+    return ret
 
 
 def match_Htt(genparticles, candidatefj):
