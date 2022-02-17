@@ -118,11 +118,12 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels):  # makes hist
 
                         # we can make further selections before filling the hists here
                         data = data[data['ht'] > 300]
-                        print('ch', ch)
-                        print('data', data)
+
+                        print(ch, data.keys())
 
                         variable = data[var].to_numpy()
-                        event_weight = data['weight'].to_numpy()
+                        # event_weight = data['weight'].to_numpy()
+                        event_weight = 1
 
                         # filling histograms
                         if "QCD" in sample:
