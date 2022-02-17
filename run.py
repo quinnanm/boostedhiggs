@@ -40,10 +40,10 @@ def main(args):
             for subdir in files.keys():
                 # print('files[subdir].items()', files[subdir].items())
                 for key, flist in files[subdir].items():
-                    print(key)
-                    if key in samples:
-                        print('key in sample')
-                        fileset[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist[args.starti:args.endi]]
+                    for s in samples:
+                        if key in s:
+                            print('key in sample')
+                            fileset[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist[args.starti:args.endi]]
         else:
             files = json.load(f)
             for s in samples:
