@@ -511,8 +511,8 @@ class HwwProcessor(processor.ProcessorABC):
             variables["iswlepton_lep"] = pad_val(match_HWW_lep["iswlepton"], -1)
             variables["iswstarlepton_lep"] = pad_val(match_HWW_lep["iswstarlepton"], -1)
 
-            # variables["matchedH_had"] = pad_val(match_HWW_had["matchedH"], -1)
-            # variables["matchedH_lep"] = pad_val(match_HWW_lep["matchedH"], -1)
+            variables["matchedH_had"] = pad_val(ak.firsts(match_HWW_had["matchedH"].pt), -1)
+            variables["matchedH_lep"] = pad_val(ak.firsts(match_HWW_lep["matchedH"]).pt, -1)
 
         variables["lepton_pt"] = pad_val(candidatelep.pt, -1)
         variables["dr_jet_candlep"] = pad_val(dr_jet_candlep, -1)
