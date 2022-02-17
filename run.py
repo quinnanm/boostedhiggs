@@ -33,10 +33,14 @@ def main(args):
         fname = f"data/pfnanoindex_{args.year}.json"
     else:
         fname = f"data/fileset_{args.year}_UL_NANO.json"
+
     with open(fname, 'r') as f:
         if args.pfnano:
             files = json.load(f)[args.year]
+            print('files.keys()', files.keys())
             for subdir in files.keys():
+                print('subdir', subdir)
+                print('files[subdir].items()', files[subdir].items())
                 for key, flist in files[subdir].items():
                     if key in samples:
                         fileset[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist[args.starti:args.endi]]

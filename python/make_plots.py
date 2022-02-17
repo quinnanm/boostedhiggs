@@ -239,12 +239,12 @@ if __name__ == "__main__":
     # e.g.
     # run locally as: python make_plots.py --year 2017 --samples configs/samples.json  --vars configs/vars.json --channels ele,mu,had --idir ../results/ --odir hists
     parser = argparse.ArgumentParser()
-    parser.add_argument('--years',      dest='years',       default='2017',                     help="year", type=str)
+    parser.add_argument('--years',      dest='years',       default='2017',                     help="year")
     parser.add_argument('--samples',    dest='samples',     default="configs/samples.json",     help='path to json with samples to be plotted', required=True)
     parser.add_argument('--vars',       dest='vars',        default="configs/vars.json",        help='path to json with variables to be plotted', required=True)
     parser.add_argument('--channels',   dest='channels',    default='ele,mu,had',               help='channels for which to plot this variable', required=True)
-    parser.add_argument('--odir',       dest='odir',        default='hists',                    help="tag for output directory", type=str)
-    parser.add_argument('--idir',       dest='idir',        default='../results/',              help="input directory with results", type=str)
+    parser.add_argument('--odir',       dest='odir',        default='hists',                    help="tag for output directory")
+    parser.add_argument('--idir',       dest='idir',        default='../results/',              help="input directory with results")
     args = parser.parse_args()
 
     main(args)
