@@ -18,6 +18,7 @@ from boostedhiggs.utils import match_HWW
 
 import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 np.seterr(invalid='ignore')
 
 
@@ -495,46 +496,51 @@ class HwwProcessor(processor.ProcessorABC):
             channel=['had']
         )
 
+        variables = {}
+
         # higgs matching
-        match_HWW_had = match_HWW(events.GenPart, candidatefj)
-        match_HWW_lep = match_HWW(events.GenPart, candidatefj_lep)
+        if ('HToWW' or 'HWW') in dataset:
+            match_HWW_had = match_HWW(events.GenPart, candidatefj)
+            match_HWW_lep = match_HWW(events.GenPart, candidatefj_lep)
+
+            variables["hWW_nprongs_had"] = pad_val(match_HWW_had["hWW_nprongs"], -1)
+            variables["iswlepton_had"] = pad_val(match_HWW_had["iswlepton"], -1)
+            variables["iswstarlepton_had"] = pad_val(match_HWW_had["iswstarlepton"], -1)
+
+            variables["hWW_nprongs_lep"] = pad_val(match_HWW_lep["hWW_nprongs"], -1)
+            variables["iswlepton_lep"] = pad_val(match_HWW_lep["iswlepton"], -1)
+            variables["iswstarlepton_lep"] = pad_val(match_HWW_lep["iswstarlepton"], -1)
+
+            # variables["matchedH_had"] = pad_val(match_HWW_had["matchedH"], -1)
+            # variables["matchedH_lep"] = pad_val(match_HWW_lep["matchedH"], -1)
 
         # initialize pandas dataframe
         output = {}
 
-        all = {"lepton_pt": pad_val(candidatelep.pt, -1),
-               "dr_jet_candlep": pad_val(dr_jet_candlep, -1),
-               "mt_lep_met": pad_val(mt_lep_met, -1),
-               "ht": pad_val(ht, -1),
-               "met": pad_val(met.pt, -1),
-               "lep_isolation": pad_val(lep_reliso, -1),
-               "lepfj_m": pad_val(lep_fj_m, -1),
-               "candidatefj_lep_pt": pad_val(candidatefj_lep.pt, -1),
-               "leadingfj_pt": pad_val(leadingfj.pt, -1),
-               "leadingfj_msoftdrop": pad_val(leadingfj.msoftdrop, -1),
-               "secondfj_pt": pad_val(secondfj.msoftdrop, -1),
-               "secondfj_msoftdrop": pad_val(secondfj.msoftdrop, -1),
-               "bjets_ophem_lepfj": pad_val(bjets_ophem_lepfj, -1),
-               "bjets_ophem_leadingfj": pad_val(bjets_ophem_leadingfj, -1),
-               "fj_lep_msoftdrop": pad_val(candidatefj_lep.msoftdrop, -1),
-               "fj_lep_pt": pad_val(candidatefj_lep.pt, -1),
-               "lep_fj_m": pad_val(lep_fj_m, -1),
-               "weight": pad_val(events.genWeight, -1),
-               # "matchedH_had": pad_val(match_HWW_had["matchedH"], -1),
-               "hWW_nprongs_had": pad_val(match_HWW_had["hWW_nprongs"], -1),
-               "iswlepton_had": pad_val(match_HWW_had["iswlepton"], -1),
-               "iswstarlepton_had": pad_val(match_HWW_had["iswstarlepton"], -1),
-               # "matchedH_lep": pad_val(match_HWW_lep["matchedH"], -1),
-               "hWW_nprongs_lep": pad_val(match_HWW_lep["hWW_nprongs"], -1),
-               "iswlepton_lep": pad_val(match_HWW_lep["iswlepton"], -1),
-               "iswstarlepton_lep": pad_val(match_HWW_lep["iswstarlepton"], -1),
-               }
+        variables["lepton_pt"] = pad_val(candidatelep.pt, -1)
+        variables["dr_jet_candlep"] = pad_val(dr_jet_candlep, -1)
+        variables["mt_lep_met"] = pad_val(mt_lep_met, -1)
+        variables["ht"] = pad_val(ht, -1)
+        variables["met"] = pad_val(met.pt, -1)
+        variables["lep_isolation"] = pad_val(lep_reliso, -1)
+        variables["lepfj_m"] = pad_val(lep_fj_m, -1)
+        variables["candidatefj_lep_pt"] = pad_val(candidatefj_lep.pt, -1)
+        variables["leadingfj_pt"] = pad_val(leadingfj.pt, -1)
+        variables["leadingfj_msoftdrop"] = pad_val(leadingfj.msoftdrop, -1)
+        variables["secondfj_pt"] = pad_val(secondfj.msoftdrop, -1)
+        variables["secondfj_msoftdrop"] = pad_val(secondfj.msoftdrop, -1)
+        variables["bjets_ophem_lepfj"] = pad_val(bjets_ophem_lepfj, -1)
+        variables["bjets_ophem_leadingfj"] = pad_val(bjets_ophem_leadingfj, -1)
+        variables["fj_lep_msoftdrop"] = pad_val(candidatefj_lep.msoftdrop, -1)
+        variables["fj_lep_pt"] = pad_val(candidatefj_lep.pt, -1)
+        variables["lep_fj_m"] = pad_val(lep_fj_m, -1)
+        variables["weight"] = pad_val(events.genWeight, -1)
 
         for ch in self._channels:
             out = {}
             for var in self._skimvars[ch]:
-                if var in all.keys():
-                    out[var] = all[var]
+                if var in variables.keys():
+                    out[var] = variables[var]
 
             # # TODO: for data, only save one channel for the corresponding name of the dataset... make use of flag isMC
 
