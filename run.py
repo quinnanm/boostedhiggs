@@ -26,8 +26,19 @@ def main(args):
     channels = ["ele", "mu", "had"]
     job_name = '/' + str(args.starti) + '-' + str(args.endi)
 
-    # read samples to submit
-    samples = args.sample.split(',')
+    # # read samples to submit
+    # samples = args.sample.split(',')
+
+    # get samples
+    f = open(args.samples)
+    json_samples = json.load(f)
+    f.close()
+
+    samples = []
+    for key, value in json_samples.items():
+        if value == 1:
+            samples.append(key)
+
     fileset = {}
     if args.pfnano:
         fname = f"data/pfnanoindex_{args.year}.json"
@@ -47,7 +58,6 @@ def main(args):
             files = json.load(f)
             for s in samples:
                 fileset[s] = ["root://cmsxrootd.fnal.gov/" + f for f in files[s][args.starti:args.endi]]
-    print('s', s)
 
     # define processor
     if args.processor == 'hww':
@@ -123,7 +133,9 @@ if __name__ == "__main__":
     parser.add_argument('--endi',       dest='endi',       default=-1,           help="end index of files", type=int)
     parser.add_argument("--processor",  dest="processor",  default="hww",        help="HWW processor", type=str)
     parser.add_argument("--dask",       dest="dask",       action="store_true",  default=False, help="Run with dask")
-    parser.add_argument('--sample',     dest='sample',     default=None,         help='sample name', required=True)
+    # parser.add_argument('--sample',     dest='sample',     default=None,         help='sample name', required=True)
+    parser.add_argument('--samples',    dest='samples',     default="samples_config.json",     help='path to datafiles', required=True)
+
     # parser.add_argument("--pfnano",     dest='pfnano',     action="store_true",  default=False, help="Run with pfnano")
     parser.add_argument("--pfnano", dest='pfnano', action=BoolArg, default=False, help="Run with pfnano")
     parser.add_argument("--chunksize",  dest='chunksize',  type=int, default=10000, help="chunk size in processor")
