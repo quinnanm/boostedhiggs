@@ -51,7 +51,6 @@ def main(args):
             for subdir in files.keys():
                 for key, flist in files[subdir].items():
                     for s in samples:
-                        print('key', key)
                         if key in s:
                             fileset[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist[args.starti:args.endi]]
         else:
@@ -124,21 +123,18 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as: python run.py --year 2017 --processor hww --starti 0 --endi 1 --sample GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8
-    # or for pfnano: python run.py --year 2017 --processor hww --starti 0 --endi 1 --sample GluGluHToWWToLNuQQ
+    # run locally as: python run.py --year 2017 --processor hww --starti 0 --endi 1 --samples samples_config.json
+    # or for pfnano: python run.py --year 2017 --processor hww --starti 0 --endi 1 --samples samples_config.json --pfnano=True
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--year',       dest='year',       default='2017',       help="year", type=str)
-    parser.add_argument('--starti',     dest='starti',     default=0,            help="start index of files", type=int)
-    parser.add_argument('--endi',       dest='endi',       default=-1,           help="end index of files", type=int)
-    parser.add_argument("--processor",  dest="processor",  default="hww",        help="HWW processor", type=str)
-    parser.add_argument("--dask",       dest="dask",       action="store_true",  default=False, help="Run with dask")
-    # parser.add_argument('--sample',     dest='sample',     default=None,         help='sample name', required=True)
-    parser.add_argument('--samples',    dest='samples',     default="samples_config.json",     help='path to datafiles', required=True)
-
-    # parser.add_argument("--pfnano",     dest='pfnano',     action="store_true",  default=False, help="Run with pfnano")
-    parser.add_argument("--pfnano", dest='pfnano', action=BoolArg, default=False, help="Run with pfnano")
-    parser.add_argument("--chunksize",  dest='chunksize',  type=int, default=10000, help="chunk size in processor")
+    parser.add_argument('--year',       dest='year',       default='2017',                  help="year", type=str)
+    parser.add_argument('--starti',     dest='starti',     default=0,                       help="start index of files", type=int)
+    parser.add_argument('--endi',       dest='endi',       default=-1,                      help="end index of files", type=int)
+    parser.add_argument("--processor",  dest="processor",  default="hww",                   help="HWW processor", type=str)
+    parser.add_argument("--dask",       dest="dask",       action="store_true",             default=False, help="Run with dask")
+    parser.add_argument('--samples',    dest='samples',    default="samples_config.json",   help='path to datafiles', required=True)
+    parser.add_argument("--pfnano",     dest='pfnano',     action=BoolArg,                  default=False, help="Run with pfnano")
+    parser.add_argument("--chunksize",  dest='chunksize',  type=int,                        default=10000, help="chunk size in processor")
     parser.add_argument(
         "--executor",
         type=str,
