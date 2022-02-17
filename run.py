@@ -14,6 +14,7 @@ import pyarrow.parquet as pq
 import pickle as pkl
 import pandas as pd
 import os
+from python.BoolArg import BoolArg
 
 
 def main(args):
@@ -120,7 +121,8 @@ if __name__ == "__main__":
     parser.add_argument("--processor",  dest="processor",  default="hww",        help="HWW processor", type=str)
     parser.add_argument("--dask",       dest="dask",       action="store_true",  default=False, help="Run with dask")
     parser.add_argument('--sample',     dest='sample',     default=None,         help='sample name', required=True)
-    parser.add_argument("--pfnano",     dest='pfnano',     action="store_true",  default=False, help="Run with pfnano")
+    # parser.add_argument("--pfnano",     dest='pfnano',     action="store_true",  default=False, help="Run with pfnano")
+    parser.add_argument("--pfnano", dest='pfnano', action=BoolArg, default=False, help="Run with pfnano")
     parser.add_argument("--chunksize",  dest='chunksize',  type=int, default=10000, help="chunk size in processor")
     parser.add_argument(
         "--executor",
