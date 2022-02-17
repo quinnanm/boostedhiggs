@@ -496,10 +496,8 @@ class HwwProcessor(processor.ProcessorABC):
         )
 
         # higgs matching
-        if 'had' in self._channels:
-            match_HWW_had = match_HWW(events.GenPart, candidatefj)
-        if ('ele' in self._channels or 'mu' in self._channels):
-            match_HWW_lep = match_HWW(events.GenPart, candidatefj_lep)
+        match_HWW_had = match_HWW(events.GenPart, candidatefj)
+        match_HWW_lep = match_HWW(events.GenPart, candidatefj_lep)
 
         # initialize pandas dataframe
         output = {}
