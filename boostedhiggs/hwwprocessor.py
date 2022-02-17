@@ -514,9 +514,6 @@ class HwwProcessor(processor.ProcessorABC):
             # variables["matchedH_had"] = pad_val(match_HWW_had["matchedH"], -1)
             # variables["matchedH_lep"] = pad_val(match_HWW_lep["matchedH"], -1)
 
-        # initialize pandas dataframe
-        output = {}
-
         variables["lepton_pt"] = pad_val(candidatelep.pt, -1)
         variables["dr_jet_candlep"] = pad_val(dr_jet_candlep, -1)
         variables["mt_lep_met"] = pad_val(mt_lep_met, -1)
@@ -535,6 +532,9 @@ class HwwProcessor(processor.ProcessorABC):
         variables["fj_lep_pt"] = pad_val(candidatefj_lep.pt, -1)
         variables["lep_fj_m"] = pad_val(lep_fj_m, -1)
         variables["weight"] = pad_val(events.genWeight, -1)
+
+        # initialize pandas dataframe
+        output = {}
 
         for ch in self._channels:
             out = {}
