@@ -172,13 +172,14 @@ def make_stack(odir, vars_to_plot, years, channels):
                 fig, ax = plt.subplots(1, 1)
                 # TODO: Add data
                 # plot the background stacked
-                hep.histplot([x for x in hists[year][ch][var].stack(0)[1:]],   # the [1:] is there to skip the signal sample which is usually given first in the samples list
-                             ax=ax,
-                             stack=True,
-                             sort='yield',
-                             histtype="fill",
-                             label=[x for x in hists[year][ch][var].axes[0]][1:],
-                             )
+                if len(hists[year][ch][var].stack(0)[1:]) != 0:
+                    hep.histplot([x for x in hists[year][ch][var].stack(0)[1:]],   # the [1:] is there to skip the signal sample which is usually given first in the samples list
+                                 ax=ax,
+                                 stack=True,
+                                 sort='yield',
+                                 histtype="fill",
+                                 label=[x for x in hists[year][ch][var].axes[0]][1:],
+                                 )
                 # plot the signal separately on the same plot
                 hep.histplot(hists[year][ch][var][{"samples": get_simplified_label(signal)}],
                              ax=ax,
