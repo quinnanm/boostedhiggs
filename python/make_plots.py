@@ -115,10 +115,11 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels):  # makes hist
                     for var in vars_to_plot:
                         if var not in data.keys():
                             continue
+                        print('1', data.keys())
 
                         # we can make further selections before filling the hists here
                         data = data[data['ht'] > 300]
-
+                        print('2', data.keys())
                         variable = data[var].to_numpy()
                         event_weight = data['weight'].to_numpy()
 
