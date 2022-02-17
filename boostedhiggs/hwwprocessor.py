@@ -85,7 +85,7 @@ class HwwProcessor(processor.ProcessorABC):
                 "bjets_ophem_lepfj",
                 "fj_lep_msoftdrop",
                 "fj_lep_pt",
-                "lep_fj_m"
+                "lep_fj_m",
                 "weight",
                 "matchedH_lep",
                 "hWW_nprongs_lep",
