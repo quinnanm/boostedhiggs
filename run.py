@@ -40,12 +40,14 @@ def main(args):
             for subdir in files.keys():
                 for key, flist in files[subdir].items():
                     for s in samples:
+                        print('key', key)
                         if key in s:
                             fileset[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist[args.starti:args.endi]]
         else:
             files = json.load(f)
             for s in samples:
                 fileset[s] = ["root://cmsxrootd.fnal.gov/" + f for f in files[s][args.starti:args.endi]]
+    print('s', s)
 
     # define processor
     if args.processor == 'hww':
