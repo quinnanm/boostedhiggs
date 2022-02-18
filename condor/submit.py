@@ -138,7 +138,8 @@ if __name__ == "__main__":
     parser.add_argument('--samples',     dest='samples',        default="samples_config.json",      help='path to datafiles',                   type=str)
     parser.add_argument("--pfnano",      dest='pfnano',         default=False,                      help="Run with pfnano",                     action=BoolArg)
     parser.add_argument("--files-per-job", default=20, help="# files per condor job", type=int)
-    parser.add_argument("--submit",    dest="submit", default=False, help="submit jobs when created")
+    parser.add_argument("--submit",      dest='submit',         default=False,                      help="submit jobs when created",                     action=BoolArg)
+
     args = parser.parse_args()
 
     main(args)
