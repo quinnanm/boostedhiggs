@@ -58,13 +58,14 @@ def main(args):
                         if s in key:
                             print('s', s)
                             print('key', key)
+                            a = key
                             fileset[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist[args.starti:args.endi]]
         else:
             files = json.load(f)
             for s in samples:
                 fileset[s] = ["root://cmsxrootd.fnal.gov/" + f for f in files[s][args.starti:args.endi]]
     print('fileset.keys()', fileset.keys())
-    print('fileset.keys()[0]', len(fileset[key]))
+    print('fileset.keys()[0]', len(fileset[a]))
 
     # define processor
     if args.processor == 'hww':
