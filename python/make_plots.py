@@ -47,7 +47,6 @@ axis_dict = {
 def get_simplified_label(sample, pfnano):   # get simplified "alias" names of the samples for plotting purposes
     if pfnano:
         return sample
-    else:
     f = open('../data/simplified_labels.json')
     name = json.load(f)
     f.close()
