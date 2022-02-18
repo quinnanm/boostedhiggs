@@ -44,7 +44,9 @@ axis_dict = {
 }
 
 
-def get_simplified_label(sample):   # get simplified "alias" names of the samples for plotting purposes
+def get_simplified_label(sample, pfnano):   # get simplified "alias" names of the samples for plotting purposes
+    if pfnano:
+        return sample
     f = open('../data/simplified_labels.json')
     name = json.load(f)
     f.close()
@@ -63,7 +65,7 @@ def get_sum_sumgenweight(idir, year, sample):
     return sum_sumgenweight
 
 
-def make_hist(idir, odir, vars_to_plot, samples, years, channels):  # makes histograms and saves in pkl file
+def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # makes histograms and saves in pkl file
     hists = {}  # define a placeholder for all histograms
     for year in years:
         # Get luminosity of year
@@ -94,7 +96,11 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels):  # makes hist
                 continue
 
             # Get xsection of sample
-            f = open('../data/xsecs.json')
+            if args.pfnano:
+                f = open('../data/xsecs_pfnano.json')
+            else:
+                f = open('../data/xsecs.json')
+
             xsec = json.load(f)
             f.close()
             xsec = eval(str((xsec[sample])))  # because some xsections are given as string formulas in the xsecs.json
@@ -121,7 +127,10 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels):  # makes hist
                         data = data[data['ht'] > 300]
 
                         variable = data[var].to_numpy()
-                        event_weight = data['weight'].to_numpy()
+                        try:
+                            event_weight = data['weight'].to_numpy()
+                        except:
+                            event_weight = 1  # for data
 
                         # filling histograms
                         if "QCD" in sample:
@@ -138,21 +147,33 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels):  # makes hist
                             )
                         else:
                             hists[year][ch][var].fill(
-                                samples=get_simplified_label(sample),
+                                samples=get_simplified_label(sample, pfnano),
                                 var=variable,
                                 weight=event_weight * xsec_weight,
                             )
+            try:
+                if event_weight == 1:
+                    print(sample, "sample is data not MC")
+            except:
+                continue
 
     # store the hists variable
     with open(f'{odir}/hists.pkl', 'wb') as f:  # saves the hists objects
         pkl.dump(hists, f)
 
 
-def make_stack(odir, vars_to_plot, years, channels,logy=True,add_data=False):
-    signal_by_ch = {'ele': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',
-                    'mu': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',
-                    'had': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',  # NOTE: need to change this file
-    }
+def make_stack(odir, vars_to_plot, years, channels,pfnano,logy=True,add_data=False):
+    if pfnano:
+         signal_by_ch = {'ele': 'GluGluHToWWToLNuQQ',
+                         'mu': 'GluGluHToWWToLNuQQ',
+                         #'had': 'GluGluHToWWTo4q',
+                         'had': 'GluGluHToWWToLNuQQ', #TODO: change this file
+                    }
+     else:
+         signal_by_ch = {'ele': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',
+                         'mu': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',
+                         'had': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',  
+                     }
 
 
     # load the hists
@@ -202,14 +223,14 @@ def make_stack(odir, vars_to_plot, years, channels,logy=True,add_data=False):
                 except:
                     print('No background samples to plot besides the signal')
                 # plot the signal separately on the same plot
-                signal = hists[year][ch][var][{"samples": get_simplified_label(signal_by_ch[ch])}]
+                signal = hists[year][ch][var][{"samples": get_simplified_label(signal_by_ch[ch],pfnano)}]
                 # if not logy then scale the signal by 10 (?)
                 if not logy:
                     signal = signal*10
                 hep.histplot(signal,
                              ax=ax,
                              stack=True,
-                             label=get_simplified_label(signal_by_ch[ch]),
+                             label=get_simplified_label(signal_by_ch[ch],pfnano),
                              color='red'
                 )
                 # add ratio plot if we have data
@@ -260,7 +281,10 @@ def main(args):
     channels = args.channels.split(',')
 
     # get samples to make histograms
-    f = open(args.samples)
+    if args.pfnano:
+        f = open('configs/samples_pfnano.json')
+    else:
+        f = open('configs/samples.json')
     json_samples = json.load(f)
     f.close()
 
@@ -280,22 +304,23 @@ def main(args):
             vars_to_plot.append(key)
 
     # make the histograms and save in pkl files
-    make_hist(args.idir, odir, vars_to_plot, samples, years, channels)
+    make_hist(args.idir, odir, vars_to_plot, samples, years, channels, args.pfnano)
 
     # plot all process in stack
-    make_stack(odir, vars_to_plot, years, channels)
+    make_stack(odir, vars_to_plot, years, channels, args.pfnano)
 
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as: python make_plots.py --year 2017 --samples configs/samples.json  --vars configs/vars.json --channels ele,mu,had --idir ../results/ --odir hists
+    # run locally as: python make_plots.py --year 2017 --vars configs/vars.json --channels ele,mu,had --idir ../results/ --odir hists --pfnano True
     parser = argparse.ArgumentParser()
-    parser.add_argument('--years',      dest='years',       default='2017',                     help="year", type=str)
-    parser.add_argument('--samples',    dest='samples',     default="configs/samples.json",     help='path to json with samples to be plotted')
+    parser.add_argument('--years',      dest='years',       default='2017',                     help="year")
+    parser.add_argument("--pfnano",     dest='pfnano',      default=False,                      help="Run with pfnano",                     action=BoolArg)
     parser.add_argument('--vars',       dest='vars',        default="configs/vars.json",        help='path to json with variables to be plotted')
     parser.add_argument('--channels',   dest='channels',    default='ele,mu,had',               help='channels for which to plot this variable')
-    parser.add_argument('--odir',       dest='odir',        default='hists',                    help="tag for output directory", type=str)
-    parser.add_argument('--idir',       dest='idir',        default='../results/',              help="input directory with results", type=str)
+    parser.add_argument('--odir',       dest='odir',        default='hists',                    help="tag for output directory")
+    parser.add_argument('--idir',       dest='idir',        default='../results/',              help="input directory with results")
+
     args = parser.parse_args()
 
     main(args)

@@ -49,15 +49,15 @@ def main(args):
     with open(fname, 'r') as f:
         if args.pfnano:
             files = json.load(f)[args.year]
-            for subdir in files.keys():
-                for key, flist in files[subdir].items():
-                    for s in samples:
-                        if s in key:
-                            fileset[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist]
+            for sample in samples:
+                for subdir in files:
+                    for key, flist in files[subdir].items():
+                        if sample == key:
+                            fileset[sample] = files[subdir][key]
         else:
             files = json.load(f)
-            for s in samples:
-                fileset[s] = files[s]
+            for sample in samples:
+                fileset[sample] = files[sample]
 
     # directories for every sample
     for sample in samples:
@@ -107,9 +107,9 @@ def main(args):
                 line = line.replace("EOSOUTPKL", eosoutput_pkl)
                 line = line.replace("SAMPLE", sample)
                 if args.pfnano:
-                    line = line.replace("PFNANO", "--pfnano")
+                    line = line.replace("PFNANO", "True")
                 else:
-                    line = line.replace("PFNANO", "")
+                    line = line.replace("PFNANO", "False")
                 sh_file.write(line)
             sh_file.close()
             sh_templ_file.close()
