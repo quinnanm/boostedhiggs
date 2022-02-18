@@ -14,9 +14,12 @@ import pyarrow.parquet as pq
 from coffea import processor
 from coffea.nanoevents.methods import candidate, vector
 from coffea.analysis_tools import Weights, PackedSelection
+from boostedhiggs.utils import match_HWW
 
 import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+np.seterr(invalid='ignore')
 
 
 def dsum(*dicts):
@@ -62,7 +65,15 @@ class HwwProcessor(processor.ProcessorABC):
                 "ht",
                 "mt_lep_met",
                 "dr_jet_candlep",
+                "bjets_ophem_lepfj",
+                "fj_lep_msoftdrop",
+                "fj_lep_pt",
+                "lep_fj_m",
                 "weight",
+                "matchedH_lep",
+                "hWW_nprongs_lep",
+                "iswlepton_lep",
+                "iswstarlepton_lep",
             ],
             'mu': [
                 "lepton_pt",
@@ -72,7 +83,15 @@ class HwwProcessor(processor.ProcessorABC):
                 "mt_lep_met",
                 "dr_jet_candlep",
                 "mu_mvaId",
+                "bjets_ophem_lepfj",
+                "fj_lep_msoftdrop",
+                "fj_lep_pt",
+                "lep_fj_m",
                 "weight",
+                "matchedH_lep",
+                "hWW_nprongs_lep",
+                "iswlepton_lep",
+                "iswstarlepton_lep",
             ],
             'had': [
                 "leadingfj_pt",
@@ -83,6 +102,8 @@ class HwwProcessor(processor.ProcessorABC):
                 "ht",
                 "bjets_ophem_leadingfj",
                 "weight",
+                "matchedH_had",
+                "hWW_nprongs_had",
             ],
         }
 
@@ -373,14 +394,18 @@ class HwwProcessor(processor.ProcessorABC):
         leadingfj = ak.firsts(good_fatjets)
         secondfj = ak.pad_none(good_fatjets, 2, axis=1)[:, 1]
 
+        # for hadronic channels: leading pt
+        candidatefj = leadingfj
+        dphi_jet_leadingfj = abs(goodjets.delta_phi(leadingfj))
+
+        # for leptonic channel: leading pt which contains lepton
         candidatefj_lep = ak.firsts(good_fatjets[ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)])
+        dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj_lep))
+
         # lepton and fatjet mass
-        lep_fj_m = (candidatefj_lep - candidatelep_p4).mass
+        lep_fj_m = (candidatefj_lep - candidatelep_p4).mass  # mass of fatjet without lepton
 
-        dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj_lep))  # ele and mu
-        dphi_jet_leadingfj = abs(goodjets.delta_phi(leadingfj))  # had
-
-        bjets_ophem_lepfj = ak.max(goodjets[dphi_jet_lepfj > np.pi / 2].btagDeepFlavB, axis=1)  # in event, pick highest b score in opposite direction from signal
+        bjets_ophem_lepfj = ak.max(goodjets[dphi_jet_lepfj > np.pi / 2].btagDeepFlavB, axis=1)  # in event, pick highest b score in opposite direction from signal (we will make cut here to avoid tt background events producing bjets)
         bjets_ophem_leadingfj = ak.max(goodjets[dphi_jet_leadingfj > np.pi / 2].btagDeepFlavB, axis=1)
 
         # deltaR
@@ -411,16 +436,8 @@ class HwwProcessor(processor.ProcessorABC):
             | ((candidatelep.pt >= 55)
                & (candidatelep.miniPFRelIso_all < 0.2))
         ), channel=['mu'])
-        self.add_selection('leptonInJet', sel=(dr_jet_candlep < 0.8), channel=['mu', 'ele'])
-        self.add_selection('ht', sel=(ht > 200), channel=['mu', 'ele'])
-        # self.add_selection('mt', sel=(mt_lep_met < 100), channel=['mu', 'ele'])
-        # self.add_selection(
-        #     name='bjet_tag',
-        #     sel=(bjets_ophem_lepfj > self._btagWPs["medium"]),
-        #     channel=['mu', 'ele']
-        # )
 
-        # event selections for electrons
+        # event selections for electron channel
         self.add_selection(
             name='leptonKin',
             sel=(candidatelep.pt > 40),
@@ -440,10 +457,22 @@ class HwwProcessor(processor.ProcessorABC):
                & (candidatelep.miniPFRelIso_all < 0.2))
         ), channel=['ele'])
 
-        # had selection   (# TODO: add taus and check signal in hadronic channel plots)
+        # event selections for both leptonic channels
+        self.add_selection('leptonInJet', sel=(dr_jet_candlep < 0.8), channel=['mu', 'ele'])
+        self.add_selection(
+            name='bjet_tag',
+            sel=(bjets_ophem_lepfj < self._btagWPs["medium"]),
+            channel=['mu', 'ele']
+        )
+        # self.add_selection('ht', sel=(ht > 200), channel=['mu', 'ele'])
+        # self.add_selection('mt', sel=(mt_lep_met < 100), channel=['mu', 'ele'])
+
+        # event selections for hadronic channel
         self.add_selection(
             name='oneFatjet',
-            sel=(n_fatjets >= 1) & (n_good_muons == 0) & (n_loose_muons == 0) & (n_good_electrons == 0) & (n_loose_electrons == 0),
+            sel=(n_fatjets >= 1) &
+                (n_good_muons == 0) & (n_loose_muons == 0) &
+                (n_good_electrons == 0) & (n_loose_electrons == 0),
             channel=['had']
         )
         self.add_selection(
@@ -461,68 +490,59 @@ class HwwProcessor(processor.ProcessorABC):
             sel=(leadingfj.qcdrho > -7) & (leadingfj.qcdrho < -2.0),
             channel=['had']
         )
-#         self.add_selection(
-#             name='bjet_tag',
-#             sel=(bjets_ophem_leadingfj > self._btagWPs["medium"]),
-#             channel=['had']
-#         )
+        self.add_selection(
+            name='bjet_tag',
+            sel=(bjets_ophem_leadingfj < self._btagWPs["medium"]),
+            channel=['had']
+        )
+
+        variables = {}
+
+        # higgs matching
+        if ('HToWW' or 'HWW') in dataset:
+            match_HWW_had = match_HWW(events.GenPart, candidatefj)
+            match_HWW_lep = match_HWW(events.GenPart, candidatefj_lep)
+
+            variables["hWW_nprongs_had"] = pad_val(match_HWW_had["hWW_nprongs"], -1)
+            variables["iswlepton_had"] = pad_val(match_HWW_had["iswlepton"], -1)
+            variables["iswstarlepton_had"] = pad_val(match_HWW_had["iswstarlepton"], -1)
+
+            variables["hWW_nprongs_lep"] = pad_val(match_HWW_lep["hWW_nprongs"], -1)
+            variables["iswlepton_lep"] = pad_val(match_HWW_lep["iswlepton"], -1)
+            variables["iswstarlepton_lep"] = pad_val(match_HWW_lep["iswstarlepton"], -1)
+
+            variables["matchedH_had"] = pad_val(ak.firsts(match_HWW_had["matchedH"].pt), -1)
+            variables["matchedH_lep"] = pad_val(ak.firsts(match_HWW_lep["matchedH"]).pt, -1)
+
+        variables["lepton_pt"] = pad_val(candidatelep.pt, -1)
+        variables["dr_jet_candlep"] = pad_val(dr_jet_candlep, -1)
+        variables["mt_lep_met"] = pad_val(mt_lep_met, -1)
+        variables["ht"] = pad_val(ht, -1)
+        variables["met"] = pad_val(met.pt, -1)
+        variables["lep_isolation"] = pad_val(lep_reliso, -1)
+        variables["lepfj_m"] = pad_val(lep_fj_m, -1)
+        variables["candidatefj_lep_pt"] = pad_val(candidatefj_lep.pt, -1)
+        variables["leadingfj_pt"] = pad_val(leadingfj.pt, -1)
+        variables["leadingfj_msoftdrop"] = pad_val(leadingfj.msoftdrop, -1)
+        variables["secondfj_pt"] = pad_val(secondfj.msoftdrop, -1)
+        variables["secondfj_msoftdrop"] = pad_val(secondfj.msoftdrop, -1)
+        variables["bjets_ophem_lepfj"] = pad_val(bjets_ophem_lepfj, -1)
+        variables["bjets_ophem_leadingfj"] = pad_val(bjets_ophem_leadingfj, -1)
+        variables["fj_lep_msoftdrop"] = pad_val(candidatefj_lep.msoftdrop, -1)
+        variables["fj_lep_pt"] = pad_val(candidatefj_lep.pt, -1)
+        variables["lep_fj_m"] = pad_val(lep_fj_m, -1)
+        variables["weight"] = pad_val(events.genWeight, -1)
 
         # initialize pandas dataframe
         output = {}
+
         for ch in self._channels:
             out = {}
             for var in self._skimvars[ch]:
-                if var == "lepton_pt":
-                    value = pad_val(candidatelep.pt, -1)
-                    out[var] = value
-                if var == "dr_jet_candlep":
-                    value = pad_val(dr_jet_candlep, -1)
-                    out[var] = value
-                if var == "mt_lep_met":
-                    value = pad_val(mt_lep_met, -1)
-                    out[var] = value
-                if var == "ht":
-                    value = pad_val(ht, -1)
-                    out[var] = value
-                if var == "met":
-                    value = pad_val(met.pt, -1)
-                    out[var] = value
-                if var == "lep_isolation":
-                    value = pad_val(lep_reliso, -1)
-                    out[var] = value
-                if var == "lepfj_m":
-                    value = pad_val(lep_fj_m, -1)
-                    out[var] = value
-                if var == "candidatefj_lep_pt":
-                    value = pad_val(candidatefj_lep.pt, -1)
-                    out[var] = value
-                if var == "leadingfj_pt":
-                    value = pad_val(leadingfj.pt, -1)
-                    out[var] = value
-                if var == "leadingfj_msoftdrop":
-                    value = pad_val(leadingfj.msoftdrop, -1)
-                    out[var] = value
-                if var == "secondfj_pt":
-                    value = pad_val(secondfj.pt, -1)
-                    out[var] = value
-                if var == "secondfj_msoftdrop":
-                    value = pad_val(secondfj.msoftdrop, -1)
-                    out[var] = value
-                if var == "bjets_ophem_lepfj":
-                    value = pad_val(bjets_ophem_lepfj, -1)
-                    out[var] = value
-                if var == "bjets_ophem_leadingfj":
-                    value = pad_val(bjets_ophem_leadingfj, -1)
-                    out[var] = value
-                if var == "weight":
-                    value = pad_val(events.genWeight, -1)
-                    out[var] = value
-                else:
-                    continue
+                if var in variables.keys():
+                    out[var] = variables[var]
 
-            # print arrays and selections to debug
-            # print(out)
-            # print(selections[ch].all(*selections[ch].names))
+            # # TODO: for data, only save one channel for the corresponding name of the dataset... make use of flag isMC
 
             # apply selections
             if np.sum(self.selections[ch].all(*self.selections[ch].names)) > 0:
@@ -539,10 +559,10 @@ class HwwProcessor(processor.ProcessorABC):
         # now save pandas dataframes
         fname = events.behavior["__events_factory__"]._partition_key.replace("/", "_")
         fname = 'condor_' + fname
-        for ch in self._channels:
-            if not os.path.exists(self._output_location + ch):  # creating a directory for each channel
+        for ch in self._channels:  # creating directories for each channel
+            if not os.path.exists(self._output_location + ch):
                 os.makedirs(self._output_location + ch)
-            if not os.path.exists(self._output_location + ch + '/parquet'):  # creating a directory for each channel
+            if not os.path.exists(self._output_location + ch + '/parquet'):
                 os.makedirs(self._output_location + ch + '/parquet')
 
             self.save_dfs_parquet(fname, output[ch], ch)

@@ -187,13 +187,14 @@ where:
 
 So for example:
 ```
-python condor/submit.py --tag Jan25 --script run.py --files-per-job=1 --sample GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8
+python condor/submit.py --tag Jan25 --script run.py --files-per-job=1 --pfnano False --submit False
 ```
 
 The `run.py` script has different options to e.g. select a different processor, run over files that go from one starting index (starti) to the end (endi).
 
-The `submit.py` creates the submission files **and submits jobs afterwards by default.**
-For testing purposes one can comment the `condor_submit` expression and do, e.g:
+The `submit.py` creates the submission files **and submits jobs afterwards if --submit is True.**
+
+To submit jobs one does:
 ```
 for i in condor/Jan25/*.jdl; do condor_submit $i; done
 ```
@@ -232,7 +233,7 @@ condor_q ID --long -n $NAME
 
 #### Submitting jobs locally
 ```
-python run.py --year 2017 --starti 0 --endi 1 --processor hww --sample GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8 --chunksize 10000
+python run.py --year 2017 --processor hww --starti 0 --endi 1 --pfnano False
 ```
 
 ## Post-processing

@@ -8,12 +8,13 @@ import json
 import argparse
 import os
 from math import ceil
+from BoolArg import BoolArg
 
 
 def main(args):
 
     locdir = "condor/" + args.tag
-    homedir = f"/store/user/fmokhtar/boostedhiggs/"
+    homedir = "/store/user/fmokhtar/boostedhiggs/"
     outdir = homedir + args.tag + "/"
 
     # make local directory
@@ -24,20 +25,35 @@ def main(args):
     print("CONDOR work dir: " + outdir)
     os.system(f"mkdir -p /eos/uscms/{outdir}")
 
-    # read samples
-    samples = args.sample.split(',')
-    fileset = {}
+    # get samples
     if args.pfnano:
         fname = f"data/pfnanoindex_{args.year}.json"
+
+        f = open("samples_config_pfnano.json")
+        json_samples = json.load(f)
+        f.close()
     else:
         fname = f"data/fileset_{args.year}_UL_NANO.json"
+
+        f = open("samples_config.json")
+        json_samples = json.load(f)
+        f.close()
+
+    samples = []
+    for key, value in json_samples.items():
+        if value == 1:
+            samples.append(key)
+
+    fileset = {}
+
     with open(fname, 'r') as f:
         if args.pfnano:
             files = json.load(f)[args.year]
             for subdir in files.keys():
                 for key, flist in files[subdir].items():
-                    if key in samples:
-                        fileset[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist[args.starti:args.endi]]
+                    for s in samples:
+                        if s in key:
+                            fileset[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist]
         else:
             files = json.load(f)
             for s in samples:
@@ -119,10 +135,11 @@ if __name__ == "__main__":
     parser.add_argument("--tag",       dest="tag", default="Test", help="process tag", type=str)
     parser.add_argument("--outdir",    dest="outdir", default="outfiles", help="directory for output files", type=str)
     parser.add_argument("--processor", dest="processor", default="hww", help="which processor", type=str, choices=["hww"])
-    parser.add_argument('--sample',    dest='sample',default=None, help='sample name', required=True)
-    parser.add_argument("--pfnano",    dest='pfnano',action="store_true",  default=False, help="Run with pfnano")
+    parser.add_argument('--samples',     dest='samples',        default="samples_config.json",      help='path to datafiles',                   type=str)
+    parser.add_argument("--pfnano",      dest='pfnano',         default=False,                      help="Run with pfnano",                     action=BoolArg)
     parser.add_argument("--files-per-job", default=20, help="# files per condor job", type=int)
-    parser.add_argument("--submit",    dest="submit", default=False, help="submit jobs when created")
+    parser.add_argument("--submit",      dest='submit',         default=False,                      help="submit jobs when created",                     action=BoolArg)
+
     args = parser.parse_args()
 
     main(args)

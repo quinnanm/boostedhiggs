@@ -110,12 +110,15 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels):  # makes hist
                 parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
 
                 for parquet_file in parquet_files:
-                    data = pq.read_table(parquet_file).to_pandas()  # we can make further selections on the hists here
+                    data = pq.read_table(parquet_file).to_pandas()
 
                     for var in vars_to_plot:
                         if var not in data.keys():
                             print(f'- No {var} for {year}/{ch} - skipping')
                             continue
+
+                        # we can make further selections before filling the hists here
+                        data = data[data['ht'] > 300]
 
                         variable = data[var].to_numpy()
                         event_weight = data['weight'].to_numpy()
@@ -188,13 +191,16 @@ def make_stack(odir, vars_to_plot, years, channels,logy=True,add_data=False):
                     fig, ax = plt.subplots(1, 1)
 
                 # plot the background stacked
-                hep.histplot([x for x in hists[year][ch][var].stack(0)[1:]],   # the [1:] is there to skip the signal sample which is usually given first in the samples list
-                             ax=ax,
-                             stack=True,
-                             sort='yield',
-                             histtype="fill",
-                             label=[x for x in hists[year][ch][var].axes[0]][1:],
-                             )
+                try:
+                    hep.histplot([x for x in hists[year][ch][var].stack(0)[1:]],   # the [1:] is there to skip the signal sample which is usually given first in the samples list
+                                 ax=ax,
+                                 stack=True,
+                                 sort='yield',
+                                 histtype="fill",
+                                 label=[x for x in hists[year][ch][var].axes[0]][1:],
+                                 )
+                except:
+                    print('No background samples to plot besides the signal')
                 # plot the signal separately on the same plot
                 signal = hists[year][ch][var][{"samples": get_simplified_label(signal_by_ch[ch])}]
                 # if not logy then scale the signal by 10 (?)
