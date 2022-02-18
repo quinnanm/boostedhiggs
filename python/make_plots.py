@@ -44,7 +44,10 @@ axis_dict = {
 }
 
 
-def get_simplified_label(sample):   # get simplified "alias" names of the samples for plotting purposes
+def get_simplified_label(sample, pfnano):   # get simplified "alias" names of the samples for plotting purposes
+    if pfnano:
+        return sample
+    else:
     f = open('../data/simplified_labels.json')
     name = json.load(f)
     f.close()
@@ -141,7 +144,7 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # ma
                             )
                         else:
                             hists[year][ch][var].fill(
-                                samples=get_simplified_label(sample),
+                                samples=get_simplified_label(sample, pfnano),
                                 var=variable,
                                 weight=event_weight * xsec_weight,
                             )
@@ -151,7 +154,7 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # ma
         pkl.dump(hists, f)
 
 
-def make_stack(odir, vars_to_plot, years, channels):
+def make_stack(odir, vars_to_plot, years, channels, pfnano):
     signal_by_ch = {'ele': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',
                     'mu': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',
                     'had': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',  # NOTE: need to change this file
@@ -187,10 +190,10 @@ def make_stack(odir, vars_to_plot, years, channels):
                 except:
                     print('No background samples to plot besides the signal')
                 # plot the signal separately on the same plot
-                hep.histplot(hists[year][ch][var][{"samples": get_simplified_label(signal)}],
+                hep.histplot(hists[year][ch][var][{"samples": get_simplified_label(signal, pfnano)}],
                              ax=ax,
                              stack=True,
-                             label=get_simplified_label(signal),
+                             label=get_simplified_label(signal, pfnano),
                              color='red'
                              )
                 ax.set_yscale('log')
@@ -239,7 +242,7 @@ def main(args):
     make_hist(args.idir, odir, vars_to_plot, samples, years, channels, args.pfnano)
 
     # plot all process in stack
-    make_stack(odir, vars_to_plot, years, channels)
+    make_stack(odir, vars_to_plot, years, channels, args.pfnano)
 
 
 if __name__ == "__main__":
