@@ -64,7 +64,7 @@ def main(args):
             for s in samples:
                 fileset[s] = ["root://cmsxrootd.fnal.gov/" + f for f in files[s][args.starti:args.endi]]
     print('fileset.keys()', fileset.keys())
-    print('fileset.keys()[0]', len(fileset.keys()[0]))
+    print('fileset.keys()[0]', len(fileset[key]))
 
     # define processor
     if args.processor == 'hww':
