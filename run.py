@@ -162,13 +162,15 @@ if __name__ == "__main__":
 #
 # fname = f"data/pfnanoindex_2017.json"
 #
+# fname1 = f"samples_config_pfnano.json"
+#
 # with open(fname, 'r') as f:
 #     files = json.load(f)['2017']
 # files.keys()
 # files['HWW'].keys()
-# files['HWWPrivate'].keys()
 # for subdir in files.keys():
 #     for key in files[subdir].keys():
-#         if 'HToWW' in key:
-#             print('key', key)
-#             print('subdir', subdir)
+#         for key1 in files1:
+#             if key1 in key:
+#                 print('key', key)
+#                 print('subdir', subdir)
