@@ -209,7 +209,10 @@ def main(args):
     channels = args.channels.split(',')
 
     # get samples to make histograms
-    f = open(args.samples)
+    if args.pfnano:
+        f = open('configs/samples_pfnano.json')
+    else:
+        f = open('configs/samples.json')
     json_samples = json.load(f)
     f.close()
 
@@ -237,10 +240,10 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as: python make_plots.py --year 2017 --samples configs/samples.json  --vars configs/vars.json --channels ele,mu,had --idir ../results/ --odir hists
+    # run locally as: python make_plots.py --year 2017 --vars configs/vars.json --channels ele,mu,had --idir ../results/ --odir hists
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',      dest='years',       default='2017',                     help="year")
-    parser.add_argument('--samples',    dest='samples',     default="configs/samples.json",     help='path to json with samples to be plotted', required=True)
+    parser.add_argument("--pfnano",      dest='pfnano',         default=False,                  help="Run with pfnano",                     action=BoolArg)
     parser.add_argument('--vars',       dest='vars',        default="configs/vars.json",        help='path to json with variables to be plotted', required=True)
     parser.add_argument('--channels',   dest='channels',    default='ele,mu,had',               help='channels for which to plot this variable', required=True)
     parser.add_argument('--odir',       dest='odir',        default='hists',                    help="tag for output directory")
