@@ -58,6 +58,7 @@ def main(args):
                         if s in key:
                             print('s', s)
                             print('key', key)
+                            print('flist', flist)
                             fileset[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist[args.starti:args.endi]]
         else:
             files = json.load(f)
