@@ -158,8 +158,10 @@ def make_stack(odir, vars_to_plot, years, channels, pfnano):
                     'mu': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',
                     'had': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',  # NOTE: need to change this file
                     }
-
-    signal = 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8'
+    if args.pfnano:
+        signal = 'GluGluHToWWToLNuQQ'
+    else:
+        signal = 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8'
 
     # load the hists
     with open(f'{odir}/hists.pkl', 'rb') as f:
