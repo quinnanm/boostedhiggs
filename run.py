@@ -26,24 +26,28 @@ def main(args):
     channels = ["ele", "mu", "had"]
     job_name = '/' + str(args.starti) + '-' + str(args.endi)
 
-    # # read samples to submit
-    # samples = args.sample.split(',')
-
     # get samples
-    f = open(args.samples)
-    json_samples = json.load(f)
-    f.close()
+    if args.pfnano:
+        fname = f"data/pfnanoindex_{args.year}.json"
+
+        f = open("samples_config_pfnano.json")
+        json_samples = json.load(f)
+        f.close()
+    else:
+        fname = f"data/fileset_{args.year}_UL_NANO.json"
+
+        f = open("samples_config.json")
+        json_samples = json.load(f)
+        f.close()
 
     samples = []
     for key, value in json_samples.items():
         if value == 1:
             samples.append(key)
+        if not args.all:
+            break
 
     fileset = {}
-    if args.pfnano:
-        fname = f"data/pfnanoindex_{args.year}.json"
-    else:
-        fname = f"data/fileset_{args.year}_UL_NANO.json"
 
     with open(fname, 'r') as f:
         if args.pfnano:
@@ -123,8 +127,8 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as: python run.py --year 2017 --processor hww --starti 0 --endi 1 --samples samples_config.json
-    # or for pfnano: python run.py --year 2017 --processor hww --starti 0 --endi 1 --samples samples_config.json --pfnano=True
+    # run locally
+    # or for pfnano: python run.py --year 2017 --processor hww --starti 0 --endi 1 --pfnano=True --all=True
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',       dest='year',       default='2017',                  help="year", type=str)
@@ -132,9 +136,11 @@ if __name__ == "__main__":
     parser.add_argument('--endi',       dest='endi',       default=-1,                      help="end index of files", type=int)
     parser.add_argument("--processor",  dest="processor",  default="hww",                   help="HWW processor", type=str)
     parser.add_argument("--dask",       dest="dask",       action="store_true",             default=False, help="Run with dask")
-    parser.add_argument('--samples',    dest='samples',    default="samples_config.json",   help='path to datafiles', required=True)
+    parser.add_argument('--samples',    dest='samples',    default="samples_config.json",   help='path to datafiles')
     parser.add_argument("--pfnano",     dest='pfnano',     action=BoolArg,                  default=False, help="Run with pfnano")
     parser.add_argument("--chunksize",  dest='chunksize',  type=int,                        default=10000, help="chunk size in processor")
+    parser.add_argument("--all",        dest='all',        action=BoolArg,                  default=False, help="Run over all samples in the config")
+
     parser.add_argument(
         "--executor",
         type=str,
