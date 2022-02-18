@@ -55,7 +55,7 @@ def main(args):
             for s in samples:
                 for subdir in files:
                     for key, flist in files[subdir].items():
-                        if s in key:
+                        if s == key:
                             print('s', s)
                             print('key', key)
                             fileset[s] = ["root://cmsxrootd.fnal.gov/" + f for f in files[subdir][key][args.starti:args.endi]]
