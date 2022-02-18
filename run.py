@@ -138,7 +138,7 @@ if __name__ == "__main__":
     parser.add_argument('--samples',     dest='samples',        default="samples_config.json",      help='path to datafiles',                   type=str)
     parser.add_argument("--pfnano",      dest='pfnano',         default=False,                      help="Run with pfnano",                     action=BoolArg)
     parser.add_argument("--chunksize",   dest='chunksize',      default=10000,                      help="chunk size in processor",             type=int)
-    parser.add_argument("--all",         dest='all',            default=False,                      help="Run over all samples in the config",  action=BoolArg)
+    parser.add_argument("--all",         dest='all',            default=True,                       help="Run over all samples in the config",  action=BoolArg)
     parser.add_argument(
         "--executor",
         type=str,
