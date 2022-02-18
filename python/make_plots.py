@@ -63,7 +63,7 @@ def get_sum_sumgenweight(idir, year, sample):
     return sum_sumgenweight
 
 
-def make_hist(idir, odir, vars_to_plot, samples, years, channels):  # makes histograms and saves in pkl file
+def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # makes histograms and saves in pkl file
     hists = {}  # define a placeholder for all histograms
     for year in years:
         # Get luminosity of year
@@ -94,7 +94,11 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels):  # makes hist
                 continue
 
             # Get xsection of sample
-            f = open('../data/xsecs.json')
+            if args.pfnano:
+                f = open('../data/xsecs_pfnano.json')
+            else:
+                f = open('../data/xsecs.json')
+
             xsec = json.load(f)
             f.close()
             xsec = eval(str((xsec[sample])))  # because some xsections are given as string formulas in the xsecs.json
@@ -232,7 +236,7 @@ def main(args):
             vars_to_plot.append(key)
 
     # make the histograms and save in pkl files
-    make_hist(args.idir, odir, vars_to_plot, samples, years, channels)
+    make_hist(args.idir, odir, vars_to_plot, samples, years, channels, args.pfnano)
 
     # plot all process in stack
     make_stack(odir, vars_to_plot, years, channels)
@@ -240,7 +244,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as: python make_plots.py --year 2017 --vars configs/vars.json --channels ele,mu,had --idir ../results/ --odir hists
+    # run locally as: python make_plots.py --year 2017 --vars configs/vars.json --channels ele,mu,had --idir ../results/ --odir hists --pfnano True
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',      dest='years',       default='2017',                     help="year")
     parser.add_argument("--pfnano",      dest='pfnano',         default=False,                  help="Run with pfnano",                     action=BoolArg)
