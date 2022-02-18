@@ -49,20 +49,22 @@ def main(args):
 
     fileset = {}
 
+    print('Samples to be processed:')
+
     with open(fname, 'r') as f:
         if args.pfnano:
             files = json.load(f)[args.year]
-            for s in samples:
+            for sample in samples:
                 for subdir in files:
                     for key, flist in files[subdir].items():
-                        if s == key:
-                            print('s', s)
-                            print('key', key)
-                            fileset[s] = ["root://cmsxrootd.fnal.gov/" + f for f in files[subdir][key][args.starti:args.endi]]
+                        if sample == key:
+                            print(sample)
+                            fileset[sample] = ["root://cmsxrootd.fnal.gov/" + f for f in files[subdir][key][args.starti:args.endi]]
         else:
             files = json.load(f)
-            for s in samples:
-                fileset[s] = ["root://cmsxrootd.fnal.gov/" + f for f in files[s][args.starti:args.endi]]
+            for sample in samples:
+                print(sample)
+                fileset[sample] = ["root://cmsxrootd.fnal.gov/" + f for f in files[sample][args.starti:args.endi]]
 
     # define processor
     if args.processor == 'hww':
