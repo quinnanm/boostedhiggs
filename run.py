@@ -14,7 +14,7 @@ import pyarrow.parquet as pq
 import pickle as pkl
 import pandas as pd
 import os
-from python.BoolArg import BoolArg
+from BoolArg import BoolArg
 
 
 def main(args):
