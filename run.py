@@ -32,7 +32,7 @@ def main(args):
     else:
         fname = f"data/fileset_{args.year}_UL_NANO.json"
 
-    if args.sample not None:
+    if args.sample == None:
         if args.pfnano:
             f = open("samples_config_pfnano.json")
             json_samples = json.load(f)
