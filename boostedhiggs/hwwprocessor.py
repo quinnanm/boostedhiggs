@@ -499,7 +499,7 @@ class HwwProcessor(processor.ProcessorABC):
         variables = {}
 
         # higgs matching
-        if ('HToWW' or 'HWW') in dataset:
+        if (('HToWW' or 'HWW') in dataset) and isMC:
             match_HWW_had = match_HWW(events.GenPart, candidatefj)
             match_HWW_lep = match_HWW(events.GenPart, candidatefj_lep)
 
@@ -531,7 +531,8 @@ class HwwProcessor(processor.ProcessorABC):
         variables["fj_lep_msoftdrop"] = pad_val(candidatefj_lep.msoftdrop, -1)
         variables["fj_lep_pt"] = pad_val(candidatefj_lep.pt, -1)
         variables["lep_fj_m"] = pad_val(lep_fj_m, -1)
-        variables["weight"] = pad_val(events.genWeight, -1)
+        if isMC:
+            variables["weight"] = pad_val(events.genWeight, -1)
 
         # initialize pandas dataframe
         output = {}

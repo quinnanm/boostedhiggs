@@ -126,7 +126,11 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # ma
                         data = data[data['ht'] > 300]
 
                         variable = data[var].to_numpy()
-                        event_weight = data['weight'].to_numpy()
+                        try:
+                            event_weight = data['weight'].to_numpy()
+                        except:
+                            print(sample, "sample is data not MC")
+                            event_weight = 1  # for data
 
                         # filling histograms
                         if "QCD" in sample:
