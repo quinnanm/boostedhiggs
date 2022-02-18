@@ -150,8 +150,9 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # ma
                                 var=variable,
                                 weight=event_weight * xsec_weight,
                             )
-            if event_weight == 1:
-                print(sample, "sample is data not MC")
+            try:
+                if event_weight == 1:
+                    print(sample, "sample is data not MC")
 
     # store the hists variable
     with open(f'{odir}/hists.pkl', 'wb') as f:  # saves the hists objects
