@@ -107,9 +107,9 @@ def main(args):
                 line = line.replace("EOSOUTPKL", eosoutput_pkl)
                 line = line.replace("SAMPLE", sample)
                 if args.pfnano:
-                    line = line.replace("PFNANO", "--pfnano")
+                    line = line.replace("PFNANO", "True")
                 else:
-                    line = line.replace("PFNANO", "")
+                    line = line.replace("PFNANO", "False")
                 sh_file.write(line)
             sh_file.close()
             sh_templ_file.close()
