@@ -158,3 +158,17 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main(args)
+
+#
+# fname = f"data/pfnanoindex_2017.json"
+#
+# with open(fname, 'r') as f:
+#     files = json.load(f)['2017']
+# files.keys()
+# files['HWW'].keys()
+# files['HWWPrivate'].keys()
+# for subdir in files.keys():
+#     for key in files[subdir].keys():
+#         if 'HToWW' in key:
+#             print('key', key)
+#             print('subdir', subdir)
