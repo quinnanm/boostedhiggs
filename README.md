@@ -232,7 +232,7 @@ condor_q ID --long -n $NAME
 
 #### Submitting jobs locally
 ```
-python run.py --year 2017 --starti 0 --endi 1 --processor hww --sample GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8 --chunksize 10000
+python run.py --year 2017 --processor hww --starti 0 --endi 1 --pfnano=False
 ```
 
 ## Post-processing
