@@ -29,23 +29,27 @@ def main(args):
     # get samples
     if args.pfnano:
         fname = f"data/pfnanoindex_{args.year}.json"
-
-        f = open("samples_config_pfnano.json")
-        json_samples = json.load(f)
-        f.close()
     else:
         fname = f"data/fileset_{args.year}_UL_NANO.json"
 
-        f = open("samples_config.json")
-        json_samples = json.load(f)
-        f.close()
+    if args.sample not None:
+        if args.pfnano:
+            f = open("samples_config_pfnano.json")
+            json_samples = json.load(f)
+            f.close()
+        else:
+            f = open("samples_config.json")
+            json_samples = json.load(f)
+            f.close()
 
-    samples = []
-    for key, value in json_samples.items():
-        if value == 1:
-            samples.append(key)
-        if not args.all:
-            break
+        samples = []
+        for key, value in json_samples.items():
+            if value == 1:
+                samples.append(key)
+            if not args.all:
+                break
+    else:
+        samples = [args.sample]
 
     fileset = {}
 
@@ -140,6 +144,7 @@ if __name__ == "__main__":
     parser.add_argument("--processor",   dest="processor",      default="hww",                      help="HWW processor",                       type=str)
     parser.add_argument("--dask",        dest='dask',           default=False,                      help="Run with dask",                       action=BoolArg)
     parser.add_argument('--samples',     dest='samples',        default="samples_config.json",      help='path to datafiles',                   type=str)
+    parser.add_argument('--sample',      dest='sample',         default=None,                       help='path to datafiles',                   type=str)
     parser.add_argument("--pfnano",      dest='pfnano',         default=False,                      help="Run with pfnano",                     action=BoolArg)
     parser.add_argument("--chunksize",   dest='chunksize',      default=10000,                      help="chunk size in processor",             type=int)
     parser.add_argument("--all",         dest='all',            default=True,                       help="Run over all samples in the config",  action=BoolArg)
