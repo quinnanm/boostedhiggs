@@ -127,20 +127,18 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally
-    # or for pfnano: python run.py --year 2017 --processor hww --starti 0 --endi 1 --pfnano=True --all=True
+    # run locally as: python run.py --year 2017 --processor hww --starti 0 --endi 1 --pfnano=False --all=False
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--year',       dest='year',       default='2017',                  help="year", type=str)
-    parser.add_argument('--starti',     dest='starti',     default=0,                       help="start index of files", type=int)
-    parser.add_argument('--endi',       dest='endi',       default=-1,                      help="end index of files", type=int)
-    parser.add_argument("--processor",  dest="processor",  default="hww",                   help="HWW processor", type=str)
-    parser.add_argument("--dask",       dest="dask",       action="store_true",             default=False, help="Run with dask")
-    parser.add_argument('--samples',    dest='samples',    default="samples_config.json",   help='path to datafiles')
-    parser.add_argument("--pfnano",     dest='pfnano',     action=BoolArg,                  default=False, help="Run with pfnano")
-    parser.add_argument("--chunksize",  dest='chunksize',  type=int,                        default=10000, help="chunk size in processor")
-    parser.add_argument("--all",        dest='all',        action=BoolArg,                  default=False, help="Run over all samples in the config")
-
+    parser.add_argument('--year',        dest='year',           default='2017',                     help="year",                                type=str)
+    parser.add_argument('--starti',      dest='starti',         default=0,                          help="start index of files",                type=int)
+    parser.add_argument('--endi',        dest='endi',           default=-1,                         help="end index of files",                  type=int)
+    parser.add_argument("--processor",   dest="processor",      default="hww",                      help="HWW processor",                       type=str)
+    parser.add_argument("--dask",        dest='dask',           default=False,                      help="Run with dask",                       action=BoolArg)
+    parser.add_argument('--samples',     dest='samples',        default="samples_config.json",      help='path to datafiles',                   type=str)
+    parser.add_argument("--pfnano",      dest='pfnano',         default=False,                      help="Run with pfnano",                     action=BoolArg)
+    parser.add_argument("--chunksize",   dest='chunksize',      default=10000,                      help="chunk size in processor",             type=int)
+    parser.add_argument("--all",         dest='all',            default=False,                      help="Run over all samples in the config",  action=BoolArg)
     parser.add_argument(
         "--executor",
         type=str,
