@@ -110,6 +110,8 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # ma
             sum_sumgenweight = get_sum_sumgenweight(idir, year, sample)
 
             # Get overall weighting of events
+            if sum_sumgenweight == 0:
+                sum_sumgenweight = 1
             xsec_weight = (xsec * luminosity[year]) / (sum_sumgenweight)  # each event has (possibly a different) genweight... sumgenweight sums over events in a chunk... sum_sumgenweight sums over chunks
 
             for ch in channels:
