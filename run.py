@@ -69,7 +69,7 @@ def main(args):
             for sample in samples:
                 print(sample)
                 fileset[sample] = ["root://cmsxrootd.fnal.gov/" + f for f in files[sample][args.starti:args.endi]]
-    print(len(fileset[sample]))
+    print(fileset[sample])
     # define processor
     if args.processor == 'hww':
         from boostedhiggs.hwwprocessor import HwwProcessor
