@@ -259,7 +259,7 @@ if __name__ == "__main__":
     # run locally as: python make_plots.py --year 2017 --vars configs/vars.json --channels ele,mu,had --idir ../results/ --odir hists --pfnano True
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',      dest='years',       default='2017',                     help="year")
-    parser.add_argument("--pfnano",      dest='pfnano',         default=False,                  help="Run with pfnano",                     action=BoolArg)
+    parser.add_argument("--pfnano",     dest='pfnano',      default=False,                      help="Run with pfnano",                     action=BoolArg)
     parser.add_argument('--vars',       dest='vars',        default="configs/vars.json",        help='path to json with variables to be plotted', required=True)
     parser.add_argument('--channels',   dest='channels',    default='ele,mu,had',               help='channels for which to plot this variable', required=True)
     parser.add_argument('--odir',       dest='odir',        default='hists',                    help="tag for output directory")
