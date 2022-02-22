@@ -32,7 +32,7 @@ def main(args):
     os.system(f"mkdir -p /eos/uscms/{outdir}")
 
     # build metadata.json with samples
-    files = loadJson(args.samples,args.year,args.pfnano)
+    files,nfiles_per_job = loadJson(args.samples,args.year,args.pfnano)
     with open(f"{locdir}/metadata.json", "w") as f:
         json.dump(files,f,sort_keys=True,indent=2)
 
@@ -50,8 +50,11 @@ def main(args):
             pass
 
         tot_files = len(files[sample])
-        njobs = ceil(tot_files / args.files_per_job)
-        
+        if args.files_per_job:
+            njobs = ceil(tot_files / args.files_per_job)
+        else:
+            njobs = ceil(tot_files / nfiles_per_job[sample])
+
         # make submit.txt with number of jobs
         jobids = [str(jobid) for jobid in range(njobs)]
         if args.test:
@@ -116,7 +119,7 @@ if __name__ == "__main__":
     parser.add_argument('--samples',   dest='samples',   default="samples_config.json", help='path to datafiles',                   type=str)
     parser.add_argument("--test",      dest="test",      action='store_true',           help="only 2 jobs per sample will be created")
     parser.add_argument("--submit",    dest='submit',    action='store_true',           help="submit jobs when created")
-    parser.add_argument("--files-per-job",               default=20,                    help="# files per condor job", type=int)
+    parser.add_argument("--files-per-job",               default=None,                  help="# files per condor job", type=int)
     parser.add_argument("--pfnano",    dest='pfnano', action='store_true')
     parser.add_argument("--no-pfnano", dest='pfnano', action='store_false')
     parser.set_defaults(pfnano=True)
