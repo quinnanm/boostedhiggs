@@ -272,10 +272,12 @@ class HwwProcessor(processor.ProcessorABC):
 
     def process(self, events: ak.Array):
         """Returns skimmed events which pass preselection cuts and with the branches listed in self._skimvars"""
+        print('here')
         dataset = events.metadata['dataset']
         isMC = hasattr(events, "genWeight")
         sumgenweight = ak.sum(events.genWeight) if isMC else 0
         nevents = len(events)
+        print('here2')
 
         # empty selections and cutflows
         self.selections = {}
@@ -305,6 +307,7 @@ class HwwProcessor(processor.ProcessorABC):
             if mf in events.Flag.fields:
                 metfilters = metfilters & events.Flag[mf]
         self.add_selection("metfilters", metfilters)
+        print('here3')
 
         # define muon objects
         loose_muons = (
@@ -416,6 +419,7 @@ class HwwProcessor(processor.ProcessorABC):
         mt_lep_met = np.sqrt(
             2. * candidatelep_p4.pt * met.pt * (ak.ones_like(met.pt) - np.cos(candidatelep_p4.delta_phi(met)))
         )
+        print('here4')
 
         # event selections for muon channel
         self.add_selection(
@@ -495,6 +499,7 @@ class HwwProcessor(processor.ProcessorABC):
             sel=(bjets_ophem_leadingfj < self._btagWPs["medium"]),
             channel=['had']
         )
+        print('here5')
 
         variables = {}
 
