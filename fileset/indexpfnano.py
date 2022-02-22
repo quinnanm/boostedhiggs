@@ -84,6 +84,18 @@ folders_to_index = [
 	"/store/user/lpcpfnano/cmantill/v2_2/2017/DYJetsToLL",
 	"/store/user/lpcpfnano/cmantill/v2_2/2018/DYJetsToLL",
 
+        "/store/user/lpcpfnano/jdickins/v2_2/2018/Diboson/",
+
+        "/store/user/lpcpfnano/jdickins/v2_2/2016/ttHToBB/"
+        "/store/user/lpcpfnano/jdickins/v2_2/2016APV/ttHToBB/",
+        "/store/user/lpcpfnano/jdickins/v2_2/2017/ttHToBB/",
+        "/store/user/lpcpfnano/jdickins/v2_2/2018/ttHToBB/",
+
+        "/store/user/lpcpfnano/jdickins/v2_2/2016/VBFHToBB/",
+        "/store/user/lpcpfnano/jdickins/v2_2/2016APV/VBFHToBB/",
+        "/store/user/lpcpfnano/jdickins/v2_2/2017/VBFHToBB/",
+        "/store/user/lpcpfnano/jdickins/v2_2/2018/VBFHToBB/",
+
 	"/store/user/lpcpfnano/cmantill/v2_2/2016/HWW",
 	"/store/user/lpcpfnano/cmantill/v2_2/2016APV/HWW",
 	"/store/user/lpcpfnano/cmantill/v2_2/2017/HWW",

@@ -8307,6 +8307,7 @@
         "/store/user/lpcpfnano/drankin/v2_2/2016APV/TTbar/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/TTToSemiLeptonic_ext1/211112_131727/0000/nano_mc2016pre_85.root"
       ]
     },
+    "VBFHToBB": {},
     "VectorZPrime": {},
     "WJetsToLNu": {
       "WJetsToLNu_HT-100To200": [
@@ -9529,6 +9530,7 @@
         "/store/user/lpcpfnano/jekrupa/v2_2/2016APV/ZJetsToQQ/ZJetsToQQ_HT-800toInf_TuneCP5_13TeV-madgraphMLM-pythia8/ZJetsToQQ_HT-800toInf/220207_162304/0000/nano_mc2016pre_8.root",
         "/store/user/lpcpfnano/jekrupa/v2_2/2016APV/ZJetsToQQ/ZJetsToQQ_HT-800toInf_TuneCP5_13TeV-madgraphMLM-pythia8/ZJetsToQQ_HT-800toInf/220207_162304/0000/nano_mc2016pre_9.root"
       ]
-    }
+    },
+    "ttHToBB": {}
   }
 }
