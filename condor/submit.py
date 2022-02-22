@@ -52,8 +52,10 @@ def main(args):
         tot_files = len(files[sample])
         if args.files_per_job:
             njobs = ceil(tot_files / args.files_per_job)
+            files_per_job = str(args.files_per_job)
         else:
             njobs = ceil(tot_files / nfiles_per_job[sample])
+            files_per_job = str(nfiles_per_job[sample])
 
         # make submit.txt with number of jobs
         jobids = [str(jobid) for jobid in range(njobs)]
@@ -85,7 +87,7 @@ def main(args):
             line = line.replace("SCRIPTNAME", args.script)
             line = line.replace("YEAR", args.year) 
             line = line.replace("PROCESSOR", args.processor)  
-            line = line.replace("NUMJOBS", str(args.files_per_job))
+            line = line.replace("NUMJOBS", files_per_job)
             line = line.replace("SAMPLE", sample)
             line = line.replace("EOSOUTPKL", eosoutput_pkl) 
             if args.pfnano:
