@@ -14,8 +14,6 @@ import pyarrow.parquet as pq
 import pickle as pkl
 import pandas as pd
 import os
-from BoolArg import BoolArg
-
 
 def main(args):
 
@@ -24,56 +22,41 @@ def main(args):
         os.makedirs('./outfiles')
 
     channels = ["ele", "mu", "had"]
-    job_name = '/' + str(args.starti) + '-' + str(args.endi)
+    starti = args.starti
+    job_name = '/' + str(starti)
+    if args.n!=-1:
+        job_name += '-' + str(args.starti+args.n) 
 
     # get samples
-    if args.pfnano:
-        fname = f"data/pfnanoindex_{args.year}.json"
-    else:
-        fname = f"data/fileset_{args.year}_UL_NANO.json"
-
-    if args.sample == None:
-        if args.pfnano:
-            f = open("samples_config_pfnano.json")
-            json_samples = json.load(f)
-            f.close()
-        else:
-            f = open("samples_config.json")
-            json_samples = json.load(f)
-            f.close()
-
-        samples = []
-        for key, value in json_samples.items():
-            if value == 1:
-                samples.append(key)
-            if not args.all:
-                break
-    else:
-        samples = [args.sample]
-
-    fileset = {}
-
-    print('Samples to be processed:')
-
-    with open(fname, 'r') as f:
-        if args.pfnano:
-            files = json.load(f)[args.year]
-            for sample in samples:
-                for subdir in files:
-                    for key, flist in files[subdir].items():
-                        if sample == key:
-                            print(sample)
-                            fileset[sample] = ["root://cmsxrootd.fnal.gov/" + f for f in files[subdir][key][args.starti:args.endi]]
-        else:
+    if args.json=='metadata.json':
+        with open(args.json, 'r') as f:
             files = json.load(f)
-            for sample in samples:
-                print(sample)
-                fileset[sample] = ["root://cmsxrootd.fnal.gov/" + f for f in files[sample][args.starti:args.endi]]
+    else:
+        # hopefully this step is avoided in condor jobs that have metadata.json
+        from condor.file_utils import loadJson
+        files,_ = loadJson(args.json,args.year,args.pfnano)
+
+    if not files: 
+        print('Did not find files.. Exiting.')
+        exit(1)
+
+    # build fileset with files to run per job
+    fileset = {}
+    for sample, flist in files.items():
+        if args.sample:
+            if sample not in args.sample.split(','): continue
+        if args.n!=-1:
+            fileset[sample] = flist[args.starti:args.starti+args.n]
+        else:
+            fileset[sample] = flist
+
+    print('Samples in fileset to be processed: ',list(fileset.keys()))
 
     # define processor
     if args.processor == 'hww':
         from boostedhiggs.hwwprocessor import HwwProcessor
         p = HwwProcessor(year=args.year, channels=channels, output_location='./outfiles' + job_name)
+        print(p)
     else:
         from boostedhiggs.trigger_efficiencies_processor import TriggerEfficienciesProcessor
         p = TriggerEfficienciesProcessor(year=int(args.year))
@@ -124,7 +107,7 @@ def main(args):
     pkl.dump(out, filehandler)
     filehandler.close()
 
-    # # merge parquet
+    # merge parquet
     for ch in channels:
         data = pd.read_parquet('./outfiles/' + job_name + ch + '/parquet')
         data.to_parquet('./outfiles/' + job_name + '_' + ch + '.parquet')
@@ -135,19 +118,16 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as: python run.py --year 2017 --processor hww --starti 0 --endi 1 --pfnano=False --all=False
+    # run locally as: python run.py --year 2017 --processor hww --starti 0 -n 1 
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',        dest='year',           default='2017',                     help="year",                                type=str)
     parser.add_argument('--starti',      dest='starti',         default=0,                          help="start index of files",                type=int)
-    parser.add_argument('--endi',        dest='endi',           default=-1,                         help="end index of files",                  type=int)
+    parser.add_argument('-n',            dest='n',              default=-1,                         help="number of files to process",          type=int)
+    parser.add_argument('--json',        dest='json',           default="metadata.json",            help='path to datafiles',                   type=str)
+    parser.add_argument('--sample',      dest='sample',         default=None,                       help='specify sample',                      type=str)
     parser.add_argument("--processor",   dest="processor",      default="hww",                      help="HWW processor",                       type=str)
-    parser.add_argument("--dask",        dest='dask',           default=False,                      help="Run with dask",                       action=BoolArg)
-    parser.add_argument('--samples',     dest='samples',        default="samples_config.json",      help='path to datafiles',                   type=str)
-    parser.add_argument('--sample',      dest='sample',         default=None,                       help='for condor purposes',                 type=str)
-    parser.add_argument("--pfnano",      dest='pfnano',         default=False,                      help="Run with pfnano",                     action=BoolArg)
     parser.add_argument("--chunksize",   dest='chunksize',      default=10000,                      help="chunk size in processor",             type=int)
-    parser.add_argument("--all",         dest='all',            default=True,                       help="Run over all samples in the config",  action=BoolArg)
     parser.add_argument(
         "--executor",
         type=str,
@@ -155,9 +135,14 @@ if __name__ == "__main__":
         choices=["futures", "iterative", "dask"],
         help="type of processor executor",
     )
+    parser.add_argument("--pfnano",      dest='pfnano',action='store_true')
+    parser.add_argument("--no-pfnano",   dest='pfnano',action='store_false')                        
+    parser.set_defaults(pfnano=True)
+
     args = parser.parse_args()
 
     main(args)
+<<<<<<< HEAD
 
 #
 # fname = f"data/pfnanoindex_2017.json"
@@ -174,3 +159,5 @@ if __name__ == "__main__":
 #             if key1 in key:
 #                 print('key', key)
 #                 print('subdir', subdir)
+=======
+>>>>>>> 2423a358e8217bc641c9d1fb0866189b72354558
