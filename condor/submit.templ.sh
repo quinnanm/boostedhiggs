@@ -1,5 +1,7 @@
 #!/bin/bash
 
+jobid=$1
+
 python3 -m pip install correctionlib==2.0.0rc6
 pip install --upgrade numpy==1.21.5
 
@@ -8,7 +10,7 @@ mkdir outfiles
 
 # run code
 # pip install --user onnxruntime
-python SCRIPTNAME --year YEAR --starti STARTNUM --endi ENDNUM --processor PROCESSOR --pfnano PFNANO --sample SAMPLE
+python SCRIPTNAME --year YEAR --processor PROCESSOR PFNANO -n NUMJOBS --starti ${jobid} --sample SAMPLE
 
 # remove incomplete jobs
 rm -rf outfiles/*had

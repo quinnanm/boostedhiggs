@@ -1,18 +1,18 @@
 #!/usr/bin/env condor_submit
 
-executable              = DIRECTORY/PREFIX_JOBID.sh
+executable              = DIRECTORY/PREFIX.sh
 should_transfer_files   = YES
-transfer_input_files    = boostedhiggs,run.py,data,BoolArg.py
+transfer_input_files    = boostedhiggs,run.py,DIRECTORY/metadata.json
+arguments               = $(jobid)
 when_to_transfer_output = ON_EXIT_OR_EVICT
 transfer_output_files   = ""
-request_memory          = 6000
 use_x509userproxy       = true
-x509userproxy           = /uscms/home/fmokhtar/x509up_u56880
+x509userproxy           = PROXY
 
-output                  = DIRECTORY/logs/PREFIX_JOBID.out
-error                   = DIRECTORY/logs/PREFIX_JOBID.err
-log                     = DIRECTORY/logs/PREFIX_JOBID.log
+output                  = DIRECTORY/logs/PREFIX_$(jobid).out
+error                   = DIRECTORY/logs/PREFIX_$(jobid).err
+log                     = DIRECTORY/logs/PREFIX_$(jobid).log
 
 +SingularityImage = "/cvmfs/unpacked.cern.ch/registry.hub.docker.com/coffeateam/coffea-dask:latest"
 
-Queue 1
+queue jobid from JOBIDS_FILE
