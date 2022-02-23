@@ -125,7 +125,7 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # ma
                             continue
 
                         # we can make further selections before filling the hists here
-                        data = data[data['ht'] > 300]
+                        # data = data[data['ht'] > 300]
 
                         variable = data[var].to_numpy()
                         try:
@@ -269,3 +269,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main(args)
+
+
+# make data single points and aggregate (same as qcd)
+# make sure to not weight the data with xsecs weight (make weight=1 for data)
+# put correct xsecs for pfnano
