@@ -56,7 +56,6 @@ def main(args):
     if args.processor == 'hww':
         from boostedhiggs.hwwprocessor import HwwProcessor
         p = HwwProcessor(year=args.year, channels=channels, output_location='./outfiles' + job_name)
-        print(p)
     else:
         from boostedhiggs.trigger_efficiencies_processor import TriggerEfficienciesProcessor
         p = TriggerEfficienciesProcessor(year=int(args.year))
@@ -142,22 +141,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main(args)
-<<<<<<< HEAD
-
-#
-# fname = f"data/pfnanoindex_2017.json"
-#
-# fname1 = f"samples_config_pfnano.json"
-#
-# with open(fname, 'r') as f:
-#     files = json.load(f)['2017']
-# files.keys()
-# files['HWW'].keys()
-# for subdir in files.keys():
-#     for key in files[subdir].keys():
-#         for key1 in files1:
-#             if key1 in key:
-#                 print('key', key)
-#                 print('subdir', subdir)
-=======
->>>>>>> 2423a358e8217bc641c9d1fb0866189b72354558

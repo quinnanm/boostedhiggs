@@ -98,7 +98,7 @@
 	"ZJetsToQQ_HT-800toInf":0
     }, 
     "2017": {
-	"DYJetsToLL_Pt-100To250":0,
+	"DYJetsToLL_Pt-100To250":1,
 	"DYJetsToLL_Pt-250To400":0,
 	"DYJetsToLL_Pt-400To650":0,
 	"DYJetsToLL_Pt-50To100":0,
@@ -108,7 +108,7 @@
 	"GluGluHToWWTo4q-HpT190":0,
 	"GluGluHToWWTo4q-HpT190_ext1":0,
 	"GluGluHToWWTo4q_ext1":0,
-	"GluGluHToWWToLNuQQ-HpT190":20,
+	"GluGluHToWWToLNuQQ-HpT190":0,
 	"GluGluHToWWToLNuQQ-HpT190_ext1":0,
 	"JetHT_Run2017B":0,
 	"JetHT_Run2017C":0,
