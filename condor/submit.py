@@ -10,8 +10,9 @@ import os
 from math import ceil
 from file_utils import loadJson
 
+
 def main(args):
-    
+
     try:
         proxy = os.environ["X509_USER_PROXY"]
     except:
@@ -21,7 +22,7 @@ def main(args):
     locdir = "condor/" + args.tag + "_" + args.year
     username = os.environ["USER"]
     homedir = f"/store/user/{username}/boostedhiggs/"
-    outdir = homedir + args.tag + "_" + args.year + "/" 
+    outdir = homedir + args.tag + "_" + args.year + "/"
 
     # make local directory
     logdir = locdir + "/logs"
@@ -32,14 +33,14 @@ def main(args):
     os.system(f"mkdir -p /eos/uscms/{outdir}")
 
     # build metadata.json with samples
-    files,nfiles_per_job = loadJson(args.samples,args.year,args.pfnano)
+    files, nfiles_per_job = loadJson(args.samples, args.year, args.pfnano)
     with open(f"{locdir}/metadata.json", "w") as f:
-        json.dump(files,f,sort_keys=True,indent=2)
+        json.dump(files, f, sort_keys=True, indent=2)
 
     # submit a cluster of jobs per sample
     for sample in files.keys():
         os.system(f"mkdir -p /eos/uscms/{outdir}/{sample}")
-        
+
         localcondor = f"{locdir}/{sample}.jdl"
         localsh = f"{locdir}/{sample}.sh"
         try:
@@ -84,11 +85,11 @@ def main(args):
         sh_file = open(localsh, "w")
         for line in sh_templ_file:
             line = line.replace("SCRIPTNAME", args.script)
-            line = line.replace("YEAR", args.year) 
-            line = line.replace("PROCESSOR", args.processor)  
+            line = line.replace("YEAR", args.year)
+            line = line.replace("PROCESSOR", args.processor)
             line = line.replace("NUMJOBS", files_per_job)
             line = line.replace("SAMPLE", sample)
-            line = line.replace("EOSOUTPKL", eosoutput_pkl) 
+            line = line.replace("EOSOUTPKL", eosoutput_pkl)
             if args.pfnano:
                 line = line.replace("PFNANO", "--pfnano")
             else:
@@ -104,20 +105,20 @@ def main(args):
         # submit
         if args.submit:
             os.system('condor_submit %s' % localcondor)
-            
+
 
 if __name__ == "__main__":
     """
-    python condor/submit.py --year 2017 --tag Feb21 --samples python/configs/samples_pfnano.json --pfnano --submit
+    python condor/submit.py --year 2017 --tag Feb21 --samples samples_pfnano.json --pfnano --submit
     # or
-    python condor/submit.py --year 2017 --tag Feb21 --samples python/configs/samples.json --no-pfnano --submit
+    python condor/submit.py --year 2017 --tag Feb21 --samples samples.json --no-pfnano --submit
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("--script",    dest="script",    default="run.py",              help="script to run", type=str)
     parser.add_argument("--year",      dest="year",      default="2017",                help="year", type=str)
     parser.add_argument("--tag",       dest="tag",       default="Test",                help="process tag", type=str)
     parser.add_argument("--processor", dest="processor", default="hww",                 help="which processor", type=str, choices=["hww"])
-    parser.add_argument('--samples',   dest='samples',   default="samples_config.json", help='path to datafiles',                   type=str)
+    parser.add_argument('--samples',   dest='samples',   default="samples_pfnano.json", help='path to datafiles',                   type=str)
     parser.add_argument("--test",      dest="test",      action='store_true',           help="only 2 jobs per sample will be created")
     parser.add_argument("--submit",    dest='submit',    action='store_true',           help="submit jobs when created")
     parser.add_argument("--files-per-job",               default=None,                  help="# files per condor job", type=int)

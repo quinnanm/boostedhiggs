@@ -50,7 +50,7 @@ conda create -n coffea-env python=3.7
 conda activate coffea-env
 
 # install packages
-pip install numpy pandas scikit-learn coffea correctionlib
+pip install numpy pandas scikit-learn coffea correctionlib pyarrow
 
 # install xrootd
 conda install -c conda-forge xrootd
@@ -110,7 +110,7 @@ We use the `submit.py` script to submit jobs.
 
 For example:
 ```
-python condor/submit.py --year 2017 --tag Feb21 --samples python/configs/samples_pfnano.json --pfnano 
+python condor/submit.py --year 2017 --tag Feb21 --samples python/configs/samples_pfnano.json --pfnano
 ```
 where:
 - year: this determines which fileset to read
