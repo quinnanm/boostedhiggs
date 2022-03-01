@@ -100,40 +100,42 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # ma
                     axis_dict[var],
                 )
 
+        xsec_weight_by_sample = {}
         # loop over the processed files and fill the histograms
-        for sample in samples[year]:
-            print('Processing sample', sample)
-            pkl_dir = f'{idir}/{sample}/outfiles/*.pkl'
-            pkl_files = glob.glob(pkl_dir)  # get list of files that were processed
-            if not pkl_files:  # skip samples which were not processed
-                print('- No processed files found...',pkl_dir,'skipping sample...',sample)
-                continue
+        for ch in channels:
+            for sample in samples[year][ch]:
+                print('Processing sample', sample)
+                is_data = False
+                for key in data_by_ch.values():
+                    if key in sample:
+                        is_data = True
+                if not is_data and sample not in xsec_weight_by_sample.keys():
+                    pkl_dir = f'{idir}/{sample}/outfiles/*.pkl'
+                    pkl_files = glob.glob(pkl_dir)  # get list of files that were processed
+                    if not pkl_files:  # skip samples which were not processed
+                        print('- No processed files found...',pkl_dir,'skipping sample...',sample)
+                        continue
 
-            is_data = False
-            for key in data_by_ch.values():
-                if key in sample:
-                    is_data = True
+                    # Find xsection
+                    if args.pfnano:
+                        f = open('../fileset/xsec_pfnano.json')
+                    else:
+                        f = open('../fileset/xsec.json')
+                    xsec = json.load(f)
+                    f.close()
+                    xsec = eval(str((xsec[sample])))
 
-            if not is_data:
-                # Find xsection
-                if args.pfnano:
-                    f = open('../fileset/xsec_pfnano.json')
+                    # Get sum_sumgenweight of sample
+                    sum_sumgenweight = get_sum_sumgenweight(idir, year, sample)
+                    
+                    # Get overall weighting of events
+                    xsec_weight = (xsec * luminosity[year]) / (sum_sumgenweight)  # each event has (possibly a different) genweight... sumgenweight sums over events in a chunk... sum_sumgenweight sums over chunks
+                    xsec_weight_by_sample[sample] = xsec_weight
+                elif sample in xsec_weight_by_sample.keys():
+                    xsec_weight = xsec_weight_by_sample[sample]
                 else:
-                    f = open('../fileset/xsec.json')
-                xsec = json.load(f)
-                f.close()
-                xsec = eval(str((xsec[sample])))
-                # print('- xsection of sample is', xsec)
+                    xsec_weight = 1
 
-                # Get sum_sumgenweight of sample
-                sum_sumgenweight = get_sum_sumgenweight(idir, year, sample)
-                
-                # Get overall weighting of events
-                xsec_weight = (xsec * luminosity[year]) / (sum_sumgenweight)  # each event has (possibly a different) genweight... sumgenweight sums over events in a chunk... sum_sumgenweight sums over chunks
-            else:
-                xsec_weight = 1
-
-            for ch in channels:
                 parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
 
                 for parquet_file in parquet_files:
@@ -319,11 +321,12 @@ def main(args):
     # build samples
     samples = {}
     for year in years:
-        samples[year] = []
+        samples[year] = {}
         for ch in channels:
+            samples[year][ch] = []
             for key, value in json_samples[year][ch].items():
                 if value == 1:
-                    samples[year].append(key)
+                    samples[year][ch].append(key)
 
     # get variables to plot
     f = open(args.vars)
