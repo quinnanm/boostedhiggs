@@ -357,7 +357,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main(args)
-
-
-# make sure to not weight the data with xsecs weight (make weight=1 for data)
-# put correct xsecs for pfnano
