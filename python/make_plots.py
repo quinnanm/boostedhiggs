@@ -50,6 +50,11 @@ add_samples = {
     'SingleMuon': 'SingleMuon',
     'JetHT': 'JetHT',
     'QCD': 'QCD_Pt',
+    'DYJets': 'DYJets',
+    'ZQQ': 'ZJetsToQQ',
+    'WQQ': 'WJetsToQQ',
+    'SingleTop': 'ST',
+    'TTbar': 'TT',
     'WJetsLNu': 'WJetsToLNu',
 }
 
