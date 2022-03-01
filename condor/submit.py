@@ -58,25 +58,24 @@ def main(args):
             files_per_job = str(nfiles_per_job[sample])
 
         # make submit.txt with number of jobs
-        jobids = [str(jobid) for jobid in range(njobs)]
         if args.test:
-            # if testing then only submit one job
-            jobids = ['0']
+            njobs = 1
+        jobids = [str(jobid) for jobid in range(njobs)]
         jobids_file = os.path.join(locdir, f'submit_{sample}.txt')
         with open(jobids_file, 'w') as f:
             f.write('\n'.join(jobids))
 
         # make condor file
-        condor_templ_file = open("condor/submit.templ.jdl")                                                                                                                                                                                                                 
-        condor_file = open(localcondor, "w")                                                                                                                                                                                                                                
-        for line in condor_templ_file:                                                                                                                                                                                                                                      
-            line = line.replace("DIRECTORY", locdir)                                                                                                                                                                                                                        
-            line = line.replace("PREFIX", sample)                                                                                                                                                                                                                           
+        condor_templ_file = open("condor/submit.templ.jdl")
+        condor_file = open(localcondor, "w")
+        for line in condor_templ_file:
+            line = line.replace("DIRECTORY", locdir)
+            line = line.replace("PREFIX", sample)
             line = line.replace("JOBIDS_FILE", jobids_file)
             line = line.replace("PROXY", proxy)
             condor_file.write(line)
         condor_file.close()
-        condor_templ_file.close()                                                                                                                                                                                                                                           
+        condor_templ_file.close()
 
         # make executable file
         sh_templ_file = open("condor/submit.templ.sh")
@@ -99,7 +98,7 @@ def main(args):
         sh_templ_file.close()
 
         os.system(f"chmod u+x {localsh}")
-        if os.path.exists("%s.log" % localcondor):                                                                                                                                                                                                                        
+        if os.path.exists("%s.log" % localcondor):
             os.system("rm %s.log" % localcondor)
 
         # submit

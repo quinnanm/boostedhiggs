@@ -247,6 +247,12 @@ class HwwProcessor(processor.ProcessorABC):
         self.selections = {}
         self.cutflows = {}
 
+        self.dataset_per_ch = {
+            "ele": "SingleElectron",
+            "mu": "SingleMuon",
+            "had": "JetHT",
+        }
+
     @property
     def accumulator(self):
         return self._accumulator
@@ -272,12 +278,10 @@ class HwwProcessor(processor.ProcessorABC):
 
     def process(self, events: ak.Array):
         """Returns skimmed events which pass preselection cuts and with the branches listed in self._skimvars"""
-        print('here')
         dataset = events.metadata['dataset']
         isMC = hasattr(events, "genWeight")
         sumgenweight = ak.sum(events.genWeight) if isMC else 0
         nevents = len(events)
-        print('here2')
 
         # empty selections and cutflows
         self.selections = {}
@@ -307,7 +311,6 @@ class HwwProcessor(processor.ProcessorABC):
             if mf in events.Flag.fields:
                 metfilters = metfilters & events.Flag[mf]
         self.add_selection("metfilters", metfilters)
-        print('here3')
 
         # define muon objects
         loose_muons = (
@@ -419,7 +422,6 @@ class HwwProcessor(processor.ProcessorABC):
         mt_lep_met = np.sqrt(
             2. * candidatelep_p4.pt * met.pt * (ak.ones_like(met.pt) - np.cos(candidatelep_p4.delta_phi(met)))
         )
-        print('here4')
 
         # event selections for muon channel
         self.add_selection(
@@ -432,14 +434,14 @@ class HwwProcessor(processor.ProcessorABC):
             sel=(n_good_muons == 1) & (n_good_electrons == 0) & (n_loose_electrons == 0),
             channel=['mu']
         )
-        self.add_selection('leptonIsolation', sel=(
-            ((candidatelep.pt > 30)
-             & (candidatelep.pt < 55)
-             & (lep_reliso < 0.25)
-             )
-            | ((candidatelep.pt >= 55)
-               & (candidatelep.miniPFRelIso_all < 0.2))
-        ), channel=['mu'])
+        # self.add_selection('leptonIsolation', sel=(
+        #     ((candidatelep.pt > 30)
+        #      & (candidatelep.pt < 55)
+        #      & (lep_reliso < 0.25)
+        #      )
+        #     | ((candidatelep.pt >= 55)
+        #        & (candidatelep.miniPFRelIso_all < 0.2))
+        # ), channel=['mu'])
 
         # event selections for electron channel
         self.add_selection(
@@ -452,14 +454,14 @@ class HwwProcessor(processor.ProcessorABC):
             sel=(n_good_muons == 0) & (n_loose_muons == 0) & (n_good_electrons == 1),
             channel=['ele']
         )
-        self.add_selection('leptonIsolation', sel=(
-            ((candidatelep.pt > 30)
-             & (candidatelep.pt < 120)
-             & (lep_reliso < 0.3)
-             )
-            | ((candidatelep.pt >= 120)
-               & (candidatelep.miniPFRelIso_all < 0.2))
-        ), channel=['ele'])
+        # self.add_selection('leptonIsolation', sel=(
+        #     ((candidatelep.pt > 30)
+        #      & (candidatelep.pt < 120)
+        #      & (lep_reliso < 0.3)
+        #      )
+        #     | ((candidatelep.pt >= 120)
+        #        & (candidatelep.miniPFRelIso_all < 0.2))
+        # ), channel=['ele'])
 
         # event selections for both leptonic channels
         self.add_selection('leptonInJet', sel=(dr_jet_candlep < 0.8), channel=['mu', 'ele'])
@@ -499,45 +501,45 @@ class HwwProcessor(processor.ProcessorABC):
             sel=(bjets_ophem_leadingfj < self._btagWPs["medium"]),
             channel=['had']
         )
-        print('here5')
 
         variables = {}
 
-        # # higgs matching
-        # if (('HToWW' or 'HWW') in dataset) and isMC:
-        #     match_HWW_had = match_HWW(events.GenPart, candidatefj)
-        #     match_HWW_lep = match_HWW(events.GenPart, candidatefj_lep)
-        #
-        #     variables["hWW_nprongs_had"] = pad_val(match_HWW_had["hWW_nprongs"], -1)
-        #     variables["iswlepton_had"] = pad_val(match_HWW_had["iswlepton"], -1)
-        #     variables["iswstarlepton_had"] = pad_val(match_HWW_had["iswstarlepton"], -1)
-        #
-        #     variables["hWW_nprongs_lep"] = pad_val(match_HWW_lep["hWW_nprongs"], -1)
-        #     variables["iswlepton_lep"] = pad_val(match_HWW_lep["iswlepton"], -1)
-        #     variables["iswstarlepton_lep"] = pad_val(match_HWW_lep["iswstarlepton"], -1)
-        #
-        #     variables["matchedH_had"] = pad_val(ak.firsts(match_HWW_had["matchedH"].pt), -1)
-        #     variables["matchedH_lep"] = pad_val(ak.firsts(match_HWW_lep["matchedH"]).pt, -1)
-        #
-        # variables["lepton_pt"] = pad_val(candidatelep.pt, -1)
-        # variables["dr_jet_candlep"] = pad_val(dr_jet_candlep, -1)
-        # variables["mt_lep_met"] = pad_val(mt_lep_met, -1)
-        # variables["ht"] = pad_val(ht, -1)
-        # variables["met"] = pad_val(met.pt, -1)
-        # variables["lep_isolation"] = pad_val(lep_reliso, -1)
-        # variables["lepfj_m"] = pad_val(lep_fj_m, -1)
-        # variables["candidatefj_lep_pt"] = pad_val(candidatefj_lep.pt, -1)
-        # variables["leadingfj_pt"] = pad_val(leadingfj.pt, -1)
-        # variables["leadingfj_msoftdrop"] = pad_val(leadingfj.msoftdrop, -1)
-        # variables["secondfj_pt"] = pad_val(secondfj.msoftdrop, -1)
-        # variables["secondfj_msoftdrop"] = pad_val(secondfj.msoftdrop, -1)
-        # variables["bjets_ophem_lepfj"] = pad_val(bjets_ophem_lepfj, -1)
-        # variables["bjets_ophem_leadingfj"] = pad_val(bjets_ophem_leadingfj, -1)
-        # variables["fj_lep_msoftdrop"] = pad_val(candidatefj_lep.msoftdrop, -1)
-        # variables["fj_lep_pt"] = pad_val(candidatefj_lep.pt, -1)
-        # variables["lep_fj_m"] = pad_val(lep_fj_m, -1)
-        # if isMC:
-        #     variables["weight"] = pad_val(events.genWeight, -1)
+        # higgs matching
+        if (('HToWW' or 'HWW') in dataset) and isMC:
+            match_HWW_had = match_HWW(events.GenPart, candidatefj)
+            match_HWW_lep = match_HWW(events.GenPart, candidatefj_lep)
+        
+            variables["hWW_nprongs_had"] = pad_val(match_HWW_had["hWW_nprongs"], -1)
+            variables["iswlepton_had"] = pad_val(match_HWW_had["iswlepton"], -1)
+            variables["iswstarlepton_had"] = pad_val(match_HWW_had["iswstarlepton"], -1)
+        
+            variables["hWW_nprongs_lep"] = pad_val(match_HWW_lep["hWW_nprongs"], -1)
+            variables["iswlepton_lep"] = pad_val(match_HWW_lep["iswlepton"], -1)
+            variables["iswstarlepton_lep"] = pad_val(match_HWW_lep["iswstarlepton"], -1)
+        
+            variables["matchedH_had"] = pad_val(ak.firsts(match_HWW_had["matchedH"].pt), -1)
+            variables["matchedH_lep"] = pad_val(ak.firsts(match_HWW_lep["matchedH"]).pt, -1)
+        
+        variables["lepton_pt"] = pad_val(candidatelep.pt, -1)
+        variables["dr_jet_candlep"] = pad_val(dr_jet_candlep, -1)
+        variables["mt_lep_met"] = pad_val(mt_lep_met, -1)
+        variables["ht"] = pad_val(ht, -1)
+        variables["met"] = pad_val(met.pt, -1)
+        variables["lep_isolation"] = pad_val(lep_reliso, -1)
+        variables["lep_miso"] = pad_val(lep_miso, -1)
+        variables["lepfj_m"] = pad_val(lep_fj_m, -1)
+        variables["candidatefj_lep_pt"] = pad_val(candidatefj_lep.pt, -1)
+        variables["leadingfj_pt"] = pad_val(leadingfj.pt, -1)
+        variables["leadingfj_msoftdrop"] = pad_val(leadingfj.msoftdrop, -1)
+        variables["secondfj_pt"] = pad_val(secondfj.msoftdrop, -1)
+        variables["secondfj_msoftdrop"] = pad_val(secondfj.msoftdrop, -1)
+        variables["bjets_ophem_lepfj"] = pad_val(bjets_ophem_lepfj, -1)
+        variables["bjets_ophem_leadingfj"] = pad_val(bjets_ophem_leadingfj, -1)
+        variables["fj_lep_msoftdrop"] = pad_val(candidatefj_lep.msoftdrop, -1)
+        variables["fj_lep_pt"] = pad_val(candidatefj_lep.pt, -1)
+        variables["lep_fj_m"] = pad_val(lep_fj_m, -1)
+        if isMC:
+            variables["weight"] = pad_val(events.genWeight, -1)
 
         # initialize pandas dataframe
         output = {}
@@ -548,10 +550,14 @@ class HwwProcessor(processor.ProcessorABC):
                 if var in variables.keys():
                     out[var] = variables[var]
 
-            # # TODO: for data, only save one channel for the corresponding name of the dataset... make use of flag isMC
+            fill_output = True
+            # for data, only fill output for that channel
+            if not isMC and self.dataset_per_ch[ch] not in dataset:
+                fill_output = False
+            if np.sum(self.selections[ch].all(*self.selections[ch].names)) <=0:
+                fill_output = False
 
-            # apply selections
-            if np.sum(self.selections[ch].all(*self.selections[ch].names)) > 0:
+            if fill_output:
                 output[ch] = {
                     key: value[self.selections[ch].all(*self.selections[ch].names)] for (key, value) in out.items()
                 }
