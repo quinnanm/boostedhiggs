@@ -137,17 +137,17 @@ class HwwProcessor(processor.ProcessorABC):
             },
             2017: {
                 'ele': [
-                    # "Ele35_WPTight_Gsf",
-                    "Ele115_CaloIdVT_GsfTrkIdT",
+                    "Ele35_WPTight_Gsf",
+                    # "Ele115_CaloIdVT_GsfTrkIdT",
                     "Photon200",
                     # "Ele50_CaloIdVT_GsfTrkIdT_PFJet165", # extra
                     # "Ele15_IsoVVVL_PFHT600", # VVL
                 ],
                 'mu': [
-                    "Mu50",
-                    # "IsoMu27",
-                    "OldMu100",
-                    "TkMu100",
+                    # "Mu50",
+                    "IsoMu27",
+                    # "OldMu100",
+                    # "TkMu100",
                     # "Mu15_IsoVVVL_PFHT600", # VVL
                 ],
                 'had': [
