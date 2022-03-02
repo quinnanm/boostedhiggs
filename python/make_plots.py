@@ -359,7 +359,7 @@ def main(args):
 
     if not args.noplot:
         # plot all process in stack
-        make_stack(odir, vars_to_plot, years, channels, args.pfnano, logy=True)
+        # make_stack(odir, vars_to_plot, years, channels, args.pfnano, logy=True)
         make_stack(odir, vars_to_plot, years, channels, args.pfnano, logy=False)
 
 
