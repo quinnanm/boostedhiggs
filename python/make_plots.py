@@ -226,12 +226,12 @@ def make_stack(odir, vars_to_plot, years, channels, pfnano, logy=True, add_data=
                 #     signal = signal * 10  # if not log, scale the signal
 
                 # everything else (background)
-                bkg_labels = [label for label in samples if (label and label != data_label and label != signal_label)]
-                bkg = [h[{"samples": label}] for label in bkg_labels]
-
-                if bkg is None:
-                    print('No background samples to plot besides the signal')
-                    return
+                # bkg_labels = [label for label in samples if (label and label != data_label and label != signal_label)]
+                # bkg = [h[{"samples": label}] for label in bkg_labels]
+                #
+                # if bkg is None:
+                #     print('No background samples to plot besides the signal')
+                #     return
 
                 # print(data,signal,bkg)
 
@@ -258,21 +258,21 @@ def make_stack(odir, vars_to_plot, years, channels, pfnano, logy=True, add_data=
                                  label=get_simplified_label(data_label),
                                  **data_err_opts
                                  )
-                    rax.errorbar(
-                        x=[data.axes.value(i)[0] for i in range(len(data.values()))],
-                        y=data.values() / np.sum([b.values() for b in bkg], axis=0),
-                        fmt="ko",
-                    )
+                    # rax.errorbar(
+                    #     x=[data.axes.value(i)[0] for i in range(len(data.values()))],
+                    #     y=data.values() / np.sum([b.values() for b in bkg], axis=0),
+                    #     fmt="ko",
+                    # )
                 else:
                     fig, ax = plt.subplots(1, 1)
 
-                hep.histplot(bkg,
-                             ax=ax,
-                             stack=True,
-                             sort='yield',
-                             histtype="fill",
-                             label=[get_simplified_label(bkg_label) for bkg_label in bkg_labels],
-                             )
+                # hep.histplot(bkg,
+                #              ax=ax,
+                #              stack=True,
+                #              sort='yield',
+                #              histtype="fill",
+                #              label=[get_simplified_label(bkg_label) for bkg_label in bkg_labels],
+                #              )
 
                 # hep.histplot(signal,
                 #              ax=ax,
