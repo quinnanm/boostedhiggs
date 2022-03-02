@@ -138,16 +138,16 @@ class HwwProcessor(processor.ProcessorABC):
             2017: {
                 'ele': [
                     "Ele35_WPTight_Gsf",
-                    "Ele115_CaloIdVT_GsfTrkIdT",
+                    # "Ele115_CaloIdVT_GsfTrkIdT",
                     "Photon200",
                     # "Ele50_CaloIdVT_GsfTrkIdT_PFJet165", # extra
                     # "Ele15_IsoVVVL_PFHT600", # VVL
                 ],
                 'mu': [
-                    "Mu50",
+                    # "Mu50",
                     "IsoMu27",
-                    "OldMu100",
-                    "TkMu100",
+                    # "OldMu100",
+                    # "TkMu100",
                     # "Mu15_IsoVVVL_PFHT600", # VVL
                 ],
                 'had': [
@@ -508,18 +508,18 @@ class HwwProcessor(processor.ProcessorABC):
         if (('HToWW' or 'HWW') in dataset) and isMC:
             match_HWW_had = match_HWW(events.GenPart, candidatefj)
             match_HWW_lep = match_HWW(events.GenPart, candidatefj_lep)
-        
+
             variables["hWW_nprongs_had"] = pad_val(match_HWW_had["hWW_nprongs"], -1)
             variables["iswlepton_had"] = pad_val(match_HWW_had["iswlepton"], -1)
             variables["iswstarlepton_had"] = pad_val(match_HWW_had["iswstarlepton"], -1)
-        
+
             variables["hWW_nprongs_lep"] = pad_val(match_HWW_lep["hWW_nprongs"], -1)
             variables["iswlepton_lep"] = pad_val(match_HWW_lep["iswlepton"], -1)
             variables["iswstarlepton_lep"] = pad_val(match_HWW_lep["iswstarlepton"], -1)
-        
+
             variables["matchedH_had"] = pad_val(ak.firsts(match_HWW_had["matchedH"].pt), -1)
             variables["matchedH_lep"] = pad_val(ak.firsts(match_HWW_lep["matchedH"]).pt, -1)
-        
+
         variables["lepton_pt"] = pad_val(candidatelep.pt, -1)
         variables["dr_jet_candlep"] = pad_val(dr_jet_candlep, -1)
         variables["mt_lep_met"] = pad_val(mt_lep_met, -1)
@@ -554,7 +554,7 @@ class HwwProcessor(processor.ProcessorABC):
             # for data, only fill output for that channel
             if not isMC and self.dataset_per_ch[ch] not in dataset:
                 fill_output = False
-            if np.sum(self.selections[ch].all(*self.selections[ch].names)) <=0:
+            if np.sum(self.selections[ch].all(*self.selections[ch].names)) <= 0:
                 fill_output = False
 
             if fill_output:
@@ -589,3 +589,8 @@ class HwwProcessor(processor.ProcessorABC):
 
     def postprocess(self, accumulator):
         return accumulator
+
+
+# TODO:
+# run over some data with each trigger to compare
+# add non log scale hists

@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+from axes import axis_dict
 import pickle as pkl
 import pyarrow.parquet as pq
 import pyarrow as pa
@@ -27,7 +28,6 @@ import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 # define the axes for the different variables to be plotted
-from axes import axis_dict
 
 # define samples
 signal_by_ch = {
@@ -58,6 +58,7 @@ add_samples = {
     'WJetsLNu': 'WJetsToLNu',
 }
 
+
 def get_simplified_label(sample):   # get simplified "alias" names of the samples for plotting purposes
     f = open('configs/simplified_labels.json')
     name = json.load(f)
@@ -66,6 +67,7 @@ def get_simplified_label(sample):   # get simplified "alias" names of the sample
         return str(name[sample])
     else:
         return sample
+
 
 def get_sum_sumgenweight(idir, year, sample):
     pkl_files = glob.glob(f'{idir}/{sample}/outfiles/*.pkl')  # get the pkl metadata of the pkl files that were processed
@@ -113,7 +115,7 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # ma
                     pkl_dir = f'{idir}/{sample}/outfiles/*.pkl'
                     pkl_files = glob.glob(pkl_dir)  # get list of files that were processed
                     if not pkl_files:  # skip samples which were not processed
-                        print('- No processed files found...',pkl_dir,'skipping sample...',sample)
+                        print('- No processed files found...', pkl_dir, 'skipping sample...', sample)
                         continue
 
                     # Find xsection
@@ -127,7 +129,7 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # ma
 
                     # Get sum_sumgenweight of sample
                     sum_sumgenweight = get_sum_sumgenweight(idir, year, sample)
-                    
+
                     # Get overall weighting of events
                     xsec_weight = (xsec * luminosity[year]) / (sum_sumgenweight)  # each event has (possibly a different) genweight... sumgenweight sums over events in a chunk... sum_sumgenweight sums over chunks
                     xsec_weight_by_sample[sample] = xsec_weight
@@ -143,7 +145,7 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # ma
                         data = pq.read_table(parquet_file).to_pandas()
                     except:
                         if not is_data:
-                            print('Not able to read data: ',parquet_file,' should remove evts from scaling')
+                            print('Not able to read data: ', parquet_file, ' should remove evts from scaling')
                         continue
 
                     for var in vars_to_plot[ch]:
@@ -162,13 +164,13 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # ma
 
                         # filling histograms
                         single_sample = None
-                        for single_key,key in add_samples.items():
+                        for single_key, key in add_samples.items():
                             if key in sample:
                                 single_sample = single_key
 
                         if single_sample is not None:
                             hists[year][ch][var].fill(
-                                samples=single_sample,  # combining all events under one name 
+                                samples=single_sample,  # combining all events under one name
                                 var=variable,
                                 weight=event_weight * xsec_weight,
                             )
@@ -183,7 +185,8 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # ma
     with open(f'{odir}/hists.pkl', 'wb') as f:  # saves the hists objects
         pkl.dump(hists, f)
 
-def make_stack(odir,vars_to_plot,years,channels,pfnano,logy=True,add_data=True):
+
+def make_stack(odir, vars_to_plot, years, channels, pfnano, logy=True, add_data=True):
     # load the hists
     with open(f'{odir}/hists.pkl', 'rb') as f:
         hists = pkl.load(f)
@@ -192,19 +195,23 @@ def make_stack(odir,vars_to_plot,years,channels,pfnano,logy=True,add_data=True):
     # make the histogram plots in this directory
     # TODO: we will want combined plots for all years later too
     for year in years:
-        if not os.path.exists(f'{odir}/hists_{year}'):
-            os.makedirs(f'{odir}/hists_{year}')
+        if logy:
+            if not os.path.exists(f'{odir}/hists_{year}_log'):
+                os.makedirs(f'{odir}/hists_{year}_log')
+        else:
+            if not os.path.exists(f'{odir}/hists_{year}'):
+                os.makedirs(f'{odir}/hists_{year}')
         for ch in channels:
             for var in vars_to_plot[ch]:
                 if hists[year][ch][var].shape[0] == 0:     # skip empty histograms (such as lepton_pt for hadronic channel)
                     continue
-                    
+
                 # get histograms
                 h = hists[year][ch][var]
-                
+
                 # get samples existing in histogram
                 samples = [h.axes[0].value(i) for i in range(len(h.axes[0].edges))]
-                signal_label = signal_by_ch[ch]
+                # signal_label = signal_by_ch[ch]
                 data_label = data_by_ch[ch]
 
                 # data
@@ -212,30 +219,30 @@ def make_stack(odir,vars_to_plot,years,channels,pfnano,logy=True,add_data=True):
                 if data_label in samples:
                     data = h[{"samples": data_label}]
 
-                # signal
-                signal = h[{"samples": signal_label}]
-                print(signal)
-                if not logy:
-                    signal = signal*10 # if not log, scale the signal  
+                # # signal
+                # signal = h[{"samples": signal_label}]
+                # print(signal)
+                # if not logy:
+                #     signal = signal * 10  # if not log, scale the signal
 
                 # everything else (background)
-                bkg_labels = [label for label in samples if (label and label!=data_label and label!=signal_label)]
-                bkg = [h[{"samples": label}] for label in bkg_labels]
-
-                if bkg is None:
-                    print('No background samples to plot besides the signal')
-                    return
+                # bkg_labels = [label for label in samples if (label and label != data_label and label != signal_label)]
+                # bkg = [h[{"samples": label}] for label in bkg_labels]
+                #
+                # if bkg is None:
+                #     print('No background samples to plot besides the signal')
+                #     return
 
                 # print(data,signal,bkg)
 
                 if add_data and data:
                     fig, (ax, rax) = plt.subplots(nrows=2,
                                                   ncols=1,
-                                                  figsize=(8,8),
+                                                  figsize=(8, 8),
                                                   tight_layout=True,
                                                   gridspec_kw={"height_ratios": (3, 1)},
                                                   sharex=True
-                                              )
+                                                  )
                     fig.subplots_adjust(hspace=.07)
                     data_err_opts = {
                         'linestyle': 'none',
@@ -245,33 +252,33 @@ def make_stack(odir,vars_to_plot,years,channels,pfnano,logy=True,add_data=True):
                     }
                     hep.histplot(data,
                                  ax=ax,
-                                 histtype="errorbar", 
+                                 histtype="errorbar",
                                  color="k",
                                  yerr=True,
                                  label=get_simplified_label(data_label),
                                  **data_err_opts
                                  )
-                    rax.errorbar(
-                        x=[data.axes.value(i)[0] for i in range(len(data.values()))],
-                        y=data.values() / np.sum([b.values() for b in bkg], axis=0),
-                        fmt="ko",
-                    )
+                    # rax.errorbar(
+                    #     x=[data.axes.value(i)[0] for i in range(len(data.values()))],
+                    #     y=data.values() / np.sum([b.values() for b in bkg], axis=0),
+                    #     fmt="ko",
+                    # )
                 else:
                     fig, ax = plt.subplots(1, 1)
 
-                hep.histplot(bkg,
-                             ax=ax,
-                             stack=True,
-                             sort='yield',
-                             histtype="fill",
-                             label=[get_simplified_label(bkg_label) for bkg_label in bkg_labels],
-                )
-                    
-                hep.histplot(signal,
-                             ax=ax,
-                             label=get_simplified_label(signal_label),
-                             color='red'
-                         )
+                # hep.histplot(bkg,
+                #              ax=ax,
+                #              stack=True,
+                #              sort='yield',
+                #              histtype="fill",
+                #              label=[get_simplified_label(bkg_label) for bkg_label in bkg_labels],
+                #              )
+
+                # hep.histplot(signal,
+                #              ax=ax,
+                #              label=get_simplified_label(signal_label),
+                #              color='red'
+                #              )
 
                 if logy:
                     ax.set_yscale('log')
@@ -281,11 +288,17 @@ def make_stack(odir,vars_to_plot,years,channels,pfnano,logy=True,add_data=True):
 
                 hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
                 hep.cms.text("Work in Progress", ax=ax)
-                print('Saving to ',f'{odir}/hists_{year}/{var}_{ch}.pdf')
-                plt.savefig(f'{odir}/hists_{year}/{var}_{ch}.pdf')
+
+                if logy:
+                    print('Saving to ', f'{odir}/hists_{year}_log/{var}_{ch}.pdf')
+                    plt.savefig(f'{odir}/hists_{year}_log/{var}_{ch}.pdf')
+                else:
+                    print('Saving to ', f'{odir}/hists_{year}/{var}_{ch}.pdf')
+                    plt.savefig(f'{odir}/hists_{year}/{var}_{ch}.pdf')
                 plt.close()
 
-def make_norm(idir, vars_to_plot, years, channels,logy=True):
+
+def make_norm(idir, vars_to_plot, years, channels, logy=True):
     for year in years:
         if not os.path.exists(f'{odir}/hists_{year}'):
             os.makedirs(f'{odir}/hists_{year}')
@@ -304,6 +317,7 @@ def make_norm(idir, vars_to_plot, years, channels,logy=True):
                 hep.cms.text("Work in Progress", ax=ax)
                 plt.savefig(f'{odir}/hists_{year}/{var}_{ch}_density.pdf')
                 plt.close()
+
 
 def main(args):
     odir = args.odir
@@ -339,18 +353,21 @@ def main(args):
             if value == 1:
                 vars_to_plot[ch].append(key)
 
-    if args.hist:
+    if not args.hist:
         # make the histograms and save in pkl files
         make_hist(args.idir, odir, vars_to_plot, samples, years, channels, args.pfnano)
 
     if not args.noplot:
         # plot all process in stack
-        make_stack(odir, vars_to_plot, years, channels, args.pfnano)
+        make_stack(odir, vars_to_plot, years, channels, args.pfnano, logy=True)
+        make_stack(odir, vars_to_plot, years, channels, args.pfnano, logy=False)
 
 
 if __name__ == "__main__":
     # e.g.
     # run locally as: python make_plots.py --year 2017 --vars configs/vars.json --channels ele,mu,had --idir ../results/ --odir hists --pfnano --samples configs/samples_pfnano.json
+    # run on lpc as: python make_plots.py --year 2017 --vars configs/vars.json --channels ele,mu,had --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/Mar1_2017/ --odir hists --pfnano --samples configs/samples_pfnano.json
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',      dest='years',       default='2017',                        help="year")
     parser.add_argument('--vars',       dest='vars',        default="configs/vars.json",           help='path to json with variables to be plotted')
