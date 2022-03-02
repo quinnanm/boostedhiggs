@@ -182,7 +182,6 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # ma
                             )
 
     # store the hists variable
-    print('lol')
     with open(f'{odir}/hists.pkl', 'wb') as f:  # saves the hists objects
         pkl.dump(hists, f)
 
