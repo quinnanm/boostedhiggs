@@ -211,7 +211,7 @@ def make_stack(odir, vars_to_plot, years, channels, pfnano, logy=True, add_data=
 
                 # get samples existing in histogram
                 samples = [h.axes[0].value(i) for i in range(len(h.axes[0].edges))]
-                signal_label = signal_by_ch[ch]
+                # signal_label = signal_by_ch[ch]
                 data_label = data_by_ch[ch]
 
                 # data
@@ -219,11 +219,11 @@ def make_stack(odir, vars_to_plot, years, channels, pfnano, logy=True, add_data=
                 if data_label in samples:
                     data = h[{"samples": data_label}]
 
-                # signal
-                signal = h[{"samples": signal_label}]
-                print(signal)
-                if not logy:
-                    signal = signal * 10  # if not log, scale the signal
+                # # signal
+                # signal = h[{"samples": signal_label}]
+                # print(signal)
+                # if not logy:
+                #     signal = signal * 10  # if not log, scale the signal
 
                 # everything else (background)
                 bkg_labels = [label for label in samples if (label and label != data_label and label != signal_label)]
@@ -274,11 +274,11 @@ def make_stack(odir, vars_to_plot, years, channels, pfnano, logy=True, add_data=
                              label=[get_simplified_label(bkg_label) for bkg_label in bkg_labels],
                              )
 
-                hep.histplot(signal,
-                             ax=ax,
-                             label=get_simplified_label(signal_label),
-                             color='red'
-                             )
+                # hep.histplot(signal,
+                #              ax=ax,
+                #              label=get_simplified_label(signal_label),
+                #              color='red'
+                #              )
 
                 if logy:
                     ax.set_yscale('log')
@@ -359,7 +359,7 @@ def main(args):
 
     if not args.noplot:
         # plot all process in stack
-        # make_stack(odir, vars_to_plot, years, channels, args.pfnano, logy=True)
+        make_stack(odir, vars_to_plot, years, channels, args.pfnano, logy=True)
         make_stack(odir, vars_to_plot, years, channels, args.pfnano, logy=False)
 
 
