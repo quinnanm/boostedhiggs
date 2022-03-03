@@ -1,28 +1,47 @@
 {
     "ele": {
-	"lepton_pt": 1,
+	"lep_pt": 1,
 	"lep_isolation": 1,
+	"lep_misolation": 1,
+	"lep_fj_m": 1,
+	"lep_fj_bjets_ophem": 1,
+	"lep_fj_dr": 1,
+	"fj_msoftdrop": 1,
+	"fj_pt": 1,
 	"ht": 1,
-	"dr_jet_candlep": 1,
 	"met": 1,
-	"mt_lep_met": 1,
-	"bjets_ophem_lepfj": 1
+	"lep_met_mt": 1,
+	"lep_matchedH": 0,
+	"lep_nprongs": 0
     },
     "mu": {
-	"lepton_pt": 1,
-        "lep_isolation": 1,
+	"lep_pt": 1,
+	"lep_isolation": 1,
+        "lep_misolation": 1,
+	"lep_fj_m": 1,
+	"lep_fj_bjets_ophem": 1,
+	"lep_fj_dr": 1,
+	"fj_msoftdrop":1,
+	"fj_pt": 1,
         "ht": 1,
-        "dr_jet_candlep": 1,
         "met": 1,
-        "mt_lep_met": 1,
-	"mu_mvaId": 0,
-        "bjets_ophem_lepfj": 1
+	"lep_met_mt": 1,
+	"mu_mvaId": 1,
+	"lep_met_mt": 1,
+        "lep_matchedH": 0,
+        "lep_nprongs": 0
     },
     "had": {
-	"leadingfj_pt": 1,
-	"leadingfj_msoftdrop": 1,
-	"secondfj_pt": 1,
-	"secondfj_msoftdrop": 1,
-	"bjets_ophem_leadingfj": 1
+	"fj0_msoftdrop": 1,
+	"fj0_pt": 1,
+	"fj0_pnh4q": 1,
+	"fj1_msoftdrop": 1,
+	"fj1_pt": 1,
+	"fj1_pnh4q": 1,
+	"fj0_bjets_ophem": 1,
+	"ht": 1,
+        "met": 1,
+	"had_matchedH": 0,
+        "had_nprongs": 0
     }
 }
