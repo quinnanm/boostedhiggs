@@ -80,6 +80,7 @@
   "ttHToBB"                                :      0.29120517,
   "GluGluHToWWToLNuQQ"                     :     28.87,
   "GluGluHToWWTo4q"                        :      1,
+  "GluGluHToWWTo4q_ext1"                   :      1,
   "GluGluHToWWTo4q-HpT190"                 :      1,
   "GluGluHToWWTo4q-HpT190_ext1"            :      1
 }

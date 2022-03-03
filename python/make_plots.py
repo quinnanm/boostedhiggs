@@ -167,12 +167,12 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # ma
 
                         # we can make further selections before filling the hists here
                         # data = data[data['ht'] > 200]
-                        if ch=="mu":
-                            data = data[((data['lep_misolation'] < 0.2) & (data['lep_pt'] >=55)) | ((data['lep_isolation'] < 0.25) & (data['lep_pt'] <55))]
-                        elif ch=="ele":
-                            data = data[((data['lep_misolation'] < 0.2) & (data['lep_pt'] >=120)) | ((data['lep_isolation'] < 0.3) & (data['lep_pt'] <120))]
-                        elif ch=="had":
-                            data = data[data['met'] < 200]
+                        #if ch=="mu":
+                        #    data = data[((data['lep_misolation'] < 0.2) & (data['lep_pt'] >=55)) | ((data['lep_isolation'] < 0.25) & (data['lep_pt'] <55))]
+                        #elif ch=="ele":
+                        #    data = data[((data['lep_misolation'] < 0.2) & (data['lep_pt'] >=120)) | ((data['lep_isolation'] < 0.3) & (data['lep_pt'] <120))]
+                        #elif ch=="had":
+                        #    data = data[data['met'] < 200]
 
                         variable = data[var].to_numpy()
                         try:
