@@ -518,6 +518,11 @@ class HwwProcessor(processor.ProcessorABC):
             sel=(ak.max(bjets_away_leadingfj.btagDeepFlavB,axis=1) < self._btagWPs["M"]),
             channel=['had']
         )
+        self.add_selection(
+            name='met',
+            sel=(met < 200),
+            channel=['had']
+        )
 
         variables = {}
         variables["lep_pt"] = pad_val(candidatelep.pt, -1)
