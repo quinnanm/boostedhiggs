@@ -264,6 +264,8 @@ def make_stack(odir, vars_to_plot, years, channels, pfnano, logy=True, add_data=
                         y=data.values() / np.sum([b.values() for b in bkg], axis=0),
                         fmt="ko",
                     )
+                    # NOTE: change limit later
+                    rax.set_ylim(0.,1.2)
                 else:
                     fig, ax = plt.subplots(1, 1)
 
