@@ -347,12 +347,18 @@ class HwwProcessor(processor.ProcessorABC):
         n_good_electrons = ak.sum(good_electrons, axis=1)
 
         # define tau objects
-        # TODO: Select taus that come from W(taunuqq) decay but hopefully do not overlap with H(tautau) selection
-        good_taus = (
+        loose_taus_mu = (
             (events.Tau.pt > 20)
             & (abs(events.Tau.eta) < 2.3)
+            & (tau_coll.idAntiMu >= 1) # loose antiMu ID
         )
-        n_good_taus = ak.sum(good_taus, axis=1)
+        loose_taus_ele = (
+            (events.Tau.pt > 20)
+            & (abs(events.Tau.eta) < 2.3)
+            & (tau_coll.idAntiEle2018 >= 2) # loose Anti-electron MVA discriminator V6 (2018)
+        )
+        n_loose_taus_mu = ak.sum(loose_taus_mu, axis=1)
+        n_loose_taus_ele = ak.sum(loose_taus_ele, axis=1)
 
         # leading lepton
         goodleptons = ak.concatenate([events.Muon[good_muons], events.Electron[good_electrons]], axis=1)
@@ -426,7 +432,12 @@ class HwwProcessor(processor.ProcessorABC):
         )
         self.add_selection(
             name='oneLepton',
-            sel=(n_good_muons == 1) & (n_good_electrons == 0) & (n_loose_electrons == 0),
+            sel=(n_good_muons == 1) & (n_good_electrons == 0) & (n_loose_electrons == 0) & ~ak.any(loose_muons & ~good_muons, 1),
+            channel=['mu']
+        )
+        self.add_selection(
+            name='notaus',
+            sel=(n_loose_taus_mu==0),
             channel=['mu']
         )
         # self.add_selection(
@@ -443,7 +454,12 @@ class HwwProcessor(processor.ProcessorABC):
         )
         self.add_selection(
             name='oneLepton',
-            sel=(n_good_muons == 0) & (n_loose_muons == 0) & (n_good_electrons == 1),
+            sel=(n_good_muons == 0) & (n_loose_muons == 0) & (n_good_electrons == 1) & ~ak.any(loose_electrons & ~good_electrons, 1),
+            channel=['ele']
+        )
+        self.add_selection(
+            name='notaus',
+            sel=(n_loose_taus_ele==0),
             channel=['ele']
         )
         # self.add_selection(
