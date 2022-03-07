@@ -350,12 +350,12 @@ class HwwProcessor(processor.ProcessorABC):
         loose_taus_mu = (
             (events.Tau.pt > 20)
             & (abs(events.Tau.eta) < 2.3)
-            & (tau_coll.idAntiMu >= 1) # loose antiMu ID
+            & (events.Tau.idAntiMu >= 1) # loose antiMu ID
         )
         loose_taus_ele = (
             (events.Tau.pt > 20)
             & (abs(events.Tau.eta) < 2.3)
-            & (tau_coll.idAntiEle2018 >= 2) # loose Anti-electron MVA discriminator V6 (2018)
+            & (events.Tau.idAntiEleDeadECal >= 2) # loose Anti-electron MVA discriminator V6 (2018) ?
         )
         n_loose_taus_mu = ak.sum(loose_taus_mu, axis=1)
         n_loose_taus_ele = ak.sum(loose_taus_ele, axis=1)
