@@ -21,6 +21,7 @@ from coffea.analysis_tools import Weights, PackedSelection
 
 import hist as hist2
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 import mplhep as hep
 from hist.intervals import clopper_pearson_interval
 
@@ -31,15 +32,10 @@ warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 # define samples
 signal_by_ch = {
-    'ele': 'GluGluHToWWToLNuQQ',
-    'mu': 'GluGluHToWWToLNuQQ',
-    'had': 'GluGluHToWWTo4q',
+    'ele': ['GluGluHToWWToLNuQQ'],
+    'mu': ['GluGluHToWWToLNuQQ'],
+    'had': ['GluGluHToWWTo4q','GluGluHToWWTo4q_ext1'],
 }
-# signal_by_ch = {
-#     'ele': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',
-#     'mu': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',
-#     'had': 'GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8',
-# }
 data_by_ch = {
     'ele': 'SingleElectron',
     'mu': 'SingleMuon',
@@ -57,7 +53,20 @@ add_samples = {
     'TTbar': 'TT',
     'WJetsLNu': 'WJetsToLNu',
 }
-
+color_by_sample = {
+    "QCD": 'tab:orange',
+    "DYJets": 'tab:purple',
+    "WJetsLNu": 'tab:green',
+    "TTbar": 'tab:blue',
+    "ZQQ": 'tab:pink',
+    "WQQ": 'tab:red',
+    "SingleTop": 'tab:gray',
+}
+# available tab colors
+# 'tab:cyan'
+# 'tab:olive'
+# 'tab:gray'
+# 'tab:brown':
 
 def get_simplified_label(sample):   # get simplified "alias" names of the samples for plotting purposes
     f = open('configs/simplified_labels.json')
@@ -111,6 +120,7 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # ma
                 for key in data_by_ch.values():
                     if key in sample:
                         is_data = True
+
                 if not is_data and sample not in xsec_weight_by_sample.keys():
                     pkl_dir = f'{idir}/{sample}/outfiles/*.pkl'
                     pkl_files = glob.glob(pkl_dir)  # get list of files that were processed
@@ -131,10 +141,13 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # ma
                     sum_sumgenweight = get_sum_sumgenweight(idir, year, sample)
 
                     # Get overall weighting of events
-                    xsec_weight = (xsec * luminosity[year]) / (sum_sumgenweight)  # each event has (possibly a different) genweight... sumgenweight sums over events in a chunk... sum_sumgenweight sums over chunks
+                    # each event has (possibly a different) genweight... sumgenweight sums over events in a chunk... sum_sumgenweight sums over chunks 
+                    xsec_weight = (xsec * luminosity[year]) / (sum_sumgenweight)
                     xsec_weight_by_sample[sample] = xsec_weight
+
                 elif sample in xsec_weight_by_sample.keys():
                     xsec_weight = xsec_weight_by_sample[sample]
+
                 else:
                     xsec_weight = 1
 
@@ -144,8 +157,7 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # ma
                     try:
                         data = pq.read_table(parquet_file).to_pandas()
                     except:
-                        if not is_data:
-                            print('Not able to read data: ', parquet_file, ' should remove evts from scaling')
+                        print('Not able to read data: ', parquet_file, ' should remove evts from scaling/lumi')
                         continue
 
                     for var in vars_to_plot[ch]:
@@ -154,7 +166,13 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # ma
                             continue
 
                         # we can make further selections before filling the hists here
-                        # data = data[data['ht'] > 300]
+                        # data = data[data['ht'] > 200]
+                        #if ch=="mu":
+                        #    data = data[((data['lep_misolation'] < 0.2) & (data['lep_pt'] >=55)) | ((data['lep_isolation'] < 0.25) & (data['lep_pt'] <55))]
+                        #elif ch=="ele":
+                        #    data = data[((data['lep_misolation'] < 0.2) & (data['lep_pt'] >=120)) | ((data['lep_isolation'] < 0.3) & (data['lep_pt'] <120))]
+                        #elif ch=="had":
+                        #    data = data[data['met'] < 200]
 
                         variable = data[var].to_numpy()
                         try:
@@ -181,6 +199,9 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # ma
                                 weight=event_weight * xsec_weight,
                             )
 
+    # TODO: combine histograms for all years here and flag them as year='combined'
+
+
     # store the hists variable
     with open(f'{odir}/hists.pkl', 'wb') as f:  # saves the hists objects
         pkl.dump(hists, f)
@@ -193,7 +214,6 @@ def make_stack(odir, vars_to_plot, years, channels, pfnano, logy=True, add_data=
         f.close()
 
     # make the histogram plots in this directory
-    # TODO: we will want combined plots for all years later too
     for year in years:
         if logy:
             if not os.path.exists(f'{odir}/hists_{year}_log'):
@@ -211,31 +231,26 @@ def make_stack(odir, vars_to_plot, years, channels, pfnano, logy=True, add_data=
 
                 # get samples existing in histogram
                 samples = [h.axes[0].value(i) for i in range(len(h.axes[0].edges))]
-                # signal_label = signal_by_ch[ch]
                 data_label = data_by_ch[ch]
+                signal_labels = [label for label in samples if label in signal_by_ch[ch]]
+                bkg_labels = [label for label in samples if (label and label != data_label and label not in signal_labels)] 
 
                 # data
                 data = None
                 if data_label in samples:
                     data = h[{"samples": data_label}]
 
-                # # signal
-                # signal = h[{"samples": signal_label}]
-                # print(signal)
-                # if not logy:
-                #     signal = signal * 10  # if not log, scale the signal
+                # signal
+                signal = [h[{"samples": label}] for label in signal_labels]
+                if not logy:
+                    signal = [s * 10 for s in signal]  # if not log, scale the signal
 
-                # everything else (background)
-                # bkg_labels = [label for label in samples if (label and label != data_label and label != signal_label)]
-                # bkg = [h[{"samples": label}] for label in bkg_labels]
-                #
-                # if bkg is None:
-                #     print('No background samples to plot besides the signal')
-                #     return
+                # background
+                bkg = [h[{"samples": label}] for label in bkg_labels]
 
                 # print(data,signal,bkg)
 
-                if add_data and data:
+                if add_data and data and len(bkg)>0:
                     fig, (ax, rax) = plt.subplots(nrows=2,
                                                   ncols=1,
                                                   figsize=(8, 8),
@@ -244,6 +259,27 @@ def make_stack(odir, vars_to_plot, years, channels, pfnano, logy=True, add_data=
                                                   sharex=True
                                                   )
                     fig.subplots_adjust(hspace=.07)
+                    rax.errorbar(
+                        x=[data.axes.value(i)[0] for i in range(len(data.values()))],
+                        y=data.values() / np.sum([b.values() for b in bkg], axis=0),
+                        fmt="ko",
+                    )
+                    # NOTE: change limit later
+                    rax.set_ylim(0.,1.2)
+                else:
+                    fig, ax = plt.subplots(1, 1)
+
+                if len(bkg)>0:
+                    hep.histplot(bkg,
+                                 ax=ax,
+                                 stack=True,
+                                 sort='yield',
+                                 histtype="fill",
+                                 label=[get_simplified_label(bkg_label) for bkg_label in bkg_labels],
+                             )
+                    for handle, label in zip(*ax.get_legend_handles_labels()):
+                        handle.set_color(color_by_sample[label])
+                if add_data and data:
                     data_err_opts = {
                         'linestyle': 'none',
                         'marker': '.',
@@ -258,28 +294,14 @@ def make_stack(odir, vars_to_plot, years, channels, pfnano, logy=True, add_data=
                                  label=get_simplified_label(data_label),
                                  **data_err_opts
                                  )
-                    # rax.errorbar(
-                    #     x=[data.axes.value(i)[0] for i in range(len(data.values()))],
-                    #     y=data.values() / np.sum([b.values() for b in bkg], axis=0),
-                    #     fmt="ko",
-                    # )
-                else:
-                    fig, ax = plt.subplots(1, 1)
 
-                # hep.histplot(bkg,
-                #              ax=ax,
-                #              stack=True,
-                #              sort='yield',
-                #              histtype="fill",
-                #              label=[get_simplified_label(bkg_label) for bkg_label in bkg_labels],
-                #              )
-
-                # hep.histplot(signal,
-                #              ax=ax,
-                #              label=get_simplified_label(signal_label),
-                #              color='red'
-                #              )
-
+                if len(signal)>0:
+                    hep.histplot(signal,
+                                 ax=ax,
+                                 label=[get_simplified_label(sig_label) for sig_label in signal_labels],
+                                 color='red'
+                             )
+                    
                 if logy:
                     ax.set_yscale('log')
                     ax.set_ylim(0.1)
@@ -353,12 +375,13 @@ def main(args):
             if value == 1:
                 vars_to_plot[ch].append(key)
 
-    if not args.hist:
+    if args.hist:
         # make the histograms and save in pkl files
         make_hist(args.idir, odir, vars_to_plot, samples, years, channels, args.pfnano)
 
     if not args.noplot:
         # plot all process in stack
+        print('plot')
         make_stack(odir, vars_to_plot, years, channels, args.pfnano, logy=True)
         make_stack(odir, vars_to_plot, years, channels, args.pfnano, logy=False)
 

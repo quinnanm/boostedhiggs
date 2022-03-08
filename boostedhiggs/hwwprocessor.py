@@ -15,6 +15,7 @@ from coffea import processor
 from coffea.nanoevents.methods import candidate, vector
 from coffea.analysis_tools import Weights, PackedSelection
 from boostedhiggs.utils import match_HWW
+from boostedhiggs.btag import btagWPs,BTagCorrector
 
 import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
@@ -236,29 +237,8 @@ class HwwProcessor(processor.ProcessorABC):
             ],
         }[int(self._year)]
 
-        # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
-        self._btagWPs = {
-            '2016preVFP': {
-                'loose': 0.0508,
-                'medium': 0.2598,
-                'tight': 0.6502,
-            },
-            '2016postVFP': {
-                'loose': 0.0480,
-                'medium': 0.2489,
-                'tight': 0.6377,
-            },
-            '2017': {
-                'loose': 0.0532,
-                'medium': 0.3040,
-                'tight': 0.7476,
-            },
-            '2018': {
-                'loose': 0.0490,
-                'medium': 0.2783,
-                'tight': 0.7100,
-            },
-        }[year + yearmod]
+        self._btagWPs = btagWPs["deepJet"][year + yearmod]
+        self.btagCorr = BTagCorrector("M","deepJet",year,yearmod)
 
         self.selections = {}
         self.cutflows = {}
@@ -367,12 +347,18 @@ class HwwProcessor(processor.ProcessorABC):
         n_good_electrons = ak.sum(good_electrons, axis=1)
 
         # define tau objects
-        # TODO: Select taus that come from W(taunuqq) decay but hopefully do not overlap with H(tautau) selection
-        good_taus = (
+        loose_taus_mu = (
             (events.Tau.pt > 20)
             & (abs(events.Tau.eta) < 2.3)
+            & (events.Tau.idAntiMu >= 1) # loose antiMu ID
         )
-        n_good_taus = ak.sum(good_taus, axis=1)
+        loose_taus_ele = (
+            (events.Tau.pt > 20)
+            & (abs(events.Tau.eta) < 2.3)
+            & (events.Tau.idAntiEleDeadECal >= 2) # loose Anti-electron MVA discriminator V6 (2018) ?
+        )
+        n_loose_taus_mu = ak.sum(loose_taus_mu, axis=1)
+        n_loose_taus_ele = ak.sum(loose_taus_ele, axis=1)
 
         # leading lepton
         goodleptons = ak.concatenate([events.Muon[good_muons], events.Electron[good_electrons]], axis=1)
@@ -426,8 +412,8 @@ class HwwProcessor(processor.ProcessorABC):
         
         # b-jets
         # in event, pick highest b score in opposite direction from signal (we will make cut here to avoid tt background events producing bjets)
-        bjets_ophem_lepfj = ak.max(goodjets[dphi_jet_lepfj > np.pi / 2].btagDeepFlavB, axis=1)
-        bjets_ophem_leadingfj = ak.max(goodjets[dphi_jet_leadingfj > np.pi / 2].btagDeepFlavB, axis=1)
+        bjets_away_lepfj = goodjets[dphi_jet_lepfj > np.pi / 2]
+        bjets_away_leadingfj = goodjets[dphi_jet_leadingfj > np.pi / 2]
 
         # deltaR
         dr_jet_candlep = candidatefj_lep.delta_r(candidatelep_p4)
@@ -446,7 +432,12 @@ class HwwProcessor(processor.ProcessorABC):
         )
         self.add_selection(
             name='oneLepton',
-            sel=(n_good_muons == 1) & (n_good_electrons == 0) & (n_loose_electrons == 0),
+            sel=(n_good_muons == 1) & (n_good_electrons == 0) & (n_loose_electrons == 0) & ~ak.any(loose_muons & ~good_muons, 1),
+            channel=['mu']
+        )
+        self.add_selection(
+            name='notaus',
+            sel=(n_loose_taus_mu==0),
             channel=['mu']
         )
         # self.add_selection(
@@ -463,7 +454,12 @@ class HwwProcessor(processor.ProcessorABC):
         )
         self.add_selection(
             name='oneLepton',
-            sel=(n_good_muons == 0) & (n_loose_muons == 0) & (n_good_electrons == 1),
+            sel=(n_good_muons == 0) & (n_loose_muons == 0) & (n_good_electrons == 1) & ~ak.any(loose_electrons & ~good_electrons, 1),
+            channel=['ele']
+        )
+        self.add_selection(
+            name='notaus',
+            sel=(n_loose_taus_ele==0),
             channel=['ele']
         )
         # self.add_selection(
@@ -479,8 +475,8 @@ class HwwProcessor(processor.ProcessorABC):
         #     channel=['mu', 'ele']
         # )
         self.add_selection(
-            name='bjet_tag',
-            sel=(bjets_ophem_lepfj < self._btagWPs["medium"]),
+            name='anti_bjettag',
+            sel=(ak.max(bjets_away_lepfj.btagDeepFlavB,axis=1) < self._btagWPs["M"]),
             channel=['mu', 'ele']
         )
         self.add_selection(
@@ -518,8 +514,13 @@ class HwwProcessor(processor.ProcessorABC):
             channel=['had']
         )
         self.add_selection(
-            name='bjet_tag',
-            sel=(bjets_ophem_leadingfj < self._btagWPs["medium"]),
+            name='anti_bjettag',
+            sel=(ak.max(bjets_away_leadingfj.btagDeepFlavB,axis=1) < self._btagWPs["M"]),
+            channel=['had']
+        )
+        self.add_selection(
+            name='met',
+            sel=(met < 200),
             channel=['had']
         )
 
@@ -528,7 +529,7 @@ class HwwProcessor(processor.ProcessorABC):
         variables["lep_isolation"] = pad_val(lep_reliso, -1)
         variables["lep_misolation"] = pad_val(lep_miso, -1)
         variables["lep_fj_m"] = pad_val(lep_fj_m, -1)
-        variables["lep_fj_bjets_ophem"] = pad_val(bjets_ophem_lepfj, -1)
+        variables["lep_fj_bjets_ophem"] = pad_val(ak.max(bjets_away_lepfj.btagDeepFlavB,axis=1), -1)
         variables["lep_fj_dr"] = pad_val(dr_jet_candlep, -1)
         variables["lep_mvaId"] = pad_val(mu_mvaId, -1)
         variables["fj_msoftdrop"] = pad_val(candidatefj_lep.msoftdrop, -1)
@@ -541,7 +542,7 @@ class HwwProcessor(processor.ProcessorABC):
         variables["fj1_msoftdrop"] = pad_val(secondfj.msoftdrop, -1)
         variables["fj1_pt"] = pad_val(secondfj.pt, -1)
         variables["fj1_pnh4q"] = pad_val(secondfj.particleNet_H4qvsQCD, -1)
-        variables["fj0_bjets_ophem"] = pad_val(bjets_ophem_leadingfj, -1)
+        variables["fj0_bjets_ophem"] = pad_val(ak.max(bjets_away_leadingfj.btagDeepFlavB,axis=1), -1)
 
         # weights
         # TODO:
@@ -562,6 +563,8 @@ class HwwProcessor(processor.ProcessorABC):
         if isMC:
             weights = Weights(nevents, storeIndividual=True)
             weights.add('genweight', events.genWeight)
+            # self.btagCorr.addBtagWeight(bjets_away_lepfj, weights)
+            # self.btagCorr.addBtagWeight(bjets_away_leadingfj, weights)
             variables["weight"] = pad_val(weights.weight(), -1)
 
         # systematics 
