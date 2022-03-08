@@ -15,6 +15,7 @@ import pickle as pkl
 import pandas as pd
 import os
 
+
 def main(args):
 
     # make directory for output
@@ -24,19 +25,19 @@ def main(args):
     channels = ["ele", "mu", "had"]
     starti = args.starti
     job_name = '/' + str(starti)
-    if args.n!=-1:
-        job_name += '-' + str(args.starti+args.n) 
+    if args.n != -1:
+        job_name += '-' + str(args.starti + args.n)
 
     # get samples
-    if args.json=='metadata.json':
+    if args.json == 'metadata.json':
         with open(args.json, 'r') as f:
             files = json.load(f)
     else:
         # hopefully this step is avoided in condor jobs that have metadata.json
         from condor.file_utils import loadJson
-        files,_ = loadJson(args.json,args.year,args.pfnano)
+        files, _ = loadJson(args.json, args.year, args.pfnano)
 
-    if not files: 
+    if not files:
         print('Did not find files.. Exiting.')
         exit(1)
 
@@ -44,13 +45,14 @@ def main(args):
     fileset = {}
     for sample, flist in files.items():
         if args.sample:
-            if sample not in args.sample.split(','): continue
-        if args.n!=-1:
-            fileset[sample] = flist[args.starti:args.starti+args.n]
+            if sample not in args.sample.split(','):
+                continue
+        if args.n != -1:
+            fileset[sample] = flist[args.starti:args.starti + args.n]
         else:
             fileset[sample] = flist
 
-    print('Samples in fileset to be processed: ',list(fileset.keys()))
+    print('Samples in fileset to be processed: ', list(fileset.keys()))
 
     # define processor
     if args.processor == 'hww':
@@ -117,12 +119,12 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as: python run.py --year 2017 --processor hww --starti 0 -n 1 
+    # run locally on lpc as: python run.py --year 2017 --processor hww --starti 0 --n 1 --json samples_pfnano.json
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',        dest='year',           default='2017',                     help="year",                                type=str)
     parser.add_argument('--starti',      dest='starti',         default=0,                          help="start index of files",                type=int)
-    parser.add_argument('-n',            dest='n',              default=-1,                         help="number of files to process",          type=int)
+    parser.add_argument('--n',            dest='n',              default=-1,                         help="number of files to process",          type=int)
     parser.add_argument('--json',        dest='json',           default="metadata.json",            help='path to datafiles',                   type=str)
     parser.add_argument('--sample',      dest='sample',         default=None,                       help='specify sample',                      type=str)
     parser.add_argument("--processor",   dest="processor",      default="hww",                      help="HWW processor",                       type=str)
@@ -134,8 +136,8 @@ if __name__ == "__main__":
         choices=["futures", "iterative", "dask"],
         help="type of processor executor",
     )
-    parser.add_argument("--pfnano",      dest='pfnano',action='store_true')
-    parser.add_argument("--no-pfnano",   dest='pfnano',action='store_false')                        
+    parser.add_argument("--pfnano",      dest='pfnano', action='store_true')
+    parser.add_argument("--no-pfnano",   dest='pfnano', action='store_false')
     parser.set_defaults(pfnano=True)
 
     args = parser.parse_args()
