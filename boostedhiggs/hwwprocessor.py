@@ -628,13 +628,12 @@ class HwwProcessor(processor.ProcessorABC):
         fname = events.behavior["__events_factory__"]._partition_key.replace("/", "_")
         fname = 'condor_' + fname
 
-        print(self._output_location)
         if self.local:
             if not os.path.exists(self._output_location + dataset):
                 os.makedirs(self._output_location + dataset)
-                self._output_location = self._output_location + dataset + '/' + append
+                self._output_location = self._output_location + dataset + '/' + self.append
         else:
-            self._output_location = self._output_location + append
+            self._output_location = self._output_location + self.append
 
         for ch in self._channels:  # creating directories for each channel
             if not os.path.exists(self._output_location + ch):
