@@ -66,11 +66,12 @@ def build_p4(cand):
 
 
 class HwwProcessor(processor.ProcessorABC):
-    def __init__(self, year="2017", yearmod="", channels=["ele", "mu", "had"], output_location="./outfiles/"):
+    def __init__(self, year="2017", yearmod="", channels=["ele", "mu", "had"], output_location="./outfiles/", local=False):
         self._year = year
         self._yearmod = yearmod
         self._channels = channels
         self._output_location = output_location
+        self.local = local
 
         # define variables to save for each channel
         self._skimvars = {
@@ -625,6 +626,11 @@ class HwwProcessor(processor.ProcessorABC):
         # now save pandas dataframes
         fname = events.behavior["__events_factory__"]._partition_key.replace("/", "_")
         fname = 'condor_' + fname
+
+        print(self._output_location)
+        # if self.local:
+        #     if not os.path.exists(self._output_location + ch):
+        #         os.makedirs(self._output_location + ch)
 
         for ch in self._channels:  # creating directories for each channel
             if not os.path.exists(self._output_location + ch):
