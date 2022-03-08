@@ -1,6 +1,6 @@
 import hist as hist2
 axis_dict = {
-    'lep_pt': hist2.axis.Regular(50, 20, 500, name='var', label=r'Lepton $p_T$ [GeV]'),
+    'lepton_pt': hist2.axis.Regular(50, 20, 500, name='var', label=r'Lepton $p_T$ [GeV]'),
     'lep_isolation': hist2.axis.Regular(20, 0, 3.5, name='var', label=r'Lepton iso'),
     'lep_misolation': hist2.axis.Regular(20, 0, 3.5, name='var', label=r'Lepton mini iso'),
     'lep_fj_m': hist2.axis.Regular(20, 0, 200, name='var', label=r'Jet - Lepton mass [GeV]'),
@@ -22,5 +22,5 @@ axis_dict = {
     'lep_matchedH': hist2.axis.Regular(20, 100, 400, name='var', label=r'matchedH $p_T$ [GeV]'),
     'had_matchedH': hist2.axis.Regular(20, 100, 400, name='var', label=r'matchedH $p_T$ [GeV]'),
     'lep_nprongs': hist2.axis.Regular(20, 0, 4, name='var', label=r'num of prongs'),
-    'had_nprongs': hist2.axis.Regular(20, 0, 4,name='var', label=r'num of prongs'),
+    'had_nprongs': hist2.axis.Regular(20, 0, 4, name='var', label=r'num of prongs'),
 }
