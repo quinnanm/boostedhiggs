@@ -628,6 +628,7 @@ class HwwProcessor(processor.ProcessorABC):
 
         if not os.path.exists(self._output_location + dataset + '/'):
             os.makedirs(self._output_location + dataset + '/')
+        self._output_location = self._output_location + dataset + '/'
 
         for ch in self._channels:  # creating directories for each channel
             if not os.path.exists(self._output_location + ch):
