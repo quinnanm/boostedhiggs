@@ -241,7 +241,7 @@ class HwwProcessor(processor.ProcessorABC):
         }[int(self._year)]
 
         self._btagWPs = btagWPs["deepJet"][year + yearmod]
-        self.btagCorr = BTagCorrector("M", "deepJet", year, yearmod)
+        # self.btagCorr = BTagCorrector("M", "deepJet", year, yearmod)
 
         self.selections = {}
         self.cutflows = {}
@@ -523,7 +523,7 @@ class HwwProcessor(processor.ProcessorABC):
         )
         self.add_selection(
             name='met',
-            sel=(met < 200),
+            sel=(met.pt < 200),
             channel=['had']
         )
 

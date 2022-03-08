@@ -52,7 +52,7 @@ def main(args):
         else:
             fileset[sample] = flist
 
-    print('Samples in fileset to be processed: ', list(fileset.keys()))
+    print(len(list(fileset.keys())), 'Samples in fileset to be processed: ', list(fileset.keys()))
 
     # define processor
     if args.processor == 'hww':
