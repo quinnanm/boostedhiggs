@@ -625,6 +625,10 @@ class HwwProcessor(processor.ProcessorABC):
         # now save pandas dataframes
         fname = events.behavior["__events_factory__"]._partition_key.replace("/", "_")
         fname = 'condor_' + fname
+
+        if not os.path.exists(self._output_location + dataset + '/'):
+            os.makedirs(self._output_location + dataset + '/')
+
         for ch in self._channels:  # creating directories for each channel
             if not os.path.exists(self._output_location + ch):
                 os.makedirs(self._output_location + ch)
