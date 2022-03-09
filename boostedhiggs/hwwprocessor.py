@@ -546,6 +546,7 @@ class HwwProcessor(processor.ProcessorABC):
         variables["fj1_pt"] = pad_val(secondfj.pt, -1)
         variables["fj1_pnh4q"] = pad_val(secondfj.particleNet_H4qvsQCD, -1)
         variables["fj0_bjets_ophem"] = pad_val(ak.max(bjets_away_leadingfj.btagDeepFlavB, axis=1), -1)
+        variables["lep_met_mt"] = pad_val(mt_lep_met, -1)
 
         # weights
         # TODO:
