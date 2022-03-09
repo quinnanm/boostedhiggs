@@ -90,8 +90,10 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins=50, x_start=0
 
                 if not os.path.exists(f'{odir}/plots_{year}/'):
                     os.makedirs(f'{odir}/plots_{year}/')
+                if not os.path.exists(f'{odir}/plots_{year}/{x}_vs_{y}'):
+                    os.makedirs(f'{odir}/plots_{year}/{x}_vs_{y}')
 
-                plt.savefig(f'{odir}/plots_{year}/{ch}_{sample}_{x}_&_{y}.pdf')
+                plt.savefig(f'{odir}/plots_{year}/{x}_vs_{y}/{ch}_{sample}.pdf')
                 plt.close()
 
 
