@@ -126,9 +126,9 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # lep_pt vs lep_iso: python make_2dplots.py --year 2017 --idir ../results/ --odir 2dplots --samples configs/samples_pfnano.json --channels ele,mu --vars lep_pt,lep_isolation --x_bins 50 --x_start 0 --x_end 500 --y_bins 50 --y_start 0 --y_end 1
-    # lep_pt vs dR: python make_2dplots.py --year 2017 --idir ../results/ --odir 2dplots --samples configs/samples_pfnano.json --channels ele,mu --vars lep_pt,lep_fj_dr --x_bins 50 --x_start 0 --x_end 500 --y_bins 50 --y_start 0 --y_end 2
-    # lep_pt vs mt: python make_2dplots.py --year 2017 --idir ../results/ --odir 2dplots --samples configs/samples_pfnano.json --channels ele,mu --vars lep_pt,lep_met_mt --x_bins 50 --x_start 0 --x_end 500 --y_bins 50 --y_start 0 --y_end 500
+    # lep_pt vs lep_iso: python make_2dplots.py --year 2017 --odir 2dplots --samples configs/samples_pfnano.json --channels ele,mu --vars lep_pt,lep_isolation --x_bins 50 --x_start 0 --x_end 500 --y_bins 50 --y_start 0 --y_end 1 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs
+    # lep_pt vs dR: python make_2dplots.py --year 2017 --odir 2dplots --samples configs/samples_pfnano.json --channels ele,mu --vars lep_pt,lep_fj_dr --x_bins 50 --x_start 0 --x_end 500 --y_bins 50 --y_start 0 --y_end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs
+    # lep_pt vs mt: python make_2dplots.py --year 2017 --odir 2dplots --samples configs/samples_pfnano.json --channels ele,mu --vars lep_pt,lep_met_mt --x_bins 50 --x_start 0 --x_end 500 --y_bins 50 --y_start 0 --y_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',           dest='years',       default='2017',                        help="year")
