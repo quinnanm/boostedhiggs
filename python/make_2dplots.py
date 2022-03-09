@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 import json
 import os
+import sys
 import glob
 import shutil
 import pathlib
@@ -20,6 +21,7 @@ from coffea.nanoevents.methods import candidate, vector
 from coffea.analysis_tools import Weights, PackedSelection
 
 import hist as hist2
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import mplhep as hep
@@ -79,9 +81,9 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins=50, x_start=0
             for sample in hists[year][ch].axes[-1]:
 
                 fig, ax = plt.subplots(figsize=(8, 5))
-                hep.hist2dplot(hists[year][ch][{'samples': sample}], ax=ax)
-                ax.set_xlabel("pt")
-                ax.set_ylabel("lep_is0")
+                hep.hist2dplot(hists[year][ch][{'samples': sample}], ax=ax, norm=matplotlib.colors.Normalize(vmin=0, vmax=1), cmap="plasma")
+                ax.set_xlabel(f"{x}")
+                ax.set_ylabel(f"{y}")
                 ax.set_title(f'{ch} channel for \n {sample}')
                 hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
                 hep.cms.text("Work in Progress", ax=ax)
@@ -89,7 +91,7 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins=50, x_start=0
                 if not os.path.exists(f'{odir}/plots_{year}/'):
                     os.makedirs(f'{odir}/plots_{year}/')
 
-                plt.savefig(f'{odir}/plots_{year}/{ch}_{sample}.pdf')
+                plt.savefig(f'{odir}/plots_{year}/{ch}_{sample}_{x}_&_{y}.pdf')
                 plt.close()
 
 
@@ -121,23 +123,25 @@ def main(args):
 
 
 if __name__ == "__main__":
-    # e.g.
-    # run locally as: python make_2dplots.py --year 2017 --idir ../results/ --odir 2dplots --pfnano --samples configs/samples_pfnano.json --channels ele,mu --vars lep_pt,lep_isolation --x_bins 50 --x_start 0 --x_end 500 --y_bins 50 --y_start 0 --y_end 1
+    # e.g. run locally as
+    # lep_pt vs lep_iso: python make_2dplots.py --year 2017 --idir ../results/ --odir 2dplots --pfnano --samples configs/samples_pfnano.json --channels ele,mu --vars lep_pt,lep_isolation --x_bins 50 --x_start 0 --x_end 500 --y_bins 50 --y_start 0 --y_end 1
+    # lep_pt vs dR: python make_2dplots.py --year 2017 --idir ../results/ --odir 2dplots --pfnano --samples configs/samples_pfnano.json --channels ele,mu --vars lep_pt,lep_fj_dr --x_bins 50 --x_start 0 --x_end 500 --y_bins 50 --y_start 0 --y_end 2
+    # lep_pt vs mt: python make_2dplots.py --year 2017 --idir ../results/ --odir 2dplots --pfnano --samples configs/samples_pfnano.json --channels ele,mu --vars lep_pt,lep_met_mt --x_bins 50 --x_start 0 --x_end 500 --y_bins 50 --y_start 0 --y_end 500
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--years',            dest='years',       default='2017',                        help="year")
-    parser.add_argument('--samples',          dest='samples',     default="configs/samples_pfnano.json", help='path to json with samples to be plotted')
-    parser.add_argument('--channels',         dest='channels',    default='ele,mu,had',                  help='channels for which to plot this variable')
-    parser.add_argument('--odir',             dest='odir',        default='2dplots',                       help="tag for output directory")
-    parser.add_argument('--idir',             dest='idir',        default='../results/',                 help="input directory with results")
-    parser.add_argument("--pfnano",           dest='pfnano',      action='store_true',                   help="Run with pfnano")
-    parser.add_argument('--vars',         dest='vars',    default='lep_pt,lep_isolation',                  help='channels for which to plot this variable')
-    parser.add_argument('--x_bins',      dest='x_bins',         default=50,                          help="start index of files",                type=int)
-    parser.add_argument('--x_start',      dest='x_start',         default=0,                          help="start index of files",                type=int)
-    parser.add_argument('--x_end',      dest='x_end',         default=1,                          help="start index of files",                type=int)
-    parser.add_argument('--y_bins',      dest='y_bins',         default=50,                          help="start index of files",                type=int)
-    parser.add_argument('--y_start',      dest='y_start',         default=0,                          help="start index of files",                type=int)
-    parser.add_argument('--y_end',      dest='y_end',         default=1,                          help="start index of files",                type=int)
+    parser.add_argument('--years',           dest='years',       default='2017',                        help="year")
+    parser.add_argument('--samples',         dest='samples',     default="configs/samples_pfnano.json", help='path to json with samples to be plotted')
+    parser.add_argument('--channels',        dest='channels',    default='ele,mu,had',                  help='channels for which to plot this variable')
+    parser.add_argument('--odir',            dest='odir',        default='2dplots',                     help="tag for output directory")
+    parser.add_argument('--idir',            dest='idir',        default='../results/',                 help="input directory with results")
+    parser.add_argument("--pfnano",          dest='pfnano',      action='store_true',                   help="Run with pfnano")
+    parser.add_argument('--vars',            dest='vars',        default='lep_pt,lep_isolation',        help='channels for which to plot this variable')
+    parser.add_argument('--x_bins',          dest='x_bins',      default=50,                            help="binning of the first variable passed",                type=int)
+    parser.add_argument('--x_start',         dest='x_start',     default=0,                             help="starting range of the first variable passed",         type=int)
+    parser.add_argument('--x_end',           dest='x_end',       default=1,                             help="end range of the first variable passed",              type=int)
+    parser.add_argument('--y_bins',          dest='y_bins',      default=50,                            help="binning of the second variable passed",               type=int)
+    parser.add_argument('--y_start',         dest='y_start',     default=0,                             help="starting range of the second variable passed",        type=int)
+    parser.add_argument('--y_end',           dest='y_end',       default=1,                             help="end range of the second variable passed",             type=int)
 
     args = parser.parse_args()
 
