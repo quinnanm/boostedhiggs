@@ -51,7 +51,7 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins=50, x_start=0
         # loop over the processed files and fill the histograms
         for ch in channels:
             for sample in samples[year][ch]:
-                parquet_files = glob.glob(f'../results/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
+                parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
                 if len(parquet_files) != 0:
                     print(f'Processing {ch} channel of sample', sample)
 
@@ -63,7 +63,7 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins=50, x_start=0
                         continue
                     if len(data) == 0:
                         continue
-                    print(data.keys())
+
                     single_sample = None
                     for single_key, key in add_samples.items():
                         if key in sample:
