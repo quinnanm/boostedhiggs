@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from axes import axis_dict
+from axes import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch
 import pickle as pkl
 import pyarrow.parquet as pq
 import pyarrow as pa
@@ -27,46 +27,6 @@ from hist.intervals import clopper_pearson_interval
 
 import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
-
-# define the axes for the different variables to be plotted
-
-# define samples
-signal_by_ch = {
-    'ele': ['GluGluHToWWToLNuQQ'],
-    'mu': ['GluGluHToWWToLNuQQ'],
-    'had': ['GluGluHToWWTo4q', 'GluGluHToWWTo4q_ext1'],
-}
-data_by_ch = {
-    'ele': 'SingleElectron',
-    'mu': 'SingleMuon',
-    'had': 'JetHT',
-}
-add_samples = {
-    'SingleElectron': 'SingleElectron',
-    'SingleMuon': 'SingleMuon',
-    'JetHT': 'JetHT',
-    'QCD': 'QCD_Pt',
-    'DYJets': 'DYJets',
-    'ZQQ': 'ZJetsToQQ',
-    'WQQ': 'WJetsToQQ',
-    'SingleTop': 'ST',
-    'TTbar': 'TT',
-    'WJetsLNu': 'WJetsToLNu',
-}
-color_by_sample = {
-    "QCD": 'tab:orange',
-    "DYJets": 'tab:purple',
-    "WJetsLNu": 'tab:green',
-    "TTbar": 'tab:blue',
-    "ZQQ": 'tab:pink',
-    "WQQ": 'tab:red',
-    "SingleTop": 'tab:gray',
-}
-# available tab colors
-# 'tab:cyan'
-# 'tab:olive'
-# 'tab:gray'
-# 'tab:brown':
 
 
 def get_simplified_label(sample):   # get simplified "alias" names of the samples for plotting purposes

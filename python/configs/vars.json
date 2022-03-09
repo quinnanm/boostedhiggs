@@ -1,6 +1,6 @@
 {
     "ele": {
-	"lepton_pt": 1,
+	"lep_pt": 1,
 	"lep_isolation": 1,
 	"lep_misolation": 0,
 	"lep_fj_m": 0,
@@ -15,7 +15,7 @@
 	"lep_nprongs": 0
     },
     "mu": {
-	"lepton_pt": 1,
+	"lep_pt": 1,
 	"lep_isolation": 1,
         "lep_misolation": 0,
 	"lep_fj_m": 0,

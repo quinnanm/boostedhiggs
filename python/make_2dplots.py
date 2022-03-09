@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from axes import axis_dict
+from axes import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch
 import pickle as pkl
 import pyarrow.parquet as pq
 import pyarrow as pa
@@ -37,12 +37,13 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins=50, x_start=0
     hists = {}
     for year in years:
         hists[year] = {}
+
         for ch in channels:  # initialize the histograms for the different channels and different variables
-            hists[year][ch] = {}
 
             hists[year][ch] = hist2.Hist(
                 hist2.axis.Regular(x_bins, x_start, x_end, name=x, label=x, flow=False),
                 hist2.axis.Regular(y_bins, y_start, y_end, name=y, label=y, flow=False),
+                hist2.axis.StrCategory([], name='samples', growth=True)
             )
 
         # loop over the processed files and fill the histograms
@@ -61,21 +62,35 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins=50, x_start=0
                     if len(data) == 0:
                         continue
 
-                    hists[year][ch].fill(data[xr, data[y])
+                    single_sample = None
+                    for single_key, key in add_samples.items():
+                        if key in sample:
+                            single_sample = single_key
 
-            fig, ax = plt.subplots(figsize=(8, 5))
-            hep.hist2dplot(hists[year][ch], ax=ax)
-            ax.set_xlabel("pt")
-            ax.set_ylabel("lep_is0")
-            ax.set_title(f'{ch} channel')
-            hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
-            hep.cms.text("Work in Progress", ax=ax)
+                    if single_sample is not None:
+                        hists[year][ch].fill(
+                            data[x], data[y], single_sample,  # combining all events under one name
+                        )
+                    else:
+                        hists[year][ch].fill(
+                            data[x], data[y], sample,
+                        )
 
-            if not os.path.exists(f'{odir}/plots_{year}/'):
-                os.makedirs(f'{odir}/plots_{year}/')
+            for sample in hists[year][ch].axes[-1]:
 
-            plt.savefig(f'{odir}/plots_{year}/{ch}.pdf')
-            plt.close()
+                fig, ax = plt.subplots(figsize=(8, 5))
+                hep.hist2dplot(hists[year][ch][{'samples': sample}], ax=ax)
+                ax.set_xlabel("pt")
+                ax.set_ylabel("lep_is0")
+                ax.set_title(f'{ch} channel for \n {sample}')
+                hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
+                hep.cms.text("Work in Progress", ax=ax)
+
+                if not os.path.exists(f'{odir}/plots_{year}/'):
+                    os.makedirs(f'{odir}/plots_{year}/')
+
+                plt.savefig(f'{odir}/plots_{year}/{ch}_{sample}.pdf')
+                plt.close()
 
 
 def main(args):
@@ -107,16 +122,16 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as: python make_2dplots.py --year 2017 --idir ../results/ --odir plots --pfnano --samples configs/samples_pfnano.json --channels ele,mu --vars lepton_pt,lep_isolation --x_bins 50 --x_start 0 --x_end 1 --y_bins 50 --y_start 0 --y_end 1
+    # run locally as: python make_2dplots.py --year 2017 --idir ../results/ --odir 2dplots --pfnano --samples configs/samples_pfnano.json --channels ele,mu --vars lep_pt,lep_isolation --x_bins 50 --x_start 0 --x_end 500 --y_bins 50 --y_start 0 --y_end 1
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',            dest='years',       default='2017',                        help="year")
     parser.add_argument('--samples',          dest='samples',     default="configs/samples_pfnano.json", help='path to json with samples to be plotted')
     parser.add_argument('--channels',         dest='channels',    default='ele,mu,had',                  help='channels for which to plot this variable')
-    parser.add_argument('--odir',             dest='odir',        default='plots',                       help="tag for output directory")
+    parser.add_argument('--odir',             dest='odir',        default='2dplots',                       help="tag for output directory")
     parser.add_argument('--idir',             dest='idir',        default='../results/',                 help="input directory with results")
     parser.add_argument("--pfnano",           dest='pfnano',      action='store_true',                   help="Run with pfnano")
-    parser.add_argument('--vars',         dest='vars',    default='lepton_pt,lep_isolation',                  help='channels for which to plot this variable')
+    parser.add_argument('--vars',         dest='vars',    default='lep_pt,lep_isolation',                  help='channels for which to plot this variable')
     parser.add_argument('--x_bins',      dest='x_bins',         default=50,                          help="start index of files",                type=int)
     parser.add_argument('--x_start',      dest='x_start',         default=0,                          help="start index of files",                type=int)
     parser.add_argument('--x_end',      dest='x_end',         default=1,                          help="start index of files",                type=int)

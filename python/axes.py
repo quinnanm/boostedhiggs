@@ -1,6 +1,49 @@
 import hist as hist2
+
+# define the axes for the different variables to be plotted
+
+# define samples
+signal_by_ch = {
+    'ele': ['GluGluHToWWToLNuQQ'],
+    'mu': ['GluGluHToWWToLNuQQ'],
+    'had': ['GluGluHToWWTo4q', 'GluGluHToWWTo4q_ext1'],
+}
+data_by_ch = {
+    'ele': 'SingleElectron',
+    'mu': 'SingleMuon',
+    'had': 'JetHT',
+}
+
+color_by_sample = {
+    "QCD": 'tab:orange',
+    "DYJets": 'tab:purple',
+    "WJetsLNu": 'tab:green',
+    "TTbar": 'tab:blue',
+    "ZQQ": 'tab:pink',
+    "WQQ": 'tab:red',
+    "SingleTop": 'tab:gray',
+}
+# available tab colors
+# 'tab:cyan'
+# 'tab:olive'
+# 'tab:gray'
+# 'tab:brown':
+
+add_samples = {
+    'SingleElectron': 'SingleElectron',
+    'SingleMuon': 'SingleMuon',
+    'JetHT': 'JetHT',
+    'QCD': 'QCD_Pt',
+    'DYJets': 'DYJets',
+    'ZQQ': 'ZJetsToQQ',
+    'WQQ': 'WJetsToQQ',
+    'SingleTop': 'ST',
+    'TTbar': 'TT',
+    'WJetsLNu': 'WJetsToLNu',
+}
+
 axis_dict = {
-    'lepton_pt': hist2.axis.Regular(50, 20, 500, name='var', label=r'Lepton $p_T$ [GeV]'),
+    'lep_pt': hist2.axis.Regular(50, 20, 500, name='var', label=r'Lepton $p_T$ [GeV]'),
     'lep_isolation': hist2.axis.Regular(20, 0, 3.5, name='var', label=r'Lepton iso'),
     'lep_misolation': hist2.axis.Regular(20, 0, 3.5, name='var', label=r'Lepton mini iso'),
     'lep_fj_m': hist2.axis.Regular(20, 0, 200, name='var', label=r'Jet - Lepton mass [GeV]'),
@@ -24,3 +67,4 @@ axis_dict = {
     'lep_nprongs': hist2.axis.Regular(20, 0, 4, name='var', label=r'num of prongs'),
     'had_nprongs': hist2.axis.Regular(20, 0, 4, name='var', label=r'num of prongs'),
 }
+# be careful
