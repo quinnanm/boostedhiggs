@@ -63,7 +63,7 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins=50, x_start=0
                         continue
                     if len(data) == 0:
                         continue
-
+                    print(data.keys())
                     single_sample = None
                     for single_key, key in add_samples.items():
                         if key in sample:
