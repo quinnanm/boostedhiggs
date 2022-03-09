@@ -35,6 +35,7 @@ def main(args):
     else:
         # hopefully this step is avoided in condor jobs that have metadata.json
         from condor.file_utils import loadJson
+        print(args.pfnano)
         files, _ = loadJson(args.json, args.year, args.pfnano)
 
     if not files:
