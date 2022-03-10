@@ -143,7 +143,7 @@ if __name__ == "__main__":
     parser.add_argument('--channels',        dest='channels',    default='ele,mu,had',                  help='channels for which to plot this variable')
     parser.add_argument('--odir',            dest='odir',        default='2dplots',                     help="tag for output directory")
     parser.add_argument('--idir',            dest='idir',        default='../results/',                 help="input directory with results")
-    parser.add_argument('--x',               dest='x',        default='lep_pt,lep_isolation',        help='channels for which to plot this variable')
+    parser.add_argument('--x',               dest='x',           default='lep_pt,lep_isolation',        help='channels for which to plot this variable')
     parser.add_argument('--x_bins',          dest='x_bins',      default=50,                            help="binning of the first variable passed",                type=int)
     parser.add_argument('--x_start',         dest='x_start',     default=0,                             help="starting range of the first variable passed",         type=int)
     parser.add_argument('--x_end',           dest='x_end',       default=1,                             help="end range of the first variable passed",              type=int)
