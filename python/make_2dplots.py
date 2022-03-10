@@ -81,7 +81,8 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins=50, x_start=0
             for sample in hists[year][ch].axes[-1]:
 
                 fig, ax = plt.subplots(figsize=(8, 5))
-                hep.hist2dplot(hists[year][ch][{'samples': sample}], ax=ax, norm=matplotlib.colors.Normalize(vmin=0, vmax=1), cmap="plasma")
+                # hep.hist2dplot(hists[year][ch][{'samples': sample}], ax=ax, norm=matplotlib.colors.Normalize(vmin=0, vmax=1), cmap="plasma")
+                hep.hist2dplot(hists[year][ch][{'samples': sample}], ax=ax, cmap="plasma")
                 ax.set_xlabel(f"{x}")
                 ax.set_ylabel(f"{y}")
                 ax.set_title(f'{ch} channel for \n {sample}')
