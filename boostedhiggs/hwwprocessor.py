@@ -15,7 +15,8 @@ from coffea import processor
 from coffea.nanoevents.methods import candidate, vector
 from coffea.analysis_tools import Weights, PackedSelection
 from boostedhiggs.utils import match_HWW
-from boostedhiggs.btag import btagWPs,BTagCorrector
+from boostedhiggs.btag import btagWPs
+from boostedhiggs.btag import BTagCorrector
 
 import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
@@ -49,6 +50,7 @@ def pad_val(
         ret = ak.fill_none(arr, value, axis=None)
     return ret.to_numpy() if to_numpy else ret
 
+
 def build_p4(cand):
     return ak.zip(
         {
@@ -61,6 +63,7 @@ def build_p4(cand):
         with_name="PtEtaPhiMCandidate",
         behavior=candidate.behavior,
     )
+
 
 class HwwProcessor(processor.ProcessorABC):
     def __init__(self, year="2017", yearmod="", channels=["ele", "mu", "had"], output_location="./outfiles/"):
@@ -242,7 +245,7 @@ class HwwProcessor(processor.ProcessorABC):
         }[int(self._year)]
 
         self._btagWPs = btagWPs["deepJet"][year + yearmod]
-        self.btagCorr = BTagCorrector("M","deepJet",year,yearmod)
+        # self.btagCorr = BTagCorrector("M", "deepJet", year, yearmod)
 
         self.selections = {}
         self.cutflows = {}
@@ -364,12 +367,12 @@ class HwwProcessor(processor.ProcessorABC):
         loose_taus_mu = (
             (events.Tau.pt > 20)
             & (abs(events.Tau.eta) < 2.3)
-            & (events.Tau.idAntiMu >= 1) # loose antiMu ID
+            & (events.Tau.idAntiMu >= 1)  # loose antiMu ID
         )
         loose_taus_ele = (
             (events.Tau.pt > 20)
             & (abs(events.Tau.eta) < 2.3)
-            & (events.Tau.idAntiEleDeadECal >= 2) # loose Anti-electron MVA discriminator V6 (2018) ?
+            & (events.Tau.idAntiEleDeadECal >= 2)  # loose Anti-electron MVA discriminator V6 (2018) ?
         )
         n_loose_taus_mu = ak.sum(loose_taus_mu, axis=1)
         n_loose_taus_ele = ak.sum(loose_taus_ele, axis=1)
@@ -387,7 +390,7 @@ class HwwProcessor(processor.ProcessorABC):
         lep_miso = candidatelep.miniPFRelIso_all
         # MVA-ID
         mu_mvaId = candidatelep.mvaId if hasattr(candidatelep, "mvaId") else np.zeros(nevents)
-        
+
         # JETS
         goodjets = events.Jet[
             (events.Jet.pt > 30)
@@ -423,7 +426,7 @@ class HwwProcessor(processor.ProcessorABC):
 
         # lepton and fatjet mass
         lep_fj_m = (candidatefj_lep - candidatelep_p4).mass  # mass of fatjet without lepton
-        
+
         # b-jets
         # in event, pick highest b score in opposite direction from signal (we will make cut here to avoid tt background events producing bjets)
         bjets_away_lepfj = goodjets[dphi_jet_lepfj > np.pi / 2]
@@ -451,11 +454,11 @@ class HwwProcessor(processor.ProcessorABC):
         )
         self.add_selection(
             name='notaus',
-            sel=(n_loose_taus_mu==0),
+            sel=(n_loose_taus_mu == 0),
             channel=['mu']
         )
         # self.add_selection(
-        #     'leptonIsolation', 
+        #     'leptonIsolation',
         #     sel=(((candidatelep.pt > 30) & (candidatelep.pt < 55) & (lep_reliso < 0.25)) | ((candidatelep.pt >= 55) & (candidatelep.miniPFRelIso_all < 0.2)))
         #     channel=['mu']
         # )
@@ -473,34 +476,34 @@ class HwwProcessor(processor.ProcessorABC):
         )
         self.add_selection(
             name='notaus',
-            sel=(n_loose_taus_ele==0),
+            sel=(n_loose_taus_ele == 0),
             channel=['ele']
         )
         # self.add_selection(
-        #     'leptonIsolation', 
+        #     'leptonIsolation',
         #     sel=(((candidatelep.pt > 30) & (candidatelep.pt < 120) & (lep_reliso < 0.3)) | ((candidatelep.pt >= 120) & (candidatelep.miniPFRelIso_all < 0.2))),
         #     channel=['ele']
         # )
 
         # event selections for both leptonic channels
         # self.add_selection(
-        #     name='leptonInJet', 
-        #     sel=(dr_jet_candlep < 0.8), 
+        #     name='leptonInJet',
+        #     sel=(dr_jet_candlep < 0.8),
         #     channel=['mu', 'ele']
         # )
         self.add_selection(
             name='anti_bjettag',
-            sel=(ak.max(bjets_away_lepfj.btagDeepFlavB,axis=1) < self._btagWPs["M"]),
+            sel=(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
             channel=['mu', 'ele']
         )
         self.add_selection(
-            name='ht', 
-            sel=(ht > 200), 
+            name='ht',
+            sel=(ht > 200),
             channel=['mu', 'ele']
         )
         # self.add_selection(
-        #     name='mt', 
-        #     sel=(mt_lep_met < 100), 
+        #     name='mt',
+        #     sel=(mt_lep_met < 100),
         #     channel=['mu', 'ele']
         # )
 
@@ -529,12 +532,12 @@ class HwwProcessor(processor.ProcessorABC):
         )
         self.add_selection(
             name='anti_bjettag',
-            sel=(ak.max(bjets_away_leadingfj.btagDeepFlavB,axis=1) < self._btagWPs["M"]),
+            sel=(ak.max(bjets_away_leadingfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
             channel=['had']
         )
         self.add_selection(
             name='met',
-            sel=(met < 200),
+            sel=(met.pt < 200),
             channel=['had']
         )
 
@@ -543,7 +546,7 @@ class HwwProcessor(processor.ProcessorABC):
         variables["lep_isolation"] = pad_val(lep_reliso, -1)
         variables["lep_misolation"] = pad_val(lep_miso, -1)
         variables["lep_fj_m"] = pad_val(lep_fj_m, -1)
-        variables["lep_fj_bjets_ophem"] = pad_val(ak.max(bjets_away_lepfj.btagDeepFlavB,axis=1), -1)
+        variables["lep_fj_bjets_ophem"] = pad_val(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1), -1)
         variables["lep_fj_dr"] = pad_val(dr_jet_candlep, -1)
         variables["lep_mvaId"] = pad_val(mu_mvaId, -1)
         variables["fj_msoftdrop"] = pad_val(candidatefj_lep.msoftdrop, -1)
@@ -556,7 +559,8 @@ class HwwProcessor(processor.ProcessorABC):
         variables["fj1_msoftdrop"] = pad_val(secondfj.msoftdrop, -1)
         variables["fj1_pt"] = pad_val(secondfj.pt, -1)
         variables["fj1_pnh4q"] = pad_val(secondfj.particleNet_H4qvsQCD, -1)
-        variables["fj0_bjets_ophem"] = pad_val(ak.max(bjets_away_leadingfj.btagDeepFlavB,axis=1), -1)
+        variables["fj0_bjets_ophem"] = pad_val(ak.max(bjets_away_leadingfj.btagDeepFlavB, axis=1), -1)
+        variables["lep_met_mt"] = pad_val(mt_lep_met, -1)
 
         # weights
         # TODO:
@@ -581,11 +585,11 @@ class HwwProcessor(processor.ProcessorABC):
             # self.btagCorr.addBtagWeight(bjets_away_leadingfj, weights)
             variables["weight"] = pad_val(weights.weight(), -1)
 
-        # systematics 
+        # systematics
         # - trigger up/down (variable)
-        # - btag weights up/down (variable) 
-        # - l1 prefiring up/down (variable) 
-        # - pu up/down (variable) 
+        # - btag weights up/down (variable)
+        # - l1 prefiring up/down (variable)
+        # - pu up/down (variable)
         # - JES up/down systematics (new output files)
         # - JER up/down systematics (new output files)
         # - MET unclustered up/down (new output files)
@@ -638,6 +642,7 @@ class HwwProcessor(processor.ProcessorABC):
         # now save pandas dataframes
         fname = events.behavior["__events_factory__"]._partition_key.replace("/", "_")
         fname = 'condor_' + fname
+
         for ch in self._channels:  # creating directories for each channel
             if not os.path.exists(self._output_location + ch):
                 os.makedirs(self._output_location + ch)

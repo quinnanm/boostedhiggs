@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from axes import axis_dict
+from axes import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch
 import pickle as pkl
 import pyarrow.parquet as pq
 import pyarrow as pa
@@ -28,45 +28,6 @@ from hist.intervals import clopper_pearson_interval
 import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
-# define the axes for the different variables to be plotted
-
-# define samples
-signal_by_ch = {
-    'ele': ['GluGluHToWWToLNuQQ'],
-    'mu': ['GluGluHToWWToLNuQQ'],
-    'had': ['GluGluHToWWTo4q','GluGluHToWWTo4q_ext1'],
-}
-data_by_ch = {
-    'ele': 'SingleElectron',
-    'mu': 'SingleMuon',
-    'had': 'JetHT',
-}
-add_samples = {
-    'SingleElectron': 'SingleElectron',
-    'SingleMuon': 'SingleMuon',
-    'JetHT': 'JetHT',
-    'QCD': 'QCD_Pt',
-    'DYJets': 'DYJets',
-    'ZQQ': 'ZJetsToQQ',
-    'WQQ': 'WJetsToQQ',
-    'SingleTop': 'ST',
-    'TTbar': 'TT',
-    'WJetsLNu': 'WJetsToLNu',
-}
-color_by_sample = {
-    "QCD": 'tab:orange',
-    "DYJets": 'tab:purple',
-    "WJetsLNu": 'tab:green',
-    "TTbar": 'tab:blue',
-    "ZQQ": 'tab:pink',
-    "WQQ": 'tab:red',
-    "SingleTop": 'tab:gray',
-}
-# available tab colors
-# 'tab:cyan'
-# 'tab:olive'
-# 'tab:gray'
-# 'tab:brown':
 
 def get_simplified_label(sample):   # get simplified "alias" names of the samples for plotting purposes
     f = open('configs/simplified_labels.json')
@@ -115,7 +76,6 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # ma
         # loop over the processed files and fill the histograms
         for ch in channels:
             for sample in samples[year][ch]:
-                print('Processing sample', sample)
                 is_data = False
                 for key in data_by_ch.values():
                     if key in sample:
@@ -141,7 +101,7 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # ma
                     sum_sumgenweight = get_sum_sumgenweight(idir, year, sample)
 
                     # Get overall weighting of events
-                    # each event has (possibly a different) genweight... sumgenweight sums over events in a chunk... sum_sumgenweight sums over chunks 
+                    # each event has (possibly a different) genweight... sumgenweight sums over events in a chunk... sum_sumgenweight sums over chunks
                     xsec_weight = (xsec * luminosity[year]) / (sum_sumgenweight)
                     xsec_weight_by_sample[sample] = xsec_weight
 
@@ -152,6 +112,8 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # ma
                     xsec_weight = 1
 
                 parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
+                if len(parquet_files) != 0:
+                    print(f'Processing {ch} channel of sample', sample)
 
                 for parquet_file in parquet_files:
                     try:
@@ -167,11 +129,11 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # ma
 
                         # we can make further selections before filling the hists here
                         # data = data[data['ht'] > 200]
-                        #if ch=="mu":
+                        # if ch=="mu":
                         #    data = data[((data['lep_misolation'] < 0.2) & (data['lep_pt'] >=55)) | ((data['lep_isolation'] < 0.25) & (data['lep_pt'] <55))]
-                        #elif ch=="ele":
+                        # elif ch=="ele":
                         #    data = data[((data['lep_misolation'] < 0.2) & (data['lep_pt'] >=120)) | ((data['lep_isolation'] < 0.3) & (data['lep_pt'] <120))]
-                        #elif ch=="had":
+                        # elif ch=="had":
                         #    data = data[data['met'] < 200]
 
                         variable = data[var].to_numpy()
@@ -200,7 +162,6 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # ma
                             )
 
     # TODO: combine histograms for all years here and flag them as year='combined'
-
 
     # store the hists variable
     with open(f'{odir}/hists.pkl', 'wb') as f:  # saves the hists objects
@@ -233,7 +194,7 @@ def make_stack(odir, vars_to_plot, years, channels, pfnano, logy=True, add_data=
                 samples = [h.axes[0].value(i) for i in range(len(h.axes[0].edges))]
                 data_label = data_by_ch[ch]
                 signal_labels = [label for label in samples if label in signal_by_ch[ch]]
-                bkg_labels = [label for label in samples if (label and label != data_label and label not in signal_labels)] 
+                bkg_labels = [label for label in samples if (label and label != data_label and label not in signal_labels)]
 
                 # data
                 data = None
@@ -250,7 +211,7 @@ def make_stack(odir, vars_to_plot, years, channels, pfnano, logy=True, add_data=
 
                 # print(data,signal,bkg)
 
-                if add_data and data and len(bkg)>0:
+                if add_data and data and len(bkg) > 0:
                     fig, (ax, rax) = plt.subplots(nrows=2,
                                                   ncols=1,
                                                   figsize=(8, 8),
@@ -265,18 +226,18 @@ def make_stack(odir, vars_to_plot, years, channels, pfnano, logy=True, add_data=
                         fmt="ko",
                     )
                     # NOTE: change limit later
-                    rax.set_ylim(0.,1.2)
+                    rax.set_ylim(0., 1.2)
                 else:
                     fig, ax = plt.subplots(1, 1)
 
-                if len(bkg)>0:
+                if len(bkg) > 0:
                     hep.histplot(bkg,
                                  ax=ax,
                                  stack=True,
                                  sort='yield',
                                  histtype="fill",
                                  label=[get_simplified_label(bkg_label) for bkg_label in bkg_labels],
-                             )
+                                 )
                     for handle, label in zip(*ax.get_legend_handles_labels()):
                         handle.set_color(color_by_sample[label])
                 if add_data and data:
@@ -295,13 +256,13 @@ def make_stack(odir, vars_to_plot, years, channels, pfnano, logy=True, add_data=
                                  **data_err_opts
                                  )
 
-                if len(signal)>0:
+                if len(signal) > 0:
                     hep.histplot(signal,
                                  ax=ax,
                                  label=[get_simplified_label(sig_label) for sig_label in signal_labels],
                                  color='red'
-                             )
-                    
+                                 )
+
                 if logy:
                     ax.set_yscale('log')
                     ax.set_ylim(0.1)
@@ -342,9 +303,8 @@ def make_norm(idir, vars_to_plot, years, channels, logy=True):
 
 
 def main(args):
-    odir = args.odir
-    if not os.path.exists(odir):
-        os.makedirs(odir)
+    if not os.path.exists(args.odir):
+        os.makedirs(args.odir)
 
     years = args.years.split(',')
     channels = args.channels.split(',')
@@ -375,32 +335,31 @@ def main(args):
             if value == 1:
                 vars_to_plot[ch].append(key)
 
-    if args.hist:
+    if not args.hist:
         # make the histograms and save in pkl files
-        make_hist(args.idir, odir, vars_to_plot, samples, years, channels, args.pfnano)
+        make_hist(args.idir, args.odir, vars_to_plot, samples, years, channels, args.pfnano)
 
     if not args.noplot:
         # plot all process in stack
-        print('plot')
-        make_stack(odir, vars_to_plot, years, channels, args.pfnano, logy=True)
-        make_stack(odir, vars_to_plot, years, channels, args.pfnano, logy=False)
+        make_stack(args.odir, vars_to_plot, years, channels, args.pfnano, logy=True)
+        make_stack(args.odir, vars_to_plot, years, channels, args.pfnano, logy=False)
 
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as: python make_plots.py --year 2017 --vars configs/vars.json --channels ele,mu,had --idir ../results/ --odir hists --pfnano --samples configs/samples_pfnano.json
+    # run locally as: python make_plots.py --year 2017 --idir ../results/ --odir hists --pfnano --samples configs/samples_pfnano.json --channels ele,mu,had
     # run on lpc as: python make_plots.py --year 2017 --vars configs/vars.json --channels ele,mu,had --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/Mar1_2017/ --odir hists --pfnano --samples configs/samples_pfnano.json
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--years',      dest='years',       default='2017',                        help="year")
-    parser.add_argument('--vars',       dest='vars',        default="configs/vars.json",           help='path to json with variables to be plotted')
-    parser.add_argument('--samples',    dest='samples',     default="configs/samples_pfnano.json", help='path to json with samples to be plotted')
-    parser.add_argument('--channels',   dest='channels',    default='ele,mu,had',                  help='channels for which to plot this variable')
-    parser.add_argument('--odir',       dest='odir',        default='hists',                       help="tag for output directory")
-    parser.add_argument('--idir',       dest='idir',        default='../results/',                 help="input directory with results")
-    parser.add_argument("--pfnano",     dest='pfnano',      action='store_true',                   help="Run with pfnano")
-    parser.add_argument("--hist",       dest='hist',        action='store_true',                   help="Make hists")
-    parser.add_argument("--noplot",     dest='noplot',      action='store_true',                   help="Do not plot")
+    parser.add_argument('--years',            dest='years',       default='2017',                        help="year")
+    parser.add_argument('--vars',             dest='vars',        default="configs/vars.json",           help='path to json with variables to be plotted')
+    parser.add_argument('--samples',          dest='samples',     default="configs/samples_pfnano.json", help='path to json with samples to be plotted')
+    parser.add_argument('--channels',         dest='channels',    default='ele,mu,had',                  help='channels for which to plot this variable')
+    parser.add_argument('--odir',             dest='odir',        default='hists',                       help="tag for output directory")
+    parser.add_argument('--idir',             dest='idir',        default='../results/',                 help="input directory with results")
+    parser.add_argument("--pfnano",           dest='pfnano',      action='store_true',                   help="Run with pfnano")
+    parser.add_argument("--hist",             dest='hist',        action='store_true',                   help="Make hists")
+    parser.add_argument("--noplot",           dest='noplot',      action='store_true',                   help="Do not plot")
 
     args = parser.parse_args()
 
