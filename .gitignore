@@ -19,5 +19,6 @@ data2.root
 outfiles/
 lpc/
 hists/
+1dhists/
 2dplots/
 results/

@@ -31,13 +31,9 @@ import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
-def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_end, y_bins, y_start, y_end, trigger=None):
+def make_1dhist(idir, odir, samples, years, channels, x, x_bins, x_start, x_end, trigger=None):
     if trigger != None:
         print(f'Using {trigger}')
-
-    # for readability
-    x = vars[0]
-    y = vars[1]
 
     hists = {}
     for year in years:
@@ -47,7 +43,6 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
 
             hists[year][ch] = hist2.Hist(
                 hist2.axis.Regular(x_bins, x_start, x_end, name=x, label=x, flow=False),
-                hist2.axis.Regular(y_bins, y_start, y_end, name=y, label=y, flow=False),
                 hist2.axis.StrCategory([], name='samples', growth=True)
             )
 
@@ -80,20 +75,18 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
 
                     if single_sample is not None:
                         hists[year][ch].fill(
-                            data[x], data[y], single_sample,  # combining all events under one name
+                            data[x], single_sample,  # combining all events under one name
                         )
                     else:
                         hists[year][ch].fill(
-                            data[x], data[y], sample,
+                            data[x], sample,
                         )
 
             for sample in hists[year][ch].axes[-1]:
 
                 fig, ax = plt.subplots(figsize=(8, 5))
-                # hep.hist2dplot(hists[year][ch][{'samples': sample}], ax=ax, norm=matplotlib.colors.Normalize(vmin=0, vmax=1), cmap="plasma")
-                hep.hist2dplot(hists[year][ch][{'samples': sample}], ax=ax, cmap="plasma")
+                hep.histplot(hists[year][ch][{'samples': sample}], ax=ax)
                 ax.set_xlabel(f"{x}")
-                ax.set_ylabel(f"{y}")
                 ax.set_title(f'{ch} channel for \n {sample}')
                 hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
                 hep.cms.text("Work in Progress", ax=ax)
@@ -102,10 +95,10 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
                     os.makedirs(f'{odir}/plots_{year}/')
                 if not os.path.exists(f'{odir}/plots_{year}/{trigger}'):
                     os.makedirs(f'{odir}/plots_{year}/{trigger}')
-                if not os.path.exists(f'{odir}/plots_{year}/{trigger}/{x}_vs_{y}'):
-                    os.makedirs(f'{odir}/plots_{year}/{trigger}/{x}_vs_{y}')
+                if not os.path.exists(f'{odir}/plots_{year}/{trigger}/{x}'):
+                    os.makedirs(f'{odir}/plots_{year}/{trigger}/{x}')
 
-                plt.savefig(f'{odir}/plots_{year}/{trigger}/{x}_vs_{y}/{ch}_{sample}.pdf')
+                plt.savefig(f'{odir}/plots_{year}/{trigger}/{x}/{ch}_{sample}.pdf')
                 plt.close()
 
 
@@ -115,7 +108,6 @@ def main(args):
 
     years = args.years.split(',')
     channels = args.channels.split(',')
-    vars = args.vars.split(',')
 
     # get samples to make histograms
     f = open(args.samples)
@@ -132,18 +124,18 @@ def main(args):
                 if value == 1:
                     samples[year][ch].append(key)
 
-    print(f'The 2 variables for cross check are: {vars}')
-    make_2dplot(args.idir, args.odir, samples, years, channels, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end)
-    make_2dplot(args.idir, args.odir, samples, years, channels, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end, 'trigger_noiso')
-    make_2dplot(args.idir, args.odir, samples, years, channels, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end, 'trigger_iso')
-    make_2dplot(args.idir, args.odir, samples, years, channels, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end, 'both')
+    print(f'Plotting {args.x} histogram')
+    make_1dhist(args.idir, args.odir, samples, years, channels, args.x, args.x_bins, args.x_start, args.x_end)
+    make_1dhist(args.idir, args.odir, samples, years, channels, args.x, args.x_bins, args.x_start, args.x_end, 'trigger_noiso')
+    make_1dhist(args.idir, args.odir, samples, years, channels, args.x, args.x_bins, args.x_start, args.x_end, 'trigger_iso')
+    make_1dhist(args.idir, args.odir, samples, years, channels, args.x, args.x_bins, args.x_start, args.x_end, 'both')
 
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # lep_pt vs lep_iso: python make_2dplots.py --year 2017 --odir plots/2dplots --samples configs/samples_pfnano.json --channels ele,mu --vars lep_pt,lep_isolation --x_bins 50 --x_start 0 --x_end 500 --y_bins 50 --y_start 0 --y_end 1 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs
-    # lep_pt vs dR: python make_2dplots.py --year 2017 --odir plots/2dplots --samples configs/samples_pfnano.json --channels ele,mu --vars lep_pt,lep_fj_dr --x_bins 50 --x_start 0 --x_end 500 --y_bins 50 --y_start 0 --y_end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs
-    # lep_pt vs mt: python make_2dplots.py --year 2017 --odir plots/2dplots --samples configs/samples_pfnano.json --channels ele,mu --vars lep_pt,lep_met_mt --x_bins 50 --x_start 0 --x_end 500 --y_bins 50 --y_start 0 --y_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs
+    # lep_pt vs lep_iso: python make_1dhist.py --year 2017 --odir plots/1dhists --samples configs/samples_pfnano.json --channels ele,mu --x lep_pt --x_bins 50 --x_start 0 --x_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs
+    # lep_pt vs dR: python make_1dhist.py --year 2017 --odir plots/1dhists --samples configs/samples_pfnano.json --channels ele,mu --x lep_isolation --x_bins 50 --x_start 0 --x_end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs
+    # lep_pt vs mt: python make_1dhist.py --year 2017 --odir plots/1dhists --samples configs/samples_pfnano.json --channels ele,mu --x lep_met_mt --x_bins 50 --x_start 0 --x_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',           dest='years',       default='2017',                        help="year")
@@ -151,13 +143,10 @@ if __name__ == "__main__":
     parser.add_argument('--channels',        dest='channels',    default='ele,mu,had',                  help='channels for which to plot this variable')
     parser.add_argument('--odir',            dest='odir',        default='2dplots',                     help="tag for output directory")
     parser.add_argument('--idir',            dest='idir',        default='../results/',                 help="input directory with results")
-    parser.add_argument('--vars',            dest='vars',        default='lep_pt,lep_isolation',        help='channels for which to plot this variable')
+    parser.add_argument('--x',               dest='x',        default='lep_pt,lep_isolation',        help='channels for which to plot this variable')
     parser.add_argument('--x_bins',          dest='x_bins',      default=50,                            help="binning of the first variable passed",                type=int)
     parser.add_argument('--x_start',         dest='x_start',     default=0,                             help="starting range of the first variable passed",         type=int)
     parser.add_argument('--x_end',           dest='x_end',       default=1,                             help="end range of the first variable passed",              type=int)
-    parser.add_argument('--y_bins',          dest='y_bins',      default=50,                            help="binning of the second variable passed",               type=int)
-    parser.add_argument('--y_start',         dest='y_start',     default=0,                             help="starting range of the second variable passed",        type=int)
-    parser.add_argument('--y_end',           dest='y_end',       default=1,                             help="end range of the second variable passed",             type=int)
 
     args = parser.parse_args()
 
