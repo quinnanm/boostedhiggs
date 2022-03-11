@@ -463,17 +463,17 @@ class HwwProcessor(processor.ProcessorABC):
         #     channel=['mu']
         # )
 
-        # event selections for electron channel
-        self.add_selection(
-            name='leptonKin',
-            sel=(candidatelep.pt > 40),
-            channel=['ele']
-        )
+        # # event selections for electron channel
         # self.add_selection(
-        #     name='oneLepton',
-        #     sel=(n_good_muons == 0) & (n_loose_muons == 0) & (n_good_electrons == 1) & ~ak.any(loose_electrons & ~good_electrons, 1),
+        #     name='leptonKin',
+        #     sel=(candidatelep.pt > 40),
         #     channel=['ele']
         # )
+        self.add_selection(
+            name='oneLepton',
+            sel=(n_good_muons == 0) & (n_loose_muons == 0) & (n_good_electrons == 1) & ~ak.any(loose_electrons & ~good_electrons, 1),
+            channel=['ele']
+        )
         # self.add_selection(
         #     name='notaus',
         #     sel=(n_loose_taus_ele == 0),
