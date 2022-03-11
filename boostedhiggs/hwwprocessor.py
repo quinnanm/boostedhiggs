@@ -93,7 +93,6 @@ class HwwProcessor(processor.ProcessorABC):
                 "trigger_iso",
                 "trigger_noniso",
                 "weight",
-                "mt",
             ],
             'mu': [
                 "lep_pt",
@@ -115,7 +114,6 @@ class HwwProcessor(processor.ProcessorABC):
                 "trigger_iso",
                 "trigger_noniso",
                 "weight",
-                "mt",
             ],
             'had': [
                 "fj0_msoftdrop",
@@ -562,7 +560,7 @@ class HwwProcessor(processor.ProcessorABC):
         variables["fj1_pnh4q"] = pad_val(secondfj.particleNet_H4qvsQCD, -1)
         variables["fj0_bjets_ophem"] = pad_val(ak.max(bjets_away_leadingfj.btagDeepFlavB, axis=1), -1)
         variables["lep_met_mt"] = pad_val(mt_lep_met, -1)
-        variables["mt"] = pad_val(mt, -1)
+        variables["lep_met_mt"] = pad_val(mt_lep_met, -1)
 
         # weights
         # TODO:
