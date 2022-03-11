@@ -457,11 +457,11 @@ class HwwProcessor(processor.ProcessorABC):
             sel=(n_loose_taus_mu == 0),
             channel=['mu']
         )
-        self.add_selection(
-            'leptonIsolation',
-            sel=(((candidatelep.pt > 30) & (candidatelep.pt < 55) & (lep_reliso < 0.25)) | ((candidatelep.pt >= 55) & (candidatelep.miniPFRelIso_all < 0.2))),
-            channel=['mu']
-        )
+        # self.add_selection(
+        #     'leptonIsolation',
+        #     sel=(((candidatelep.pt > 30) & (candidatelep.pt < 55) & (lep_reliso < 0.25)) | ((candidatelep.pt >= 55) & (candidatelep.miniPFRelIso_all < 0.2))),
+        #     channel=['mu']
+        # )
 
         # event selections for electron channel
         self.add_selection(
@@ -479,11 +479,11 @@ class HwwProcessor(processor.ProcessorABC):
             sel=(n_loose_taus_ele == 0),
             channel=['ele']
         )
-        self.add_selection(
-            'leptonIsolation',
-            sel=(((candidatelep.pt > 30) & (candidatelep.pt < 120) & (lep_reliso < 0.3)) | ((candidatelep.pt >= 120) & (candidatelep.miniPFRelIso_all < 0.2))),
-            channel=['ele']
-        )
+        # self.add_selection(
+        #     'leptonIsolation',
+        #     sel=(((candidatelep.pt > 30) & (candidatelep.pt < 120) & (lep_reliso < 0.3)) | ((candidatelep.pt >= 120) & (candidatelep.miniPFRelIso_all < 0.2))),
+        #     channel=['ele']
+        # )
         # event selections for both leptonic channels
         # self.add_selection(
         #     name='leptonInJet',
@@ -559,7 +559,6 @@ class HwwProcessor(processor.ProcessorABC):
         variables["fj1_pt"] = pad_val(secondfj.pt, -1)
         variables["fj1_pnh4q"] = pad_val(secondfj.particleNet_H4qvsQCD, -1)
         variables["fj0_bjets_ophem"] = pad_val(ak.max(bjets_away_leadingfj.btagDeepFlavB, axis=1), -1)
-        variables["lep_met_mt"] = pad_val(mt_lep_met, -1)
         variables["lep_met_mt"] = pad_val(mt_lep_met, -1)
 
         # weights
