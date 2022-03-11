@@ -457,11 +457,11 @@ class HwwProcessor(processor.ProcessorABC):
             sel=(n_loose_taus_mu == 0),
             channel=['mu']
         )
-        # self.add_selection(
-        #     'leptonIsolation',
-        #     sel=(((candidatelep.pt > 30) & (candidatelep.pt < 55) & (lep_reliso < 0.25)) | ((candidatelep.pt >= 55) & (candidatelep.miniPFRelIso_all < 0.2))),
-        #     channel=['mu']
-        # )
+        self.add_selection(
+            'leptonIsolation',
+            sel=(((candidatelep.pt > 30) & (candidatelep.pt < 55) & (lep_reliso < 0.25)) | ((candidatelep.pt >= 55) & (candidatelep.miniPFRelIso_all < 0.2))),
+            channel=['mu']
+        )
 
         # # event selections for electron channel
         # self.add_selection(
