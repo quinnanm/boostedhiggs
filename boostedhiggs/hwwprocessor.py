@@ -495,11 +495,11 @@ class HwwProcessor(processor.ProcessorABC):
         #     sel=(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
         #     channel=['mu', 'ele']
         # )
-        # self.add_selection(
-        #     name='ht',
-        #     sel=(ht > 200),
-        #     channel=['mu', 'ele']
-        # )
+        self.add_selection(
+            name='ht',
+            sel=(ht > 200),
+            channel=['mu', 'ele']
+        )
         # self.add_selection(
         #     name='mt',
         #     sel=(mt_lep_met < 100),
