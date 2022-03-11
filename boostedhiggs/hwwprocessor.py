@@ -459,7 +459,7 @@ class HwwProcessor(processor.ProcessorABC):
         )
         self.add_selection(
             'leptonIsolation',
-            sel=(((candidatelep.pt > 30) & (candidatelep.pt < 55) & (lep_reliso < 0.25)) | ((candidatelep.pt >= 55) & (candidatelep.miniPFRelIso_all < 0.2)))
+            sel=(((candidatelep.pt > 30) & (candidatelep.pt < 55) & (lep_reliso < 0.25)) | ((candidatelep.pt >= 55) & (candidatelep.miniPFRelIso_all < 0.2))),
             channel=['mu']
         )
 
