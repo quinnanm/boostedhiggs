@@ -469,11 +469,11 @@ class HwwProcessor(processor.ProcessorABC):
             sel=(candidatelep.pt > 40),
             channel=['ele']
         )
-        self.add_selection(
-            name='oneLepton',
-            sel=(n_good_muons == 0) & (n_loose_muons == 0) & (n_good_electrons == 1) & ~ak.any(loose_electrons & ~good_electrons, 1),
-            channel=['ele']
-        )
+        # self.add_selection(
+        #     name='oneLepton',
+        #     sel=(n_good_muons == 0) & (n_loose_muons == 0) & (n_good_electrons == 1) & ~ak.any(loose_electrons & ~good_electrons, 1),
+        #     channel=['ele']
+        # )
         # self.add_selection(
         #     name='notaus',
         #     sel=(n_loose_taus_ele == 0),
