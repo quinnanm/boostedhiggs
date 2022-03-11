@@ -93,6 +93,8 @@ class HwwProcessor(processor.ProcessorABC):
                 "trigger_iso",
                 "trigger_noniso",
                 "weight",
+                "Z_pt",
+                "lep_Z_dr",
             ],
             'mu': [
                 "lep_pt",
@@ -114,6 +116,8 @@ class HwwProcessor(processor.ProcessorABC):
                 "trigger_iso",
                 "trigger_noniso",
                 "weight",
+                "Z_pt",
+                "lep_Z_dr",
             ],
             'had': [
                 "fj0_msoftdrop",
@@ -608,6 +612,13 @@ class HwwProcessor(processor.ProcessorABC):
             variables["lep_iswlepton"] = pad_val(match_HWW_lep["iswlepton"], -1)
             variables["lep_iswstarlepton"] = pad_val(match_HWW_lep["iswstarlepton"], -1)
             variables["lep_matchedH"] = pad_val(ak.firsts(match_HWW_lep["matchedH"]).pt, -1)
+
+        # get Z-boson
+        Z = getParticles(events.GenPart, 23)
+        Z = ak.firsts(Z)
+        lep_Z_dr = Z.delta_r(candidatelep_p4)   # get dr between Z and lepton
+        variables["Z_pt"] = pad_val(Z.pt, -1)
+        variables["lep_Z_dr"] = pad_val(lep_Z_dr, -1)
 
         # initialize pandas dataframe
         output = {}

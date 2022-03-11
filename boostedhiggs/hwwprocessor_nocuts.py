@@ -14,7 +14,7 @@ import pyarrow.parquet as pq
 from coffea import processor
 from coffea.nanoevents.methods import candidate, vector
 from coffea.analysis_tools import Weights, PackedSelection
-from boostedhiggs.utils import match_HWW
+from boostedhiggs.utils import match_HWW, getParticles
 from boostedhiggs.btag import btagWPs
 from boostedhiggs.btag import BTagCorrector
 
@@ -93,7 +93,9 @@ class HwwProcessor_nocuts(processor.ProcessorABC):
                 "trigger_iso",
                 "trigger_noniso",
                 "weight",
-                "metfilters"
+                "metfilters",
+                "Z_pt",
+                "lep_Z_dr",
             ],
             'mu': [
                 "lep_pt",
@@ -115,6 +117,8 @@ class HwwProcessor_nocuts(processor.ProcessorABC):
                 "trigger_iso",
                 "trigger_noniso",
                 "weight",
+                "Z_pt",
+                "lep_Z_dr",
             ],
             'had': [
                 "fj0_msoftdrop",
@@ -554,6 +558,10 @@ class HwwProcessor_nocuts(processor.ProcessorABC):
 #             sel=(met.pt < 200),
 #             channel=['had']
 #         )
+        # get Z
+        Z = getParticles(events.GenPart, 23)
+        Z = ak.firsts(Z)
+        lep_Z_dr = Z.delta_r(candidatelep_p4)
 
         variables = {}
         variables["lep_pt"] = pad_val(candidatelep.pt, -1)
@@ -575,6 +583,8 @@ class HwwProcessor_nocuts(processor.ProcessorABC):
         variables["fj1_pnh4q"] = pad_val(secondfj.particleNet_H4qvsQCD, -1)
         variables["fj0_bjets_ophem"] = pad_val(ak.max(bjets_away_leadingfj.btagDeepFlavB, axis=1), -1)
         variables["lep_met_mt"] = pad_val(mt_lep_met, -1)
+        variables["Z_pt"] = pad_val(Z.pt, -1)
+        variables["lep_Z_dr"] = pad_val(lep_Z_dr, -1)
 
         # weights
         # TODO:
