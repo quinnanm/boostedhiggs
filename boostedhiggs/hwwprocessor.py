@@ -474,11 +474,11 @@ class HwwProcessor(processor.ProcessorABC):
             sel=(n_good_muons == 0) & (n_loose_muons == 0) & (n_good_electrons == 1) & ~ak.any(loose_electrons & ~good_electrons, 1),
             channel=['ele']
         )
-        self.add_selection(
-            name='notaus',
-            sel=(n_loose_taus_ele == 0),
-            channel=['ele']
-        )
+        # self.add_selection(
+        #     name='notaus',
+        #     sel=(n_loose_taus_ele == 0),
+        #     channel=['ele']
+        # )
         # self.add_selection(
         #     'leptonIsolation',
         #     sel=(((candidatelep.pt > 30) & (candidatelep.pt < 120) & (lep_reliso < 0.3)) | ((candidatelep.pt >= 120) & (candidatelep.miniPFRelIso_all < 0.2))),
@@ -495,11 +495,11 @@ class HwwProcessor(processor.ProcessorABC):
         #     sel=(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
         #     channel=['mu', 'ele']
         # )
-        self.add_selection(
-            name='ht',
-            sel=(ht > 200),
-            channel=['mu', 'ele']
-        )
+        # self.add_selection(
+        #     name='ht',
+        #     sel=(ht > 200),
+        #     channel=['mu', 'ele']
+        # )
         # self.add_selection(
         #     name='mt',
         #     sel=(mt_lep_met < 100),
