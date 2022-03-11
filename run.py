@@ -120,7 +120,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally on lpc as: python run.py --year 2017 --processor hww --starti 0 --n 1 --json samples_pfnano.json
+    # run locally on lpc as: python run.py --year 2017 --processor hww --starti 0 --n 1 --json samples_pfnano.json --pfnano
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',        dest='year',           default='2017',                     help="year",                                type=str)
