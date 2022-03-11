@@ -614,7 +614,7 @@ class HwwProcessor(processor.ProcessorABC):
             variables["lep_matchedH"] = pad_val(ak.firsts(match_HWW_lep["matchedH"]).pt, -1)
 
         # get Z-boson
-        Z = getParticles(events.GenPart, 23)
+        Z = getParticles(events.GenPart, lowid=23, highid=23, flags=['fromHardProcess', 'isLastCopy'])
         Z = ak.firsts(Z)
         lep_Z_dr = Z.delta_r(candidatelep_p4)   # get dr between Z and lepton
         variables["Z_pt"] = pad_val(Z.pt, -1)
