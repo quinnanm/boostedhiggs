@@ -271,6 +271,12 @@ class HwwProcessor_nocuts(processor.ProcessorABC):
             if len(table) != 0:     # skip dataframes with empty entries
                 pq.write_table(table, self._output_location + ch + '/parquet/' + fname + '.parquet')
 
+    def save_dfs_parquet_jets(self, fname, dfs_dict, ch):
+        if self._output_location is not None:
+            table = pa.Table.from_pandas(dfs_dict)
+            if len(table) != 0:     # skip dataframes with empty entries
+                pq.write_table(table, self._output_location + '/jets/' + ch + '/parquet/' + fname + '.parquet')
+
     def ak_to_pandas(self, output_collection: ak.Array) -> pd.DataFrame:
         output = pd.DataFrame()
         for field in ak.fields(output_collection):
@@ -428,14 +434,17 @@ class HwwProcessor_nocuts(processor.ProcessorABC):
         # for leptonic channel: leading pt which contains lepton
         candidatefj_lep = ak.firsts(good_fatjets[ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)])
         dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj_lep))
+        dR_jet_lepfj = abs(goodjets.delta_r(candidatefj_lep))
 
         # lepton and fatjet mass
         lep_fj_m = (candidatefj_lep - candidatelep_p4).mass  # mass of fatjet without lepton
 
         # b-jets
         # in event, pick highest b score in opposite direction from signal (we will make cut here to avoid tt background events producing bjets)
-        bjets_away_lepfj = goodjets[dphi_jet_lepfj > np.pi / 2]
-        bjets_away_leadingfj = goodjets[dphi_jet_leadingfj > np.pi / 2]
+        # bjets_away_lepfj = goodjets[dphi_jet_lepfj > np.pi / 2]
+        # bjets_away_leadingfj = goodjets[dphi_jet_leadingfj > np.pi / 2]
+        bjets_away_lepfj = goodjets[dR_jet_lepfj > 0.8]
+        bjets_away_leadingfj = goodjets[dR_jet_lepfj > 0.8]
 
         # deltaR
         dr_jet_candlep = candidatefj_lep.delta_r(candidatelep_p4)
@@ -558,10 +567,6 @@ class HwwProcessor_nocuts(processor.ProcessorABC):
 #             sel=(met.pt < 200),
 #             channel=['had']
 #         )
-        # get Z
-        Z = getParticles(events.GenPart, 23)
-        Z = ak.firsts(Z)
-        lep_Z_dr = Z.delta_r(candidatelep_p4)
 
         variables = {}
         variables["lep_pt"] = pad_val(candidatelep.pt, -1)
@@ -583,8 +588,6 @@ class HwwProcessor_nocuts(processor.ProcessorABC):
         variables["fj1_pnh4q"] = pad_val(secondfj.particleNet_H4qvsQCD, -1)
         variables["fj0_bjets_ophem"] = pad_val(ak.max(bjets_away_leadingfj.btagDeepFlavB, axis=1), -1)
         variables["lep_met_mt"] = pad_val(mt_lep_met, -1)
-        variables["Z_pt"] = pad_val(Z.pt, -1)
-        variables["lep_Z_dr"] = pad_val(lep_Z_dr, -1)
 
         # weights
         # TODO:
@@ -634,10 +637,30 @@ class HwwProcessor_nocuts(processor.ProcessorABC):
             variables["lep_iswstarlepton"] = pad_val(match_HWW_lep["iswstarlepton"], -1)
             variables["lep_matchedH"] = pad_val(ak.firsts(match_HWW_lep["matchedH"]).pt, -1)
 
+        if isMC:
+            # get Z-boson
+            Z = getParticles(events.GenPart, lowid=23, highid=23, flags=['fromHardProcess', 'isLastCopy'])
+            Z = ak.firsts(Z)
+            lep_Z_dr = Z.delta_r(candidatelep_p4)   # get dr between Z and lepton
+            variables["Z_pt"] = pad_val(Z.pt, -1)
+            variables["lep_Z_dr"] = pad_val(lep_Z_dr, -1)
+
+        # # Added 17 March
+        # # goodjets outside fatjet
+        # goodjets_outside = goodjets[goodjets.delta_r(candidatefj) > 0.8]
+        # goodjets_outside_btag = goodjets_outside.btagDeepFlavB
+
+        # jets outside fatjet
+        jet = events.Jet
+        jets_outside = jet[jet.delta_r(candidatefj) > 0.8]
+        jets_outside_btag = jets_outside.btagDeepFlavB
+
         # initialize pandas dataframe
         output = {}
+        output_jets = {}
         for ch in self._channels:
             out = {}
+            out_jets = {}
             for var in self._skimvars[ch]:
                 if var in variables.keys():
                     out[var] = variables[var]
@@ -665,6 +688,10 @@ class HwwProcessor_nocuts(processor.ProcessorABC):
             out["qcdrho"] = pad_val((leadingfj.qcdrho > -7) & (leadingfj.qcdrho < -2.0), -1)
             out["met"] = pad_val(met.pt, -1)
 
+            # # Added 17 March
+            out["jets_outside_btag_max"] = pad_val(ak.max(jets_outside_btag, axis=1), -1)
+            out_jets["jets_outside_btag"] = pad_val(jets_outside_btag, -1)
+
             fill_output = True
             # for data, only fill output for that channel
             if not isMC and self.dataset_per_ch[ch] not in dataset:
@@ -677,12 +704,20 @@ class HwwProcessor_nocuts(processor.ProcessorABC):
                 output[ch] = {
                     key: value[self.selections[ch].all(*self.selections[ch].names)] for (key, value) in out.items()
                 }
+                # Added 17 March
+                output_jets[ch] = {
+                    key: ak.flatten(value[self.selections[ch].all(*self.selections[ch].names)], axis=None) for (key, value) in out_jets.items()
+                }
             else:
                 output[ch] = {}
+                output_jets[ch] = {}
 
             # convert arrays to pandas
             if not isinstance(output[ch], pd.DataFrame):
                 output[ch] = self.ak_to_pandas(output[ch])
+            # convert arrays to pandas
+            if not isinstance(output_jets[ch], pd.DataFrame):
+                output_jets[ch] = self.ak_to_pandas(output_jets[ch]).dropna()
 
         # now save pandas dataframes
         fname = events.behavior["__events_factory__"]._partition_key.replace("/", "_")
@@ -693,8 +728,13 @@ class HwwProcessor_nocuts(processor.ProcessorABC):
                 os.makedirs(self._output_location + ch)
             if not os.path.exists(self._output_location + ch + '/parquet'):
                 os.makedirs(self._output_location + ch + '/parquet')
+            if not os.path.exists(self._output_location + '/jets/'):
+                os.makedirs(self._output_location + '/jets/')
+            if not os.path.exists(self._output_location + '/jets/' + ch + '/parquet'):
+                os.makedirs(self._output_location + '/jets/' + ch + '/parquet')
 
             self.save_dfs_parquet(fname, output[ch], ch)
+            self.save_dfs_parquet_jets(fname, output_jets[ch], ch)
 
         # return dictionary with cutflows
         return {
