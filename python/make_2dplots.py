@@ -50,6 +50,7 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
                 hist2.axis.Regular(y_bins, y_start, y_end, name=y, label=y, flow=False),
                 hist2.axis.StrCategory([], name='samples', growth=True)
             )
+        print('n')
 
         # loop over the processed files and fill the histograms
         for ch in channels:
@@ -66,7 +67,7 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
                         continue
                     if len(data) == 0:
                         continue
-
+                    print('f')
                     if trigger == "both":
                         data = data[data["trigger_noiso"]]
                         data = data[data["trigger_iso"]]
