@@ -41,7 +41,7 @@ def get_simplified_label(sample):   # get simplified "alias" names of the sample
 
 def get_sum_sumgenweight(idir, year, sample):
     pkl_files = glob.glob(f'{idir}/{sample}/outfiles/*.pkl')  # get the pkl metadata of the pkl files that were processed
-    sum_sumgenweight = 1
+    sum_sumgenweight = 1  # TODO why not 0
     for file in pkl_files:
         # load and sum the sumgenweight of each
         with open(file, 'rb') as f:
@@ -348,7 +348,7 @@ def main(args):
 if __name__ == "__main__":
     # e.g.
     # run locally as: python make_plots.py --year 2017 --idir ../results/ --odir hists --pfnano --samples configs/samples_pfnano.json --channels ele,mu,had
-    # run on lpc as: python make_plots.py --year 2017 --vars configs/vars.json --channels ele,mu,had --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/Mar1_2017/ --odir hists --pfnano --samples configs/samples_pfnano.json
+    # run on lpc as: python make_plots.py --year 2017 --vars configs/vars.json --channels ele,mu,had --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/March11_2017/ --odir hists --pfnano --samples configs/samples_pfnano.json
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',            dest='years',       default='2017',                        help="year")
