@@ -31,9 +31,18 @@ import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
-def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_end, y_bins, y_start, y_end, trigger=None):
-    if trigger != None:
-        print(f'Using {trigger}')
+def get_sum_sumgenweight(idir, year, sample):
+    pkl_files = glob.glob(f'{idir}/{sample}/outfiles/*.pkl')  # get the pkl metadata of the pkl files that were processed
+    sum_sumgenweight = 1  # TODO why not 0
+    for file in pkl_files:
+        # load and sum the sumgenweight of each
+        with open(file, 'rb') as f:
+            metadata = pkl.load(f)
+        sum_sumgenweight = sum_sumgenweight + metadata[sample][year]['sumgenweight']
+    return sum_sumgenweight
+
+
+def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_end, y_bins, y_start, y_end, log_z):
 
     # for readability
     x = vars[0]
@@ -58,6 +67,15 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
                 if len(parquet_files) != 0:
                     print(f'Processing {ch} channel of sample', sample)
 
+                    # Find xsection
+                    f = open('../fileset/xsec_pfnano.json')
+                    xsec = json.load(f)
+                    f.close()
+                    xsec = eval(str((xsec[sample])))
+
+                    # Get overall weighting of events
+                    xsec_weight = (xsec * luminosity[year]) / (get_sum_sumgenweight(idir, year, sample))
+
                 for i, parquet_file in enumerate(parquet_files):
                     try:
                         data = pq.read_table(parquet_file).to_pandas()
@@ -67,11 +85,10 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
                     if len(data) == 0:
                         continue
 
-                    if trigger == "both":
-                        data = data[data["trigger_noiso"]]
-                        data = data[data["trigger_iso"]]
-                    elif trigger != None:
-                        data = data[data[trigger]]
+                    try:
+                        event_weight = data['weight'].to_numpy()
+                    except:
+                        event_weight = 1  # for data
 
                     single_sample = None
                     for single_key, key in add_samples.items():
@@ -80,11 +97,11 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
 
                     if single_sample is not None:
                         hists[year][ch].fill(
-                            data[x], data[y], single_sample,  # combining all events under one name
+                            data[x], data[y], single_sample, weight=event_weight * xsec_weight  # combining all events under one name
                         )
                     else:
                         hists[year][ch].fill(
-                            data[x], data[y], sample,
+                            data[x], data[y], sample, weight=event_weight * xsec_weight,
                         )
 
             for sample in hists[year][ch].axes[-1]:
@@ -98,14 +115,12 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
                 hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
                 hep.cms.text("Work in Progress", ax=ax)
 
-                if not os.path.exists(f'{odir}/plots_{year}/'):
-                    os.makedirs(f'{odir}/plots_{year}/')
-                if not os.path.exists(f'{odir}/plots_{year}/{trigger}'):
-                    os.makedirs(f'{odir}/plots_{year}/{trigger}')
-                if not os.path.exists(f'{odir}/plots_{year}/{trigger}/{x}_vs_{y}'):
-                    os.makedirs(f'{odir}/plots_{year}/{trigger}/{x}_vs_{y}')
+                if not os.path.exists(f'{odir}/plots_{year}'):
+                    os.makedirs(f'{odir}/plots_{year}')
+                if not os.path.exists(f'{odir}/plots_{year}/{x}_vs_{y}'):
+                    os.makedirs(f'{odir}/plots_{year}/{x}_vs_{y}')
 
-                plt.savefig(f'{odir}/plots_{year}/{trigger}/{x}_vs_{y}/{ch}_{sample}.pdf')
+                plt.savefig(f'{odir}/plots_{year}/{x}_vs_{y}/{ch}_{sample}.pdf')
                 plt.close()
 
 
@@ -133,10 +148,8 @@ def main(args):
                     samples[year][ch].append(key)
 
     print(f'The 2 variables for cross check are: {vars}')
-    # make_2dplot(args.idir, args.odir, samples, years, channels, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end)
-    # make_2dplot(args.idir, args.odir, samples, years, channels, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end, 'trigger_noiso')
-    # make_2dplot(args.idir, args.odir, samples, years, channels, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end, 'trigger_iso')
-    make_2dplot(args.idir, args.odir, samples, years, channels, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end, 'both')
+    make_2dplot(args.idir, args.odir, samples, years, channels, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end, log_z=False)
+    # make_2dplot(args.idir, args.odir, samples, years, channels, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end, log_z=True)
 
 
 if __name__ == "__main__":
