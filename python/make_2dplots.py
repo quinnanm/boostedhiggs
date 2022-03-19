@@ -114,7 +114,11 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
 
                 fig, ax = plt.subplots(figsize=(8, 5))
                 # hep.hist2dplot(hists[year][ch][{'samples': sample}], ax=ax, norm=matplotlib.colors.Normalize(vmin=0, vmax=1), cmap="plasma")
-                hep.hist2dplot(hists[year][ch][{'samples': sample}], ax=ax, cmap="plasma")
+                if log_z = True:
+                    hep.hist2dplot(hists[year][ch][{'samples': sample}], ax=ax, cmap="plasma", norm=matplotlib.colors.LogNorm(vmin=1e-3))
+                else:
+                    hep.hist2dplot(hists[year][ch][{'samples': sample}], ax=ax, cmap="plasma")
+
                 ax.set_xlabel(f"{x}")
                 ax.set_ylabel(f"{y}")
                 ax.set_title(f'{ch} channel for \n {sample}')
@@ -126,7 +130,10 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
                 if not os.path.exists(f'{odir}/plots_{year}/{x}_vs_{y}'):
                     os.makedirs(f'{odir}/plots_{year}/{x}_vs_{y}')
 
-                plt.savefig(f'{odir}/plots_{year}/{x}_vs_{y}/{ch}_{sample}.pdf')
+                if log_z = True:
+                    plt.savefig(f'{odir}/plots_{year}/{x}_vs_{y}/{ch}_{sample}_log_z.pdf')
+                else:
+                    plt.savefig(f'{odir}/plots_{year}/{x}_vs_{y}/{ch}_{sample}_.pdf')
                 plt.close()
 
 
@@ -154,8 +161,8 @@ def main(args):
                     samples[year][ch].append(key)
 
     print(f'The 2 variables for cross check are: {vars}')
-    make_2dplot(args.idir, args.odir, samples, years, channels, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end, log_z=False)
-    # make_2dplot(args.idir, args.odir, samples, years, channels, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end, log_z=True)
+    make_2dplot(args.idir, args.odir, samples, years, channels, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end, log_z=True)
+    # make_2dplot(args.idir, args.odir, samples, years, channels, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end, log_z=False)
 
 
 if __name__ == "__main__":
