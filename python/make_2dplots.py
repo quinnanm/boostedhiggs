@@ -50,6 +50,12 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
 
     hists = {}
     for year in years:
+        # Get luminosity of year
+        f = open('../fileset/luminosity.json')
+        luminosity = json.load(f)
+        f.close()
+        print(f'Processing samples from year {year} with luminosity {luminosity[year]}')
+
         hists[year] = {}
 
         for ch in channels:  # initialize the histograms for the different channels and different variables
