@@ -115,7 +115,7 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
                 fig, ax = plt.subplots(figsize=(8, 5))
                 # hep.hist2dplot(hists[year][ch][{'samples': sample}], ax=ax, norm=matplotlib.colors.Normalize(vmin=0, vmax=1), cmap="plasma")
                 if log_z == True:
-                    hep.hist2dplot(hists[year][ch][{'samples': sample}], ax=ax, cmap="plasma", norm=matplotlib.colors.LogNorm(vmin=1, vmax=50))
+                    hep.hist2dplot(hists[year][ch][{'samples': sample}], ax=ax, cmap="plasma", norm=matplotlib.colors.LogNorm(vmin=1e-3, vmax=1000))
                 else:
                     hep.hist2dplot(hists[year][ch][{'samples': sample}], ax=ax, cmap="plasma")
 
@@ -162,7 +162,7 @@ def main(args):
 
     print(f'The 2 variables for cross check are: {vars}')
     make_2dplot(args.idir, args.odir, samples, years, channels, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end, log_z=True)
-    # make_2dplot(args.idir, args.odir, samples, years, channels, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end, log_z=False)
+    make_2dplot(args.idir, args.odir, samples, years, channels, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end, log_z=False)
 
 
 if __name__ == "__main__":
