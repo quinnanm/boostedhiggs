@@ -10,7 +10,8 @@ metadata.json
 
 binder/lol.pdf
 binder/plots/*
-
+binder/DY*
+binder/all
 
 run_local.py
 data1.root

@@ -613,12 +613,13 @@ class HwwProcessor(processor.ProcessorABC):
             variables["lep_iswstarlepton"] = pad_val(match_HWW_lep["iswstarlepton"], -1)
             variables["lep_matchedH"] = pad_val(ak.firsts(match_HWW_lep["matchedH"]).pt, -1)
 
-        # get Z-boson
-        Z = getParticles(events.GenPart, lowid=23, highid=23, flags=['fromHardProcess', 'isLastCopy'])
-        Z = ak.firsts(Z)
-        lep_Z_dr = Z.delta_r(candidatelep_p4)   # get dr between Z and lepton
-        variables["Z_pt"] = pad_val(Z.pt, -1)
-        variables["lep_Z_dr"] = pad_val(lep_Z_dr, -1)
+        if isMC:
+            # get Z-boson
+            Z = getParticles(events.GenPart, lowid=23, highid=23, flags=['fromHardProcess', 'isLastCopy'])
+            Z = ak.firsts(Z)
+            lep_Z_dr = Z.delta_r(candidatelep_p4)   # get dr between Z and lepton
+            variables["Z_pt"] = pad_val(Z.pt, -1)
+            variables["lep_Z_dr"] = pad_val(lep_Z_dr, -1)
 
         # initialize pandas dataframe
         output = {}
