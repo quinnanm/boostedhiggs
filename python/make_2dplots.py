@@ -115,7 +115,7 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
                 fig, ax = plt.subplots(figsize=(8, 5))
                 # hep.hist2dplot(hists[year][ch][{'samples': sample}], ax=ax, norm=matplotlib.colors.Normalize(vmin=0, vmax=1), cmap="plasma")
                 if log_z == True:
-                    hep.hist2dplot(hists[year][ch][{'samples': sample}], ax=ax, cmap="plasma", norm=matplotlib.colors.LogNorm())
+                    hep.hist2dplot(hists[year][ch][{'samples': sample}], ax=ax, cmap="plasma", norm=matplotlib.colors.LogNorm(vmin=1))
                 else:
                     hep.hist2dplot(hists[year][ch][{'samples': sample}], ax=ax, cmap="plasma")
 
