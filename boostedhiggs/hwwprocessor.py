@@ -494,11 +494,11 @@ class HwwProcessor(processor.ProcessorABC):
             sel=(dr_jet_candlep < 0.8),
             channel=['mu', 'ele']
         )
-        self.add_selection(
-            name='anti_bjettag',
-            sel=(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
-            channel=['mu', 'ele']
-        )
+        # self.add_selection(
+        #     name='anti_bjettag',
+        #     sel=(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
+        #     channel=['mu', 'ele']
+        # )
         self.add_selection(
             name='ht',
             sel=(ht > 200),
