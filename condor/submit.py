@@ -109,7 +109,7 @@ def main(args):
 
 if __name__ == "__main__":
     """
-    python condor/submit.py --year 2017 --tag bdr --samples samples_pfnano.json --pfnano --submit
+    python condor/submit.py --year 2017 --tag bdrdr --samples samples_pfnano.json --pfnano --submit
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("--script",    dest="script",    default="run.py",              help="script to run", type=str)
