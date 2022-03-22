@@ -488,12 +488,12 @@ class HwwProcessor(processor.ProcessorABC):
             sel=(((candidatelep.pt > 30) & (candidatelep.pt < 120) & (lep_reliso < 0.3)) | ((candidatelep.pt >= 120) & (candidatelep.miniPFRelIso_all < 0.2))),
             channel=['ele']
         )
-        # event selections for both leptonic channels
-        # self.add_selection(
-        #     name='leptonInJet',
-        #     sel=(dr_jet_candlep < 0.8),
-        #     channel=['mu', 'ele']
-        # )
+        event selections for both leptonic channels
+        self.add_selection(
+            name='leptonInJet',
+            sel=(dr_jet_candlep < 0.8),
+            channel=['mu', 'ele']
+        )
         # self.add_selection(
         #     name='anti_bjettag',
         #     sel=(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
