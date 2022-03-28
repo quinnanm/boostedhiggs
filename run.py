@@ -28,7 +28,7 @@ def main(args):
     if args.n != -1:
         job_name += '-' + str(args.starti + args.n)
 
-    # if provided a specefic sample, look at the args.sample provided
+    # if --local is specefied, process only the args.sample provided
     if args.local:
         fileset = {}
         with open(f"fileset/pfnanoindex_{args.year}.json", 'r') as f:
@@ -38,6 +38,7 @@ def main(args):
                     if key == args.sample:
                         # fileset[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist]
                         fileset[key] = flist[args.starti:args.starti + args.n]
+                        print("lol", fileset[key])
         print(len(list(fileset.keys())), 'Samples in fileset to be processed: ', list(fileset.keys()))
     else:
         # get samples
