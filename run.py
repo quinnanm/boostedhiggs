@@ -29,7 +29,7 @@ def main(args):
         job_name += '-' + str(args.starti + args.n)
 
     # if provided a specefic sample, look at the args.sample provided
-    if args.sample:
+    if args.local:
         fileset = {}
         with open(f"fileset/pfnanoindex_{args.year}.json", 'r') as f:
             files = json.load(f)
@@ -37,7 +37,7 @@ def main(args):
                 for key, flist in files[args.year][subdir].items():
                     if key == args.sample:
                         # fileset[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist]
-                        fileset[key] = "root://cmsxrootd.fnal.gov/" + flist[args.starti:args.starti + args.n]
+                        fileset[key] = flist[args.starti:args.starti + args.n]
         print(len(list(fileset.keys())), 'Samples in fileset to be processed: ', list(fileset.keys()))
     else:
         # get samples
@@ -132,7 +132,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally on lpc as: python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --json samples_pfnano.json
+    # run locally on lpc as: python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --json samples_pfnano.json --local
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',        dest='year',           default='2017',                     help="year",                                type=str)
@@ -149,6 +149,7 @@ if __name__ == "__main__":
         choices=["futures", "iterative", "dask"],
         help="type of processor executor",
     )
+    parser.add_argument("--local",      dest='local', action='store_true')
     parser.add_argument("--pfnano",      dest='pfnano', action='store_true')
     parser.add_argument("--no-pfnano",   dest='pfnano', action='store_false')
     parser.set_defaults(pfnano=True)
