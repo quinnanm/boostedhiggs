@@ -28,32 +28,41 @@ def main(args):
     if args.n != -1:
         job_name += '-' + str(args.starti + args.n)
 
-    # get samples
-    if args.json == 'metadata.json':
-        with open(args.json, 'r') as f:
+    # if provided a specefic sample, look at the args.sample provided
+    if args.sample:
+        with open("fileset/pfnanoindex_{year}.json", 'r') as f:
             files = json.load(f)
+            for subdir in files[year]:
+                for key, flist in files[year][subdir].items():
+                    if key == args.sample:
+                        fileset[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist]
     else:
-        # hopefully this step is avoided in condor jobs that have metadata.json
-        from condor.file_utils import loadJson
-        print(args.pfnano)
-        files, _ = loadJson(args.json, args.year, args.pfnano)
-
-    if not files:
-        print('Did not find files.. Exiting.')
-        exit(1)
-
-    # build fileset with files to run per job
-    fileset = {}
-    for sample, flist in files.items():
-        if args.sample:
-            if sample not in args.sample.split(','):
-                continue
-        if args.n != -1:
-            fileset[sample] = flist[args.starti:args.starti + args.n]
+        # get samples
+        if args.json == 'metadata.json':
+            with open(args.json, 'r') as f:
+                files = json.load(f)
         else:
-            fileset[sample] = flist
+            # hopefully this step is avoided in condor jobs that have metadata.json
+            from condor.file_utils import loadJson
+            print(args.pfnano)
+            files, _ = loadJson(args.json, args.year, args.pfnano)
 
-    print(len(list(fileset.keys())), 'Samples in fileset to be processed: ', list(fileset.keys()))
+        if not files:
+            print('Did not find files.. Exiting.')
+            exit(1)
+
+        # build fileset with files to run per job
+        fileset = {}
+        for sample, flist in files.items():
+            if args.sample:
+                if sample not in args.sample.split(','):
+                    continue
+            if args.n != -1:
+                fileset[sample] = flist[args.starti:args.starti + args.n]
+            else:
+                fileset[sample] = flist
+
+        print(len(list(fileset.keys())), 'Samples in fileset to be processed: ', list(fileset.keys()))
 
     # define processor
     if args.processor == 'hww':
@@ -120,27 +129,27 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally on lpc as: python run.py --year 2017 --processor hww --starti 0 --n 1 --json samples_pfnano.json --pfnano
+    # run locally on lpc as: python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --json samples_pfnano.json
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--year',        dest='year',           default='2017',                     help="year",                                type=str)
-    parser.add_argument('--starti',      dest='starti',         default=0,                          help="start index of files",                type=int)
-    parser.add_argument('--n',            dest='n',              default=-1,                         help="number of files to process",          type=int)
-    parser.add_argument('--json',        dest='json',           default="metadata.json",            help='path to datafiles',                   type=str)
-    parser.add_argument('--sample',      dest='sample',         default=None,                       help='specify sample',                      type=str)
-    parser.add_argument("--processor",   dest="processor",      default="hww",                      help="HWW processor",                       type=str)
-    parser.add_argument("--chunksize",   dest='chunksize',      default=10000,                      help="chunk size in processor",             type=int)
-    parser.add_argument(
-        "--executor",
-        type=str,
-        default="futures",
-        choices=["futures", "iterative", "dask"],
-        help="type of processor executor",
-    )
-    parser.add_argument("--pfnano",      dest='pfnano', action='store_true')
-    parser.add_argument("--no-pfnano",   dest='pfnano', action='store_false')
-    parser.set_defaults(pfnano=True)
+parser = argparse.ArgumentParser()
+parser.add_argument('--year',        dest='year',           default='2017',                     help="year",                                type=str)
+parser.add_argument('--starti',      dest='starti',         default=0,                          help="start index of files",                type=int)
+parser.add_argument('--n',           dest='n',              default=-1,                         help="number of files to process",          type=int)
+parser.add_argument('--json',        dest='json',           default="metadata.json",            help='path to datafiles',                   type=str)
+parser.add_argument('--sample',      dest='sample',         default=None,                       help='specify sample',                      type=str)
+parser.add_argument("--processor",   dest="processor",      default="hww",                      help="HWW processor",                       type=str)
+parser.add_argument("--chunksize",   dest='chunksize',      default=10000,                      help="chunk size in processor",             type=int)
+parser.add_argument(
+    "--executor",
+    type=str,
+    default="futures",
+    choices=["futures", "iterative", "dask"],
+    help="type of processor executor",
+)
+parser.add_argument("--pfnano",      dest='pfnano', action='store_true')
+parser.add_argument("--no-pfnano",   dest='pfnano', action='store_false')
+parser.set_defaults(pfnano=True)
 
-    args = parser.parse_args()
+args = parser.parse_args()
 
-    main(args)
+main(args)
