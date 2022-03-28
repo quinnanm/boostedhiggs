@@ -30,6 +30,7 @@ def main(args):
 
     # if provided a specefic sample, look at the args.sample provided
     if args.sample:
+        fileset = {}
         with open(f"fileset/pfnanoindex_{args.year}.json", 'r') as f:
             files = json.load(f)
             for subdir in files[args.year]:
