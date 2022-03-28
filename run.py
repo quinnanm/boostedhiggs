@@ -33,11 +33,10 @@ def main(args):
         files = {}
         with open(f"fileset/pfnanoindex_{args.year}.json", 'r') as f:
             files_all = json.load(f)
-            if pfnano:
-                for subdir in files_all[args.year]:
-                    for key, flist in files_all[args.year][subdir].items():
-                        if key in samples:
-                            files[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist]
+            for subdir in files_all[args.year]:
+                for key, flist in files_all[args.year][subdir].items():
+                    if key in samples:
+                        files[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist]
     else:
         # get samples
         if args.json == 'metadata.json':
