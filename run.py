@@ -32,8 +32,8 @@ def main(args):
     if args.sample:
         with open(f"fileset/pfnanoindex_{args.year}.json", 'r') as f:
             files = json.load(f)
-            for subdir in files[year]:
-                for key, flist in files[year][subdir].items():
+            for subdir in files[args.year]:
+                for key, flist in files[args.year][subdir].items():
                     if key == args.sample:
                         fileset[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist]
     else:
