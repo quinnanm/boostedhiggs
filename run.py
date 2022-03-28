@@ -35,7 +35,7 @@ def main(args):
             files_all = json.load(f)
             for subdir in files_all[args.year]:
                 for key, flist in files_all[args.year][subdir].items():
-                    if key in samples:
+                    if key in args.samples:
                         files[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist]
     else:
         # get samples
@@ -48,9 +48,9 @@ def main(args):
             print(args.pfnano)
             files, _ = loadJson(args.json, args.year, args.pfnano)
 
-        if not files:
-            print('Did not find files.. Exiting.')
-            exit(1)
+    if not files:
+        print('Did not find files.. Exiting.')
+        exit(1)
 
     # build fileset with files to run per job
     fileset = {}
