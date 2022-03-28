@@ -348,7 +348,7 @@ def main(args):
 if __name__ == "__main__":
     # e.g.
     # run locally as: python make_plots.py --year 2017 --idir ../results/ --odir hists --pfnano --samples configs/samples_pfnano.json --channels ele,mu,had
-    # run on lpc as: python make_plots.py --year 2017 --vars configs/vars.json --channels ele,mu,had --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/March11_2017/ --odir hists --pfnano --samples configs/samples_pfnano.json
+    # run on lpc as: python make_plots.py --year 2017 --vars configs/vars.json --channels ele,mu,had --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/bdrdr_2017/ --odir hists_bdr --pfnano --samples configs/samples_pfnano.json
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',            dest='years',       default='2017',                        help="year")

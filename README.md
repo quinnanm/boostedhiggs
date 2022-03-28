@@ -138,7 +138,12 @@ condor_q
 ```
 If you see no jobs listed it means they have all finished.
 
-#### Testing jobs locally
+#### Testing jobs locally per single sample:
 ```
-python run.py --year 2017 --processor hww --pfnano -n 4 --starti 0 --sample GluGluHToWWToLNuQQ
+python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --sample GluGluHToWWToLNuQQ --local
+```
+
+#### Testing jobs locally over multiple samples specified in the json:
+```
+python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --json samples_pfnano.json
 ```

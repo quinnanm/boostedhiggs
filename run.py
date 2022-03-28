@@ -28,7 +28,7 @@ def main(args):
     if args.n != -1:
         job_name += '-' + str(args.starti + args.n)
 
-    # if --local is specefied, process only the args.sample provided
+    # if --local is specefied in args, process only the args.sample provided
     if args.local:
         files = {}
         with open(f"fileset/pfnanoindex_{args.year}.json", 'r') as f:
@@ -69,9 +69,6 @@ def main(args):
     if args.processor == 'hww':
         from boostedhiggs.hwwprocessor import HwwProcessor
         p = HwwProcessor(year=args.year, channels=channels, output_location='./outfiles' + job_name)
-    else:
-        from boostedhiggs.trigger_efficiencies_processor import TriggerEfficienciesProcessor
-        p = TriggerEfficienciesProcessor(year=int(args.year))
 
     tic = time.time()
     if args.executor == "dask":
@@ -130,7 +127,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally on lpc as: python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --json samples_pfnano.json --local
+    # run locally on lpc as: python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --json samples_pfnano.json
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',        dest='year',           default='2017',                     help="year",                                type=str)
