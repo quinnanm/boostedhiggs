@@ -89,9 +89,7 @@ def main(args):
 
         # does treereduction help?
         executor = processor.DaskExecutor(status=True, client=client, treereduction=2)
-        run = processor.Runner(
-            executor=executor, savemetrics=True, schema=nanoevents.NanoAODSchema, chunksize=100000
-        )
+
     else:
         uproot.open.defaults["xrootd_handler"] = uproot.source.xrootd.MultithreadedXRootDSource
 
@@ -99,9 +97,10 @@ def main(args):
             executor = processor.FuturesExecutor(status=True)
         else:
             executor = processor.IterativeExecutor(status=True)
-        run = processor.Runner(
-            executor=executor, savemetrics=True, schema=nanoevents.NanoAODSchema, chunksize=args.chunksize
-        )
+
+    run = processor.Runner(
+        executor=executor, savemetrics=True, schema=nanoevents.NanoAODSchema, chunksize=args.chunksize
+    )
 
     out, metrics = run(
         fileset, "Events", processor_instance=p
