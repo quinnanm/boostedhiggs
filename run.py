@@ -30,16 +30,14 @@ def main(args):
 
     # if --local is specefied, process only the args.sample provided
     if args.local:
-        fileset = {}
+        files = {}
         with open(f"fileset/pfnanoindex_{args.year}.json", 'r') as f:
-            files = json.load(f)
-            for subdir in files[args.year]:
-                for key, flist in files[args.year][subdir].items():
-                    if key == args.sample:
-                        # fileset[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist]
-                        fileset[key] = flist[args.starti:args.starti + args.n]
-                        print("lol", fileset[key])
-        print(len(list(fileset.keys())), 'Samples in fileset to be processed: ', list(fileset.keys()))
+            files_all = json.load(f)
+            if pfnano:
+                for subdir in files_all[args.year]:
+                    for key, flist in files_all[args.year][subdir].items():
+                        if key in samples:
+                            files[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist]
     else:
         # get samples
         if args.json == 'metadata.json':
@@ -55,18 +53,18 @@ def main(args):
             print('Did not find files.. Exiting.')
             exit(1)
 
-        # build fileset with files to run per job
-        fileset = {}
-        for sample, flist in files.items():
-            if args.sample:
-                if sample not in args.sample.split(','):
-                    continue
-            if args.n != -1:
-                fileset[sample] = flist[args.starti:args.starti + args.n]
-            else:
-                fileset[sample] = flist
+    # build fileset with files to run per job
+    fileset = {}
+    for sample, flist in files.items():
+        if args.sample:
+            if sample not in args.sample.split(','):
+                continue
+        if args.n != -1:
+            fileset[sample] = flist[args.starti:args.starti + args.n]
+        else:
+            fileset[sample] = flist
 
-        print(len(list(fileset.keys())), 'Samples in fileset to be processed: ', list(fileset.keys()))
+    print(len(list(fileset.keys())), 'Samples in fileset to be processed: ', list(fileset.keys()))
 
     # define processor
     if args.processor == 'hww':
