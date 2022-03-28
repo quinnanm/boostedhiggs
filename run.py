@@ -37,7 +37,7 @@ def main(args):
                 for key, flist in files[args.year][subdir].items():
                     if key == args.sample:
                         # fileset[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist]
-                        fileset[key] = flist[args.starti:args.starti + args.n]
+                        fileset[key] = "root://cmsxrootd.fnal.gov/" + flist[args.starti:args.starti + args.n]
         print(len(list(fileset.keys())), 'Samples in fileset to be processed: ', list(fileset.keys()))
     else:
         # get samples
