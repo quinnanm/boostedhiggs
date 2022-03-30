@@ -329,6 +329,21 @@ class HwwProcessor(processor.ProcessorABC):
                 metfilters = metfilters & events.Flag[mf]
         self.add_selection("metfilters", metfilters)
 
+        # define tau objects for starters (will be needed in the end to avoid picking taus)
+        loose_taus_mu = (
+            (events.Tau.pt > 20)
+            & (abs(events.Tau.eta) < 2.3)
+            & (events.Tau.idAntiMu >= 1)  # loose antiMu ID
+        )
+        loose_taus_ele = (
+            (events.Tau.pt > 20)
+            & (abs(events.Tau.eta) < 2.3)
+            & (events.Tau.idAntiEleDeadECal >= 2)  # loose Anti-electron MVA discriminator V6 (2018) ?
+        )
+        n_loose_taus_mu = ak.sum(loose_taus_mu, axis=1)
+        n_loose_taus_ele = ak.sum(loose_taus_ele, axis=1)
+
+        # Object definitions:
         # define muon objects
         loose_muons = (
             (((events.Muon.pt > 30) & (events.Muon.pfRelIso04_all < 0.25)) |
@@ -367,33 +382,15 @@ class HwwProcessor(processor.ProcessorABC):
         )
         n_good_electrons = ak.sum(good_electrons, axis=1)
 
-        # define tau objects
-        loose_taus_mu = (
-            (events.Tau.pt > 20)
-            & (abs(events.Tau.eta) < 2.3)
-            & (events.Tau.idAntiMu >= 1)  # loose antiMu ID
-        )
-        loose_taus_ele = (
-            (events.Tau.pt > 20)
-            & (abs(events.Tau.eta) < 2.3)
-            & (events.Tau.idAntiEleDeadECal >= 2)  # loose Anti-electron MVA discriminator V6 (2018) ?
-        )
-        n_loose_taus_mu = ak.sum(loose_taus_mu, axis=1)
-        n_loose_taus_ele = ak.sum(loose_taus_ele, axis=1)
+        # get candidate lepton
+        goodleptons = ak.concatenate([events.Muon[good_muons], events.Electron[good_electrons]], axis=1)    # concat muons and electrons
+        goodleptons = goodleptons[ak.argsort(goodleptons.pt, ascending=False)]      # sort by pt
+        candidatelep = ak.firsts(goodleptons)   # pick highest pt
 
-        # leading lepton
-        goodleptons = ak.concatenate([events.Muon[good_muons], events.Electron[good_electrons]], axis=1)
-        goodleptons = goodleptons[ak.argsort(goodleptons.pt, ascending=False)]
-        candidatelep = ak.firsts(goodleptons)
-
-        # candidate leptons
-        candidatelep_p4 = build_p4(candidatelep)
-        # relative isolation
-        lep_reliso = candidatelep.pfRelIso04_all if hasattr(candidatelep, "pfRelIso04_all") else candidatelep.pfRelIso03_all
-        # mini isolation
-        lep_miso = candidatelep.miniPFRelIso_all
-        # MVA-ID
-        mu_mvaId = candidatelep.mvaId if hasattr(candidatelep, "mvaId") else np.zeros(nevents)
+        candidatelep_p4 = build_p4(candidatelep)    # build p4 for candidate lepton
+        lep_reliso = candidatelep.pfRelIso04_all if hasattr(candidatelep, "pfRelIso04_all") else candidatelep.pfRelIso03_all    # reliso for candidate lepton
+        lep_miso = candidatelep.miniPFRelIso_all    # miniso for candidate lepton
+        mu_mvaId = candidatelep.mvaId if hasattr(candidatelep, "mvaId") else np.zeros(nevents)      # MVA-ID for candidate lepton
 
         # JETS
         goodjets = events.Jet[
@@ -415,32 +412,32 @@ class HwwProcessor(processor.ProcessorABC):
         )
         n_fatjets = ak.sum(good_fatjets, axis=1)
 
-        good_fatjets = fatjets[good_fatjets]
-        good_fatjets = good_fatjets[ak.argsort(good_fatjets.pt, ascending=False)]
-        leadingfj = ak.firsts(good_fatjets)
-        secondfj = ak.pad_none(good_fatjets, 2, axis=1)[:, 1]
+        good_fatjets = fatjets[good_fatjets]        # select good fatjets
+        good_fatjets = good_fatjets[ak.argsort(good_fatjets.pt, ascending=False)]       # sort them by pt
+        leadingfj = ak.firsts(good_fatjets)     # pick leading pt
+        secondfj = ak.pad_none(good_fatjets, 2, axis=1)[:, 1]       # pick second leading pt
 
-        # for hadronic channels: leading pt
-        candidatefj = leadingfj
-        dphi_jet_leadingfj = abs(goodjets.delta_phi(leadingfj))
+        # for hadronic channels: candidatefj is the leading pt one
+        candidatefj_had = leadingfj
 
-        # for leptonic channel: clean jets and leptons by removing overlap
-        no_lep_in_fj_bool = good_fatjets.delta_r(candidatelep_p4) > 0.1
-        good_fatjets = good_fatjets[no_lep_in_fj_bool]
-        candidatefj_lep = ak.firsts(good_fatjets[ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)])
-
-        dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj_lep))
+        # for leptonic channel: first clean jets and leptons by removing overlap
+        lep_in_fj_overlap_bool = good_fatjets.delta_r(candidatelep_p4) > 0.1
+        good_fatjets = good_fatjets[lep_in_fj_overlap_bool]
+        candidatefj_lep = ak.firsts(good_fatjets[ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)])      # get candidatefj for leptonic channel
 
         # lepton and fatjet mass
         lep_fj_m = (candidatefj_lep - candidatelep_p4).mass  # mass of fatjet without lepton
 
         # b-jets
         # in event, pick highest b score in opposite direction from signal (we will make cut here to avoid tt background events producing bjets)
+        dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj_lep))
         bjets_away_lepfj = goodjets[dphi_jet_lepfj > np.pi / 2]
+
+        dphi_jet_leadingfj = abs(goodjets.delta_phi(leadingfj))
         bjets_away_leadingfj = goodjets[dphi_jet_leadingfj > np.pi / 2]
 
         # deltaR
-        dr_jet_candlep = candidatefj_lep.delta_r(candidatelep_p4)
+        lep_fj_dr = candidatefj_lep.delta_r(candidatelep_p4)
 
         # MET
         met = events.MET
@@ -469,7 +466,6 @@ class HwwProcessor(processor.ProcessorABC):
             sel=(((candidatelep.pt > 30) & (candidatelep.pt < 55) & (lep_reliso < 0.25)) | ((candidatelep.pt >= 55) & (candidatelep.miniPFRelIso_all < 0.2))),
             channel=['mu']
         )
-
         # event selections for electron channel
         self.add_selection(
             name='leptonKin',
@@ -494,7 +490,7 @@ class HwwProcessor(processor.ProcessorABC):
         # # event selections for both leptonic channels
         # self.add_selection(
         #     name='leptonInJet',
-        #     sel=(dr_jet_candlep < 0.8),
+        #     sel=(lep_fj_dr < 0.8),
         #     channel=['mu', 'ele']
         # )
         # self.add_selection(
@@ -502,7 +498,6 @@ class HwwProcessor(processor.ProcessorABC):
         #     sel=(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
         #     channel=['mu', 'ele']
         # )
-
         self.add_selection(
             name='ht',
             sel=(ht > 200),
@@ -513,7 +508,6 @@ class HwwProcessor(processor.ProcessorABC):
             sel=(mt_lep_met < 100),
             channel=['mu', 'ele']
         )
-
         # event selections for hadronic channel
         self.add_selection(
             name='oneFatjet',
@@ -554,7 +548,7 @@ class HwwProcessor(processor.ProcessorABC):
         variables["lep_misolation"] = pad_val(lep_miso, -1)
         variables["lep_fj_m"] = pad_val(lep_fj_m, -1)
         variables["lep_fj_bjets_ophem"] = pad_val(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1), -1)
-        variables["lep_fj_dr"] = pad_val(dr_jet_candlep, -1)
+        variables["lep_fj_dr"] = pad_val(lep_fj_dr, -1)
         variables["lep_mvaId"] = pad_val(mu_mvaId, -1)
         variables["fj_msoftdrop"] = pad_val(candidatefj_lep.msoftdrop, -1)
         variables["fj_pt"] = pad_val(candidatefj_lep.pt, -1)
@@ -606,7 +600,7 @@ class HwwProcessor(processor.ProcessorABC):
 
         # higgs matching
         if (('HToWW' or 'HWW') in dataset) and isMC:
-            match_HWW_had = match_HWW(events.GenPart, candidatefj)
+            match_HWW_had = match_HWW(events.GenPart, candidatefj_had)
             match_HWW_lep = match_HWW(events.GenPart, candidatefj_lep)
 
             variables["had_nprongs"] = pad_val(match_HWW_had["hWW_nprongs"], -1)
