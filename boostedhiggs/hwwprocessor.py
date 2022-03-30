@@ -424,8 +424,11 @@ class HwwProcessor(processor.ProcessorABC):
         candidatefj = leadingfj
         dphi_jet_leadingfj = abs(goodjets.delta_phi(leadingfj))
 
-        # for leptonic channel: leading pt which contains lepton
+        # for leptonic channel: clean jets and leptons by removing overlap
+        no_lep_in_fj_bool = good_fatjets.delta_r(candidatelep_p4) > 0.1
+        good_fatjets = good_fatjets[no_lep_in_fj_bool]
         candidatefj_lep = ak.firsts(good_fatjets[ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)])
+
         dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj_lep))
 
         # lepton and fatjet mass
@@ -488,17 +491,17 @@ class HwwProcessor(processor.ProcessorABC):
             sel=(((candidatelep.pt > 30) & (candidatelep.pt < 120) & (lep_reliso < 0.3)) | ((candidatelep.pt >= 120) & (candidatelep.miniPFRelIso_all < 0.2))),
             channel=['ele']
         )
-        # event selections for both leptonic channels
-        self.add_selection(
-            name='leptonInJet',
-            sel=(dr_jet_candlep < 0.8),
-            channel=['mu', 'ele']
-        )
-        self.add_selection(
-            name='anti_bjettag',
-            sel=(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
-            channel=['mu', 'ele']
-        )
+        # # event selections for both leptonic channels
+        # self.add_selection(
+        #     name='leptonInJet',
+        #     sel=(dr_jet_candlep < 0.8),
+        #     channel=['mu', 'ele']
+        # )
+        # self.add_selection(
+        #     name='anti_bjettag',
+        #     sel=(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
+        #     channel=['mu', 'ele']
+        # )
 
         self.add_selection(
             name='ht',
@@ -534,11 +537,11 @@ class HwwProcessor(processor.ProcessorABC):
             sel=(leadingfj.qcdrho > -7) & (leadingfj.qcdrho < -2.0),
             channel=['had']
         )
-        self.add_selection(
-            name='anti_bjettag',
-            sel=(ak.max(bjets_away_leadingfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
-            channel=['had']
-        )
+        # self.add_selection(
+        #     name='anti_bjettag',
+        #     sel=(ak.max(bjets_away_leadingfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
+        #     channel=['had']
+        # )
         self.add_selection(
             name='met',
             sel=(met.pt < 200),
@@ -629,8 +632,10 @@ class HwwProcessor(processor.ProcessorABC):
             for var in self._skimvars[ch]:
                 if var in variables.keys():
                     out[var] = variables[var]
-                out["trigger_iso"] = pad_val(trigger_iso[ch], -1)
-                out["trigger_noiso"] = pad_val(trigger_noiso[ch], -1)
+            out["trigger_iso"] = pad_val(trigger_iso[ch], -1)
+            out["trigger_noiso"] = pad_val(trigger_noiso[ch], -1)
+            out["leptonInJet"] = pad_val((lep_fj_dr < 0.8), -1)
+            out["anti_bjettag"] = pad_val((ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]), -1)
 
             fill_output = True
             # for data, only fill output for that channel
