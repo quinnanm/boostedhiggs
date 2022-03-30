@@ -110,7 +110,7 @@ We use the `submit.py` script to submit jobs.
 
 For example:
 ```
-python condor/submit.py --year 2017 --tag Feb21 --samples python/configs/samples_pfnano.json --pfnano
+python condor/submit.py --year 2017 --tag Feb21 --samples samples_pfnano.json --pfnano
 ```
 where:
 - year: this determines which fileset to read
