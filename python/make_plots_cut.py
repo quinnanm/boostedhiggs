@@ -183,7 +183,7 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano, cut): 
     return cut
 
 
-def make_stack(odir, vars_to_plot, years, channels, pfnano, logy=True, add_data=True):
+def make_stack(odir, vars_to_plot, years, channels, pfnano, logy=True, add_data=True, cut=None):
     # load the hists
     path = odir + '/' + cut
     with open(f'{path}/hists.pkl', 'rb') as f:
@@ -282,7 +282,7 @@ def make_stack(odir, vars_to_plot, years, channels, pfnano, logy=True, add_data=
                 if logy:
                     ax.set_yscale('log')
                     ax.set_ylim(0.1)
-                ax.set_title(f'{ch} channel')
+                ax.set_title(f'{ch} channel \n with {cut} cut')
                 ax.legend()
 
                 hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
@@ -364,7 +364,7 @@ def main(args):
 if __name__ == "__main__":
     # e.g.
     # run locally as: python make_plots_cut.py --year 2017 --idir ../results/ --odir hists --pfnano --samples configs/samples_pfnano.json --channels ele,mu,had
-    # run on lpc as: python make_plots_cut.py --year 2017 --vars configs/vars.json --odir hists_dr0 --pfnano --samples configs/samples_pfnano.json --channels ele,mu,had --cut btag --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # run on lpc as: python make_plots_cut.py --year 2017 --vars configs/vars.json --odir hists_dr0 --pfnano --samples configs/samples_pfnano.json --channels ele --cut btag&dr --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',            dest='years',       default='2017',                        help="year")
