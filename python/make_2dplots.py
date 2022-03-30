@@ -73,15 +73,6 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
                 if len(parquet_files) != 0:
                     print(f'Processing {ch} channel of sample', sample)
 
-                    # Find xsection
-                    f = open('../fileset/xsec_pfnano.json')
-                    xsec = json.load(f)
-                    f.close()
-                    xsec = eval(str((xsec[sample])))
-
-                    # Get overall weighting of events
-                    xsec_weight = (xsec * luminosity[year]) / (get_sum_sumgenweight(idir, year, sample))
-
                 for i, parquet_file in enumerate(parquet_files):
                     try:
                         data = pq.read_table(parquet_file).to_pandas()
@@ -96,8 +87,18 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
 
                     try:
                         event_weight = data['weight'].to_numpy()
-                    except:
-                        event_weight = 1  # for data
+                        # Find xsection if MC
+                        f = open('../fileset/xsec_pfnano.json')
+                        xsec = json.load(f)
+                        f.close()
+                        xsec = eval(str((xsec[sample])))
+
+                        # Get overall weighting of events
+                        xsec_weight = (xsec * luminosity[year]) / (get_sum_sumgenweight(idir, year, sample))
+
+                    except:  # for data
+                        event_weight = 1
+                        xsec_weight = 1
 
                     single_sample = None
                     for single_key, key in add_samples.items():
