@@ -431,8 +431,11 @@ class HwwProcessor_nocuts(processor.ProcessorABC):
         candidatefj = leadingfj
         dphi_jet_leadingfj = abs(goodjets.delta_phi(leadingfj))
 
-        # for leptonic channel: leading pt which contains lepton
+        # for leptonic channel: leading pt closest to lepton (but does not include lepton inside it)
+        no_lep_in_fj_bool = good_fatjets.delta_r(candidatelep_p4) > 0
+        good_fatjets = good_fatjets[no_lep_in_fj_bool]
         candidatefj_lep = ak.firsts(good_fatjets[ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)])
+
         dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj_lep))
         dR_jet_lepfj = abs(goodjets.delta_r(candidatefj_lep))
 
@@ -447,7 +450,7 @@ class HwwProcessor_nocuts(processor.ProcessorABC):
         bjets_away_leadingfj = goodjets[dR_jet_lepfj > 0.8]
 
         # deltaR
-        dr_jet_candlep = candidatefj_lep.delta_r(candidatelep_p4)
+        lep_fj_dr = candidatefj_lep.delta_r(candidatelep_p4)
 
         # MET
         met = events.MET
@@ -515,7 +518,7 @@ class HwwProcessor_nocuts(processor.ProcessorABC):
 #         # event selections for both leptonic channels
 #         # self.add_selection(
 #         #     name='leptonInJet',
-#         #     sel=(dr_jet_candlep < 0.8),
+#         #     sel=(lep_fj_dr < 0.8),
 #         #     channel=['mu', 'ele']
 #         # )
 #         self.add_selection(
@@ -574,7 +577,7 @@ class HwwProcessor_nocuts(processor.ProcessorABC):
         variables["lep_misolation"] = pad_val(lep_miso, -1)
         variables["lep_fj_m"] = pad_val(lep_fj_m, -1)
         variables["lep_fj_bjets_ophem"] = pad_val(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1), -1)
-        variables["lep_fj_dr"] = pad_val(dr_jet_candlep, -1)
+        variables["lep_fj_dr"] = pad_val(lep_fj_dr, -1)
         variables["lep_mvaId"] = pad_val(mu_mvaId, -1)
         variables["fj_msoftdrop"] = pad_val(candidatefj_lep.msoftdrop, -1)
         variables["fj_pt"] = pad_val(candidatefj_lep.pt, -1)
@@ -675,7 +678,7 @@ class HwwProcessor_nocuts(processor.ProcessorABC):
             out["notaus_ele"] = pad_val((n_loose_taus_ele == 0), -1)
             out["MuonIsolation"] = pad_val((((candidatelep.pt > 30) & (candidatelep.pt < 55) & (lep_reliso < 0.25)) | ((candidatelep.pt >= 55) & (candidatelep.miniPFRelIso_all < 0.2))), -1)
             out["ElectronIsolation"] = pad_val((((candidatelep.pt > 30) & (candidatelep.pt < 120) & (lep_reliso < 0.3)) | ((candidatelep.pt >= 120) & (candidatelep.miniPFRelIso_all < 0.2))), -1)
-            out["leptonInJet"] = pad_val((dr_jet_candlep < 0.8), -1)
+            out["leptonInJet"] = pad_val((lep_fj_dr < 0.8), -1)
             out["anti_bjettag"] = pad_val((ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]), -1)
             out["ht"] = pad_val((ht > 200), -1)
             out["mt_lep_met"] = pad_val((mt_lep_met < 100), -1)
