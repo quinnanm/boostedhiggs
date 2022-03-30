@@ -137,13 +137,12 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano, cut): 
                         #    data = data[data['met'] < 200]
 
                         if cut == "btag":
-                            print(data["anti_bjettag"])
-                            data = data[data["anti_bjettag"]]
+                            data = data[data["anti_bjettag"] == 1]
                         elif cut == "dr":
-                            data = data[data["leptonInJet"]]
+                            data = data[data["leptonInJet"] == 1]
                         elif cut == "btag&dr":
-                            data = data[data["anti_bjettag"]]
-                            data = data[data["leptonInJet"]]
+                            data = data[data["anti_bjettag"] == 1]
+                            data = data[data["leptonInJet"] == 1]
                         else:
                             cut == 'preselection'
 
