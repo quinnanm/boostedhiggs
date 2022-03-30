@@ -69,6 +69,7 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
         # loop over the processed files and fill the histograms
         for ch in channels:
             for sample in samples[year][ch]:
+                num_events = 0
                 parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
                 if len(parquet_files) != 0:
                     print(f'Processing {ch} channel of sample', sample)
@@ -114,6 +115,8 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
                             data[x], data[y], sample, weight=event_weight[data[y] != -1] * xsec_weight,
                         )
 
+                    num_events = num_events + len(data[x])
+                print(num_events)
             for sample in hists[year][ch].axes[-1]:
                 fig, ax = plt.subplots(figsize=(8, 5))
                 # hep.hist2dplot(hists[year][ch][{'samples': sample}], ax=ax, norm=matplotlib.colors.Normalize(vmin=0, vmax=1), cmap="plasma")
