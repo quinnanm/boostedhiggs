@@ -140,7 +140,7 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano, cut): 
                             data = data[data["anti_bjettag"] == 1]
                         elif cut == "dr":
                             data = data[data["leptonInJet"] == 1]
-                        elif cut == "btag&dr":
+                        elif cut == "btagdr":
                             data = data[data["anti_bjettag"] == 1]
                             data = data[data["leptonInJet"] == 1]
                         else:
@@ -364,7 +364,7 @@ def main(args):
 if __name__ == "__main__":
     # e.g.
     # run locally as: python make_plots_cut.py --year 2017 --idir ../results/ --odir hists --pfnano --samples configs/samples_pfnano.json --channels ele,mu,had
-    # run on lpc as: python make_plots_cut.py --year 2017 --vars configs/vars.json --odir hists_dr0 --pfnano --samples configs/samples_pfnano.json --channels ele --cut btag&dr --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # run on lpc as: python make_plots_cut.py --year 2017 --vars configs/vars.json --odir hists_dr0 --pfnano --samples configs/samples_pfnano.json --channels ele --cut btagdr --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',            dest='years',       default='2017',                        help="year")
