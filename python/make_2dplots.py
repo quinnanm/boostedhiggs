@@ -91,6 +91,9 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
                     if len(data) == 0:
                         continue
 
+                    # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
+                    data = data[data[y] != -1]
+
                     try:
                         event_weight = data['weight'].to_numpy()
                     except:
@@ -107,11 +110,10 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
                         )
                     else:
                         hists[year][ch].fill(
-                            data[x], data[y], sample, weight=event_weight * xsec_weight,
+                            data[x], data[y], sample, weight=event_weight[data[y] != -1] * xsec_weight,
                         )
 
             for sample in hists[year][ch].axes[-1]:
-
                 fig, ax = plt.subplots(figsize=(8, 5))
                 # hep.hist2dplot(hists[year][ch][{'samples': sample}], ax=ax, norm=matplotlib.colors.Normalize(vmin=0, vmax=1), cmap="plasma")
                 if log_z == True:
@@ -167,10 +169,10 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # lep_pt vs lep_iso: python make_2dplots.py --year 2017 --odir plots/2dplots --samples configs/samples_pfnano.json --channels ele,mu --vars lep_pt,lep_isolation --x_bins 50 --x_start 0 --x_end 500 --y_bins 50 --y_start 0 --y_end 1 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs
-    # lep_pt vs dR: python make_2dplots.py --year 2017 --odir plots/2dplots --samples configs/samples_pfnano.json --channels ele,mu --vars lep_pt,lep_fj_dr --x_bins 50 --x_start 0 --x_end 500 --y_bins 50 --y_start 0 --y_end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs
-    # lep_pt vs mt: python make_2dplots.py --year 2017 --odir plots/2dplots --samples configs/samples_pfnano.json --channels ele,mu --vars lep_pt,lep_met_mt --x_bins 50 --x_start 0 --x_end 500 --y_bins 50 --y_start 0 --y_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs
-    # lep_pt vs fj_pt: python make_2dplots.py --year 2017 --odir plots/2dplots --samples configs/samples_pfnano.json --channels ele,mu --vars lep_pt,fj_pt --x_bins 50 --x_start 0 --x_end 500 --y_bins 50 --y_start 0 --y_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs
+    # lep_pt vs lep_iso: python make_2dplots.py --year 2017 --odir 2dplots --samples configs/samples_pfnano.json --channels ele,mu --vars lep_pt,lep_isolation --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0 --y_end 1 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs
+    # lep_pt vs dR: python make_2dplots.py --year 2017 --odir 2dplots --samples configs/samples_pfnano.json --channels ele,mu --vars lep_pt,lep_fj_dr --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0 --y_end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs
+    # lep_pt vs mt: python make_2dplots.py --year 2017 --odir 2dplots --samples configs/samples_pfnano.json --channels ele,mu --vars lep_pt,lep_met_mt --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0 --y_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs
+    # lep_pt vs fj_pt: python make_2dplots.py --year 2017 --odir 2dplots --samples configs/samples_pfnano.json --channels ele,mu --vars lep_pt,fj_pt --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0 --y_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',           dest='years',       default='2017',                        help="year")
