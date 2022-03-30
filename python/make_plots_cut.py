@@ -137,6 +137,7 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano, cut): 
                         #    data = data[data['met'] < 200]
 
                         if cut == "btag":
+                            print(data["anti_bjettag"])
                             data = data[data["anti_bjettag"]]
                         elif cut == "dr":
                             data = data[data["leptonInJet"]]
