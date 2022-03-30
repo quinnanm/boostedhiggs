@@ -180,6 +180,8 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano, cut): 
     with open(f'{path}/hists.pkl', 'wb') as f:  # saves the hists objects
         pkl.dump(hists, f)
 
+    return cut
+
 
 def make_stack(odir, vars_to_plot, years, channels, pfnano, logy=True, add_data=True):
     # load the hists
@@ -351,18 +353,18 @@ def main(args):
 
     if not args.hist:
         # make the histograms and save in pkl files
-        make_hist(args.idir, args.odir, vars_to_plot, samples, years, channels, args.pfnano, cut=args.cut)
+        cut = make_hist(args.idir, args.odir, vars_to_plot, samples, years, channels, args.pfnano, cut=args.cut)
 
     if not args.noplot:
         # plot all process in stack
-        make_stack(args.odir, vars_to_plot, years, channels, args.pfnano, logy=True, cut=args.cut)
-        make_stack(args.odir, vars_to_plot, years, channels, args.pfnano, logy=False, cut=args.cut)
+        make_stack(args.odir, vars_to_plot, years, channels, args.pfnano, logy=True, cut=cut)
+        make_stack(args.odir, vars_to_plot, years, channels, args.pfnano, logy=False, cut=cut)
 
 
 if __name__ == "__main__":
     # e.g.
     # run locally as: python make_plots_cut.py --year 2017 --idir ../results/ --odir hists --pfnano --samples configs/samples_pfnano.json --channels ele,mu,had
-    # run on lpc as: python make_plots_cut.py --year 2017 --vars configs/vars.json --odir hists_bdr --pfnano --samples configs/samples_pfnano.json --channels ele,mu,had --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/ --cut btag
+    # run on lpc as: python make_plots_cut.py --year 2017 --vars configs/vars.json --odir hists_dr0 --pfnano --samples configs/samples_pfnano.json --channels ele,mu,had --cut btag --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',            dest='years',       default='2017',                        help="year")
