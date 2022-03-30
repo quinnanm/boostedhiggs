@@ -8,10 +8,8 @@ __pycache__
 binder/data/
 metadata.json
 
-binder/lol.pdf
 binder/plots/*
 binder/DY*
-binder/all
 
 run_local.py
 data1.root
@@ -32,3 +30,6 @@ datafiles/
 
 binder/DY/
 binder/GluGluHToWWToLNuQQ/
+
+binder/outfiles0
+binder/outfiles01
