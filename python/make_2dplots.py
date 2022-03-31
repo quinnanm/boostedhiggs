@@ -102,8 +102,6 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
                     else:
                         cut = 'preselection'
 
-                    print(f"Applied {cut} cut")
-
                     try:
                         event_weight = data['weight'].to_numpy()
                         # Find xsection if MC
@@ -135,6 +133,7 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
 
                     num_events = num_events + len(data[x])
                 print(f"Num of events is {num_events}")
+                print(f"Applied {cut} cut")
 
             for sample in hists[year][ch].axes[-1]:
                 fig, ax = plt.subplots(figsize=(8, 5))

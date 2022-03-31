@@ -145,8 +145,6 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano, cut=No
                         else:
                             cut = 'preselection'
 
-                        print(f"Applied {cut} cut")
-
                         variable = data[var].to_numpy()
                         try:
                             event_weight = data['weight'].to_numpy()
@@ -171,6 +169,7 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano, cut=No
                                 var=variable,
                                 weight=event_weight * xsec_weight,
                             )
+                print(f"Applied {cut} cut")
 
     # TODO: combine histograms for all years here and flag them as year='combined'
 
