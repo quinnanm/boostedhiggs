@@ -61,16 +61,16 @@ def make_1dhist(idir, odir, samples, years, channels, var, bins, range, cut=None
 
                     if cut == "btag":
                         data = data[data["anti_bjettag"] == 1]
-                        cut == 'preselection + btag'
+                        cut = 'preselection + btag'
                     elif cut == "dr":
                         data = data[data["leptonInJet"] == 1]
-                        cut == 'preselection + leptonInJet'
+                        cut = 'preselection + leptonInJet'
                     elif cut == "btagdr":
                         data = data[data["anti_bjettag"] == 1]
                         data = data[data["leptonInJet"] == 1]
-                        cut == 'preselection + btag + leptonInJet'
+                        cut = 'preselection + btag + leptonInJet'
                     else:
-                        cut == 'preselection'
+                        cut = 'preselection'
 
                     print(f"Applied {cut} cut")
 
