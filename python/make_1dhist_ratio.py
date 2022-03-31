@@ -31,9 +31,11 @@ import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
-def make_1dhist(idir, odir, samples, years, channels, var, bins, range, cut=None):
+def make_1dhist_ratio(idir, odir, samples, years, channels, var1, var2, bins, range, cut=None):
     '''
-    makes and plots 1d histograms of a variable "var"
+    makes and plots 1d histograms of a ratio of two variables
+    - var1: numerator
+    - var2: denominator
     '''
 
     hists = {}
@@ -89,11 +91,11 @@ def make_1dhist(idir, odir, samples, years, channels, var, bins, range, cut=None
 
                     if single_sample is not None:
                         hists[year][ch].fill(
-                            data[var], single_sample,  # combining all events under one name
+                            data[var1] / data[var2], single_sample,  # combining all events under one name
                         )
                     else:
                         hists[year][ch].fill(
-                            data[var], sample,
+                            data[var1] / data[var2], sample,
                         )
                 print(f"Applied {cut} cuts")
 
@@ -110,10 +112,10 @@ def make_1dhist(idir, odir, samples, years, channels, var, bins, range, cut=None
                     os.makedirs(f'{odir}/plots_{year}/')
                 if not os.path.exists(f'{odir}/plots_{year}/{cut}'):
                     os.makedirs(f'{odir}/plots_{year}/{cut}')
-                if not os.path.exists(f'{odir}/plots_{year}/{cut}/{var}'):
-                    os.makedirs(f'{odir}/plots_{year}/{cut}/{var}')
+                if not os.path.exists(f'{odir}/plots_{year}/{cut}/{var1}_over_{var2}'):
+                    os.makedirs(f'{odir}/plots_{year}/{cut}/{var1}_over_{var2}')
 
-                plt.savefig(f'{odir}/plots_{year}/{cut}/{var}/{ch}_{sample}.pdf')
+                plt.savefig(f'{odir}/plots_{year}/{cut}/{{var1}_over_{var2}/{ch}_{sample}.pdf')
                 plt.close()
 
 
@@ -123,6 +125,7 @@ def main(args):
 
     years = args.years.split(',')
     channels = args.channels.split(',')
+    vars = args.vars.split(',')
 
     # get samples to make histograms
     f = open(args.samples)
@@ -140,15 +143,13 @@ def main(args):
                     samples[year][ch].append(key)
 
     range = [args.start, args.end]
-    print(f'Plotting {args.var} histogram')
-    make_1dhist(args.idir, args.odir, samples, years, channels, args.var, args.bins, range, args.cut)
+    print(f'Plotting {vars[0]}/{vars[1]} histogram')
+    make_1dhist_ratio(args.idir, args.odir, samples, years, channels, vars[0], vars[1], args.bins, range, args.cut)
 
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # lep_pt:        python make_1dhist.py --year 2017 --odir plots/1dhists --channels ele,mu --var lep_pt        --bins 100 --start 0 --end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # lep_isolation: python make_1dhist.py --year 2017 --odir plots/1dhists --channels ele,mu --var lep_isolation --bins 100 --start 0 --end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # lep_fj_dr:     python make_1dhist.py --year 2017 --odir plots/1dhists --channels ele,mu --var lep_fj_dr     --bins 100 --start 0 --end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_pt/fj_pt: python make_1dhist_ratio.py --year 2017 --odir plots/1dhists --channels ele,mu --vars lep_pt,fj_pt --bins 100 --start 0 --end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',           dest='years',       default='2017',                             help="year")
@@ -156,7 +157,7 @@ if __name__ == "__main__":
     parser.add_argument('--channels',        dest='channels',    default='ele,mu,had',                       help='channels for which to plot this variable')
     parser.add_argument('--odir',            dest='odir',        default='2dplots',                          help="tag for output directory")
     parser.add_argument('--idir',            dest='idir',        default='../results/',                      help="input directory with results")
-    parser.add_argument('--var',             dest='var',         default='lep_pt',                           help='variable to plot')
+    parser.add_argument('--vars',            dest='vars',        default='lep_pt,fj_pt',                     help='variable to plot')
     parser.add_argument('--bins',            dest='bins',        default=50,                                 help="binning of the first variable passed",                type=int)
     parser.add_argument('--start',           dest='start',       default=0,                                  help="starting range of the first variable passed",         type=int)
     parser.add_argument('--end',             dest='end',         default=1,                                  help="end range of the first variable passed",              type=int)
