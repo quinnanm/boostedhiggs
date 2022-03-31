@@ -150,7 +150,7 @@ if __name__ == "__main__":
     parser.add_argument('--bins',            dest='bins',        default=50,                            help="binning of the first variable passed",                type=int)
     parser.add_argument('--start',           dest='start',       default=0,                             help="starting range of the first variable passed",         type=int)
     parser.add_argument('--end',             dest='end',         default=1,                             help="end range of the first variable passed",              type=int)
-    parser.add_argument('--cut',             dest='cut',         default=None,                          help="specefy cut... if None, preselection is applied")
+    parser.add_argument('--cut',             dest='cut',         default=None,                          help="specefy cut... choices are ['btag', 'dr', 'btagdr'] otherwise only preselection is applied")
 
     args = parser.parse_args()
 

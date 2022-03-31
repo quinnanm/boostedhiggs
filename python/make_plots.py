@@ -50,7 +50,7 @@ def get_sum_sumgenweight(idir, year, sample):
     return sum_sumgenweight
 
 
-def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # makes histograms and saves in pkl file
+def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano, cut=None):  # makes histograms and saves in pkl file
     hists = {}  # define a placeholder for all histograms
     for year in years:
         # Get luminosity of year
@@ -136,6 +136,21 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # ma
                         # elif ch=="had":
                         #    data = data[data['met'] < 200]
 
+                        if cut == "btag":
+                            data = data[data["anti_bjettag"] == 1]
+                            cut == 'preselection + btag'
+                        elif cut == "dr":
+                            data = data[data["leptonInJet"] == 1]
+                            cut == 'preselection + leptonInJet'
+                        elif cut == "btagdr":
+                            data = data[data["anti_bjettag"] == 1]
+                            data = data[data["leptonInJet"] == 1]
+                            cut == 'preselection + btag + leptonInJet'
+                        else:
+                            cut == 'preselection'
+
+                        print(f"Applied {cut} cut")
+
                         variable = data[var].to_numpy()
                         try:
                             event_weight = data['weight'].to_numpy()
@@ -168,7 +183,11 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # ma
         pkl.dump(hists, f)
 
 
-def make_stack(odir, vars_to_plot, years, channels, pfnano, logy=True, add_data=True):
+def make_stack(odir, vars_to_plot, years, channels, pfnano, cut=None, logy=True, add_data=True):
+    # for organization and labeling
+    if cut not in ["btag", "dr", "btagdr"]:
+        cut == 'preselection'
+
     # load the hists
     with open(f'{odir}/hists.pkl', 'rb') as f:
         hists = pkl.load(f)
@@ -273,32 +292,11 @@ def make_stack(odir, vars_to_plot, years, channels, pfnano, logy=True, add_data=
                 hep.cms.text("Work in Progress", ax=ax)
 
                 if logy:
-                    print('Saving to ', f'{odir}/hists_{year}_log/{var}_{ch}.pdf')
-                    plt.savefig(f'{odir}/hists_{year}_log/{var}_{ch}.pdf')
+                    print('Saving to ', f'{odir}/hists_{year}_log/{var}_{ch}_{cut}.pdf')
+                    plt.savefig(f'{odir}/hists_{year}_log/{var}_{ch}_{cut}.pdf')
                 else:
-                    print('Saving to ', f'{odir}/hists_{year}/{var}_{ch}.pdf')
-                    plt.savefig(f'{odir}/hists_{year}/{var}_{ch}.pdf')
-                plt.close()
-
-
-def make_norm(idir, vars_to_plot, years, channels, logy=True):
-    for year in years:
-        if not os.path.exists(f'{odir}/hists_{year}'):
-            os.makedirs(f'{odir}/hists_{year}')
-        for ch in channels:
-            for var in vars_to_plot[ch]:
-                if hists[year][ch][var].shape[0] == 0:
-                    continue
-
-                fig, ax = plt.subplots(1, 1)
-                hep.histplot([x for x in hists[year][ch][var].stack(0)[1:]],
-                             ax=ax,
-                             stack=False,
-                             density=True,
-                             )
-                hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
-                hep.cms.text("Work in Progress", ax=ax)
-                plt.savefig(f'{odir}/hists_{year}/{var}_{ch}_density.pdf')
+                    print('Saving to ', f'{odir}/hists_{year}/{var}_{ch}_{cut}.pdf')
+                    plt.savefig(f'{odir}/hists_{year}/{var}_{ch}_{cut}.pdf')
                 plt.close()
 
 
@@ -335,31 +333,33 @@ def main(args):
             if value == 1:
                 vars_to_plot[ch].append(key)
 
-    if not args.hist:
+    if args.make_hists:
         # make the histograms and save in pkl files
-        make_hist(args.idir, args.odir, vars_to_plot, samples, years, channels, args.pfnano)
+        make_hist(args.idir, args.odir, vars_to_plot, samples, years, channels, args.pfnano, args.cut)
 
-    if not args.noplot:
+    if args.plot_hists:
         # plot all process in stack
-        make_stack(args.odir, vars_to_plot, years, channels, args.pfnano, logy=True)
-        make_stack(args.odir, vars_to_plot, years, channels, args.pfnano, logy=False)
+        make_stack(args.odir, vars_to_plot, years, channels, args.pfnano, args.cut, logy=True)
+        # make_stack(args.odir, vars_to_plot, years, channels, args.pfnano, logy=False)
 
 
 if __name__ == "__main__":
+    make_hists
     # e.g.
-    # run locally as: python make_plots.py --year 2017 --idir ../results/ --odir hists --pfnano --samples configs/samples_pfnano.json --channels ele,mu,had
-    # run on lpc as: python make_plots.py --year 2017 --vars configs/vars.json --channels ele,mu,had --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/bdrdr_2017/ --odir hists_bdr --pfnano --samples configs/samples_pfnano.json
+   # run locally as: python make_plots.py --year 2017 --odir hists --pfnano --make_hists --plot_hists --channels ele,mu,had
+   # run on lpc as:  python make_plots.py --year 2017 --odir hists --pfnano --make_hists --plot_hists --channels ele,mu,had --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--years',            dest='years',       default='2017',                        help="year")
-    parser.add_argument('--vars',             dest='vars',        default="configs/vars.json",           help='path to json with variables to be plotted')
-    parser.add_argument('--samples',          dest='samples',     default="configs/samples_pfnano.json", help='path to json with samples to be plotted')
-    parser.add_argument('--channels',         dest='channels',    default='ele,mu,had',                  help='channels for which to plot this variable')
-    parser.add_argument('--odir',             dest='odir',        default='hists',                       help="tag for output directory")
-    parser.add_argument('--idir',             dest='idir',        default='../results/',                 help="input directory with results")
-    parser.add_argument("--pfnano",           dest='pfnano',      action='store_true',                   help="Run with pfnano")
-    parser.add_argument("--hist",             dest='hist',        action='store_true',                   help="Make hists")
-    parser.add_argument("--noplot",           dest='noplot',      action='store_true',                   help="Do not plot")
+   parser = argparse.ArgumentParser()
+    parser.add_argument('--years',            dest='years',          default='2017',                               help="year")
+    parser.add_argument('--vars',             dest='vars',           default="plot_configs/vars.json",             help='path to json with variables to be plotted')
+    parser.add_argument('--samples',          dest='samples',        default="plot_configs/samples_pfnano.json",   help='path to json with samples to be plotted')
+    parser.add_argument('--channels',         dest='channels',       default='ele,mu,had',                         help='channels for which to plot this variable')
+    parser.add_argument('--odir',             dest='odir',           default='hists',                              help="tag for output directory")
+    parser.add_argument('--idir',             dest='idir',           default='../results/',                        help="input directory with results")
+    parser.add_argument("--pfnano",           dest='pfnano',         action='store_true',                          help="Run with pfnano")
+    parser.add_argument('--cut',              dest='cut',            default=None,                                 help="specefy cut... choices are ['btag', 'dr', 'btagdr'] otherwise only preselection is applied")
+    parser.add_argument("--make_hists",       dest='make_hists',     action='store_true',                          help="Make hists")
+    parser.add_argument("--plot_hists",       dest='plot_hists',     action='store_true',                          help="Plot the hists")
 
     args = parser.parse_args()
 
