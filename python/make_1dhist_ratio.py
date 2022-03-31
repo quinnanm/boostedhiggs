@@ -70,7 +70,7 @@ def make_1dhist_ratio(idir, odir, samples, years, channels, var1, var2, bins, ra
                         continue
                     if len(data) == 0:
                         continue
-                    print('before', data[var1])
+                    print('before', data[var2])
                     if cut == "btag":
                         data = data[data["anti_bjettag"] == 1]
                         cut = 'preselection + btag'
@@ -83,7 +83,7 @@ def make_1dhist_ratio(idir, odir, samples, years, channels, var1, var2, bins, ra
                         cut = 'preselection + btag + leptonInJet'
                     else:
                         cut = 'preselection'
-                    print('after', data[var1])
+                    print('after', data[var2])
 
                     single_sample = None
                     for single_key, key in add_samples.items():
