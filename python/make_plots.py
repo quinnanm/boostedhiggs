@@ -182,7 +182,7 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano, cut=No
 def make_stack(odir, vars_to_plot, years, channels, pfnano, cut=None, logy=True, add_data=True):
     # for organization and labeling
     if cut not in ["btag", "dr", "btagdr"]:
-        cut == 'preselection'
+        cut = 'preselection'
 
     # load the hists
     with open(f'{odir}/hists.pkl', 'rb') as f:
