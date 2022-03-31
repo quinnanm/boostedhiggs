@@ -70,7 +70,7 @@ def make_1dhist_ratio(idir, odir, samples, years, channels, var1, var2, bins, ra
                         continue
                     if len(data) == 0:
                         continue
-
+                    print('before', data[var1])
                     if cut == "btag":
                         data = data[data["anti_bjettag"] == 1]
                         cut = 'preselection + btag'
@@ -83,6 +83,7 @@ def make_1dhist_ratio(idir, odir, samples, years, channels, var1, var2, bins, ra
                         cut = 'preselection + btag + leptonInJet'
                     else:
                         cut = 'preselection'
+                    print('after', data[var1])
 
                     single_sample = None
                     for single_key, key in add_samples.items():
@@ -149,7 +150,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # lep_pt/fj_pt: python make_1dhist_ratio.py --year 2017 --odir plots/1dhists --channels ele,mu --vars lep_pt,fj_pt --bins 100 --start 0 --end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_pt/fj_pt: python make_1dhist_ratio.py --year 2017 --odir plots/1dhists --channels ele,mu --vars lep_pt,fj_pt --bins 100 --start 0 --end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',           dest='years',       default='2017',                             help="year")
