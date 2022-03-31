@@ -59,7 +59,6 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
         hists[year] = {}
 
         for ch in channels:  # initialize the histograms for the different channels and different variables
-
             hists[year][ch] = hist2.Hist(
                 hist2.axis.Regular(x_bins, x_start, x_end, name=x, label=x, flow=False),
                 hist2.axis.Regular(y_bins, y_start, y_end, name=y, label=y, flow=False),

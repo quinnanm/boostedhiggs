@@ -35,8 +35,13 @@ def make_1dhist(idir, odir, samples, years, channels, var, bins, range, cut=None
 
     hists = {}
     for year in years:
-        hists[year] = {}
+        # Get luminosity of year
+        f = open('../fileset/luminosity.json')
+        luminosity = json.load(f)
+        f.close()
+        print(f'Processing samples from year {year} with luminosity {luminosity[year]}')
 
+        hists[year] = {}
         for ch in channels:  # initialize the histograms for the different channels and different variables
             hists[year][ch] = hist2.Hist(
                 hist2.axis.Regular(bins, range[0], range[1], name=var, label=var, flow=False),
