@@ -280,7 +280,7 @@ def make_stack(odir, vars_to_plot, years, channels, pfnano, cut=None, logy=True,
                 if logy:
                     ax.set_yscale('log')
                     ax.set_ylim(0.1)
-                ax.set_title(f'{ch} channel')
+                ax.set_title(f'{ch} channel \n with {cut} cut')
                 ax.legend()
 
                 hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)

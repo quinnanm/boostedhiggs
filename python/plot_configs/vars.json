@@ -1,7 +1,7 @@
 {
     "ele": {
 	"lep_pt": 1,
-	"lep_isolation": 1,
+	"lep_isolation": 0,
 	"lep_misolation": 0,
 	"lep_fj_m": 0,
 	"lep_fj_bjets_ophem": 0,
