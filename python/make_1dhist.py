@@ -72,7 +72,7 @@ def make_1dhist(idir, odir, samples, years, channels, var, bins, range, cut=None
                     else:
                         cut = 'preselection'
 
-                    print(f"Applied {cut} cut")
+                    print(f"Applied {cut} cuts")
 
                     single_sample = None
                     for single_key, key in add_samples.items():
