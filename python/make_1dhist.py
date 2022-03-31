@@ -31,19 +31,16 @@ import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
-def make_1dhist(idir, odir, samples, years, channels, x, x_bins, x_start, x_end, trigger=None):
-    if trigger != None:
-        print(f'Using {trigger}')
+def make_1dhist(idir, odir, samples, years, channels, var, bins, range, cut=None):
 
     hists = {}
     for year in years:
         hists[year] = {}
 
         for ch in channels:  # initialize the histograms for the different channels and different variables
-
             hists[year][ch] = hist2.Hist(
-                hist2.axis.Regular(x_bins, x_start, x_end, name=x, label=x, flow=False),
-                hist2.axis.StrCategory([], name='samples', growth=True)
+                hist2.axis.Regular(bins, range[0], range[1], name=var, label=var, flow=False),
+                hist2.axis.StrCategory([], name='samples', growth=True)     # to combine different pt bins of the same process
             )
 
         # loop over the processed files and fill the histograms
@@ -62,11 +59,20 @@ def make_1dhist(idir, odir, samples, years, channels, x, x_bins, x_start, x_end,
                     if len(data) == 0:
                         continue
 
-                    if trigger == "both":
-                        data = data[data["trigger_noiso"]]
-                        data = data[data["trigger_iso"]]
-                    elif trigger != None:
-                        data = data[data[trigger]]
+                    if cut == "btag":
+                        data = data[data["anti_bjettag"] == 1]
+                        cut == 'preselection + btag'
+                    elif cut == "dr":
+                        data = data[data["leptonInJet"] == 1]
+                        cut == 'preselection + leptonInJet'
+                    elif cut == "btagdr":
+                        data = data[data["anti_bjettag"] == 1]
+                        data = data[data["leptonInJet"] == 1]
+                        cut == 'preselection + btag + leptonInJet'
+                    else:
+                        cut == 'preselection'
+
+                    print(f"Applied {cut} cut")
 
                     single_sample = None
                     for single_key, key in add_samples.items():
@@ -75,30 +81,30 @@ def make_1dhist(idir, odir, samples, years, channels, x, x_bins, x_start, x_end,
 
                     if single_sample is not None:
                         hists[year][ch].fill(
-                            data[x], single_sample,  # combining all events under one name
+                            data[var], single_sample,  # combining all events under one name
                         )
                     else:
                         hists[year][ch].fill(
-                            data[x], sample,
+                            data[var], sample,
                         )
 
             for sample in hists[year][ch].axes[-1]:
 
                 fig, ax = plt.subplots(figsize=(8, 5))
                 hep.histplot(hists[year][ch][{'samples': sample}], ax=ax)
-                ax.set_xlabel(f"{x}")
-                ax.set_title(f'{ch} channel for \n {sample}')
+                ax.set_xlabel(f"{var}")
+                ax.set_title(f'{ch} channel for \n {sample} \n with {cut} cut')
                 hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
                 hep.cms.text("Work in Progress", ax=ax)
 
                 if not os.path.exists(f'{odir}/plots_{year}/'):
                     os.makedirs(f'{odir}/plots_{year}/')
-                if not os.path.exists(f'{odir}/plots_{year}/{trigger}'):
+                if not os.path.exists(f'{odir}/plots_{year}/{cut}'):
                     os.makedirs(f'{odir}/plots_{year}/{trigger}')
-                if not os.path.exists(f'{odir}/plots_{year}/{trigger}/{x}'):
-                    os.makedirs(f'{odir}/plots_{year}/{trigger}/{x}')
+                if not os.path.exists(f'{odir}/plots_{year}/{cut}/{var}'):
+                    os.makedirs(f'{odir}/plots_{year}/{cut}/{var}')
 
-                plt.savefig(f'{odir}/plots_{year}/{trigger}/{x}/{ch}_{sample}.pdf')
+                plt.savefig(f'{odir}/plots_{year}/{cut}/{var}/{ch}_{sample}.pdf')
                 plt.close()
 
 
@@ -124,18 +130,16 @@ def main(args):
                 if value == 1:
                     samples[year][ch].append(key)
 
-    print(f'Plotting {args.x} histogram')
-    make_1dhist(args.idir, args.odir, samples, years, channels, args.x, args.x_bins, args.x_start, args.x_end)
-    make_1dhist(args.idir, args.odir, samples, years, channels, args.x, args.x_bins, args.x_start, args.x_end, 'trigger_noiso')
-    make_1dhist(args.idir, args.odir, samples, years, channels, args.x, args.x_bins, args.x_start, args.x_end, 'trigger_iso')
-    make_1dhist(args.idir, args.odir, samples, years, channels, args.x, args.x_bins, args.x_start, args.x_end, 'both')
+    range = [args.start, args.end]
+    print(f'Plotting {args.var} histogram')
+    make_1dhist(args.idir, args.odir, samples, years, channels, args.var, args.bins, range, args.cut)
 
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # lep_pt: python make_1dhist.py --year 2017 --odir plots/1dhists --samples configs/samples_pfnano.json --channels ele,mu --x lep_pt --x_bins 50 --x_start 0 --x_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs
-    # lep_isolation: python make_1dhist.py --year 2017 --odir plots/1dhists --samples configs/samples_pfnano.json --channels ele,mu --x lep_isolation --x_bins 50 --x_start 0 --x_end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs
-    # mt: python make_1dhist.py --year 2017 --odir plots/1dhists --samples configs/samples_pfnano.json --channels ele,mu --x lep_met_mt --x_bins 50 --x_start 0 --x_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs
+    # lep_pt:        python make_1dhist.py --year 2017 --odir plots/1dhists --samples configs/samples_pfnano.json --channels ele,mu --var lep_pt        --bins 100 --start 0 --end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_isolation: python make_1dhist.py --year 2017 --odir plots/1dhists --samples configs/samples_pfnano.json --channels ele,mu --var lep_isolation --bins 100 --start 0 --end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_fj_dr:     python make_1dhist.py --year 2017 --odir plots/1dhists --samples configs/samples_pfnano.json --channels ele,mu --var lep_fj_dr     --bins 100 --start 0 --end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',           dest='years',       default='2017',                        help="year")
@@ -143,10 +147,11 @@ if __name__ == "__main__":
     parser.add_argument('--channels',        dest='channels',    default='ele,mu,had',                  help='channels for which to plot this variable')
     parser.add_argument('--odir',            dest='odir',        default='2dplots',                     help="tag for output directory")
     parser.add_argument('--idir',            dest='idir',        default='../results/',                 help="input directory with results")
-    parser.add_argument('--x',               dest='x',           default='lep_pt,lep_isolation',        help='channels for which to plot this variable')
-    parser.add_argument('--x_bins',          dest='x_bins',      default=50,                            help="binning of the first variable passed",                type=int)
-    parser.add_argument('--x_start',         dest='x_start',     default=0,                             help="starting range of the first variable passed",         type=int)
-    parser.add_argument('--x_end',           dest='x_end',       default=1,                             help="end range of the first variable passed",              type=int)
+    parser.add_argument('--var',             dest='var',         default='lep_pt',                      help='variable to plot')
+    parser.add_argument('--bins',            dest='bins',        default=50,                            help="binning of the first variable passed",                type=int)
+    parser.add_argument('--start',           dest='start',       default=0,                             help="starting range of the first variable passed",         type=int)
+    parser.add_argument('--end',             dest='end',         default=1,                             help="end range of the first variable passed",              type=int)
+    parser.add_argument('--cut',             dest='cut',         default=None,                          help="specefy cut... if None, preselection is applied")
 
     args = parser.parse_args()
 
