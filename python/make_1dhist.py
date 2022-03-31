@@ -72,8 +72,6 @@ def make_1dhist(idir, odir, samples, years, channels, var, bins, range, cut=None
                     else:
                         cut = 'preselection'
 
-                    print(f"Applied {cut} cuts")
-
                     single_sample = None
                     for single_key, key in add_samples.items():
                         if key in sample:
@@ -87,6 +85,7 @@ def make_1dhist(idir, odir, samples, years, channels, var, bins, range, cut=None
                         hists[year][ch].fill(
                             data[var], sample,
                         )
+                print(f"Applied {cut} cuts")
 
             for sample in hists[year][ch].axes[-1]:
 
