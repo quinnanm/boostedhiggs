@@ -141,16 +141,16 @@ if __name__ == "__main__":
     # lep_fj_dr:     python make_1dhist.py --year 2017 --odir plots/1dhists --samples configs/samples_pfnano.json --channels ele,mu --var lep_fj_dr     --bins 100 --start 0 --end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--years',           dest='years',       default='2017',                        help="year")
-    parser.add_argument('--samples',         dest='samples',     default="configs/samples_pfnano.json", help='path to json with samples to be plotted')
-    parser.add_argument('--channels',        dest='channels',    default='ele,mu,had',                  help='channels for which to plot this variable')
-    parser.add_argument('--odir',            dest='odir',        default='2dplots',                     help="tag for output directory")
-    parser.add_argument('--idir',            dest='idir',        default='../results/',                 help="input directory with results")
-    parser.add_argument('--var',             dest='var',         default='lep_pt',                      help='variable to plot')
-    parser.add_argument('--bins',            dest='bins',        default=50,                            help="binning of the first variable passed",                type=int)
-    parser.add_argument('--start',           dest='start',       default=0,                             help="starting range of the first variable passed",         type=int)
-    parser.add_argument('--end',             dest='end',         default=1,                             help="end range of the first variable passed",              type=int)
-    parser.add_argument('--cut',             dest='cut',         default=None,                          help="specefy cut... choices are ['btag', 'dr', 'btagdr'] otherwise only preselection is applied")
+    parser.add_argument('--years',           dest='years',       default='2017',                             help="year")
+    parser.add_argument('--samples',         dest='samples',     default="plot_configs/samples_pfnano.json", help='path to json with samples to be plotted')
+    parser.add_argument('--channels',        dest='channels',    default='ele,mu,had',                       help='channels for which to plot this variable')
+    parser.add_argument('--odir',            dest='odir',        default='2dplots',                          help="tag for output directory")
+    parser.add_argument('--idir',            dest='idir',        default='../results/',                      help="input directory with results")
+    parser.add_argument('--var',             dest='var',         default='lep_pt',                           help='variable to plot')
+    parser.add_argument('--bins',            dest='bins',        default=50,                                 help="binning of the first variable passed",                type=int)
+    parser.add_argument('--start',           dest='start',       default=0,                                  help="starting range of the first variable passed",         type=int)
+    parser.add_argument('--end',             dest='end',         default=1,                                  help="end range of the first variable passed",              type=int)
+    parser.add_argument('--cut',             dest='cut',         default=None,                               help="specefy cut... choices are ['btag', 'dr', 'btagdr'] otherwise only preselection is applied")
 
     args = parser.parse_args()
 
