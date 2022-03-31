@@ -103,7 +103,7 @@ def make_1dhist_ratio(idir, odir, samples, years, channels, var1, var2, bins, ra
 
                 fig, ax = plt.subplots(figsize=(8, 5))
                 hep.histplot(hists[year][ch][{'samples': sample}], ax=ax)
-                ax.set_xlabel(f"{var}")
+                ax.set_xlabel(f"{var1}/{var2}")
                 ax.set_title(f'{ch} channel for \n {sample} \n with {cut} cut')
                 hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
                 hep.cms.text("Work in Progress", ax=ax)
