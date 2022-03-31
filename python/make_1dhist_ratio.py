@@ -115,7 +115,7 @@ def make_1dhist_ratio(idir, odir, samples, years, channels, var1, var2, bins, ra
                 if not os.path.exists(f'{odir}/plots_{year}/{cut}/{var1}_over_{var2}'):
                     os.makedirs(f'{odir}/plots_{year}/{cut}/{var1}_over_{var2}')
 
-                plt.savefig(f'{odir}/plots_{year}/{cut}/{{var1}_over_{var2}/{ch}_{sample}.pdf')
+                plt.savefig(f'{odir}/plots_{year}/{cut}/{var1}_over_{var2}/{ch}_{sample}.pdf')
                 plt.close()
 
 
@@ -157,7 +157,7 @@ if __name__ == "__main__":
     parser.add_argument('--channels',        dest='channels',    default='ele,mu,had',                       help='channels for which to plot this variable')
     parser.add_argument('--odir',            dest='odir',        default='2dplots',                          help="tag for output directory")
     parser.add_argument('--idir',            dest='idir',        default='../results/',                      help="input directory with results")
-    parser.add_argument('--vars',            dest='vars',        default='lep_pt,fj_pt',                     help='variable to plot')
+    parser.add_argument('--vars',            dest='vars',        default='lep_pt,fj_pt',                     help='variables to plot... specefy it in the form num,den')
     parser.add_argument('--bins',            dest='bins',        default=50,                                 help="binning of the first variable passed",                type=int)
     parser.add_argument('--start',           dest='start',       default=0,                                  help="starting range of the first variable passed",         type=int)
     parser.add_argument('--end',             dest='end',         default=1,                                  help="end range of the first variable passed",              type=int)
