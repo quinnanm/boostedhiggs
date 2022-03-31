@@ -42,7 +42,7 @@ def get_sum_sumgenweight(idir, year, sample):
     return sum_sumgenweight
 
 
-def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_end, y_bins, y_start, y_end, log_z):
+def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_end, y_bins, y_start, y_end, cut, log_z=None):
 
     # for readability
     x = vars[0]
@@ -88,6 +88,21 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
                     data = data[data[x] != -1]
                     # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
                     data = data[data[y] != -1]
+
+                    if cut == "btag":
+                        data = data[data["anti_bjettag"] == 1]
+                        cut = 'preselection + btag'
+                    elif cut == "dr":
+                        data = data[data["leptonInJet"] == 1]
+                        cut = 'preselection + leptonInJet'
+                    elif cut == "btagdr":
+                        data = data[data["anti_bjettag"] == 1]
+                        data = data[data["leptonInJet"] == 1]
+                        cut = 'preselection + btag + leptonInJet'
+                    else:
+                        cut = 'preselection'
+
+                    print(f"Applied {cut} cut")
 
                     try:
                         event_weight = data['weight'].to_numpy()
@@ -141,9 +156,9 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
                     os.makedirs(f'{odir}/plots_{year}/{x}_vs_{y}')
 
                 if log_z == True:
-                    plt.savefig(f'{odir}/plots_{year}/{x}_vs_{y}/{ch}_{sample}_log_z.pdf')
+                    plt.savefig(f'{odir}/plots_{year}/{x}_vs_{y}/{ch}_{sample}_{cut}_log_z.pdf')
                 else:
-                    plt.savefig(f'{odir}/plots_{year}/{x}_vs_{y}/{ch}_{sample}_.pdf')
+                    plt.savefig(f'{odir}/plots_{year}/{x}_vs_{y}/{ch}_{sample}_{cut}.pdf')
                 plt.close()
 
 
@@ -171,8 +186,8 @@ def main(args):
                     samples[year][ch].append(key)
 
     print(f'The 2 variables for cross check are: {vars}')
-    make_2dplot(args.idir, args.odir, samples, years, channels, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end, log_z=True)
-    make_2dplot(args.idir, args.odir, samples, years, channels, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end, log_z=False)
+    make_2dplot(args.idir, args.odir, samples, years, channels, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end, args.cut, log_z=True)
+    make_2dplot(args.idir, args.odir, samples, years, channels, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end, args.cut, log_z=False)
 
 
 if __name__ == "__main__":
@@ -183,18 +198,19 @@ if __name__ == "__main__":
     # lep_pt vs fj_pt:     python make_2dplots.py --year 2017 --odir plots/2dplots --channels ele,mu --vars lep_pt,fj_pt         --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0 --y_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--years',           dest='years',       default='2017',                        help="year")
-    parser.add_argument('--samples',         dest='samples',     default="plot_configs/samples_pfnano.json", help='path to json with samples to be plotted')
-    parser.add_argument('--channels',        dest='channels',    default='ele,mu,had',                  help='channels for which to plot this variable')
-    parser.add_argument('--odir',            dest='odir',        default='2dplots',                     help="tag for output directory")
-    parser.add_argument('--idir',            dest='idir',        default='../results/',                 help="input directory with results")
-    parser.add_argument('--vars',            dest='vars',        default='lep_pt,lep_isolation',        help='channels for which to plot this variable')
-    parser.add_argument('--x_bins',          dest='x_bins',      default=50,                            help="binning of the first variable passed",                type=int)
-    parser.add_argument('--x_start',         dest='x_start',     default=0,                             help="starting range of the first variable passed",         type=int)
-    parser.add_argument('--x_end',           dest='x_end',       default=1,                             help="end range of the first variable passed",              type=int)
-    parser.add_argument('--y_bins',          dest='y_bins',      default=50,                            help="binning of the second variable passed",               type=int)
-    parser.add_argument('--y_start',         dest='y_start',     default=0,                             help="starting range of the second variable passed",        type=int)
-    parser.add_argument('--y_end',           dest='y_end',       default=1,                             help="end range of the second variable passed",             type=int)
+    parser.add_argument('--years',           dest='years',       default='2017',                                 help="year")
+    parser.add_argument('--samples',         dest='samples',     default="plot_configs/samples_pfnano.json",     help='path to json with samples to be plotted')
+    parser.add_argument('--channels',        dest='channels',    default='ele,mu,had',                           help='channels for which to plot this variable')
+    parser.add_argument('--odir',            dest='odir',        default='2dplots',                              help="tag for output directory")
+    parser.add_argument('--idir',            dest='idir',        default='../results/',                          help="input directory with results")
+    parser.add_argument('--vars',            dest='vars',        default='lep_pt,lep_isolation',                 help='channels for which to plot this variable')
+    parser.add_argument('--x_bins',          dest='x_bins',      default=50,                                     help="binning of the first variable passed",                type=int)
+    parser.add_argument('--x_start',         dest='x_start',     default=0,                                      help="starting range of the first variable passed",         type=int)
+    parser.add_argument('--x_end',           dest='x_end',       default=1,                                      help="end range of the first variable passed",              type=int)
+    parser.add_argument('--y_bins',          dest='y_bins',      default=50,                                     help="binning of the second variable passed",               type=int)
+    parser.add_argument('--y_start',         dest='y_start',     default=0,                                      help="starting range of the second variable passed",        type=int)
+    parser.add_argument('--y_end',           dest='y_end',       default=1,                                      help="end range of the second variable passed",             type=int)
+    parser.add_argument('--cut',             dest='cut',         default=None,                                   help="specify cut... choices are ['btag', 'dr', 'btagdr'] otherwise only preselection is applied")
 
     args = parser.parse_args()
 

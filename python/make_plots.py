@@ -134,16 +134,16 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano, cut=No
 
                         if cut == "btag":
                             data = data[data["anti_bjettag"] == 1]
-                            cut == 'preselection + btag'
+                            cut = 'preselection + btag'
                         elif cut == "dr":
                             data = data[data["leptonInJet"] == 1]
-                            cut == 'preselection + leptonInJet'
-                        elif cut == "btagdr":
+                            cut = 'preselection + leptonInJet'
+                        elif cut = "btagdr":
                             data = data[data["anti_bjettag"] == 1]
                             data = data[data["leptonInJet"] == 1]
-                            cut == 'preselection + btag + leptonInJet'
+                            cut = 'preselection + btag + leptonInJet'
                         else:
-                            cut == 'preselection'
+                            cut = 'preselection'
 
                         print(f"Applied {cut} cut")
 
@@ -352,7 +352,7 @@ if __name__ == "__main__":
     parser.add_argument('--odir',             dest='odir',           default='hists',                              help="tag for output directory")
     parser.add_argument('--idir',             dest='idir',           default='../results/',                        help="input directory with results")
     parser.add_argument("--pfnano",           dest='pfnano',         action='store_true',                          help="Run with pfnano")
-    parser.add_argument('--cut',              dest='cut',            default=None,                                 help="specefy cut... choices are ['btag', 'dr', 'btagdr'] otherwise only preselection is applied")
+    parser.add_argument('--cut',              dest='cut',            default=None,                                 help="specify cut... choices are ['btag', 'dr', 'btagdr'] otherwise only preselection is applied")
     parser.add_argument("--make_hists",       dest='make_hists',     action='store_true',                          help="Make hists")
     parser.add_argument("--plot_hists",       dest='plot_hists',     action='store_true',                          help="Plot the hists")
 
