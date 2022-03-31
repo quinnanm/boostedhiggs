@@ -55,7 +55,7 @@ def make_1dhist(idir, odir, samples, years, channels, var, bins, range, cut=None
         if not os.path.exists(f'{odir}/plots_{year}/'):
             os.makedirs(f'{odir}/plots_{year}/')
         if not os.path.exists(f'{odir}/plots_{year}/{var}'):
-            os.makedirs(f'{odir}/plots_{year}/{cut}/{var}')
+            os.makedirs(f'{odir}/plots_{year}/{var}')
 
         # loop over the processed files and fill the histograms
         for ch in channels:
