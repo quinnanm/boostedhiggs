@@ -54,6 +54,8 @@ def make_1dhist(idir, odir, samples, years, channels, var, bins, range, cut=None
                 parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
                 if len(parquet_files) != 0:
                     print(f'Processing {ch} channel of sample', sample)
+                else:
+                    print(f'No processed files for {sample} are found')
 
                 for i, parquet_file in enumerate(parquet_files):
                     try:
