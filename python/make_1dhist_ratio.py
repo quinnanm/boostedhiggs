@@ -117,10 +117,10 @@ def make_1dhist_ratio(idir, odir, samples, years, channels, var1, var2, bins, ra
                     os.makedirs(f'{odir}/plots_{year}/')
                 if not os.path.exists(f'{odir}/plots_{year}/{cut}'):
                     os.makedirs(f'{odir}/plots_{year}/{cut}')
-                if not os.path.exists(f'{odir}/plots_{year}/{cut}/{var1}_over_{var2}'):
-                    os.makedirs(f'{odir}/plots_{year}/{cut}/{var1}_over_{var2}')
+                if not os.path.exists(f'{odir}/plots_{year}/{cut}/{var1}_{var2}'):
+                    os.makedirs(f'{odir}/plots_{year}/{cut}/{var1}_{var2}')
 
-                plt.savefig(f'{odir}/plots_{year}/{cut}/{var1}_over_{var2}/{ch}_{sample}.pdf')
+                plt.savefig(f'{odir}/plots_{year}/{cut}/{var1}_{var2}/{ch}_{sample}.pdf')
                 plt.close()
 
 
@@ -154,13 +154,13 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # lep_pt/fj_pt: python make_1dhist_ratio.py --year 2017 --odir plots/1dhists --channels ele,mu --vars lep_pt,fj_pt --bins 100 --start 0 --end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_pt/fj_pt: python make_1dhist_ratio.py --year 2017 --odir hists/1dhists_ratio --channels ele,mu --vars lep_pt,fj_pt --bins 100 --start 0 --end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',           dest='years',       default='2017',                             help="year")
     parser.add_argument('--samples',         dest='samples',     default="plot_configs/samples_pfnano.json", help='path to json with samples to be plotted')
     parser.add_argument('--channels',        dest='channels',    default='ele,mu,had',                       help='channels for which to plot this variable')
-    parser.add_argument('--odir',            dest='odir',        default='2dplots',                          help="tag for output directory")
+    parser.add_argument('--odir',            dest='odir',        default='hists/1dhists_ratio',              help="tag for output directory")
     parser.add_argument('--idir',            dest='idir',        default='../results/',                      help="input directory with results")
     parser.add_argument('--vars',            dest='vars',        default='lep_pt,fj_pt',                     help='variables to plot... specefy it in the form num,den')
     parser.add_argument('--bins',            dest='bins',        default=50,                                 help="binning of the first variable passed",                type=int)
