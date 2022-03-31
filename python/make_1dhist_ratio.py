@@ -118,7 +118,7 @@ def make_1dhist_ratio(idir, odir, samples, years, channels, var1, var2, bins, ra
                 ax.set_title(f'{ch} channel for \n {sample} \n with {cut} cut')
                 hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
                 hep.cms.text("Work in Progress", ax=ax)
-                plt.savefig(f'{odir}/plots_{year}/{var1}_{var2}/{ch}_{sample}.pdf')
+                plt.savefig(f'{odir}/plots_{year}/{var1}_{var2}/{ch}_{sample}_{cut}.pdf')
                 plt.close()
 
 
