@@ -119,7 +119,7 @@ def make_1dhist_cut_comparison(idir, odir, samples, years, channels, var, bins, 
                 fig, ax = plt.subplots(figsize=(8, 5))
                 hep.histplot(hists[year][ch][{'samples': sample, 'cuts': 'preselection'}],  ax=ax, label='preselection')
                 hep.histplot(hists[year][ch][{'samples': sample, 'cuts': 'btag'}],          ax=ax, label='preselection + btag')
-                hep.histplot(hists[year][ch][{'samples': sample, 'cuts': 'dr'}],            ax=ax, label='preselection + dr')
+                hep.histplot(hists[year][ch][{'samples': sample, 'cuts': 'dr'}],            ax=ax, label='preselection + leptonInJet')
                 hep.histplot(hists[year][ch][{'samples': sample, 'cuts': 'btagdr'}],        ax=ax, label='preselection + btag + leptonInJet')
                 ax.set_xlabel(f"{var}")
                 ax.set_title(f'{ch} channel for \n {sample}')
