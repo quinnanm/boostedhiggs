@@ -50,7 +50,7 @@ def make_1dhist_cut_comparison(idir, odir, samples, years, channels, var, bins, 
         for ch in channels:  # initialize the histograms for the different channels and different variables
             hists[year][ch] = hist2.Hist(
                 hist2.axis.Regular(bins, range[0], range[1], name=var, label=var, flow=False),
-                hist2.axis.StrCategory([], name='samples', growth=True)     # to combine different pt bins of the same process
+                hist2.axis.StrCategory([], name='samples', growth=True),     # to combine different pt bins of the same process
                 hist2.axis.StrCategory([], name='cuts', growth=True)     # the different cuts ['preselection', 'btag', 'dr', 'btagdr']
             )
 
