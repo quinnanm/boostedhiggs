@@ -351,9 +351,9 @@ if __name__ == "__main__":
     parser.add_argument('--odir',             dest='odir',           default='hists',                              help="tag for output directory")
     parser.add_argument('--idir',             dest='idir',           default='../results/',                        help="input directory with results")
     parser.add_argument("--pfnano",           dest='pfnano',         action='store_true',                          help="Run with pfnano")
-    parser.add_argument('--cut',              dest='cut',            default=None,                                 help="specify cut... choices are ['btag', 'dr', 'btagdr'] otherwise only preselection is applied")
     parser.add_argument("--make_hists",       dest='make_hists',     action='store_true',                          help="Make hists")
     parser.add_argument("--plot_hists",       dest='plot_hists',     action='store_true',                          help="Plot the hists")
+    parser.add_argument('--cut',              dest='cut',            default=None,                                 help="specify cut... choices are ['btag', 'dr', 'btagdr'] otherwise only preselection is applied")
 
     args = parser.parse_args()
 
