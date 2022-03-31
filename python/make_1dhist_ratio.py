@@ -49,7 +49,7 @@ def make_1dhist_ratio(idir, odir, samples, years, channels, var1, var2, bins, ra
         hists[year] = {}
         for ch in channels:  # initialize the histograms for the different channels and different variables
             hists[year][ch] = hist2.Hist(
-                hist2.axis.Regular(bins, range[0], range[1], name=var, label=var, flow=False),
+                hist2.axis.Regular(bins, range[0], range[1], name=var1 + '/' + var2, label=var1 + '/' + var2, flow=False),
                 hist2.axis.StrCategory([], name='samples', growth=True)     # to combine different pt bins of the same process
             )
 
