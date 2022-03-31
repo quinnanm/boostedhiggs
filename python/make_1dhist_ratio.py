@@ -56,10 +56,8 @@ def make_1dhist_ratio(idir, odir, samples, years, channels, var1, var2, bins, ra
         # make directory to store stuff per year
         if not os.path.exists(f'{odir}/plots_{year}/'):
             os.makedirs(f'{odir}/plots_{year}/')
-        if not os.path.exists(f'{odir}/plots_{year}/{cut}'):
-            os.makedirs(f'{odir}/plots_{year}/{cut}')
-        if not os.path.exists(f'{odir}/plots_{year}/{cut}/{var}'):
-            os.makedirs(f'{odir}/plots_{year}/{cut}/{var}')
+        if not os.path.exists(f'{odir}/plots_{year}/{var1}_{var2}'):
+            os.makedirs(f'{odir}/plots_{year}/{var1}_{var2}')
 
         # loop over the processed files and fill the histograms
         for ch in channels:
@@ -120,7 +118,7 @@ def make_1dhist_ratio(idir, odir, samples, years, channels, var1, var2, bins, ra
                 ax.set_title(f'{ch} channel for \n {sample} \n with {cut} cut')
                 hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
                 hep.cms.text("Work in Progress", ax=ax)
-                plt.savefig(f'{odir}/plots_{year}/{cut}/{var1}_{var2}/{ch}_{sample}.pdf')
+                plt.savefig(f'{odir}/plots_{year}/{var1}_{var2}/{ch}_{sample}.pdf')
                 plt.close()
 
 
