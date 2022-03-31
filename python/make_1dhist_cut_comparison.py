@@ -151,7 +151,7 @@ def make_1dhist_cut_comparison(idir, odir, samples, years, channels, var, bins, 
                 ax.legend()
                 hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
                 hep.cms.text("Work in Progress", ax=ax)
-                plt.savefig(f'{odir}/plots_{year}/{var}/{ch}_{sample}_{cut}.pdf')
+                plt.savefig(f'{odir}/plots_{year}/{var}/{ch}_{sample}_cut_comparison.pdf')
                 plt.close()
 
 
