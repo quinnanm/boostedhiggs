@@ -85,6 +85,8 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
                         continue
 
                     # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
+                    data = data[data[x] != -1]
+                    # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
                     data = data[data[y] != -1]
 
                     try:

@@ -76,7 +76,6 @@ def make_1dhist_ratio(idir, odir, samples, years, channels, var1, var2, bins, ra
                     # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
                     data = data[data[var2] != -1]
 
-                    print('before', data[var2])
                     if cut == "btag":
                         data = data[data["anti_bjettag"] == 1]
                         cut = 'preselection + btag'
@@ -89,7 +88,6 @@ def make_1dhist_ratio(idir, odir, samples, years, channels, var1, var2, bins, ra
                         cut = 'preselection + btag + leptonInJet'
                     else:
                         cut = 'preselection'
-                    print('after', data[var2])
 
                     single_sample = None
                     for single_key, key in add_samples.items():

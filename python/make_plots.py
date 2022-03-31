@@ -126,15 +126,11 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano, cut=No
                         if var not in data.keys():
                             # print(f'- No {var} for {year}/{ch} - skipping')
                             continue
+                        if len(data) == 0:
+                            continue
 
-                        # we can make further selections before filling the hists here
-                        # data = data[data['ht'] > 200]
-                        # if ch=="mu":
-                        #    data = data[((data['lep_misolation'] < 0.2) & (data['lep_pt'] >=55)) | ((data['lep_isolation'] < 0.25) & (data['lep_pt'] <55))]
-                        # elif ch=="ele":
-                        #    data = data[((data['lep_misolation'] < 0.2) & (data['lep_pt'] >=120)) | ((data['lep_isolation'] < 0.3) & (data['lep_pt'] <120))]
-                        # elif ch=="had":
-                        #    data = data[data['met'] < 200]
+                        # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
+                        data = data[data[var] != -1]
 
                         if cut == "btag":
                             data = data[data["anti_bjettag"] == 1]

@@ -69,6 +69,9 @@ def make_1dhist(idir, odir, samples, years, channels, var, bins, range, cut=None
                     if len(data) == 0:
                         continue
 
+                    # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
+                    data = data[data[var] != -1]
+
                     if cut == "btag":
                         data = data[data["anti_bjettag"] == 1]
                         cut = 'preselection + btag'
