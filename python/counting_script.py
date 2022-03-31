@@ -77,7 +77,7 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
                 data = data[data[y] != -1]
 
                 num_events = num_events + len(data[x])
-            print(num_events)
+            print(f"Num_events is {num_events}")
 
 
 def main(args):
