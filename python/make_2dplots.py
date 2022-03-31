@@ -42,7 +42,7 @@ def get_sum_sumgenweight(idir, year, sample):
     return sum_sumgenweight
 
 
-def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_end, y_bins, y_start, y_end, cut, log_z=None):
+def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_end, y_bins, y_start, y_end, cut):
 
     # for readability
     x = vars[0]
@@ -64,6 +64,12 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
                 hist2.axis.Regular(y_bins, y_start, y_end, name=y, label=y, flow=False),
                 hist2.axis.StrCategory([], name='samples', growth=True)
             )
+
+        # make directory to store stuff per year
+        if not os.path.exists(f'{odir}/plots_{year}'):
+            os.makedirs(f'{odir}/plots_{year}')
+        if not os.path.exists(f'{odir}/plots_{year}/{x}_vs_{y}'):
+            os.makedirs(f'{odir}/plots_{year}/{x}_vs_{y}')
 
         # loop over the processed files and fill the histograms
         for ch in channels:
@@ -136,28 +142,26 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
                 print(f"Applied {cut} cut")
 
             for sample in hists[year][ch].axes[-1]:
+                # one for log z-scale
                 fig, ax = plt.subplots(figsize=(8, 5))
-                # hep.hist2dplot(hists[year][ch][{'samples': sample}], ax=ax, norm=matplotlib.colors.Normalize(vmin=0, vmax=1), cmap="plasma")
-                if log_z == True:
-                    hep.hist2dplot(hists[year][ch][{'samples': sample}], ax=ax, cmap="plasma", norm=matplotlib.colors.LogNorm(vmin=1e-3, vmax=1000))
-                else:
-                    hep.hist2dplot(hists[year][ch][{'samples': sample}], ax=ax, cmap="plasma")
-
+                hep.hist2dplot(hists[year][ch][{'samples': sample}], ax=ax, cmap="plasma", norm=matplotlib.colors.LogNorm(vmin=1e-3, vmax=1000))
                 ax.set_xlabel(f"{x}")
                 ax.set_ylabel(f"{y}")
                 ax.set_title(f'{ch} channel for \n {sample}')
                 hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
                 hep.cms.text("Work in Progress", ax=ax)
+                plt.savefig(f'{odir}/plots_{year}/{x}_vs_{y}/{ch}_{sample}_{cut}_log_z.pdf')
+                plt.close()
 
-                if not os.path.exists(f'{odir}/plots_{year}'):
-                    os.makedirs(f'{odir}/plots_{year}')
-                if not os.path.exists(f'{odir}/plots_{year}/{x}_vs_{y}'):
-                    os.makedirs(f'{odir}/plots_{year}/{x}_vs_{y}')
-
-                if log_z == True:
-                    plt.savefig(f'{odir}/plots_{year}/{x}_vs_{y}/{ch}_{sample}_{cut}_log_z.pdf')
-                else:
-                    plt.savefig(f'{odir}/plots_{year}/{x}_vs_{y}/{ch}_{sample}_{cut}.pdf')
+                # one for non-log z-scale
+                fig, ax = plt.subplots(figsize=(8, 5))
+                hep.hist2dplot(hists[year][ch][{'samples': sample}], ax=ax, cmap="plasma")
+                ax.set_xlabel(f"{x}")
+                ax.set_ylabel(f"{y}")
+                ax.set_title(f'{ch} channel for \n {sample}')
+                hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
+                hep.cms.text("Work in Progress", ax=ax)
+                plt.savefig(f'{odir}/plots_{year}/{x}_vs_{y}/{ch}_{sample}_{cut}.pdf')
                 plt.close()
 
 
@@ -185,8 +189,7 @@ def main(args):
                     samples[year][ch].append(key)
 
     print(f'The 2 variables for cross check are: {vars}')
-    make_2dplot(args.idir, args.odir, samples, years, channels, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end, args.cut, log_z=True)
-    make_2dplot(args.idir, args.odir, samples, years, channels, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end, args.cut, log_z=False)
+    make_2dplot(args.idir, args.odir, samples, years, channels, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end, args.cut)
 
 
 if __name__ == "__main__":
