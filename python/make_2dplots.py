@@ -119,7 +119,8 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
                         )
 
                     num_events = num_events + len(data[x])
-                print(num_events)
+                print(f"Num of events is {num_events}")
+
             for sample in hists[year][ch].axes[-1]:
                 fig, ax = plt.subplots(figsize=(8, 5))
                 # hep.hist2dplot(hists[year][ch][{'samples': sample}], ax=ax, norm=matplotlib.colors.Normalize(vmin=0, vmax=1), cmap="plasma")
