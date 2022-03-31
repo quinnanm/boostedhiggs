@@ -30,7 +30,7 @@ warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
 def get_simplified_label(sample):   # get simplified "alias" names of the samples for plotting purposes
-    f = open('configs/simplified_labels.json')
+    f = open('plot_configs/simplified_labels.json')
     name = json.load(f)
     f.close()
     if sample in name.keys():
