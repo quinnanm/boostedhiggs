@@ -138,7 +138,7 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano, cut=No
                         elif cut == "dr":
                             data = data[data["leptonInJet"] == 1]
                             cut = 'preselection + leptonInJet'
-                        elif cut = "btagdr":
+                        elif cut == "btagdr":
                             data = data[data["anti_bjettag"] == 1]
                             data = data[data["leptonInJet"] == 1]
                             cut = 'preselection + btag + leptonInJet'
