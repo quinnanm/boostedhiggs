@@ -33,10 +33,11 @@ warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 def make_1dhist_cut_comparison(idir, odir, samples, years, channels, var, bins, range):
     '''
-    makes and plots 1d histograms of a variable "var" and compares the different cuts
+    makes and plots 1d histogram of a variable "var" and compares the different cuts
     '''
 
     hists = {}
+
     for year in years:
         # Get luminosity of year
         f = open('../fileset/luminosity.json')
@@ -45,26 +46,12 @@ def make_1dhist_cut_comparison(idir, odir, samples, years, channels, var, bins, 
         print(f'Processing samples from year {year} with luminosity {luminosity[year]}')
 
         hists[year] = {}
-        hists_btag[year] = {}
-        hists_dr[year] = {}
-        hists_btagdr[year] = {}
 
         for ch in channels:  # initialize the histograms for the different channels and different variables
             hists[year][ch] = hist2.Hist(
                 hist2.axis.Regular(bins, range[0], range[1], name=var, label=var, flow=False),
                 hist2.axis.StrCategory([], name='samples', growth=True)     # to combine different pt bins of the same process
-            )
-            hists_btag[year][ch] = hist2.Hist(
-                hist2.axis.Regular(bins, range[0], range[1], name=var, label=var, flow=False),
-                hist2.axis.StrCategory([], name='samples', growth=True)     # to combine different pt bins of the same process
-            )
-            hists_dr[year][ch] = hist2.Hist(
-                hist2.axis.Regular(bins, range[0], range[1], name=var, label=var, flow=False),
-                hist2.axis.StrCategory([], name='samples', growth=True)     # to combine different pt bins of the same process
-            )
-            hists_btagdr[year][ch] = hist2.Hist(
-                hist2.axis.Regular(bins, range[0], range[1], name=var, label=var, flow=False),
-                hist2.axis.StrCategory([], name='samples', growth=True)     # to combine different pt bins of the same process
+                hist2.axis.StrCategory([], name='cuts', growth=True)     # the different cuts ['preselection', 'btag', 'dr', 'btagdr']
             )
 
         # make directory to store stuff per year
@@ -94,19 +81,6 @@ def make_1dhist_cut_comparison(idir, odir, samples, years, channels, var, bins, 
                     # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
                     data = data[data[var] != -1]
 
-                    if cut == "btag":
-                        data = data[data["anti_bjettag"] == 1]
-                        cut = 'preselection + btag'
-                    elif cut == "dr":
-                        data = data[data["leptonInJet"] == 1]
-                        cut = 'preselection + leptonInJet'
-                    elif cut == "btagdr":
-                        data = data[data["anti_bjettag"] == 1]
-                        data = data[data["leptonInJet"] == 1]
-                        cut = 'preselection + btag + leptonInJet'
-                    else:
-                        cut = 'preselection'
-
                     single_sample = None
                     for single_key, key in add_samples.items():
                         if key in sample:
@@ -114,38 +88,39 @@ def make_1dhist_cut_comparison(idir, odir, samples, years, channels, var, bins, 
 
                     if single_sample is not None:
                         hists[year][ch].fill(
-                            data[var], single_sample,  # combining all events under one name
+                            data[var], single_sample, 'preselection'  # combining all events under one name
                         )
-                        hists_btag[year][ch].fill(
-                            data[var][data["anti_bjettag"] == 1], single_sample,  # combining all events under one name
+                        hists[year][ch].fill(
+                            data[var][data["anti_bjettag"] == 1], single_sample, 'btag'  # combining all events under one name
                         )
-                        hists_dr[year][ch].fill(
-                            data[var][data["leptonInJet"] == 1], single_sample,  # combining all events under one name
+                        hists[year][ch].fill(
+                            data[var][data["leptonInJet"] == 1], single_sample, 'dr'  # combining all events under one name
                         )
-                        hists_btagdr[year][ch].fill(
-                            data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1], single_sample,  # combining all events under one name
+                        hists[year][ch].fill(
+                            data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1], single_sample, 'btagdr'  # combining all events under one name
                         )
+
                     else:
                         hists[year][ch].fill(
-                            data[var], sample,
+                            data[var], sample, 'preselection'  # combining all events under one name
                         )
-                        hists_btag[year][ch].fill(
-                            data[var][data["anti_bjettag"] == 1], sample,
+                        hists[year][ch].fill(
+                            data[var][data["anti_bjettag"] == 1], sample, 'btag'  # combining all events under one name
                         )
-                        hists_dr[year][ch].fill(
-                            data[var][data["leptonInJet"] == 1], sample,
+                        hists[year][ch].fill(
+                            data[var][data["leptonInJet"] == 1], sample, 'dr'  # combining all events under one name
                         )
-                        hists_btagdr[year][ch].fill(
-                            data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1], sample,
+                        hists[year][ch].fill(
+                            data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1], sample, 'btagdr'  # combining all events under one name
                         )
 
             for sample in hists[year][ch].axes[-1]:
 
                 fig, ax = plt.subplots(figsize=(8, 5))
-                hep.histplot(hists[year][ch][{'samples': sample}], ax=ax, label='preselection')
-                hep.histplot(hists_btag[year][ch][{'samples': sample}], ax=ax, label='preselection + btag')
-                hep.histplot(hists_dr[year][ch][{'samples': sample}], ax=ax, label='preselection + dr')
-                hep.histplot(hists_btagdr[year][ch][{'samples': sample}], ax=ax, label='preselection + btag + dr')
+                hep.histplot(hists[year][ch][{'samples': sample}, {'cuts': 'preselection'}], ax=ax, label='preselection')
+                hep.histplot(hists[year][ch][{'samples': sample}, {'cuts': 'btag'}], ax=ax, label='preselection + btag')
+                hep.histplot(hists[year][ch][{'samples': sample}, {'cuts': 'dr'}], ax=ax, label='preselection + dr')
+                hep.histplot(hists[year][ch][{'samples': sample}, {'cuts': 'btagdr'}], ax=ax, label='preselection + btag + leptonInJet')
                 ax.set_xlabel(f"{var}")
                 ax.set_title(f'{ch} channel for \n {sample} \n with {cut} cut')
                 ax.legend()
