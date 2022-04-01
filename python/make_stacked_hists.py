@@ -135,9 +135,9 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # ma
                         data = data[data[var] != -1]
 
                         try:
-                            event_weight = data['weight'].to_numpy()
+                            event_weight = data['weight']
                         except:
-                            event_weight = 1  # for data
+                            data['weight'] = 1  # for data fill a weight column with ones
 
                         # filling histograms
                         single_sample = None
@@ -150,50 +150,50 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # ma
                                 samples=single_sample,  # combining all pt bins under one name
                                 cuts='preselection',
                                 var=data[var],
-                                weight=event_weight * xsec_weight,
+                                weight=xsec_weight * data['weight'],
                             )
                             hists[year][ch][var].fill(
                                 samples=single_sample,  # combining all pt bins under one name
                                 cuts='btag',
                                 var=data[var][data["anti_bjettag"] == 1],
-                                weight=event_weight * xsec_weight,
+                                weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1],
                             )
                             hists[year][ch][var].fill(
                                 samples=single_sample,  # combining all pt bins under one name
                                 cuts='dr',
                                 var=data[var][data["leptonInJet"] == 1],
-                                weight=event_weight * xsec_weight,
+                                weight=xsec_weight * data['weight'][data["leptonInJet"] == 1],
                             )
                             hists[year][ch][var].fill(
                                 samples=single_sample,  # combining all pt bins under one name
                                 cuts='btagdr',
                                 var=data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
-                                weight=event_weight * xsec_weight,
+                                weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
                             )
                         else:
                             hists[year][ch][var].fill(
                                 samples=sample,
                                 cuts='preselection',
                                 var=data[var],
-                                weight=event_weight * xsec_weight,
+                                weight=xsec_weight * data['weight'],
                             )
                             hists[year][ch][var].fill(
                                 samples=sample,
                                 cuts='btag',
                                 var=data[var][data["anti_bjettag"] == 1],
-                                weight=event_weight * xsec_weight,
+                                weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1],
                             )
                             hists[year][ch][var].fill(
                                 samples=sample,
                                 cuts='dr',
                                 var=data[var][data["leptonInJet"] == 1],
-                                weight=event_weight * xsec_weight,
+                                weight=xsec_weight * data['weight'][data["leptonInJet"] == 1],
                             )
                             hists[year][ch][var].fill(
                                 samples=sample,
                                 cuts='btagdr',
                                 var=data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
-                                weight=event_weight * xsec_weight,
+                                weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
                             )
 
     # TODO: combine histograms for all years here and flag them as year='combined'
