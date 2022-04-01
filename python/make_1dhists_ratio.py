@@ -186,26 +186,13 @@ def plot_1dhists_ratio(odir, years, channels, vars, cut):
     for year in years:
         for ch in channels:
             for sample in hists[year][ch].axes[1]:
-                # one for log z-scale
                 fig, ax = plt.subplots(figsize=(8, 5))
-                hep.hist2dplot(hists[year][ch][{'samples': sample, 'cuts': cut}], ax=ax, cmap="plasma", norm=matplotlib.colors.LogNorm(vmin=1e-3, vmax=1000))
-                ax.set_xlabel(f"{x}")
-                ax.set_ylabel(f"{y}")
-                ax.set_title(f'{ch} channel for \n {sample}')
+                hep.histplot(hists[year][ch][{'samples': sample}], ax=ax)
+                ax.set_xlabel(f"{var1}/{var2}")
+                ax.set_title(f'{ch} channel for \n {sample} \n with {cut} cut')
                 hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
                 hep.cms.text("Work in Progress", ax=ax)
-                plt.savefig(f'{odir}/plots_{year}/{x}_vs_{y}/{ch}_{sample}_{cut}_log_z.pdf')
-                plt.close()
-
-                # one for non-log z-scale
-                fig, ax = plt.subplots(figsize=(8, 5))
-                hep.hist2dplot(hists[year][ch][{'samples': sample, 'cuts': cut}], ax=ax, cmap="plasma")
-                ax.set_xlabel(f"{x}")
-                ax.set_ylabel(f"{y}")
-                ax.set_title(f'{ch} channel for \n {sample}')
-                hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
-                hep.cms.text("Work in Progress", ax=ax)
-                plt.savefig(f'{odir}/plots_{year}/{x}_vs_{y}/{ch}_{sample}_{cut}.pdf')
+                plt.savefig(f'{odir}/plots_{year}/ratio_{var1}_{var2}/{ch}_{sample}_{cut}.pdf')
                 plt.close()
 
 
