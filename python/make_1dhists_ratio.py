@@ -166,7 +166,7 @@ def make_1dhists_ratio(idir, odir, samples, years, channels, vars, bins, start, 
                     print(f"Num of events after {cut} cut is: {num_events[cut]}")
     print("------------------------------------------------------------")
 
-    with open(f'{odir}/1d_hists_ratio.pkl', 'wb') as f:  # saves the hists objects
+    with open(f'{odir}/1d_hists_ratio_{vars[0]}_{vars[1]}.pkl', 'wb') as f:  # saves the hists objects
         pkl.dump(hists, f)
 
 
@@ -182,7 +182,7 @@ def plot_1dhists_ratio(odir, years, channels, vars, cut='preselection'):
     print(f'plotting for {cut} cut')
 
     # load the hists
-    with open(f'{odir}/1d_hists_ratio.pkl', 'rb') as f:
+    with open(f'{odir}/1d_hists_ratio_{vars[0]}_{vars[1]}.pkl', 'rb') as f:
         hists = pkl.load(f)
         f.close()
 
@@ -217,7 +217,7 @@ def plot_1dhists_ratio_compare_cuts(odir, years, channels, vars):
     print(f'plotting all cuts on same plot for comparison')
 
     # load the hists
-    with open(f'{odir}/1d_hists_ratio.pkl', 'rb') as f:
+    with open(f'{odir}/1d_hists_ratio_{vars[0]}_{vars[1]}.pkl', 'rb') as f:
         hists = pkl.load(f)
         f.close()
 
@@ -281,7 +281,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # lep_pt vs fj_pt: python make_1dhists_ratio.py --year 2017 --odir hists/1dhists_ratio --channels ele --vars lep_pt,fj_pt --make_hists --plot_hists --bins 100 --start 0 --end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_pt vs fj_pt: python make_1dhists_ratio.py --year 2017 --odir hists0/1dhists_ratio --channels ele --vars lep_pt,fj_pt --make_hists --plot_hists --bins 100 --start 0 --end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',           dest='years',       default='2017',                                 help="year")

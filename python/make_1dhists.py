@@ -140,7 +140,7 @@ def make_1dhists(idir, odir, samples, years, channels, var, bins, range):
                     print(f"Num of events after {cut} cut is: {num_events[cut]}")
     print("------------------------------------------------------------")
 
-    with open(f'{odir}/1d_hists.pkl', 'wb') as f:  # saves the hists objects
+    with open(f'{odir}/1d_hists_{var}.pkl', 'wb') as f:  # saves the hists objects
         pkl.dump(hists, f)
 
 
@@ -155,7 +155,7 @@ def plot_1dhists(odir, years, channels, var, cut='preselection'):
 
     print(f'plotting for {cut} cut')
     # load the hists
-    with open(f'{odir}/1d_hists.pkl', 'rb') as f:
+    with open(f'{odir}/1d_hists_{var}.pkl', 'rb') as f:
         hists = pkl.load(f)
         f.close()
 
@@ -190,7 +190,7 @@ def plot_1dhists_compare_cuts(odir, years, channels, var):
     print(f'plotting all cuts on same plot for comparison')
 
     # load the hists
-    with open(f'{odir}/1d_hists.pkl', 'rb') as f:
+    with open(f'{odir}/1d_hists_{var}.pkl', 'rb') as f:
         hists = pkl.load(f)
         f.close()
 
