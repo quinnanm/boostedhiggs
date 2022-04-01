@@ -152,7 +152,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # lep_pt/fj_pt: python make_1dhist_ratio.py --year 2017 --odir hists/1dhists_ratio --channels ele,mu --vars lep_pt,fj_pt --bins 100 --start 0 --end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_pt/fj_pt: python make_1dhist_ratio.py --year 2017 --odir hists/1dhists_ratio --channels ele --vars lep_pt,fj_pt --bins 100 --start 0 --end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',           dest='years',       default='2017',                             help="year")

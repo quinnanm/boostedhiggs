@@ -147,9 +147,9 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # lep_pt:        python make_1dhist.py --year 2017 --odir hists/1dhists --channels ele,mu --var lep_pt        --bins 100 --start 0 --end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # lep_isolation: python make_1dhist.py --year 2017 --odir hists/1dhists --channels ele,mu --var lep_isolation --bins 100 --start 0 --end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # lep_fj_dr:     python make_1dhist.py --year 2017 --odir hists/1dhists --channels ele,mu --var lep_fj_dr     --bins 100 --start 0 --end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_pt:        python make_1dhist.py --year 2017 --odir hists/1dhists --channels ele --var lep_pt        --bins 100 --start 0 --end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_isolation: python make_1dhist.py --year 2017 --odir hists/1dhists --channels ele --var lep_isolation --bins 100 --start 0 --end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_fj_dr:     python make_1dhist.py --year 2017 --odir hists/1dhists --channels ele --var lep_fj_dr     --bins 100 --start 0 --end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',           dest='years',       default='2017',                             help="year")
