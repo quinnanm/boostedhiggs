@@ -281,10 +281,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # lep_pt vs lep_iso:   python make_1dhists_ratio.py --year 2017 --odir hists/1dhists_ratio --channels ele --vars lep_pt,lep_isolation --make_hists --plot_hists --bins 100 --start 0 --end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # lep_pt vs dR:        python make_1dhists_ratio.py --year 2017 --odir hists/1dhists_ratio --channels ele --vars lep_pt,lep_fj_dr     --make_hists --plot_hists --bins 100 --start 0 --end 500 --cut dr --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # lep_pt vs mt:        python make_1dhists_ratio.py --year 2017 --odir hists/1dhists_ratio --channels ele --vars lep_pt,lep_met_mt    --make_hists --plot_hists --bins 100 --start 0 --end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # lep_pt vs fj_pt:     python make_1dhists_ratio.py --year 2017 --odir hists/1dhists_ratio --channels ele --vars lep_pt,fj_pt         --make_hists --plot_hists --bins 100 --start 0 --end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_pt vs fj_pt: python make_1dhists_ratio.py --year 2017 --odir hists/1dhists_ratio --channels ele --vars lep_pt,fj_pt --make_hists --plot_hists --bins 100 --start 0 --end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',           dest='years',       default='2017',                                 help="year")
