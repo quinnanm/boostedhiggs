@@ -44,20 +44,19 @@ def count_events(idir, odir, samples, years, channels):
 
         # initialize a num_events dictionary to count events per sample after each cut (but have to merge same process different bins samples)
         num_events[year] = {}
-        for sample in samples[year][ch]:
-            single_sample = None
-            for single_key, key in add_samples.items():
-                if key in sample:
-                    single_sample = single_key
+        for ch in channels:
+            for sample in samples[year][ch]:
+                single_sample = None
+                for single_key, key in add_samples.items():
+                    if key in sample:
+                        single_sample = single_key
 
-            if single_sample is not None:
-                for ch in channels:
+                if single_sample is not None:
                     num_events[year][single_sample][ch] = {}
                     for cut in ['preselection', 'dr', 'btagdr']:
                         num_events[year][single_sample][ch][cut] = 0
-            else:
-                num_events[year][sample] = {}
-                for ch in channels:
+                else:
+                    num_events[year][sample] = {}
                     num_events[year][sample][ch] = {}
                     for cut in ['preselection', 'dr', 'btagdr']:
                         num_events[year][sample][ch][cut] = 0
