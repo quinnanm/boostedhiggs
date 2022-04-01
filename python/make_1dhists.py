@@ -132,8 +132,8 @@ def make_1dhists(idir, odir, samples, years, channels, var, bins, range):
 
                     num_events['preselection'] = num_events['preselection'] + len(data[var])
                     num_events['btag'] = num_events['btag'] + len(data[var][data["anti_bjettag"] == 1])
-                    num_events['dr'] = num_events['dr'] + len(data[var[data["leptonInJet"] == 1])
-                    num_events['btagdr'] = num_events['btagdr'] + len(data[var[data["anti_bjettag"] == 1][data["leptonInJet"] == 1])
+                    num_events['dr'] = num_events['dr'] + len(data[var][data["leptonInJet"] == 1])
+                    num_events['btagdr'] = num_events['btagdr'] + len(data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1])
 
                 for cut in ['preselection', 'btag', 'dr', 'btagdr']:
                     print(f"Num of events after {cut} cut is: {num_events[cut]}")
