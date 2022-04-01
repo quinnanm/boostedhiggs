@@ -76,7 +76,7 @@ def make_1dhists_ratio(idir, odir, samples, years, channels, vars, bins, start, 
         # loop over the processed files and fill the histograms
         for ch in channels:
             for sample in samples[year][ch]:
-                num_events = 0
+                print("------------------------------------------------------------")
                 parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
                 if len(parquet_files) != 0:
                     print(f'Processing {ch} channel of {sample}')
@@ -175,6 +175,7 @@ def make_1dhists_ratio(idir, odir, samples, years, channels, vars, bins, start, 
 
                 for cut in ['preselection', 'btag', 'dr', 'btagdr']:
                     print(f"Num of events after {cut} cut is: {num_events[cut]}")
+    print("------------------------------------------------------------")
 
     with open(f'{odir}/1d_hists_ratio.pkl', 'wb') as f:  # saves the hists objects
         pkl.dump(hists, f)
