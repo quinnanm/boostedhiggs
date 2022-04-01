@@ -98,16 +98,28 @@ def count_events(idir, odir, samples, years, channels):
         pkl.dump(num_events, f)
 
 
-# def plot_counts(idir, odir, samples, years, channels):
-#
-#     # load the counts dictionary
-#     with open(f'{odir}/counts.pkl', 'rb') as f:
-#         num_events = pkl.load(f)
-#         f.close()
-#
-#     for year in years:
-#         for sample in num_events[year]:
-#
+def plot_counts(odir, years, channels):
+
+    # load the counts dictionary
+    with open(f'{odir}/counts.pkl', 'rb') as f:
+        num_events = pkl.load(f)
+        f.close()
+
+    for year in years:
+        for sample in num_events[year].keys():
+            for ch in channels:
+                counts = []
+                for key, value in (num_events[year][sample][ch]).items():
+                    counts.append(value)
+
+                fig, ax = plt.subplots(figsize=(8, 5))
+                plt.bar([0, 2, 4],
+                        counts,
+                        tick_label=['preselection', 'preselection + \n dr', 'preselection + \n dr + \n btag'],
+                        log=True)
+                ax.set_xlabel(f"cut")
+                ax.set_title(f'{ch} channel for \n {sample}')
+                plt.savefig(f'counts_{ch}_{sample}.pdf')
 
 
 def main(args):
@@ -133,7 +145,9 @@ def main(args):
                     samples[year][ch].append(key)
 
     print(f'Counting events of processed samples after each cut')
-    count_events(args.idir, args.odir, samples, years, channels)
+    # count_events(args.idir, args.odir, samples, years, channels)
+    print(f'Plotting the counts of each sample after each cut')
+    plot_counts(args.odir, years, channels)
 
 
 if __name__ == "__main__":
