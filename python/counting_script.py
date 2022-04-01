@@ -102,7 +102,7 @@ def count_events(idir, odir, samples, years, channels):
                         num_events[year][sample][ch]['dr'] = num_events[year][sample][ch]['dr'] + len(data[data["leptonInJet"] == 1])
                         num_events[year][sample][ch]['btagdr'] = num_events[year][sample][ch]['btagdr'] + len(data[data["anti_bjettag"] == 1][data["leptonInJet"] == 1])
 
-    with open(f'{odir}/counts.pkl', 'wb') as f:  # dump the counts for further plotting
+    with open(f'{odir}/counts_{ch}.pkl', 'wb') as f:  # dump the counts for further plotting
         pkl.dump(num_events, f)
 
 
@@ -114,7 +114,7 @@ def plot_counts(odir, years, channels):
     print(f'Plotting the counts of each sample after each cut')
 
     # load the counts dictionary
-    with open(f'{odir}/counts.pkl', 'rb') as f:
+    with open(f'{odir}/counts_{ch}.pkl', 'rb') as f:
         num_events = pkl.load(f)
         f.close()
 
@@ -170,7 +170,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # python counting_script.py --year 2017 --odir counts --channels ele,mu,had --compute_counts --plot_counts --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # python counting_script.py --year 2017 --odir counts --channels ele,mu --compute_counts --plot_counts --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',           dest='years',              default='2017',                                help="year")
