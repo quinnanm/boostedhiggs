@@ -114,7 +114,7 @@ def plot_counts(odir, years, channels):
     print(f'Plotting the counts of each sample after each cut')
 
     # load the counts dictionary
-    with open(f'{odir}/counts_{ch}.pkl', 'rb') as f:
+    with open(f'{odir}/counts_{channels[0]}.pkl', 'rb') as f:
         num_events = pkl.load(f)
         f.close()
 
