@@ -50,7 +50,7 @@ def get_sum_sumgenweight(idir, year, sample):
     return sum_sumgenweight
 
 
-def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano, cut=None):  # makes histograms and saves in pkl file
+def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # makes histograms and saves in pkl file
     hists = {}  # define a placeholder for all histograms
     for year in years:
         # Get luminosity of year
@@ -66,9 +66,11 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano, cut=No
 
             for var in vars_to_plot[ch]:
                 sample_axis = hist2.axis.StrCategory([], name='samples', growth=True)
+                cut_axis = hist2.axis.StrCategory([], name='cuts', growth=True)
 
                 hists[year][ch][var] = hist2.Hist(
                     sample_axis,
+                    cut_axis,
                     axis_dict[var],
                 )
 
@@ -132,20 +134,6 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano, cut=No
                         # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
                         data = data[data[var] != -1]
 
-                        if cut == "btag":
-                            data = data[data["anti_bjettag"] == 1]
-                            cut = 'preselection + btag'
-                        elif cut == "dr":
-                            data = data[data["leptonInJet"] == 1]
-                            cut = 'preselection + leptonInJet'
-                        elif cut == "btagdr":
-                            data = data[data["anti_bjettag"] == 1]
-                            data = data[data["leptonInJet"] == 1]
-                            cut = 'preselection + btag + leptonInJet'
-                        else:
-                            cut = 'preselection'
-
-                        variable = data[var].to_numpy()
                         try:
                             event_weight = data['weight'].to_numpy()
                         except:
@@ -159,32 +147,66 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano, cut=No
 
                         if single_sample is not None:
                             hists[year][ch][var].fill(
-                                samples=single_sample,  # combining all events under one name
-                                var=variable,
+                                samples=single_sample,  # combining all pt bins under one name
+                                cuts='preselection',
+                                var=data[var],
+                                weight=event_weight * xsec_weight,
+                            )
+                            hists[year][ch][var].fill(
+                                samples=single_sample,  # combining all pt bins under one name
+                                cuts='btag',
+                                var=data[var][data["anti_bjettag"] == 1],
+                                weight=event_weight * xsec_weight,
+                            )
+                            hists[year][ch][var].fill(
+                                samples=single_sample,  # combining all pt bins under one name
+                                cuts='dr',
+                                var=data[var][data["leptonInJet"] == 1],
+                                weight=event_weight * xsec_weight,
+                            )
+                            hists[year][ch][var].fill(
+                                samples=single_sample,  # combining all pt bins under one name
+                                cuts='btagdr',
+                                var=data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
                                 weight=event_weight * xsec_weight,
                             )
                         else:
                             hists[year][ch][var].fill(
                                 samples=sample,
-                                var=variable,
+                                cuts='preselection',
+                                var=data[var],
                                 weight=event_weight * xsec_weight,
                             )
-                print(f"Applied {cut} cut")
+                            hists[year][ch][var].fill(
+                                samples=sample,
+                                cuts='btag',
+                                var=data[var][data["anti_bjettag"] == 1],
+                                weight=event_weight * xsec_weight,
+                            )
+                            hists[year][ch][var].fill(
+                                samples=sample,
+                                cuts='dr',
+                                var=data[var][data["leptonInJet"] == 1],
+                                weight=event_weight * xsec_weight,
+                            )
+                            hists[year][ch][var].fill(
+                                samples=sample,
+                                cuts='btagdr',
+                                var=data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
+                                weight=event_weight * xsec_weight,
+                            )
 
     # TODO: combine histograms for all years here and flag them as year='combined'
 
     # store the hists variable
-    with open(f'{odir}/hists_{cut}.pkl', 'wb') as f:  # saves the hists objects
+    with open(f'{odir}/hists.pkl', 'wb') as f:  # saves the hists objects
         pkl.dump(hists, f)
 
 
-def make_stack(odir, vars_to_plot, years, channels, pfnano, cut=None, logy=True, add_data=True):
-    # for organization and labeling
-    if cut not in ["btag", "dr", "btagdr"]:
-        cut = 'preselection'
+def make_stack(odir, vars_to_plot, years, channels, pfnano, cut='preselection', logy=True, add_data=True):
 
     # load the hists
-    with open(f'{odir}/hists_{cut}.pkl', 'rb') as f:
+    with open(f'{odir}/hists.pkl', 'rb') as f:
         hists = pkl.load(f)
         f.close()
 
@@ -245,7 +267,7 @@ def make_stack(odir, vars_to_plot, years, channels, pfnano, cut=None, logy=True,
                     fig, ax = plt.subplots(1, 1)
 
                 if len(bkg) > 0:
-                    hep.histplot(bkg,
+                    hep.histplot(bkg[{'cuts': cut}],
                                  ax=ax,
                                  stack=True,
                                  sort='yield',
@@ -261,7 +283,7 @@ def make_stack(odir, vars_to_plot, years, channels, pfnano, cut=None, logy=True,
                         'markersize': 12.,
                         'elinewidth': 2,
                     }
-                    hep.histplot(data,
+                    hep.histplot(data[{'cuts': cut}],
                                  ax=ax,
                                  histtype="errorbar",
                                  color="k",
@@ -271,7 +293,7 @@ def make_stack(odir, vars_to_plot, years, channels, pfnano, cut=None, logy=True,
                                  )
 
                 if len(signal) > 0:
-                    hep.histplot(signal,
+                    hep.histplot(signal[{'cuts': cut}],
                                  ax=ax,
                                  label=[get_simplified_label(sig_label) for sig_label in signal_labels],
                                  color='red'
@@ -330,12 +352,13 @@ def main(args):
 
     if args.make_hists:
         # make the histograms and save in pkl files
-        make_hist(args.idir, args.odir, vars_to_plot, samples, years, channels, args.pfnano, args.cut)
+        make_hist(args.idir, args.odir, vars_to_plot, samples, years, channels, args.pfnano)
 
     if args.plot_hists:
         # plot all process in stack
-        make_stack(args.odir, vars_to_plot, years, channels, args.pfnano, args.cut, logy=True)
-        # make_stack(args.odir, vars_to_plot, years, channels, args.pfnano, logy=False)
+        for cut in ['preselection', 'dr', 'btag', 'btagdr']:
+            make_stack(args.odir, vars_to_plot, years, channels, args.pfnano, cut, logy=True)
+            # make_stack(args.odir, vars_to_plot, years, channels, args.pfnano, cut, logy=False)
 
 
 if __name__ == "__main__":
