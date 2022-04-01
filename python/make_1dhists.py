@@ -137,6 +137,7 @@ def make_1dhists(idir, odir, samples, years, channels, var, bins, range):
 
                 for cut in ['preselection', 'btag', 'dr', 'btagdr']:
                     print(f"Num of events after {cut} cut is: {num_events[cut]}")
+                print("--------------------------------------------------------")
 
     with open(f'{odir}/1d_hists.pkl', 'wb') as f:  # saves the hists objects
         pkl.dump(hists, f)

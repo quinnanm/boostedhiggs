@@ -283,8 +283,8 @@ def main(args):
         make_1dhists_ratio(args.idir, args.odir, samples, years, channels, vars, args.bins, args.start, args.end)
 
     if args.plot_hists:
-        # for cut in ['preselection', 'dr', 'btag', 'btagdr']:
-        #     plot_1dhists_ratio(args.odir, years, channels, vars, cut)
+        for cut in ['preselection', 'dr', 'btag', 'btagdr']:
+            plot_1dhists_ratio(args.odir, years, channels, vars, cut)
 
         plot_1dhists_ratio_compare_cuts(args.odir, years, channels, vars)
 
