@@ -116,7 +116,6 @@ def main(args):
 
     years = args.years.split(',')
     channels = args.channels.split(',')
-    vars = args.vars.split(',')
 
     # get samples to make histograms
     f = open(args.samples)
