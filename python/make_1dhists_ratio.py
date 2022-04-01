@@ -65,12 +65,6 @@ def make_1dhists_ratio(idir, odir, samples, years, channels, vars, bins, start, 
                 hist2.axis.StrCategory([], name='cuts', growth=True)
             )
 
-        # make directory to store stuff per year
-        if not os.path.exists(f'{odir}/plots_{year}'):
-            os.makedirs(f'{odir}/plots_{year}')
-        if not os.path.exists(f'{odir}/plots_{year}/{x}_vs_{y}'):
-            os.makedirs(f'{odir}/plots_{year}/{x}_vs_{y}')
-
         # loop over the processed files and fill the histograms
         for ch in channels:
             for sample in samples[year][ch]:
@@ -174,6 +168,7 @@ def make_1dhists_ratio(idir, odir, samples, years, channels, vars, bins, start, 
 
 
 def plot_1dhists_ratio(odir, years, channels, vars, cut):
+
     print(f'plotting for {cut} cut')
     # load the hists
     with open(f'{odir}/1d_hists_ratio.pkl', 'rb') as f:
@@ -181,6 +176,12 @@ def plot_1dhists_ratio(odir, years, channels, vars, cut):
         f.close()
 
     for year in years:
+        # make directories to hold plots
+        if not os.path.exists(f'{odir}/plots_{year}/'):
+            os.makedirs(f'{odir}/plots_{year}')
+        if not os.path.exists(f'{odir}/plots_{year}/ratio_{vars[0]}_vs_{vars[1]}'):
+            os.makedirs(f'{odir}/plots_{year}/ratio_{vars[0]}_vs_{vars[1]}')
+        # make plots per channel
         for ch in channels:
             for sample in hists[year][ch].axes[1]:
                 fig, ax = plt.subplots(figsize=(8, 5))
@@ -194,13 +195,21 @@ def plot_1dhists_ratio(odir, years, channels, vars, cut):
 
 
 def plot_1dhists_ratio_compare_cuts(odir, years, channels, vars):
+
     print(f'plotting all cuts on same plot for comparison')
+
     # load the hists
     with open(f'{odir}/1d_hists_ratio.pkl', 'rb') as f:
         hists = pkl.load(f)
         f.close()
 
     for year in years:
+        # make directories to hold plots
+        if not os.path.exists(f'{odir}/plots_{year}/'):
+            os.makedirs(f'{odir}/plots_{year}')
+        if not os.path.exists(f'{odir}/plots_{year}/ratio_{vars[0]}_vs_{vars[1]}'):
+            os.makedirs(f'{odir}/plots_{year}/ratio_{vars[0]}_vs_{vars[1]}')
+        # make plots per channel
         for ch in channels:
             for sample in hists[year][ch].axes[1]:
                 fig, ax = plt.subplots(figsize=(8, 5))
