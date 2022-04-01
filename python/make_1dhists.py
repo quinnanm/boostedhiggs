@@ -205,8 +205,8 @@ def main(args):
         make_1dhists(args.idir, args.odir, samples, years, channels, args.var, args.bins, range)
 
     if args.plot_hists:
-        # for cut in ['preselection', 'dr', 'btag', 'btagdr']:
-        #     plot_1dhists(args.odir, years, channels, args.var, cut)
+        for cut in ['preselection', 'dr', 'btag', 'btagdr']:
+            plot_1dhists(args.odir, years, channels, args.var, cut)
 
         plot_1dhists_compare_cuts(args.odir, years, channels, args.var)
 
