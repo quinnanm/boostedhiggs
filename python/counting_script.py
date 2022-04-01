@@ -33,6 +33,14 @@ warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
 def count_events(idir, odir, samples, years, channels):
+    """
+    Counts events oprocessed per sample after each cut
+
+    Args:
+        samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
+    """
+
+    print(f'Counting events of processed samples after each cut')
 
     num_events = {}
     for year in years:
@@ -99,6 +107,11 @@ def count_events(idir, odir, samples, years, channels):
 
 
 def plot_counts(odir, years, channels):
+    """
+    Plot the counts that were computed using the "count_events" function
+    """
+
+    print(f'Plotting the counts of each sample after each cut')
 
     # load the counts dictionary
     with open(f'{odir}/counts.pkl', 'rb') as f:
@@ -119,7 +132,7 @@ def plot_counts(odir, years, channels):
                         log=True)
                 ax.set_xlabel(f"cut")
                 ax.set_title(f'{ch} channel for \n {sample}')
-                plt.savefig(f'counts_{ch}_{sample}.pdf')
+                plt.savefig(f'{odir}/counts_{ch}_{sample}.pdf')
 
 
 def main(args):
@@ -144,9 +157,7 @@ def main(args):
                 if value == 1:
                     samples[year][ch].append(key)
 
-    print(f'Counting events of processed samples after each cut')
     # count_events(args.idir, args.odir, samples, years, channels)
-    print(f'Plotting the counts of each sample after each cut')
     plot_counts(args.odir, years, channels)
 
 
