@@ -32,17 +32,6 @@ import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
-def get_sum_sumgenweight(idir, year, sample):
-    pkl_files = glob.glob(f'{idir}/{sample}/outfiles/*.pkl')  # get the pkl metadata of the pkl files that were processed
-    sum_sumgenweight = 1  # TODO why not 0
-    for file in pkl_files:
-        # load and sum the sumgenweight of each
-        with open(file, 'rb') as f:
-            metadata = pkl.load(f)
-        sum_sumgenweight = sum_sumgenweight + metadata[sample][year]['sumgenweight']
-    return sum_sumgenweight
-
-
 def make_1dhists_ratio(idir, odir, samples, years, channels, vars, bins, start, end):
     """
     Makes 1D histograms of a ratio of two variables (e.g. lep_pt/fj_pt)

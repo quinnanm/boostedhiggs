@@ -66,7 +66,7 @@ def make_2dplots(idir, odir, samples, years, channels, vars, x_bins, x_start, x_
         # loop over the processed files and fill the histograms
         for ch in channels:
             for sample in samples[year][ch]:
-
+                print("------------------------------------------------------------")
                 parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
                 if len(parquet_files) != 0:
                     print(f'Processing {ch} channel of {sample}')
@@ -175,7 +175,7 @@ def make_2dplots(idir, odir, samples, years, channels, vars, x_bins, x_start, x_
 
                 for cut in ['preselection', 'btag', 'dr', 'btagdr']:
                     print(f"Num of events after {cut} cut is: {num_events[cut]}")
-                print("--------------------------------------------------------")
+    print("------------------------------------------------------------")
 
     with open(f'{odir}/2d_plots.pkl', 'wb') as f:  # saves the hists objects
         pkl.dump(hists, f)
