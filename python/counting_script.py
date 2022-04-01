@@ -119,6 +119,10 @@ def plot_counts(odir, years, channels):
         f.close()
 
     for year in years:
+        # make directories to hold plots
+        if not os.path.exists(f'{odir}/plots_{year}/'):
+            os.makedirs(f'{odir}/plots_{year}/')
+
         for sample in num_events[year].keys():
             for ch in channels:
                 counts = []
@@ -132,7 +136,7 @@ def plot_counts(odir, years, channels):
                         log=True)
                 ax.set_xlabel(f"cut")
                 ax.set_title(f'{ch} channel for \n {sample}')
-                plt.savefig(f'{odir}/counts_{ch}_{sample}.pdf')
+                plt.savefig(f'{odir}/plots_{year}/counts_{ch}_{sample}.pdf')
 
 
 def main(args):
