@@ -185,7 +185,7 @@ def plot_1dhists_ratio(odir, years, channels, vars, cut):
 
     for year in years:
         for ch in channels:
-            for sample in hists[year][ch].axes[2]:
+            for sample in hists[year][ch].axes[1]:
                 # one for log z-scale
                 fig, ax = plt.subplots(figsize=(8, 5))
                 hep.hist2dplot(hists[year][ch][{'samples': sample, 'cuts': cut}], ax=ax, cmap="plasma", norm=matplotlib.colors.LogNorm(vmin=1e-3, vmax=1000))
@@ -245,10 +245,10 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # lep_pt vs lep_iso:   python make_1dhists_ratio.py --year 2017 --odir hists/2dplots --channels ele --vars lep_pt,lep_isolation --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # lep_pt vs dR:        python make_1dhists_ratio.py --year 2017 --odir hists/2dplots --channels ele --vars lep_pt,lep_fj_dr     --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --cut dr --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # lep_pt vs mt:        python make_1dhists_ratio.py --year 2017 --odir hists/2dplots --channels ele --vars lep_pt,lep_met_mt    --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # lep_pt vs fj_pt:     python make_1dhists_ratio.py --year 2017 --odir hists/2dplots --channels ele --vars lep_pt,fj_pt         --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_pt vs lep_iso:   python make_1dhists_ratio.py --year 2017 --odir hists/2dplots --channels ele --vars lep_pt,lep_isolation --make_hists --plot_hists --bins 100 --start 0 --end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_pt vs dR:        python make_1dhists_ratio.py --year 2017 --odir hists/2dplots --channels ele --vars lep_pt,lep_fj_dr     --make_hists --plot_hists --bins 100 --start 0 --end 500 --cut dr --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_pt vs mt:        python make_1dhists_ratio.py --year 2017 --odir hists/2dplots --channels ele --vars lep_pt,lep_met_mt    --make_hists --plot_hists --bins 100 --start 0 --end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_pt vs fj_pt:     python make_1dhists_ratio.py --year 2017 --odir hists/2dplots --channels ele --vars lep_pt,fj_pt         --make_hists --plot_hists --bins 100 --start 0 --end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',           dest='years',       default='2017',                                 help="year")
