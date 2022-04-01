@@ -166,11 +166,11 @@ if __name__ == "__main__":
     # python counting_script.py --year 2017 --odir counts --channels ele --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--years',           dest='years',       default='2017',                        help="year")
-    parser.add_argument('--samples',         dest='samples',     default="plot_configs/samples_pfnano.json", help='path to json with samples to be plotted')
-    parser.add_argument('--channels',        dest='channels',    default='ele,mu,had',                  help='channels for which to plot this variable')
-    parser.add_argument('--odir',            dest='odir',        default='counts',                     help="tag for output directory")
-    parser.add_argument('--idir',            dest='idir',        default='../results/',                 help="input directory with results")
+    parser.add_argument('--years',           dest='years',       default='2017',                                help="year")
+    parser.add_argument('--samples',         dest='samples',     default="plot_configs/samples_pfnano.json",    help='path to json with samples to be plotted')
+    parser.add_argument('--channels',        dest='channels',    default='ele,mu,had',                          help='channels for which to plot this variable')
+    parser.add_argument('--odir',            dest='odir',        default='counts',                              help="tag for output directory")
+    parser.add_argument('--idir',            dest='idir',        default='../results/',                         help="input directory with results")
 
     args = parser.parse_args()
 
