@@ -141,7 +141,7 @@ def plot_1dhists(odir, years, channels, var, cut):
         for ch in channels:
             for sample in hists[year][ch].axes[1]:
                 fig, ax = plt.subplots(figsize=(8, 5))
-                hep.histplot(hists[year][ch][{'samples': sample}, 'cuts': cut], ax=ax)
+                hep.histplot(hists[year][ch][{'samples': sample, 'cuts': cut}], ax=ax)
                 ax.set_xlabel(f"{var}")
                 ax.set_title(f'{ch} channel for \n {sample} \n with {cut} cut')
                 hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
@@ -181,7 +181,7 @@ def main(args):
 
     if args.plot_hists:
         for cut in ['preselection', 'dr', 'btag', 'btagdr']:
-            print('plotting for {cut}')
+            print(f'plotting for {cut}')
             plot_1dhists(args.odir, years, channels, args.var, cut)
 
 
