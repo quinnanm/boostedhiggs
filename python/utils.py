@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-from axes import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch
 import pickle as pkl
 import pyarrow.parquet as pq
 import pyarrow as pa
