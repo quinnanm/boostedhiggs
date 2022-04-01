@@ -235,15 +235,15 @@ def make_stack(odir, vars_to_plot, years, channels, pfnano, cut='preselection', 
                 # data
                 data = None
                 if data_label in samples:
-                    data = h[{"samples": data_label}]
+                    data = h[{"samples": data_label, 'cuts': cut}]
 
                 # signal
-                signal = [h[{"samples": label}] for label in signal_labels]
+                signal = [h[{"samples": label, "cuts": cut}] for label in signal_labels]
                 if not logy:
                     signal = [s * 10 for s in signal]  # if not log, scale the signal
 
                 # background
-                bkg = [h[{"samples": label}] for label in bkg_labels]
+                bkg = [h[{"samples": label, "cuts": cut}] for label in bkg_labels]
 
                 # print(data,signal,bkg)
 
@@ -267,7 +267,7 @@ def make_stack(odir, vars_to_plot, years, channels, pfnano, cut='preselection', 
                     fig, ax = plt.subplots(1, 1)
 
                 if len(bkg) > 0:
-                    hep.histplot(bkg[{'cuts': cut}],
+                    hep.histplot(bkg,
                                  ax=ax,
                                  stack=True,
                                  sort='yield',
@@ -283,7 +283,7 @@ def make_stack(odir, vars_to_plot, years, channels, pfnano, cut='preselection', 
                         'markersize': 12.,
                         'elinewidth': 2,
                     }
-                    hep.histplot(data[{'cuts': cut}],
+                    hep.histplot(data,
                                  ax=ax,
                                  histtype="errorbar",
                                  color="k",
@@ -293,7 +293,7 @@ def make_stack(odir, vars_to_plot, years, channels, pfnano, cut='preselection', 
                                  )
 
                 if len(signal) > 0:
-                    hep.histplot(signal[{'cuts': cut}],
+                    hep.histplot(signal,
                                  ax=ax,
                                  label=[get_simplified_label(sig_label) for sig_label in signal_labels],
                                  color='red'
