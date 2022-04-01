@@ -32,24 +32,9 @@ import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
-def get_sum_sumgenweight(idir, year, sample):
-    pkl_files = glob.glob(f'{idir}/{sample}/outfiles/*.pkl')  # get the pkl metadata of the pkl files that were processed
-    sum_sumgenweight = 1  # TODO why not 0
-    for file in pkl_files:
-        # load and sum the sumgenweight of each
-        with open(file, 'rb') as f:
-            metadata = pkl.load(f)
-        sum_sumgenweight = sum_sumgenweight + metadata[sample][year]['sumgenweight']
-    return sum_sumgenweight
+def count_events(idir, odir, samples, years, channels):
 
-
-def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_end, y_bins, y_start, y_end, log_z):
-
-    # for readability
-    x = vars[0]
-    y = vars[1]
-
-    hists = {}
+    num_events = {}
     for year in years:
         # Get luminosity of year
         f = open('../fileset/luminosity.json')
@@ -57,28 +42,72 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
         f.close()
         print(f'Processing samples from year {year} with luminosity {luminosity[year]}')
 
-        # loop over the processed files and fill the histograms
-        ch = 'ele'
+        # initialize a num_events dictionary to count events per sample after each cut (but have to merge same process different bins samples)
+        num_events[year] = {}
         for sample in samples[year][ch]:
-            num_events = 0
-            parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
-            if len(parquet_files) != 0:
-                print(f'Processing {ch} channel of sample {sample} with {len(parquet_files)} number of files')
+            single_sample = None
+            for single_key, key in add_samples.items():
+                if key in sample:
+                    single_sample = single_key
 
-            for i, parquet_file in enumerate(parquet_files):
-                try:
-                    data = pq.read_table(parquet_file).to_pandas()
-                except:
-                    print('Not able to read data: ', parquet_file, ' should remove evts from scaling/lumi')
-                    continue
-                if len(data) == 0:
-                    continue
+            if single_sample is not None:
+                for ch in channels:
+                    num_events[year][single_sample][ch] = {}
+                    for cut in ['preselection', 'dr', 'btagdr']:
+                        num_events[year][single_sample][ch][cut] = 0
+            else:
+                num_events[year][sample] = {}
+                for ch in channels:
+                    num_events[year][sample][ch] = {}
+                    for cut in ['preselection', 'dr', 'btagdr']:
+                        num_events[year][sample][ch][cut] = 0
 
-                # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
-                data = data[data[y] != -1]
+        for ch in channels:
+            for sample in samples[year][ch]:
+                parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
+                if len(parquet_files) != 0:
+                    print(f'Processing {ch} channel of sample {sample} with {len(parquet_files)} number of files')
 
-                num_events = num_events + len(data[x])
-            print(f"Num_events is {num_events}")
+                for i, parquet_file in enumerate(parquet_files):
+                    try:
+                        data = pq.read_table(parquet_file).to_pandas()
+                    except:
+                        print('Not able to read data: ', parquet_file, ' should remove evts from scaling/lumi')
+                        continue
+                    if len(data) == 0:
+                        continue
+
+                    # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
+                    data = data[data['fj_pt'] != -1]
+
+                    single_sample = None
+                    for single_key, key in add_samples.items():
+                        if key in sample:
+                            single_sample = single_key
+
+                    if single_sample is not None:
+                        num_events[year][single_sample][ch]['preselection'] = num_events[year][single_sample][ch]['preselection'] + len(data)
+                        num_events[year][single_sample][ch]['dr'] = num_events[year][single_sample][ch]['dr'] + len(data[data["leptonInJet"] == 1])
+                        num_events[year][single_sample][ch]['btagdr'] = num_events[year][single_sample][ch]['btagdr'] + len(data[data["anti_bjettag"] == 1][data["leptonInJet"] == 1])
+                    else:
+                        num_events[year][sample][ch]['preselection'] = num_events[year][sample][ch]['preselection'] + len(data)
+                        num_events[year][sample][ch]['dr'] = num_events[year][sample][ch]['dr'] + len(data[data["leptonInJet"] == 1])
+                        num_events[year][sample][ch]['btagdr'] = num_events[year][sample][ch]['btagdr'] + len(data[data["anti_bjettag"] == 1][data["leptonInJet"] == 1])
+
+    with open(f'{odir}/counts.pkl', 'wb') as f:  # dump the counts for further plotting
+        pkl.dump(num_events, f)
+
+
+# def plot_counts(idir, odir, samples, years, channels):
+#
+#     # load the counts dictionary
+#     with open(f'{odir}/counts.pkl', 'rb') as f:
+#         num_events = pkl.load(f)
+#         f.close()
+#
+#     for year in years:
+#         for sample in num_events[year]:
+#
 
 
 def main(args):
@@ -104,27 +133,20 @@ def main(args):
                 if value == 1:
                     samples[year][ch].append(key)
 
-    print(f'The 2 variables for cross check are: {vars}')
-    make_2dplot(args.idir, args.odir, samples, years, channels, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end, log_z=True)
+    print(f'Counting events of processed samples after each cut')
+    count_events(args.idir, args.odir, samples, years, channels)
 
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # python counting_script.py --year 2017 --samples configs/samples_pfnano.json --channels ele,mu --vars lep_pt,lep_isolation --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0 --y_end 1 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # python counting_script.py --year 2017 --odir counts --channels ele --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',           dest='years',       default='2017',                        help="year")
     parser.add_argument('--samples',         dest='samples',     default="configs/samples_pfnano.json", help='path to json with samples to be plotted')
     parser.add_argument('--channels',        dest='channels',    default='ele,mu,had',                  help='channels for which to plot this variable')
-    parser.add_argument('--odir',            dest='odir',        default='2dplots',                     help="tag for output directory")
+    parser.add_argument('--odir',            dest='odir',        default='counts',                     help="tag for output directory")
     parser.add_argument('--idir',            dest='idir',        default='../results/',                 help="input directory with results")
-    parser.add_argument('--vars',            dest='vars',        default='lep_pt,lep_isolation',        help='channels for which to plot this variable')
-    parser.add_argument('--x_bins',          dest='x_bins',      default=50,                            help="binning of the first variable passed",                type=int)
-    parser.add_argument('--x_start',         dest='x_start',     default=0,                             help="starting range of the first variable passed",         type=int)
-    parser.add_argument('--x_end',           dest='x_end',       default=1,                             help="end range of the first variable passed",              type=int)
-    parser.add_argument('--y_bins',          dest='y_bins',      default=50,                            help="binning of the second variable passed",               type=int)
-    parser.add_argument('--y_start',         dest='y_start',     default=0,                             help="starting range of the second variable passed",        type=int)
-    parser.add_argument('--y_end',           dest='y_end',       default=1,                             help="end range of the second variable passed",             type=int)
 
     args = parser.parse_args()
 
