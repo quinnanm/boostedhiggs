@@ -177,7 +177,7 @@ def make_2dplots(idir, odir, samples, years, channels, vars, x_bins, x_start, x_
                     print(f"Num of events after {cut} cut is: {num_events[cut]}")
     print("------------------------------------------------------------")
 
-    with open(f'{odir}/2d_plots.pkl', 'wb') as f:  # saves the hists objects
+    with open(f'{odir}/2d_plots_{vars[0]}_vs_{vars[1]}.pkl', 'wb') as f:  # saves the hists objects
         pkl.dump(hists, f)
 
 
@@ -193,7 +193,7 @@ def plot_2dplots(odir, years, channels, vars, cut='preselection'):
     print(f'plotting for {cut} cut')
 
     # load the hists
-    with open(f'{odir}/2d_plots.pkl', 'rb') as f:
+    with open(f'{odir}/2d_plots_{vars[0]}_vs_{vars[1]}.pkl', 'rb') as f:
         hists = pkl.load(f)
         f.close()
 
