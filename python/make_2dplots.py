@@ -42,7 +42,7 @@ def get_sum_sumgenweight(idir, year, sample):
     return sum_sumgenweight
 
 
-def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_end, y_bins, y_start, y_end, cut):
+def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_end, y_bins, y_start, y_end):
 
     # for readability
     x = vars[0]
@@ -62,7 +62,8 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
             hists[year][ch] = hist2.Hist(
                 hist2.axis.Regular(x_bins, x_start, x_end, name=x, label=x, flow=False),
                 hist2.axis.Regular(y_bins, y_start, y_end, name=y, label=y, flow=False),
-                hist2.axis.StrCategory([], name='samples', growth=True)
+                hist2.axis.StrCategory([], name='samples', growth=True),
+                hist2.axis.StrCategory([], name='cuts', growth=True)
             )
 
         # make directory to store stuff per year
@@ -95,19 +96,6 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
                     # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
                     data = data[data[y] != -1]
 
-                    if cut == "btag":
-                        data = data[data["anti_bjettag"] == 1]
-                        cut = 'preselection + btag'
-                    elif cut == "dr":
-                        data = data[data["leptonInJet"] == 1]
-                        cut = 'preselection + leptonInJet'
-                    elif cut == "btagdr":
-                        data = data[data["anti_bjettag"] == 1]
-                        data = data[data["leptonInJet"] == 1]
-                        cut = 'preselection + btag + leptonInJet'
-                    else:
-                        cut = 'preselection'
-
                     try:
                         event_weight = data['weight'].to_numpy()
                         # Find xsection if MC
@@ -120,7 +108,7 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
                         xsec_weight = (xsec * luminosity[year]) / (get_sum_sumgenweight(idir, year, sample))
 
                     except:  # for data
-                        event_weight = 1
+                        data['weight'] = 1  # for data fill a weight column with ones
                         xsec_weight = 1
 
                     single_sample = None
@@ -130,21 +118,82 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
 
                     if single_sample is not None:
                         hists[year][ch].fill(
-                            data[x], data[y], single_sample, weight=event_weight * xsec_weight  # combining all events under one name
+                            data[x],
+                            data[y],
+                            single_sample,
+                            cuts='preselection',
+                            weight=xsec_weight * data['weight']  # combining all events under one name
+                        )
+                        hists[year][ch].fill(
+                            data[x][data["anti_bjettag"] == 1],
+                            data[y][data["anti_bjettag"] == 1],
+                            single_sample,
+                            cuts='btag',
+                            weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1]  # combining all events under one name
+                        )
+                        hists[year][ch].fill(
+                            data[x][data["leptonInJet"] == 1],
+                            data[y][data["leptonInJet"] == 1],
+                            single_sample,
+                            cuts='dr',
+                            weight=xsec_weight * data['weight'][data["leptonInJet"] == 1]  # combining all events under one name
+                        )
+                        hists[year][ch].fill(
+                            data[x][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
+                            data[y][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
+                            single_sample,
+                            cuts='btagdr',
+                            weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1]  # combining all events under one name
                         )
                     else:
                         hists[year][ch].fill(
-                            data[x], data[y], sample, weight=event_weight[data[y] != -1] * xsec_weight,
+                            data[x],
+                            data[y],
+                            sample,
+                            cuts='preselection',
+                            weight=xsec_weight * data['weight']
+                        )
+                        hists[year][ch].fill(
+                            data[x][data["anti_bjettag"] == 1],
+                            data[y][data["anti_bjettag"] == 1],
+                            sample,
+                            cuts='btag',
+                            weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1]
+                        )
+                        hists[year][ch].fill(
+                            data[x][data["leptonInJet"] == 1],
+                            data[y][data["leptonInJet"] == 1],
+                            sample,
+                            cuts='dr',
+                            weight=xsec_weight * data['weight'][data["leptonInJet"] == 1]
+                        )
+                        hists[year][ch].fill(
+                            data[x][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
+                            data[y][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
+                            sample,
+                            cuts='btagdr',
+                            weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1]
                         )
 
                     num_events = num_events + len(data[x])
                 print(f"Num of events is {num_events}")
-                print(f"Applied {cut} cut")
 
-            for sample in hists[year][ch].axes[-1]:
+    with open(f'{odir}/2d_hists.pkl', 'wb') as f:  # saves the hists objects
+        pkl.dump(hists, f)
+
+
+def plot_2dplot(odir, years, channels, cut):
+    # load the hists
+    with open(f'{odir}/2d_hists.pkl', 'rb') as f:
+        hists = pkl.load(f)
+        f.close()
+
+    for year in years:
+        for ch in channels:
+            for sample in hists[year][ch].axes[2]:
                 # one for log z-scale
                 fig, ax = plt.subplots(figsize=(8, 5))
-                hep.hist2dplot(hists[year][ch][{'samples': sample}], ax=ax, cmap="plasma", norm=matplotlib.colors.LogNorm(vmin=1e-3, vmax=1000))
+                hep.hist2dplot(hists[year][ch][{'samples': sample, 'cuts': cut}], ax=ax, cmap="plasma", norm=matplotlib.colors.LogNorm(vmin=1e-3, vmax=1000))
                 ax.set_xlabel(f"{x}")
                 ax.set_ylabel(f"{y}")
                 ax.set_title(f'{ch} channel for \n {sample}')
@@ -155,7 +204,7 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
 
                 # one for non-log z-scale
                 fig, ax = plt.subplots(figsize=(8, 5))
-                hep.hist2dplot(hists[year][ch][{'samples': sample}], ax=ax, cmap="plasma")
+                hep.hist2dplot(hists[year][ch][{'samples': sample, 'cuts': cut}], ax=ax, cmap="plasma")
                 ax.set_xlabel(f"{x}")
                 ax.set_ylabel(f"{y}")
                 ax.set_title(f'{ch} channel for \n {sample}')
@@ -189,15 +238,21 @@ def main(args):
                     samples[year][ch].append(key)
 
     print(f'The 2 variables for cross check are: {vars}')
-    make_2dplot(args.idir, args.odir, samples, years, channels, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end, args.cut)
+
+    if args.make_hists:
+        make_2dplot(args.idir, args.odir, samples, years, channels, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end)
+
+    if args.plot_hists:
+        for cut in ['preselection', 'dr', 'btag', 'btagdr']:
+            plot_2dplot(args.odir, years, channels, cut)
 
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # lep_pt vs lep_iso:   python make_2dplots.py --year 2017 --odir hists/2dplots --channels ele --vars lep_pt,lep_isolation --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0 --y_end 1 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # lep_pt vs dR:        python make_2dplots.py --year 2017 --odir hists0/2dplots --channels ele --vars lep_pt,lep_fj_dr     --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0 --y_end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # lep_pt vs mt:        python make_2dplots.py --year 2017 --odir hists/2dplots --channels ele --vars lep_pt,lep_met_mt    --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0 --y_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # lep_pt vs fj_pt:     python make_2dplots.py --year 2017 --odir hists/2dplots --channels ele --vars lep_pt,fj_pt         --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0 --y_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_pt vs lep_iso:   python make_2dplots.py --year 2017 --odir hists/2dplots --channels ele --vars lep_pt,lep_isolation --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0 --y_end 1 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_pt vs dR:        python make_2dplots.py --year 2017 --odir hists/2dplots --channels ele --vars lep_pt,lep_fj_dr     --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0 --y_end 2 --cut dr --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_pt vs mt:        python make_2dplots.py --year 2017 --odir hists/2dplots --channels ele --vars lep_pt,lep_met_mt    --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0 --y_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_pt vs fj_pt:     python make_2dplots.py --year 2017 --odir hists/2dplots --channels ele --vars lep_pt,fj_pt         --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0 --y_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',           dest='years',       default='2017',                                 help="year")
@@ -212,7 +267,8 @@ if __name__ == "__main__":
     parser.add_argument('--y_bins',          dest='y_bins',      default=50,                                     help="binning of the second variable passed",               type=int)
     parser.add_argument('--y_start',         dest='y_start',     default=0,                                      help="starting range of the second variable passed",        type=int)
     parser.add_argument('--y_end',           dest='y_end',       default=1,                                      help="end range of the second variable passed",             type=int)
-    parser.add_argument('--cut',             dest='cut',         default=None,                                   help="specify cut... choices are ['btag', 'dr', 'btagdr'] otherwise only preselection is applied")
+    parser.add_argument("--make_hists",      dest='make_hists',     action='store_true',                          help="Make hists")
+    parser.add_argument("--plot_hists",      dest='plot_hists',     action='store_true',                          help="Plot the hists")
 
     args = parser.parse_args()
 
