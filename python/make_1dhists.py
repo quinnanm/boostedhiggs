@@ -182,7 +182,7 @@ def main(args):
     if args.plot_hists:
         for cut in ['preselection', 'dr', 'btag', 'btagdr']:
             print('plotting for {cut}')
-            plot_1dhists(odir, years, channels, args.var, cut)
+            plot_1dhists(args.odir, years, channels, args.var, cut)
 
 
 if __name__ == "__main__":
