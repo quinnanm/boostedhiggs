@@ -174,7 +174,7 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano, cut=No
     # TODO: combine histograms for all years here and flag them as year='combined'
 
     # store the hists variable
-    with open(f'{odir}/hists.pkl', 'wb') as f:  # saves the hists objects
+    with open(f'{odir}/hists_{cut}.pkl', 'wb') as f:  # saves the hists objects
         pkl.dump(hists, f)
 
 
@@ -184,7 +184,7 @@ def make_stack(odir, vars_to_plot, years, channels, pfnano, cut=None, logy=True,
         cut = 'preselection'
 
     # load the hists
-    with open(f'{odir}/hists.pkl', 'rb') as f:
+    with open(f'{odir}/hists_{cut}.pkl', 'rb') as f:
         hists = pkl.load(f)
         f.close()
 
@@ -341,7 +341,7 @@ def main(args):
 if __name__ == "__main__":
     # e.g.
     # run locally as: python make_stacked_hists.py --year 2017 --odir hists/stacked_hists --pfnano --make_hists --plot_hists --channels ele,mu,had
-    # run on lpc as:  python make_stacked_hists.py --year 2017 --odir hists0/stacked_hists --pfnano --make_hists --plot_hists --channels ele --cut dr --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # run on lpc as:  python make_stacked_hists.py --year 2017 --odir hists0/stacked_hists --pfnano --make_hists --plot_hists --channels ele --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',            dest='years',          default='2017',                               help="year")
