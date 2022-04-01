@@ -281,23 +281,23 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # lep_pt vs lep_iso:   python make_1dhists_ratio.py --year 2017 --odir hists/2dplots --channels ele --vars lep_pt,lep_isolation --make_hists --plot_hists --bins 100 --start 0 --end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # lep_pt vs dR:        python make_1dhists_ratio.py --year 2017 --odir hists/2dplots --channels ele --vars lep_pt,lep_fj_dr     --make_hists --plot_hists --bins 100 --start 0 --end 500 --cut dr --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # lep_pt vs mt:        python make_1dhists_ratio.py --year 2017 --odir hists/2dplots --channels ele --vars lep_pt,lep_met_mt    --make_hists --plot_hists --bins 100 --start 0 --end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # lep_pt vs fj_pt:     python make_1dhists_ratio.py --year 2017 --odir hists/2dplots --channels ele --vars lep_pt,fj_pt         --make_hists --plot_hists --bins 100 --start 0 --end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_pt vs lep_iso:   python make_1dhists_ratio.py --year 2017 --odir hists/1dhists_ratio --channels ele --vars lep_pt,lep_isolation --make_hists --plot_hists --bins 100 --start 0 --end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_pt vs dR:        python make_1dhists_ratio.py --year 2017 --odir hists/1dhists_ratio --channels ele --vars lep_pt,lep_fj_dr     --make_hists --plot_hists --bins 100 --start 0 --end 500 --cut dr --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_pt vs mt:        python make_1dhists_ratio.py --year 2017 --odir hists/1dhists_ratio --channels ele --vars lep_pt,lep_met_mt    --make_hists --plot_hists --bins 100 --start 0 --end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_pt vs fj_pt:     python make_1dhists_ratio.py --year 2017 --odir hists/1dhists_ratio --channels ele --vars lep_pt,fj_pt         --make_hists --plot_hists --bins 100 --start 0 --end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',           dest='years',       default='2017',                                 help="year")
     parser.add_argument('--samples',         dest='samples',     default="plot_configs/samples_pfnano.json",     help='path to json with samples to be plotted')
     parser.add_argument('--channels',        dest='channels',    default='ele,mu,had',                           help='channels for which to plot this variable')
-    parser.add_argument('--odir',            dest='odir',        default='hists/2dplots',                        help="tag for output directory")
+    parser.add_argument('--odir',            dest='odir',        default='hists/1dhists_ratio',                  help="tag for output directory")
     parser.add_argument('--idir',            dest='idir',        default='../results/',                          help="input directory with results")
     parser.add_argument('--vars',            dest='vars',        default='lep_pt,lep_isolation',                 help='channels for which to plot this variable')
-    parser.add_argument('--bins',          dest='bins',      default=50,                                     help="binning of the first variable passed",                type=int)
-    parser.add_argument('--start',         dest='start',     default=0,                                      help="starting range of the first variable passed",         type=int)
-    parser.add_argument('--end',           dest='end',       default=1,                                      help="end range of the first variable passed",              type=int)
-    parser.add_argument("--make_hists",      dest='make_hists',     action='store_true',                          help="Make hists")
-    parser.add_argument("--plot_hists",      dest='plot_hists',     action='store_true',                          help="Plot the hists")
+    parser.add_argument('--bins',            dest='bins',        default=50,                                     help="binning of the first variable passed",                type=int)
+    parser.add_argument('--start',           dest='start',       default=0,                                      help="starting range of the first variable passed",         type=int)
+    parser.add_argument('--end',             dest='end',         default=1,                                      help="end range of the first variable passed",              type=int)
+    parser.add_argument("--make_hists",      dest='make_hists',  action='store_true',                            help="Make hists")
+    parser.add_argument("--plot_hists",      dest='plot_hists',  action='store_true',                            help="Plot the hists")
 
     args = parser.parse_args()
 
