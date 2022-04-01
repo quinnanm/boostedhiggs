@@ -182,11 +182,15 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
         pkl.dump(hists, f)
 
 
-def plot_2dplot(odir, years, channels, cut):
+def plot_2dplot(odir, years, channels, vars, cut):
     # load the hists
     with open(f'{odir}/2d_hists.pkl', 'rb') as f:
         hists = pkl.load(f)
         f.close()
+
+    # for readability
+    x = vars[0]
+    y = vars[1]
 
     for year in years:
         for ch in channels:
@@ -244,7 +248,7 @@ def main(args):
 
     if args.plot_hists:
         for cut in ['preselection', 'dr', 'btag', 'btagdr']:
-            plot_2dplot(args.odir, years, channels, cut)
+            plot_2dplot(args.odir, years, channels, vars, cut)
 
 
 if __name__ == "__main__":
