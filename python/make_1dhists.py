@@ -177,6 +177,16 @@ def plot_1dhists(odir, years, channels, var, cut='preselection'):
                 plt.savefig(f'{odir}/plots_{year}/{var}/{ch}_{sample}_{cut}.pdf')
                 plt.close()
 
+                fig, ax = plt.subplots(figsize=(8, 5))
+                hep.histplot(hists[year][ch][{'samples': sample, 'cuts': cut}], ax=ax)
+                ax.set_xlabel(f"{var}")
+                ax.set_title(f'{ch} channel for \n {sample} \n with {cut} cut')
+                ax.set_yscale('log')
+                hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
+                hep.cms.text("Work in Progress", ax=ax)
+                plt.savefig(f'{odir}/plots_{year}/{var}/{ch}_{sample}_{cut}.pdf')
+                plt.close()
+
 
 def plot_1dhists_compare_cuts(odir, years, channels, var):
     """
@@ -214,6 +224,20 @@ def plot_1dhists_compare_cuts(odir, years, channels, var):
                 hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
                 hep.cms.text("Work in Progress", ax=ax)
                 plt.savefig(f'{odir}/plots_{year}/{var}/{ch}_{sample}_all_cuts_comparison.pdf')
+                plt.close()
+
+                fig, ax = plt.subplots(figsize=(8, 5))
+                hep.histplot(hists[year][ch][{'samples': sample, 'cuts': 'preselection'}],  ax=ax, label='preselection')
+                hep.histplot(hists[year][ch][{'samples': sample, 'cuts': 'btag'}],          ax=ax, label='preselection + btag')
+                hep.histplot(hists[year][ch][{'samples': sample, 'cuts': 'dr'}],            ax=ax, label='preselection + leptonInJet')
+                hep.histplot(hists[year][ch][{'samples': sample, 'cuts': 'btagdr'}],        ax=ax, label='preselection + btag + leptonInJet')
+                ax.set_xlabel(f"{var}")
+                ax.set_title(f'{ch} channel for \n {sample}')
+                ax.legend()
+                ax.set_yscale('log')
+                hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
+                hep.cms.text("Work in Progress", ax=ax)
+                plt.savefig(f'{odir}/plots_{year}/{var}/{ch}_{sample}_all_cuts_comparison_log.pdf')
                 plt.close()
 
 
