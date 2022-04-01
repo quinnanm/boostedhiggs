@@ -31,7 +31,7 @@ import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
-def make_1dhists(idir, odir, samples, years, channels, var, bins, range, cut=None):
+def make_1dhists(idir, odir, samples, years, channels, var, bins, range):
     '''
     makes and plots 1d histograms of a variable "var"
     '''
@@ -177,12 +177,12 @@ def main(args):
     print(f'Plotting {args.var} histogram')
 
     if args.make_hists:
-        make_1dhists(args.idir, args.odir, samples, years, channels, args.var, args.bins, range, args.cut)
+        make_1dhists(args.idir, args.odir, samples, years, channels, args.var, args.bins, range)
 
     if args.plot_hists:
         for cut in ['preselection', 'dr', 'btag', 'btagdr']:
             print('plotting for {cut}')
-            plot_1dhists(odir, years, channels, args.var)
+            plot_1dhists(odir, years, channels, args.var, cut)
 
 
 if __name__ == "__main__":
