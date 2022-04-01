@@ -174,6 +174,7 @@ def make_1dhists_ratio(idir, odir, samples, years, channels, vars, bins, start, 
 
 
 def plot_1dhists_ratio(odir, years, channels, vars, cut):
+    print(f'plotting for {cut} cut')
     # load the hists
     with open(f'{odir}/1d_hists_ratio.pkl', 'rb') as f:
         hists = pkl.load(f)
@@ -187,13 +188,37 @@ def plot_1dhists_ratio(odir, years, channels, vars, cut):
         for ch in channels:
             for sample in hists[year][ch].axes[1]:
                 fig, ax = plt.subplots(figsize=(8, 5))
-                hep.histplot(hists[year][ch][{'samples': sample}], ax=ax)
+                hep.histplot(hists[year][ch][{'samples': sample, 'cuts': cut}], ax=ax)
                 ax.set_xlabel(f"{var1}/{var2}")
                 ax.set_title(f'{ch} channel for \n {sample} \n with {cut} cut')
                 hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
                 hep.cms.text("Work in Progress", ax=ax)
                 plt.savefig(f'{odir}/plots_{year}/ratio_{var1}_{var2}/{ch}_{sample}_{cut}.pdf')
                 plt.close()
+
+
+# def plot_1dhists_ratio_compare_cuts(odir, years, channels, var):
+#     print(f'plotting all cuts on same plot for comparison')
+#     # load the hists
+#     with open(f'{odir}/1d_hists.pkl', 'rb') as f:
+#         hists = pkl.load(f)
+#         f.close()
+#
+#     for year in years:
+#         for ch in channels:
+#             for sample in hists[year][ch].axes[1]:
+#                 fig, ax = plt.subplots(figsize=(8, 5))
+#                 hep.histplot(hists[year][ch][{'samples': sample, 'cuts': 'preselection'}],  ax=ax, label='preselection')
+#                 hep.histplot(hists[year][ch][{'samples': sample, 'cuts': 'btag'}],          ax=ax, label='preselection + btag')
+#                 hep.histplot(hists[year][ch][{'samples': sample, 'cuts': 'dr'}],            ax=ax, label='preselection + leptonInJet')
+#                 hep.histplot(hists[year][ch][{'samples': sample, 'cuts': 'btagdr'}],        ax=ax, label='preselection + btag + leptonInJet')
+#                 ax.set_xlabel(f"{var}")
+#                 ax.set_title(f'{ch} channel for \n {sample}')
+#                 ax.legend()
+#                 hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
+#                 hep.cms.text("Work in Progress", ax=ax)
+#                 plt.savefig(f'{odir}/plots_{year}/{var}/{ch}_{sample}_all_cuts_comparison.pdf')
+#                 plt.close()
 
 
 def main(args):
@@ -226,8 +251,9 @@ def main(args):
 
     if args.plot_hists:
         for cut in ['preselection', 'dr', 'btag', 'btagdr']:
-            print(f'plotting for {cut} cut')
             plot_1dhists_ratio(args.odir, years, channels, vars, cut)
+
+        # plot_1dhists_compare_cuts(args.odir, years, channels, args.var)
 
 
 if __name__ == "__main__":
