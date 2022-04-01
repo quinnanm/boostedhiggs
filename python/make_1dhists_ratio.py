@@ -232,7 +232,7 @@ def main(args):
                 if value == 1:
                     samples[year][ch].append(key)
 
-    print(f'TMaking histograms of {vars[0]}/{vars[1]}')
+    print(f'Making histograms of {vars[0]}/{vars[1]}')
 
     if args.make_hists:
         make_1dhists_ratio(args.idir, args.odir, samples, years, channels, vars, args.bins, args.start, args.end)
