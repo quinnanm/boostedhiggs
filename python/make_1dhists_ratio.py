@@ -179,8 +179,8 @@ def plot_1dhists_ratio(odir, years, channels, vars, cut):
         # make directories to hold plots
         if not os.path.exists(f'{odir}/plots_{year}/'):
             os.makedirs(f'{odir}/plots_{year}')
-        if not os.path.exists(f'{odir}/plots_{year}/ratio_{vars[0]}_vs_{vars[1]}'):
-            os.makedirs(f'{odir}/plots_{year}/ratio_{vars[0]}_vs_{vars[1]}')
+        if not os.path.exists(f'{odir}/plots_{year}/ratio_{vars[0]}_{vars[1]}'):
+            os.makedirs(f'{odir}/plots_{year}/ratio_{vars[0]}_{vars[1]}')
         # make plots per channel
         for ch in channels:
             for sample in hists[year][ch].axes[1]:
@@ -207,8 +207,8 @@ def plot_1dhists_ratio_compare_cuts(odir, years, channels, vars):
         # make directories to hold plots
         if not os.path.exists(f'{odir}/plots_{year}/'):
             os.makedirs(f'{odir}/plots_{year}')
-        if not os.path.exists(f'{odir}/plots_{year}/ratio_{vars[0]}_vs_{vars[1]}'):
-            os.makedirs(f'{odir}/plots_{year}/ratio_{vars[0]}_vs_{vars[1]}')
+        if not os.path.exists(f'{odir}/plots_{year}/ratio_{vars[0]}_{vars[1]}'):
+            os.makedirs(f'{odir}/plots_{year}/ratio_{vars[0]}_{vars[1]}')
         # make plots per channel
         for ch in channels:
             for sample in hists[year][ch].axes[1]:
