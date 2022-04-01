@@ -207,7 +207,7 @@ def main(args):
         # for cut in ['preselection', 'dr', 'btag', 'btagdr']:
         #     plot_1dhists(args.odir, years, channels, args.var, cut)
 
-        plot_1dhists_compare_cuts(args.odir, years, channels, var)
+        plot_1dhists_compare_cuts(args.odir, years, channels, args.var)
 
 
 if __name__ == "__main__":
