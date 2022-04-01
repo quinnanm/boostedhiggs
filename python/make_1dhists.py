@@ -31,7 +31,7 @@ import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
-def make_1dhist(idir, odir, samples, years, channels, var, bins, range, cut=None):
+def make_1dhists(idir, odir, samples, years, channels, var, bins, range, cut=None):
     '''
     makes and plots 1d histograms of a variable "var"
     '''
@@ -49,6 +49,7 @@ def make_1dhist(idir, odir, samples, years, channels, var, bins, range, cut=None
             hists[year][ch] = hist2.Hist(
                 hist2.axis.Regular(bins, range[0], range[1], name=var, label=var, flow=False),
                 hist2.axis.StrCategory([], name='samples', growth=True)     # to combine different pt bins of the same process
+                hist2.axis.StrCategory([], name='cuts', growth=True)
             )
 
         # make directory to store stuff per year
@@ -78,19 +79,6 @@ def make_1dhist(idir, odir, samples, years, channels, var, bins, range, cut=None
                     # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
                     data = data[data[var] != -1]
 
-                    if cut == "btag":
-                        data = data[data["anti_bjettag"] == 1]
-                        cut = 'preselection + btag'
-                    elif cut == "dr":
-                        data = data[data["leptonInJet"] == 1]
-                        cut = 'preselection + leptonInJet'
-                    elif cut == "btagdr":
-                        data = data[data["anti_bjettag"] == 1]
-                        data = data[data["leptonInJet"] == 1]
-                        cut = 'preselection + btag + leptonInJet'
-                    else:
-                        cut = 'preselection'
-
                     single_sample = None
                     for single_key, key in add_samples.items():
                         if key in sample:
@@ -98,18 +86,62 @@ def make_1dhist(idir, odir, samples, years, channels, var, bins, range, cut=None
 
                     if single_sample is not None:
                         hists[year][ch].fill(
-                            data[var], single_sample,  # combining all events under one name
+                            data[var],
+                            single_sample,  # combining all events under one name
+                            cuts='preselection'
+                        )
+                        hists[year][ch].fill(
+                            data[var][data["anti_bjettag"] == 1],
+                            single_sample,  # combining all events under one name
+                            cuts='btag'
+                        )
+                        hists[year][ch].fill(
+                            data[var][data["leptonInJet"] == 1],
+                            single_sample,  # combining all events under one name
+                            cuts='dr'
+                        )
+                        hists[year][ch].fill(
+                            data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
+                            single_sample,  # combining all events under one name
+                            cuts='btagdr'
                         )
                     else:
                         hists[year][ch].fill(
-                            data[var], sample,
+                            data[var],
+                            sample,
+                            cuts='preselection'
                         )
-                print(f"Applied {cut} cuts")
+                        hists[year][ch].fill(
+                            data[var][data["anti_bjettag"] == 1],
+                            sample,
+                            cuts='btag'
+                        )
+                        hists[year][ch].fill(
+                            data[var][data["leptonInJet"] == 1],
+                            sample,
+                            cuts='dr'
+                        )
+                        hists[year][ch].fill(
+                            data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
+                            sample,
+                            cuts='btagdr'
+                        )
 
-            for sample in hists[year][ch].axes[-1]:
+    with open(f'{odir}/1d_hists.pkl', 'wb') as f:  # saves the hists objects
+        pkl.dump(hists, f)
 
+
+def plot_1dhists(odir, years, channels, var, cut):
+    # load the hists
+    with open(f'{odir}/1d_hists.pkl', 'rb') as f:
+        hists = pkl.load(f)
+        f.close()
+
+    for year in years:
+        for ch in channels:
+            for sample in hists[year][ch].axes[1]:
                 fig, ax = plt.subplots(figsize=(8, 5))
-                hep.histplot(hists[year][ch][{'samples': sample}], ax=ax)
+                hep.histplot(hists[year][ch][{'samples': sample}, 'cuts': cut], ax=ax)
                 ax.set_xlabel(f"{var}")
                 ax.set_title(f'{ch} channel for \n {sample} \n with {cut} cut')
                 hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
@@ -141,15 +173,23 @@ def main(args):
                     samples[year][ch].append(key)
 
     range = [args.start, args.end]
+
     print(f'Plotting {args.var} histogram')
-    make_1dhist(args.idir, args.odir, samples, years, channels, args.var, args.bins, range, args.cut)
+
+    if args.make_hists:
+        make_1dhists(args.idir, args.odir, samples, years, channels, args.var, args.bins, range, args.cut)
+
+    if args.plot_hists:
+        for cut in ['preselection', 'dr', 'btag', 'btagdr']:
+            print('plotting for {cut}')
+            plot_1dhists(odir, years, channels, args.var)
 
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # lep_pt:        python make_1dhist.py --year 2017 --odir hists/1dhists --channels ele --var lep_pt        --bins 100 --start 0 --end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # lep_isolation: python make_1dhist.py --year 2017 --odir hists/1dhists --channels ele --var lep_isolation --bins 100 --start 0 --end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # lep_fj_dr:     python make_1dhist.py --year 2017 --odir hists/1dhists --channels ele --var lep_fj_dr     --bins 100 --start 0 --end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_pt:        python make_1dhists.py --year 2017 --odir hists/1dhists --channels ele --var lep_pt        --make_hists --plot_hists --bins 100 --start 0 --end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_isolation: python make_1dhists.py --year 2017 --odir hists/1dhists --channels ele --var lep_isolation --make_hists --plot_hists --bins 100 --start 0 --end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_fj_dr:     python make_1dhists.py --year 2017 --odir hists/1dhists --channels ele --var lep_fj_dr     --make_hists --plot_hists --bins 100 --start 0 --end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',           dest='years',       default='2017',                             help="year")
@@ -161,7 +201,8 @@ if __name__ == "__main__":
     parser.add_argument('--bins',            dest='bins',        default=50,                                 help="binning of the first variable passed",                type=int)
     parser.add_argument('--start',           dest='start',       default=0,                                  help="starting range of the first variable passed",         type=int)
     parser.add_argument('--end',             dest='end',         default=1,                                  help="end range of the first variable passed",              type=int)
-    parser.add_argument('--cut',             dest='cut',         default=None,                               help="specify cut... choices are ['btag', 'dr', 'btagdr'] otherwise only preselection is applied")
+    parser.add_argument("--make_hists",      dest='make_hists',     action='store_true',                          help="Make hists")
+    parser.add_argument("--plot_hists",      dest='plot_hists',     action='store_true',                          help="Plot the hists")
 
     args = parser.parse_args()
 
