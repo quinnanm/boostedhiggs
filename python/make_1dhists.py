@@ -167,7 +167,7 @@ def plot_1dhists_compare_cuts(odir, years, channels, var):
                 hep.histplot(hists[year][ch][{'samples': sample, 'cuts': 'dr'}],            ax=ax, label='preselection + leptonInJet')
                 hep.histplot(hists[year][ch][{'samples': sample, 'cuts': 'btagdr'}],        ax=ax, label='preselection + btag + leptonInJet')
                 ax.set_xlabel(f"{var}")
-                ax.set_title(f'{ch} channel for \n {sample} \n with {cut} cut')
+                ax.set_title(f'{ch} channel for \n {sample}')
                 hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
                 hep.cms.text("Work in Progress", ax=ax)
                 plt.savefig(f'{odir}/plots_{year}/{var}/{ch}_{sample}_all_cuts_comparison.pdf')
