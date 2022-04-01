@@ -52,6 +52,7 @@ def count_events(idir, odir, samples, years, channels):
                         single_sample = single_key
 
                 if single_sample is not None:
+                    num_events[year][single_sample] = {}
                     num_events[year][single_sample][ch] = {}
                     for cut in ['preselection', 'dr', 'btagdr']:
                         num_events[year][single_sample][ch][cut] = 0
