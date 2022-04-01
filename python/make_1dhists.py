@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
-from axes import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch
+from utils import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch
+from utils import get_simplified_label, get_sum_sumgenweight
 import pickle as pkl
 import pyarrow.parquet as pq
 import pyarrow as pa
@@ -32,9 +33,13 @@ warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
 def make_1dhists(idir, odir, samples, years, channels, var, bins, range):
-    '''
-    makes and plots 1d histograms of a variable "var"
-    '''
+    """
+    Makes 1D histograms
+
+    Args:
+        var: the variable to plot a 1D-histogram of
+        samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
+    """
 
     hists = {}
     for year in years:
@@ -52,11 +57,9 @@ def make_1dhists(idir, odir, samples, years, channels, var, bins, range):
                 hist2.axis.StrCategory([], name='cuts', growth=True)
             )
 
-        # make directory to store stuff per year
-        if not os.path.exists(f'{odir}/plots_{year}/'):
-            os.makedirs(f'{odir}/plots_{year}/')
-        if not os.path.exists(f'{odir}/plots_{year}/{var}'):
-            os.makedirs(f'{odir}/plots_{year}/{var}')
+        num_events = {}
+        for cut in ['preselection', 'btag', 'dr', 'btagdr']:
+            num_events[cut] = 0
 
         # loop over the processed files and fill the histograms
         for ch in channels:
@@ -127,11 +130,27 @@ def make_1dhists(idir, odir, samples, years, channels, var, bins, range):
                             cuts='btagdr'
                         )
 
+                    num_events['preselection'] = num_events['preselection'] + len(data[vars[0]])
+                    num_events['btag'] = num_events['btag'] + len(data[vars[0]][data["anti_bjettag"] == 1])
+                    num_events['dr'] = num_events['dr'] + len(data[vars[0]][data["leptonInJet"] == 1])
+                    num_events['btagdr'] = num_events['btagdr'] + len(data[vars[0]][data["anti_bjettag"] == 1][data["leptonInJet"] == 1])
+
+                for cut in ['preselection', 'btag', 'dr', 'btagdr']:
+                    print(f"Num of events after {cut} cut is: {num_events[cut]}")
+
     with open(f'{odir}/1d_hists.pkl', 'wb') as f:  # saves the hists objects
         pkl.dump(hists, f)
 
 
-def plot_1dhists(odir, years, channels, var, cut):
+def plot_1dhists(odir, years, channels, var, cut='preselection'):
+    """
+    Plots 1D histograms that were made by "make_1dhists" function
+
+    Args:
+        var: the variable to plot a 1D-histogram of
+        cut: the cut to apply when plotting the histogram
+    """
+
     print(f'plotting for {cut} cut')
     # load the hists
     with open(f'{odir}/1d_hists.pkl', 'rb') as f:
@@ -139,6 +158,12 @@ def plot_1dhists(odir, years, channels, var, cut):
         f.close()
 
     for year in years:
+        # make directory to store stuff per year
+        if not os.path.exists(f'{odir}/plots_{year}/'):
+            os.makedirs(f'{odir}/plots_{year}/')
+        if not os.path.exists(f'{odir}/plots_{year}/{var}'):
+            os.makedirs(f'{odir}/plots_{year}/{var}')
+        # make plots per channel
         for ch in channels:
             for sample in hists[year][ch].axes[1]:
                 fig, ax = plt.subplots(figsize=(8, 5))
@@ -152,13 +177,28 @@ def plot_1dhists(odir, years, channels, var, cut):
 
 
 def plot_1dhists_compare_cuts(odir, years, channels, var):
+    """
+    Plots 1D histograms that were made by "make_1dhists" function,
+    with all cuts shown on the same plot for comparison
+
+    Args:
+        var: the variable to plot a 1D-histogram of
+    """
+
     print(f'plotting all cuts on same plot for comparison')
+
     # load the hists
     with open(f'{odir}/1d_hists.pkl', 'rb') as f:
         hists = pkl.load(f)
         f.close()
 
     for year in years:
+        # make directory to store stuff per year
+        if not os.path.exists(f'{odir}/plots_{year}/'):
+            os.makedirs(f'{odir}/plots_{year}/')
+        if not os.path.exists(f'{odir}/plots_{year}/{var}'):
+            os.makedirs(f'{odir}/plots_{year}/{var}')
+        # make plots per channel
         for ch in channels:
             for sample in hists[year][ch].axes[1]:
                 fig, ax = plt.subplots(figsize=(8, 5))

@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
-from axes import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch
+from utils import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch
+from utils import get_simplified_label, get_sum_sumgenweight
 import pickle as pkl
 import pyarrow.parquet as pq
 import pyarrow as pa
@@ -31,22 +32,14 @@ import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
-def get_sum_sumgenweight(idir, year, sample):
-    pkl_files = glob.glob(f'{idir}/{sample}/outfiles/*.pkl')  # get the pkl metadata of the pkl files that were processed
-    sum_sumgenweight = 1  # TODO why not 0
-    for file in pkl_files:
-        # load and sum the sumgenweight of each
-        with open(file, 'rb') as f:
-            metadata = pkl.load(f)
-        sum_sumgenweight = sum_sumgenweight + metadata[sample][year]['sumgenweight']
-    return sum_sumgenweight
+def make_2dplots(idir, odir, samples, years, channels, vars, x_bins, x_start, x_end, y_bins, y_start, y_end):
+    """
+    Makes 2D plots of two variables
 
-
-def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_end, y_bins, y_start, y_end):
-
-    # for readability
-    x = vars[0]
-    y = vars[1]
+    Args:
+        vars: a list of two variables to plot against each other
+        samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
+    """
 
     hists = {}
     for year in years:
@@ -60,22 +53,20 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
 
         for ch in channels:  # initialize the histograms for the different channels and different variables
             hists[year][ch] = hist2.Hist(
-                hist2.axis.Regular(x_bins, x_start, x_end, name=x, label=x, flow=False),
-                hist2.axis.Regular(y_bins, y_start, y_end, name=y, label=y, flow=False),
+                hist2.axis.Regular(x_bins, x_start, x_end, name=vars[0], label=vars[0], flow=False),
+                hist2.axis.Regular(y_bins, y_start, y_end, name=vars[1], label=vars[1], flow=False),
                 hist2.axis.StrCategory([], name='samples', growth=True),
                 hist2.axis.StrCategory([], name='cuts', growth=True)
             )
 
-        # make directory to store stuff per year
-        if not os.path.exists(f'{odir}/plots_{year}'):
-            os.makedirs(f'{odir}/plots_{year}')
-        if not os.path.exists(f'{odir}/plots_{year}/{x}_vs_{y}'):
-            os.makedirs(f'{odir}/plots_{year}/{x}_vs_{y}')
+        num_events = {}
+        for cut in ['preselection', 'btag', 'dr', 'btagdr']:
+            num_events[cut] = 0
 
         # loop over the processed files and fill the histograms
         for ch in channels:
             for sample in samples[year][ch]:
-                num_events = 0
+
                 parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
                 if len(parquet_files) != 0:
                     print(f'Processing {ch} channel of {sample}')
@@ -92,9 +83,9 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
                         continue
 
                     # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
-                    data = data[data[x] != -1]
+                    data = data[data[vars[0]] != -1]
                     # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
-                    data = data[data[y] != -1]
+                    data = data[data[vars[1]] != -1]
 
                     try:
                         event_weight = data['weight'].to_numpy()
@@ -116,105 +107,124 @@ def make_2dplot(idir, odir, samples, years, channels, vars, x_bins, x_start, x_e
                         if key in sample:
                             single_sample = single_key
 
+                    # combining all pt bins of a specefic process under one name
                     if single_sample is not None:
                         hists[year][ch].fill(
-                            data[x],
-                            data[y],
+                            data[vars[0]],
+                            data[vars[1]],
                             single_sample,
                             cuts='preselection',
-                            weight=xsec_weight * data['weight']  # combining all events under one name
+                            weight=xsec_weight * data['weight']
                         )
                         hists[year][ch].fill(
-                            data[x][data["anti_bjettag"] == 1],
-                            data[y][data["anti_bjettag"] == 1],
+                            data[vars[0]][data["anti_bjettag"] == 1],
+                            data[vars[1]][data["anti_bjettag"] == 1],
                             single_sample,
                             cuts='btag',
-                            weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1]  # combining all events under one name
+                            weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1]
                         )
                         hists[year][ch].fill(
-                            data[x][data["leptonInJet"] == 1],
-                            data[y][data["leptonInJet"] == 1],
+                            data[vars[0]][data["leptonInJet"] == 1],
+                            data[vars[1]][data["leptonInJet"] == 1],
                             single_sample,
                             cuts='dr',
-                            weight=xsec_weight * data['weight'][data["leptonInJet"] == 1]  # combining all events under one name
+                            weight=xsec_weight * data['weight'][data["leptonInJet"] == 1]
                         )
                         hists[year][ch].fill(
-                            data[x][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
-                            data[y][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
+                            data[vars[0]][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
+                            data[vars[1]][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
                             single_sample,
                             cuts='btagdr',
-                            weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1]  # combining all events under one name
+                            weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1]
                         )
+                    # otherwise give unique name
                     else:
                         hists[year][ch].fill(
-                            data[x],
-                            data[y],
+                            data[vars[0]],
+                            data[vars[1]],
                             sample,
                             cuts='preselection',
                             weight=xsec_weight * data['weight']
                         )
                         hists[year][ch].fill(
-                            data[x][data["anti_bjettag"] == 1],
-                            data[y][data["anti_bjettag"] == 1],
+                            data[vars[0]][data["anti_bjettag"] == 1],
+                            data[vars[1]][data["anti_bjettag"] == 1],
                             sample,
                             cuts='btag',
                             weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1]
                         )
                         hists[year][ch].fill(
-                            data[x][data["leptonInJet"] == 1],
-                            data[y][data["leptonInJet"] == 1],
+                            data[vars[0]][data["leptonInJet"] == 1],
+                            data[vars[1]][data["leptonInJet"] == 1],
                             sample,
                             cuts='dr',
                             weight=xsec_weight * data['weight'][data["leptonInJet"] == 1]
                         )
                         hists[year][ch].fill(
-                            data[x][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
-                            data[y][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
+                            data[vars[0]][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
+                            data[vars[1]][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
                             sample,
                             cuts='btagdr',
                             weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1]
                         )
 
-                    num_events = num_events + len(data[x])
-                print(f"Num of events is {num_events}")
+                    num_events['preselection'] = num_events['preselection'] + len(data[vars[0]])
+                    num_events['btag'] = num_events['btag'] + len(data[vars[0]][data["anti_bjettag"] == 1])
+                    num_events['dr'] = num_events['dr'] + len(data[vars[0]][data["leptonInJet"] == 1])
+                    num_events['btagdr'] = num_events['btagdr'] + len(data[vars[0]][data["anti_bjettag"] == 1][data["leptonInJet"] == 1])
 
-    with open(f'{odir}/2d_hists.pkl', 'wb') as f:  # saves the hists objects
+                for cut in ['preselection', 'btag', 'dr', 'btagdr']:
+                    print(f"Num of events after {cut} cut is: {num_events[cut]}")
+
+    with open(f'{odir}/2d_plots.pkl', 'wb') as f:  # saves the hists objects
         pkl.dump(hists, f)
 
 
-def plot_2dplot(odir, years, channels, vars, cut):
+def plot_2dplots(odir, years, channels, vars, cut='preselection'):
+    """
+    Plots 2D plots of two variables that were made by "make_2dplots" function
+
+    Args:
+        vars: a list of two variables to plot against each other
+        cut: the cut to apply when plotting the histogram
+    """
+
+    print(f'plotting for {cut} cut')
+
     # load the hists
-    with open(f'{odir}/2d_hists.pkl', 'rb') as f:
+    with open(f'{odir}/2d_plots.pkl', 'rb') as f:
         hists = pkl.load(f)
         f.close()
 
-    # for readability
-    x = vars[0]
-    y = vars[1]
-
     for year in years:
+        # make directory to store stuff per year
+        if not os.path.exists(f'{odir}/plots_{year}'):
+            os.makedirs(f'{odir}/plots_{year}')
+        if not os.path.exists(f'{odir}/plots_{year}/{vars[0]}_vs_{vars[1]}'):
+            os.makedirs(f'{odir}/plots_{year}/{vars[0]}_vs_{vars[1]}')
+        # make plots per channel
         for ch in channels:
             for sample in hists[year][ch].axes[2]:
                 # one for log z-scale
                 fig, ax = plt.subplots(figsize=(8, 5))
                 hep.hist2dplot(hists[year][ch][{'samples': sample, 'cuts': cut}], ax=ax, cmap="plasma", norm=matplotlib.colors.LogNorm(vmin=1e-3, vmax=1000))
-                ax.set_xlabel(f"{x}")
-                ax.set_ylabel(f"{y}")
+                ax.set_xlabel(f"{vars[0]}")
+                ax.set_ylabel(f"{vars[1]}")
                 ax.set_title(f'{ch} channel for \n {sample}')
                 hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
                 hep.cms.text("Work in Progress", ax=ax)
-                plt.savefig(f'{odir}/plots_{year}/{x}_vs_{y}/{ch}_{sample}_{cut}_log_z.pdf')
+                plt.savefig(f'{odir}/plots_{year}/{vars[0]}_vs_{vars[1]}/{ch}_{sample}_{cut}_log_z.pdf')
                 plt.close()
 
                 # one for non-log z-scale
                 fig, ax = plt.subplots(figsize=(8, 5))
                 hep.hist2dplot(hists[year][ch][{'samples': sample, 'cuts': cut}], ax=ax, cmap="plasma")
-                ax.set_xlabel(f"{x}")
-                ax.set_ylabel(f"{y}")
+                ax.set_xlabel(f"{vars[0]}")
+                ax.set_ylabel(f"{vars[1]}")
                 ax.set_title(f'{ch} channel for \n {sample}')
                 hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
                 hep.cms.text("Work in Progress", ax=ax)
-                plt.savefig(f'{odir}/plots_{year}/{x}_vs_{y}/{ch}_{sample}_{cut}.pdf')
+                plt.savefig(f'{odir}/plots_{year}/{vars[0]}_vs_{vars[1]}/{ch}_{sample}_{cut}.pdf')
                 plt.close()
 
 
@@ -244,11 +254,13 @@ def main(args):
     print(f'The 2 variables for cross check are: {vars}')
 
     if args.make_hists:
-        make_2dplot(args.idir, args.odir, samples, years, channels, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end)
+        print('Making histograms...')
+        make_2dplots(args.idir, args.odir, samples, years, channels, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end)
 
     if args.plot_hists:
+        print('Plotting histograms...')
         for cut in ['preselection', 'dr', 'btag', 'btagdr']:
-            plot_2dplot(args.odir, years, channels, vars, cut)
+            plot_2dplots(args.odir, years, channels, vars, cut)
 
 
 if __name__ == "__main__":

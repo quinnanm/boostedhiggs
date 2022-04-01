@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
-from axes import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch
+from utils import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch
+from utils import get_simplified_label, get_sum_sumgenweight
 import pickle as pkl
 import pyarrow.parquet as pq
 import pyarrow as pa
@@ -43,10 +44,13 @@ def get_sum_sumgenweight(idir, year, sample):
 
 
 def make_1dhists_ratio(idir, odir, samples, years, channels, vars, bins, start, end):
+    """
+    Makes 1D histograms of a ratio of two variables (e.g. lep_pt/fj_pt)
 
-    # for readability
-    x = vars[0]
-    y = vars[1]
+    Args:
+        vars: a list of two variables... the first is the numerator, the second is the denominator
+        samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
+    """
 
     hists = {}
     for year in years:
@@ -60,10 +64,14 @@ def make_1dhists_ratio(idir, odir, samples, years, channels, vars, bins, start, 
 
         for ch in channels:  # initialize the histograms for the different channels and different variables
             hists[year][ch] = hist2.Hist(
-                hist2.axis.Regular(bins, start, end, name=x + '/' + y, label=x + '/' + y, flow=False),
+                hist2.axis.Regular(bins, start, end, name=vars[0] + '/' + vars[1], label=vars[0] + '/' + vars[1], flow=False),
                 hist2.axis.StrCategory([], name='samples', growth=True),
                 hist2.axis.StrCategory([], name='cuts', growth=True)
             )
+
+        num_events = {}
+        for cut in ['preselection', 'btag', 'dr', 'btagdr']:
+            num_events[cut] = 0
 
         # loop over the processed files and fill the histograms
         for ch in channels:
@@ -85,9 +93,9 @@ def make_1dhists_ratio(idir, odir, samples, years, channels, vars, bins, start, 
                         continue
 
                     # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
-                    data = data[data[x] != -1]
+                    data = data[data[vars[0]] != -1]
                     # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
-                    data = data[data[y] != -1]
+                    data = data[data[vars[1]] != -1]
 
                     try:
                         event_weight = data['weight'].to_numpy()
@@ -111,65 +119,78 @@ def make_1dhists_ratio(idir, odir, samples, years, channels, vars, bins, start, 
 
                     if single_sample is not None:
                         hists[year][ch].fill(
-                            data[x] / data[y],
+                            data[vars[0]] / data[vars[1]],
                             single_sample,
                             cuts='preselection',
                             weight=xsec_weight * data['weight']  # combining all events under one name
                         )
                         hists[year][ch].fill(
-                            data[x][data["anti_bjettag"] == 1] / data[y][data["anti_bjettag"] == 1],
+                            data[vars[0]][data["anti_bjettag"] == 1] / data[vars[1]][data["anti_bjettag"] == 1],
                             single_sample,
                             cuts='btag',
                             weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1]  # combining all events under one name
                         )
                         hists[year][ch].fill(
-                            data[x][data["leptonInJet"] == 1] / data[y][data["leptonInJet"] == 1],
+                            data[vars[0]][data["leptonInJet"] == 1] / data[vars[1]][data["leptonInJet"] == 1],
                             single_sample,
                             cuts='dr',
                             weight=xsec_weight * data['weight'][data["leptonInJet"] == 1]  # combining all events under one name
                         )
                         hists[year][ch].fill(
-                            data[x][data["anti_bjettag"] == 1][data["leptonInJet"] == 1] / data[y][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
+                            data[vars[0]][data["anti_bjettag"] == 1][data["leptonInJet"] == 1] / data[vars[1]][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
                             single_sample,
                             cuts='btagdr',
                             weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1]  # combining all events under one name
                         )
                     else:
                         hists[year][ch].fill(
-                            data[x] / data[y],
+                            data[vars[0]] / data[vars[1]],
                             sample,
                             cuts='preselection',
                             weight=xsec_weight * data['weight']
                         )
                         hists[year][ch].fill(
-                            data[x][data["anti_bjettag"] == 1] / data[y][data["anti_bjettag"] == 1],
+                            data[vars[0]][data["anti_bjettag"] == 1] / data[vars[1]][data["anti_bjettag"] == 1],
                             sample,
                             cuts='btag',
                             weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1]
                         )
                         hists[year][ch].fill(
-                            data[x][data["leptonInJet"] == 1] / data[y][data["leptonInJet"] == 1],
+                            data[vars[0]][data["leptonInJet"] == 1] / data[vars[1]][data["leptonInJet"] == 1],
                             sample,
                             cuts='dr',
                             weight=xsec_weight * data['weight'][data["leptonInJet"] == 1]
                         )
                         hists[year][ch].fill(
-                            data[x][data["anti_bjettag"] == 1][data["leptonInJet"] == 1] / data[y][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
+                            data[vars[0]][data["anti_bjettag"] == 1][data["leptonInJet"] == 1] / data[vars[1]][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
                             sample,
                             cuts='btagdr',
                             weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1]
                         )
 
-                    num_events = num_events + len(data[x])
-                print(f"Num of events is {num_events}")
+                    num_events['preselection'] = num_events['preselection'] + len(data[vars[0]])
+                    num_events['btag'] = num_events['btag'] + len(data[vars[0]][data["anti_bjettag"] == 1])
+                    num_events['dr'] = num_events['dr'] + len(data[vars[0]][data["leptonInJet"] == 1])
+                    num_events['btagdr'] = num_events['btagdr'] + len(data[vars[0]][data["anti_bjettag"] == 1][data["leptonInJet"] == 1])
+
+                for cut in ['preselection', 'btag', 'dr', 'btagdr']:
+                    print(f"Num of events after {cut} cut is: {num_events[cut]}")
 
     with open(f'{odir}/1d_hists_ratio.pkl', 'wb') as f:  # saves the hists objects
         pkl.dump(hists, f)
 
 
-def plot_1dhists_ratio(odir, years, channels, vars, cut):
+def plot_1dhists_ratio(odir, years, channels, vars, cut='preselection'):
+    """
+    Plots the 1D histograms of a ratio of two variables that were made by "make_1dhists_ratio" function
+
+    Args:
+        vars: a list of two variables... the first is the numerator, the second is the denominator
+        cut: the cut to apply when plotting the histogram
+    """
 
     print(f'plotting for {cut} cut')
+
     # load the hists
     with open(f'{odir}/1d_hists_ratio.pkl', 'rb') as f:
         hists = pkl.load(f)
@@ -195,6 +216,13 @@ def plot_1dhists_ratio(odir, years, channels, vars, cut):
 
 
 def plot_1dhists_ratio_compare_cuts(odir, years, channels, vars):
+    """
+    Plots the 1D histograms of a ratio of two variables that were made by "make_1dhists_ratio" function,
+    with all cuts shown on the same plot for comparison
+
+    Args:
+        vars: a list of two variables... the first is the numerator, the second is the denominator
+    """
 
     print(f'plotting all cuts on same plot for comparison')
 

@@ -1,7 +1,56 @@
+#!/usr/bin/python
+
+from axes import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch
+import pickle as pkl
+import pyarrow.parquet as pq
+import pyarrow as pa
+import awkward as ak
+import numpy as np
+import pandas as pd
+import json
+import os
+import glob
+import shutil
+import pathlib
+from typing import List, Optional
+
+import argparse
+from coffea import processor
+from coffea.nanoevents.methods import candidate, vector
+from coffea.analysis_tools import Weights, PackedSelection
+
 import hist as hist2
+import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
+import mplhep as hep
+from hist.intervals import clopper_pearson_interval
+
+import warnings
+warnings.filterwarnings("ignore", message="Found duplicate branch ")
+
+
+def get_simplified_label(sample):   # get simplified "alias" names of the samples for plotting purposes
+    f = open('plot_configs/simplified_labels.json')
+    name = json.load(f)
+    f.close()
+    if sample in name.keys():
+        return str(name[sample])
+    else:
+        return sample
+
+
+def get_sum_sumgenweight(idir, year, sample):
+    pkl_files = glob.glob(f'{idir}/{sample}/outfiles/*.pkl')  # get the pkl metadata of the pkl files that were processed
+    sum_sumgenweight = 1  # TODO why not 0
+    for file in pkl_files:
+        # load and sum the sumgenweight of each
+        with open(file, 'rb') as f:
+            metadata = pkl.load(f)
+        sum_sumgenweight = sum_sumgenweight + metadata[sample][year]['sumgenweight']
+    return sum_sumgenweight
+
 
 # define the axes for the different variables to be plotted
-
 # define samples
 signal_by_ch = {
     'ele': ['GluGluHToWWToLNuQQ'],

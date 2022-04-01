@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
-from axes import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch
+from utils import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch
+from utils import get_simplified_label, get_sum_sumgenweight
 import pickle as pkl
 import pyarrow.parquet as pq
 import pyarrow as pa
@@ -29,31 +30,18 @@ import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
-def get_simplified_label(sample):   # get simplified "alias" names of the samples for plotting purposes
-    f = open('plot_configs/simplified_labels.json')
-    name = json.load(f)
-    f.close()
-    if sample in name.keys():
-        return str(name[sample])
-    else:
-        return sample
+def make_stacked_hists(idir, odir, vars_to_plot, samples, years, channels, pfnano):
+    """
+    Makes 1D histograms to be plotted as stacked over the different samples
 
+    Args:
+        vars_to_plot: the set of variable to plot a 1D-histogram of (by default: the samples with key==1 defined in plot_configs/vars.json)
+        samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
+    """
 
-def get_sum_sumgenweight(idir, year, sample):
-    pkl_files = glob.glob(f'{idir}/{sample}/outfiles/*.pkl')  # get the pkl metadata of the pkl files that were processed
-    sum_sumgenweight = 1  # TODO why not 0
-    for file in pkl_files:
-        # load and sum the sumgenweight of each
-        with open(file, 'rb') as f:
-            metadata = pkl.load(f)
-        sum_sumgenweight = sum_sumgenweight + metadata[sample][year]['sumgenweight']
-    return sum_sumgenweight
-
-
-def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # makes histograms and saves in pkl file
-    hists = {}  # define a placeholder for all histograms
+    hists = {}
     for year in years:
-        # Get luminosity of year
+        # Get luminosity per year
         f = open('../fileset/luminosity.json')
         luminosity = json.load(f)
         f.close()
@@ -63,7 +51,6 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # ma
 
         for ch in channels:  # initialize the histograms for the different channels and different variables
             hists[year][ch] = {}
-
             for var in vars_to_plot[ch]:
                 sample_axis = hist2.axis.StrCategory([], name='samples', growth=True)
                 cut_axis = hist2.axis.StrCategory([], name='cuts', growth=True)
@@ -145,31 +132,33 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # ma
                             if key in sample:
                                 single_sample = single_key
 
+                        # combining all pt bins of a specefic process under one name
                         if single_sample is not None:
                             hists[year][ch][var].fill(
-                                samples=single_sample,  # combining all pt bins under one name
+                                samples=single_sample,
                                 cuts='preselection',
                                 var=data[var],
                                 weight=xsec_weight * data['weight'],
                             )
                             hists[year][ch][var].fill(
-                                samples=single_sample,  # combining all pt bins under one name
+                                samples=single_sample,
                                 cuts='btag',
                                 var=data[var][data["anti_bjettag"] == 1],
                                 weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1],
                             )
                             hists[year][ch][var].fill(
-                                samples=single_sample,  # combining all pt bins under one name
+                                samples=single_sample,
                                 cuts='dr',
                                 var=data[var][data["leptonInJet"] == 1],
                                 weight=xsec_weight * data['weight'][data["leptonInJet"] == 1],
                             )
                             hists[year][ch][var].fill(
-                                samples=single_sample,  # combining all pt bins under one name
+                                samples=single_sample,
                                 cuts='btagdr',
                                 var=data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
                                 weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
                             )
+                        # otherwise give unique name
                         else:
                             hists[year][ch][var].fill(
                                 samples=sample,
@@ -199,14 +188,24 @@ def make_hist(idir, odir, vars_to_plot, samples, years, channels, pfnano):  # ma
     # TODO: combine histograms for all years here and flag them as year='combined'
 
     # store the hists variable
-    with open(f'{odir}/hists.pkl', 'wb') as f:  # saves the hists objects
+    with open(f'{odir}/stacked_hists.pkl', 'wb') as f:  # saves the hists objects
         pkl.dump(hists, f)
 
 
-def make_stack(odir, vars_to_plot, years, channels, pfnano, cut='preselection', logy=True, add_data=True):
+def plot_stacked_hists(odir, vars_to_plot, years, channels, pfnano, cut='preselection', logy=True, add_data=True):
+    """
+    Plots the stacked 1D histograms that were made by "make_stacked_hists" function
+
+    Args:
+        vars_to_plot: the set of variable to plot a 1D-histogram of (by default: the samples with key==1 defined in plot_configs/vars.json)
+        samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
+        cut: the cut to apply when plotting the histogram
+    """
+
+    print(f'plotting for {cut} cut')
 
     # load the hists
-    with open(f'{odir}/hists.pkl', 'rb') as f:
+    with open(f'{odir}/stacked_hists.pkl', 'rb') as f:
         hists = pkl.load(f)
         f.close()
 
@@ -351,20 +350,20 @@ def main(args):
                 vars_to_plot[ch].append(key)
 
     if args.make_hists:
-        # make the histograms and save in pkl files
-        make_hist(args.idir, args.odir, vars_to_plot, samples, years, channels, args.pfnano)
+        print('Making histograms...')
+        make_stacked_hists(args.idir, args.odir, vars_to_plot, samples, years, channels, args.pfnano)
 
     if args.plot_hists:
-        # plot all process in stack
+        print('Plotting histograms...')
         for cut in ['preselection', 'dr', 'btag', 'btagdr']:
-            make_stack(args.odir, vars_to_plot, years, channels, args.pfnano, cut, logy=True)
-            # make_stack(args.odir, vars_to_plot, years, channels, args.pfnano, cut, logy=False)
+            plot_stacked_hists(args.odir, vars_to_plot, years, channels, args.pfnano, cut, logy=True)
+            # plot_stacked_hists(args.odir, vars_to_plot, years, channels, args.pfnano, cut, logy=False)
 
 
 if __name__ == "__main__":
     # e.g.
     # run locally as: python make_stacked_hists.py --year 2017 --odir hists/stacked_hists --pfnano --make_hists --plot_hists --channels ele,mu,had
-    # run on lpc as:  python make_stacked_hists.py --year 2017 --odir hists0/stacked_hists --pfnano --make_hists --plot_hists --channels ele --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # run on lpc as:  python make_stacked_hists.py --year 2017 --odir hists01/stacked_hists --pfnano --make_hists --plot_hists --channels ele --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',            dest='years',          default='2017',                               help="year")
@@ -376,7 +375,6 @@ if __name__ == "__main__":
     parser.add_argument("--pfnano",           dest='pfnano',         action='store_true',                          help="Run with pfnano")
     parser.add_argument("--make_hists",       dest='make_hists',     action='store_true',                          help="Make hists")
     parser.add_argument("--plot_hists",       dest='plot_hists',     action='store_true',                          help="Plot the hists")
-    parser.add_argument('--cut',              dest='cut',            default=None,                                 help="specify cut... choices are ['btag', 'dr', 'btagdr'] otherwise only preselection is applied")
 
     args = parser.parse_args()
 
