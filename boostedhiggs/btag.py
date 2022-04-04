@@ -10,12 +10,12 @@ from coffea.lookup_tools.dense_lookup import dense_lookup
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
 btagWPs = {
     "deepJet": {
-        '2016': {  # this one is preVFP
+        '2016preVFP': {  # this one is preVFP
             'L': 0.0508,
             'M': 0.2598,
             'T': 0.6502,
         },
-        '2016postVFP': {
+        '2016': {
             'L': 0.0480,
             'M': 0.2489,
             'T': 0.6377,
