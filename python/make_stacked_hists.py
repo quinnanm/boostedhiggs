@@ -35,7 +35,7 @@ def make_stacked_hists(idir, odir, vars_to_plot, samples, years, channels, pfnan
     Makes 1D histograms to be plotted as stacked over the different samples
 
     Args:
-        vars_to_plot: the set of variable to plot a 1D-histogram of (by default: the samples with key==1 defined in plot_configs/vars.json)
+        vars_to_plot: the set of variables to plot a 1D-histogram of (by default: the samples with key==1 defined in plot_configs/vars.json)
         samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
     """
 
@@ -199,7 +199,7 @@ def plot_stacked_hists(odir, vars_to_plot, years, channels, pfnano, cut='presele
     Args:
         vars_to_plot: the set of variable to plot a 1D-histogram of (by default: the samples with key==1 defined in plot_configs/vars.json)
         samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
-        cut: the cut to apply when plotting the histogram
+        cut: the cut to apply when plotting the histogram... choices are ['preselection', 'dr', 'btag', 'btagdr']
     """
 
     print(f'plotting for {cut} cut')

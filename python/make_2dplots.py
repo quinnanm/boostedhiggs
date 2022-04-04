@@ -37,7 +37,7 @@ def make_2dplots(idir, odir, samples, years, channels, vars, x_bins, x_start, x_
     Makes 2D plots of two variables
 
     Args:
-        vars: a list of two variables to plot against each other
+        vars: a list of two variable names to plot against each other... see the full list of choices in plot_configs/vars.json
         samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
     """
 
@@ -186,8 +186,8 @@ def plot_2dplots(odir, years, channels, vars, cut='preselection'):
     Plots 2D plots of two variables that were made by "make_2dplots" function
 
     Args:
-        vars: a list of two variables to plot against each other
-        cut: the cut to apply when plotting the histogram
+        vars: a list of two variable names to plot against each other... see the full list of choices in plot_configs/vars.json
+        cut: the cut to apply when plotting the histogram... choices are ['preselection', 'dr', 'btag', 'btagdr']
     """
 
     print(f'plotting for {cut} cut')

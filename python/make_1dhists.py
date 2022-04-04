@@ -37,7 +37,7 @@ def make_1dhists(idir, odir, samples, years, channels, var, bins, range):
     Makes 1D histograms
 
     Args:
-        var: the variable to plot a 1D-histogram of
+        var: the name of the variable to plot a 1D-histogram of... see the full list of choices in plot_configs/vars.json
         samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
     """
 
@@ -149,8 +149,8 @@ def plot_1dhists(odir, years, channels, var, cut='preselection'):
     Plots 1D histograms that were made by "make_1dhists" function
 
     Args:
-        var: the variable to plot a 1D-histogram of
-        cut: the cut to apply when plotting the histogram
+        var: the name of the variable to plot a 1D-histogram of... see the full list of choices in plot_configs/vars.json
+        cut: the cut to apply when plotting the histogram... choices are ['preselection', 'dr', 'btag', 'btagdr']
     """
 
     print(f'plotting for {cut} cut')
@@ -194,7 +194,7 @@ def plot_1dhists_compare_cuts(odir, years, channels, var):
     with all cuts shown on the same plot for comparison
 
     Args:
-        var: the variable to plot a 1D-histogram of
+        var: the name of the variable to plot a 1D-histogram of... see the full list of choices in plot_configs/vars.json
     """
 
     print(f'plotting all cuts on same plot for comparison')
