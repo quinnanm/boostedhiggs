@@ -425,6 +425,14 @@ class HwwProcessor(processor.ProcessorABC):
         # good_fatjets = good_fatjets[lep_in_fj_overlap_bool]
         # candidatefj_lep = ak.firsts(good_fatjets[ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)])      # get candidatefj for leptonic channel
 
+        # MET
+        met = events.MET
+        mt_lep_met = np.sqrt(
+            2. * candidatelep_p4.pt * met.pt * (ak.ones_like(met.pt) - np.cos(candidatelep_p4.delta_phi(met)))
+        )
+
+        candidatefj_lep = ak.firsts(good_fatjets[ak.argmin(good_fatjets.delta_r(met), axis=1, keepdims=True)])      # get candidatefj for leptonic channel
+
         # lepton and fatjet mass
         lep_fj_m = (candidatefj_lep - candidatelep_p4).mass  # mass of fatjet without lepton
 
@@ -438,14 +446,6 @@ class HwwProcessor(processor.ProcessorABC):
 
         # deltaR
         lep_fj_dr = candidatefj_lep.delta_r(candidatelep_p4)
-
-        # MET
-        met = events.MET
-        mt_lep_met = np.sqrt(
-            2. * candidatelep_p4.pt * met.pt * (ak.ones_like(met.pt) - np.cos(candidatelep_p4.delta_phi(met)))
-        )
-
-        candidatefj_lep = ak.firsts(good_fatjets[ak.argmin(good_fatjets.delta_r(met), axis=1, keepdims=True)])      # get candidatefj for leptonic channel
 
         # event selections for muon channel
         self.add_selection(
