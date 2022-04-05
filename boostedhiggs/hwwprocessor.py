@@ -420,18 +420,19 @@ class HwwProcessor(processor.ProcessorABC):
         # for hadronic channels: candidatefj is the leading pt one
         candidatefj_had = leadingfj
 
-        # for leptonic channel: first clean jets and leptons by removing overlap
+        # for leptonic channel: first clean jets and leptons by removing overlap, then pick candidate_fj closest to the lepton
         # lep_in_fj_overlap_bool = good_fatjets.delta_r(candidatelep_p4) > 0.1
         # good_fatjets = good_fatjets[lep_in_fj_overlap_bool]
         # candidatefj_lep = ak.firsts(good_fatjets[ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)])      # get candidatefj for leptonic channel
 
+        # for leptonic channel: pick candidate_fj closest to the MET
         # MET
         met = events.MET
         mt_lep_met = np.sqrt(
             2. * candidatelep_p4.pt * met.pt * (ak.ones_like(met.pt) - np.cos(candidatelep_p4.delta_phi(met)))
         )
 
-        candidatefj_lep = ak.firsts(good_fatjets[ak.argmin(good_fatjets.delta_r(met), axis=1, keepdims=True)])      # get candidatefj for leptonic channel
+        candidatefj_lep = ak.firsts(good_fatjets[ak.argmin(good_fatjets.delta_phi(met), axis=1, keepdims=True)])      # get candidatefj for leptonic channel
 
         # lepton and fatjet mass
         lep_fj_m = (candidatefj_lep - candidatelep_p4).mass  # mass of fatjet without lepton
