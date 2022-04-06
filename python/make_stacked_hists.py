@@ -161,7 +161,7 @@ def make_stacked_hists(idir, odir, vars_to_plot, samples, years, channels, pfnan
                             hists[year][ch][var].fill(
                                 samples=single_sample,
                                 cuts='btagdrMass',
-                                var=data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1][data[['fj_msoftdrop'] > 20]],
+                                var=data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1][data['fj_msoftdrop'] > 20],
                                 weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1][data[['fj_msoftdrop'] > 20]],
                             )
 
@@ -194,7 +194,7 @@ def make_stacked_hists(idir, odir, vars_to_plot, samples, years, channels, pfnan
                             hists[year][ch][var].fill(
                                 samples=sample,
                                 cuts='btagdrMass',
-                                var=data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1][data[['fj_msoftdrop'] > 20]],
+                                var=data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1][data['fj_msoftdrop'] > 20],
                                 weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1][data[['fj_msoftdrop'] > 20]],
                             )
 
