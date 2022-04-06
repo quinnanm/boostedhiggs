@@ -216,11 +216,6 @@ def plot_stacked_hists(odir, vars_to_plot, years, channels, pfnano, cut='presele
     # make the histogram plots in this directory
     for year in years:
 
-        if year == '2018':
-            data_label = data_by_ch_2018[ch]
-        else:
-            data_label = data_by_ch[ch]
-
         if logy:
             if not os.path.exists(f'{odir}/hists_{year}_log'):
                 os.makedirs(f'{odir}/hists_{year}_log')
@@ -228,6 +223,11 @@ def plot_stacked_hists(odir, vars_to_plot, years, channels, pfnano, cut='presele
             if not os.path.exists(f'{odir}/hists_{year}'):
                 os.makedirs(f'{odir}/hists_{year}')
         for ch in channels:
+            if year == '2018':
+                data_label = data_by_ch_2018[ch]
+            else:
+                data_label = data_by_ch[ch]
+
             for var in vars_to_plot[ch]:
                 if hists[year][ch][var].shape[0] == 0:     # skip empty histograms (such as lepton_pt for hadronic channel)
                     continue
