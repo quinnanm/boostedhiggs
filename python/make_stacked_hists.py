@@ -33,7 +33,6 @@ warnings.filterwarnings("ignore", message="Found duplicate branch ")
 def make_stacked_hists(idir, odir, vars_to_plot, samples, years, channels, pfnano):
     """
     Makes 1D histograms to be plotted as stacked over the different samples
-
     Args:
         vars_to_plot: the set of variables to plot a 1D-histogram of (by default: the samples with key==1 defined in plot_configs/vars.json)
         samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
@@ -126,9 +125,6 @@ def make_stacked_hists(idir, odir, vars_to_plot, samples, years, channels, pfnan
                         except:
                             data['weight'] = 1  # for data fill a weight column with ones
 
-                        if ch == 'had':
-                            data['fj_msoftdrop'] = data['fj0_msoftdrop']  # for hadronic channel
-
                         # filling histograms
                         single_sample = None
                         for single_key, key in add_samples.items():
@@ -149,25 +145,18 @@ def make_stacked_hists(idir, odir, vars_to_plot, samples, years, channels, pfnan
                                 var=data[var][data["anti_bjettag"] == 1],
                                 weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1],
                             )
-                            # hists[year][ch][var].fill(
-                            #     samples=single_sample,
-                            #     cuts='dr',
-                            #     var=data[var][data["leptonInJet"] == 1],
-                            #     weight=xsec_weight * data['weight'][data["leptonInJet"] == 1],
-                            # )
-                            # hists[year][ch][var].fill(
-                            #     samples=single_sample,
-                            #     cuts='btagdr',
-                            #     var=data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
-                            #     weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
-                            # )
-                            # hists[year][ch][var].fill(
-                            #     samples=single_sample,
-                            #     cuts='btagdrMass',
-                            #     var=data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1][data['fj_msoftdrop'] > 20],
-                            #     weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1][data['fj_msoftdrop'] > 20],
-                            # )
-
+                            hists[year][ch][var].fill(
+                                samples=single_sample,
+                                cuts='dr',
+                                var=data[var][data["leptonInJet"] == 1],
+                                weight=xsec_weight * data['weight'][data["leptonInJet"] == 1],
+                            )
+                            hists[year][ch][var].fill(
+                                samples=single_sample,
+                                cuts='btagdr',
+                                var=data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
+                                weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
+                            )
                         # otherwise give unique name
                         else:
                             hists[year][ch][var].fill(
@@ -182,24 +171,18 @@ def make_stacked_hists(idir, odir, vars_to_plot, samples, years, channels, pfnan
                                 var=data[var][data["anti_bjettag"] == 1],
                                 weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1],
                             )
-                            # hists[year][ch][var].fill(
-                            #     samples=sample,
-                            #     cuts='dr',
-                            #     var=data[var][data["leptonInJet"] == 1],
-                            #     weight=xsec_weight * data['weight'][data["leptonInJet"] == 1],
-                            # )
-                            # hists[year][ch][var].fill(
-                            #     samples=sample,
-                            #     cuts='btagdr',
-                            #     var=data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
-                            #     weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
-                            # )
-                            # hists[year][ch][var].fill(
-                            #     samples=sample,
-                            #     cuts='btagdrMass',
-                            #     var=data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1][data['fj_msoftdrop'] > 20],
-                            #     weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1][data['fj_msoftdrop'] > 20],
-                            # )
+                            hists[year][ch][var].fill(
+                                samples=sample,
+                                cuts='dr',
+                                var=data[var][data["leptonInJet"] == 1],
+                                weight=xsec_weight * data['weight'][data["leptonInJet"] == 1],
+                            )
+                            hists[year][ch][var].fill(
+                                samples=sample,
+                                cuts='btagdr',
+                                var=data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
+                                weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
+                            )
 
     # TODO: combine histograms for all years here and flag them as year='combined'
 
@@ -211,7 +194,6 @@ def make_stacked_hists(idir, odir, vars_to_plot, samples, years, channels, pfnan
 def plot_stacked_hists(odir, vars_to_plot, years, channels, pfnano, cut='preselection', logy=True, add_data=True):
     """
     Plots the stacked 1D histograms that were made by "make_stacked_hists" function
-
     Args:
         vars_to_plot: the set of variable to plot a 1D-histogram of (by default: the samples with key==1 defined in plot_configs/vars.json)
         samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
@@ -311,7 +293,7 @@ def plot_stacked_hists(odir, vars_to_plot, years, channels, pfnano, cut='presele
                     hep.histplot(signal,
                                  ax=ax,
                                  label=[get_simplified_label(sig_label) for sig_label in signal_labels],
-                                 color='red',
+                                 color='red'
                                  )
 
                 if logy:
@@ -371,15 +353,14 @@ def main(args):
 
     if args.plot_hists:
         print('Plotting histograms...')
-        # for cut in ['preselection', 'dr', 'btag', 'btagdr', 'btagdrMass']:
-        for cut in ['btagdr']:
+        for cut in ['preselection', 'dr', 'btag', 'btagdr']:
             plot_stacked_hists(args.odir, vars_to_plot, years, channels, args.pfnano, cut, logy=True)
             # plot_stacked_hists(args.odir, vars_to_plot, years, channels, args.pfnano, cut, logy=False)
 
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as:  python make_stacked_hists.py --year 2017 --odir hists_2017/stacked_hists --pfnano --make_hists --plot_hists --channels ele,mu --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # run locally as:  python make_stacked_hists.py --year 2017 --odir hists0/stacked_hists --pfnano --make_hists --plot_hists --channels ele,mu --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',            dest='years',          default='2017',                               help="year")
