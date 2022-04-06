@@ -137,12 +137,12 @@ def make_stacked_hists(idir, odir, vars_to_plot, samples, years, channels, pfnan
 
                         # combining all pt bins of a specefic process under one name
                         if single_sample is not None:
-                            # hists[year][ch][var].fill(
-                            #     samples=single_sample,
-                            #     cuts='preselection',
-                            #     var=data[var],
-                            #     weight=xsec_weight * data['weight'],
-                            # )
+                            hists[year][ch][var].fill(
+                                samples=single_sample,
+                                cuts='preselection',
+                                var=data[var],
+                                weight=xsec_weight * data['weight'],
+                            )
                             hists[year][ch][var].fill(
                                 samples=single_sample,
                                 cuts='btag',
@@ -170,12 +170,12 @@ def make_stacked_hists(idir, odir, vars_to_plot, samples, years, channels, pfnan
 
                         # otherwise give unique name
                         else:
-                            # hists[year][ch][var].fill(
-                            #     samples=sample,
-                            #     cuts='preselection',
-                            #     var=data[var],
-                            #     weight=xsec_weight * data['weight'],
-                            # )
+                            hists[year][ch][var].fill(
+                                samples=sample,
+                                cuts='preselection',
+                                var=data[var],
+                                weight=xsec_weight * data['weight'],
+                            )
                             hists[year][ch][var].fill(
                                 samples=sample,
                                 cuts='btag',
