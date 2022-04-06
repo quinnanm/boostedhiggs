@@ -49,9 +49,9 @@ def make_stacked_hists(idir, odir, vars_to_plot, samples, years, channels, pfnan
         hists[year] = {}
 
         if year == '2018':
-            dict_sig = data_by_ch_2018
+            data_label = data_by_ch_2018
         else:
-            dict_sig = data_by_ch
+            data_label = data_by_ch
 
         for ch in channels:  # initialize the histograms for the different channels and different variables
             hists[year][ch] = {}
@@ -71,7 +71,7 @@ def make_stacked_hists(idir, odir, vars_to_plot, samples, years, channels, pfnan
             for sample in samples[year][ch]:
                 is_data = False
 
-                for key in dict_sig.values():
+                for key in data_label.values():
                     if key in sample:
                         is_data = True
 
@@ -215,6 +215,12 @@ def plot_stacked_hists(odir, vars_to_plot, years, channels, pfnano, cut='presele
 
     # make the histogram plots in this directory
     for year in years:
+
+        if year == '2018':
+            data_label = data_by_ch_2018[ch]
+        else:
+            data_label = data_by_ch[ch]
+
         if logy:
             if not os.path.exists(f'{odir}/hists_{year}_log'):
                 os.makedirs(f'{odir}/hists_{year}_log')
@@ -231,7 +237,6 @@ def plot_stacked_hists(odir, vars_to_plot, years, channels, pfnano, cut='presele
 
                 # get samples existing in histogram
                 samples = [h.axes[0].value(i) for i in range(len(h.axes[0].edges))]
-                data_label = data_by_ch[ch]
                 signal_labels = [label for label in samples if label in signal_by_ch[ch]]
                 bkg_labels = [label for label in samples if (label and label != data_label and label not in signal_labels)]
 
