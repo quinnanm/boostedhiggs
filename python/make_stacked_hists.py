@@ -284,7 +284,6 @@ def plot_stacked_hists(odir, vars_to_plot, years, channels, pfnano, cut='presele
                                  stack=True,
                                  sort='yield',
                                  histtype="fill",
-                                 density=True,
                                  label=[get_simplified_label(bkg_label) for bkg_label in bkg_labels],
                                  )
                     for handle, label in zip(*ax.get_legend_handles_labels()):
@@ -301,7 +300,6 @@ def plot_stacked_hists(odir, vars_to_plot, years, channels, pfnano, cut='presele
                                  histtype="errorbar",
                                  color="k",
                                  yerr=True,
-                                 density=True,
                                  label=get_simplified_label(data_label),
                                  **data_err_opts
                                  )
@@ -311,7 +309,6 @@ def plot_stacked_hists(odir, vars_to_plot, years, channels, pfnano, cut='presele
                                  ax=ax,
                                  label=[get_simplified_label(sig_label) for sig_label in signal_labels],
                                  color='red',
-                                 density=True
                                  )
 
                 if logy:
