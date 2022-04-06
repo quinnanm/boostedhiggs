@@ -1,46 +1,51 @@
-#potential script for converting pandas dataframe to rootfile
-import subprocess
-import os.path
-from root_numpy import root2array, array2root, fill_hist, array2tree
-from rootpy.tree import Tree, TreeModel, FloatCol
-from rootpy.io import root_open
+#script for converting pandas dataframe to rootfile
+#import fastparquet
+import os
+import uproot
 import argparse
-from array import array
 import numpy as np
 import pandas as pd
-import ROOT as r
-import inspect
+import pyarrow.parquet as pq
 pd.options.mode.chained_assignment = None  # default='warn'
 
 parser = argparse.ArgumentParser(description='converting pandas dataframe to rootfile ')
 parser.add_argument("-f", "--filenames", dest="filenames", nargs="*", default=['./testfiles/bla.root'])
+parser.add_argument("-y", "--year", dest="year", default='2016')
 parser.add_argument("-t", "--treename", dest="treename", default='Events')
-parser.add_argument("-o", "--outdir", dest="outdir", default='./rootfiles/')
 parser.add_argument("-d", "--data", dest="isdata", default='False')
 args = parser.parse_args()
 
+indir = '/eos/uscms/store/user/fmokhtar/boostedhiggs/Apr4_'+args.year
+filetype='.parquet' #replace with proper filetype
+outdir = './rootfiles/'
 
-filetype='pkl' #replace with proper filetype
+for subdir, dirs, files in os.walk(indir):
+    for file in files:
+        #load files
+        if 'had.parquet' in file:
+            f=subdir+'/'+file
+            # f=f.replace("/eos/uscms/","root://cmseos.fnal.gov//")
+            outf=f
+            print('prepping input file', f, '...')
+            outname = outf[outf.rfind(args.year+'/')+5:]
+            outname = outdir+outname.strip('.'+filetype)+'.root'
+            outname = outname.replace('/outfiles/', '_')
+            
+            #load parquet into dataframe
+            print('loading dataframe...')
+            table = pq.read_table(f)
+            data = table.to_pandas()
+            print('# input events:', len(data)  )
+            if len(data)==0:
+                print('no skimmed events. skipping')
+                continue
 
-for f in args.filenames: #get proper outname if files are eos files
-    outf=f
-    f=f.replace("/eos/uscms/","root://cmseos.fnal.gov/")
-    print 'prepping input file', f, '...'
-    outname = outf[outf.rfind('/')+1:]
-    outname = outname.strip('.'+filetype)
+            #here is where you can add branches to the tree, skim the selection to include fewer events, etc   
 
-    #load dataframe
-    data = pd.DataFrame(f) #not sure about the syntax here
-    print '# input events:', len(data)
-    if len(data)==0:
-        print 'no skimmed events. skipping'
-        continue
+            #fill dataframe to rootfile
+            # array2root(data.to_records(index=False), filename=outname, treename=args.treename, mode='RECREATE') #dont use, requires root
 
-    #here is where you can add branches to the tree, skim the selection to include fewer events, etc
+            file = uproot.recreate(outname) 
+            file[args.treename]=uproot.newtree(data)
+            print('Wrote rootfile ',outname)
 
-    #fill dataframe to rootfile
-    array2root(data.to_records(index=False), filename=args.outdir+outname, treename=args.treename, mode='RECREATE')
-
-print 'Wrote', args.outdir+outname
-
-#run using python dataframe2root.py -f /dir/files* 
