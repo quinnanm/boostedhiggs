@@ -633,6 +633,8 @@ class HwwProcessor(processor.ProcessorABC):
             out["trigger_noiso"] = pad_val(trigger_noiso[ch], -1)
             out["leptonInJet"] = pad_val((lep_fj_dr < 0.8), -1)
             out["anti_bjettag"] = pad_val((ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]), -1)
+            # out["anti_bjettag_ele"] = pad_val((ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]), -1)
+            # out["anti_bjettag_had"] = pad_val((ak.max(bjets_away_leadingfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]), -1)
 
             fill_output = True
             # for data, only fill output for that channel
