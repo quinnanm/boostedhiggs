@@ -66,7 +66,7 @@ def make_stacked_hists(idir, odir, vars_to_plot, samples, years, channels, pfnan
             for sample in samples[year][ch]:
                 is_data = False
                 for key in data_by_ch.values():
-                    if key in sample:
+                    if (key in sample) or ('EGamma' in sample):
                         is_data = True
 
                 if not is_data and sample not in xsec_weight_by_sample.keys():
@@ -353,7 +353,7 @@ def main(args):
 
     if args.plot_hists:
         print('Plotting histograms...')
-        for cut in ['preselection', 'dr', 'btag', 'btagdr']:
+        for cut in ['preselection', 'btagdr']:
             # for cut in ['preselection']:
             plot_stacked_hists(args.odir, vars_to_plot, years, channels, args.pfnano, cut, logy=True)
             # plot_stacked_hists(args.odir, vars_to_plot, years, channels, args.pfnano, cut, logy=False)
