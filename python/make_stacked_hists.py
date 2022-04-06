@@ -353,7 +353,8 @@ def main(args):
 
     if args.plot_hists:
         print('Plotting histograms...')
-        for cut in ['preselection', 'dr', 'btag', 'btagdr']:
+        # for cut in ['preselection', 'dr', 'btag', 'btagdr']:
+        for cut in ['preselection', 'btag']:
             plot_stacked_hists(args.odir, vars_to_plot, years, channels, args.pfnano, cut, logy=True)
             # plot_stacked_hists(args.odir, vars_to_plot, years, channels, args.pfnano, cut, logy=False)
 
