@@ -65,7 +65,11 @@ data_by_ch = {
     'mu': 'SingleMuon',
     'had': 'JetHT',
 }
-
+data_by_ch_2018 = {
+    'ele': 'EGamma',
+    'mu': 'SingleMuon',
+    'had': 'JetHT',
+}
 color_by_sample = {
     "QCD": 'tab:orange',
     "DYJets": 'tab:purple',
@@ -85,6 +89,7 @@ add_samples = {
     'SingleElectron': 'SingleElectron',
     'SingleMuon': 'SingleMuon',
     'JetHT': 'JetHT',
+    'EGamma': 'EGamma',
     'QCD': 'QCD_Pt',
     'DYJets': 'DYJets',
     'ZQQ': 'ZJetsToQQ',

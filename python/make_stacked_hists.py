@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from utils import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch
+from utils import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch, data_by_ch_2018
 from utils import get_simplified_label, get_sum_sumgenweight
 import pickle as pkl
 import pyarrow.parquet as pq
@@ -48,6 +48,11 @@ def make_stacked_hists(idir, odir, vars_to_plot, samples, years, channels, pfnan
 
         hists[year] = {}
 
+        if year == '2018':
+            dict_sig = data_by_ch_2018
+        else:
+            dict_sig = data_by_ch
+
         for ch in channels:  # initialize the histograms for the different channels and different variables
             hists[year][ch] = {}
             for var in vars_to_plot[ch]:
@@ -65,8 +70,9 @@ def make_stacked_hists(idir, odir, vars_to_plot, samples, years, channels, pfnan
         for ch in channels:
             for sample in samples[year][ch]:
                 is_data = False
-                for key in data_by_ch.values():
-                    if (key in sample) or ('EGamma' in sample):
+
+                for key in dict_sig.values():
+                    if key in sample:
                         is_data = True
 
                 if not is_data and sample not in xsec_weight_by_sample.keys():
