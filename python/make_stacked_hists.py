@@ -126,6 +126,9 @@ def make_stacked_hists(idir, odir, vars_to_plot, samples, years, channels, pfnan
                         except:
                             data['weight'] = 1  # for data fill a weight column with ones
 
+                        if ch == 'had':
+                            data['fj_msoftdrop'] = data['fj0_msoftdrop']  # for hadronic channel
+
                         # filling histograms
                         single_sample = None
                         for single_key, key in add_samples.items():
