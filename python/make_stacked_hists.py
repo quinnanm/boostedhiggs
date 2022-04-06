@@ -134,30 +134,30 @@ def make_stacked_hists(idir, odir, vars_to_plot, samples, years, channels, pfnan
 
                         # combining all pt bins of a specefic process under one name
                         if single_sample is not None:
-                            # hists[year][ch][var].fill(
-                            #     samples=single_sample,
-                            #     cuts='preselection',
-                            #     var=data[var],
-                            #     weight=xsec_weight * data['weight'],
-                            # )
-                            # hists[year][ch][var].fill(
-                            #     samples=single_sample,
-                            #     cuts='btag',
-                            #     var=data[var][data["anti_bjettag"] == 1],
-                            #     weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1],
-                            # )
-                            # hists[year][ch][var].fill(
-                            #     samples=single_sample,
-                            #     cuts='dr',
-                            #     var=data[var][data["leptonInJet"] == 1],
-                            #     weight=xsec_weight * data['weight'][data["leptonInJet"] == 1],
-                            # )
-                            # hists[year][ch][var].fill(
-                            #     samples=single_sample,
-                            #     cuts='btagdr',
-                            #     var=data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
-                            #     weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
-                            # )
+                            hists[year][ch][var].fill(
+                                samples=single_sample,
+                                cuts='preselection',
+                                var=data[var],
+                                weight=xsec_weight * data['weight'],
+                            )
+                            hists[year][ch][var].fill(
+                                samples=single_sample,
+                                cuts='btag',
+                                var=data[var][data["anti_bjettag"] == 1],
+                                weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1],
+                            )
+                            hists[year][ch][var].fill(
+                                samples=single_sample,
+                                cuts='dr',
+                                var=data[var][data["leptonInJet"] == 1],
+                                weight=xsec_weight * data['weight'][data["leptonInJet"] == 1],
+                            )
+                            hists[year][ch][var].fill(
+                                samples=single_sample,
+                                cuts='btagdr',
+                                var=data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
+                                weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
+                            )
                             hists[year][ch][var].fill(
                                 samples=single_sample,
                                 cuts='btagdrMass',
@@ -167,30 +167,30 @@ def make_stacked_hists(idir, odir, vars_to_plot, samples, years, channels, pfnan
 
                         # otherwise give unique name
                         else:
-                            # hists[year][ch][var].fill(
-                            #     samples=sample,
-                            #     cuts='preselection',
-                            #     var=data[var],
-                            #     weight=xsec_weight * data['weight'],
-                            # )
-                            # hists[year][ch][var].fill(
-                            #     samples=sample,
-                            #     cuts='btag',
-                            #     var=data[var][data["anti_bjettag"] == 1],
-                            #     weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1],
-                            # )
-                            # hists[year][ch][var].fill(
-                            #     samples=sample,
-                            #     cuts='dr',
-                            #     var=data[var][data["leptonInJet"] == 1],
-                            #     weight=xsec_weight * data['weight'][data["leptonInJet"] == 1],
-                            # )
-                            # hists[year][ch][var].fill(
-                            #     samples=sample,
-                            #     cuts='btagdr',
-                            #     var=data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
-                            #     weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
-                            # )
+                            hists[year][ch][var].fill(
+                                samples=sample,
+                                cuts='preselection',
+                                var=data[var],
+                                weight=xsec_weight * data['weight'],
+                            )
+                            hists[year][ch][var].fill(
+                                samples=sample,
+                                cuts='btag',
+                                var=data[var][data["anti_bjettag"] == 1],
+                                weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1],
+                            )
+                            hists[year][ch][var].fill(
+                                samples=sample,
+                                cuts='dr',
+                                var=data[var][data["leptonInJet"] == 1],
+                                weight=xsec_weight * data['weight'][data["leptonInJet"] == 1],
+                            )
+                            hists[year][ch][var].fill(
+                                samples=sample,
+                                cuts='btagdr',
+                                var=data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
+                                weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
+                            )
                             hists[year][ch][var].fill(
                                 samples=sample,
                                 cuts='btagdrMass',
@@ -368,8 +368,8 @@ def main(args):
 
     if args.plot_hists:
         print('Plotting histograms...')
-        # for cut in ['preselection', 'dr', 'btag', 'btagdr']:
-        for cut in ['btagdrMass']:
+        # for cut in ['preselection', 'dr', 'btag', 'btagdr', 'btagdrMass']:
+        for cut in ['btagdr']:
             plot_stacked_hists(args.odir, vars_to_plot, years, channels, args.pfnano, cut, logy=True)
             # plot_stacked_hists(args.odir, vars_to_plot, years, channels, args.pfnano, cut, logy=False)
 
