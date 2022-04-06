@@ -376,7 +376,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as:  python make_stacked_hists.py --year 2017 --odir hists_close_to_met/stacked_hists --pfnano --make_hists --plot_hists --channels ele,mu --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # run locally as:  python make_stacked_hists.py --year 2017 --odir hists_2017/stacked_hists --pfnano --make_hists --plot_hists --channels ele,mu --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',            dest='years',          default='2017',                               help="year")
