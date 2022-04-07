@@ -115,7 +115,7 @@ def make_stacked_hists(idir, odir, vars_to_plot, samples, years, channels, pfnan
                     except:
                         print('Not able to read data: ', parquet_file, ' should remove evts from scaling/lumi')
                         continue
-
+                    print(data)
                     for var in vars_to_plot[ch]:
                         if var not in data.keys():
                             # print(f'- No {var} for {year}/{ch} - skipping')
