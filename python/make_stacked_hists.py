@@ -106,7 +106,7 @@ def make_stacked_hists(idir, odir, vars_to_plot, samples, years, channels, pfnan
                     xsec_weight = 1
 
                 parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
-                print(parquet_files)
+
                 if len(parquet_files) != 0:
                     print(f'Processing {ch} channel of sample', sample)
 
