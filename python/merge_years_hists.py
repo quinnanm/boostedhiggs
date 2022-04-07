@@ -242,15 +242,15 @@ def plot_stacked_hists_years(odir, vars_to_plot, years, channels, pfnano, cut='p
             samples = [h.axes[1].value(i) for i in range(len(h.axes[1].edges))]
             signal_labels = [label for label in samples if label in signal_by_ch[ch]]
             bkg_labels = [label for label in samples if (label and label != data_label and label not in signal_labels)]
+            print('h', h)
 
             # data
             data = None
-
+            print('samples', samples)
             if (data_label in samples) or ('EGamma' in samples):
+                print('lol')
                 print(data_label)
-                print(h)
                 data = h[{"samples": data_label, 'cuts': cut}][{'years': years}][{'years': sum}]
-
             # signal
             signal = [h[{"samples": label, "cuts": cut}][{'years': years}][{'years': sum}] for label in signal_labels]
             if not logy:
