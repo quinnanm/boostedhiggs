@@ -98,7 +98,7 @@
 	"ZJetsToQQ_HT-800toInf":0
     },
     "2017": {
-	"DYJetsToLL_Pt-100To250":1,
+	"DYJetsToLL_Pt-100To250":0,
 	"DYJetsToLL_Pt-250To400":0,
 	"DYJetsToLL_Pt-400To650":0,
 	"DYJetsToLL_Pt-50To100":0,
