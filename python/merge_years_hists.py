@@ -242,9 +242,9 @@ def plot_stacked_hists_years(odir, vars_to_plot, years, channels, pfnano, cut='p
             samples = [h.axes[1].value(i) for i in range(len(h.axes[1].edges))]
             signal_labels = [label for label in samples if label in signal_by_ch[ch]]
             bkg_labels = [label for label in samples if (label and label != data_label and label not in signal_labels)]
-            print(years)
-            for label in bkg_labels:
-                print(h[{"samples": label, "cuts": cut}[{'years': years}][{'years': sum}])
+            # print(years)
+            # for label in bkg_labels:
+            #     print(h[{"samples": label, "cuts": cut}][{'years': years}][{'years': sum})
 
             # data
             data = None
@@ -252,12 +252,12 @@ def plot_stacked_hists_years(odir, vars_to_plot, years, channels, pfnano, cut='p
                 data = h[{"samples": data_label, 'cuts': cut}][{'years': years}][{'years': sum}]
 
             # signal
-            signal = [h[{"samples": label, "cuts": cut}[{'years': years}][{'years': sum}]] for label in signal_labels]
+            signal = [h[{"samples": label, "cuts": cut}][{'years': years}][{'years': sum}]] for label in signal_labels]
             if not logy:
                 signal = [s * 10 for s in signal]  # if not log, scale the signal
 
             # background
-            bkg = [h[{"samples": label, "cuts": cut}[{'years': years}][{'years': sum}]] for label in bkg_labels]
+            bkg = [h[{"samples": label, "cuts": cut}][{'years': years}][{'years': sum}]] for label in bkg_labels]
 
             # print(data,signal,bkg)
 
