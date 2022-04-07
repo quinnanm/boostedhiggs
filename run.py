@@ -36,7 +36,6 @@ def main(args):
             for subdir in files_all[args.year]:
                 for key, flist in files_all[args.year][subdir].items():
                     if key in args.sample:
-                        print(f)
                         files[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist]
     else:
         # get samples

@@ -1,6 +1,7 @@
 import json
 
-def loadJson(samplesjson="python/configs/samples_pfnano.json",year='2017',pfnano=True):
+
+def loadJson(samplesjson="python/configs/samples_pfnano.json", year='2017', pfnano=True):
     samples = []
     values = {}
     with open(samplesjson, 'r') as f:
@@ -23,14 +24,16 @@ def loadJson(samplesjson="python/configs/samples_pfnano.json",year='2017',pfnano
             for subdir in files[year]:
                 for key, flist in files[year][subdir].items():
                     if key in samples:
+                        print(f)
                         fileset[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist]
         else:
             for key, flist in files.items():
                 if key in samples:
                     fileset[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist]
-    return fileset,values
+    return fileset, values
 
-def printPFNano(year='2017',samplesjson=None):
+
+def printPFNano(year='2017', samplesjson=None):
     samples = None
     if samplesjson:
         samples = []
@@ -39,12 +42,12 @@ def printPFNano(year='2017',samplesjson=None):
             for key, value in json_samples.items():
                 if value != 0:
                     samples.append(key)
-                
+
     if not samples:
-        desired_keys = ["QCD","WJets","ZJets","TT","ST","Single","DYJets","EGamma","JetHT","HToWW","ZZ","WW","WZ"]
+        desired_keys = ["QCD", "WJets", "ZJets", "TT", "ST", "Single", "DYJets", "EGamma", "JetHT", "HToWW", "ZZ", "WW", "WZ"]
 
     fname = f"fileset/pfnanoindex_{year}.json"
-    
+
     with open(fname, 'r') as f:
         files = json.load(f)
         for subdir in files[year]:
@@ -52,13 +55,14 @@ def printPFNano(year='2017',samplesjson=None):
                 if samples:
                     if key in samples:
                         print(key)
-                        #print('key',key)
+                        # print('key',key)
                         #print('subdir', subdir)
                 else:
                     for dk in desired_keys:
                         if dk in key:
                             print(f'"{key}":4,')
                     #print('subdir', subdir)
+
 
 if __name__ == "__main__":
 
@@ -74,4 +78,4 @@ if __name__ == "__main__":
     parser.add_argument('--samples',     dest='samples',        default=None, help='path to datafiles', type=str)
     args = parser.parse_args()
 
-    printPFNano(args.year,args.samples)
+    printPFNano(args.year, args.samples)
