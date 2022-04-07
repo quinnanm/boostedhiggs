@@ -106,6 +106,7 @@ def make_stacked_hists(idir, odir, vars_to_plot, samples, years, channels, pfnan
                     xsec_weight = 1
 
                 parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
+                print(parquet_files)
                 if len(parquet_files) != 0:
                     print(f'Processing {ch} channel of sample', sample)
 
@@ -115,7 +116,7 @@ def make_stacked_hists(idir, odir, vars_to_plot, samples, years, channels, pfnan
                     except:
                         print('Not able to read data: ', parquet_file, ' should remove evts from scaling/lumi')
                         continue
-                    print(data)
+
                     for var in vars_to_plot[ch]:
                         if var not in data.keys():
                             # print(f'- No {var} for {year}/{ch} - skipping')
