@@ -254,11 +254,18 @@ class HwwProcessor(processor.ProcessorABC):
         self.selections = {}
         self.cutflows = {}
 
-        self.dataset_per_ch = {
-            "ele": "SingleElectron",
-            "mu": "SingleMuon",
-            "had": "JetHT",
-        }
+        if year == '2018':
+            self.dataset_per_ch = {
+                "ele": "EGamma",
+                "mu": "SingleMuon",
+                "had": "JetHT",
+            }
+        else:
+            self.dataset_per_ch = {
+                "ele": "SingleElectron",
+                "mu": "SingleMuon",
+                "had": "JetHT",
+            }
 
     @property
     def accumulator(self):

@@ -255,11 +255,18 @@ class HwwProcessor_nocuts(processor.ProcessorABC):
         self.selections = {}
         self.cutflows = {}
 
-        self.dataset_per_ch = {
-            "ele": "SingleElectron",
-            "mu": "SingleMuon",
-            "had": "JetHT",
-        }
+        if year == '2018':
+            self.dataset_per_ch = {
+                "ele": "EGamma",
+                "mu": "SingleMuon",
+                "had": "JetHT",
+            }
+        else:
+            self.dataset_per_ch = {
+                "ele": "SingleElectron",
+                "mu": "SingleMuon",
+                "had": "JetHT",
+            }
 
     @property
     def accumulator(self):
@@ -269,6 +276,7 @@ class HwwProcessor_nocuts(processor.ProcessorABC):
         if self._output_location is not None:
             table = pa.Table.from_pandas(dfs_dict)
             if len(table) != 0:     # skip dataframes with empty entries
+                print('len not zero')
                 pq.write_table(table, self._output_location + ch + '/parquet/' + fname + '.parquet')
 
     def save_dfs_parquet_jets(self, fname, dfs_dict, ch):
