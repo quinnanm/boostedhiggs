@@ -296,7 +296,7 @@ def plot_stacked_hists_years(odir, vars_to_plot, years, channels, pfnano, cut='p
                     'elinewidth': 2,
                 }
 
-                if '2018' in years:
+                if ('2018' in years) and (ch == 'ele'):
                     legend_label = get_simplified_label(data_label) + ' + EGamma'
                 else:
                     legend_label = get_simplified_label(data_label)
