@@ -332,7 +332,7 @@ def main(args):
 
     years = args.years.split(',')
     channels = args.channels.split(',')
-
+    print(years)
     # get samples to make histograms
     f = open(args.samples)
     json_samples = json.load(f)
