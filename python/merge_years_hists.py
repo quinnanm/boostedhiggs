@@ -135,6 +135,8 @@ def make_stacked_hists_years(tag, odir, vars_to_plot, samples, years, channels, 
                         for single_key, key in add_samples.items():
                             if key in sample:
                                 single_sample = single_key
+                        if 'EGamma' in sample:
+                            single_sample = 'SingleElectron'
 
                         # combining all pt bins of a specefic process under one name
                         if single_sample is not None:
