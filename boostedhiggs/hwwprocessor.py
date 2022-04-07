@@ -428,18 +428,18 @@ class HwwProcessor(processor.ProcessorABC):
         candidatefj_had = leadingfj
 
         # for leptonic channel: first clean jets and leptons by removing overlap, then pick candidate_fj closest to the lepton
-        # lep_in_fj_overlap_bool = good_fatjets.delta_r(candidatelep_p4) > 0.1
-        # good_fatjets = good_fatjets[lep_in_fj_overlap_bool]
-        # candidatefj_lep = ak.firsts(good_fatjets[ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)])      # get candidatefj for leptonic channel
+        lep_in_fj_overlap_bool = good_fatjets.delta_r(candidatelep_p4) > 0.1
+        good_fatjets = good_fatjets[lep_in_fj_overlap_bool]
+        candidatefj_lep = ak.firsts(good_fatjets[ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)])      # get candidatefj for leptonic channel
 
-        # for leptonic channel: pick candidate_fj closest to the MET
         # MET
         met = events.MET
         mt_lep_met = np.sqrt(
             2. * candidatelep_p4.pt * met.pt * (ak.ones_like(met.pt) - np.cos(candidatelep_p4.delta_phi(met)))
         )
 
-        candidatefj_lep = ak.firsts(good_fatjets[ak.argmin(good_fatjets.delta_phi(met), axis=1, keepdims=True)])      # get candidatefj for leptonic channel
+        # for leptonic channel: pick candidate_fj closest to the MET
+        # candidatefj_lep = ak.firsts(good_fatjets[ak.argmin(good_fatjets.delta_phi(met), axis=1, keepdims=True)])      # get candidatefj for leptonic channel
 
         # lepton and fatjet mass
         lep_fj_m = (candidatefj_lep - candidatelep_p4).mass  # mass of fatjet without lepton
@@ -639,10 +639,10 @@ class HwwProcessor(processor.ProcessorABC):
             out["trigger_iso"] = pad_val(trigger_iso[ch], -1)
             out["trigger_noiso"] = pad_val(trigger_noiso[ch], -1)
             out["leptonInJet"] = pad_val((lep_fj_dr < 0.8), -1)
-            out["anti_bjettag"] = pad_val((ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]), -1)
 
-            # out["anti_bjettag_ele"] = pad_val((ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]), -1)
-            # out["anti_bjettag_had"] = pad_val((ak.max(bjets_away_leadingfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]), -1)
+            out["anti_bjettag"] = pad_val((ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]), -1)  # TODO: remove because it's the same as below... for now convenient for previous plotting scripts
+            out["anti_bjettag_ele"] = pad_val((ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]), -1)
+            out["anti_bjettag_had"] = pad_val((ak.max(bjets_away_leadingfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]), -1)
 
             fill_output = True
             # for data, only fill output for that channel
