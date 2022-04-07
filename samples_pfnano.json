@@ -98,7 +98,7 @@
 	"ZJetsToQQ_HT-800toInf":0
     },
     "2017": {
-	"DYJetsToLL_Pt-100To250":1,
+	"DYJetsToLL_Pt-100To250":0,
 	"DYJetsToLL_Pt-250To400":0,
 	"DYJetsToLL_Pt-400To650":0,
 	"DYJetsToLL_Pt-50To100":0,
@@ -169,7 +169,6 @@
   "EGamma_Run2018C":1,
   "EGamma_Run2018D":1,
   "EGamma_Run2018A":1,
-
 	"GluGluHToWWToLNuQQ":0,
 	"JetHT_Run2018A":0,
 	"JetHT_Run2018B":0,
