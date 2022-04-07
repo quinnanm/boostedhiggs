@@ -87,9 +87,9 @@ color_by_sample = {
 
 add_samples = {
     'SingleElectron': 'SingleElectron',
+    'EGamma': 'SingleElectron',
     'SingleMuon': 'SingleMuon',
     'JetHT': 'JetHT',
-    'EGamma': 'EGamma',
     'QCD': 'QCD_Pt',
     'DYJets': 'DYJets',
     'ZQQ': 'ZJetsToQQ',

@@ -63,10 +63,7 @@ def make_stacked_hists_years(tag, odir, vars_to_plot, samples, years, channels, 
         f.close()
         print(f'Processing samples from year {year} with luminosity {luminosity[year]}')
 
-        if year == '2018':
-            data_label = data_by_ch_2018
-        else:
-            data_label = data_by_ch
+        data_label = data_by_ch
 
         xsec_weight_by_sample = {}
         # loop over the processed files and fill the histograms
@@ -232,10 +229,7 @@ def plot_stacked_hists_years(odir, vars_to_plot, years, channels, pfnano, cut='p
 
     # make the histogram plots in this directory
     for ch in channels:
-        if year == '2018':
-            data_label = data_by_ch_2018[ch]
-        else:
-            data_label = data_by_ch[ch]
+        data_label = data_by_ch[ch]
 
         for var in vars_to_plot[ch]:
             if hists[ch][var].shape[0] == 0:     # skip empty histograms (such as lepton_pt for hadronic channel)
@@ -387,7 +381,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as:  python merge_years_hists.py --years 2016,2017,2018 --odir hists_2018/stacked_hists --pfnano --make_hists --plot_hists --channels ele --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # run locally as:  python merge_years_hists.py --years 2016,2017,2018 --odir hists/stacked_hists --pfnano --make_hists --plot_hists --channels ele --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',            dest='years',          default='2017',                               help="year")
