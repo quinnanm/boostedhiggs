@@ -323,7 +323,7 @@ def plot_stacked_hists_years(odir, vars_to_plot, years, channels, pfnano, cut='p
             ax.set_title(f'{ch} channel \n with {cut} cut')
             ax.legend()
 
-            hep.cms.lumitext(f"combined (13 TeV)", ax=ax)
+            hep.cms.lumitext(f"combined (13 TeV) \n {years}", ax=ax)
             hep.cms.text("Work in Progress", ax=ax)
 
             if logy:
