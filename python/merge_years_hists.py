@@ -71,46 +71,46 @@ def make_stacked_hists_years(tag, odir, vars_to_plot, samples, years, channels, 
             for sample in samples[year][ch]:
                 is_data = False
 
-                for key in data_label.values():
-                    if key in sample:
-                        is_data = True
+                for key in data_label.values()):
+                    if (key in sample) or ('EGamma' in sample):
+                        is_data=True
 
                 if not is_data and sample not in xsec_weight_by_sample.keys():
-                    pkl_dir = f'{idir}/{sample}/outfiles/*.pkl'
-                    pkl_files = glob.glob(pkl_dir)  # get list of files that were processed
+                    pkl_dir=f'{idir}/{sample}/outfiles/*.pkl'
+                    pkl_files=glob.glob(pkl_dir)  # get list of files that were processed
                     if not pkl_files:  # skip samples which were not processed
                         print('- No processed files found...', pkl_dir, 'skipping sample...', sample)
                         continue
 
                     # Find xsection
-                    f = open('../fileset/xsec_pfnano.json')
+                    f=open('../fileset/xsec_pfnano.json')
 
-                    xsec = json.load(f)
+                    xsec=json.load(f)
                     f.close()
-                    xsec = eval(str((xsec[sample])))
+                    xsec=eval(str((xsec[sample])))
 
                     # Get sum_sumgenweight of sample
-                    sum_sumgenweight = get_sum_sumgenweight(idir, year, sample)
+                    sum_sumgenweight=get_sum_sumgenweight(idir, year, sample)
 
                     # Get overall weighting of events
                     # each event has (possibly a different) genweight... sumgenweight sums over events in a chunk... sum_sumgenweight sums over chunks
-                    xsec_weight = (xsec * luminosity[year]) / (sum_sumgenweight)
-                    xsec_weight_by_sample[sample] = xsec_weight
+                    xsec_weight=(xsec * luminosity[year]) / (sum_sumgenweight)
+                    xsec_weight_by_sample[sample]=xsec_weight
 
                 elif sample in xsec_weight_by_sample.keys():
-                    xsec_weight = xsec_weight_by_sample[sample]
+                    xsec_weight=xsec_weight_by_sample[sample]
 
                 else:
-                    xsec_weight = 1
+                    xsec_weight=1
 
-                parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
+                parquet_files=glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
 
                 if len(parquet_files) != 0:
                     print(f'Processing {ch} channel of sample', sample)
 
                 for parquet_file in parquet_files:
                     try:
-                        data = pq.read_table(parquet_file).to_pandas()
+                        data=pq.read_table(parquet_file).to_pandas()
                     except:
                         print('Not able to read data: ', parquet_file, ' should remove evts from scaling/lumi')
                         continue
@@ -123,27 +123,27 @@ def make_stacked_hists_years(tag, odir, vars_to_plot, samples, years, channels, 
                             continue
 
                         # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
-                        data = data[data[var] != -1]
+                        data=data[data[var] != -1]
 
                         try:
-                            event_weight = data['weight']
+                            event_weight=data['weight']
                         except:
-                            data['weight'] = 1  # for data fill a weight column with ones
+                            data['weight']=1  # for data fill a weight column with ones
 
                         # filling histograms
-                        single_sample = None
+                        single_sample=None
                         for single_key, key in add_samples.items():
                             if key in sample:
-                                single_sample = single_key
+                                single_sample=single_key
 
                         # combining all pt bins of a specefic process under one name
                         if single_sample is not None:
                             hists[ch][var].fill(
-                                years=year,
-                                samples=single_sample,
-                                cuts='preselection',
-                                var=data[var],
-                                weight=xsec_weight * data['weight'],
+                                years = year,
+                                samples = single_sample,
+                                cuts = 'preselection',
+                                var = data[var],
+                                weight = xsec_weight * data['weight'],
                             )
                             hists[ch][var].fill(
                                 years=year,
