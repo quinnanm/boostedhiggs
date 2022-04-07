@@ -453,7 +453,7 @@ class HwwProcessor(processor.ProcessorABC):
             name='leptonKin',
             sel=(candidatelep.pt > 30),
             channel=['mu']
-        # )
+        )
         # self.add_selection(
         #     name='oneLepton',
         #     sel=(n_good_muons == 1) & (n_good_electrons == 0) & (n_loose_electrons == 0) & ~ak.any(loose_muons & ~good_muons, 1),
@@ -474,7 +474,7 @@ class HwwProcessor(processor.ProcessorABC):
             name='leptonKin',
             sel=(candidatelep.pt > 40),
             channel=['ele']
-        # )
+        )
         # self.add_selection(
         #     name='oneLepton',
         #     sel=(n_good_muons == 0) & (n_loose_muons == 0) & (n_good_electrons == 1) & ~ak.any(loose_electrons & ~good_electrons, 1),
@@ -545,26 +545,26 @@ class HwwProcessor(processor.ProcessorABC):
         #     channel=['had']
         # )
 
-        variables={}
-        variables["lep_pt"]=pad_val(candidatelep.pt, -1)
-        variables["lep_isolation"]=pad_val(lep_reliso, -1)
-        variables["lep_misolation"]=pad_val(lep_miso, -1)
-        variables["lep_fj_m"]=pad_val(lep_fj_m, -1)
-        variables["lep_fj_bjets_ophem"]=pad_val(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1), -1)
-        variables["lep_fj_dr"]=pad_val(lep_fj_dr, -1)
-        variables["lep_mvaId"]=pad_val(mu_mvaId, -1)
-        variables["fj_msoftdrop"]=pad_val(candidatefj_lep.msoftdrop, -1)
-        variables["fj_pt"]=pad_val(candidatefj_lep.pt, -1)
-        variables["met"]=pad_val(met.pt, -1)
-        variables["ht"]=pad_val(ht, -1)
-        variables["fj0_msoftdrop"]=pad_val(leadingfj.msoftdrop, -1)
-        variables["fj0_pt"]=pad_val(leadingfj.pt, -1)
-        variables["fj0_pnh4q"]=pad_val(leadingfj.particleNet_H4qvsQCD, -1)
-        variables["fj1_msoftdrop"]=pad_val(secondfj.msoftdrop, -1)
-        variables["fj1_pt"]=pad_val(secondfj.pt, -1)
-        variables["fj1_pnh4q"]=pad_val(secondfj.particleNet_H4qvsQCD, -1)
-        variables["fj0_bjets_ophem"]=pad_val(ak.max(bjets_away_leadingfj.btagDeepFlavB, axis=1), -1)
-        variables["lep_met_mt"]=pad_val(mt_lep_met, -1)
+        variables = {}
+        variables["lep_pt"] = pad_val(candidatelep.pt, -1)
+        variables["lep_isolation"] = pad_val(lep_reliso, -1)
+        variables["lep_misolation"] = pad_val(lep_miso, -1)
+        variables["lep_fj_m"] = pad_val(lep_fj_m, -1)
+        variables["lep_fj_bjets_ophem"] = pad_val(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1), -1)
+        variables["lep_fj_dr"] = pad_val(lep_fj_dr, -1)
+        variables["lep_mvaId"] = pad_val(mu_mvaId, -1)
+        variables["fj_msoftdrop"] = pad_val(candidatefj_lep.msoftdrop, -1)
+        variables["fj_pt"] = pad_val(candidatefj_lep.pt, -1)
+        variables["met"] = pad_val(met.pt, -1)
+        variables["ht"] = pad_val(ht, -1)
+        variables["fj0_msoftdrop"] = pad_val(leadingfj.msoftdrop, -1)
+        variables["fj0_pt"] = pad_val(leadingfj.pt, -1)
+        variables["fj0_pnh4q"] = pad_val(leadingfj.particleNet_H4qvsQCD, -1)
+        variables["fj1_msoftdrop"] = pad_val(secondfj.msoftdrop, -1)
+        variables["fj1_pt"] = pad_val(secondfj.pt, -1)
+        variables["fj1_pnh4q"] = pad_val(secondfj.particleNet_H4qvsQCD, -1)
+        variables["fj0_bjets_ophem"] = pad_val(ak.max(bjets_away_leadingfj.btagDeepFlavB, axis=1), -1)
+        variables["lep_met_mt"] = pad_val(mt_lep_met, -1)
 
         # weights
         # TODO:
@@ -583,11 +583,11 @@ class HwwProcessor(processor.ProcessorABC):
         # - top pt reweighting for top
         # - psweights for signal
         if isMC:
-            weights=Weights(nevents, storeIndividual=True)
+            weights = Weights(nevents, storeIndividual=True)
             weights.add('genweight', events.genWeight)
             # self.btagCorr.addBtagWeight(bjets_away_lepfj, weights)
             # self.btagCorr.addBtagWeight(bjets_away_leadingfj, weights)
-            variables["weight"]=pad_val(weights.weight(), -1)
+            variables["weight"] = pad_val(weights.weight(), -1)
 
         # systematics
         # - trigger up/down (variable)
@@ -603,61 +603,61 @@ class HwwProcessor(processor.ProcessorABC):
 
         # higgs matching
         if (('HToWW' or 'HWW') in dataset) and isMC:
-            match_HWW_had=match_HWW(events.GenPart, candidatefj_had)
-            match_HWW_lep=match_HWW(events.GenPart, candidatefj_lep)
+            match_HWW_had = match_HWW(events.GenPart, candidatefj_had)
+            match_HWW_lep = match_HWW(events.GenPart, candidatefj_lep)
 
-            variables["had_nprongs"]=pad_val(match_HWW_had["hWW_nprongs"], -1)
-            variables["had_matchedH"]=pad_val(ak.firsts(match_HWW_had["matchedH"].pt), -1)
+            variables["had_nprongs"] = pad_val(match_HWW_had["hWW_nprongs"], -1)
+            variables["had_matchedH"] = pad_val(ak.firsts(match_HWW_had["matchedH"].pt), -1)
 
-            variables["lep_nprongs"]=pad_val(match_HWW_lep["hWW_nprongs"], -1)
-            variables["lep_iswlepton"]=pad_val(match_HWW_lep["iswlepton"], -1)
-            variables["lep_iswstarlepton"]=pad_val(match_HWW_lep["iswstarlepton"], -1)
-            variables["lep_matchedH"]=pad_val(ak.firsts(match_HWW_lep["matchedH"]).pt, -1)
+            variables["lep_nprongs"] = pad_val(match_HWW_lep["hWW_nprongs"], -1)
+            variables["lep_iswlepton"] = pad_val(match_HWW_lep["iswlepton"], -1)
+            variables["lep_iswstarlepton"] = pad_val(match_HWW_lep["iswstarlepton"], -1)
+            variables["lep_matchedH"] = pad_val(ak.firsts(match_HWW_lep["matchedH"]).pt, -1)
 
         if isMC:
             # get Z-boson
-            Z=getParticles(events.GenPart, lowid=23, highid=23, flags=['fromHardProcess', 'isLastCopy'])
-            Z=ak.firsts(Z)
-            lep_Z_dr=Z.delta_r(candidatelep_p4)   # get dr between Z and lepton
-            variables["Z_pt"]=pad_val(Z.pt, -1)
-            variables["lep_Z_dr"]=pad_val(lep_Z_dr, -1)
+            Z = getParticles(events.GenPart, lowid=23, highid=23, flags=['fromHardProcess', 'isLastCopy'])
+            Z = ak.firsts(Z)
+            lep_Z_dr = Z.delta_r(candidatelep_p4)   # get dr between Z and lepton
+            variables["Z_pt"] = pad_val(Z.pt, -1)
+            variables["lep_Z_dr"] = pad_val(lep_Z_dr, -1)
 
         # initialize pandas dataframe
-        output={}
+        output = {}
         for ch in self._channels:
-            out={}
+            out = {}
             for var in self._skimvars[ch]:
                 if var in variables.keys():
-                    out[var]=variables[var]
-            out["trigger_iso"]=pad_val(trigger_iso[ch], -1)
-            out["trigger_noiso"]=pad_val(trigger_noiso[ch], -1)
-            out["leptonInJet"]=pad_val((lep_fj_dr < 0.8), -1)
-            out["anti_bjettag"]=pad_val((ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]), -1)
+                    out[var] = variables[var]
+            out["trigger_iso"] = pad_val(trigger_iso[ch], -1)
+            out["trigger_noiso"] = pad_val(trigger_noiso[ch], -1)
+            out["leptonInJet"] = pad_val((lep_fj_dr < 0.8), -1)
+            out["anti_bjettag"] = pad_val((ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]), -1)
             # out["anti_bjettag_ele"] = pad_val((ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]), -1)
             # out["anti_bjettag_had"] = pad_val((ak.max(bjets_away_leadingfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]), -1)
 
-            fill_output=True
+            fill_output = True
             # for data, only fill output for that channel
             if not isMC and self.dataset_per_ch[ch] not in dataset:
-                fill_output=False
+                fill_output = False
             # only fill output for that channel if the selections yield any events
             if np.sum(self.selections[ch].all(*self.selections[ch].names)) <= 0:
-                fill_output=False
+                fill_output = False
 
             if fill_output:
-                output[ch]={
+                output[ch] = {
                     key: value[self.selections[ch].all(*self.selections[ch].names)] for (key, value) in out.items()
                 }
             else:
-                output[ch]={}
+                output[ch] = {}
 
             # convert arrays to pandas
             if not isinstance(output[ch], pd.DataFrame):
-                output[ch]=self.ak_to_pandas(output[ch])
+                output[ch] = self.ak_to_pandas(output[ch])
 
         # now save pandas dataframes
-        fname=events.behavior["__events_factory__"]._partition_key.replace("/", "_")
-        fname='condor_' + fname
+        fname = events.behavior["__events_factory__"]._partition_key.replace("/", "_")
+        fname = 'condor_' + fname
 
         for ch in self._channels:  # creating directories for each channel
             if not os.path.exists(self._output_location + ch):
