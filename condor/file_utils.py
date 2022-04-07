@@ -23,6 +23,8 @@ def loadJson(samplesjson="python/configs/samples_pfnano.json", year='2017', pfna
         if pfnano:
             for subdir in files[year]:
                 for key, flist in files[year][subdir].items():
+                    print('key', key)
+                    print('samples', samples)
 
                     if key in samples:
                         print(f)
