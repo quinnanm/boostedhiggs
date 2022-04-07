@@ -247,6 +247,8 @@ def plot_stacked_hists_years(odir, vars_to_plot, years, channels, pfnano, cut='p
             data = None
 
             if (data_label in samples) or ('EGamma' in samples):
+                print(data_label)
+                print(h)
                 data = h[{"samples": data_label, 'cuts': cut}][{'years': years}][{'years': sum}]
 
             # signal
