@@ -252,12 +252,12 @@ def plot_stacked_hists_years(odir, vars_to_plot, years, channels, pfnano, cut='p
                 data = h[{"samples": data_label, 'cuts': cut}][{'years': years}][{'years': sum}]
 
             # signal
-            signal = [h[{"samples": label, "cuts": cut}][{'years': years}][{'years': sum}]] for label in signal_labels]
+            signal = [h[{"samples": label, "cuts": cut}][{'years': years}][{'years': sum}] for label in signal_labels]
             if not logy:
                 signal = [s * 10 for s in signal]  # if not log, scale the signal
 
             # background
-            bkg = [h[{"samples": label, "cuts": cut}][{'years': years}][{'years': sum}]] for label in bkg_labels]
+            bkg = [h[{"samples": label, "cuts": cut}][{'years': years}][{'years': sum}] for label in bkg_labels]
 
             # print(data,signal,bkg)
 
