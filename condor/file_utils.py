@@ -5,7 +5,8 @@ def loadJson(samplesjson="samples_pfnano.json", year='2017', pfnano=True):
     samples = []
     values = {}
     with open(samplesjson, 'r') as f:
-        json_samples = json.load(f)[year]
+        # json_samples = json.load(f)[year] # TODO
+        json_samples = json.load(f)['2016']
         for key, value in json_samples.items():
             if value != 0:
                 samples.append(key)
@@ -14,7 +15,6 @@ def loadJson(samplesjson="samples_pfnano.json", year='2017', pfnano=True):
 
     fname = f"fileset/pfnanoindex_{year}.json"
 
-    print('samples', samples)
     fileset = {}
     with open(fname, 'r') as f:
         files = json.load(f)
