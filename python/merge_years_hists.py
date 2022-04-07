@@ -248,11 +248,10 @@ def plot_stacked_hists_years(odir, vars_to_plot, years, channels, pfnano, cut='p
 
             # data
             data = None
-            print('samples', samples)
+
             if (data_label in samples) or ('EGamma' in samples):
-                print('lol')
-                print(data_label)
                 data = h[{"samples": data_label, 'cuts': cut}][{'years': years}][{'years': sum}]
+
             # signal
             signal = [h[{"samples": label, "cuts": cut}][{'years': years}][{'years': sum}] for label in signal_labels]
             if not logy:
@@ -305,12 +304,18 @@ def plot_stacked_hists_years(odir, vars_to_plot, years, channels, pfnano, cut='p
                     'markersize': 12.,
                     'elinewidth': 2,
                 }
+
+                if '2018' in years:
+                    legend_label = get_simplified_label(data_label) + 'EGamma'
+                else:
+                    legend_label = get_simplified_label(data_label)
+
                 hep.histplot(data,
                              ax=ax,
                              histtype="errorbar",
                              color="k",
                              yerr=True,
-                             label=get_simplified_label(data_label),
+                             label=legend_label,
                              **data_err_opts
                              )
 
