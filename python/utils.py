@@ -45,10 +45,10 @@ def get_sum_sumgenweight(idir, year, sample):
         # load and sum the sumgenweight of each
         with open(file, 'rb') as f:
             metadata = pkl.load(f)
-        try:  # to use 2017 signal for 2016
-            sum_sumgenweight = sum_sumgenweight + metadata[sample][year]['sumgenweight']
-        except:
-            sum_sumgenweight = sum_sumgenweight + metadata[sample]['2017']['sumgenweight']  # TODO: remove it
+        # try:  # to use 2017 signal for 2016
+        sum_sumgenweight = sum_sumgenweight + metadata[sample][year]['sumgenweight']
+        # except:
+        # sum_sumgenweight = sum_sumgenweight + metadata[sample]['2017']['sumgenweight']  # TODO: remove it
 
     return sum_sumgenweight
 
