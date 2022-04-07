@@ -24,7 +24,7 @@ def loadJson(samplesjson="python/configs/samples_pfnano.json", year='2017', pfna
             for subdir in files[year]:
                 for key, flist in files[year][subdir].items():
                     if key in samples:
-                        print(f)
+                        print(flist)
                         fileset[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist]
         else:
             for key, flist in files.items():
