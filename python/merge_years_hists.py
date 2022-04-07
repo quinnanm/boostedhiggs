@@ -244,7 +244,6 @@ def plot_stacked_hists_years(odir, vars_to_plot, years, channels, pfnano, cut='p
             samples = [h.axes[1].value(i) for i in range(len(h.axes[1].edges))]
             signal_labels = [label for label in samples if label in signal_by_ch[ch]]
             bkg_labels = [label for label in samples if (label and label != data_label and label not in signal_labels)]
-            print('h', h)
 
             # data
             data = None
@@ -259,14 +258,6 @@ def plot_stacked_hists_years(odir, vars_to_plot, years, channels, pfnano, cut='p
 
             # background
             bkg = [h[{"samples": label, "cuts": cut}][{'years': years}][{'years': sum}] for label in bkg_labels]
-
-            print('data', data)
-            print('------------------------------------------')
-            print('signal', signal)
-            print('------------------------------------------')
-            print('bkg', bkg)
-
-            # print(data,signal,bkg)
 
             if add_data and data and len(bkg) > 0:
                 fig, (ax, rax) = plt.subplots(nrows=2,
@@ -306,7 +297,7 @@ def plot_stacked_hists_years(odir, vars_to_plot, years, channels, pfnano, cut='p
                 }
 
                 if '2018' in years:
-                    legend_label = get_simplified_label(data_label) + 'EGamma'
+                    legend_label = get_simplified_label(data_label) + ' + EGamma'
                 else:
                     legend_label = get_simplified_label(data_label)
 
