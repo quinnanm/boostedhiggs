@@ -53,5 +53,8 @@ for subdir, dirs, files in os.walk(indir):
             # fill dataframe to rootfile
             # array2root(data.to_records(index=False), filename=outname, treename=args.treename, mode='RECREATE') #dont use, requires root
             file = uproot.recreate(outname)
-            file[args.treename] = uproot.newtree(data)
+
+            with uproot.recreate(outname) as file:
+                file[args.treename] = uproot.newtree(data)
+
             print('Wrote rootfile ', outname)
