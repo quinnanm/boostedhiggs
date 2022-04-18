@@ -107,7 +107,10 @@ def count_events(idir, odir, samples, years, channels):
                             num_events[year][sample][ch]['dr'] = num_events[year][sample][ch]['dr'] + len(data[data["leptonInJet"] == 1])
                             num_events[year][sample][ch]['btagdr'] = num_events[year][sample][ch]['btagdr'] + len(data[data["anti_bjettag"] == 1][data["leptonInJet"] == 1])
                 if ch == 'had':
-                    print(f"Sample {sample} has {num_events[year][sample][ch]['preselection']} events after cuts")
+                    try:
+                        print(f"Sample {sample} has {num_events[year][sample][ch]['preselection']} events after cuts")
+                    except:
+                        print(f"Sample {single_sample} has {num_events[year][single_sample][ch]['preselection']} events after cuts")
 
     with open(f'{odir}/counts_{channels[0]}.pkl', 'wb') as f:  # dump the counts for further plotting
         pkl.dump(num_events, f)
