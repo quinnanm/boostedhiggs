@@ -50,5 +50,5 @@ for subdir, dirs, files in os.walk(indir):
             # array2root(data.to_records(index=False), filename=outname, treename=args.treename, mode='RECREATE') #dont use, requires root
             print(outname)
             file = uproot.recreate(outname)
-            file[args.treename] = uproot.newtree(data)
-            print('Wrote rootfile ', outname)
+            # file[args.treename] = uproot.newtree(data)
+            # print('Wrote rootfile ', outname)
