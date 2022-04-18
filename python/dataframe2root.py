@@ -23,6 +23,10 @@ filetype = '.parquet'
 outdir = './rootfiles/'
 print(args.proc + ' must be in file')
 
+# make directory to hold rootfiles
+if not os.path.exists('./rootfiles'):
+    os.makedirs('./rootfiles')
+
 for subdir, dirs, files in os.walk(indir):
     for file in files:
         # load files
@@ -48,7 +52,6 @@ for subdir, dirs, files in os.walk(indir):
 
             # fill dataframe to rootfile
             # array2root(data.to_records(index=False), filename=outname, treename=args.treename, mode='RECREATE') #dont use, requires root
-            print(outname)
             file = uproot.recreate(outname)
-            # file[args.treename] = uproot.newtree(data)
-            # print('Wrote rootfile ', outname)
+            file[args.treename] = uproot.newtree(data)
+            print('Wrote rootfile ', outname)
