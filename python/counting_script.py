@@ -86,7 +86,10 @@ def count_events(idir, odir, samples, years, channels):
                         continue
 
                     # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
-                    data = data[data['fj_pt'] != -1]
+                    try:
+                        data = data[data['fj_pt'] != -1]
+                    except:
+                        data = data[data['fj0_pt'] != -1]
 
                     single_sample = None
                     for single_key, key in add_samples.items():
@@ -101,6 +104,7 @@ def count_events(idir, odir, samples, years, channels):
                         num_events[year][sample][ch]['preselection'] = num_events[year][sample][ch]['preselection'] + len(data)
                         num_events[year][sample][ch]['dr'] = num_events[year][sample][ch]['dr'] + len(data[data["leptonInJet"] == 1])
                         num_events[year][sample][ch]['btagdr'] = num_events[year][sample][ch]['btagdr'] + len(data[data["anti_bjettag"] == 1][data["leptonInJet"] == 1])
+                print(f'Sample {sample} has {num_events[year][single_sample][ch]['btagdr']} events after btagdr cut')
 
     with open(f'{odir}/counts_{channels[0]}.pkl', 'wb') as f:  # dump the counts for further plotting
         pkl.dump(num_events, f)
@@ -170,7 +174,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # python counting_script.py --year 2017 --odir counts --channels ele,mu --compute_counts --plot_counts --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # python counting_script.py --year 2017 --odir counts --channels had --compute_counts --plot_counts --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',           dest='years',              default='2017',                                help="year")
