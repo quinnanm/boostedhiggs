@@ -142,7 +142,7 @@ def make_1dhists_ratio(idir, odir, samples, years, ch, vars, bins, start, end, c
         pkl.dump(hists, f)
 
 
-def plot_1dhists_ratio(odir, years, channels, vars, cut='preselection'):
+def plot_1dhists_ratio(odir, years, ch, vars, cut='preselection'):
     """
     Plots the 1D histograms of a ratio of two variables that were made by "make_1dhists_ratio" function
 
@@ -154,7 +154,7 @@ def plot_1dhists_ratio(odir, years, channels, vars, cut='preselection'):
     print(f'plotting for {cut} cut')
 
     # load the hists
-    with open(f'{odir}/1d_hists_ratio_{vars[0]}_{vars[1]}.pkl', 'rb') as f:
+    with open(f'{odir}/{ch}_1d_hists_ratio_{vars[0]}_{vars[1]}.pkl', 'rb') as f:
         hists = pkl.load(f)
         f.close()
 
@@ -165,19 +165,18 @@ def plot_1dhists_ratio(odir, years, channels, vars, cut='preselection'):
         if not os.path.exists(f'{odir}/plots_{year}/ratio_{vars[0]}_{vars[1]}'):
             os.makedirs(f'{odir}/plots_{year}/ratio_{vars[0]}_{vars[1]}')
         # make plots per channel
-        for ch in channels:
-            for sample in hists[year].axes[1]:
-                fig, ax = plt.subplots(figsize=(8, 5))
-                hep.histplot(hists[year][{'samples': sample, 'cuts': cut}], ax=ax)
-                ax.set_xlabel(f"{vars[0]}/{vars[1]}")
-                ax.set_title(f'{ch} channel for \n {sample} \n with {cut} cut')
-                hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
-                hep.cms.text("Work in Progress", ax=ax)
-                plt.savefig(f'{odir}/plots_{year}/ratio_{vars[0]}_{vars[1]}/{ch}_{sample}_{cut}.pdf')
-                plt.close()
+        for sample in hists[year].axes[1]:
+            fig, ax = plt.subplots(figsize=(8, 5))
+            hep.histplot(hists[year][{'samples': sample, 'cuts': cut}], ax=ax)
+            ax.set_xlabel(f"{vars[0]}/{vars[1]}")
+            ax.set_title(f'{ch} channel for \n {sample} \n with {cut} cut')
+            hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
+            hep.cms.text("Work in Progress", ax=ax)
+            plt.savefig(f'{odir}/plots_{year}/ratio_{vars[0]}_{vars[1]}/{ch}_{sample}_{cut}.pdf')
+            plt.close()
 
 
-def plot_1dhists_ratio_compare_cuts(odir, years, channels, vars):
+def plot_1dhists_ratio_compare_cuts(odir, years, ch, vars):
     """
     Plots the 1D histograms of a ratio of two variables that were made by "make_1dhists_ratio" function,
     with all cuts shown on the same plot for comparison
@@ -189,7 +188,7 @@ def plot_1dhists_ratio_compare_cuts(odir, years, channels, vars):
     print(f'plotting all cuts on same plot for comparison')
 
     # load the hists
-    with open(f'{odir}/1d_hists_ratio_{vars[0]}_{vars[1]}.pkl', 'rb') as f:
+    with open(f'{odir}/{ch}_1d_hists_ratio_{vars[0]}_{vars[1]}.pkl', 'rb') as f:
         hists = pkl.load(f)
         f.close()
 
@@ -200,18 +199,17 @@ def plot_1dhists_ratio_compare_cuts(odir, years, channels, vars):
         if not os.path.exists(f'{odir}/plots_{year}/ratio_{vars[0]}_{vars[1]}'):
             os.makedirs(f'{odir}/plots_{year}/ratio_{vars[0]}_{vars[1]}')
         # make plots per channel
-        for ch in channels:
-            for sample in hists[year].axes[1]:
-                fig, ax = plt.subplots(figsize=(8, 5))
-                hep.histplot(hists[year][{'samples': sample, 'cuts': 'preselection'}],  ax=ax, label='preselection')
-                hep.histplot(hists[year][{'samples': sample, 'cuts': 'btagdr'}],        ax=ax, label='preselection + btag + leptonInJet')
-                ax.set_xlabel(f"{vars[0]}/{vars[1]}")
-                ax.set_title(f'{ch} channel for \n {sample}')
-                ax.legend()
-                hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
-                hep.cms.text("Work in Progress", ax=ax)
-                plt.savefig(f'{odir}/plots_{year}/ratio_{vars[0]}_{vars[1]}/{ch}_{sample}_all_cuts_comparison.pdf')
-                plt.close()
+        for sample in hists[year].axes[1]:
+            fig, ax = plt.subplots(figsize=(8, 5))
+            hep.histplot(hists[year][{'samples': sample, 'cuts': 'preselection'}],  ax=ax, label='preselection')
+            hep.histplot(hists[year][{'samples': sample, 'cuts': 'btagdr'}],        ax=ax, label='preselection + btag + leptonInJet')
+            ax.set_xlabel(f"{vars[0]}/{vars[1]}")
+            ax.set_title(f'{ch} channel for \n {sample}')
+            ax.legend()
+            hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
+            hep.cms.text("Work in Progress", ax=ax)
+            plt.savefig(f'{odir}/plots_{year}/ratio_{vars[0]}_{vars[1]}/{ch}_{sample}_all_cuts_comparison.pdf')
+            plt.close()
 
 
 def main(args):
