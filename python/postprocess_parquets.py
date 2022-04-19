@@ -34,7 +34,7 @@ warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 def append_correct_weights(idir, samples, years, channels):
     """
-    Updates the processed parquet daraftames by appending the correct scaling factor/weight per event
+    Updates the processed parquet daraftames by appending the correct scaling factor/weight per event as new column 'tot_weight'
 
     Args:
         samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
