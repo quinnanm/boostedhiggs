@@ -95,6 +95,7 @@ class HwwProcessor(processor.ProcessorABC):
                 "weight",
                 "Z_pt",
                 "lep_Z_dr",
+                "lep_matchedH"
             ],
             'mu': [
                 "lep_pt",
@@ -118,6 +119,7 @@ class HwwProcessor(processor.ProcessorABC):
                 "weight",
                 "Z_pt",
                 "lep_Z_dr",
+                "lep_matchedH"
             ],
             'had': [
                 "fj0_msoftdrop",
@@ -132,6 +134,7 @@ class HwwProcessor(processor.ProcessorABC):
                 "had_machedH",
                 "had_nprongs",
                 "weight",
+                "had_matchedH",
             ],
         }
 
