@@ -119,7 +119,7 @@ def main(args):
                 if value == 1:
                     samples[year][ch].append(key)
 
-    append_correct_weights(args.idir, args.samples, years, channels)
+    append_correct_weights(args.idir, samples, years, channels)
 
 
 if __name__ == "__main__":
