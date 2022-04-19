@@ -146,24 +146,13 @@ def make_stacked_hists(idir, odir, vars_to_plot, samples, years, channels, pfnan
                                 var=data[var],
                                 weight=xsec_weight * data['weight'],
                             )
-                            hists[year][ch][var].fill(
-                                samples=single_sample,
-                                cuts='btag',
-                                var=data[var][data["anti_bjettag"] == 1],
-                                weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1],
-                            )
-                            hists[year][ch][var].fill(
-                                samples=single_sample,
-                                cuts='dr',
-                                var=data[var][data["leptonInJet"] == 1],
-                                weight=xsec_weight * data['weight'][data["leptonInJet"] == 1],
-                            )
-                            hists[year][ch][var].fill(
-                                samples=single_sample,
-                                cuts='btagdr',
-                                var=data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
-                                weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
-                            )
+                            if ch != 'had':
+                                hists[year][ch][var].fill(
+                                    samples=single_sample,
+                                    cuts='btagdr',
+                                    var=data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
+                                    weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
+                                )
                         # otherwise give unique name
                         else:
                             hists[year][ch][var].fill(
@@ -172,24 +161,13 @@ def make_stacked_hists(idir, odir, vars_to_plot, samples, years, channels, pfnan
                                 var=data[var],
                                 weight=xsec_weight * data['weight'],
                             )
-                            hists[year][ch][var].fill(
-                                samples=sample,
-                                cuts='btag',
-                                var=data[var][data["anti_bjettag"] == 1],
-                                weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1],
-                            )
-                            hists[year][ch][var].fill(
-                                samples=sample,
-                                cuts='dr',
-                                var=data[var][data["leptonInJet"] == 1],
-                                weight=xsec_weight * data['weight'][data["leptonInJet"] == 1],
-                            )
-                            hists[year][ch][var].fill(
-                                samples=sample,
-                                cuts='btagdr',
-                                var=data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
-                                weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
-                            )
+                            if ch != 'had':
+                                hists[year][ch][var].fill(
+                                    samples=sample,
+                                    cuts='btagdr',
+                                    var=data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
+                                    weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
+                                )
 
     # TODO: combine histograms for all years here and flag them as year='combined'
 
@@ -359,18 +337,18 @@ def main(args):
             if value == 1:
                 vars_to_plot[ch].append(key)
 
-    if args.make_hists:
-        print('Making histograms...')
-        make_stacked_hists(args.idir, args.odir, vars_to_plot, samples, years, channels, args.pfnano)
+    for ch in channels:
+        if ch == 'had':
+            cuts = ['preselection']
+        else:
+            cuts = ['preselection', 'btagdr']
 
-    if args.plot_hists:
-        print('Plotting histograms...')
+        if args.make_hists:
+            print('Making histograms...')
+            make_stacked_hists(args.idir, args.odir, vars_to_plot, samples, years, [ch], args.pfnano)
 
-        for ch in channels:
-            if ch == 'had':
-                cuts = ['preselection']
-            else:
-                cuts = ['preselection', 'btagdr']
+        if args.plot_hists:
+            print('Plotting histograms...')
 
             for cut in cuts:
                 plot_stacked_hists(args.odir, vars_to_plot, years, [ch], args.pfnano, cut, logy=True)

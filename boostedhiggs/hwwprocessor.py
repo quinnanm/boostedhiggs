@@ -646,9 +646,8 @@ class HwwProcessor(processor.ProcessorABC):
                     out[var] = variables[var]
             out["trigger_iso"] = pad_val(trigger_iso[ch], -1)
             out["trigger_noiso"] = pad_val(trigger_noiso[ch], -1)
-            out["leptonInJet"] = pad_val((lep_fj_dr < 0.8), -1)
 
-            out["anti_bjettag"] = pad_val((ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]), -1)  # TODO: remove because it's the same as below... for now convenient for previous plotting scripts
+            out["leptonInJet"] = pad_val((lep_fj_dr < 0.8), -1)
             out["anti_bjettag_ele"] = pad_val((ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]), -1)
             out["anti_bjettag_had"] = pad_val((ak.max(bjets_away_candidatefj_had.btagDeepFlavB, axis=1) < self._btagWPs["M"]), -1)
 

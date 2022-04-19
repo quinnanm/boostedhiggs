@@ -32,7 +32,7 @@ import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
-def make_1dhists(idir, odir, samples, years, channels, var, bins, range):
+def make_1dhists(idir, odir, samples, years, channels, var, bins, range, cuts):
     """
     Makes 1D histograms
 
@@ -81,7 +81,8 @@ def make_1dhists(idir, odir, samples, years, channels, var, bins, range):
                         continue
 
                     # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
-                    data = data[data[var] != -1]
+                    if ch != 'had':
+                        data = data[data['fj_pt'] != -1]
 
                     single_sample = None
                     for single_key, key in add_samples.items():
@@ -94,49 +95,30 @@ def make_1dhists(idir, odir, samples, years, channels, var, bins, range):
                             single_sample,  # combining all events under one name
                             cuts='preselection'
                         )
-                        hists[year][ch].fill(
-                            data[var][data["anti_bjettag"] == 1],
-                            single_sample,  # combining all events under one name
-                            cuts='btag'
-                        )
-                        hists[year][ch].fill(
-                            data[var][data["leptonInJet"] == 1],
-                            single_sample,  # combining all events under one name
-                            cuts='dr'
-                        )
-                        hists[year][ch].fill(
-                            data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
-                            single_sample,  # combining all events under one name
-                            cuts='btagdr'
-                        )
+                        if ch != 'had':
+                            hists[year][ch].fill(
+                                data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
+                                single_sample,  # combining all events under one name
+                                cuts='btagdr'
+                            )
                     else:
                         hists[year][ch].fill(
                             data[var],
                             sample,
                             cuts='preselection'
                         )
-                        hists[year][ch].fill(
-                            data[var][data["anti_bjettag"] == 1],
-                            sample,
-                            cuts='btag'
-                        )
-                        hists[year][ch].fill(
-                            data[var][data["leptonInJet"] == 1],
-                            sample,
-                            cuts='dr'
-                        )
-                        hists[year][ch].fill(
-                            data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
-                            sample,
-                            cuts='btagdr'
-                        )
+                        if ch != 'had':
+                            hists[year][ch].fill(
+                                data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
+                                sample,
+                                cuts='btagdr'
+                            )
 
                     num_events['preselection'] = num_events['preselection'] + len(data[var])
-                    num_events['btag'] = num_events['btag'] + len(data[var][data["anti_bjettag"] == 1])
-                    num_events['dr'] = num_events['dr'] + len(data[var][data["leptonInJet"] == 1])
-                    num_events['btagdr'] = num_events['btagdr'] + len(data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1])
+                    if ch != 'had':
+                        num_events['btagdr'] = num_events['btagdr'] + len(data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1])
 
-                for cut in ['preselection', 'btag', 'dr', 'btagdr']:
+                for cut in cuts:
                     print(f"Num of events after {cut} cut is: {num_events[cut]}")
     print("------------------------------------------------------------")
 
@@ -267,14 +249,20 @@ def main(args):
 
     print(f'Plotting {args.var} histogram')
 
-    if args.make_hists:
-        make_1dhists(args.idir, args.odir, samples, years, channels, args.var, args.bins, range)
+    for ch in channels:
+        if ch == 'had':
+            cuts = ['preselection']
+        else:
+            cuts = ['preselection', 'btagdr']
 
-    if args.plot_hists:
-        for cut in ['preselection', 'dr', 'btag', 'btagdr']:
-            plot_1dhists(args.odir, years, channels, args.var, cut)
+        if args.make_hists:
+            make_1dhists(args.idir, args.odir, samples, years, [ch], args.var, args.bins, range, cuts)
 
-        plot_1dhists_compare_cuts(args.odir, years, channels, args.var)
+        if args.plot_hists:
+            for cut in cuts:
+                plot_1dhists(args.odir, years, [ch], args.var, cut)
+
+            plot_1dhists_compare_cuts(args.odir, years, [ch], args.var)
 
 
 if __name__ == "__main__":
