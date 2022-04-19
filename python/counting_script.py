@@ -86,9 +86,9 @@ def count_events(idir, odir, samples, years, channels):
                         continue
 
                     # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
-                    try:
+                    if ch != 'had':
                         data = data[data['fj_pt'] != -1]
-                    except:
+                    elif ch == 'had':
                         data = data[data['fj0_pt'] != -1]
 
                     single_sample = None

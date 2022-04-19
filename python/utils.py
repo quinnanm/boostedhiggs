@@ -40,7 +40,7 @@ def get_simplified_label(sample):   # get simplified "alias" names of the sample
 
 def get_sum_sumgenweight(idir, year, sample):
     pkl_files = glob.glob(f'{idir}/{sample}/outfiles/*.pkl')  # get the pkl metadata of the pkl files that were processed
-    sum_sumgenweight = 1  # TODO why not 0
+    sum_sumgenweight = 0
     for file in pkl_files:
         # load and sum the sumgenweight of each
         with open(file, 'rb') as f:

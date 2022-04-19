@@ -52,9 +52,9 @@ for subdir, dirs, files in os.walk(indir):
 
             # fill dataframe to rootfile
             # array2root(data.to_records(index=False), filename=outname, treename=args.treename, mode='RECREATE') #dont use, requires root
-            file = uproot.recreate(outname)
-
             with uproot.recreate(outname) as file:
                 file[args.treename] = data
 
             print('Wrote rootfile ', outname)
+
+            # you can further do hadd name_merged.root files*.root to merge the files per sample
