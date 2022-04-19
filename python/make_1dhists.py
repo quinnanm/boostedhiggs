@@ -262,7 +262,8 @@ def main(args):
             for cut in cuts:
                 plot_1dhists(args.odir, years, [ch], args.var, cut)
 
-            plot_1dhists_compare_cuts(args.odir, years, [ch], args.var)
+            if len(cuts) > 1:  # if there's more than one cut make comparisons
+                plot_1dhists_compare_cuts(args.odir, years, [ch], args.var)
 
 
 if __name__ == "__main__":
