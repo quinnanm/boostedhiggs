@@ -70,7 +70,7 @@ def append_correct_weights(idir, samples, years, channels):
                     if ch != 'had':
                         data = data[data['fj_pt'] != -1]
                     elif ch == 'had':
-                        b4 = len(data)
+                        bf = len(data)
                         data = data[data['fj0_pt'] != -1]
                         af = len(data)
                         if (bf != af):
