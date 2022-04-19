@@ -449,8 +449,8 @@ class HwwProcessor(processor.ProcessorABC):
         dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj_lep))
         bjets_away_lepfj = goodjets[dphi_jet_lepfj > np.pi / 2]
 
-        dphi_jet_leadingfj = abs(goodjets.delta_phi(leadingfj))
-        bjets_away_leadingfj = goodjets[dphi_jet_leadingfj > np.pi / 2]
+        dphi_jet_candidatefj_had = abs(goodjets.delta_phi(candidatefj_had))
+        bjets_away_candidatefj_had = goodjets[dphi_jet_candidatefj_had > np.pi / 2]
 
         # deltaR
         lep_fj_dr = candidatefj_lep.delta_r(candidatelep_p4)
@@ -509,6 +509,11 @@ class HwwProcessor(processor.ProcessorABC):
         #     channel=['mu', 'ele']
         # )
         self.add_selection(
+            name='fatjetKin',
+            sel=candidatefj_lep.pt > 200,
+            channel=['mu', 'ele']
+        )
+        self.add_selection(
             name='ht',
             sel=(ht > 200),
             channel=['mu', 'ele']
@@ -528,22 +533,22 @@ class HwwProcessor(processor.ProcessorABC):
         )
         self.add_selection(
             name='fatjetKin',
-            sel=leadingfj.pt > 300,
+            sel=candidatefj_had.pt > 300,
             channel=['had']
         )
         self.add_selection(
             name='fatjetSoftdrop',
-            sel=leadingfj.msoftdrop > 30,
+            sel=candidatefj_had.msoftdrop > 30,
             channel=['had']
         )
         self.add_selection(
             name='qcdrho',
-            sel=(leadingfj.qcdrho > -7) & (leadingfj.qcdrho < -2.0),
+            sel=(candidatefj_had.qcdrho > -7) & (candidatefj_had.qcdrho < -2.0),
             channel=['had']
         )
         # self.add_selection(
         #     name='anti_bjettag',
-        #     sel=(ak.max(bjets_away_leadingfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
+        #     sel=(ak.max(bjets_away_candidatefj_had.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
         #     channel=['had']
         # )
         self.add_selection(
@@ -564,13 +569,13 @@ class HwwProcessor(processor.ProcessorABC):
         variables["fj_pt"] = pad_val(candidatefj_lep.pt, -1)
         variables["met"] = pad_val(met.pt, -1)
         variables["ht"] = pad_val(ht, -1)
-        variables["fj0_msoftdrop"] = pad_val(leadingfj.msoftdrop, -1)
-        variables["fj0_pt"] = pad_val(leadingfj.pt, -1)
-        variables["fj0_pnh4q"] = pad_val(leadingfj.particleNet_H4qvsQCD, -1)
+        variables["fj0_msoftdrop"] = pad_val(candidatefj_had.msoftdrop, -1)
+        variables["fj0_pt"] = pad_val(candidatefj_had.pt, -1)
+        variables["fj0_pnh4q"] = pad_val(candidatefj_had.particleNet_H4qvsQCD, -1)
         variables["fj1_msoftdrop"] = pad_val(secondfj.msoftdrop, -1)
         variables["fj1_pt"] = pad_val(secondfj.pt, -1)
         variables["fj1_pnh4q"] = pad_val(secondfj.particleNet_H4qvsQCD, -1)
-        variables["fj0_bjets_ophem"] = pad_val(ak.max(bjets_away_leadingfj.btagDeepFlavB, axis=1), -1)
+        variables["fj0_bjets_ophem"] = pad_val(ak.max(bjets_away_candidatefj_had.btagDeepFlavB, axis=1), -1)
         variables["lep_met_mt"] = pad_val(mt_lep_met, -1)
 
         # weights
@@ -593,7 +598,7 @@ class HwwProcessor(processor.ProcessorABC):
             weights = Weights(nevents, storeIndividual=True)
             weights.add('genweight', events.genWeight)
             # self.btagCorr.addBtagWeight(bjets_away_lepfj, weights)
-            # self.btagCorr.addBtagWeight(bjets_away_leadingfj, weights)
+            # self.btagCorr.addBtagWeight(bjets_away_candidatefj_had, weights)
             variables["weight"] = pad_val(weights.weight(), -1)
 
         # systematics
@@ -642,7 +647,7 @@ class HwwProcessor(processor.ProcessorABC):
 
             out["anti_bjettag"] = pad_val((ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]), -1)  # TODO: remove because it's the same as below... for now convenient for previous plotting scripts
             out["anti_bjettag_ele"] = pad_val((ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]), -1)
-            out["anti_bjettag_had"] = pad_val((ak.max(bjets_away_leadingfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]), -1)
+            out["anti_bjettag_had"] = pad_val((ak.max(bjets_away_candidatefj_had.btagDeepFlavB, axis=1) < self._btagWPs["M"]), -1)
 
             fill_output = True
             # for data, only fill output for that channel
