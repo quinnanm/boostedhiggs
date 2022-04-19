@@ -61,64 +61,63 @@ def make_1dhists(idir, odir, samples, years, ch, var, bins, range, cuts):
             num_events[cut] = 0
 
         # loop over the processed files and fill the histograms
-        for ch in channels:
-            for sample in samples[year][ch]:
-                print("------------------------------------------------------------")
-                parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
-                if len(parquet_files) != 0:
-                    print(f'Processing {ch} channel of sample', sample)
-                else:
-                    print(f'No processed files for {sample} are found')
+        for sample in samples[year][ch]:
+            print("------------------------------------------------------------")
+            parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
+            if len(parquet_files) != 0:
+                print(f'Processing {ch} channel of sample', sample)
+            else:
+                print(f'No processed files for {sample} are found')
 
-                for i, parquet_file in enumerate(parquet_files):
-                    try:
-                        data = pq.read_table(parquet_file).to_pandas()
-                    except:
-                        print('Not able to read data: ', parquet_file, ' should remove evts from scaling/lumi')
-                        continue
-                    if len(data) == 0:
-                        continue
+            for i, parquet_file in enumerate(parquet_files):
+                try:
+                    data = pq.read_table(parquet_file).to_pandas()
+                except:
+                    print('Not able to read data: ', parquet_file, ' should remove evts from scaling/lumi')
+                    continue
+                if len(data) == 0:
+                    continue
 
-                    # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
+                # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
+                if ch != 'had':
+                    data = data[data['fj_pt'] != -1]
+
+                single_sample = None
+                for single_key, key in add_samples.items():
+                    if key in sample:
+                        single_sample = single_key
+
+                if single_sample is not None:
+                    hists[year].fill(
+                        data[var],
+                        single_sample,  # combining all events under one name
+                        cuts='preselection'
+                    )
                     if ch != 'had':
-                        data = data[data['fj_pt'] != -1]
-
-                    single_sample = None
-                    for single_key, key in add_samples.items():
-                        if key in sample:
-                            single_sample = single_key
-
-                    if single_sample is not None:
                         hists[year].fill(
-                            data[var],
+                            data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
                             single_sample,  # combining all events under one name
-                            cuts='preselection'
+                            cuts='btagdr'
                         )
-                        if ch != 'had':
-                            hists[year].fill(
-                                data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
-                                single_sample,  # combining all events under one name
-                                cuts='btagdr'
-                            )
-                    else:
-                        hists[year].fill(
-                            data[var],
-                            sample,
-                            cuts='preselection'
-                        )
-                        if ch != 'had':
-                            hists[year].fill(
-                                data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
-                                sample,
-                                cuts='btagdr'
-                            )
-
-                    num_events['preselection'] = num_events['preselection'] + len(data[var])
+                else:
+                    hists[year].fill(
+                        data[var],
+                        sample,
+                        cuts='preselection'
+                    )
                     if ch != 'had':
-                        num_events['btagdr'] = num_events['btagdr'] + len(data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1])
+                        hists[year].fill(
+                            data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
+                            sample,
+                            cuts='btagdr'
+                        )
 
-                for cut in cuts:
-                    print(f"Num of events after {cut} cut is: {num_events[cut]}")
+                num_events['preselection'] = num_events['preselection'] + len(data[var])
+                if ch != 'had':
+                    num_events['btagdr'] = num_events['btagdr'] + len(data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1])
+
+            for cut in cuts:
+                print(f"Num of events after {cut} cut is: {num_events[cut]}")
     print("------------------------------------------------------------")
 
     with open(f'{odir}/{ch}_1d_hists_{var}.pkl', 'wb') as f:  # saves the hists objects
