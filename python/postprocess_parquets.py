@@ -68,14 +68,13 @@ def append_correct_weights(idir, samples, years, channels):
 
                     # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
                     if ch != 'had':
-                        data = data[data['fj_pt'] != -1]
-                    elif ch == 'had':
                         bf = len(data)
-                        data = data[data['fj0_pt'] != -1]
+                        data = data[data['fj_pt'] != -1]
                         af = len(data)
                         if (bf != af):
                             print('some jets had -1')
-                        print('all good')
+                    elif ch == 'had':
+                        data = data[data['fj0_pt'] != -1]
 
     #                 try:
     #                     event_weight = data['weight'].to_numpy()
