@@ -66,37 +66,31 @@ def append_correct_weights(idir, samples, years, channels):
                     if len(data) == 0:
                         continue
 
-                    # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
+                    # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)... these will be avoided when we add fj_pt>200 cut for leptonic channels
                     if ch != 'had':
-                        bf = len(data)
                         data = data[data['fj_pt'] != -1]
-                        af = len(data)
-                        if (bf != af):
-                            print('some jets had -1')
-                    elif ch == 'had':
-                        data = data[data['fj0_pt'] != -1]
 
-    #                 try:
-    #                     event_weight = data['weight'].to_numpy()
-    #                     # Find xsection if MC
-    #                     f = open('../fileset/xsec_pfnano.json')
-    #                     xsec = json.load(f)
-    #                     f.close()
-    #                     xsec = eval(str((xsec[sample])))
-    #
-    #                     # Get overall weighting of events
-    #                     xsec_weight = (xsec * luminosity[year]) / (get_sum_sumgenweight(idir, year, sample))
-    #
-    #                 except:  # for data
-    #                     data['weight'] = 1  # for data fill a weight column with ones
-    #                     xsec_weight = 1
-    #
-    #                 data['tot_weight'] = xsec_weight * data['weight']
-    #
-    #                 # update parquet file (this line should overwrite the stored dataframe)
-    #                 pq.write_table(pa.Table.from_pandas(data), parquet_file)
-    #
-    # print("------------------------------------------------------------")
+                    try:
+                        event_weight = data['weight'].to_numpy()
+                        # Find xsection if MC
+                        f = open('../fileset/xsec_pfnano.json')
+                        xsec = json.load(f)
+                        f.close()
+                        xsec = eval(str((xsec[sample])))
+
+                        # Get overall weighting of events
+                        xsec_weight = (xsec * luminosity[year]) / (get_sum_sumgenweight(idir, year, sample))
+
+                    except:  # for data
+                        data['weight'] = 1  # for data fill a weight column with ones
+                        xsec_weight = 1
+
+                    data['tot_weight'] = xsec_weight * data['weight']
+
+                    # update parquet file (this line should overwrite the stored dataframe)
+                    pq.write_table(pa.Table.from_pandas(data), parquet_file)
+
+    print("------------------------------------------------------------")
 
 
 def main(args):
