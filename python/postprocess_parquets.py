@@ -85,6 +85,7 @@ def append_correct_weights(idir, samples, years, channels):
                         data['weight'] = 1  # for data fill a weight column with ones
                         xsec_weight = 1
 
+                    # append an additional column 'tot_weight' to the parquet dataframes
                     data['tot_weight'] = xsec_weight * data['weight']
 
                     # update parquet file (this line should overwrite the stored dataframe)
