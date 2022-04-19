@@ -75,7 +75,8 @@ def append_correct_weights(idir, samples, years, channels):
                         af = len(data)
                         if (bf != af):
                             print('some jets had -1')
-    #
+                        print('all good')
+
     #                 try:
     #                     event_weight = data['weight'].to_numpy()
     #                     # Find xsection if MC
