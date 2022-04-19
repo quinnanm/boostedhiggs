@@ -71,7 +71,8 @@ def append_correct_weights(idir, samples, years, channels):
                         data = data[data['fj_pt'] != -1]
 
                     if ((data["leptonInJet"] != 1).sum() != 0):
-                        print('elbes')
+
+                        print(data[data["leptonInJet"] != 1]["leptonInJet"])
                     # try:
                     #     event_weight = data['weight'].to_numpy()
                     #     # Find xsection if MC
