@@ -70,7 +70,7 @@ def append_correct_weights(idir, samples, years, channels):
                     if ch != 'had':
                         data = data[data['fj_pt'] != -1]
 
-                    if (data["leptonInJet"] != 1).sum() != 0):
+                    if ((data["leptonInJet"] != 1).sum() != 0):
                         print('elbes')
                     # try:
                     #     event_weight = data['weight'].to_numpy()
@@ -98,20 +98,20 @@ def append_correct_weights(idir, samples, years, channels):
 
 def main(args):
 
-    years=args.years.split(',')
-    channels=args.channels.split(',')
+    years = args.years.split(',')
+    channels = args.channels.split(',')
 
     # get samples to make histograms
-    f=open(args.samples)
-    json_samples=json.load(f)
+    f = open(args.samples)
+    json_samples = json.load(f)
     f.close()
 
     # build samples
-    samples={}
+    samples = {}
     for year in years:
-        samples[year]={}
+        samples[year] = {}
         for ch in channels:
-            samples[year][ch]=[]
+            samples[year][ch] = []
             for key, value in json_samples[year][ch].items():
                 if value == 1:
                     samples[year][ch].append(key)
@@ -123,12 +123,12 @@ if __name__ == "__main__":
     # e.g. run locally as
     # python postprocess_parquets.py --year 2017 --channels had --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
-    parser=argparse.ArgumentParser()
-    parser.add_argument('--years',           dest = 'years',       default = '2017',                                 help = "year")
-    parser.add_argument('--samples',         dest = 'samples',     default = "plot_configs/samples_pfnano.json",     help = 'path to json with samples to be plotted')
-    parser.add_argument('--channels',        dest = 'channels',    default = 'ele,mu,had',                           help = 'channels for which to plot this variable')
-    parser.add_argument('--idir',            dest = 'idir',        default = '../results/',                          help = "input directory with results")
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--years',           dest='years',       default='2017',                                 help="year")
+    parser.add_argument('--samples',         dest='samples',     default="plot_configs/samples_pfnano.json",     help='path to json with samples to be plotted')
+    parser.add_argument('--channels',        dest='channels',    default='ele,mu,had',                           help='channels for which to plot this variable')
+    parser.add_argument('--idir',            dest='idir',        default='../results/',                          help="input directory with results")
 
-    args=parser.parse_args()
+    args = parser.parse_args()
 
     main(args)
