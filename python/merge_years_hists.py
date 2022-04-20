@@ -30,7 +30,7 @@ import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
-def make_stacked_hists_years(years, ch, tag, odir, vars_to_plot, samples, ):
+def make_stacked_hists_years(years, ch, tag, odir, vars_to_plot, samples):
     """
     Makes 1D histograms to be plotted as stacked over the different samples
     Args:
@@ -355,7 +355,7 @@ def main(args):
 
         if args.make_hists:
             print('Making histograms...')
-            make_stacked_hists_years(years, channels, args.idir, odir, vars_to_plot, samples)
+            make_stacked_hists_years(years, ch, args.idir, odir, vars_to_plot, samples)
 
         if args.plot_hists:
             print('Plotting histograms...')
