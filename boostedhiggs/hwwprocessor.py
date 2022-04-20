@@ -23,14 +23,12 @@ warnings.filterwarnings("ignore", message="Found duplicate branch ")
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 np.seterr(invalid='ignore')
 
-
 def dsum(*dicts):
     ret = defaultdict(int)
     for d in dicts:
         for k, v in d.items():
             ret[k] += v
     return dict(ret)
-
 
 def pad_val(
     arr: ak.Array,
@@ -64,79 +62,12 @@ def build_p4(cand):
         behavior=candidate.behavior,
     )
 
-
 class HwwProcessor(processor.ProcessorABC):
-    def __init__(self, year="2017", yearmod="", channels=["ele", "mu", "had"], output_location="./outfiles/"):
+    def __init__(self, year="2017", yearmod="", channels=["ele", "mu", "had"], output_location="./outfiles/", apply_trigger=True):
         self._year = year
         self._yearmod = yearmod
         self._channels = channels
         self._output_location = output_location
-
-        # define variables to save for each channel
-        self._skimvars = {
-            'ele': [
-                "lep_pt",
-                "lep_isolation",
-                "lep_misolation",
-                "lep_fj_m",
-                "lep_fj_bjets_ophem",
-                "lep_fj_dr",
-                "fj_msoftdrop",
-                "fj_pt",
-                "lep_met_mt",
-                "met",
-                "ht",
-                "lep_matchedH",
-                "lep_nprongs",
-                "lep_iswlepton",
-                "lep_iswstarlepton",
-                "trigger_iso",
-                "trigger_noniso",
-                "weight",
-                "Z_pt",
-                "lep_Z_dr",
-                "lep_matchedH"
-            ],
-            'mu': [
-                "lep_pt",
-                "lep_isolation",
-                "lep_misolation",
-                "lep_fj_m",
-                "lep_fj_bjets_ophem",
-                "lep_fj_dr",
-                "lep_mvaId",
-                "fj_msoftdrop",
-                "fj_pt",
-                "lep_met_mt",
-                "met",
-                "ht",
-                "lep_matchedH",
-                "lep_nprongs",
-                "lep_iswlepton",
-                "lep_iswstarlepton",
-                "trigger_iso",
-                "trigger_noniso",
-                "weight",
-                "Z_pt",
-                "lep_Z_dr",
-                "lep_matchedH"
-            ],
-            'had': [
-                "fj0_msoftdrop",
-                "fj0_pt",
-                "fj0_pnh4q",
-                "fj1_msoftdrop",
-                "fj1_pt",
-                "fj1_pnh4q",
-                "fj0_bjets_ophem",
-                "met",
-                "ht",
-                "had_machedH",
-                "had_nprongs",
-                "weight",
-                "had_matchedH",
-            ],
-        }
 
         # trigger paths
         self._HLTs = {
@@ -215,6 +146,9 @@ class HwwProcessor(processor.ProcessorABC):
                 ],
             }
         }[int(self._year)]
+
+        # apply trigger in selection?
+        self.apply_trigger = apply_trigger
 
         # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFiltersRun2
         self._metfilters = {
@@ -327,9 +261,10 @@ class HwwProcessor(processor.ProcessorABC):
                             trigger_iso[ch] = trigger_iso[ch] | events.HLT[t]
                         else:
                             trigger_noiso[ch] = trigger_noiso[ch] | events.HLT[t]
-
                         trigger = trigger | events.HLT[t]
-            # self.add_selection("trigger", trigger, [ch])
+            if self.apply_trigger:
+                # apply trigger selection
+                self.add_selection("trigger", trigger, [ch])
             del trigger
 
         # metfilters
@@ -458,7 +393,32 @@ class HwwProcessor(processor.ProcessorABC):
         # deltaR
         lep_fj_dr = candidatefj_lep.delta_r(candidatelep_p4)
 
-        # event selections for muon channel
+        # gen matching
+        if (('HToWW' or 'HWW') in dataset) and isMC:
+            match_HWW_had = match_HWW(events.GenPart, candidatefj_had)
+            match_HWW_lep = match_HWW(events.GenPart, candidatefj_lep)
+        if ('DY' in dataset) and isMC:
+            Z = getParticles(events.GenPart, lowid=23, highid=23, flags=['fromHardProcess', 'isLastCopy'])
+            Z = ak.firsts(Z)
+            lep_Z_dr = Z.delta_r(candidatelep_p4)   # get dr between Z and lepton                                                                                                                                                                                              
+
+        # event selections for semi-leptonic channels
+        self.add_selection(
+            name='fatjetKin',
+            sel=candidatefj_lep.pt > 200,
+            channel=['mu', 'ele']
+        )
+        self.add_selection(
+            name='ht',
+            sel=(ht > 200),
+            channel=['mu', 'ele']
+        )
+        self.add_selection(
+            name='mt',
+            sel=(mt_lep_met < 100),
+            channel=['mu', 'ele']
+        )
+        # event selection for muon channel
         self.add_selection(
             name='leptonKin',
             sel=(candidatelep.pt > 30),
@@ -500,32 +460,7 @@ class HwwProcessor(processor.ProcessorABC):
             sel=(((candidatelep.pt > 30) & (candidatelep.pt < 120) & (lep_reliso < 0.3)) | ((candidatelep.pt >= 120) & (candidatelep.miniPFRelIso_all < 0.2))),
             channel=['ele']
         )
-        # # event selections for both leptonic channels
-        # self.add_selection(
-        #     name='leptonInJet',
-        #     sel=(lep_fj_dr < 0.8),
-        #     channel=['mu', 'ele']
-        # )
-        # self.add_selection(
-        #     name='anti_bjettag',
-        #     sel=(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
-        #     channel=['mu', 'ele']
-        # )
-        self.add_selection(
-            name='fatjetKin',
-            sel=candidatefj_lep.pt > 200,
-            channel=['mu', 'ele']
-        )
-        self.add_selection(
-            name='ht',
-            sel=(ht > 200),
-            channel=['mu', 'ele']
-        )
-        self.add_selection(
-            name='mt',
-            sel=(mt_lep_met < 100),
-            channel=['mu', 'ele']
-        )
+
         # event selections for hadronic channel
         self.add_selection(
             name='oneFatjet',
@@ -549,37 +484,54 @@ class HwwProcessor(processor.ProcessorABC):
             sel=(candidatefj_had.qcdrho > -7) & (candidatefj_had.qcdrho < -2.0),
             channel=['had']
         )
-        # self.add_selection(
-        #     name='anti_bjettag',
-        #     sel=(ak.max(bjets_away_candidatefj_had.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
-        #     channel=['had']
-        # )
         self.add_selection(
             name='met',
             sel=(met.pt < 200),
             channel=['had']
         )
 
-        variables = {}
-        variables["lep_pt"] = pad_val(candidatelep.pt, -1)
-        variables["lep_isolation"] = pad_val(lep_reliso, -1)
-        variables["lep_misolation"] = pad_val(lep_miso, -1)
-        variables["lep_fj_m"] = pad_val(lep_fj_m, -1)
-        variables["lep_fj_bjets_ophem"] = pad_val(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1), -1)
-        variables["lep_fj_dr"] = pad_val(lep_fj_dr, -1)
-        variables["lep_mvaId"] = pad_val(mu_mvaId, -1)
-        variables["fj_msoftdrop"] = pad_val(candidatefj_lep.msoftdrop, -1)
-        variables["fj_pt"] = pad_val(candidatefj_lep.pt, -1)
-        variables["met"] = pad_val(met.pt, -1)
-        variables["ht"] = pad_val(ht, -1)
-        variables["fj0_msoftdrop"] = pad_val(candidatefj_had.msoftdrop, -1)
-        variables["fj0_pt"] = pad_val(candidatefj_had.pt, -1)
-        variables["fj0_pnh4q"] = pad_val(candidatefj_had.particleNet_H4qvsQCD, -1)
-        variables["fj1_msoftdrop"] = pad_val(secondfj.msoftdrop, -1)
-        variables["fj1_pt"] = pad_val(secondfj.pt, -1)
-        variables["fj1_pnh4q"] = pad_val(secondfj.particleNet_H4qvsQCD, -1)
-        variables["fj0_bjets_ophem"] = pad_val(ak.max(bjets_away_candidatefj_had.btagDeepFlavB, axis=1), -1)
-        variables["lep_met_mt"] = pad_val(mt_lep_met, -1)
+        # fill tuple variables
+        variables = {
+            "lep": {
+                "fj_pt": candidatefj_lep.pt,
+                "fj_msoftdrop": candidatefj_lep.msoftdrop,
+                "fj_bjets_ophem": (ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
+                "cut_antibjettag": (ak.max(bjets_away_candidatefj_had.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
+                "cut_leptonInJet": (lep_fj_dr < 0.8),
+                "gen_Hpt": ak.firsts(match_HWW_lep["matchedH"].pt),
+                "gen_Hnprongs": match_HWW_lep["hWW_nprongs"],
+                "gen_iswlepton": match_HWW_lep["iswlepton"],
+                "gen_iswstarlepton": match_HWW_lep["iswstarlepton"],
+                "lep_pt": candidatelep.pt,
+                "lep_isolation": lep_reliso,
+                "lep_misolation": lep_miso,
+                "lep_fj_m": lep_fj_m,
+                "lep_fj_dr": lep_fj_dr,
+                "lep_met_mt": mt_lep_met,
+                "lep_mvaId": mu_mvaId,
+            },
+            "had": {
+                "fj_pt": candidatefj_lep.pt,
+                "fj_msoftdrop": candidatefj_lep.msoftdrop,
+                "fj_bjets_ophem": ak.max(bjets_away_candidatefj_had.btagDeepFlavB, axis=1),
+                "cut_antibjettag":(ak.max(bjets_away_candidatefj_had.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
+                "gen_Hpt": ak.firsts(match_HWW_had["matchedH"].pt),
+                "gen_Hnprongs": match_HWW_had["hWW_nprongs"],
+                "fj_pnh4q": candidatefj_had.particleNet_H4qvsQCD,
+                "fj_sl_pt":  secondfj.pt,
+                "fj_sl_msoftdrop": secondfj.msoftdrop,
+                "fj_sl_pnh4q": secondfj.particleNet_H4qvsQCD,
+            },
+            "common": {
+                "met": met.pt,
+                "ht": ht,
+            },
+        }
+        # if trigger is not applied then save the trigger variables
+        if not self.apply_trigger:
+            variables["lep"]["cut_trigger_iso"] = trigger_iso[ch]
+            variables["lep"]["cut_trigger_noniso"] = trigger_noiso[ch]
+            variables["had"]["cut_trigger"] = trigger_noiso[ch]
 
         # weights
         # TODO:
@@ -602,7 +554,7 @@ class HwwProcessor(processor.ProcessorABC):
             weights.add('genweight', events.genWeight)
             # self.btagCorr.addBtagWeight(bjets_away_lepfj, weights)
             # self.btagCorr.addBtagWeight(bjets_away_candidatefj_had, weights)
-            variables["weight"] = pad_val(weights.weight(), -1)
+            variables["commom"]["weight"] = weights.weight()
 
         # systematics
         # - trigger up/down (variable)
@@ -616,43 +568,11 @@ class HwwProcessor(processor.ProcessorABC):
         # - JMR (variable)
         # - tagger SF (variable)
 
-        # higgs matching
-        if (('HToWW' or 'HWW') in dataset) and isMC:
-            match_HWW_had = match_HWW(events.GenPart, candidatefj_had)
-            match_HWW_lep = match_HWW(events.GenPart, candidatefj_lep)
-
-            variables["had_nprongs"] = pad_val(match_HWW_had["hWW_nprongs"], -1)
-            variables["had_matchedH"] = pad_val(ak.firsts(match_HWW_had["matchedH"].pt), -1)
-
-            variables["lep_nprongs"] = pad_val(match_HWW_lep["hWW_nprongs"], -1)
-            variables["lep_iswlepton"] = pad_val(match_HWW_lep["iswlepton"], -1)
-            variables["lep_iswstarlepton"] = pad_val(match_HWW_lep["iswstarlepton"], -1)
-            variables["lep_matchedH"] = pad_val(ak.firsts(match_HWW_lep["matchedH"]).pt, -1)
-
-        if isMC:
-            # get Z-boson
-            Z = getParticles(events.GenPart, lowid=23, highid=23, flags=['fromHardProcess', 'isLastCopy'])
-            Z = ak.firsts(Z)
-            lep_Z_dr = Z.delta_r(candidatelep_p4)   # get dr between Z and lepton
-            variables["Z_pt"] = pad_val(Z.pt, -1)
-            variables["lep_Z_dr"] = pad_val(lep_Z_dr, -1)
-
         # initialize pandas dataframe
         output = {}
         for ch in self._channels:
-            out = {}
-            for var in self._skimvars[ch]:
-                if var in variables.keys():
-                    out[var] = variables[var]
-            out["trigger_iso"] = pad_val(trigger_iso[ch], -1)
-            out["trigger_noiso"] = pad_val(trigger_noiso[ch], -1)
-
-            out["leptonInJet"] = pad_val((lep_fj_dr < 0.8), -1)
-            out["anti_bjettag_ele"] = pad_val((ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]), -1)
-            out["anti_bjettag_had"] = pad_val((ak.max(bjets_away_candidatefj_had.btagDeepFlavB, axis=1) < self._btagWPs["M"]), -1)
-
             fill_output = True
-            # for data, only fill output for that channel
+            # for data, only fill output for the dataset needed
             if not isMC and self.dataset_per_ch[ch] not in dataset:
                 fill_output = False
             # only fill output for that channel if the selections yield any events
@@ -660,6 +580,16 @@ class HwwProcessor(processor.ProcessorABC):
                 fill_output = False
 
             if fill_output:
+                var_ch = ch if ch=="had" else "lep"
+                keys = ["common",var_ch]
+                for key in keys:
+                    for var,item in variables[key].items():
+                        # pad all the variables that are not a cut with -1
+                        pad_item = item if ("cut" in var or "weight" in var) else pad_val(item,-1)
+                        # fill out dictionary
+                        out[var] = item
+                    
+                # fill the output dictionary
                 output[ch] = {
                     key: value[self.selections[ch].all(*self.selections[ch].names)] for (key, value) in out.items()
                 }
