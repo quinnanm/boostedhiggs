@@ -434,13 +434,13 @@ class HwwProcessor(processor.ProcessorABC):
             match_HWW_had = match_HWW(events.GenPart, candidatefj_had)
             match_HWW_lep = match_HWW(events.GenPart, candidatefj_lep)
 
-            variables['lep']["gen_Hpt"]: ak.firsts(match_HWW_lep["matchedH"].pt)
-            variables['lep']["gen_Hnprongs"]: match_HWW_lep["hWW_nprongs"]
-            variables['lep']["gen_iswlepton"]: match_HWW_lep["iswlepton"]
-            variables['lep']["gen_iswstarlepton"]: match_HWW_lep["iswstarlepton"]
-            variables['had']["gen_Hpt"]: ak.firsts(match_HWW_had["matchedH"].pt)
-            variables['had']["gen_Hnprongs"]: match_HWW_had["hWW_nprongs"]
-        print(variables['had'].keys())
+            variables["lep"]["gen_Hpt"] = ak.firsts(match_HWW_lep["matchedH"].pt)
+            variables["lep"]["gen_Hnprongs"] = match_HWW_lep["hWW_nprongs"]
+            variables["lep"]["gen_iswlepton"] = match_HWW_lep["iswlepton"]
+            variables["lep"]["gen_iswstarlepton"] = match_HWW_lep["iswstarlepton"]
+            variables["had"]["gen_Hpt"] = ak.firsts(match_HWW_had["matchedH"].pt)
+            variables["had"]["gen_Hnprongs"] = match_HWW_had["hWW_nprongs"]
+        print(variables["had"].keys())
         if ('DY' in dataset) and isMC:
             Z = getParticles(events.GenPart, lowid=23, highid=23, flags=['fromHardProcess', 'isLastCopy'])
             Z = ak.firsts(Z)
