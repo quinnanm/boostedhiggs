@@ -485,6 +485,7 @@ class HwwProcessor(processor.ProcessorABC):
 
         # initialize pandas dataframe
         output = {}
+        out = {}
         for ch in self._channels:
             fill_output = True
             # for data, only fill output for the dataset needed
