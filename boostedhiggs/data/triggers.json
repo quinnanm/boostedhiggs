@@ -19,7 +19,7 @@
             "PFHT650_WideJetMJJ950DEtaJJ1p5",
             "PFHT650_WideJetMJJ900DEtaJJ1p5",
             "PFJet450"
-	],
+	]
     },
     "2017": {
         "ele": [
@@ -40,7 +40,7 @@
             "AK8PFHT800_TrimMass50",
             "PFJet500",
             "AK8PFJet500"
-        ],
+        ]
     },
     "2018": {
         "ele": [
