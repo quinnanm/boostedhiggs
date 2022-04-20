@@ -295,15 +295,6 @@ class HwwProcessor(processor.ProcessorABC):
         # deltaR
         lep_fj_dr = candidatefj_lep.delta_r(candidatelep_p4)
 
-        # gen matching
-        if (('HToWW' or 'HWW') in dataset) and isMC:
-            match_HWW_had = match_HWW(events.GenPart, candidatefj_had)
-            match_HWW_lep = match_HWW(events.GenPart, candidatefj_lep)
-        if ('DY' in dataset) and isMC:
-            Z = getParticles(events.GenPart, lowid=23, highid=23, flags=['fromHardProcess', 'isLastCopy'])
-            Z = ak.firsts(Z)
-            lep_Z_dr = Z.delta_r(candidatelep_p4)   # get dr between Z and lepton
-
         # event selections for semi-leptonic channels
         self.add_selection(
             name='fatjetKin',
@@ -414,10 +405,6 @@ class HwwProcessor(processor.ProcessorABC):
                 "fj_pt": candidatefj_lep.pt,
                 "fj_msoftdrop": candidatefj_lep.msoftdrop,
                 "fj_bjets_ophem": (ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
-                "gen_Hpt": ak.firsts(match_HWW_lep["matchedH"].pt),
-                "gen_Hnprongs": match_HWW_lep["hWW_nprongs"],
-                "gen_iswlepton": match_HWW_lep["iswlepton"],
-                "gen_iswstarlepton": match_HWW_lep["iswstarlepton"],
                 "lep_pt": candidatelep.pt,
                 "lep_isolation": lep_reliso,
                 "lep_misolation": lep_miso,
@@ -430,8 +417,6 @@ class HwwProcessor(processor.ProcessorABC):
                 "fj_pt": candidatefj_had.pt,
                 "fj_msoftdrop": candidatefj_had.msoftdrop,
                 "fj_bjets_ophem": ak.max(bjets_away_candidatefj_had.btagDeepFlavB, axis=1),
-                "gen_Hpt": ak.firsts(match_HWW_had["matchedH"].pt),
-                "gen_Hnprongs": match_HWW_had["hWW_nprongs"],
                 "fj_pnh4q": candidatefj_had.particleNet_H4qvsQCD,
                 "fj_sl_pt":  secondfj.pt,
                 "fj_sl_msoftdrop": secondfj.msoftdrop,
@@ -442,6 +427,24 @@ class HwwProcessor(processor.ProcessorABC):
                 "ht": ht,
             },
         }
+
+        # gen matching
+        if (('HToWW' or 'HWW') in dataset) and isMC:
+            match_HWW_had = match_HWW(events.GenPart, candidatefj_had)
+            match_HWW_lep = match_HWW(events.GenPart, candidatefj_lep)
+
+            variables['lep']["gen_Hpt"]: ak.firsts(match_HWW_lep["matchedH"].pt),
+            variables['lep']["gen_Hnprongs"]: match_HWW_lep["hWW_nprongs"],
+            variables['lep']["gen_iswlepton"]: match_HWW_lep["iswlepton"],
+            variables['lep']["gen_iswstarlepton"]: match_HWW_lep["iswstarlepton"],
+            variables['had']["gen_Hpt"]: ak.firsts(match_HWW_had["matchedH"].pt),
+            variables['had']["gen_Hnprongs"]: match_HWW_had["hWW_nprongs"],
+
+        if ('DY' in dataset) and isMC:
+            Z = getParticles(events.GenPart, lowid=23, highid=23, flags=['fromHardProcess', 'isLastCopy'])
+            Z = ak.firsts(Z)
+            lep_Z_dr = Z.delta_r(candidatelep_p4)   # get dr between Z and lepton
+
         # if trigger is not applied then save the trigger variables
         if not self.apply_trigger:
             variables["lep"]["cut_trigger_iso"] = trigger_iso[ch]
