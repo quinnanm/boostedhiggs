@@ -205,7 +205,7 @@ def plot_stacked_hists(odir, vars_to_plot, years, ch, pfnano, cut='preselection'
             data_label = data_by_ch[ch]
 
         for var in vars_to_plot[ch]:
-            if hists[year][ch][var].shape[0] == 0:     # skip empty histograms (such as lepton_pt for hadronic channel)
+            if hists[year][var].shape[0] == 0:     # skip empty histograms (such as lepton_pt for hadronic channel)
                 continue
 
             # get histograms
@@ -307,7 +307,7 @@ def main(args):
 
     years = args.years.split(',')
     channels = args.channels.split(',')
-    print(years)
+
     # get samples to make histograms
     f = open(args.samples)
     json_samples = json.load(f)
