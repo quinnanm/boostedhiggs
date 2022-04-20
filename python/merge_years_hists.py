@@ -142,7 +142,7 @@ def make_stacked_hists_years(years, ch, tag, odir, vars_to_plot, samples):
 
                     # combining all pt bins of a specefic process under one name
                     if single_sample is not None:
-                        hists[ch][var].fill(
+                        hists[var].fill(
                             years=year,
                             samples=single_sample,
                             cuts='preselection',
@@ -150,7 +150,7 @@ def make_stacked_hists_years(years, ch, tag, odir, vars_to_plot, samples):
                             weight=xsec_weight * data['weight'],
                         )
                         if ch != 'had':
-                            hists[ch][var].fill(
+                            hists[var].fill(
                                 years=year,
                                 samples=single_sample,
                                 cuts='btagdr',
