@@ -527,6 +527,11 @@ class HwwProcessor(processor.ProcessorABC):
                 "ht": ht,
             },
         }
+        # if trigger is not applied then save the trigger variables
+        if not self.apply_trigger:
+            variables["lep"]["cut_trigger_iso"] = trigger_iso[ch]
+            variables["lep"]["cut_trigger_noniso"] = trigger_noiso[ch]
+            variables["had"]["cut_trigger"] = trigger_noiso[ch]
 
         # weights
         # TODO:
