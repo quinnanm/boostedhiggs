@@ -77,14 +77,14 @@ class HwwProcessor(processor.ProcessorABC):
         # trigger paths
         with importlib.resources.path("boostedhiggs.data", "triggers.json") as path:
             with open(path, 'r') as f:
-                self._HLTs = json.loads(f.read())[self._year]
+                self._HLTs = json.load(f)[self._year]
         # apply trigger in selection?
         self.apply_trigger = apply_trigger
 
         # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFiltersRun2
         with importlib.resources.path("boostedhiggs.data", "metfilters.json") as path:
             with open(path, 'r') as f:
-                self._metfilters = json.loads(f.read())[self._year]
+                self._metfilters = json.load(f)[self._year]
 
         self._btagWPs = btagWPs["deepJet"][year + yearmod]
         # self.btagCorr = BTagCorrector("M", "deepJet", year, yearmod)
