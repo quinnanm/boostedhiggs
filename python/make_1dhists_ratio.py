@@ -222,7 +222,7 @@ def main(args):
         samples[args.year][ch] = []
         for key, value in json_samples[args.year][ch].items():
             if value == 1:
-                samples[year][ch].append(key)
+                samples[args.year][ch].append(key)
 
     print(f'Making {args.year} histograms of {vars[0]}/{vars[1]}')
 
