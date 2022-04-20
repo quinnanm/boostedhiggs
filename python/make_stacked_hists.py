@@ -75,7 +75,7 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                 is_data = True
 
         if not is_data and sample not in xsec_weight_by_sample.keys():
-            pkl_dir = f'{idir+}_{year}/{sample}/outfiles/*.pkl'
+            pkl_dir = f'{idir}_{year}/{sample}/outfiles/*.pkl'
             pkl_files = glob.glob(pkl_dir)  # get list of files that were processed
             if not pkl_files:  # skip samples which were not processed
                 print('- No processed files found...', pkl_dir, 'skipping sample...', sample)
