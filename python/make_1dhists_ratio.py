@@ -45,7 +45,6 @@ def make_1dhists_ratio(year, ch, idir, odir, samples, vars, bins, start, end):
         vars: a list of two variable names... the first is going to be the numerator, and the second the denominator... see the full list of choices in plot_configs/vars.json
     """
 
-    hists = {}
     # Get luminosity of year
     f = open('../fileset/luminosity.json')
     luminosity = json.load(f)
@@ -187,7 +186,7 @@ def plot_1dhists_ratio_compare_cuts(year, ch, odir, vars):
     print(f'plotting all cuts on same plot for comparison')
 
     # load the hists
-    with open(f'{odir}_{year}/{ch}_1d_hists_ratio_{vars[0]}_{vars[1]}.pkl', 'rb') as f:
+    with open(f'{odir}/{ch}_1d_hists_ratio_{vars[0]}_{vars[1]}.pkl', 'rb') as f:
         hists = pkl.load(f)
         f.close()
 
