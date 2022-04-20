@@ -32,7 +32,7 @@ import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
-def make_1dhists_ratio(idir, odir, samples, years, ch, vars, bins, start, end, cuts):
+def make_1dhists_ratio(idir, odir, samples, years, ch, vars, bins, start, end):
     """
     Makes 1D histograms of a ratio of two variables (e.g. lep_pt/fj_pt)
 
@@ -56,10 +56,6 @@ def make_1dhists_ratio(idir, odir, samples, years, ch, vars, bins, start, end, c
             hist2.axis.StrCategory([], name='samples', growth=True),
             hist2.axis.StrCategory([], name='cuts', growth=True)
         )
-
-        num_events = {}
-        for cut in cuts:
-            num_events[cut] = 0
 
         # loop over the processed files and fill the histograms
         for sample in samples[year][ch]:
@@ -130,12 +126,6 @@ def make_1dhists_ratio(idir, odir, samples, years, ch, vars, bins, start, end, c
                         weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1]
                     )
 
-                num_events['preselection'] = num_events['preselection'] + len(data[vars[0]])
-                if ch != 'had':
-                    num_events['btagdr'] = num_events['btagdr'] + len(data[vars[0]][data["anti_bjettag"] == 1][data["leptonInJet"] == 1])
-
-            for cut in cuts:
-                print(f"Num of events after {cut} cut is: {num_events[cut]}")
     print("------------------------------------------------------------")
 
     with open(f'{odir}/{ch}_1d_hists_ratio_{vars[0]}_{vars[1]}.pkl', 'wb') as f:  # saves the hists objects
@@ -148,7 +138,7 @@ def plot_1dhists_ratio(odir, years, ch, vars, cut='preselection'):
 
     Args:
         vars: a list of two variable names... the first is going to be the numerator, and the second the denominator... see the full list of choices in plot_configs/vars.json
-        cut: the cut to apply when plotting the histogram... choices are ['preselection', 'dr', 'btag', 'btagdr']
+        cut: the cut to apply when plotting the histogram... choices are ['preselection', 'btagdr'] for leptonic channel and ['preselection'] for hadronic channel
     """
 
     print(f'plotting for {cut} cut')
@@ -244,7 +234,7 @@ def main(args):
             cuts = ['preselection', 'btagdr']
 
         if args.make_hists:
-            make_1dhists_ratio(args.idir, args.odir, samples, years, ch, vars, args.bins, args.start, args.end, cuts)
+            make_1dhists_ratio(args.idir, args.odir, samples, years, ch, vars, args.bins, args.start, args.end)
 
         if args.plot_hists:
             for cut in cuts:
