@@ -243,7 +243,7 @@ if __name__ == "__main__":
     # lep_pt vs fj_pt:     python make_2dplots.py --year 2017 --odir hists --channel ele --vars lep_pt,fj_pt         --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0 --y_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--years',           dest='years',       default='2017',                                 help="year")
+    parser.add_argument('--year',            dest='year',       default='2017',                                 help="year")
     parser.add_argument('--samples',         dest='samples',     default="plot_configs/samples_pfnano.json",     help="path to json with samples to be plotted")
     parser.add_argument('--channel',         dest='channel',     default='ele',                                  help="channel... choices are ['ele', 'mu', 'had']")
     parser.add_argument('--odir',            dest='odir',        default='hists',                                help="tag for output directory... will append '_{year}' to it")
