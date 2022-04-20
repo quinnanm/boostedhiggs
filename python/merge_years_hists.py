@@ -347,18 +347,18 @@ def main(args):
             if value == 1:
                 vars_to_plot[ch].append(key)
 
-    if args.make_hists:
-        print('Making histograms...')
-        make_stacked_hists_years(years, channels, args.idir, odir, vars_to_plot, samples)
+    for ch in channels:
+        if ch == 'had':
+            cuts = ['preselection']
+        else:
+            cuts = ['preselection', 'btagdr']
 
-    if args.plot_hists:
-        print('Plotting histograms...')
+        if args.make_hists:
+            print('Making histograms...')
+            make_stacked_hists_years(years, channels, args.idir, odir, vars_to_plot, samples)
 
-        for ch in channels:
-            if ch == 'had':
-                cuts = ['preselection']
-            else:
-                cuts = ['preselection', 'btagdr']
+        if args.plot_hists:
+            print('Plotting histograms...')
 
             for cut in cuts:
                 plot_stacked_hists_years(years, ch, odir, vars_to_plot, cut, logy=True)
@@ -367,7 +367,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as:  python merge_years_hists.py --years 2016,2017,2018 --odir hists/stacked_hists --make_hists --plot_hists --channels ele --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/Apr4
+    # run locally as:  python merge_years_hists.py --years 2016,2017,2018 --odir hists --make_hists --plot_hists --channels ele --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/Apr4
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',            dest='years',          default='2017',                               help="year")
