@@ -110,7 +110,7 @@
 	"DYJetsToLL_Pt-400To650":0,
 	"DYJetsToLL_Pt-50To100":0,
 	"DYJetsToLL_Pt-650ToInf":0,
-	"GluGluHToWWToLNuQQ":0,
+	"GluGluHToWWToLNuQQ":1,
 	"GluGluHToWWTo4q":0,
 	"GluGluHToWWTo4q-HpT190":0,
 	"GluGluHToWWTo4q-HpT190_ext1":0,
