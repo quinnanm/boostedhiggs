@@ -504,6 +504,7 @@ class HwwProcessor(processor.ProcessorABC):
                 var_ch = ch if ch == "had" else "lep"
                 keys = ["common", var_ch]
                 for key in keys:
+                    print(variables[key].items())
                     for var, item in variables[key].items():
                         # pad all the variables that are not a cut with -1
                         pad_item = item if ("cut" in var or "weight" in var) else pad_val(item, -1)
