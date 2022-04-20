@@ -47,19 +47,19 @@ def make_1dhists_ratio(year, ch, idir, odir, samples, vars, bins, start, end):
 
     # Get luminosity of year
     f = open('../fileset/luminosity.json')
-    luminosity = json.load(f)
+    luminosity = json.load(f)[year]
     f.close()
-    print(f'Processing samples from year {year} with luminosity {luminosity[year]}')
+    print(f'Processing samples from year {year} with luminosity {luminosity}')
 
+    # instantiates the histogram object
     hists = {}
-
     hists = hist2.Hist(
         hist2.axis.Regular(bins, start, end, name=vars[0] + '/' + vars[1], label=vars[0] + '/' + vars[1], flow=False),
         hist2.axis.StrCategory([], name='samples', growth=True),
         hist2.axis.StrCategory([], name='cuts', growth=True)
     )
 
-    # loop over the processed files and fill the histograms
+    # loop over the samples specefied in the json config
     for sample in samples[year][ch]:
         print("------------------------------------------------------------")
         parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
@@ -68,6 +68,18 @@ def make_1dhists_ratio(year, ch, idir, odir, samples, vars, bins, start, end):
         else:
             print(f'No processed files for {sample} are found')
 
+        # Get xsection if sample is MC
+        try:
+            f = open('../fileset/xsec_pfnano.json')
+            xsec = json.load(f)
+            f.close()
+            xsec = eval(str((xsec[sample])))
+            # Get overall weighting of events
+            xsec_weight = (xsec * luminosity) / (get_sum_sumgenweight(idir, year, sample))
+        except:
+            xsec_weight = 1
+
+        # loop over the processed files per sample and fill the histogram
         for i, parquet_file in enumerate(parquet_files):
             try:
                 data = pq.read_table(parquet_file).to_pandas()
@@ -83,18 +95,8 @@ def make_1dhists_ratio(year, ch, idir, odir, samples, vars, bins, start, end):
 
             try:
                 event_weight = data['weight'].to_numpy()
-                # Find xsection if MC
-                f = open('../fileset/xsec_pfnano.json')
-                xsec = json.load(f)
-                f.close()
-                xsec = eval(str((xsec[sample])))
-
-                # Get overall weighting of events
-                xsec_weight = (xsec * luminosity[year]) / (get_sum_sumgenweight(idir, year, sample))
-
             except:  # for data
                 data['weight'] = 1  # for data fill a weight column with ones
-                xsec_weight = 1
 
             single_sample = None
             for single_key, key in add_samples.items():
@@ -216,6 +218,11 @@ def main(args):
     if not os.path.exists(odir):
         os.makedirs(odir)
 
+    # make subdirectory specefic to this script
+    if not os.path.exists(odir + '/1d_hists_ratio/'):
+        os.makedirs(odir + '/1d_hists_ratio/')
+    odir = odir + '/1d_hists_ratio/'
+
     channels = args.channels.split(',')
     vars = args.vars.split(',')
 
@@ -254,7 +261,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # lep_pt vs fj_pt: python make_1dhists_ratio.py --year 2017 --odir hists0/1dhists_ratio --channels ele --vars lep_pt,fj_pt --make_hists --plot_hists --bins 100 --start 0 --end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_pt vs fj_pt: python make_1dhists_ratio.py --year 2017 --odir hists --channels ele --vars lep_pt,fj_pt --make_hists --plot_hists --bins 100 --start 0 --end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',            dest='year',        default='2017',                                 help="year")
