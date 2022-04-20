@@ -32,185 +32,196 @@ import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
-def make_1dhists(idir, odir, samples, years, ch, var, bins, range):
+def make_1dhists(year, ch, idir, odir, samples, var, bins, range):
     """
     Makes 1D histograms
 
     Args:
-        var: the name of the variable to plot a 1D-histogram of... see the full list of choices in plot_configs/vars.json
+        year: the year the processed samples are from
+        ch: signal channel to look at... choices are ['ele', 'mu', 'had']
+        idir: directory that holds the processed samples (e.g. {idir}/{sample}/outfiles/*_{ch}.parquet)
+        odir: output directory to hold the hist object
         samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
+        var: the name of the variable to plot a 1D-histogram of... see the full list of choices in plot_configs/vars.json
     """
 
+    # Get luminosity of year
+    f = open('../fileset/luminosity.json')
+    luminosity = json.load(f)[year]
+    f.close()
+    print(f'Processing samples from year {year} with luminosity {luminosity}')
+
+    # instantiates the histogram object
     hists = {}
-    for year in years:
-        # Get luminosity of year
-        f = open('../fileset/luminosity.json')
-        luminosity = json.load(f)
-        f.close()
-        print(f'Processing samples from year {year} with luminosity {luminosity[year]}')
+    hists = hist2.Hist(
+        hist2.axis.Regular(bins, range[0], range[1], name=var, label=var, flow=False),
+        hist2.axis.StrCategory([], name='samples', growth=True),     # to combine different pt bins of the same process
+        hist2.axis.StrCategory([], name='cuts', growth=True)
+    )
 
-        hists[year] = {}
-        hists[year] = hist2.Hist(
-            hist2.axis.Regular(bins, range[0], range[1], name=var, label=var, flow=False),
-            hist2.axis.StrCategory([], name='samples', growth=True),     # to combine different pt bins of the same process
-            hist2.axis.StrCategory([], name='cuts', growth=True)
-        )
+    # loop over the processed files and fill the histograms
+    for sample in samples[year][ch]:
+        print("------------------------------------------------------------")
+        parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
+        if len(parquet_files) != 0:
+            print(f'Processing {ch} channel of sample', sample)
+        else:
+            print(f'No processed files for {sample} are found')
 
-        # loop over the processed files and fill the histograms
-        for sample in samples[year][ch]:
-            print("------------------------------------------------------------")
-            parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
-            if len(parquet_files) != 0:
-                print(f'Processing {ch} channel of sample', sample)
-            else:
-                print(f'No processed files for {sample} are found')
+        for i, parquet_file in enumerate(parquet_files):
+            try:
+                data = pq.read_table(parquet_file).to_pandas()
+            except:
+                print('Not able to read data: ', parquet_file, ' should remove evts from scaling/lumi')
+                continue
+            if len(data) == 0:
+                continue
 
-            for i, parquet_file in enumerate(parquet_files):
-                try:
-                    data = pq.read_table(parquet_file).to_pandas()
-                except:
-                    print('Not able to read data: ', parquet_file, ' should remove evts from scaling/lumi')
-                    continue
-                if len(data) == 0:
-                    continue
+            # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
+            if ch != 'had':
+                data = data[data['fj_pt'] != -1]
 
-                # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
+            single_sample = None
+            for single_key, key in add_samples.items():
+                if key in sample:
+                    single_sample = single_key
+
+            if single_sample is not None:
+                hists.fill(
+                    data[var],
+                    single_sample,  # combining all events under one name
+                    cuts='preselection'
+                )
                 if ch != 'had':
-                    data = data[data['fj_pt'] != -1]
-
-                single_sample = None
-                for single_key, key in add_samples.items():
-                    if key in sample:
-                        single_sample = single_key
-
-                if single_sample is not None:
-                    hists[year].fill(
-                        data[var],
+                    hists.fill(
+                        data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
                         single_sample,  # combining all events under one name
-                        cuts='preselection'
+                        cuts='btagdr'
                     )
-                    if ch != 'had':
-                        hists[year].fill(
-                            data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
-                            single_sample,  # combining all events under one name
-                            cuts='btagdr'
-                        )
-                else:
-                    hists[year].fill(
-                        data[var],
+            else:
+                hists.fill(
+                    data[var],
+                    sample,
+                    cuts='preselection'
+                )
+                if ch != 'had':
+                    hists.fill(
+                        data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
                         sample,
-                        cuts='preselection'
+                        cuts='btagdr'
                     )
-                    if ch != 'had':
-                        hists[year].fill(
-                            data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
-                            sample,
-                            cuts='btagdr'
-                        )
 
     print("------------------------------------------------------------")
 
-    with open(f'{odir}/{ch}_1d_hists_{var}.pkl', 'wb') as f:  # saves the hists objects
+    with open(f'{odir}/{ch}_{var}.pkl', 'wb') as f:  # saves the hists objects
         pkl.dump(hists, f)
 
 
-def plot_1dhists(odir, years, ch, var, cut='preselection'):
+def plot_1dhists(year, ch, odir, var, cut='preselection'):
     """
     Plots 1D histograms that were made by "make_1dhists" function
 
     Args:
+        year: the year the processed samples are from
+        ch: signal channel to look at... choices are ['ele', 'mu', 'had']
+        odir: output directory to hold the plots
         var: the name of the variable to plot a 1D-histogram of... see the full list of choices in plot_configs/vars.json
         cut: the cut to apply when plotting the histogram... choices are ['preselection', 'btagdr'] for leptonic channel and ['preselection'] for hadronic channel
     """
 
     print(f'plotting for {cut} cut')
     # load the hists
-    with open(f'{odir}/{ch}_1d_hists_{var}.pkl', 'rb') as f:
+    with open(f'{odir}/{ch}_{var}.pkl', 'rb') as f:
         hists = pkl.load(f)
         f.close()
 
-    for year in years:
-        # make directory to store stuff per year
-        if not os.path.exists(f'{odir}/plots_{year}/'):
-            os.makedirs(f'{odir}/plots_{year}/')
-        if not os.path.exists(f'{odir}/plots_{year}/{var}'):
-            os.makedirs(f'{odir}/plots_{year}/{var}')
-        # make plots per channel
-        for sample in hists[year].axes[1]:
-            fig, ax = plt.subplots(figsize=(8, 5))
-            hep.histplot(hists[year][{'samples': sample, 'cuts': cut}], ax=ax)
-            ax.set_xlabel(f"{var}")
-            ax.set_title(f'{ch} channel for \n {sample} \n with {cut} cut')
-            hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
-            hep.cms.text("Work in Progress", ax=ax)
-            plt.savefig(f'{odir}/plots_{year}/{var}/{ch}_{sample}_{cut}.pdf')
-            plt.close()
+    # make directory to store stuff per year
+    if not os.path.exists(f'{odir}/{var}'):
+        os.makedirs(f'{odir}/{var}')
+    # make plots per channel
+    for sample in hists.axes[1]:
+        fig, ax = plt.subplots(figsize=(8, 5))
+        hep.histplot(hists[{'samples': sample, 'cuts': cut}], ax=ax)
+        ax.set_xlabel(f"{var}")
+        ax.set_title(f'{ch} channel for \n {sample} \n with {cut} cut')
+        hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
+        hep.cms.text("Work in Progress", ax=ax)
+        plt.savefig(f'{odir}/{var}/{ch}_{sample}_{cut}.pdf')
+        plt.close()
 
-            fig, ax = plt.subplots(figsize=(8, 5))
-            hep.histplot(hists[year][{'samples': sample, 'cuts': cut}], ax=ax)
-            ax.set_xlabel(f"{var}")
-            ax.set_title(f'{ch} channel for \n {sample} \n with {cut} cut')
-            ax.set_yscale('log')
-            hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
-            hep.cms.text("Work in Progress", ax=ax)
-            plt.savefig(f'{odir}/plots_{year}/{var}/{ch}_{sample}_{cut}.pdf')
-            plt.close()
+        fig, ax = plt.subplots(figsize=(8, 5))
+        hep.histplot(hists[{'samples': sample, 'cuts': cut}], ax=ax)
+        ax.set_xlabel(f"{var}")
+        ax.set_title(f'{ch} channel for \n {sample} \n with {cut} cut')
+        ax.set_yscale('log')
+        hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
+        hep.cms.text("Work in Progress", ax=ax)
+        plt.savefig(f'{odir}/{var}/{ch}_{sample}_{cut}.pdf')
+        plt.close()
 
 
-def plot_1dhists_compare_cuts(odir, years, ch, var):
+def plot_1dhists_compare_cuts(year, ch, odir, var):
     """
     Plots 1D histograms that were made by "make_1dhists" function,
     with all cuts shown on the same plot for comparison
 
     Args:
+        year: the year the processed samples are from
+        ch: signal channel to look at... choices are ['ele', 'mu', 'had']
+        odir: output directory to hold the plots
         var: the name of the variable to plot a 1D-histogram of... see the full list of choices in plot_configs/vars.json
     """
 
     print(f'plotting all cuts on same plot for comparison')
 
     # load the hists
-    with open(f'{odir}/{ch}_1d_hists_{var}.pkl', 'rb') as f:
+    with open(f'{odir}/{ch}_{var}.pkl', 'rb') as f:
         hists = pkl.load(f)
         f.close()
 
-    for year in years:
-        # make directory to store stuff per year
-        if not os.path.exists(f'{odir}/plots_{year}/'):
-            os.makedirs(f'{odir}/plots_{year}/')
-        if not os.path.exists(f'{odir}/plots_{year}/{var}'):
-            os.makedirs(f'{odir}/plots_{year}/{var}')
-        # make plots per channel
-        for sample in hists[year].axes[1]:
-            fig, ax = plt.subplots(figsize=(8, 5))
-            hep.histplot(hists[year][{'samples': sample, 'cuts': 'preselection'}],  ax=ax, label='preselection')
-            hep.histplot(hists[year][{'samples': sample, 'cuts': 'btagdr'}],        ax=ax, label='preselection + btag + leptonInJet')
-            ax.set_xlabel(f"{var}")
-            ax.set_title(f'{ch} channel for \n {sample}')
-            ax.legend()
-            hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
-            hep.cms.text("Work in Progress", ax=ax)
-            plt.savefig(f'{odir}/plots_{year}/{var}/{ch}_{sample}_all_cuts_comparison.pdf')
-            plt.close()
+    # make directory to store stuff per year
+    if not os.path.exists(f'{odir}/{var}'):
+        os.makedirs(f'{odir}/{var}')
 
-            fig, ax = plt.subplots(figsize=(8, 5))
-            hep.histplot(hists[year][{'samples': sample, 'cuts': 'preselection'}],  ax=ax, label='preselection')
-            hep.histplot(hists[year][{'samples': sample, 'cuts': 'btagdr'}],        ax=ax, label='preselection + btag + leptonInJet')
-            ax.set_xlabel(f"{var}")
-            ax.set_title(f'{ch} channel for \n {sample}')
-            ax.legend()
-            ax.set_yscale('log')
-            hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
-            hep.cms.text("Work in Progress", ax=ax)
-            plt.savefig(f'{odir}/plots_{year}/{var}/{ch}_{sample}_all_cuts_comparison_log.pdf')
-            plt.close()
+    # make plots per channel
+    for sample in hists.axes[1]:
+        fig, ax = plt.subplots(figsize=(8, 5))
+        hep.histplot(hists[{'samples': sample, 'cuts': 'preselection'}],  ax=ax, label='preselection')
+        hep.histplot(hists[{'samples': sample, 'cuts': 'btagdr'}],        ax=ax, label='preselection + btag + leptonInJet')
+        ax.set_xlabel(f"{var}")
+        ax.set_title(f'{ch} channel for \n {sample}')
+        ax.legend()
+        hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
+        hep.cms.text("Work in Progress", ax=ax)
+        plt.savefig(f'{odir}/{var}/{ch}_{sample}_all_cuts_comparison.pdf')
+        plt.close()
+
+        fig, ax = plt.subplots(figsize=(8, 5))
+        hep.histplot(hists[{'samples': sample, 'cuts': 'preselection'}],  ax=ax, label='preselection')
+        hep.histplot(hists[{'samples': sample, 'cuts': 'btagdr'}],        ax=ax, label='preselection + btag + leptonInJet')
+        ax.set_xlabel(f"{var}")
+        ax.set_title(f'{ch} channel for \n {sample}')
+        ax.legend()
+        ax.set_yscale('log')
+        hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
+        hep.cms.text("Work in Progress", ax=ax)
+        plt.savefig(f'{odir}/{var}/{ch}_{sample}_all_cuts_comparison_log.pdf')
+        plt.close()
 
 
 def main(args):
-    if not os.path.exists(args.odir):
-        os.makedirs(args.odir)
+    # append '_year' to the output directory
+    odir = args.odir + '_' + args.year
+    if not os.path.exists(odir):
+        os.makedirs(odir)
 
-    years = args.years.split(',')
+    # make subdirectory specefic to this script
+    if not os.path.exists(odir + '/1d_hists/'):
+        os.makedirs(odir + '/1d_hists/')
+    odir = odir + '/1d_hists/'
+
     channels = args.channels.split(',')
+    range = [args.start, args.end]
 
     # get samples to make histograms
     f = open(args.samples)
@@ -219,15 +230,12 @@ def main(args):
 
     # build samples
     samples = {}
-    for year in years:
-        samples[year] = {}
-        for ch in channels:
-            samples[year][ch] = []
-            for key, value in json_samples[year][ch].items():
-                if value == 1:
-                    samples[year][ch].append(key)
-
-    range = [args.start, args.end]
+    samples[args.year] = {}
+    for ch in channels:
+        samples[args.year][ch] = []
+        for key, value in json_samples[args.year][ch].items():
+            if value == 1:
+                samples[args.year][ch].append(key)
 
     print(f'Plotting {args.var} histogram')
 
@@ -238,14 +246,14 @@ def main(args):
             cuts = ['preselection', 'btagdr']
 
         if args.make_hists:
-            make_1dhists(args.idir, args.odir, samples, years, ch, args.var, args.bins, range)
+            make_1dhists(args.year, ch, args.idir, odir, samples, args.var, args.bins, range)
 
         if args.plot_hists:
             for cut in cuts:
-                plot_1dhists(args.odir, years, ch, args.var, cut)
+                plot_1dhists(args.year, ch, odir, args.var, cut)
 
             if len(cuts) > 1:  # if there's more than one cut make comparisons
-                plot_1dhists_compare_cuts(args.odir, years, ch, args.var)
+                plot_1dhists_compare_cuts(args.year, ch, odir, args.var)
 
 
 if __name__ == "__main__":
