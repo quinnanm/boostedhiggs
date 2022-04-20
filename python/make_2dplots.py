@@ -236,7 +236,7 @@ def main(args):
         if args.plot_hists:
             print('Plotting histograms...')
             for cut in cuts:
-                plot_2dplots(args.odir, years, channels, vars, cut)
+                plot_2dplots(args.odir, years, ch, vars, cut)
 
 
 if __name__ == "__main__":
