@@ -25,12 +25,14 @@ warnings.filterwarnings("ignore", message="Found duplicate branch ")
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 np.seterr(invalid='ignore')
 
+
 def dsum(*dicts):
     ret = defaultdict(int)
     for d in dicts:
         for k, v in d.items():
             ret[k] += v
     return dict(ret)
+
 
 def pad_val(
     arr: ak.Array,
@@ -63,6 +65,7 @@ def build_p4(cand):
         with_name="PtEtaPhiMCandidate",
         behavior=candidate.behavior,
     )
+
 
 class HwwProcessor(processor.ProcessorABC):
     def __init__(self, year="2017", yearmod="", channels=["ele", "mu", "had"], output_location="./outfiles/", apply_trigger=True):
@@ -297,7 +300,7 @@ class HwwProcessor(processor.ProcessorABC):
         if ('DY' in dataset) and isMC:
             Z = getParticles(events.GenPart, lowid=23, highid=23, flags=['fromHardProcess', 'isLastCopy'])
             Z = ak.firsts(Z)
-            lep_Z_dr = Z.delta_r(candidatelep_p4)   # get dr between Z and lepton                                                                                                                                                                                              
+            lep_Z_dr = Z.delta_r(candidatelep_p4)   # get dr between Z and lepton
 
         # event selections for semi-leptonic channels
         self.add_selection(
@@ -315,6 +318,17 @@ class HwwProcessor(processor.ProcessorABC):
             sel=(mt_lep_met < 100),
             channel=['mu', 'ele']
         )
+        self.add_selection(
+            name='antibjettag',
+            sel=(ak.max(bjets_away_candidatefj_had.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
+            channel=['mu', 'ele']
+        )
+        self.add_selection(
+            name='leptonInJet',
+            sel=(lep_fj_dr < 0.8),
+            channel=['mu', 'ele']
+        )
+
         # event selection for muon channel
         self.add_selection(
             name='leptonKin',
@@ -386,6 +400,11 @@ class HwwProcessor(processor.ProcessorABC):
             sel=(met.pt < 200),
             channel=['had']
         )
+        self.add_selection(
+            name='antibjettag',
+            sel=(ak.max(bjets_away_candidatefj_had.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
+            channel=['had']
+        )
 
         # fill tuple variables
         variables = {
@@ -393,8 +412,6 @@ class HwwProcessor(processor.ProcessorABC):
                 "fj_pt": candidatefj_lep.pt,
                 "fj_msoftdrop": candidatefj_lep.msoftdrop,
                 "fj_bjets_ophem": (ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
-                "cut_antibjettag": (ak.max(bjets_away_candidatefj_had.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
-                "cut_leptonInJet": (lep_fj_dr < 0.8),
                 "gen_Hpt": ak.firsts(match_HWW_lep["matchedH"].pt),
                 "gen_Hnprongs": match_HWW_lep["hWW_nprongs"],
                 "gen_iswlepton": match_HWW_lep["iswlepton"],
@@ -411,7 +428,6 @@ class HwwProcessor(processor.ProcessorABC):
                 "fj_pt": candidatefj_had.pt,
                 "fj_msoftdrop": candidatefj_had.msoftdrop,
                 "fj_bjets_ophem": ak.max(bjets_away_candidatefj_had.btagDeepFlavB, axis=1),
-                "cut_antibjettag":(ak.max(bjets_away_candidatefj_had.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
                 "gen_Hpt": ak.firsts(match_HWW_had["matchedH"].pt),
                 "gen_Hnprongs": match_HWW_had["hWW_nprongs"],
                 "fj_pnh4q": candidatefj_had.particleNet_H4qvsQCD,
@@ -477,15 +493,15 @@ class HwwProcessor(processor.ProcessorABC):
                 fill_output = False
 
             if fill_output:
-                var_ch = ch if ch=="had" else "lep"
-                keys = ["common",var_ch]
+                var_ch = ch if ch == "had" else "lep"
+                keys = ["common", var_ch]
                 for key in keys:
-                    for var,item in variables[key].items():
+                    for var, item in variables[key].items():
                         # pad all the variables that are not a cut with -1
-                        pad_item = item if ("cut" in var or "weight" in var) else pad_val(item,-1)
+                        pad_item = item if ("cut" in var or "weight" in var) else pad_val(item, -1)
                         # fill out dictionary
                         out[var] = item
-                    
+
                 # fill the output dictionary
                 output[ch] = {
                     key: value[self.selections[ch].all(*self.selections[ch].names)] for (key, value) in out.items()
