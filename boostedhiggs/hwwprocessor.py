@@ -11,6 +11,8 @@ import pathlib
 from typing import List, Optional
 import pyarrow.parquet as pq
 
+import importlib.resources
+
 from coffea import processor
 from coffea.nanoevents.methods import candidate, vector
 from coffea.analysis_tools import Weights, PackedSelection
@@ -70,120 +72,14 @@ class HwwProcessor(processor.ProcessorABC):
         self._output_location = output_location
 
         # trigger paths
-        self._HLTs = {
-            2016: {
-                'ele': [
-                    "Ele27_WPTight_Gsf",
-                    "Ele115_CaloIdVT_GsfTrkIdT",
-                    "Photon175",
-                    # "Ele50_CaloIdVT_GsfTrkIdT_PFJet165", # extra
-                    # "Ele15_IsoVVVL_PFHT600", # VVL
-                ],
-                'mu': [
-                    "Mu50",
-                    "TkMu50",
-                    "IsoMu24",
-                    "IsoTkMu24",
-                    # "Mu55",
-                    # "Mu15_IsoVVVL_PFHT600" # VVL
-                ],
-                'had': [
-                    "PFHT800",
-                    "PFHT900",
-                    "AK8PFJet360_TrimMass30",
-                    "AK8PFHT700_TrimR0p1PT0p03Mass50",
-                    "PFHT650_WideJetMJJ950DEtaJJ1p5",
-                    "PFHT650_WideJetMJJ900DEtaJJ1p5",
-                    "PFJet450",
-                ],
-            },
-            2017: {
-                'ele': [
-                    "Ele35_WPTight_Gsf",
-                    "Ele115_CaloIdVT_GsfTrkIdT",
-                    "Photon200",
-                    # "Ele50_CaloIdVT_GsfTrkIdT_PFJet165", # extra
-                    # "Ele15_IsoVVVL_PFHT600", # VVL
-                ],
-                'mu': [
-                    "Mu50",
-                    "IsoMu27",
-                    "OldMu100",
-                    "TkMu100",
-                    # "Mu15_IsoVVVL_PFHT600", # VVL
-                ],
-                'had': [
-                    "PFHT1050",
-                    "AK8PFJet400_TrimMass30",
-                    "AK8PFJet420_TrimMass30",
-                    "AK8PFHT800_TrimMass50",
-                    "PFJet500",
-                    "AK8PFJet500",
-                ],
-            },
-            2018: {
-                'ele': [
-                    "Ele32_WPTight_Gsf",
-                    "Ele115_CaloIdVT_GsfTrkIdT",
-                    "Photon200",
-                    # "Ele50_CaloIdVT_GsfTrkIdT_PFJet165", # extra
-                    # "Ele15_IsoVVVL_PFHT600", # VVL
-                ],
-                'mu': [
-                    "Mu50",
-                    "IsoMu24",
-                    "OldMu100",
-                    "TkMu100",
-                    # "Mu15_IsoVVVL_PFHT600", # VVL
-                ],
-                'had': [
-                    "PFHT1050",
-                    "AK8PFJet400_TrimMass30",
-                    "AK8PFJet420_TrimMass30",
-                    "AK8PFHT800_TrimMass50",
-                    "PFJet500",
-                    "AK8PFJet500",
-                ],
-            }
-        }[int(self._year)]
-
+        with importlib.resources.path("boostedhiggs.data", "triggers.json") as path:
+            self._HLTs = json.load(path)[self._year]
         # apply trigger in selection?
         self.apply_trigger = apply_trigger
 
         # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFiltersRun2
-        self._metfilters = {
-            2016: [
-                "goodVertices",
-                "globalSuperTightHalo2016Filter",
-                "HBHENoiseFilter",
-                "HBHENoiseIsoFilter",
-                "EcalDeadCellTriggerPrimitiveFilter",
-                "BadPFMuonFilter",
-                "eeBadScFilter",
-            ],
-            2017: [
-                "goodVertices",
-                "globalSuperTightHalo2016Filter",
-                "HBHENoiseFilter",
-                "HBHENoiseIsoFilter",
-                "EcalDeadCellTriggerPrimitiveFilter",
-                "BadPFMuonFilter",
-                # "BadChargedCandidateFilter",
-                "eeBadScFilter",
-                "ecalBadCalibFilter",
-            ],
-            2018:  [
-                "goodVertices",
-                "globalSuperTightHalo2016Filter",
-                "HBHENoiseFilter",
-                "HBHENoiseIsoFilter",
-                "EcalDeadCellTriggerPrimitiveFilter",
-                "BadPFMuonFilter",
-                # "BadChargedCandidateFilter",
-                "eeBadScFilter",
-                "ecalBadCalibFilter",
-            ],
-        }[int(self._year)]
+        with importlib.resources.path("boostedhiggs.data", "metfilters.json") as path:
+            self._metfilters = json.load(path)[self._year]
 
         self._btagWPs = btagWPs["deepJet"][year + yearmod]
         # self.btagCorr = BTagCorrector("M", "deepJet", year, yearmod)
@@ -269,7 +165,8 @@ class HwwProcessor(processor.ProcessorABC):
 
         # metfilters
         metfilters = np.ones(nevents, dtype='bool')
-        for mf in self._metfilters:
+        metfilterkey = "mc" if isMC else "data"
+        for mf in self._metfilters[metfilterkey]:
             if mf in events.Flag.fields:
                 metfilters = metfilters & events.Flag[mf]
         self.add_selection("metfilters", metfilters)
@@ -511,8 +408,8 @@ class HwwProcessor(processor.ProcessorABC):
                 "lep_mvaId": mu_mvaId,
             },
             "had": {
-                "fj_pt": candidatefj_lep.pt,
-                "fj_msoftdrop": candidatefj_lep.msoftdrop,
+                "fj_pt": candidatefj_had.pt,
+                "fj_msoftdrop": candidatefj_had.msoftdrop,
                 "fj_bjets_ophem": ak.max(bjets_away_candidatefj_had.btagDeepFlavB, axis=1),
                 "cut_antibjettag":(ak.max(bjets_away_candidatefj_had.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
                 "gen_Hpt": ak.firsts(match_HWW_had["matchedH"].pt),
