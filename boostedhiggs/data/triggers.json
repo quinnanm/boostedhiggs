@@ -1,17 +1,17 @@
 {
     "2016": {
-	'ele': [
+	"ele": [
             "Ele27_WPTight_Gsf",
             "Ele115_CaloIdVT_GsfTrkIdT",
             "Photon175",
 	],
-	'mu': [
+	"mu": [
             "Mu50",
             "TkMu50",
             "IsoMu24",
             "IsoTkMu24",
 	],
-	'had': [
+	"had": [
             "PFHT800",
             "PFHT900",
             "AK8PFJet360_TrimMass30",
@@ -22,18 +22,18 @@
 	],
     },
     "2017": {
-        'ele': [
+        "ele": [
             "Ele35_WPTight_Gsf",
             "Ele115_CaloIdVT_GsfTrkIdT",
             "Photon200",
         ],
-        'mu': [
+        "mu": [
             "Mu50",
             "IsoMu27",
             "OldMu100",
             "TkMu100",
         ],
-        'had': [
+        "had": [
             "PFHT1050",
             "AK8PFJet400_TrimMass30",
             "AK8PFJet420_TrimMass30",
@@ -43,18 +43,18 @@
         ],
     },
     "2018": {
-        'ele': [
+        "ele": [
             "Ele32_WPTight_Gsf",
             "Ele115_CaloIdVT_GsfTrkIdT",
             "Photon200",
         ],
-        'mu': [
+        "mu": [
             "Mu50",
             "IsoMu24",
             "OldMu100",
             "TkMu100",
         ],
-        'had': [
+        "had": [
             "PFHT1050",
             "AK8PFJet400_TrimMass30",
             "AK8PFJet420_TrimMass30",
