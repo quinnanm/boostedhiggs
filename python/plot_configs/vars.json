@@ -32,7 +32,7 @@
      "lep_nprongs": 0
     },
   "had": {
-	   "fj0_msoftdrop": 10,
+	   "fj0_msoftdrop": 1,
 	   "fj0_pt": 1,
 	   "fj0_pnh4q": 0,
 	   "fj1_msoftdrop": 0,
