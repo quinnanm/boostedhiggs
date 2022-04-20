@@ -37,8 +37,8 @@ def make_1dhists_ratio(year, ch, idir, odir, samples, vars, bins, start, end):
     Makes 1D histograms of a ratio of two variables (e.g. lep_pt/fj_pt)
 
     Args:
-        year: the year the processed samples are from
-        ch: signal channel to look at... choices are ['ele', 'mu', 'had']
+        year: string that represents the year the processed samples are from
+        ch: string that represents the signal channel to look at... choices are ['ele', 'mu', 'had']
         idir: directory that holds the processed samples (e.g. {idir}/{sample}/outfiles/*_{ch}.parquet)
         odir: output directory to hold the hist object
         samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
@@ -141,8 +141,8 @@ def plot_1dhists_ratio(year, ch, odir, vars, cut='preselection'):
     Plots the 1D histograms of a ratio of two variables that were made by "make_1dhists_ratio" function
 
     Args:
-        year: the year the processed samples are from
-        ch: signal channel to look at... choices are ['ele', 'mu', 'had']
+        year: string that represents the year the processed samples are from
+        ch: string that represents the signal channel to look at... choices are ['ele', 'mu', 'had']
         odir: output directory to hold the plots
         vars: a list of two variable names... the first is going to be the numerator, and the second the denominator... see the full list of choices in plot_configs/vars.json
         cut: the cut to apply when plotting the histogram... choices are ['preselection', 'btagdr'] for leptonic channel and ['preselection'] for hadronic channel
@@ -177,8 +177,8 @@ def plot_1dhists_ratio_compare_cuts(year, ch, odir, vars):
     with all cuts shown on the same plot for comparison
 
     Args:
-        year: the year the processed samples are from
-        ch: signal channel to look at... choices are ['ele', 'mu', 'had']
+        year: string that represents the year the processed samples are from
+        ch: string that represents the signal channel to look at... choices are ['ele', 'mu', 'had']
         odir: output directory to hold the plots
         vars: a list of two variable names... the first is going to be the numerator, and the second the denominator... see the full list of choices in plot_configs/vars.json
     """
