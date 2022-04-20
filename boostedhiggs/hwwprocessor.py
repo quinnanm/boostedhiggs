@@ -464,12 +464,12 @@ class HwwProcessor(processor.ProcessorABC):
         # - lhe pdf weights for signal
         # - top pt reweighting for top
         # - psweights for signal
-        # if isMC:
-        #     weights = Weights(nevents, storeIndividual=True)
-        #     weights.add('genweight', events.genWeight)
-        #     # self.btagCorr.addBtagWeight(bjets_away_lepfj, weights)
-        #     # self.btagCorr.addBtagWeight(bjets_away_candidatefj_had, weights)
-        #     variables["commom"]["weight"] = weights.weight()
+        if isMC:
+            weights = Weights(nevents, storeIndividual=True)
+            weights.add('genweight', events.genWeight)
+            # self.btagCorr.addBtagWeight(bjets_away_lepfj, weights)
+            # self.btagCorr.addBtagWeight(bjets_away_candidatefj_had, weights)
+            variables["common"]["weight"] = weights.weight()
 
         # systematics
         # - trigger up/down (variable)
@@ -485,7 +485,7 @@ class HwwProcessor(processor.ProcessorABC):
 
         # initialize pandas dataframe
         output = {}
-        out = {}
+
         for ch in self._channels:
             fill_output = True
             # for data, only fill output for the dataset needed
@@ -496,6 +496,7 @@ class HwwProcessor(processor.ProcessorABC):
                 fill_output = False
 
             if fill_output:
+                out = {}
                 var_ch = ch if ch == "had" else "lep"
                 keys = ["common", var_ch]
                 for key in keys:
