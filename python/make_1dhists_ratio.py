@@ -40,7 +40,7 @@ def make_1dhists_ratio(year, ch, idir, odir, samples, vars, bins, start, end):
         year: the year the processed samples are from
         ch: signal channel to look at... choices are ['ele', 'mu', 'had']
         idir: directory that holds the processed samples (e.g. {idir}/{sample}/outfiles/*_{ch}.parquet)
-        odir: output directory to hold the plots... will append 'year' to it as follows {odir}_{year}
+        odir: output directory to hold the hist object
         samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
         vars: a list of two variable names... the first is going to be the numerator, and the second the denominator... see the full list of choices in plot_configs/vars.json
     """
@@ -131,15 +131,18 @@ def make_1dhists_ratio(year, ch, idir, odir, samples, vars, bins, start, end):
 
     print("------------------------------------------------------------")
 
-    with open(f'{odir}_{year}/{ch}_1d_hists_ratio_{vars[0]}_{vars[1]}.pkl', 'wb') as f:  # saves the hists objects
+    with open(f'{odir}/{ch}_1d_hists_ratio_{vars[0]}_{vars[1]}.pkl', 'wb') as f:  # saves the hists objects
         pkl.dump(hists, f)
 
 
-def plot_1dhists_ratio(odir, year, ch, vars, cut='preselection'):
+def plot_1dhists_ratio(year, ch, odir, vars, cut='preselection'):
     """
     Plots the 1D histograms of a ratio of two variables that were made by "make_1dhists_ratio" function
 
     Args:
+        year: the year the processed samples are from
+        ch: signal channel to look at... choices are ['ele', 'mu', 'had']
+        odir: output directory to hold the plots
         vars: a list of two variable names... the first is going to be the numerator, and the second the denominator... see the full list of choices in plot_configs/vars.json
         cut: the cut to apply when plotting the histogram... choices are ['preselection', 'btagdr'] for leptonic channel and ['preselection'] for hadronic channel
     """
@@ -147,7 +150,7 @@ def plot_1dhists_ratio(odir, year, ch, vars, cut='preselection'):
     print(f'plotting for {cut} cut')
 
     # load the hists
-    with open(f'{odir}_{year}/{ch}_1d_hists_ratio_{vars[0]}_{vars[1]}.pkl', 'rb') as f:
+    with open(f'{odir}/{ch}_1d_hists_ratio_{vars[0]}_{vars[1]}.pkl', 'rb') as f:
         hists = pkl.load(f)
         f.close()
 
@@ -156,10 +159,11 @@ def plot_1dhists_ratio(odir, year, ch, vars, cut='preselection'):
         os.makedirs(f'{odir}/plots_{year}')
     if not os.path.exists(f'{odir}/plots_{year}/ratio_{vars[0]}_{vars[1]}'):
         os.makedirs(f'{odir}/plots_{year}/ratio_{vars[0]}_{vars[1]}')
+
     # make plots per channel
-    for sample in hists[year].axes[1]:
+    for sample in hists.axes[1]:
         fig, ax = plt.subplots(figsize=(8, 5))
-        hep.histplot(hists[year][{'samples': sample, 'cuts': cut}], ax=ax)
+        hep.histplot(hists[{'samples': sample, 'cuts': cut}], ax=ax)
         ax.set_xlabel(f"{vars[0]}/{vars[1]}")
         ax.set_title(f'{ch} channel for \n {sample} \n with {cut} cut')
         hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
@@ -168,12 +172,15 @@ def plot_1dhists_ratio(odir, year, ch, vars, cut='preselection'):
         plt.close()
 
 
-def plot_1dhists_ratio_compare_cuts(odir, year, ch, vars):
+def plot_1dhists_ratio_compare_cuts(year, ch, odir, vars):
     """
     Plots the 1D histograms of a ratio of two variables that were made by "make_1dhists_ratio" function,
     with all cuts shown on the same plot for comparison
 
     Args:
+        year: the year the processed samples are from
+        ch: signal channel to look at... choices are ['ele', 'mu', 'had']
+        odir: output directory to hold the plots
         vars: a list of two variable names... the first is going to be the numerator, and the second the denominator... see the full list of choices in plot_configs/vars.json
     """
 
@@ -190,10 +197,10 @@ def plot_1dhists_ratio_compare_cuts(odir, year, ch, vars):
     if not os.path.exists(f'{odir}/plots_{year}/ratio_{vars[0]}_{vars[1]}'):
         os.makedirs(f'{odir}/plots_{year}/ratio_{vars[0]}_{vars[1]}')
     # make plots per channel
-    for sample in hists[year].axes[1]:
+    for sample in hists.axes[1]:
         fig, ax = plt.subplots(figsize=(8, 5))
-        hep.histplot(hists[year][{'samples': sample, 'cuts': 'preselection'}],  ax=ax, label='preselection')
-        hep.histplot(hists[year][{'samples': sample, 'cuts': 'btagdr'}],        ax=ax, label='preselection + btag + leptonInJet')
+        hep.histplot(hists[{'samples': sample, 'cuts': 'preselection'}],  ax=ax, label='preselection')
+        hep.histplot(hists[{'samples': sample, 'cuts': 'btagdr'}],        ax=ax, label='preselection + btag + leptonInJet')
         ax.set_xlabel(f"{vars[0]}/{vars[1]}")
         ax.set_title(f'{ch} channel for \n {sample}')
         ax.legend()
@@ -204,8 +211,11 @@ def plot_1dhists_ratio_compare_cuts(odir, year, ch, vars):
 
 
 def main(args):
-    if not os.path.exists(args.odir + '_' + args.year):
-        os.makedirs(args.odir + '_' + args.year)
+
+    # append '_year' to the output directory
+    odir = args.odir + '_' + args.year
+    if not os.path.exists(odir):
+        os.makedirs(odir)
 
     channels = args.channels.split(',')
     vars = args.vars.split(',')
@@ -233,14 +243,14 @@ def main(args):
             cuts = ['preselection', 'btagdr']
 
         if args.make_hists:
-            make_1dhists_ratio(year, ch, args.idir, args.odir, samples, vars, args.bins, args.start, args.end)
+            make_1dhists_ratio(args.year, ch, args.idir, odir, samples, vars, args.bins, args.start, args.end)
 
         if args.plot_hists:
             for cut in cuts:
-                plot_1dhists_ratio(args.odir, year, ch, vars, cut)
+                plot_1dhists_ratio(args.year, ch, odir, vars, cut)
 
             if len(cuts) > 1:  # if there's more than one cut make comparisons
-                plot_1dhists_ratio_compare_cuts(args.odir, year, ch, vars)
+                plot_1dhists_ratio_compare_cuts(args.year, ch, odir, vars)
 
 
 if __name__ == "__main__":
@@ -251,7 +261,7 @@ if __name__ == "__main__":
     parser.add_argument('--year',            dest='year',        default='2017',                                 help="year")
     parser.add_argument('--samples',         dest='samples',     default="plot_configs/samples_pfnano.json",     help='path to json with samples to be plotted')
     parser.add_argument('--channels',        dest='channels',    default='ele,mu,had',                           help='channels for which to plot this variable')
-    parser.add_argument('--odir',            dest='odir',        default='hists/1dhists_ratio',                  help="tag for output directory")
+    parser.add_argument('--odir',            dest='odir',        default='hists/1dhists_ratio',                  help="tag for output directory... will append '_{year}' to it'")
     parser.add_argument('--idir',            dest='idir',        default='../results/',                          help="input directory with results")
     parser.add_argument('--vars',            dest='vars',        default='lep_pt,lep_isolation',                 help='channels for which to plot this variable')
     parser.add_argument('--bins',            dest='bins',        default=50,                                     help="binning of the first variable passed",                type=int)
