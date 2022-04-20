@@ -32,7 +32,7 @@ import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
-def make_1dhists(idir, odir, samples, years, ch, var, bins, range, cuts):
+def make_1dhists(idir, odir, samples, years, ch, var, bins, range):
     """
     Makes 1D histograms
 
@@ -55,10 +55,6 @@ def make_1dhists(idir, odir, samples, years, ch, var, bins, range, cuts):
             hist2.axis.StrCategory([], name='samples', growth=True),     # to combine different pt bins of the same process
             hist2.axis.StrCategory([], name='cuts', growth=True)
         )
-
-        num_events = {}
-        for cut in cuts:
-            num_events[cut] = 0
 
         # loop over the processed files and fill the histograms
         for sample in samples[year][ch]:
@@ -112,12 +108,6 @@ def make_1dhists(idir, odir, samples, years, ch, var, bins, range, cuts):
                             cuts='btagdr'
                         )
 
-                num_events['preselection'] = num_events['preselection'] + len(data[var])
-                if ch != 'had':
-                    num_events['btagdr'] = num_events['btagdr'] + len(data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1])
-
-            for cut in cuts:
-                print(f"Num of events after {cut} cut is: {num_events[cut]}")
     print("------------------------------------------------------------")
 
     with open(f'{odir}/{ch}_1d_hists_{var}.pkl', 'wb') as f:  # saves the hists objects
@@ -130,7 +120,7 @@ def plot_1dhists(odir, years, ch, var, cut='preselection'):
 
     Args:
         var: the name of the variable to plot a 1D-histogram of... see the full list of choices in plot_configs/vars.json
-        cut: the cut to apply when plotting the histogram... choices are ['preselection', 'dr', 'btag', 'btagdr']
+        cut: the cut to apply when plotting the histogram... choices are ['preselection', 'btagdr'] for leptonic channel and ['preselection'] for hadronic channel
     """
 
     print(f'plotting for {cut} cut')
@@ -179,7 +169,7 @@ def plot_1dhists_compare_cuts(odir, years, ch, var):
     print(f'plotting all cuts on same plot for comparison')
 
     # load the hists
-    with open(f'{odir}/1d_hists_{var}.pkl', 'rb') as f:
+    with open(f'{odir}/{ch}_1d_hists_{var}.pkl', 'rb') as f:
         hists = pkl.load(f)
         f.close()
 
@@ -190,7 +180,7 @@ def plot_1dhists_compare_cuts(odir, years, ch, var):
         if not os.path.exists(f'{odir}/plots_{year}/{var}'):
             os.makedirs(f'{odir}/plots_{year}/{var}')
         # make plots per channel
-        for sample in hists[year][ch].axes[1]:
+        for sample in hists[year].axes[1]:
             fig, ax = plt.subplots(figsize=(8, 5))
             hep.histplot(hists[year][{'samples': sample, 'cuts': 'preselection'}],  ax=ax, label='preselection')
             hep.histplot(hists[year][{'samples': sample, 'cuts': 'btagdr'}],        ax=ax, label='preselection + btag + leptonInJet')
@@ -248,7 +238,7 @@ def main(args):
             cuts = ['preselection', 'btagdr']
 
         if args.make_hists:
-            make_1dhists(args.idir, args.odir, samples, years, ch, args.var, args.bins, range, cuts)
+            make_1dhists(args.idir, args.odir, samples, years, ch, args.var, args.bins, range)
 
         if args.plot_hists:
             for cut in cuts:
