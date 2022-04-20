@@ -30,29 +30,31 @@ import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
-def make_stacked_hists_years(tag, odir, vars_to_plot, samples, years, channels, pfnano):
+def make_stacked_hists_years(years, ch, tag, odir, vars_to_plot, samples, ):
     """
     Makes 1D histograms to be plotted as stacked over the different samples
     Args:
-        vars_to_plot: the set of variables to plot a 1D-histogram of (by default: the samples with key==1 defined in plot_configs/vars.json)
+        years: list of string that represents the years the processed samples are from
+        ch: string that represents the signal channel to look at... choices are ['ele', 'mu', 'had']
+        tag: directory that holds the processed samples (e.g. tag='Apr8' if the datafiles are in Apr8_2016/{sample}/outfiles/*_{ch}.parquet)
+        odir: output directory to hold the hist object
         samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
+        vars_to_plot: the set of variables to plot a 1D-histogram of (by default: the samples with key==1 defined in plot_configs/vars.json)
     """
 
     # initialize the histograms for the different channels and different variables
     hists = {}
-    for ch in channels:
-        hists[ch] = {}
-        for var in vars_to_plot[ch]:
-            year_axis = hist2.axis.StrCategory([], name='years', growth=True)
-            sample_axis = hist2.axis.StrCategory([], name='samples', growth=True)
-            cut_axis = hist2.axis.StrCategory([], name='cuts', growth=True)
+    for var in vars_to_plot[ch]:
+        year_axis = hist2.axis.StrCategory([], name='years', growth=True)
+        sample_axis = hist2.axis.StrCategory([], name='samples', growth=True)
+        cut_axis = hist2.axis.StrCategory([], name='cuts', growth=True)
 
-            hists[ch][var] = hist2.Hist(
-                year_axis,
-                sample_axis,
-                cut_axis,
-                axis_dict[var],
-            )
+        hists[var] = hist2.Hist(
+            year_axis,
+            sample_axis,
+            cut_axis,
+            axis_dict[var],
+        )
 
     for year in years:
         idir = tag + '_' + year
@@ -67,100 +69,87 @@ def make_stacked_hists_years(tag, odir, vars_to_plot, samples, years, channels, 
 
         xsec_weight_by_sample = {}
         # loop over the processed files and fill the histograms
-        for ch in channels:
-            for sample in samples[year][ch]:
-                is_data = False
+        for sample in samples[year][ch]:
+            is_data = False
 
-                for key in data_label.values():
-                    if (key in sample) or ('EGamma' in sample):
-                        is_data = True
+            for key in data_label.values():
+                if (key in sample) or ('EGamma' in sample):
+                    is_data = True
 
-                if not is_data and sample not in xsec_weight_by_sample.keys():
-                    pkl_dir = f'{idir}/{sample}/outfiles/*.pkl'
-                    pkl_files = glob.glob(pkl_dir)  # get list of files that were processed
-                    if not pkl_files:  # skip samples which were not processed
-                        print('- No processed files found...', pkl_dir, 'skipping sample...', sample)
+            if not is_data and sample not in xsec_weight_by_sample.keys():
+                pkl_dir = f'{idir}/{sample}/outfiles/*.pkl'
+                pkl_files = glob.glob(pkl_dir)  # get list of files that were processed
+                if not pkl_files:  # skip samples which were not processed
+                    print('- No processed files found...', pkl_dir, 'skipping sample...', sample)
+                    continue
+
+                # Find xsection
+                f = open('../fileset/xsec_pfnano.json')
+
+                xsec = json.load(f)
+                f.close()
+                xsec = eval(str((xsec[sample])))
+
+                # Get sum_sumgenweight of sample
+                sum_sumgenweight = get_sum_sumgenweight(idir, year, sample)
+
+                # Get overall weighting of events
+                # each event has (possibly a different) genweight... sumgenweight sums over events in a chunk... sum_sumgenweight sums over chunks
+                xsec_weight = (xsec * luminosity[year]) / (sum_sumgenweight)
+                xsec_weight_by_sample[sample] = xsec_weight
+
+            elif sample in xsec_weight_by_sample.keys():
+                xsec_weight = xsec_weight_by_sample[sample]
+
+            else:
+                xsec_weight = 1
+
+            parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
+
+            if len(parquet_files) != 0:
+                print(f'Processing {ch} channel of sample', sample)
+
+            for parquet_file in parquet_files:
+                try:
+                    data = pq.read_table(parquet_file).to_pandas()
+                except:
+                    print('Not able to read data: ', parquet_file, ' should remove evts from scaling/lumi')
+                    continue
+
+                for var in vars_to_plot[ch]:
+                    if var not in data.keys():
+                        # print(f'- No {var} for {year}/{ch} - skipping')
+                        continue
+                    if len(data) == 0:
                         continue
 
-                    # Find xsection
-                    f = open('../fileset/xsec_pfnano.json')
+                    # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
+                    if ch != 'had':
+                        data = data[data['fj_pt'] != -1]
 
-                    xsec = json.load(f)
-                    f.close()
-                    xsec = eval(str((xsec[sample])))
-
-                    # Get sum_sumgenweight of sample
-                    sum_sumgenweight = get_sum_sumgenweight(idir, year, sample)
-
-                    # Get overall weighting of events
-                    # each event has (possibly a different) genweight... sumgenweight sums over events in a chunk... sum_sumgenweight sums over chunks
-                    xsec_weight = (xsec * luminosity[year]) / (sum_sumgenweight)
-                    xsec_weight_by_sample[sample] = xsec_weight
-
-                elif sample in xsec_weight_by_sample.keys():
-                    xsec_weight = xsec_weight_by_sample[sample]
-
-                else:
-                    xsec_weight = 1
-
-                parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
-
-                if len(parquet_files) != 0:
-                    print(f'Processing {ch} channel of sample', sample)
-
-                for parquet_file in parquet_files:
                     try:
-                        data = pq.read_table(parquet_file).to_pandas()
+                        event_weight = data['weight']
                     except:
-                        print('Not able to read data: ', parquet_file, ' should remove evts from scaling/lumi')
-                        continue
+                        data['weight'] = 1  # for data fill a weight column with ones
 
-                    for var in vars_to_plot[ch]:
-                        if var not in data.keys():
-                            # print(f'- No {var} for {year}/{ch} - skipping')
-                            continue
-                        if len(data) == 0:
-                            continue
+                    # filling histograms
+                    single_sample = None
+                    for single_key, key in add_samples.items():
+                        if key in sample:
+                            single_sample = single_key
+                    if 'EGamma' in sample:
+                        single_sample = 'SingleElectron'
 
-                        # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
-                        data = data[data[var] != -1]
-
-                        try:
-                            event_weight = data['weight']
-                        except:
-                            data['weight'] = 1  # for data fill a weight column with ones
-
-                        # filling histograms
-                        single_sample = None
-                        for single_key, key in add_samples.items():
-                            if key in sample:
-                                single_sample = single_key
-                        if 'EGamma' in sample:
-                            single_sample = 'SingleElectron'
-
-                        # combining all pt bins of a specefic process under one name
-                        if single_sample is not None:
-                            hists[ch][var].fill(
-                                years=year,
-                                samples=single_sample,
-                                cuts='preselection',
-                                var=data[var],
-                                weight=xsec_weight * data['weight'],
-                            )
-                            hists[ch][var].fill(
-                                years=year,
-                                samples=single_sample,
-                                cuts='btag',
-                                var=data[var][data["anti_bjettag"] == 1],
-                                weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1],
-                            )
-                            hists[ch][var].fill(
-                                years=year,
-                                samples=single_sample,
-                                cuts='dr',
-                                var=data[var][data["leptonInJet"] == 1],
-                                weight=xsec_weight * data['weight'][data["leptonInJet"] == 1],
-                            )
+                    # combining all pt bins of a specefic process under one name
+                    if single_sample is not None:
+                        hists[ch][var].fill(
+                            years=year,
+                            samples=single_sample,
+                            cuts='preselection',
+                            var=data[var],
+                            weight=xsec_weight * data['weight'],
+                        )
+                        if ch != 'had':
                             hists[ch][var].fill(
                                 years=year,
                                 samples=single_sample,
@@ -168,30 +157,17 @@ def make_stacked_hists_years(tag, odir, vars_to_plot, samples, years, channels, 
                                 var=data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
                                 weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
                             )
-                        # otherwise give unique name
-                        else:
-                            hists[ch][var].fill(
-                                years=year,
-                                samples=sample,
-                                cuts='preselection',
-                                var=data[var],
-                                weight=xsec_weight * data['weight'],
-                            )
-                            hists[ch][var].fill(
-                                years=year,
-                                samples=sample,
-                                cuts='btag',
-                                var=data[var][data["anti_bjettag"] == 1],
-                                weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1],
-                            )
-                            hists[ch][var].fill(
-                                years=year,
-                                samples=sample,
-                                cuts='dr',
-                                var=data[var][data["leptonInJet"] == 1],
-                                weight=xsec_weight * data['weight'][data["leptonInJet"] == 1],
-                            )
-                            hists[ch][var].fill(
+                    # otherwise give unique name
+                    else:
+                        hists[var].fill(
+                            years=year,
+                            samples=sample,
+                            cuts='preselection',
+                            var=data[var],
+                            weight=xsec_weight * data['weight'],
+                        )
+                        if ch != 'had':
+                            hists[var].fill(
                                 years=year,
                                 samples=sample,
                                 cuts='btagdr',
@@ -202,23 +178,25 @@ def make_stacked_hists_years(tag, odir, vars_to_plot, samples, years, channels, 
     # TODO: combine histograms for all years here and flag them as year='combined'
 
     # store the hists variable
-    with open(f'{odir}/stacked_hists.pkl', 'wb') as f:  # saves the hists objects
+    with open(f'{odir}/{ch}.pkl', 'wb') as f:  # saves the hists objects
         pkl.dump(hists, f)
 
 
-def plot_stacked_hists_years(odir, vars_to_plot, years, channels, pfnano, cut='preselection', logy=True, add_data=True):
+def plot_stacked_hists_years(years, ch, odir, vars_to_plot, cut='preselection', logy=True, add_data=True):
     """
     Plots the stacked 1D histograms that were made by "make_stacked_hists" function
     Args:
+        years: list of strings that represents the years the processed samples are from
+        ch: string that represents the signal channel to look at... choices are ['ele', 'mu', 'had']
+        odir: output directory to hold the plots
         vars_to_plot: the set of variable to plot a 1D-histogram of (by default: the samples with key==1 defined in plot_configs/vars.json)
-        samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
-        cut: the cut to apply when plotting the histogram... choices are ['preselection', 'dr', 'btag', 'btagdr']
+        cut: the cut to apply when plotting the histogram... choices are ['preselection', 'btagdr'] for leptonic channel and ['preselection'] for hadronic channel
     """
 
     print(f'plotting for {cut} cut')
 
     # load the hists
-    with open(f'{odir}/stacked_hists.pkl', 'rb') as f:
+    with open(f'{odir}/{ch}.pkl', 'rb') as f:
         hists = pkl.load(f)
         f.close()
 
@@ -230,114 +208,115 @@ def plot_stacked_hists_years(odir, vars_to_plot, years, channels, pfnano, cut='p
             os.makedirs(f'{odir}/hists')
 
     # make the histogram plots in this directory
-    for ch in channels:
-        data_label = data_by_ch[ch]
+    data_label = data_by_ch[ch]
 
-        for var in vars_to_plot[ch]:
-            if hists[ch][var].shape[0] == 0:     # skip empty histograms (such as lepton_pt for hadronic channel)
-                continue
+    for var in vars_to_plot[ch]:
+        if hists[var].shape[0] == 0:     # skip empty histograms (such as lepton_pt for hadronic channel)
+            continue
 
-            # get histograms
-            h = hists[ch][var]
+        # get histograms
+        h = hists[var]
 
-            # get samples existing in histogram
-            samples = [h.axes[1].value(i) for i in range(len(h.axes[1].edges))]
-            signal_labels = [label for label in samples if label in signal_by_ch[ch]]
-            bkg_labels = [label for label in samples if (label and label != data_label and label not in signal_labels)]
+        # get samples existing in histogram
+        samples = [h.axes[1].value(i) for i in range(len(h.axes[1].edges))]
+        signal_labels = [label for label in samples if label in signal_by_ch[ch]]
+        bkg_labels = [label for label in samples if (label and label != data_label and label not in signal_labels)]
 
-            # data
-            data = None
+        # data
+        data = None
 
-            if (data_label in samples) or ('EGamma' in samples):
-                data = h[{"samples": data_label, 'cuts': cut}][{'years': years}][{'years': sum}]
+        if (data_label in samples) or ('EGamma' in samples):
+            data = h[{"samples": data_label, 'cuts': cut}][{'years': years}][{'years': sum}]
 
-            # signal
-            signal = [h[{"samples": label, "cuts": cut}][{'years': years}][{'years': sum}] for label in signal_labels]
-            if not logy:
-                signal = [s * 10 for s in signal]  # if not log, scale the signal
+        # signal
+        signal = [h[{"samples": label, "cuts": cut}][{'years': years}][{'years': sum}] for label in signal_labels]
+        if not logy:
+            signal = [s * 10 for s in signal]  # if not log, scale the signal
 
-            # background
-            bkg = [h[{"samples": label, "cuts": cut}][{'years': years}][{'years': sum}] for label in bkg_labels]
+        # background
+        bkg = [h[{"samples": label, "cuts": cut}][{'years': years}][{'years': sum}] for label in bkg_labels]
 
-            if add_data and data and len(bkg) > 0:
-                fig, (ax, rax) = plt.subplots(nrows=2,
-                                              ncols=1,
-                                              figsize=(8, 8),
-                                              tight_layout=True,
-                                              gridspec_kw={"height_ratios": (3, 1)},
-                                              sharex=True
-                                              )
-                fig.subplots_adjust(hspace=.07)
-                rax.errorbar(
-                    x=[data.axes.value(i)[0] for i in range(len(data.values()))],
-                    y=data.values() / np.sum([b.values() for b in bkg], axis=0),
-                    fmt="ko",
-                )
-                # NOTE: change limit later
-                rax.set_ylim(0., 1.2)
+        if add_data and data and len(bkg) > 0:
+            fig, (ax, rax) = plt.subplots(nrows=2,
+                                          ncols=1,
+                                          figsize=(8, 8),
+                                          tight_layout=True,
+                                          gridspec_kw={"height_ratios": (3, 1)},
+                                          sharex=True
+                                          )
+            fig.subplots_adjust(hspace=.07)
+            rax.errorbar(
+                x=[data.axes.value(i)[0] for i in range(len(data.values()))],
+                y=data.values() / np.sum([b.values() for b in bkg], axis=0),
+                fmt="ko",
+            )
+            # NOTE: change limit later
+            rax.set_ylim(0., 1.2)
+        else:
+            fig, ax = plt.subplots(1, 1)
+
+        if len(bkg) > 0:
+            hep.histplot(bkg,
+                         ax=ax,
+                         stack=True,
+                         sort='yield',
+                         histtype="fill",
+                         label=[get_simplified_label(bkg_label) for bkg_label in bkg_labels],
+                         )
+            for handle, label in zip(*ax.get_legend_handles_labels()):
+                handle.set_color(color_by_sample[label])
+        if add_data and data:
+            data_err_opts = {
+                'linestyle': 'none',
+                'marker': '.',
+                'markersize': 12.,
+                'elinewidth': 2,
+            }
+
+            if ('2018' in years) and (ch == 'ele'):
+                legend_label = get_simplified_label(data_label) + ' + EGamma'
             else:
-                fig, ax = plt.subplots(1, 1)
+                legend_label = get_simplified_label(data_label)
 
-            if len(bkg) > 0:
-                hep.histplot(bkg,
-                             ax=ax,
-                             stack=True,
-                             sort='yield',
-                             histtype="fill",
-                             label=[get_simplified_label(bkg_label) for bkg_label in bkg_labels],
-                             )
-                for handle, label in zip(*ax.get_legend_handles_labels()):
-                    handle.set_color(color_by_sample[label])
-            if add_data and data:
-                data_err_opts = {
-                    'linestyle': 'none',
-                    'marker': '.',
-                    'markersize': 12.,
-                    'elinewidth': 2,
-                }
+            hep.histplot(data,
+                         ax=ax,
+                         histtype="errorbar",
+                         color="k",
+                         yerr=True,
+                         label=legend_label,
+                         **data_err_opts
+                         )
 
-                if ('2018' in years) and (ch == 'ele'):
-                    legend_label = get_simplified_label(data_label) + ' + EGamma'
-                else:
-                    legend_label = get_simplified_label(data_label)
+        if len(signal) > 0:
+            hep.histplot(signal,
+                         ax=ax,
+                         label=[get_simplified_label(sig_label) for sig_label in signal_labels],
+                         color='red'
+                         )
 
-                hep.histplot(data,
-                             ax=ax,
-                             histtype="errorbar",
-                             color="k",
-                             yerr=True,
-                             label=legend_label,
-                             **data_err_opts
-                             )
+        if logy:
+            ax.set_yscale('log')
+            ax.set_ylim(0.1)
+        ax.set_title(f'{ch} channel \n with {cut} cut')
+        ax.legend()
 
-            if len(signal) > 0:
-                hep.histplot(signal,
-                             ax=ax,
-                             label=[get_simplified_label(sig_label) for sig_label in signal_labels],
-                             color='red'
-                             )
+        hep.cms.lumitext(f"combined (13 TeV) \n {years}", ax=ax)
+        hep.cms.text("Work in Progress", ax=ax)
 
-            if logy:
-                ax.set_yscale('log')
-                ax.set_ylim(0.1)
-            ax.set_title(f'{ch} channel \n with {cut} cut')
-            ax.legend()
-
-            hep.cms.lumitext(f"combined (13 TeV) \n {years}", ax=ax)
-            hep.cms.text("Work in Progress", ax=ax)
-
-            if logy:
-                print('Saving to ', f'{odir}/hists_log/{var}_{ch}_{cut}.pdf')
-                plt.savefig(f'{odir}/hists_log/{var}_{ch}_{cut}.pdf')
-            else:
-                print('Saving to ', f'{odir}/hists/{var}_{ch}_{cut}.pdf')
-                plt.savefig(f'{odir}/hists/{var}_{ch}_{cut}.pdf')
-            plt.close()
+        if logy:
+            print('Saving to ', f'{odir}/hists_log/{ch}_{var}_{cut}.pdf')
+            plt.savefig(f'{odir}/hists_log/{ch}_{var}_{cut}.pdf')
+        else:
+            print('Saving to ', f'{odir}/hists/{ch}_{var}_{cut}.pdf')
+            plt.savefig(f'{odir}/hists/{ch}_{var}_{cut}.pdf')
+        plt.close()
 
 
 def main(args):
-    if not os.path.exists(args.odir):
-        os.makedirs(args.odir)
+    # append '_combined' to the output directory
+    odir = args.odir + '_combined'
+    if not os.path.exists(odir):
+        os.makedirs(odir)
 
     years = args.years.split(',')
     channels = args.channels.split(',')
@@ -370,7 +349,7 @@ def main(args):
 
     if args.make_hists:
         print('Making histograms...')
-        make_stacked_hists_years(args.idir, args.odir, vars_to_plot, samples, years, channels, args.pfnano)
+        make_stacked_hists_years(years, channels, args.idir, odir, vars_to_plot, samples)
 
     if args.plot_hists:
         print('Plotting histograms...')
@@ -382,22 +361,21 @@ def main(args):
                 cuts = ['preselection', 'btagdr']
 
             for cut in cuts:
-                plot_stacked_hists_years(args.odir, vars_to_plot, years, [ch], args.pfnano, cut, logy=True)
-                # plot_stacked_hists_years(args.odir, vars_to_plot, years, ch, args.pfnano, cut, logy=False)
+                plot_stacked_hists_years(years, ch, odir, vars_to_plot, cut, logy=True)
+                # plot_stacked_hists_years(years, ch, odir, vars_to_plot, cut, logy=False)
 
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as:  python merge_years_hists.py --years 2016,2017,2018 --odir hists/stacked_hists --pfnano --make_hists --plot_hists --channels ele --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # run locally as:  python merge_years_hists.py --years 2016,2017,2018 --odir hists/stacked_hists --make_hists --plot_hists --channels ele --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/Apr4
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--years',            dest='years',          default='2017',                               help="year")
     parser.add_argument('--vars',             dest='vars',           default="plot_configs/vars.json",             help='path to json with variables to be plotted')
     parser.add_argument('--samples',          dest='samples',        default="plot_configs/samples_pfnano.json",   help='path to json with samples to be plotted')
     parser.add_argument('--channels',         dest='channels',       default='ele,mu,had',                         help='channels for which to plot this variable')
-    parser.add_argument('--odir',             dest='odir',           default='hists',                              help="tag for output directory")
-    parser.add_argument('--idir',             dest='idir',           default='../results/',                        help="input directory with results")
-    parser.add_argument("--pfnano",           dest='pfnano',         action='store_true',                          help="Run with pfnano")
+    parser.add_argument('--odir',             dest='odir',           default='hists',                              help="tag for output directory... will append '_combined' to it")
+    parser.add_argument('--idir',             dest='idir',           default='../results/',                        help="input directories with results... must be of the form Apr8 if the data files afre in 'Apr8_2016', 'Apr8_2017', 'Apr8_2018'")
     parser.add_argument("--make_hists",       dest='make_hists',     action='store_true',                          help="Make hists")
     parser.add_argument("--plot_hists",       dest='plot_hists',     action='store_true',                          help="Plot the hists")
 

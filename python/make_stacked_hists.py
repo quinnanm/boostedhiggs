@@ -367,7 +367,7 @@ if __name__ == "__main__":
     parser.add_argument('--vars',                   dest='vars',                    default="plot_configs/vars.json",             help='path to json with variables to be plotted')
     parser.add_argument('--samples',                dest='samples',                 default="plot_configs/samples_pfnano.json",   help='path to json with samples to be plotted')
     parser.add_argument('--channels',               dest='channels',                default='ele,mu,had',                         help='channels for which to plot this variable')
-    parser.add_argument('--odir',                   dest='odir',                    default='hists',                              help="tag for output directory")
+    parser.add_argument('--odir',                   dest='odir',                    default='hists',                              help="tag for output directory... will append '_{year}' to it")
     parser.add_argument('--idir',                   dest='idir',                    default='../results/',                        help="input directory with results")
     parser.add_argument("--make_hists",             dest='make_hists',              action='store_true',                          help="Make hists")
     parser.add_argument("--plot_hists",             dest='plot_hists',              action='store_true',                          help="Plot the hists")
