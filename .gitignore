@@ -8,9 +8,8 @@ __pycache__
 binder/data/
 metadata.json
 
-binder/lol.pdf
 binder/plots/*
-
+binder/DY*
 
 run_local.py
 data1.root
@@ -19,5 +18,26 @@ data2.root
 outfiles/
 lpc/
 hists/
+1dhists/
 2dplots/
+plots2/
+plots3/
 results/
+DY.root
+
+prp/
+datafiles/
+
+binder/DY/
+binder/GluGluHToWWToLNuQQ/
+
+binder/outfiles0
+binder/outfiles01
+binder/outfiles02
+binder/outfiles_2016
+binder/outfiles_2018
+binder/EGamma
+
+*.parquet
+
+histo

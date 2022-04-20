@@ -28,15 +28,25 @@ def main(args):
     if args.n != -1:
         job_name += '-' + str(args.starti + args.n)
 
-    # get samples
-    if args.json == 'metadata.json':
-        with open(args.json, 'r') as f:
-            files = json.load(f)
+    # if --local is specefied in args, process only the args.sample provided
+    if args.local:
+        files = {}
+        with open(f"fileset/pfnanoindex_{args.year}.json", 'r') as f:
+            files_all = json.load(f)
+            for subdir in files_all[args.year]:
+                for key, flist in files_all[args.year][subdir].items():
+                    if key in args.sample:
+                        files[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist]
     else:
-        # hopefully this step is avoided in condor jobs that have metadata.json
-        from condor.file_utils import loadJson
-        print(args.pfnano)
-        files, _ = loadJson(args.json, args.year, args.pfnano)
+        # get samples
+        if args.json == 'metadata.json':
+            with open(args.json, 'r') as f:
+                files = json.load(f)
+        else:
+            # hopefully this step is avoided in condor jobs that have metadata.json
+            from condor.file_utils import loadJson
+            print(args.pfnano)
+            files, _ = loadJson(args.json, args.year, args.pfnano)
 
     if not files:
         print('Did not find files.. Exiting.')
@@ -59,9 +69,6 @@ def main(args):
     if args.processor == 'hww':
         from boostedhiggs.hwwprocessor import HwwProcessor
         p = HwwProcessor(year=args.year, channels=channels, output_location='./outfiles' + job_name)
-    else:
-        from boostedhiggs.trigger_efficiencies_processor import TriggerEfficienciesProcessor
-        p = TriggerEfficienciesProcessor(year=int(args.year))
 
     tic = time.time()
     if args.executor == "dask":
@@ -82,9 +89,7 @@ def main(args):
 
         # does treereduction help?
         executor = processor.DaskExecutor(status=True, client=client, treereduction=2)
-        run = processor.Runner(
-            executor=executor, savemetrics=True, schema=nanoevents.NanoAODSchema, chunksize=100000
-        )
+
     else:
         uproot.open.defaults["xrootd_handler"] = uproot.source.xrootd.MultithreadedXRootDSource
 
@@ -92,9 +97,10 @@ def main(args):
             executor = processor.FuturesExecutor(status=True)
         else:
             executor = processor.IterativeExecutor(status=True)
-        run = processor.Runner(
-            executor=executor, savemetrics=True, schema=nanoevents.NanoAODSchema, chunksize=args.chunksize
-        )
+
+    run = processor.Runner(
+        executor=executor, savemetrics=True, schema=nanoevents.NanoAODSchema, chunksize=args.chunksize
+    )
 
     out, metrics = run(
         fileset, "Events", processor_instance=p
@@ -120,12 +126,12 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally on lpc as: python run.py --year 2017 --processor hww --starti 0 --n 1 --json samples_pfnano.json
+    # run locally on lpc as: python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --json samples_pfnano.json
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',        dest='year',           default='2017',                     help="year",                                type=str)
     parser.add_argument('--starti',      dest='starti',         default=0,                          help="start index of files",                type=int)
-    parser.add_argument('--n',            dest='n',              default=-1,                         help="number of files to process",          type=int)
+    parser.add_argument('--n',           dest='n',              default=-1,                         help="number of files to process",          type=int)
     parser.add_argument('--json',        dest='json',           default="metadata.json",            help='path to datafiles',                   type=str)
     parser.add_argument('--sample',      dest='sample',         default=None,                       help='specify sample',                      type=str)
     parser.add_argument("--processor",   dest="processor",      default="hww",                      help="HWW processor",                       type=str)
@@ -137,6 +143,7 @@ if __name__ == "__main__":
         choices=["futures", "iterative", "dask"],
         help="type of processor executor",
     )
+    parser.add_argument("--local",      dest='local', action='store_true')
     parser.add_argument("--pfnano",      dest='pfnano', action='store_true')
     parser.add_argument("--no-pfnano",   dest='pfnano', action='store_false')
     parser.set_defaults(pfnano=True)
