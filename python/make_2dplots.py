@@ -32,7 +32,7 @@ import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
-def make_2dplots(idir, odir, samples, years, ch, vars, x_bins, x_start, x_end, y_bins, y_start, y_end, cuts):
+def make_2dplots(idir, odir, samples, years, ch, vars, x_bins, x_start, x_end, y_bins, y_start, y_end):
     """
     Makes 2D plots of two variables
 
@@ -57,10 +57,6 @@ def make_2dplots(idir, odir, samples, years, ch, vars, x_bins, x_start, x_end, y
             hist2.axis.StrCategory([], name='samples', growth=True),
             hist2.axis.StrCategory([], name='cuts', growth=True)
         )
-
-        num_events = {}
-        for cut in cuts:
-            num_events[cut] = 0
 
         # loop over the processed files and fill the histograms
         for sample in samples[year][ch]:
@@ -139,12 +135,6 @@ def make_2dplots(idir, odir, samples, years, ch, vars, x_bins, x_start, x_end, y
                             weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1]
                         )
 
-                num_events['preselection'] = num_events['preselection'] + len(data[vars[0]])
-                if ch != 'had':
-                    num_events['btagdr'] = num_events['btagdr'] + len(data[vars[0]][data["anti_bjettag"] == 1][data["leptonInJet"] == 1])
-
-            for cut in cuts:
-                print(f"Num of events after {cut} cut is: {num_events[cut]}")
     print("------------------------------------------------------------")
 
     with open(f'{odir}/{ch}_2d_plots_{vars[0]}_vs_{vars[1]}.pkl', 'wb') as f:  # saves the hists objects
@@ -231,7 +221,7 @@ def main(args):
 
         if args.make_hists:
             print('Making histograms...')
-            make_2dplots(args.idir, args.odir, samples, years, ch, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end, cuts)
+            make_2dplots(args.idir, args.odir, samples, years, ch, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end)
 
         if args.plot_hists:
             print('Plotting histograms...')
