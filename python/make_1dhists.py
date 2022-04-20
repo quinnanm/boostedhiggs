@@ -258,15 +258,15 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # lep_pt:    python make_1dhists.py --year 2017 --odir hists/1dhists --channels ele --var lep_pt    --make_hists --plot_hists --bins 100 --start 0 --end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # lep_fj_dr: python make_1dhists.py --year 2017 --odir hists/1dhists --channels ele --var lep_fj_dr --make_hists --plot_hists --bins 100 --start 0 --end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # fj_pt:     python make_1dhists.py --year 2017 --odir hists/1dhists --channels had --var fj0_pt    --make_hists --plot_hists --bins 100 --start 0 --end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_pt:    python make_1dhists.py --year 2017 --odir hists --channels ele --var lep_pt    --make_hists --plot_hists --bins 100 --start 0 --end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_fj_dr: python make_1dhists.py --year 2017 --odir hists --channels ele --var lep_fj_dr --make_hists --plot_hists --bins 100 --start 0 --end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # fj_pt:     python make_1dhists.py --year 2017 --odir hists --channels had --var fj0_pt    --make_hists --plot_hists --bins 100 --start 0 --end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',            dest='year',        default='2017',                             help="year")
     parser.add_argument('--samples',         dest='samples',     default="plot_configs/samples_pfnano.json", help='path to json with samples to be plotted')
     parser.add_argument('--channels',        dest='channels',    default='ele,mu,had',                       help='channels for which to plot this variable')
-    parser.add_argument('--odir',            dest='odir',        default='hists/1dhists',                    help="tag for output directory... will append '_{year}' to it")
+    parser.add_argument('--odir',            dest='odir',        default='hists',                            help="tag for output directory... will append '_{year}' to it")
     parser.add_argument('--idir',            dest='idir',        default='../results/',                      help="input directory with results")
     parser.add_argument('--var',             dest='var',         default='lep_pt',                           help='variable to plot')
     parser.add_argument('--bins',            dest='bins',        default=50,                                 help="binning of the first variable passed",                type=int)
