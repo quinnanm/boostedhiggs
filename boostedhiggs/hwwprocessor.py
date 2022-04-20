@@ -440,7 +440,7 @@ class HwwProcessor(processor.ProcessorABC):
             variables['lep']["gen_iswstarlepton"]: match_HWW_lep["iswstarlepton"]
             variables['had']["gen_Hpt"]: ak.firsts(match_HWW_had["matchedH"].pt)
             variables['had']["gen_Hnprongs"]: match_HWW_had["hWW_nprongs"]
-
+        print(variables['had'].keys())
         if ('DY' in dataset) and isMC:
             Z = getParticles(events.GenPart, lowid=23, highid=23, flags=['fromHardProcess', 'isLastCopy'])
             Z = ak.firsts(Z)
@@ -504,8 +504,6 @@ class HwwProcessor(processor.ProcessorABC):
                 var_ch = ch if ch == "had" else "lep"
                 keys = ["common", var_ch]
                 for key in keys:
-                    print('keys', keys)
-                    print('keys in var', variables[key].keys())
                     for var, item in variables[key].items():
                         # pad all the variables that are not a cut with -1
                         pad_item = item if ("cut" in var or "weight" in var) else pad_val(item, -1)
