@@ -464,12 +464,12 @@ class HwwProcessor(processor.ProcessorABC):
         # - lhe pdf weights for signal
         # - top pt reweighting for top
         # - psweights for signal
-        if isMC:
-            weights = Weights(nevents, storeIndividual=True)
-            weights.add('genweight', events.genWeight)
-            # self.btagCorr.addBtagWeight(bjets_away_lepfj, weights)
-            # self.btagCorr.addBtagWeight(bjets_away_candidatefj_had, weights)
-            variables["commom"]["weight"] = weights.weight()
+        # if isMC:
+        #     weights = Weights(nevents, storeIndividual=True)
+        #     weights.add('genweight', events.genWeight)
+        #     # self.btagCorr.addBtagWeight(bjets_away_lepfj, weights)
+        #     # self.btagCorr.addBtagWeight(bjets_away_candidatefj_had, weights)
+        #     variables["commom"]["weight"] = weights.weight()
 
         # systematics
         # - trigger up/down (variable)
