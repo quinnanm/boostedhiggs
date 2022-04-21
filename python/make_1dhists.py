@@ -86,12 +86,12 @@ def make_1dhists(year, ch, idir, odir, samples, var, bins, range):
                     single_sample = single_key
 
             if single_sample is not None:
+                print('here')
                 hists.fill(
                     data[var],
                     single_sample,  # combining all events under one name
                 )
             else:
-                print('here')
                 hists.fill(
                     data[var],
                     sample,
