@@ -47,7 +47,7 @@ def make_1dhists(year, ch, idir, odir, samples, var, bins, range):
 
     # instantiates the histogram object
     hists = hist2.Hist(
-        hist2.axis.Regular(bins, range[0], range[1], name=var, label=var, Flow=True),
+        hist2.axis.Regular(bins, range[0], range[1], name=var, label=var, overflow=True),
         hist2.axis.StrCategory([], name='samples', growth=True),     # to combine different pt bins of the same process
     )
 
