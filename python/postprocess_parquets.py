@@ -69,27 +69,29 @@ def append_correct_weights(idir, samples, year, channels):
                 if ch != 'had':
                     data = data[data['fj_pt'] != -1]
 
-                try:
-                    event_weight = data['weight'].to_numpy()
-                    # Find xsection if MC
-                    f = open('../fileset/xsec_pfnano.json')
-                    xsec = json.load(f)
-                    f.close()
-                    xsec = eval(str((xsec[sample])))
-
-                    # Get overall weighting of events
-                    xsec_weight = (xsec * luminosity[year]) / (get_sum_sumgenweight(idir, year, sample))
-                    print('3')
-                except:  # for data
-                    print(sample)
-                    data['weight'] = 1  # for data fill a weight column with ones
-                    xsec_weight = 1
-
-                # append an additional column 'tot_weight' to the parquet dataframes
-                data['tot_weight'] = xsec_weight * data['weight']
-
-                # update parquet file (this line should overwrite the stored dataframe)
-                pq.write_table(pa.Table.from_pandas(data), parquet_file)
+                get_sum_sumgenweight(idir, year, sample)
+                #
+                # try:
+                #     event_weight = data['weight'].to_numpy()
+                #     # Find xsection if MC
+                #     f = open('../fileset/xsec_pfnano.json')
+                #     xsec = json.load(f)
+                #     f.close()
+                #     xsec = eval(str((xsec[sample])))
+                #
+                #     # Get overall weighting of events
+                #     xsec_weight = (xsec * luminosity[year]) / (get_sum_sumgenweight(idir, year, sample))
+                #
+                # except:  # for data
+                #     print(sample)
+                #     data['weight'] = 1  # for data fill a weight column with ones
+                #     xsec_weight = 1
+                #
+                # # append an additional column 'tot_weight' to the parquet dataframes
+                # data['tot_weight'] = xsec_weight * data['weight']
+                #
+                # # update parquet file (this line should overwrite the stored dataframe)
+                # pq.write_table(pa.Table.from_pandas(data), parquet_file)
 
     print("------------------------------------------------------------")
 
