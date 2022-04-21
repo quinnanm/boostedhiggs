@@ -80,7 +80,6 @@ def make_1dhists(year, ch, idir, odir, samples, var, bins, range):
             if ch != 'had':
                 data = data[data['fj_pt'] != -1]
 
-            print(data[var])
             single_sample = None
             for single_key, key in add_samples.items():
                 if key in sample:
@@ -92,11 +91,12 @@ def make_1dhists(year, ch, idir, odir, samples, var, bins, range):
                     single_sample,  # combining all events under one name
                 )
             else:
+                print('here')
                 hists.fill(
                     data[var],
                     sample,
                 )
-
+    prin(hists)
     print("------------------------------------------------------------")
 
     with open(f'{odir}/{ch}_{var}.pkl', 'wb') as f:  # saves the hists objects
