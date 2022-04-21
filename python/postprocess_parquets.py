@@ -108,10 +108,10 @@ if __name__ == "__main__":
     # e.g. python postprocess_parquets.py --channels had --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--year',            dest='year',        default='2017',                                 help="year", required=True))
-    parser.add_argument('--channels',        dest = 'channels',    default = 'ele,mu,had',                           help = 'channels for which to plot this variable')
-    parser.add_argument('--idir',            dest = 'idir',        default = '../results/',                          help = "input directory with results")
+    parser.add_argument('--year',            dest='year',          default='2017',                                   help="year", required=True)
+    parser.add_argument('--channels',        dest='channels',      default='ele,mu,had',                             help='channels for which to plot this variable')
+    parser.add_argument('--idir',            dest='idir',          default='../results/',                            help="input directory with results")
 
-    args=parser.parse_args()
+    args = parser.parse_args()
 
     main(args)
