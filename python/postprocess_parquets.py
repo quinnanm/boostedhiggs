@@ -81,6 +81,7 @@ def append_correct_weights(idir, samples, year, channels):
                     xsec_weight = (xsec * luminosity[year]) / (get_sum_sumgenweight(idir, year, sample))
 
                 except:  # for data
+                    print(sample)
                     data['weight'] = 1  # for data fill a weight column with ones
                     xsec_weight = 1
 
