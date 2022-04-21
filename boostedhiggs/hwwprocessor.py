@@ -510,7 +510,7 @@ class HwwProcessor(processor.ProcessorABC):
                         # fill out dictionary
                         out[var] = item
 
-                # fill the output dictionary
+                # fill the output dictionary after selections
                 output[ch] = {
                     key: value[self.selections[ch].all(*self.selections[ch].names)] for (key, value) in out.items()
                 }
