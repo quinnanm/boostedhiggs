@@ -69,6 +69,7 @@ def append_correct_weights(idir, samples, year, channels):
                 if ch != 'had':
                     data = data[data['fj_pt'] != -1]
 
+                print(data.keys())
                 try:
                     event_weight = data['weight'].to_numpy()
                     # Find xsection if MC
@@ -105,8 +106,7 @@ def main(args):
 
 
 if __name__ == "__main__":
-    # e.g. run locally as
-    # python postprocess_parquets.py --channels had --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # e.g. python postprocess_parquets.py --channels had --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',            dest='year',        default='2017',                                 help="year")
