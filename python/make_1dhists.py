@@ -96,7 +96,7 @@ def make_1dhists(year, ch, idir, odir, samples, var, bins, range):
                     data[var],
                     sample,
                 )
-    print(hists)
+    print(hists[{"samples": sample}])
     print("------------------------------------------------------------")
 
     with open(f'{odir}/{ch}_{var}.pkl', 'wb') as f:  # saves the hists objects
