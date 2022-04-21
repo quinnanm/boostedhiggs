@@ -75,7 +75,7 @@ def make_stacked_hists_years(years, ch, tag, odir, vars_to_plot, samples):
                     is_data = True
 
             if not is_data and sample not in xsec_weight_by_sample.keys():
-                pkl_dir = f'{idir}_{year}/{sample}/outfiles/*.pkl'
+                pkl_dir = f'{idir}/{sample}/outfiles/*.pkl'
                 pkl_files = glob.glob(pkl_dir)  # get list of files that were processed
                 if not pkl_files:  # skip samples which were not processed
                     print('- No processed files found...', pkl_dir, 'skipping sample...', sample)
@@ -102,7 +102,7 @@ def make_stacked_hists_years(years, ch, tag, odir, vars_to_plot, samples):
             else:
                 xsec_weight = 1
 
-            parquet_files = glob.glob(f'{idir}_{year}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
+            parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
 
             if len(parquet_files) != 0:
                 print(f'Processing {ch} channel of sample', sample)
