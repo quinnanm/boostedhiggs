@@ -173,11 +173,11 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
     # make the histogram plots in this directory
 
     if logy:
-        if not os.path.exists(f'{odir}/hists_log'):
-            os.makedirs(f'{odir}/hists_log')
+        if not os.path.exists(f'{odir}/{ch}_hists_log'):
+            os.makedirs(f'{odir}/{ch}_hists_log')
     else:
-        if not os.path.exists(f'{odir}/hists'):
-            os.makedirs(f'{odir}/hists')
+        if not os.path.exists(f'{odir}/{ch}_hists'):
+            os.makedirs(f'{odir}/{ch}_hists')
 
     if year == '2018':
         data_label = data_by_ch_2018[ch]
@@ -273,11 +273,11 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
         hep.cms.text("Work in Progress", ax=ax)
 
         if logy:
-            print(f'Saving to {odir}/hists_log/{ch}_{var}.pdf')
-            plt.savefig(f'{odir}/hists_log/{ch}_{var}.pdf')
+            print(f'Saving to {odir}/{ch}_hists_log/{var}.pdf')
+            plt.savefig(f'{odir}/{ch}_hists_log/{var}.pdf')
         else:
-            print(f'Saving to {odir}/hists/{ch}_{var}.pdf')
-            plt.savefig(f'{odir}/hists/{ch}_{var}.pdf')
+            print(f'Saving to {odir}/{ch}_hists/{var}.pdf')
+            plt.savefig(f'{odir}/{ch}_hists/{var}.pdf')
         plt.close()
 
 
