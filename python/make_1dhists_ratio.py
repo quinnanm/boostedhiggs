@@ -138,8 +138,8 @@ def plot_1dhists_ratio(year, ch, odir, vars):
         f.close()
 
     # make directories to hold plots
-    if not os.path.exists(f'{odir}/{vars[0]}_{vars[1]}'):
-        os.makedirs(f'{odir}/{vars[0]}_{vars[1]}')
+    if not os.path.exists(f'{odir}/{ch}_{vars[0]}_{vars[1]}'):
+        os.makedirs(f'{odir}/{ch}_{vars[0]}_{vars[1]}')
 
     # make plots per channel
     for sample in hists.axes[1]:
@@ -149,7 +149,7 @@ def plot_1dhists_ratio(year, ch, odir, vars):
         ax.set_title(f'{ch} channel for \n {sample}')
         hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
         hep.cms.text("Work in Progress", ax=ax)
-        plt.savefig(f'{odir}/{vars[0]}_{vars[1]}/{ch}_{sample}.pdf')
+        plt.savefig(f'{odir}/{ch}_{vars[0]}_{vars[1]}/{sample}.pdf')
         plt.close()
 
 
