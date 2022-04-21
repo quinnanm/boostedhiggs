@@ -56,7 +56,6 @@ def make_1dhists_ratio(year, ch, idir, odir, samples, vars, bins, start, end):
     hists = hist2.Hist(
         hist2.axis.Regular(bins, start, end, name=vars[0] + '/' + vars[1], label=vars[0] + '/' + vars[1], flow=False),
         hist2.axis.StrCategory([], name='samples', growth=True),
-        hist2.axis.StrCategory([], name='cuts', growth=True)
     )
 
     # loop over the samples specefied in the json config
@@ -107,27 +106,13 @@ def make_1dhists_ratio(year, ch, idir, odir, samples, vars, bins, start, end):
                 hists.fill(
                     data[vars[0]] / data[vars[1]],
                     single_sample,
-                    cuts='preselection',
                     weight=xsec_weight * data['weight']  # combining all events under one name
-                )
-                hists.fill(
-                    data[vars[0]][data["anti_bjettag"] == 1][data["leptonInJet"] == 1] / data[vars[1]][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
-                    single_sample,
-                    cuts='btagdr',
-                    weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1]  # combining all events under one name
                 )
             else:
                 hists.fill(
                     data[vars[0]] / data[vars[1]],
                     sample,
-                    cuts='preselection',
                     weight=xsec_weight * data['weight']
-                )
-                hists.fill(
-                    data[vars[0]][data["anti_bjettag"] == 1][data["leptonInJet"] == 1] / data[vars[1]][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
-                    sample,
-                    cuts='btagdr',
-                    weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1]
                 )
 
     print("------------------------------------------------------------")
@@ -136,7 +121,7 @@ def make_1dhists_ratio(year, ch, idir, odir, samples, vars, bins, start, end):
         pkl.dump(hists, f)
 
 
-def plot_1dhists_ratio(year, ch, odir, vars, cut='preselection'):
+def plot_1dhists_ratio(year, ch, odir, vars):
     """
     Plots the 1D histograms of a ratio of two variables that were made by "make_1dhists_ratio" function
 
@@ -145,10 +130,7 @@ def plot_1dhists_ratio(year, ch, odir, vars, cut='preselection'):
         ch: string that represents the signal channel to look at... choices are ['ele', 'mu', 'had']
         odir: output directory to hold the plots
         vars: a list of two variable names... the first is going to be the numerator, and the second the denominator... see the full list of choices in plot_configs/vars.json
-        cut: the cut to apply when plotting the histogram... choices are ['preselection', 'btagdr'] for leptonic channel and ['preselection'] for hadronic channel
     """
-
-    print(f'plotting for {cut} cut')
 
     # load the hists
     with open(f'{odir}/{ch}_{vars[0]}_{vars[1]}.pkl', 'rb') as f:
@@ -162,48 +144,12 @@ def plot_1dhists_ratio(year, ch, odir, vars, cut='preselection'):
     # make plots per channel
     for sample in hists.axes[1]:
         fig, ax = plt.subplots(figsize=(8, 5))
-        hep.histplot(hists[{'samples': sample, 'cuts': cut}], ax=ax)
-        ax.set_xlabel(f"{vars[0]}/{vars[1]}")
-        ax.set_title(f'{ch} channel for \n {sample} \n with {cut} cut')
-        hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
-        hep.cms.text("Work in Progress", ax=ax)
-        plt.savefig(f'{odir}/{vars[0]}_{vars[1]}/{ch}_{sample}_{cut}.pdf')
-        plt.close()
-
-
-def plot_1dhists_ratio_compare_cuts(year, ch, odir, vars):
-    """
-    Plots the 1D histograms of a ratio of two variables that were made by "make_1dhists_ratio" function,
-    with all cuts shown on the same plot for comparison
-
-    Args:
-        year: string that represents the year the processed samples are from
-        ch: string that represents the signal channel to look at... choices are ['ele', 'mu', 'had']
-        odir: output directory to hold the plots
-        vars: a list of two variable names... the first is going to be the numerator, and the second the denominator... see the full list of choices in plot_configs/vars.json
-    """
-
-    print(f'plotting all cuts on same plot for comparison')
-
-    # load the hists
-    with open(f'{odir}/{ch}_{vars[0]}_{vars[1]}.pkl', 'rb') as f:
-        hists = pkl.load(f)
-        f.close()
-
-    # make directories to hold plots
-    if not os.path.exists(f'{odir}/{vars[0]}_{vars[1]}'):
-        os.makedirs(f'{odir}/{vars[0]}_{vars[1]}')
-    # make plots per channel
-    for sample in hists.axes[1]:
-        fig, ax = plt.subplots(figsize=(8, 5))
-        hep.histplot(hists[{'samples': sample, 'cuts': 'preselection'}],  ax=ax, label='preselection')
-        hep.histplot(hists[{'samples': sample, 'cuts': 'btagdr'}],        ax=ax, label='preselection + btag + leptonInJet')
+        hep.histplot(hists[{'samples': sample}], ax=ax)
         ax.set_xlabel(f"{vars[0]}/{vars[1]}")
         ax.set_title(f'{ch} channel for \n {sample}')
-        ax.legend()
         hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
         hep.cms.text("Work in Progress", ax=ax)
-        plt.savefig(f'{odir}/{vars[0]}_{vars[1]}/{ch}_{sample}_all_cuts_comparison.pdf')
+        plt.savefig(f'{odir}/{vars[0]}_{vars[1]}/{ch}_{sample}.pdf')
         plt.close()
 
 
@@ -236,23 +182,14 @@ def main(args):
             if value == 1:
                 samples[args.year][ch].append(key)
 
-    print(f'Making {args.year} histograms of {vars[0]}/{vars[1]}')
-
     for ch in channels:
-        if ch == 'had':
-            cuts = ['preselection']
-        else:
-            cuts = ['preselection', 'btagdr']
-
         if args.make_hists:
+            print(f'Making {args.year} histograms of {vars[0]}/{vars[1]}')
             make_1dhists_ratio(args.year, ch, args.idir, odir, samples, vars, args.bins, args.start, args.end)
 
         if args.plot_hists:
-            for cut in cuts:
-                plot_1dhists_ratio(args.year, ch, odir, vars, cut)
-
-            if len(cuts) > 1:  # if there's more than one cut make comparisons
-                plot_1dhists_ratio_compare_cuts(args.year, ch, odir, vars)
+            print(f'Plotting...')
+            plot_1dhists_ratio(args.year, ch, odir, vars)
 
 
 if __name__ == "__main__":
