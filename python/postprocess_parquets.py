@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from utils import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch
+from utils import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch, data_by_ch_2018
 from utils import get_simplified_label, get_sum_sumgenweight
 import pickle as pkl
 import pyarrow.parquet as pq
@@ -46,15 +46,47 @@ def append_correct_weights(idir, samples, year, channels):
     f.close()
     print(f'Processing samples from year {year} with luminosity {luminosity[year]}')
 
+    if year == '2018':
+        data_label = data_by_ch_2018
+    else:
+        data_label = data_by_ch
+
     # loop over the processed files and fill the histograms
     for ch in channels:
         for sample in samples:
             print("------------------------------------------------------------")
-            parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
-            if len(parquet_files) != 0:
-                print(f'Processing {ch} channel of {sample}')
+            # check if the sample was processed
+            pkl_dir = f'{idir}/{sample}/outfiles/*.pkl'
+            pkl_files = glob.glob(pkl_dir)  #
+            if not pkl_files:  # skip samples which were not processed
+                print('- No processed files found...', pkl_dir, 'skipping sample...', sample)
+                continue
+
+            # define an isdata bool
+            is_data = False
+
+            for key in data_label.values():
+                if key in sample:
+                    is_data = True
+
+            # retrieve xsections for MC and define xsec_weight=1 for data
+            if not is_data:
+                # Find xsection
+                f = open('../fileset/xsec_pfnano.json')
+                xsec = json.load(f)
+                f.close()
+                xsec = eval(str((xsec[sample])))
+
+                # Get overall weighting of events.. each event has a genweight... sumgenweight sums over events in a chunk... sum_sumgenweight sums over chunks
+                xsec_weight = (xsec * luminosity) / get_sum_sumgenweight(idir, year, sample)
             else:
-                print(f'No processed files for {sample} are found')
+                xsec_weight = 1
+
+            # get list of parquet files that have been processed
+            parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')
+
+            if len(parquet_files) != 0:
+                print(f'Processing {ch} channel of sample', sample)
 
             for i, parquet_file in enumerate(parquet_files):
                 try:
@@ -62,36 +94,20 @@ def append_correct_weights(idir, samples, year, channels):
                 except:
                     print('Not able to read data: ', parquet_file, ' should remove evts from scaling/lumi')
                     continue
+
                 if len(data) == 0:
                     continue
 
-                # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)... these will be avoided when we add fj_pt>200 cut for leptonic channels
-                if ch != 'had':
-                    data = data[data['fj_pt'] != -1]
+                if not is_data:
+                    event_weight = data['weight']
+                else:
+                    data['weight'] = 1  # for data fill a weight column with ones
 
-                get_sum_sumgenweight(idir, year, sample)
-                #
-                # try:
-                #     event_weight = data['weight'].to_numpy()
-                #     # Find xsection if MC
-                #     f = open('../fileset/xsec_pfnano.json')
-                #     xsec = json.load(f)
-                #     f.close()
-                #     xsec = eval(str((xsec[sample])))
-                #
-                #     # Get overall weighting of events
-                #     xsec_weight = (xsec * luminosity[year]) / (get_sum_sumgenweight(idir, year, sample))
-                #
-                # except:  # for data
-                #     print(sample)
-                #     data['weight'] = 1  # for data fill a weight column with ones
-                #     xsec_weight = 1
-                #
-                # # append an additional column 'tot_weight' to the parquet dataframes
-                # data['tot_weight'] = xsec_weight * data['weight']
-                #
-                # # update parquet file (this line should overwrite the stored dataframe)
-                # pq.write_table(pa.Table.from_pandas(data), parquet_file)
+                # append an additional column 'tot_weight' to the parquet dataframes
+                data['tot_weight'] = xsec_weight * data['weight']
+
+                # update parquet file (this line should overwrite the stored dataframe)
+                pq.write_table(pa.Table.from_pandas(data), parquet_file)
 
     print("------------------------------------------------------------")
 
