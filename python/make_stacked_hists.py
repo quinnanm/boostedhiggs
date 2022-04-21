@@ -73,7 +73,7 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                 is_data = True
 
         if not is_data and sample not in xsec_weight_by_sample.keys():
-            pkl_dir = f'{idir}_{year}/{sample}/outfiles/*.pkl'
+            pkl_dir = f'{idir}/{sample}/outfiles/*.pkl'
             pkl_files = glob.glob(pkl_dir)  # get list of files that were processed
             if not pkl_files:  # skip samples which were not processed
                 print('- No processed files found...', pkl_dir, 'skipping sample...', sample)
@@ -164,8 +164,6 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
         odir: output directory to hold the plots
         vars_to_plot: the set of variable to plot a 1D-histogram of (by default: the samples with key==1 defined in plot_configs/vars.json)
     """
-
-    print(f'plotting for {cut} cut')
 
     # load the hists
     with open(f'{odir}/{ch}_hists.pkl', 'rb') as f:

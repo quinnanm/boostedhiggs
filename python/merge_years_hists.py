@@ -47,12 +47,10 @@ def make_stacked_hists_years(years, ch, tag, odir, vars_to_plot, samples):
     for var in vars_to_plot[ch]:
         year_axis = hist2.axis.StrCategory([], name='years', growth=True)
         sample_axis = hist2.axis.StrCategory([], name='samples', growth=True)
-        cut_axis = hist2.axis.StrCategory([], name='cuts', growth=True)
 
         hists[var] = hist2.Hist(
             year_axis,
             sample_axis,
-            cut_axis,
             axis_dict[var],
         )
 
@@ -77,7 +75,7 @@ def make_stacked_hists_years(years, ch, tag, odir, vars_to_plot, samples):
                     is_data = True
 
             if not is_data and sample not in xsec_weight_by_sample.keys():
-                pkl_dir = f'{idir}/{sample}/outfiles/*.pkl'
+                pkl_dir = f'{idir}_{year}/{sample}/outfiles/*.pkl'
                 pkl_files = glob.glob(pkl_dir)  # get list of files that were processed
                 if not pkl_files:  # skip samples which were not processed
                     print('- No processed files found...', pkl_dir, 'skipping sample...', sample)
@@ -104,7 +102,7 @@ def make_stacked_hists_years(years, ch, tag, odir, vars_to_plot, samples):
             else:
                 xsec_weight = 1
 
-            parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
+            parquet_files = glob.glob(f'{idir}_{year}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
 
             if len(parquet_files) != 0:
                 print(f'Processing {ch} channel of sample', sample)
@@ -145,44 +143,24 @@ def make_stacked_hists_years(years, ch, tag, odir, vars_to_plot, samples):
                         hists[var].fill(
                             years=year,
                             samples=single_sample,
-                            cuts='preselection',
                             var=data[var],
                             weight=xsec_weight * data['weight'],
                         )
-                        if ch != 'had':
-                            hists[var].fill(
-                                years=year,
-                                samples=single_sample,
-                                cuts='btagdr',
-                                var=data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
-                                weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
-                            )
                     # otherwise give unique name
                     else:
                         hists[var].fill(
                             years=year,
                             samples=sample,
-                            cuts='preselection',
                             var=data[var],
                             weight=xsec_weight * data['weight'],
                         )
-                        if ch != 'had':
-                            hists[var].fill(
-                                years=year,
-                                samples=sample,
-                                cuts='btagdr',
-                                var=data[var][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
-                                weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
-                            )
-
-    # TODO: combine histograms for all years here and flag them as year='combined'
 
     # store the hists variable
-    with open(f'{odir}/{ch}.pkl', 'wb') as f:  # saves the hists objects
+    with open(f'{odir}/{ch}_hists.pkl', 'wb') as f:  # saves the hists objects
         pkl.dump(hists, f)
 
 
-def plot_stacked_hists_years(years, ch, odir, vars_to_plot, cut='preselection', logy=True, add_data=True):
+def plot_stacked_hists_years(years, ch, odir, vars_to_plot, logy=True, add_data=True):
     """
     Plots the stacked 1D histograms that were made by "make_stacked_hists" function
     Args:
@@ -190,13 +168,10 @@ def plot_stacked_hists_years(years, ch, odir, vars_to_plot, cut='preselection', 
         ch: string that represents the signal channel to look at... choices are ['ele', 'mu', 'had']
         odir: output directory to hold the plots
         vars_to_plot: the set of variable to plot a 1D-histogram of (by default: the samples with key==1 defined in plot_configs/vars.json)
-        cut: the cut to apply when plotting the histogram... choices are ['preselection', 'btagdr'] for leptonic channel and ['preselection'] for hadronic channel
     """
 
-    print(f'plotting for {cut} cut')
-
     # load the hists
-    with open(f'{odir}/{ch}.pkl', 'rb') as f:
+    with open(f'{odir}/{ch}_hists.pkl', 'rb') as f:
         hists = pkl.load(f)
         f.close()
 
@@ -226,15 +201,15 @@ def plot_stacked_hists_years(years, ch, odir, vars_to_plot, cut='preselection', 
         data = None
 
         if (data_label in samples) or ('EGamma' in samples):
-            data = h[{"samples": data_label, 'cuts': cut}][{'years': years}][{'years': sum}]
+            data = h[{"samples": data_label}][{'years': years}][{'years': sum}]
 
         # signal
-        signal = [h[{"samples": label, "cuts": cut}][{'years': years}][{'years': sum}] for label in signal_labels]
+        signal = [h[{"samples": label}][{'years': years}][{'years': sum}] for label in signal_labels]
         if not logy:
             signal = [s * 10 for s in signal]  # if not log, scale the signal
 
         # background
-        bkg = [h[{"samples": label, "cuts": cut}][{'years': years}][{'years': sum}] for label in bkg_labels]
+        bkg = [h[{"samples": label}][{'years': years}][{'years': sum}] for label in bkg_labels]
 
         if add_data and data and len(bkg) > 0:
             fig, (ax, rax) = plt.subplots(nrows=2,
@@ -297,18 +272,18 @@ def plot_stacked_hists_years(years, ch, odir, vars_to_plot, cut='preselection', 
         if logy:
             ax.set_yscale('log')
             ax.set_ylim(0.1)
-        ax.set_title(f'{ch} channel \n with {cut} cut')
+        ax.set_title(f'{ch} channel')
         ax.legend()
 
         hep.cms.lumitext(f"combined (13 TeV) \n {years}", ax=ax)
         hep.cms.text("Work in Progress", ax=ax)
 
         if logy:
-            print('Saving to ', f'{odir}/hists_log/{ch}_{var}_{cut}.pdf')
-            plt.savefig(f'{odir}/hists_log/{ch}_{var}_{cut}.pdf')
+            print('Saving to ', f'{odir}/hists_log/{ch}_{var}.pdf')
+            plt.savefig(f'{odir}/hists_log/{ch}_{var}.pdf')
         else:
-            print('Saving to ', f'{odir}/hists/{ch}_{var}_{cut}.pdf')
-            plt.savefig(f'{odir}/hists/{ch}_{var}_{cut}.pdf')
+            print('Saving to ', f'{odir}/hists/{ch}_{var}.pdf')
+            plt.savefig(f'{odir}/hists/{ch}_{var}.pdf')
         plt.close()
 
 
@@ -348,21 +323,14 @@ def main(args):
                 vars_to_plot[ch].append(key)
 
     for ch in channels:
-        if ch == 'had':
-            cuts = ['preselection']
-        else:
-            cuts = ['preselection', 'btagdr']
-
         if args.make_hists:
             print('Making histograms...')
             make_stacked_hists_years(years, ch, args.idir, odir, vars_to_plot, samples)
 
         if args.plot_hists:
-            print('Plotting histograms...')
-
-            for cut in cuts:
-                plot_stacked_hists_years(years, ch, odir, vars_to_plot, cut, logy=True)
-                # plot_stacked_hists_years(years, ch, odir, vars_to_plot, cut, logy=False)
+            print('Plotting...')
+            plot_stacked_hists_years(years, ch, odir, vars_to_plot, logy=True)
+            # plot_stacked_hists_years(years, ch, odir, vars_to_plot, logy=False)
 
 
 if __name__ == "__main__":
