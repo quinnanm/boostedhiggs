@@ -52,9 +52,8 @@ def make_1dhists(year, ch, idir, odir, samples, var, bins, range):
     print(f'Processing samples from year {year} with luminosity {luminosity}')
 
     # instantiates the histogram object
-    hists = {}
     hists = hist2.Hist(
-        hist2.axis.Regular(bins, range[0], range[1], name=var, label=var, flow=False),
+        hist2.axis.Regular(bins, range[0], range[1], name=var, label=var, flow=True),
         hist2.axis.StrCategory([], name='samples', growth=True),     # to combine different pt bins of the same process
     )
 
@@ -86,7 +85,6 @@ def make_1dhists(year, ch, idir, odir, samples, var, bins, range):
                     single_sample = single_key
 
             if single_sample is not None:
-                print('here')
                 hists.fill(
                     data[var],
                     single_sample,  # combining all events under one name
@@ -187,7 +185,7 @@ if __name__ == "__main__":
     # e.g. run locally as
     # lep_pt:    python make_1dhists.py --year 2017 --odir hists --channels ele --var lep_pt    --make_hists --plot_hists --bins 100 --start 0 --end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
     # lep_fj_dr: python make_1dhists.py --year 2017 --odir hists --channels ele --var lep_fj_dr --make_hists --plot_hists --bins 100 --start 0 --end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # fj_pt:     python make_1dhists.py --year 2017 --odir hists --channels had --var fj_pt     --make_hists --plot_hists --bins 300 --start 0 --end 1000 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # fj_pt:     python make_1dhists.py --year 2017 --odir hists --channels had --var fj_pt     --make_hists --plot_hists --bins 100 --start 300 --end 1000 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',            dest='year',        default='2017',                             help="year")
