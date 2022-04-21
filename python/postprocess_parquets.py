@@ -69,19 +69,17 @@ def append_correct_weights(idir, samples, year, channels):
                 if ch != 'had':
                     data = data[data['fj_pt'] != -1]
 
+                print((get_sum_sumgenweight(idir, year, sample)))
                 try:
                     event_weight = data['weight'].to_numpy()
-                    print('1')
                     # Find xsection if MC
                     f = open('../fileset/xsec_pfnano.json')
                     xsec = json.load(f)
                     f.close()
                     xsec = eval(str((xsec[sample])))
-                    print('2')
 
                     # Get overall weighting of events
                     xsec_weight = (xsec * luminosity[year]) / (get_sum_sumgenweight(idir, year, sample))
-                    print('3')
 
                 except:  # for data
                     print(sample)
