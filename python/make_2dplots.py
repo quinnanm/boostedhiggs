@@ -57,7 +57,6 @@ def make_2dplots(year, ch, idir, odir, samples, vars, x_bins, x_start, x_end, y_
         hist2.axis.Regular(x_bins, x_start, x_end, name=vars[0], label=vars[0], flow=False),
         hist2.axis.Regular(y_bins, y_start, y_end, name=vars[1], label=vars[1], flow=False),
         hist2.axis.StrCategory([], name='samples', growth=True),
-        hist2.axis.StrCategory([], name='cuts', growth=True)
     )
 
     # loop over the processed files and fill the histograms
@@ -109,34 +108,16 @@ def make_2dplots(year, ch, idir, odir, samples, vars, x_bins, x_start, x_end, y_
                     data[vars[0]],
                     data[vars[1]],
                     single_sample,
-                    cuts='preselection',
                     weight=xsec_weight * data['weight']
                 )
-                if ch != 'had':
-                    hists.fill(
-                        data[vars[0]][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
-                        data[vars[1]][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
-                        single_sample,
-                        cuts='btagdr',
-                        weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1]
-                    )
             # otherwise give unique name
             else:
                 hists.fill(
                     data[vars[0]],
                     data[vars[1]],
                     sample,
-                    cuts='preselection',
                     weight=xsec_weight * data['weight']
                 )
-                if ch != 'had':
-                    hists.fill(
-                        data[vars[0]][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
-                        data[vars[1]][data["anti_bjettag"] == 1][data["leptonInJet"] == 1],
-                        sample,
-                        cuts='btagdr',
-                        weight=xsec_weight * data['weight'][data["anti_bjettag"] == 1][data["leptonInJet"] == 1]
-                    )
 
     print("------------------------------------------------------------")
 
@@ -144,7 +125,7 @@ def make_2dplots(year, ch, idir, odir, samples, vars, x_bins, x_start, x_end, y_
         pkl.dump(hists, f)
 
 
-def plot_2dplots(year, ch, odir, vars, cut='preselection'):
+def plot_2dplots(year, ch, odir, vars):
     """
     Plots 2D plots of two variables that were made by "make_2dplots" function
 
@@ -153,10 +134,7 @@ def plot_2dplots(year, ch, odir, vars, cut='preselection'):
         ch: string that represents the signal channel to look at... choices are ['ele', 'mu', 'had']
         odir: output directory to hold the plots
         vars: a list of two variable names to plot against each other... see the full list of choices in plot_configs/vars.json
-        cut: the cut to apply when plotting the histogram... choices are ['preselection', 'btagdr'] for leptonic channel and ['preselection'] for hadronic channel
     """
-
-    print(f'plotting for {cut} cut')
 
     # load the hists
     with open(f'{odir}/{ch}_{vars[0]}_{vars[1]}.pkl', 'rb') as f:
@@ -164,31 +142,31 @@ def plot_2dplots(year, ch, odir, vars, cut='preselection'):
         f.close()
 
     # make directory to store stuff per year
-    if not os.path.exists(f'{odir}/{vars[0]}_{vars[1]}'):
-        os.makedirs(f'{odir}/{vars[0]}_{vars[1]}')
+    if not os.path.exists(f'{odir}/{ch}_{vars[0]}_{vars[1]}'):
+        os.makedirs(f'{odir}/{ch}_{vars[0]}_{vars[1]}')
 
     # make plots per channel
     for sample in hists.axes[2]:
         # one for log z-scale
         fig, ax = plt.subplots(figsize=(8, 5))
-        hep.hist2dplot(hists[{'samples': sample, 'cuts': cut}], ax=ax, cmap="plasma", norm=matplotlib.colors.LogNorm(vmin=1e-3, vmax=1000))
+        hep.hist2dplot(hists[{'samples': sample}], ax=ax, cmap="plasma", norm=matplotlib.colors.LogNorm(vmin=1e-3, vmax=1000))
         ax.set_xlabel(f"{vars[0]}")
         ax.set_ylabel(f"{vars[1]}")
-        ax.set_title(f'{ch} channel for \n {sample} \n with {cut} cut')
+        ax.set_title(f'{ch} channel for \n {sample}')
         hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
         hep.cms.text("Work in Progress", ax=ax)
-        plt.savefig(f'{odir}/{vars[0]}_{vars[1]}/{ch}_{sample}_{cut}_log_z.pdf')
+        plt.savefig(f'{odir}/{ch}_{vars[0]}_{vars[1]}/{sample}_log_z.pdf')
         plt.close()
 
         # one for non-log z-scale
         fig, ax = plt.subplots(figsize=(8, 5))
-        hep.hist2dplot(hists[{'samples': sample, 'cuts': cut}], ax=ax, cmap="plasma")
+        hep.hist2dplot(hists[{'samples': sample}], ax=ax, cmap="plasma")
         ax.set_xlabel(f"{vars[0]}")
         ax.set_ylabel(f"{vars[1]}")
-        ax.set_title(f'{ch} channel for \n {sample} \n with {cut} cut')
+        ax.set_title(f'{ch} channel for \n {sample}')
         hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
         hep.cms.text("Work in Progress", ax=ax)
-        plt.savefig(f'{odir}/{vars[0]}_{vars[1]}/{ch}_{sample}_{cut}.pdf')
+        plt.savefig(f'{odir}/{ch}_{vars[0]}_{vars[1]}/{sample}.pdf')
         plt.close()
 
 
@@ -218,21 +196,14 @@ def main(args):
             samples[args.year][args.channel].append(key)
 
     vars = args.vars.split(',')
-    print(f'The 2 variables for cross check are: {vars}')
-
-    if args.channel == 'had':
-        cuts = ['preselection']
-    else:
-        cuts = ['preselection', 'btagdr']
 
     if args.make_hists:
-        print('Making histograms...')
+        print(f'Making 2dplot of {vars}')
         make_2dplots(args.year, args.channel, args.idir, odir, samples, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end)
 
     if args.plot_hists:
-        print('Plotting histograms...')
-        for cut in cuts:
-            plot_2dplots(args.year, args.channel, odir, vars, cut)
+        print('Plotting...')
+        plot_2dplots(args.year, args.channel, odir, vars)
 
 
 if __name__ == "__main__":

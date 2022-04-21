@@ -186,7 +186,7 @@ if __name__ == "__main__":
     # e.g. run locally as
     # lep_pt:    python make_1dhists.py --year 2017 --odir hists --channels ele --var lep_pt    --make_hists --plot_hists --bins 100 --start 0 --end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
     # lep_fj_dr: python make_1dhists.py --year 2017 --odir hists --channels ele --var lep_fj_dr --make_hists --plot_hists --bins 100 --start 0 --end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # fj_pt:     python make_1dhists.py --year 2017 --odir hists --channels had --var fj_pt    --make_hists --plot_hists --bins 100 --start 0 --end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # fj_pt:     python make_1dhists.py --year 2017 --odir hists --channels had --var fj_pt     --make_hists --plot_hists --bins 100 --start 0 --end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',            dest='year',        default='2017',                             help="year")
