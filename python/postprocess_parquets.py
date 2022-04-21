@@ -42,9 +42,9 @@ def append_correct_weights(idir, samples, year, channels):
 
     # Get luminosity of year
     f = open('../fileset/luminosity.json')
-    luminosity = json.load(f)
+    luminosity = json.load(f)[year]
     f.close()
-    print(f'Processing samples from year {year} with luminosity {luminosity[year]}')
+    print(f'Processing samples from year {year} with luminosity {luminosity}')
 
     if year == '2018':
         data_label = data_by_ch_2018
