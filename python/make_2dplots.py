@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from utils import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch
+from utils import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch, data_by_ch_2018
 from utils import get_simplified_label, get_sum_sumgenweight
 import pickle as pkl
 import pyarrow.parquet as pq
@@ -45,6 +45,11 @@ def make_2dplots(year, ch, idir, odir, samples, vars, x_bins, x_start, x_end, y_
         vars: a list of two variable names to plot against each other... see the full list of choices in plot_configs/vars.json
     """
 
+    if year == '2018':
+        data_label = data_by_ch_2018
+    else:
+        data_label = data_by_ch
+
     # Get luminosity of year
     f = open('../fileset/luminosity.json')
     luminosity = json.load(f)[year]
@@ -52,32 +57,47 @@ def make_2dplots(year, ch, idir, odir, samples, vars, x_bins, x_start, x_end, y_
     print(f'Processing samples from year {year} with luminosity {luminosity}')
 
     # instantiates the histogram object
-    hists = {}
     hists = hist2.Hist(
         hist2.axis.Regular(x_bins, x_start, x_end, name=vars[0], label=vars[0], flow=False),
         hist2.axis.Regular(y_bins, y_start, y_end, name=vars[1], label=vars[1], flow=False),
         hist2.axis.StrCategory([], name='samples', growth=True),
     )
 
-    # loop over the processed files and fill the histograms
+    # loop over the samples
     for sample in samples[year][ch]:
         print("------------------------------------------------------------")
-        parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
-        if len(parquet_files) != 0:
-            print(f'Processing {ch} channel of {sample}')
-        else:
-            print(f'No processed files for {sample} are found')
+        # check if the sample was processed
+        pkl_dir = f'{idir}/{sample}/outfiles/*.pkl'
+        pkl_files = glob.glob(pkl_dir)  #
+        if not pkl_files:  # skip samples which were not processed
+            print('- No processed files found...', pkl_dir, 'skipping sample...', sample)
+            continue
 
-        # Get xsection if sample is MC
-        try:
+        # define an isdata bool
+        is_data = False
+
+        for key in data_label.values():
+            if key in sample:
+                is_data = True
+
+        # retrieve xsections for MC and define xsec_weight=1 for data
+        if not is_data:
+            # Find xsection
             f = open('../fileset/xsec_pfnano.json')
             xsec = json.load(f)
             f.close()
             xsec = eval(str((xsec[sample])))
-            # Get overall weighting of events
-            xsec_weight = (xsec * luminosity) / (get_sum_sumgenweight(idir, year, sample))
-        except:
+
+            # Get overall weighting of events.. each event has a genweight... sumgenweight sums over events in a chunk... sum_sumgenweight sums over chunks
+            xsec_weight = (xsec * luminosity) / get_sum_sumgenweight(idir, year, sample)
+        else:
             xsec_weight = 1
+
+        # get list of parquet files that have been processed
+        parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')
+
+        if len(parquet_files) != 0:
+            print(f'Processing {ch} channel of sample', sample)
 
         for i, parquet_file in enumerate(parquet_files):
             try:
@@ -88,13 +108,9 @@ def make_2dplots(year, ch, idir, odir, samples, vars, x_bins, x_start, x_end, y_
             if len(data) == 0:
                 continue
 
-            # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
-            if ch != 'had':
-                data = data[data['fj_pt'] != -1]
-
-            try:
-                event_weight = data['weight'].to_numpy()
-            except:  # for data
+            if not is_data:
+                event_weight = data['weight']
+            else:
                 data['weight'] = 1  # for data fill a weight column with ones
 
             single_sample = None

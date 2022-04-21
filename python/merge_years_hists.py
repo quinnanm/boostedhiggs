@@ -57,52 +57,48 @@ def make_stacked_hists_years(years, ch, tag, odir, vars_to_plot, samples):
     for year in years:
         idir = tag + '_' + year
 
+        if year == '2018':
+            data_label = data_by_ch_2018
+        else:
+            data_label = data_by_ch
+
         # Get luminosity per year
         f = open('../fileset/luminosity.json')
         luminosity = json.load(f)
         f.close()
         print(f'Processing samples from year {year} with luminosity {luminosity[year]}')
 
-        data_label = data_by_ch
-
-        xsec_weight_by_sample = {}
-        # loop over the processed files and fill the histograms
+        # loop over the samples
         for sample in samples[year][ch]:
+            # check if the sample was processed
+            pkl_dir = f'{idir}/{sample}/outfiles/*.pkl'
+            pkl_files = glob.glob(pkl_dir)  #
+            if not pkl_files:  # skip samples which were not processed
+                print('- No processed files found...', pkl_dir, 'skipping sample...', sample)
+                continue
+
+            # define an isdata bool
             is_data = False
 
             for key in data_label.values():
-                if (key in sample) or ('EGamma' in sample):
+                if key in sample:
                     is_data = True
 
-            if not is_data and sample not in xsec_weight_by_sample.keys():
-                pkl_dir = f'{idir}/{sample}/outfiles/*.pkl'
-                pkl_files = glob.glob(pkl_dir)  # get list of files that were processed
-                if not pkl_files:  # skip samples which were not processed
-                    print('- No processed files found...', pkl_dir, 'skipping sample...', sample)
-                    continue
-
+            # retrieve xsections for MC and define xsec_weight=1 for data
+            if not is_data:
                 # Find xsection
                 f = open('../fileset/xsec_pfnano.json')
-
                 xsec = json.load(f)
                 f.close()
                 xsec = eval(str((xsec[sample])))
 
-                # Get sum_sumgenweight of sample
-                sum_sumgenweight = get_sum_sumgenweight(idir, year, sample)
-
-                # Get overall weighting of events
-                # each event has (possibly a different) genweight... sumgenweight sums over events in a chunk... sum_sumgenweight sums over chunks
-                xsec_weight = (xsec * luminosity[year]) / (sum_sumgenweight)
-                xsec_weight_by_sample[sample] = xsec_weight
-
-            elif sample in xsec_weight_by_sample.keys():
-                xsec_weight = xsec_weight_by_sample[sample]
-
+                # Get overall weighting of events.. each event has a genweight... sumgenweight sums over events in a chunk... sum_sumgenweight sums over chunks
+                xsec_weight = (xsec * luminosity) / get_sum_sumgenweight(idir, year, sample)
             else:
                 xsec_weight = 1
 
-            parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
+            # get list of parquet files that have been processed
+            parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')
 
             if len(parquet_files) != 0:
                 print(f'Processing {ch} channel of sample', sample)
@@ -116,18 +112,13 @@ def make_stacked_hists_years(years, ch, tag, odir, vars_to_plot, samples):
 
                 for var in vars_to_plot[ch]:
                     if var not in data.keys():
-                        # print(f'- No {var} for {year}/{ch} - skipping')
                         continue
                     if len(data) == 0:
                         continue
 
-                    # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
-                    if ch != 'had':
-                        data = data[data['fj_pt'] != -1]
-
-                    try:
+                    if not is_data:
                         event_weight = data['weight']
-                    except:
+                    else:
                         data['weight'] = 1  # for data fill a weight column with ones
 
                     # filling histograms

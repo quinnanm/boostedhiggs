@@ -52,7 +52,6 @@ def make_1dhists_ratio(year, ch, idir, odir, samples, vars, bins, start, end):
     print(f'Processing samples from year {year} with luminosity {luminosity}')
 
     # instantiates the histogram object
-    hists = {}
     hists = hist2.Hist(
         hist2.axis.Regular(bins, start, end, name=vars[0] + '/' + vars[1], label=vars[0] + '/' + vars[1], flow=False),
         hist2.axis.StrCategory([], name='samples', growth=True),
@@ -61,22 +60,17 @@ def make_1dhists_ratio(year, ch, idir, odir, samples, vars, bins, start, end):
     # loop over the samples specefied in the json config
     for sample in samples[year][ch]:
         print("------------------------------------------------------------")
+        # check if the sample was processed
+        pkl_dir = f'{idir}/{sample}/outfiles/*.pkl'
+        pkl_files = glob.glob(pkl_dir)  #
+        if not pkl_files:  # skip samples which were not processed
+            print('- No processed files found...', pkl_dir, 'skipping sample...', sample)
+            continue
+
         parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
+
         if len(parquet_files) != 0:
             print(f'Processing {ch} channel of {sample}')
-        else:
-            print(f'No processed files for {sample} are found')
-
-        # Get xsection if sample is MC
-        try:
-            f = open('../fileset/xsec_pfnano.json')
-            xsec = json.load(f)
-            f.close()
-            xsec = eval(str((xsec[sample])))
-            # Get overall weighting of events
-            xsec_weight = (xsec * luminosity) / (get_sum_sumgenweight(idir, year, sample))
-        except:
-            xsec_weight = 1
 
         # loop over the processed files per sample and fill the histogram
         for i, parquet_file in enumerate(parquet_files):
@@ -87,15 +81,6 @@ def make_1dhists_ratio(year, ch, idir, odir, samples, vars, bins, start, end):
                 continue
             if len(data) == 0:
                 continue
-
-            # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
-            if ch != 'had':
-                data = data[data['fj_pt'] != -1]
-
-            try:
-                event_weight = data['weight'].to_numpy()
-            except:  # for data
-                data['weight'] = 1  # for data fill a weight column with ones
 
             single_sample = None
             for single_key, key in add_samples.items():

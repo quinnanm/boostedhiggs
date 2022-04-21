@@ -45,28 +45,27 @@ def make_1dhists(year, ch, idir, odir, samples, var, bins, range):
         var: the name of the variable to plot a 1D-histogram of... see the full list of choices in plot_configs/vars.json
     """
 
-    # Get luminosity of year
-    f = open('../fileset/luminosity.json')
-    luminosity = json.load(f)[year]
-    f.close()
-    print(f'Processing samples from year {year} with luminosity {luminosity}')
-
     # instantiates the histogram object
-    print('bins', bins)
-    print('range', range[0], range[1])
     hists = hist2.Hist(
         hist2.axis.Regular(bins, range[0], range[1], name=var, label=var, Flow=True),
         hist2.axis.StrCategory([], name='samples', growth=True),     # to combine different pt bins of the same process
     )
 
-    # loop over the processed files and fill the histograms
+    # loop over the samples
     for sample in samples[year][ch]:
         print("------------------------------------------------------------")
-        parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')  # get list of parquet files that have been processed
+        # check if the sample was processed
+        pkl_dir = f'{idir}/{sample}/outfiles/*.pkl'
+        pkl_files = glob.glob(pkl_dir)  #
+        if not pkl_files:  # skip samples which were not processed
+            print('- No processed files found...', pkl_dir, 'skipping sample...', sample)
+            continue
+
+        # check if the sample was processed
+        parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')
+
         if len(parquet_files) != 0:
             print(f'Processing {ch} channel of sample', sample)
-        else:
-            print(f'No processed files for {sample} are found')
 
         for i, parquet_file in enumerate(parquet_files):
             try:
@@ -76,10 +75,6 @@ def make_1dhists(year, ch, idir, odir, samples, var, bins, range):
                 continue
             if len(data) == 0:
                 continue
-
-            # remove events with padded Nulls (e.g. events with no candidate jet will have a value of -1 for fj_pt)
-            if ch != 'had':
-                data = data[data['fj_pt'] != -1]
 
             single_sample = None
             for single_key, key in add_samples.items():
