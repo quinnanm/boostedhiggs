@@ -53,8 +53,7 @@ def make_1dhists(year, ch, idir, odir, samples, var, bins, range):
 
     # instantiates the histogram object
     print('bins', bins)
-    print('range[0]', range[0])
-    print('range[1]', range[1],)
+    print('range', range[0], range[1])
     hists = hist2.Hist(
         hist2.axis.Regular(bins, range[0], range[1], name=var, label=var, flow=False),
         hist2.axis.StrCategory([], name='samples', growth=True),     # to combine different pt bins of the same process
@@ -97,7 +96,7 @@ def make_1dhists(year, ch, idir, odir, samples, var, bins, range):
                     data[var],
                     sample,
                 )
-        # print(hists[{"samples": sample}])
+    print(hists[{"samples": sample}])
     print("------------------------------------------------------------")
 
     with open(f'{odir}/{ch}_{var}.pkl', 'wb') as f:  # saves the hists objects
