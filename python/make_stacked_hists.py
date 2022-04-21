@@ -273,10 +273,10 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
         hep.cms.text("Work in Progress", ax=ax)
 
         if logy:
-            print('Saving to ', f'{odir}/hists_log/{ch}_{var}.pdf')
-            plt.savefig(f'{odir}/hists_{year}_log/{ch}_{var}.pdf')
+            print(f'Saving to {odir}/hists_log/{ch}_{var}.pdf')
+            plt.savefig(f'{odir}/hists_log/{ch}_{var}.pdf')
         else:
-            print('Saving to ', f'{odir}/hists/{ch}_{var}.pdf')
+            print(f'Saving to {odir}/hists/{ch}_{var}.pdf')
             plt.savefig(f'{odir}/hists/{ch}_{var}.pdf')
         plt.close()
 
