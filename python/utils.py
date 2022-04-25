@@ -96,6 +96,7 @@ add_samples = {
     'SingleTop': 'ST',
     'TTbar': 'TT',
     'WJetsLNu': 'WJetsToLNu',
+    'GluGluHToWWTo4q': 'GluGluHToWWTo4q',
 }
 
 axis_dict = {
