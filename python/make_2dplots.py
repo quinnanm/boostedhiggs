@@ -81,7 +81,7 @@ def make_2dplots(year, ch, idir, odir, samples, vars, x_bins, x_start, x_end, y_
             for single_key, key in add_samples.items():
                 if key in sample:
                     single_sample = single_key
-
+            print(data.keys)
             # combining all pt bins of a specefic process under one name
             if single_sample is not None:
                 hists.fill(
@@ -188,6 +188,7 @@ if __name__ == "__main__":
     # e.g. run locally as
     # lep_pt vs lep_iso:   python make_2dplots.py --year 2017 --odir hists --channel ele --vars lep_pt,lep_isolation --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0 --y_end 1 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
     # lep_pt vs lep_fj_dr: python make_2dplots.py --year 2017 --odir hists --channel ele --vars lep_pt,lep_fj_dr     --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0 --y_end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # fj_pt vs lep_fj_dr:  python make_2dplots.py --year 2017 --odir hists --channel ele --vars fj_pt,lep_fj_dr      --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0 --y_end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
     # lep_pt vs mt:        python make_2dplots.py --year 2017 --odir hists --channel ele --vars lep_pt,lep_met_mt    --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0 --y_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
     # lep_pt vs fj_pt:     python make_2dplots.py --year 2017 --odir hists --channel ele --vars lep_pt,fj_pt         --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0 --y_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
