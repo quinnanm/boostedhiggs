@@ -160,6 +160,8 @@ def main(args):
         os.makedirs(odir + '/2d_plots/')
     odir = odir + '/2d_plots/'
 
+    channels = args.channels.split(',')
+
     # get samples to make histograms
     f = open(args.samples)
     json_samples = json.load(f)
@@ -168,34 +170,37 @@ def main(args):
     # build samples
     samples = {}
     samples[args.year] = {}
-    samples[args.year][args.channel] = []
-    for key, value in json_samples[args.year][args.channel].items():
-        if value == 1:
-            samples[args.year][args.channel].append(key)
 
+    for ch in channels:
+        samples[args.year][ch] = []
+        for key, value in json_samples[args.year][ch].items():
+            if value == 1:
+                samples[args.year][ch].append(key)
     vars = args.vars.split(',')
 
-    if args.make_hists:
-        print(f'Making 2dplot of {vars}')
-        make_2dplots(args.year, args.channel, args.idir, odir, samples, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end)
+    for ch in channels:
 
-    if args.plot_hists:
-        print('Plotting...')
-        plot_2dplots(args.year, args.channel, odir, vars)
+        if args.make_hists:
+            print(f'Making 2dplot of {vars} for {ch} channel')
+            make_2dplots(args.year, ch, args.idir, odir, samples, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end)
+
+        if args.plot_hists:
+            print('Plotting...')
+            plot_2dplots(args.year, ch, odir, vars)
 
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # lep_pt vs lep_iso:   python make_2dplots.py --year 2017 --odir hists --channel ele --vars lep_pt,lep_isolation --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0 --y_end 1 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # lep_pt vs lep_fj_dr: python make_2dplots.py --year 2017 --odir hists --channel ele --vars lep_pt,lep_fj_dr     --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0 --y_end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # fj_pt vs lep_fj_dr:  python make_2dplots.py --year 2017 --odir hists --channel ele --vars fj_pt,lep_fj_dr      --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0 --y_end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # lep_pt vs mt:        python make_2dplots.py --year 2017 --odir hists --channel ele --vars lep_pt,lep_met_mt    --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0 --y_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # lep_pt vs fj_pt:     python make_2dplots.py --year 2017 --odir hists --channel ele --vars lep_pt,fj_pt         --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0 --y_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_pt vs lep_iso:   python make_2dplots.py --year 2017 --odir hists --channels ele --vars lep_pt,lep_isolation --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0 --y_end 1 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_pt vs lep_fj_dr: python make_2dplots.py --year 2017 --odir hists --channels ele --vars lep_pt,lep_fj_dr     --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0 --y_end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # fj_pt vs lep_fj_dr:  python make_2dplots.py --year 2017 --odir hists --channels ele --vars fj_pt,lep_fj_dr      --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0 --y_end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_pt vs mt:        python make_2dplots.py --year 2017 --odir hists --channels ele --vars lep_pt,lep_met_mt    --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0 --y_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_pt vs fj_pt:     python make_2dplots.py --year 2017 --odir hists --channels ele --vars lep_pt,fj_pt         --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0 --y_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--year',            dest='year',       default='2017',                                 help="year")
+    parser.add_argument('--year',            dest='year',        default='2017',                                 help="year")
     parser.add_argument('--samples',         dest='samples',     default="plot_configs/samples_pfnano.json",     help="path to json with samples to be plotted")
-    parser.add_argument('--channel',         dest='channel',     default='ele',                                  help="channel... choices are ['ele', 'mu', 'had']")
+    parser.add_argument('--channels',        dest='channels',    default='ele',                                  help="channel... choices are ['ele', 'mu', 'had']")
     parser.add_argument('--odir',            dest='odir',        default='hists',                                help="tag for output directory... will append '_{year}' to it")
     parser.add_argument('--idir',            dest='idir',        default='../results/',                          help="input directory with results")
     parser.add_argument('--vars',            dest='vars',        default='lep_pt,lep_isolation',                 help="channels for which to plot this variable")
