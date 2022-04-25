@@ -97,7 +97,7 @@ add_samples = {
     'TTbar': 'TT',
     'WJetsLNu': 'WJetsToLNu',
     'GluGluHToWWTo4q': 'GluGluHToWWTo4q',
-    'EGamma': EGamma,
+    'EGamma': 'EGamma',
 }
 
 axis_dict = {
