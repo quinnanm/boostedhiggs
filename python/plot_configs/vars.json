@@ -1,11 +1,11 @@
 {
   "ele": {
 	   "lep_pt": 1,
-	   "lep_isolation": 1,
+	   "lep_isolation": 0,
 	   "lep_misolation": 0,
 	   "lep_fj_m": 0,
 	   "lep_fj_bjets_ophem": 0,
-	   "lep_fj_dr": 1,
+	   "lep_fj_dr": 0,
 	   "fj_msoftdrop": 0,
 	   "fj_pt": 0,
 	   "ht": 0,
@@ -13,15 +13,15 @@
 	   "lep_met_mt": 0,
 	   "lep_matchedH": 0,
 	   "lep_nprongs": 0,
-     "gen_Hpt": 1
+     "gen_Hpt": 0
     },
   "mu": {
 	   "lep_pt": 1,
-	   "lep_isolation": 1,
+	   "lep_isolation": 0,
      "lep_misolation": 0,
 	   "lep_fj_m": 0,
 	   "lep_fj_bjets_ophem": 0,
-	   "lep_fj_dr": 1,
+	   "lep_fj_dr": 0,
 	   "fj_msoftdrop":0,
 	   "fj_pt": 0,
      "ht": 0,
@@ -31,10 +31,10 @@
 	   "lep_met_mt": 0,
      "lep_matchedH": 0,
      "lep_nprongs": 0,
-     "gen_Hpt": 1
+     "gen_Hpt": 0
     },
   "had": {
-     "fj_pt": 1,
+     "fj_pt": 0,
 	   "fj_msoftdrop": 1,
      "fj_bjets_ophem": 0,
 	   "fj_pnh4q": 0,
@@ -45,6 +45,6 @@
      "met": 0,
 	   "had_matchedH": 0,
      "had_nprongs": 0,
-     "gen_Hpt": 1
+     "gen_Hpt": 0
     }
 }
