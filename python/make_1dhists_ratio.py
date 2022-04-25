@@ -53,7 +53,7 @@ def make_1dhists_ratio(year, ch, idir, odir, samples, vars, bins, start, end):
 
     # instantiates the histogram object
     hists = hist2.Hist(
-        hist2.axis.Regular(bins, start, end, name=vars[0] + '/' + vars[1], label=vars[0] + '/' + vars[1], flow=False),
+        hist2.axis.Regular(bins, start, end, name=vars[0] + '/' + vars[1], label=vars[0] + '/' + vars[1], overflow=True),
         hist2.axis.StrCategory([], name='samples', growth=True),
     )
 

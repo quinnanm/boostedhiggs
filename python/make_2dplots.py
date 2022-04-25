@@ -45,17 +45,6 @@ def make_2dplots(year, ch, idir, odir, samples, vars, x_bins, x_start, x_end, y_
         vars: a list of two variable names to plot against each other... see the full list of choices in plot_configs/vars.json
     """
 
-    if year == '2018':
-        data_label = data_by_ch_2018
-    else:
-        data_label = data_by_ch
-
-    # Get luminosity of year
-    f = open('../fileset/luminosity.json')
-    luminosity = json.load(f)[year]
-    f.close()
-    print(f'Processing samples from year {year} with luminosity {luminosity}')
-
     # instantiates the histogram object
     hists = hist2.Hist(
         hist2.axis.Regular(x_bins, x_start, x_end, name=vars[0], label=vars[0], flow=False),
@@ -73,26 +62,6 @@ def make_2dplots(year, ch, idir, odir, samples, vars, x_bins, x_start, x_end, y_
             print('- No processed files found...', pkl_dir, 'skipping sample...', sample)
             continue
 
-        # define an isdata bool
-        is_data = False
-
-        for key in data_label.values():
-            if key in sample:
-                is_data = True
-
-        # retrieve xsections for MC and define xsec_weight=1 for data
-        if not is_data:
-            # Find xsection
-            f = open('../fileset/xsec_pfnano.json')
-            xsec = json.load(f)
-            f.close()
-            xsec = eval(str((xsec[sample])))
-
-            # Get overall weighting of events.. each event has a genweight... sumgenweight sums over events in a chunk... sum_sumgenweight sums over chunks
-            xsec_weight = (xsec * luminosity) / get_sum_sumgenweight(idir, year, sample)
-        else:
-            xsec_weight = 1
-
         # get list of parquet files that have been processed
         parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')
 
@@ -108,11 +77,6 @@ def make_2dplots(year, ch, idir, odir, samples, vars, x_bins, x_start, x_end, y_
             if len(data) == 0:
                 continue
 
-            if not is_data:
-                event_weight = data['weight']
-            else:
-                data['weight'] = 1  # for data fill a weight column with ones
-
             single_sample = None
             for single_key, key in add_samples.items():
                 if key in sample:
@@ -124,7 +88,6 @@ def make_2dplots(year, ch, idir, odir, samples, vars, x_bins, x_start, x_end, y_
                     data[vars[0]],
                     data[vars[1]],
                     single_sample,
-                    weight=xsec_weight * data['weight']
                 )
             # otherwise give unique name
             else:
@@ -132,7 +95,6 @@ def make_2dplots(year, ch, idir, odir, samples, vars, x_bins, x_start, x_end, y_
                     data[vars[0]],
                     data[vars[1]],
                     sample,
-                    weight=xsec_weight * data['weight']
                 )
 
     print("------------------------------------------------------------")

@@ -12,7 +12,8 @@
 	   "met": 0,
 	   "lep_met_mt": 0,
 	   "lep_matchedH": 0,
-	   "lep_nprongs": 0
+	   "lep_nprongs": 0,
+     "gen_Hpt": 1
     },
   "mu": {
 	   "lep_pt": 1,
@@ -29,7 +30,8 @@
 	   "mu_mvaId": 0,
 	   "lep_met_mt": 0,
      "lep_matchedH": 0,
-     "lep_nprongs": 0
+     "lep_nprongs": 0,
+     "gen_Hpt": 1
     },
   "had": {
      "fj_pt": 1,
@@ -39,9 +41,10 @@
      "fj_sl_pt": 0,
      "fj_sl_msoftdrop": 0,
      "fj_sl_pnh4q": 0,
-	   "ht": 1,
+	   "ht": 0,
      "met": 0,
 	   "had_matchedH": 0,
-     "had_nprongs": 0
+     "had_nprongs": 0,
+     "gen_Hpt": 1
     }
 }
