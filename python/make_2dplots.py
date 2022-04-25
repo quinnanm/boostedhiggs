@@ -81,7 +81,7 @@ def make_2dplots(year, ch, idir, odir, samples, vars, x_bins, x_start, x_end, y_
             for single_key, key in add_samples.items():
                 if key in sample:
                     single_sample = single_key
-            print(data.keys())
+
             # combining all pt bins of a specefic process under one name
             if single_sample is not None:
                 hists.fill(
@@ -200,11 +200,11 @@ if __name__ == "__main__":
     parser.add_argument('--idir',            dest='idir',        default='../results/',                          help="input directory with results")
     parser.add_argument('--vars',            dest='vars',        default='lep_pt,lep_isolation',                 help="channels for which to plot this variable")
     parser.add_argument('--x_bins',          dest='x_bins',      default=50,                                     help="binning of the first variable passed",                type=int)
-    parser.add_argument('--x_start',         dest='x_start',     default=0,                                      help="starting range of the first variable passed",         type=int)
-    parser.add_argument('--x_end',           dest='x_end',       default=1,                                      help="end range of the first variable passed",              type=int)
+    parser.add_argument('--x_start',         dest='x_start',     default=0,                                      help="starting range of the first variable passed",         type=float)
+    parser.add_argument('--x_end',           dest='x_end',       default=1,                                      help="end range of the first variable passed",              type=float)
     parser.add_argument('--y_bins',          dest='y_bins',      default=50,                                     help="binning of the second variable passed",               type=int)
-    parser.add_argument('--y_start',         dest='y_start',     default=0,                                      help="starting range of the second variable passed",        type=int)
-    parser.add_argument('--y_end',           dest='y_end',       default=1,                                      help="end range of the second variable passed",             type=int)
+    parser.add_argument('--y_start',         dest='y_start',     default=0,                                      help="starting range of the second variable passed",        type=float)
+    parser.add_argument('--y_end',           dest='y_end',       default=1,                                      help="end range of the second variable passed",             type=float)
     parser.add_argument("--make_hists",      dest='make_hists',  action='store_true',                            help="Make hists")
     parser.add_argument("--plot_hists",      dest='plot_hists',  action='store_true',                            help="Plot the hists")
 
