@@ -81,7 +81,7 @@ def make_2dplots(year, ch, idir, odir, samples, vars, x_bins, x_start, x_end, y_
             for single_key, key in add_samples.items():
                 if key in sample:
                     single_sample = single_key
-            print(data.keys)
+            print(data.keys())
             # combining all pt bins of a specefic process under one name
             if single_sample is not None:
                 hists.fill(
