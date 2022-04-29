@@ -117,7 +117,7 @@ axis_dict = {
     'fj_sl_pnh4q': hist2.axis.Regular(30, 0, 1, name='var', label=r'Jet$_1$ PNH4q non-MD', overflow=True),
     'lep_met_mt': hist2.axis.Regular(20, 0, 300, name='var', label=r'$m_T(lep, p_T^{miss})$ [GeV]', overflow=True),
     'ht': hist2.axis.Regular(20, 180, 1500, name='var', label='HT [GeV]', overflow=True),
-    'met': hist2.axis.Regular(50, 0, 400, name='var', label='MET [GeV]', overflow=True),
+    'met': hist2.axis.Regular(50, 0, 200, name='var', label='MET [GeV]', overflow=True),
     'fj1_pnh4q': hist2.axis.Regular(30, 0, 1, name='var', label=r'Jet$_1$ PNH4q non-MD', overflow=True),
     'lep_matchedH': hist2.axis.Regular(20, 100, 400, name='var', label=r'matchedH $p_T$ [GeV]', overflow=True),
     'had_matchedH': hist2.axis.Regular(20, 100, 400, name='var', label=r'matchedH $p_T$ [GeV]', overflow=True),
