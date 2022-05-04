@@ -5,41 +5,29 @@ import gzip
 import pickle
 import importlib.resources
 import correctionlib
-from coffea.lookup_tools.lookup_base import lookup_base
-from coffea import lookup_tools
-from coffea import util
 
-with importlib.resources.path("boostedhiggs.data", "corrections.pkl.gz") as path:
-    with gzip.open(path) as fin:
-        compiled = pickle.load(fin)
-
-class SoftDropWeight(lookup_base):
-    def _evaluate(self, pt, eta):
-        gpar = np.array([1.00626, -1.06161, 0.0799900, 1.20454])
-        cpar = np.array([1.09302, -0.000150068, 3.44866e-07, -2.68100e-10, 8.67440e-14, -1.00114e-17])
-        fpar = np.array([1.27212, -0.000571640, 8.37289e-07, -5.20433e-10, 1.45375e-13, -1.50389e-17])
-        genw = gpar[0] + gpar[1]*np.power(pt*gpar[2], -gpar[3])
-        ptpow = np.power.outer(pt, np.arange(cpar.size))
-        cenweight = np.dot(ptpow, cpar)
-        forweight = np.dot(ptpow, fpar)
-        weight = np.where(np.abs(eta) < 1.3, cenweight, forweight)
-        return genw*weight
-
-_softdrop_weight = SoftDropWeight()
+with importlib.resources.path("boostedhiggs.data", "msdcorr.json") as filename:
+    msdcorr = correctionlib.CorrectionSet.from_file(str(filename))
 
 def corrected_msoftdrop(fatjets):
-    sf = _softdrop_weight(fatjets.pt, fatjets.eta)
-    sf = np.maximum(1e-5, sf)
-    dazsle_msd = (fatjets.subjets * (1 - fatjets.subjets.rawFactor)).sum()
-    return dazsle_msd.mass * sf
-
-def add_pileup_weight(weights, nPU, year='2017'):
-    weights.add(
-        'pileup_weight',
-        compiled[f'{year}_pileupweight'](nPU),
-        compiled[f'{year}_pileupweight_puUp'](nPU),
-        compiled[f'{year}_pileupweight_puDown'](nPU),
+    msdraw = np.sqrt(
+        np.maximum(
+            0.0,
+            (fatjets.subjets * (1 - fatjets.subjets.rawFactor)).sum().mass2,
+        )
     )
+    msoftdrop = fatjets.msoftdrop
+    msdfjcorr = msdraw / (1 - fatjets.rawFactor)
+
+    corr = msdcorr["msdfjcorr"].evaluate(
+        np.array(ak.flatten(msdfjcorr / fatjets.pt)),
+        np.array(ak.flatten(np.log(fatjets.pt))),
+        np.array(ak.flatten(fatjets.eta)),
+    )
+    corr = ak.unflatten(corr, ak.num(fatjets))
+    corrected_mass = msdfjcorr * corr
+
+    return corrected_mass
 
 def add_pdf_weight(weights, pdf_weights):
     nom = np.ones(len(weights.weight()))
@@ -94,105 +82,203 @@ def build_lumimask(filename):
     with importlib.resources.path("boostedhiggs.data", filename) as path:
         return LumiMask(path)
 
-lumiMasks = {
+lumi_masks = {
     "2016": build_lumimask("Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt"),
     "2017": build_lumimask("Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt"),
     "2018": build_lumimask("Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt"),
 }
 
-# TODO: Update to UL
-# Option: 0 for eta-pt, 1 for abseta-pt, 2 for pt-abseta
-lepton_sf_dict = {
-    "elec_RECO": 0,
-    "elec_ID": 0, 
-    "elec_TRIG32": 0,
-    "elec_TRIG115": 1,
-    "muon_ISO": 1,
-    "muon_ID": 1,
-    "muon_TRIG27": 2,
-    "muon_TRIG50": 2,
+
+"""
+CorrectionLib files are available from: /cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration - synced daily
+"""
+pog_correction_path = "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/"
+pog_jsons = {
+    "muon": ["MUO","muon_Z.json.gz"],
+    "electron": ["EGM","electron.json.gz"],
+    "pileup": ["LUM", "puWeights.json.gz"],
 }
 
-def add_leptonSFs(weights, lepton, year, match):
-    for sf in lepton_sf_dict:
-        sfoption = lepton_sf_dict[sf]
-        lep_pt = np.array(ak.fill_none(lepton.pt, 0.))
-        lep_eta = np.array(ak.fill_none(lepton.eta, 0.))
-        lep_abseta = np.array(ak.fill_none(abs(lepton.eta), 0.))
-        if match in sf:
-            if sfoption==0:
-                nom = compiled['%s_value'%sf](lep_eta,lep_pt)
-                err = compiled['%s_error'%sf](lep_eta,lep_pt)
-            elif sfoption==1:
-                nom = compiled['%s_value'%sf](np.abs(lep_eta),lep_pt)
-                err = compiled['%s_error'%sf](np.abs(lep_eta),lep_pt)
-            elif sfoption==2:
-                nom = compiled['%s_value'%sf](lep_pt,np.abs(lep_eta))
-                err = compiled['%s_error'%sf](lep_pt,np.abs(lep_eta))
-            else: 
-                print('Error: Invalid type ordering for lepton SF %s'%sf)
-                return
-            if "TRIG27" in sf:
-                nom[lep_pt>55.] = 1.
-                err[lep_pt>55.] = 0.
-            if "TRIG50" in sf:
-                nom[lep_pt<55.] = 1.
-                err[lep_pt<55.] = 0.
-            if "TRIG32" in sf:
-                nom[lep_pt>120.] = 1.
-                err[lep_pt>120.] = 0.
-            if "TRIG115" in sf:
-                nom[lep_pt<120.] = 1.
-                err[lep_pt<120.] = 0.
-            weights.add(sf, nom, nom+err, nom-err)
+def get_UL_year(year):
+    if year == "2016":
+        year = "2016postVFP"
+    elif year == "2016APV":
+        year = "2016preVFP"
+    return f"{year}_UL"
 
-def is_overlap(events,dataset,triggers,year):
-    dataset_ordering = {
-        '2016':['SingleMuon','SingleElectron','MET','JetHT'],
-        '2017':['SingleMuon','SingleElectron','MET','JetHT'],
-        '2018':['SingleMuon','EGamma','MET','JetHT']
-    }
-    pd_to_trig = {
-        'SingleMuon': ['Mu50',
-                       'Mu55',
-                       'Mu15_IsoVVVL_PFHT600',
-                       'Mu15_IsoVVVL_PFHT450_PFMET50',
-                       ],
-        'SingleElectron': ['Ele50_CaloIdVT_GsfTrkIdT_PFJet165',
-                           'Ele115_CaloIdVT_GsfTrkIdT',
-                           'Ele15_IsoVVVL_PFHT600',
-                           'Ele35_WPTight_Gsf',
-                           'Ele15_IsoVVVL_PFHT450_PFMET50',
-                       ],
-        'JetHT': ['PFHT800',
-                  'PFHT900',
-                  'AK8PFJet360_TrimMass30',
-                  'AK8PFHT700_TrimR0p1PT0p03Mass50',
-                  'PFHT650_WideJetMJJ950DEtaJJ1p5',
-                  'PFHT650_WideJetMJJ900DEtaJJ1p5',
-                  'PFJet450',
-                  'PFHT1050',
-                  'PFJet500',
-                  'AK8PFJet400_TrimMass30',
-                  'AK8PFJet420_TrimMass30',
-                  'AK8PFHT800_TrimMass50'
-              ],
-        'MET': ['PFMETNoMu120_PFMHTNoMu120_IDTight',
-                'PFMETNoMu110_PFMHTNoMu110_IDTight',
-            ],
-    }
-    
-    overlap = np.ones(len(events), dtype='bool')
-    for p in dataset_ordering[year]:
-        if dataset.startswith(p):
-            pass_pd = np.zeros(len(events), dtype='bool')
-            for t in pd_to_trig[p]:
-                if t in events.HLT.fields:
-                    pass_pd = pass_pd | events.HLT[t]
-            overlap = overlap & pass_pd
-            break
+def get_pog_json(obj,year):
+    try:
+        pog_json = pog_jsons[obj]
+    except:
+        print(f'No json for {obj}')
+    year = get_UL_year(year)
+    return f"{pog_correction_path}POG/{pog_json[0]}/{year}/{pog_json[1]}"
+
+"""
+Lepton Scale Factors 
+----
+
+Muons:
+https://twiki.cern.ch/twiki/bin/view/CMS/MuonUL2016
+https://twiki.cern.ch/twiki/bin/view/CMS/MuonUL2017
+https://twiki.cern.ch/twiki/bin/view/CMS/MuonUL2018
+
+- UL CorrectionLib html files:
+  https://cms-nanoaod-integration.web.cern.ch/commonJSONSFs/MUO_muon_Z_Run2_UL/
+  e.g. one example of the correction json files can be found here: 
+  https://gitlab.cern.ch/cms-muonPOG/muonefficiencies/-/raw/master/Run2/UL/2017/2017_trigger/Efficiencies_muon_generalTracks_Z_Run2017_UL_SingleMuonTriggers_schemaV2.json
+  - Trigger iso and non-iso
+  - Isolation: We use RelIso<0.25 (LooseRelIso) with medium prompt ID
+  - Reconstruction ID: We use medium prompt ID
+
+Electrons:
+- UL CorrectionLib htmlfiles:
+  https://cms-nanoaod-integration.web.cern.ch/commonJSONSFs/EGM_electron_Run2_UL/
+  - ID: wp90noiso
+  - Reconstruction: RecoAbove20
+  - Trigger:
+    Looks like the EGM group does not provide them but applying these for now.
+    https://twiki.cern.ch/twiki/bin/viewauth/CMS/EgHLTScaleFactorMeasurements (derived by Siqi Yuan)
+    These include 2017: (HLT_ELE35 OR HLT_ELE115 OR HLT_Photon200)
+    and 2018: (HLT_Ele32 OR HLT_ELE115 OR HLT_Photon200)
+  - Isolation:
+    No SFs for RelIso?
+"""
+
+# corrections not on json files.
+lepton_other_corrections = {
+    "trigger": {
+        "electron": {
+            #  note that 2016 do not exist, so taking 2017 as placeholder
+            "2016APV": "egammaEffi.txt_EGM2D_2017.root",
+            "2016": "egammaEffi.txt_EGM2D_2017.root",
+            "2017": "egammaEffi.txt_EGM2D_2017.root",
+            "2018": "egammaEffi.txt_EGM2D_2018.root",
+        },
+    },
+}
+
+lepton_corrections = {
+    "trigger_iso": {
+        "muon": { # For IsoMu24 (| IsoTkMu24 )
+            "2016APV": "NUM_IsoMu24_or_IsoTkMu24_DEN_CutBasedIdTight_and_PFIsoTight", # preVBP
+            "2016": "NUM_IsoMu24_or_IsoTkMu24_DEN_CutBasedIdTight_and_PFIsoTight", #postVBF
+            "2017": "NUM_IsoMu27_DEN_CutBasedIdTight_and_PFIsoTight",
+            "2018": "NUM_IsoMu24_DEN_CutBasedIdTight_and_PFIsoTight",
+        },
+    },
+    "trigger_noniso": {
+        "muon": { # For Mu50 (| TkMu50 )
+            "2016APV": "NUM_Mu50_or_TkMu50_DEN_CutBasedIdGlobalHighPt_and_TkIsoLoose", 
+            "2016": "NUM_Mu50_or_TkMu50_DEN_CutBasedIdGlobalHighPt_and_TkIsoLoose",
+            "2017": "NUM_Mu50_or_OldMu100_or_TkMu100_DEN_CutBasedIdGlobalHighPt_and_TkIsoLoose",
+            "2018": "NUM_Mu50_or_OldMu100_or_TkMu100_DEN_CutBasedIdGlobalHighPt_and_TkIsoLoose",
+        },
+    },
+    "isolation": {
+        "muon": {
+            "2016APV": "NUM_LooseRelIso_DEN_MediumPromptID",
+            "2016": "NUM_LooseRelIso_DEN_MediumPromptID",
+            "2017": "NUM_LooseRelIso_DEN_MediumPromptID",
+            "2018": "NUM_LooseRelIso_DEN_MediumPromptID",
+        },
+        #"electron": {
+        #},
+    },
+    # NOTE: We do not have SFs for mini-isolation yet
+    "id": {
+        "muon":{
+            "2016APV": "NUM_MediumPromptID_DEN_TrackerMuons",
+            "2016": "NUM_MediumPromptID_DEN_TrackerMuons",
+            "2017": "NUM_MediumPromptID_DEN_TrackerMuons",
+            "2018": "NUM_MediumPromptID_DEN_TrackerMuons",
+        },
+        # NOTE: should check that we do not have electrons w pT>500 GeV (I do not think we do)
+        "electron": {
+            "2016APV": "wp90noiso",
+            "2016": "wp90noiso",
+            "2017": "wp90noiso",
+            "2018": "wp90noiso",
+        },
+    },
+    "reco": {
+        "electron": {
+            "2016APV": "RecoAbove20",
+            "2016": "RecoAbove20",
+            "2017": "RecoAbove20",
+            "2018": "RecoAbove20",
+        },
+    },
+}
+
+def add_lepton_weight(weights, lepton, year, lepton_type="muon"):
+    ul_year = get_UL_year(year)
+    if lepton_type=="electron": ul_year = ul_year.replace('_UL','')
+    cset = correctionlib.CorrectionSet.from_file(get_pog_json(lepton_type,year))
+
+    def set_isothreshold(corr,value,lepton_pt,lepton_type):
+        iso_threshold = {
+            "muon": 55.,
+            "electron": 120.,
+        }[lepton_type]
+        if corr=="trigger_iso":
+            value[lepton_pt>iso_threshold] = 1.
+        elif corr=="trigger_noniso":
+            value[lepton_pt<iso_threshold] = 1.
+        elif corr=="isolation":
+            value[lepton_pt>iso_threshold] = 1.
+        return value
+
+    lep_pt = np.array(ak.fill_none(lepton.pt, 0.))
+    lep_eta = np.array(ak.fill_none(lepton.eta, 0.))
+    if lepton_type=="muon": lep_eta = np.abs(lep_eta)
+
+    for corr,corrDict in lepton_corrections.items():
+        if lepton_type not in corrDict.keys():
+            continue
+        if year not in corrDict[lepton_type].keys():
+            continue
+        json_map_name = corrDict[lepton_type][year]
+
+        clip_pt = [0., 2000]
+        clip_eta = [-2.4999, 2.4999]
+        if lepton_type=="electron":
+            clip_pt = [10.0, 499.999]
+            if corr=="reco":
+                clip_pt = [20.1, 499.999]
+        elif lepton_type=="muon":
+            clip_pt = [30., 1000.]
+            clip_eta = [0., 2.3999]
+            if corr=="trigger_noniso":
+                clip_pt = [52., 1000.]
+
+        lepton_pt = np.clip(lep_pt, clip_pt[0], clip_pt[1])
+        lepton_eta = np.clip(lep_eta, clip_eta[0], clip_eta[1])
+
+        values = {}
+        if lepton_type=="muon":
+            values["nominal"] = cset[json_map_name].evaluate( ul_year, lepton_eta, lepton_pt, "sf")
         else:
-            for t in pd_to_trig[p]:
-                if t in events.HLT.fields:
-                    overlap = overlap & np.logical_not(events.HLT[t])
-    return overlap
+            values["nominal"] = cset["UL-Electron-ID-SF"].evaluate( ul_year, "sf", json_map_name, lepton_eta, lepton_pt)
+
+        if lepton_type=="muon":
+            values["up"] = cset[json_map_name].evaluate( ul_year, lepton_eta, lepton_pt, "systup")
+            values["down"] = cset[json_map_name].evaluate( ul_year, lepton_eta, lepton_pt, "systdown")
+        else:
+            values["up"] = cset["UL-Electron-ID-SF"].evaluate( ul_year, "sfup", json_map_name, lepton_eta, lepton_pt)
+            values["down"] = cset["UL-Electron-ID-SF"].evaluate( ul_year, "sfdown", json_map_name, lepton_eta, lepton_pt)
+
+        for key,val in values.items():
+            # restrict values to 1 for some SFs if we are above/below the ISO threshold
+            values[key] = set_isothreshold(corr,val,np.array(ak.fill_none(lepton.pt,0.)),lepton_type)
+
+        # add weights (for now only the nominal weight)
+        weights.add(f"{corr}_{lepton_type}", values["nominal"], values["up"], values["down"])
+
+def add_pileup_weight(weights):
+    """ 
+    Should be able to do something similar to lepton weight but w pileup 
+    e.g. see here: https://cms-nanoaod-integration.web.cern.ch/commonJSONSFs/LUMI_puWeights_Run2_UL/
+    """
+    cset = correctionlib.CorrectionSet.from_file(get_pog_json("pileup",year))
+    weights.add("pileup", nominal, up, down)
