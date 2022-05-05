@@ -79,8 +79,10 @@
   "ggZH_HToBB_ZToLL"                       :      0,
   "ttHToBB"                                :      0.29120517,
   "GluGluHToWWToLNuQQ"                     :     28.87,
-  "GluGluHToWWTo4q"                        :      1,
-  "GluGluHToWWTo4q_ext1"                   :      1,
-  "GluGluHToWWTo4q-HpT190"                 :      1,
-  "GluGluHToWWTo4q-HpT190_ext1"            :      1
+  "GluGluHToWWToLNuQQ-HpT190"              :     13.66,
+  "GluGluHToWWToLNuQQ-HpT190_ext1"         :     13.66,
+  "GluGluHToWWTo4q"                        :     21.47,
+  "GluGluHToWWTo4q_ext1"                   :     21.47,
+  "GluGluHToWWTo4q-HpT190"                 :     10.74,
+  "GluGluHToWWTo4q-HpT190_ext1"            :     10.74
 }
