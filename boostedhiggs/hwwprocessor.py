@@ -20,6 +20,7 @@ from boostedhiggs.utils import match_HWW, getParticles
 from boostedhiggs.corrections import (
     corrected_msoftdrop,
     add_lepton_weight,
+    add_pileup_weight,
 )
 from boostedhiggs.btag import btagWPs
 from boostedhiggs.btag import BTagCorrector
@@ -256,7 +257,7 @@ class HwwProcessor(processor.ProcessorABC):
 
         # FATJETS
         fatjets = events.FatJet
-        fatjets['msdcorr'] = corrected_msoftdrop(fatjets)
+        fatjets["msdcorr"] = corrected_msoftdrop(fatjets)
         fatjets["qcdrho"] = 2 * np.log(fatjets.msdcorr / fatjets.pt)
 
         good_fatjets = (
@@ -465,12 +466,12 @@ class HwwProcessor(processor.ProcessorABC):
         Weights
         ------
         - Gen weight (DONE)
-        - Pileup weight (Farouk)
+        - Pileup weight (DONE)
         - L1 prefiring weight for 2016/2017 (DONE)
         - B-tagging efficiency weights (Cristina) 
         - Electron trigger scale factors (DONE)
         - Muon trigger scale factors (DONE)
-        - HT trigger scale factors 
+        - HT trigger scale factors
         - Electron ID scale factors and Reco scale factors (DONE)
         - Muon ID scale factors (DONE)
         - Muon Isolation scale factors (DONE)
@@ -488,7 +489,7 @@ class HwwProcessor(processor.ProcessorABC):
 
         Up and Down Variations (systematics included as a new variable)
         ----
-        - Pileup weight Up/Down 
+        - Pileup weight Up/Down
         - L1 prefiring weight Up/Down (DONE)
         - B-tagging efficiency Up/Down
         - Electron Trigger Up/Down 
@@ -501,7 +502,7 @@ class HwwProcessor(processor.ProcessorABC):
         - JMS Up/Down
         - JMR Up/Down
         - ParticleNet tagger Up/Down
-        
+
         Up and Down Variations (systematics included as a new output file)
         ----
         - Jet Energy Scale (JES)
@@ -513,9 +514,10 @@ class HwwProcessor(processor.ProcessorABC):
             weights.add('genweight', events.genWeight)
             if self._year in ("2016", "2017"):
                 weights.add("L1Prefiring", events.L1PreFiringWeight.Nom, events.L1PreFiringWeight.Up, events.L1PreFiringWeight.Dn)
+            add_pileup_weight(weights, self._year, self._yearmod, nPU=ak.to_numpy(events.Pileup.nPU))
 
-            add_lepton_weight(weights, candidatelep, self._year+self._yearmod, "muon")
-            add_lepton_weight(weights, candidatelep, self._year+self._yearmod, "electron")
+            add_lepton_weight(weights, candidatelep, self._year + self._yearmod, "muon")
+            add_lepton_weight(weights, candidatelep, self._year + self._yearmod, "electron")
 
             # self.btagCorr.addBtagWeight(bjets_away_lepfj, weights)
             # self.btagCorr.addBtagWeight(bjets_away_candidatefj_had, weights)
