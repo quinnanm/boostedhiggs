@@ -77,7 +77,7 @@
 	"DYJetsToLL_Pt-250To400":0,
 	"DYJetsToLL_Pt-400To650":0,
 	"DYJetsToLL_Pt-650ToInf":0,
-	"QCD_Pt_1000to1400":0,
+	"QCD_Pt_1000to1400":1,
 	"QCD_Pt_1400to1800":0,
 	"QCD_Pt_170to300":0,
 	"QCD_Pt_1800to2400":0,
