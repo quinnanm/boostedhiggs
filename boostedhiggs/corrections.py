@@ -292,7 +292,7 @@ def add_pileup_weight(weights, year, mod, nPU):
     Should be able to do something similar to lepton weight but w pileup
     e.g. see here: https://cms-nanoaod-integration.web.cern.ch/commonJSONSFs/LUMI_puWeights_Run2_UL/
     """
-    cset = correctionlib.CorrectionSet.from_file(get_pog_json("pileup", year))
+    cset = correctionlib.CorrectionSet.from_file(get_pog_json("pileup", year + mod))
 
     year_to_corr = {'2016': 'Collisions16_UltraLegacy_goldenJSON',
                     '2017': 'Collisions17_UltraLegacy_goldenJSON',

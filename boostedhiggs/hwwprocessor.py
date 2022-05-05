@@ -510,7 +510,7 @@ class HwwProcessor(processor.ProcessorABC):
             add_lepton_weight(weights, candidatelep, self._year + self._yearmod, "muon")
             add_lepton_weight(weights, candidatelep, self._year + self._yearmod, "electron")
 
-            add_pileup_weight(weights, self._year, self._yearmod, nPU=events.Pileup.nPU)
+            add_pileup_weight(weights, self._year, self._yearmod, nPU=ak.to_numpy(events.Pileup.nPU))
 
             # self.btagCorr.addBtagWeight(bjets_away_lepfj, weights)
             # self.btagCorr.addBtagWeight(bjets_away_candidatefj_had, weights)
