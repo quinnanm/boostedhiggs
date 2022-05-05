@@ -69,7 +69,7 @@ def main(args):
     if args.processor == 'hww':
         from boostedhiggs.hwwprocessor import HwwProcessor
         if 'APV' in args.year:
-            p = HwwProcessor(year=args.year, yearmod='APV', channels=channels, output_location='./outfiles' + job_name)
+            p = HwwProcessor(year='2016', yearmod='APV', channels=channels, output_location='./outfiles' + job_name)
         else:
             p = HwwProcessor(year=args.year, channels=channels, output_location='./outfiles' + job_name)
 
