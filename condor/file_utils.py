@@ -12,9 +12,6 @@ def loadJson(samplesjson="samples_pfnano.json", year='2017', pfnano=True):
             if key not in values:
                 values[key] = value
 
-    if year == '2016':
-        year = '2017'  # TODO: remove
-
     fname = f"fileset/pfnanoindex_{year}.json"
 
     fileset = {}
