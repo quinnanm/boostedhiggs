@@ -6,8 +6,9 @@ import pickle
 import importlib.resources
 import correctionlib
 
-with importlib.resources.path("boostedhiggs.data", "msdcorr.json") as filename:
-    msdcorr = correctionlib.CorrectionSet.from_file(str(filename))
+# with importlib.resources.path("boostedhiggs.data", "msdcorr.json") as filename:
+#     msdcorr = correctionlib.CorrectionSet.from_file(str(filename))
+
 
 def corrected_msoftdrop(fatjets):
     msdraw = np.sqrt(
@@ -28,6 +29,7 @@ def corrected_msoftdrop(fatjets):
     corrected_mass = msdfjcorr * corr
 
     return corrected_mass
+
 
 def add_pdf_weight(weights, pdf_weights):
     nom = np.ones(len(weights.weight()))
@@ -59,6 +61,7 @@ def add_pdf_weight(weights, pdf_weights):
         weights.add('PDF_weight', nom, up, down)
         weights.add('PDFaS_weight', nom, up, down)
 
+
 def add_ps_weight(weights, ps_weights):
     nom = np.ones(len(weights.weight()))
     up_isr = np.ones(len(weights.weight()))
@@ -77,10 +80,12 @@ def add_ps_weight(weights, ps_weights):
     weights.add('UEPS_ISR', nom, up_isr, down_isr)
     weights.add('UEPS_FSR', nom, up_fsr, down_fsr)
 
+
 def build_lumimask(filename):
     from coffea.lumi_tools import LumiMask
     with importlib.resources.path("boostedhiggs.data", filename) as path:
         return LumiMask(path)
+
 
 lumi_masks = {
     "2016": build_lumimask("Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt"),
@@ -94,10 +99,11 @@ CorrectionLib files are available from: /cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jso
 """
 pog_correction_path = "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/"
 pog_jsons = {
-    "muon": ["MUO","muon_Z.json.gz"],
-    "electron": ["EGM","electron.json.gz"],
+    "muon": ["MUO", "muon_Z.json.gz"],
+    "electron": ["EGM", "electron.json.gz"],
     "pileup": ["LUM", "puWeights.json.gz"],
 }
+
 
 def get_UL_year(year):
     if year == "2016":
@@ -106,7 +112,8 @@ def get_UL_year(year):
         year = "2016preVFP"
     return f"{year}_UL"
 
-def get_pog_json(obj,year):
+
+def get_pog_json(obj, year):
     try:
         pog_json = pog_jsons[obj]
     except:
@@ -114,8 +121,9 @@ def get_pog_json(obj,year):
     year = get_UL_year(year)
     return f"{pog_correction_path}POG/{pog_json[0]}/{year}/{pog_json[1]}"
 
+
 """
-Lepton Scale Factors 
+Lepton Scale Factors
 ----
 
 Muons:
@@ -125,7 +133,7 @@ https://twiki.cern.ch/twiki/bin/view/CMS/MuonUL2018
 
 - UL CorrectionLib html files:
   https://cms-nanoaod-integration.web.cern.ch/commonJSONSFs/MUO_muon_Z_Run2_UL/
-  e.g. one example of the correction json files can be found here: 
+  e.g. one example of the correction json files can be found here:
   https://gitlab.cern.ch/cms-muonPOG/muonefficiencies/-/raw/master/Run2/UL/2017/2017_trigger/Efficiencies_muon_generalTracks_Z_Run2017_UL_SingleMuonTriggers_schemaV2.json
   - Trigger iso and non-iso
   - Isolation: We use RelIso<0.25 (LooseRelIso) with medium prompt ID
@@ -160,16 +168,16 @@ lepton_other_corrections = {
 
 lepton_corrections = {
     "trigger_iso": {
-        "muon": { # For IsoMu24 (| IsoTkMu24 )
-            "2016APV": "NUM_IsoMu24_or_IsoTkMu24_DEN_CutBasedIdTight_and_PFIsoTight", # preVBP
-            "2016": "NUM_IsoMu24_or_IsoTkMu24_DEN_CutBasedIdTight_and_PFIsoTight", #postVBF
+        "muon": {  # For IsoMu24 (| IsoTkMu24 )
+            "2016APV": "NUM_IsoMu24_or_IsoTkMu24_DEN_CutBasedIdTight_and_PFIsoTight",  # preVBP
+            "2016": "NUM_IsoMu24_or_IsoTkMu24_DEN_CutBasedIdTight_and_PFIsoTight",  # postVBF
             "2017": "NUM_IsoMu27_DEN_CutBasedIdTight_and_PFIsoTight",
             "2018": "NUM_IsoMu24_DEN_CutBasedIdTight_and_PFIsoTight",
         },
     },
     "trigger_noniso": {
-        "muon": { # For Mu50 (| TkMu50 )
-            "2016APV": "NUM_Mu50_or_TkMu50_DEN_CutBasedIdGlobalHighPt_and_TkIsoLoose", 
+        "muon": {  # For Mu50 (| TkMu50 )
+            "2016APV": "NUM_Mu50_or_TkMu50_DEN_CutBasedIdGlobalHighPt_and_TkIsoLoose",
             "2016": "NUM_Mu50_or_TkMu50_DEN_CutBasedIdGlobalHighPt_and_TkIsoLoose",
             "2017": "NUM_Mu50_or_OldMu100_or_TkMu100_DEN_CutBasedIdGlobalHighPt_and_TkIsoLoose",
             "2018": "NUM_Mu50_or_OldMu100_or_TkMu100_DEN_CutBasedIdGlobalHighPt_and_TkIsoLoose",
@@ -182,12 +190,12 @@ lepton_corrections = {
             "2017": "NUM_LooseRelIso_DEN_MediumPromptID",
             "2018": "NUM_LooseRelIso_DEN_MediumPromptID",
         },
-        #"electron": {
-        #},
+        # "electron": {
+        # },
     },
     # NOTE: We do not have SFs for mini-isolation yet
     "id": {
-        "muon":{
+        "muon": {
             "2016APV": "NUM_MediumPromptID_DEN_TrackerMuons",
             "2016": "NUM_MediumPromptID_DEN_TrackerMuons",
             "2017": "NUM_MediumPromptID_DEN_TrackerMuons",
@@ -211,29 +219,32 @@ lepton_corrections = {
     },
 }
 
+
 def add_lepton_weight(weights, lepton, year, lepton_type="muon"):
     ul_year = get_UL_year(year)
-    if lepton_type=="electron": ul_year = ul_year.replace('_UL','')
-    cset = correctionlib.CorrectionSet.from_file(get_pog_json(lepton_type,year))
+    if lepton_type == "electron":
+        ul_year = ul_year.replace('_UL', '')
+    cset = correctionlib.CorrectionSet.from_file(get_pog_json(lepton_type, year))
 
-    def set_isothreshold(corr,value,lepton_pt,lepton_type):
+    def set_isothreshold(corr, value, lepton_pt, lepton_type):
         iso_threshold = {
             "muon": 55.,
             "electron": 120.,
         }[lepton_type]
-        if corr=="trigger_iso":
-            value[lepton_pt>iso_threshold] = 1.
-        elif corr=="trigger_noniso":
-            value[lepton_pt<iso_threshold] = 1.
-        elif corr=="isolation":
-            value[lepton_pt>iso_threshold] = 1.
+        if corr == "trigger_iso":
+            value[lepton_pt > iso_threshold] = 1.
+        elif corr == "trigger_noniso":
+            value[lepton_pt < iso_threshold] = 1.
+        elif corr == "isolation":
+            value[lepton_pt > iso_threshold] = 1.
         return value
 
     lep_pt = np.array(ak.fill_none(lepton.pt, 0.))
     lep_eta = np.array(ak.fill_none(lepton.eta, 0.))
-    if lepton_type=="muon": lep_eta = np.abs(lep_eta)
+    if lepton_type == "muon":
+        lep_eta = np.abs(lep_eta)
 
-    for corr,corrDict in lepton_corrections.items():
+    for corr, corrDict in lepton_corrections.items():
         if lepton_type not in corrDict.keys():
             continue
         if year not in corrDict[lepton_type].keys():
@@ -242,43 +253,52 @@ def add_lepton_weight(weights, lepton, year, lepton_type="muon"):
 
         clip_pt = [0., 2000]
         clip_eta = [-2.4999, 2.4999]
-        if lepton_type=="electron":
+        if lepton_type == "electron":
             clip_pt = [10.0, 499.999]
-            if corr=="reco":
+            if corr == "reco":
                 clip_pt = [20.1, 499.999]
-        elif lepton_type=="muon":
+        elif lepton_type == "muon":
             clip_pt = [30., 1000.]
             clip_eta = [0., 2.3999]
-            if corr=="trigger_noniso":
+            if corr == "trigger_noniso":
                 clip_pt = [52., 1000.]
 
         lepton_pt = np.clip(lep_pt, clip_pt[0], clip_pt[1])
         lepton_eta = np.clip(lep_eta, clip_eta[0], clip_eta[1])
 
         values = {}
-        if lepton_type=="muon":
-            values["nominal"] = cset[json_map_name].evaluate( ul_year, lepton_eta, lepton_pt, "sf")
+        if lepton_type == "muon":
+            values["nominal"] = cset[json_map_name].evaluate(ul_year, lepton_eta, lepton_pt, "sf")
         else:
-            values["nominal"] = cset["UL-Electron-ID-SF"].evaluate( ul_year, "sf", json_map_name, lepton_eta, lepton_pt)
+            values["nominal"] = cset["UL-Electron-ID-SF"].evaluate(ul_year, "sf", json_map_name, lepton_eta, lepton_pt)
 
-        if lepton_type=="muon":
-            values["up"] = cset[json_map_name].evaluate( ul_year, lepton_eta, lepton_pt, "systup")
-            values["down"] = cset[json_map_name].evaluate( ul_year, lepton_eta, lepton_pt, "systdown")
+        if lepton_type == "muon":
+            values["up"] = cset[json_map_name].evaluate(ul_year, lepton_eta, lepton_pt, "systup")
+            values["down"] = cset[json_map_name].evaluate(ul_year, lepton_eta, lepton_pt, "systdown")
         else:
-            values["up"] = cset["UL-Electron-ID-SF"].evaluate( ul_year, "sfup", json_map_name, lepton_eta, lepton_pt)
-            values["down"] = cset["UL-Electron-ID-SF"].evaluate( ul_year, "sfdown", json_map_name, lepton_eta, lepton_pt)
+            values["up"] = cset["UL-Electron-ID-SF"].evaluate(ul_year, "sfup", json_map_name, lepton_eta, lepton_pt)
+            values["down"] = cset["UL-Electron-ID-SF"].evaluate(ul_year, "sfdown", json_map_name, lepton_eta, lepton_pt)
 
-        for key,val in values.items():
+        for key, val in values.items():
             # restrict values to 1 for some SFs if we are above/below the ISO threshold
-            values[key] = set_isothreshold(corr,val,np.array(ak.fill_none(lepton.pt,0.)),lepton_type)
+            values[key] = set_isothreshold(corr, val, np.array(ak.fill_none(lepton.pt, 0.)), lepton_type)
 
         # add weights (for now only the nominal weight)
         weights.add(f"{corr}_{lepton_type}", values["nominal"], values["up"], values["down"])
 
-def add_pileup_weight(weights):
-    """ 
-    Should be able to do something similar to lepton weight but w pileup 
+
+def add_pileup_weight(weights, year, nPU):
+    """
+    Should be able to do something similar to lepton weight but w pileup
     e.g. see here: https://cms-nanoaod-integration.web.cern.ch/commonJSONSFs/LUMI_puWeights_Run2_UL/
     """
-    cset = correctionlib.CorrectionSet.from_file(get_pog_json("pileup",year))
-    weights.add("pileup", nominal, up, down)
+    cset = correctionlib.CorrectionSet.from_file(get_pog_json("pileup", year))
+
+    values = {}
+
+    values["nominal"] = cset["Collisions17_UltraLegacy_goldenJSON"].evaluate(nPU, "nominal")
+    values["up"] = cset["Collisions17_UltraLegacy_goldenJSON"].evaluate(nPU, "up")
+    values["down"] = cset["Collisions17_UltraLegacy_goldenJSON"].evaluate(nPU, "down")
+
+    # add weights (for now only the nominal weight)
+    weights.add("pileup", values["nominal"], values["up"], values["down"])
