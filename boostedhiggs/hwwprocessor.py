@@ -418,6 +418,9 @@ class HwwProcessor(processor.ProcessorABC):
                 "lep_fj_m": lep_fj_m,
                 "lep_fj_dr": lep_fj_dr,
                 "lep_met_mt": mt_lep_met,
+            },
+            "ele": {},
+            "mu": {
                 "lep_mvaId": mu_mvaId,
             },
             "had": {
@@ -465,7 +468,7 @@ class HwwProcessor(processor.ProcessorABC):
         - Pileup weight (Farouk)
         - L1 prefiring weight for 2016/2017 (DONE)
         - B-tagging efficiency weights (Cristina) 
-        - Electron trigger scale factors (Cristina)
+        - Electron trigger scale factors (DONE)
         - Muon trigger scale factors (DONE)
         - HT trigger scale factors 
         - Electron ID scale factors and Reco scale factors (DONE)
@@ -487,10 +490,14 @@ class HwwProcessor(processor.ProcessorABC):
         ----
         - Pileup weight Up/Down 
         - L1 prefiring weight Up/Down (DONE)
-        - B-tagging efficiency Up/Down 
-        - Trigger Up/Down
-        - Lepton ID Up/Down
-        - Lepton Isolation Up/Down
+        - B-tagging efficiency Up/Down
+        - Electron Trigger Up/Down 
+        - Muon Trigger Up/Down (DONE)
+        - HT Trigger Up/Down
+        - Electron ID Up/Down (DONE)
+        - Electron Isolation Up/Down
+        - Muon ID Up/Down (DONE)
+        - Muon Isolation Up/Down (DONE)
         - JMS Up/Down
         - JMR Up/Down
         - ParticleNet tagger Up/Down
@@ -506,21 +513,35 @@ class HwwProcessor(processor.ProcessorABC):
             weights.add('genweight', events.genWeight)
             if self._year in ("2016", "2017"):
                 weights.add("L1Prefiring", events.L1PreFiringWeight.Nom, events.L1PreFiringWeight.Up, events.L1PreFiringWeight.Dn)
+
             add_lepton_weight(weights, candidatelep, self._year+self._yearmod, "muon")
             add_lepton_weight(weights, candidatelep, self._year+self._yearmod, "electron")
 
             # self.btagCorr.addBtagWeight(bjets_away_lepfj, weights)
             # self.btagCorr.addBtagWeight(bjets_away_candidatefj_had, weights)
 
-            # store the final weight
-            variables["common"]["weight"] = weights.weight()
+            # store the final common weight
+            variables["common"]["weight"] = weights.partial_weight(["genweight","L1Prefiring"])
 
-            # store the individual weights (for now)
+            weights_per_ch = {"ele":[],"mu":[],"had":[]}
             for key in weights._weights.keys():
-                if "muon" in key or "electron" in key:
-                    variables["lep"][f"weight_{key}"] = weights.partial_weight([key])
+                if "muon" in key:
+                    varkey = "mu"
+                elif "electron" in key:
+                    varkey = "ele"
+                elif "had" in key:
+                    varkey = "had"
                 else:
-                    variables["common"][f"weight_{key}"] = weights.partial_weight([key])
+                    varkey = "common"
+                # store the individual weights (ONLY for now until we debug)
+                variables[varkey][f"weight_{key}"] = weights.partial_weight([key])
+                if varkey in weights_per_ch.keys():
+                    weights_per_ch[varkey].append(key)
+
+            # store the per channel weight
+            for ch in weights_per_ch.keys():
+                if len(weights_per_ch[ch])>0:
+                    variables[ch][f"weight_{ch}"] = weights.partial_weight(weights_per_ch[ch])
 
             # NOTE: to add variations:
             # for var in weights.variations:
@@ -539,9 +560,10 @@ class HwwProcessor(processor.ProcessorABC):
                 fill_output = False
 
             if fill_output:
+                keys = ["common", ch]
+                if ch=="ele" or ch=="mu": keys += ["lep"]
+
                 out = {}
-                var_ch = ch if ch == "had" else "lep"
-                keys = ["common", var_ch]
                 for key in keys:
                     for var, item in variables[key].items():
                         # pad all the variables that are not a cut with -1
