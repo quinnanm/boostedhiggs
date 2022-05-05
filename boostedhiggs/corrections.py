@@ -6,8 +6,8 @@ import pickle
 import importlib.resources
 import correctionlib
 
-# with importlib.resources.path("boostedhiggs.data", "msdcorr.json") as filename:
-#     msdcorr = correctionlib.CorrectionSet.from_file(str(filename))
+with importlib.resources.path("boostedhiggs.data", "msdcorr.json") as filename:
+    msdcorr = correctionlib.CorrectionSet.from_file(str(filename))
 
 
 def corrected_msoftdrop(fatjets):
