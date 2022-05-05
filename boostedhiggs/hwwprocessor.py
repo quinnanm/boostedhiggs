@@ -17,6 +17,10 @@ from coffea import processor
 from coffea.nanoevents.methods import candidate, vector
 from coffea.analysis_tools import Weights, PackedSelection
 from boostedhiggs.utils import match_HWW, getParticles
+from boostedhiggs.corrections import (
+    corrected_msoftdrop,
+    add_lepton_weight,
+)
 from boostedhiggs.btag import btagWPs
 from boostedhiggs.btag import BTagCorrector
 
@@ -201,7 +205,7 @@ class HwwProcessor(processor.ProcessorABC):
         n_loose_muons = ak.sum(loose_muons, axis=1)
 
         good_muons = (
-            (events.Muon.pt > 28)
+            (events.Muon.pt > 30)
             & (np.abs(events.Muon.eta) < 2.4)
             & (np.abs(events.Muon.dz) < 0.1)
             & (np.abs(events.Muon.dxy) < 0.05)
@@ -214,6 +218,7 @@ class HwwProcessor(processor.ProcessorABC):
         loose_electrons = (
             (((events.Electron.pt > 38) & (events.Electron.pfRelIso03_all < 0.25)) |
              (events.Electron.pt > 120))
+            & (np.abs(events.Electron.eta) < 2.4)
             & ((np.abs(events.Electron.eta) < 1.44) | (np.abs(events.Electron.eta) > 1.57))
             & (events.Electron.cutBased >= events.Electron.LOOSE)
         )
@@ -221,6 +226,7 @@ class HwwProcessor(processor.ProcessorABC):
 
         good_electrons = (
             (events.Electron.pt > 38)
+            & (np.abs(events.Electron.eta) < 2.4)
             & ((np.abs(events.Electron.eta) < 1.44) | (np.abs(events.Electron.eta) > 1.57))
             & (np.abs(events.Electron.dz) < 0.1)
             & (np.abs(events.Electron.dxy) < 0.05)
@@ -250,7 +256,8 @@ class HwwProcessor(processor.ProcessorABC):
 
         # FATJETS
         fatjets = events.FatJet
-        fatjets["qcdrho"] = 2 * np.log(fatjets.msoftdrop / fatjets.pt)
+        fatjets['msdcorr'] = corrected_msoftdrop(fatjets)
+        fatjets["qcdrho"] = 2 * np.log(fatjets.msdcorr / fatjets.pt)
 
         good_fatjets = (
             (fatjets.pt > 200)
@@ -380,7 +387,7 @@ class HwwProcessor(processor.ProcessorABC):
         )
         self.add_selection(
             name='fatjetSoftdrop',
-            sel=candidatefj_had.msoftdrop > 30,
+            sel=candidatefj_had.msdcorr > 30,
             channel=['had']
         )
         self.add_selection(
@@ -403,7 +410,7 @@ class HwwProcessor(processor.ProcessorABC):
         variables = {
             "lep": {
                 "fj_pt": candidatefj_lep.pt,
-                "fj_msoftdrop": candidatefj_lep.msoftdrop,
+                "fj_msoftdrop": candidatefj_lep.msdcorr,
                 "fj_bjets_ophem": (ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
                 "lep_pt": candidatelep.pt,
                 "lep_isolation": lep_reliso,
@@ -415,11 +422,11 @@ class HwwProcessor(processor.ProcessorABC):
             },
             "had": {
                 "fj_pt": candidatefj_had.pt,
-                "fj_msoftdrop": candidatefj_had.msoftdrop,
+                "fj_msoftdrop": candidatefj_had.msdcorr,
                 "fj_bjets_ophem": ak.max(bjets_away_candidatefj_had.btagDeepFlavB, axis=1),
                 "fj_pnh4q": candidatefj_had.particleNet_H4qvsQCD,
                 "fj_sl_pt":  secondfj.pt,
-                "fj_sl_msoftdrop": secondfj.msoftdrop,
+                "fj_sl_msoftdrop": secondfj.msdcorr,
                 "fj_sl_pnh4q": secondfj.particleNet_H4qvsQCD,
             },
             "common": {
@@ -430,7 +437,6 @@ class HwwProcessor(processor.ProcessorABC):
 
         # gen matching
         if (('HToWW' or 'HWW') in dataset) and isMC:
-            print('here')
             match_HWW_had = match_HWW(events.GenPart, candidatefj_had)
             match_HWW_lep = match_HWW(events.GenPart, candidatefj_lep)
 
@@ -452,40 +458,73 @@ class HwwProcessor(processor.ProcessorABC):
             variables["lep"]["cut_trigger_noniso"] = trigger_noiso[ch]
             variables["had"]["cut_trigger"] = trigger_noiso[ch]
 
-        # weights
-        # TODO:
-        # - pileup weight
-        # - L1 prefiring weight for 2016/2017
-        # - btag weights
-        # - electron,muon,ht trigger scale factors
-        # - lepton ID scale factors
-        # - lepton isolation scale factors
-        # - JMS scale factor
-        # - JMR scale factor
-        # - EWK NLO scale factors for DY(ll)
-        # - EWK and QCD scale factors for W/Z(qq)
-        # - lhe scale weights for signal
-        # - lhe pdf weights for signal
-        # - top pt reweighting for top
-        # - psweights for signal
+        """
+        Weights
+        ------
+        - Gen weight (DONE)
+        - Pileup weight (Farouk)
+        - L1 prefiring weight for 2016/2017 (DONE)
+        - B-tagging efficiency weights (Cristina) 
+        - Electron trigger scale factors (Cristina)
+        - Muon trigger scale factors (DONE)
+        - HT trigger scale factors 
+        - Electron ID scale factors and Reco scale factors (DONE)
+        - Muon ID scale factors (DONE)
+        - Muon Isolation scale factors (DONE)
+        - Electron Isolation scale factors
+
+        - Jet Mass Scale (JMS) scale factor
+        - Jet Mass Resolution (JMR) scale factor
+        - EWK NLO scale factors for DY(ll)
+        - EWK and QCD scale factors for W/Z(qq)
+        - Top pt reweighting for top
+        - LHE scale weights for signal
+        - LHE pdf weights for signal
+        - PSweights for signal
+        - ParticleNet tagger efficiency
+
+        Up and Down Variations (systematics included as a new variable)
+        ----
+        - Pileup weight Up/Down 
+        - L1 prefiring weight Up/Down (DONE)
+        - B-tagging efficiency Up/Down 
+        - Trigger Up/Down
+        - Lepton ID Up/Down
+        - Lepton Isolation Up/Down
+        - JMS Up/Down
+        - JMR Up/Down
+        - ParticleNet tagger Up/Down
+        
+        Up and Down Variations (systematics included as a new output file)
+        ----
+        - Jet Energy Scale (JES)
+        - Jet Energy Resolution (JER)
+        - MET unclustered up/down
+        """
         if isMC:
             weights = Weights(nevents, storeIndividual=True)
             weights.add('genweight', events.genWeight)
+            if self._year in ("2016", "2017"):
+                weights.add("L1Prefiring", events.L1PreFiringWeight.Nom, events.L1PreFiringWeight.Up, events.L1PreFiringWeight.Dn)
+            add_lepton_weight(weights, candidatelep, self._year+self._yearmod, "muon")
+            add_lepton_weight(weights, candidatelep, self._year+self._yearmod, "electron")
+
             # self.btagCorr.addBtagWeight(bjets_away_lepfj, weights)
             # self.btagCorr.addBtagWeight(bjets_away_candidatefj_had, weights)
+
+            # store the final weight
             variables["common"]["weight"] = weights.weight()
 
-        # systematics
-        # - trigger up/down (variable)
-        # - btag weights up/down (variable)
-        # - l1 prefiring up/down (variable)
-        # - pu up/down (variable)
-        # - JES up/down systematics (new output files)
-        # - JER up/down systematics (new output files)
-        # - MET unclustered up/down (new output files)
-        # - JMS (variable)
-        # - JMR (variable)
-        # - tagger SF (variable)
+            # store the individual weights (for now)
+            for key in weights._weights.keys():
+                if "muon" in key or "electron" in key:
+                    variables["lep"][f"weight_{key}"] = weights.partial_weight([key])
+                else:
+                    variables["common"][f"weight_{key}"] = weights.partial_weight([key])
+
+            # NOTE: to add variations:
+            # for var in weights.variations:
+            #     variables["common"][f"weight_{key}"] = weights.weight(key)
 
         # initialize pandas dataframe
         output = {}
