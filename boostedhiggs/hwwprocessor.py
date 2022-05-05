@@ -20,6 +20,7 @@ from boostedhiggs.utils import match_HWW, getParticles
 from boostedhiggs.corrections import (
     corrected_msoftdrop,
     add_lepton_weight,
+    add_pileup_weight,
 )
 from boostedhiggs.btag import btagWPs
 from boostedhiggs.btag import BTagCorrector
