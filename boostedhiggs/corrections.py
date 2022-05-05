@@ -301,11 +301,8 @@ def add_pileup_weight(weights, year, mod, nPU):
 
     values = {}
 
-    print('1', year_to_corr[year])
-    print('nPU', nPU)
-    print('2', cset[year_to_corr[year]])
-
     values["nominal"] = cset[year_to_corr[year]].evaluate(nPU, "nominal")
+    print('after')
     values["up"] = cset[year_to_corr[year]].evaluate(nPU, "up")
     values["down"] = cset[year_to_corr[year]].evaluate(nPU, "down")
 
