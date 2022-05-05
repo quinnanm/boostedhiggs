@@ -68,7 +68,10 @@ def main(args):
     # define processor
     if args.processor == 'hww':
         from boostedhiggs.hwwprocessor import HwwProcessor
-        p = HwwProcessor(year=args.year, channels=channels, output_location='./outfiles' + job_name)
+        if 'APV' in args.year:
+            p = HwwProcessor(year=args.year, yearmod='APV', channels=channels, output_location='./outfiles' + job_name)
+        else:
+            p = HwwProcessor(year=args.year, channels=channels, output_location='./outfiles' + job_name)
 
     tic = time.time()
     if args.executor == "dask":
