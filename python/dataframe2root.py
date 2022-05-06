@@ -23,7 +23,7 @@ args = parser.parse_args()
 if __name__ == "__main__":
     """
     e.g. run as:
-    python -u dataframe2root.py --ch='had' --proc='QCD' --dir='Apr20_2016'
+    python -u dataframe2root.py --dir='Apr20_2016' --ch='had' --proc='QCD'
     """
 
     year = args.dir[-4:]
