@@ -29,11 +29,11 @@ def loadJson(samplesjson="samples_pfnano.json", year='2017', pfnano=True):
                 with open(f"fileset/pfnanoindex_2017.json", 'r') as f:
                     files = json.load(f)
                     for key, flist in files['2017']['HWWPrivate'].items():
-                        if "GluGluHToWW" in key:
+                        if key in sample:
                             fileset[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist]
                     if '2016' in year:
                         for key, flist in files['2017']['HWW'].items():
-                            if "GluGluHToWW" in key:
+                            if key in sample:
                                 fileset[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist]
                 break
 
