@@ -12,11 +12,11 @@ import pyarrow.parquet as pq
 pd.options.mode.chained_assignment = None  # default='warn'
 
 parser = argparse.ArgumentParser(description='converting pandas dataframe to rootfile ')
-parser.add_argument("-p", "--proc", dest="proc", default='parquet')  # specify file type like QCD
-parser.add_argument("-t", "--treename", dest="treename", default='Events')
-parser.add_argument("-d", "--data", dest="isdata", default='False')
-parser.add_argument("-ch", "--ch", dest="ch", default='had')  # specify file type like QCD
-parser.add_argument("-dir", "--dir", dest="dir", default='Apr20_2016')  # specify file type like QCD
+parser.add_argument("-p",   "--proc",     dest="proc", default='parquet')  # specify file type like QCD
+parser.add_argument("-t",   "--treename", dest="treename", default='Events')
+parser.add_argument("-d",   "--data", dest="isdata", default='False')
+parser.add_argument("-ch",  "--ch",   dest="ch", default='had')
+parser.add_argument("-dir", "--dir",  dest="dir", default='Apr20_2016')
 args = parser.parse_args()
 
 
@@ -38,7 +38,7 @@ if __name__ == "__main__":
     if not os.path.exists(outdir):
         os.makedirs(outdir)
 
-    print(f'processing {ch} channel')
+    print(f'processing {args.ch} channel')
     for subdir, dirs, files in os.walk(indir):
         for file in files:
             # load files
