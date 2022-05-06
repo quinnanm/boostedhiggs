@@ -13,48 +13,60 @@ pd.options.mode.chained_assignment = None  # default='warn'
 
 parser = argparse.ArgumentParser(description='converting pandas dataframe to rootfile ')
 parser.add_argument("-p", "--proc", dest="proc", default='parquet')  # specify file type like QCD
-parser.add_argument("-y", "--year", dest="year", default='2016')
 parser.add_argument("-t", "--treename", dest="treename", default='Events')
 parser.add_argument("-d", "--data", dest="isdata", default='False')
+parser.add_argument("-ch", "--ch", dest="ch", default='had')  # specify file type like QCD
+parser.add_argument("-dir", "--dir", dest="dir", default='Apr20_2016')  # specify file type like QCD
 args = parser.parse_args()
 
-indir = '/eos/uscms/store/user/fmokhtar/boostedhiggs/Apr4_' + args.year
-filetype = '.parquet'
-outdir = './rootfiles/'
-print(args.proc + ' must be in file')
 
-# make directory to hold rootfiles
-if not os.path.exists('./rootfiles'):
-    os.makedirs('./rootfiles')
+if __name__ == "__main__":
+    """
+    e.g. run as:
+    python -u dataframe2root.py --ch='had' --proc='QCD' --dir='Apr20_2016'
+    """
 
-for subdir, dirs, files in os.walk(indir):
-    for file in files:
-        # load files
-        if ('had.parquet' in file) and (args.proc in subdir):
-            f = subdir + '/' + file
-            # f=f.replace("/eos/uscms/","root://cmseos.fnal.gov//")
-            outf = f
-            print('prepping input file', f, '...')
-            outname = outf[outf.rfind(args.year + '/') + 5:]
-            outname = outdir + outname.strip('.' + filetype) + '.root'
-            outname = outname.replace('/outfiles/', '_')
+    year = args.dir[-4:]
+    indir = '/eos/uscms/store/user/fmokhtar/boostedhiggs/' + args.dir
+    filetype = '.parquet'
+    outdir = './rootfiles/' + args.ch + '/'
+    print(args.proc + ' must be in file')
 
-            # load parquet into dataframe
-            print('loading dataframe...')
-            table = pq.read_table(f)
-            data = table.to_pandas()
-            print('# input events:', len(data))
-            if len(data) == 0:
-                print('no skimmed events. skipping')
-                continue
+    # make directory to hold rootfiles
+    if not os.path.exists('./rootfiles'):
+        os.makedirs('./rootfiles')
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
 
-            # here is where you can add branches to the tree, skim the selection to include fewer events, etc
+    print(f'processing {ch} channel')
+    for subdir, dirs, files in os.walk(indir):
+        for file in files:
+            # load files
+            if (f'{args.ch}.parquet' in file) and (args.proc in subdir):
+                f = subdir + '/' + file
+                # f=f.replace("/eos/uscms/","root://cmseos.fnal.gov//")
+                outf = f
+                print('prepping input file', f, '...')
+                outname = outf[outf.rfind(year + '/') + 5:]
+                outname = outdir + outname.strip('.' + filetype) + '.root'
+                outname = outname.replace('/outfiles/', '_')
 
-            # fill dataframe to rootfile
-            # array2root(data.to_records(index=False), filename=outname, treename=args.treename, mode='RECREATE') #dont use, requires root
-            with uproot.recreate(outname) as file:
-                file[args.treename] = data
+                # load parquet into dataframe
+                print('loading dataframe...')
+                table = pq.read_table(f)
+                data = table.to_pandas()
+                print('# input events:', len(data))
+                if len(data) == 0:
+                    print('no skimmed events. skipping')
+                    continue
 
-            print('Wrote rootfile ', outname)
+                # here is where you can add branches to the tree, skim the selection to include fewer events, etc
 
-            # you can further do hadd name_merged.root files*.root to merge the files per sample
+                # fill dataframe to rootfile
+                # array2root(data.to_records(index=False), filename=outname, treename=args.treename, mode='RECREATE') #dont use, requires root
+                with uproot.recreate(outname) as file:
+                    file[args.treename] = data
+
+                print('Wrote rootfile ', outname)
+
+                # you can further do hadd name_merged.root files*.root to merge the files per sample
