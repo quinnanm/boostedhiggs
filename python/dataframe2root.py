@@ -67,7 +67,7 @@ if __name__ == "__main__":
 
                 # fill dataframe to rootfile
                 # array2root(data.to_records(index=False), filename=outname, treename=args.treename, mode='RECREATE') #dont use, requires root
-                with uproot.recreate(outdir + outname) as file:
+                with uproot.recreate(outname) as file:
                     file[args.treename] = data
 
                 print('Wrote rootfile ', outname)
