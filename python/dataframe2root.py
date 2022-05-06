@@ -63,6 +63,7 @@ if __name__ == "__main__":
                     print('no skimmed events. skipping')
                     continue
 
+                print(data.keys())
                 # here is where you can add branches to the tree, skim the selection to include fewer events, etc
 
                 # fill dataframe to rootfile
