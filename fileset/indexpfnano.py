@@ -19,6 +19,11 @@ def get_subfolders(parent):
 	return subfolders
 
 folders_to_index = [
+        "/store/user/lpcpfnano/jekrupa/v2_2/2016APV/TTbar",
+        "/store/user/lpcpfnano/jekrupa/v2_2/2016/TTbar",
+        "/store/user/lpcpfnano/jekrupa/v2_2/2017/TTbar",
+        "/store/user/lpcpfnano/emoreno/v2_2/2018/TTbar",
+
 	"/store/user/lpcpfnano/dryu/v2_2_1/2016/SingleMu2016",
 	"/store/user/lpcpfnano/dryu/v2_2_1/2017/SingleMu2017",
 	"/store/user/lpcpfnano/dryu/v2_2/2018/SingleMu2018",
@@ -38,11 +43,6 @@ folders_to_index = [
 	"/store/user/lpcpfnano/drankin/v2_2/2016/EGamma2016",
 	"/store/user/lpcpfnano/drankin/v2_2/2017/EGamma2017",
 	"/store/user/lpcpfnano/drankin/v2_2/2018/EGamma2018",
-
-	"/store/user/lpcpfnano/jekrupa/v2_2/2016APV/TTbar",
-	"/store/user/lpcpfnano/jekrupa/v2_2/2016/TTbar",
-	"/store/user/lpcpfnano/jekrupa/v2_2/2017/TTbar",
-	"/store/user/lpcpfnano/emoreno/v2_2/2018/TTbar",
 
 	"/store/user/lpcpfnano/drankin/v2_2/2016/TTbar",
 	"/store/user/lpcpfnano/drankin/v2_2/2016APV/TTbar",
@@ -120,8 +120,11 @@ folders_to_index = [
 # .......................f1........................|.......................f2..............................|..........f3.........|.....f4......|.f5.|....
 # /store/user/lpcpfnano/jekrupa/v2_2/2017/WJetsToQQ/WJetsToQQ_HT-800toInf_TuneCP5_13TeV-madgraphMLM-pythia8/WJetsToQQ_HT-800toInf/211108_171840/0000/*root
 
+index_APV = {}
+
 for pyear in ["2016","2016APV","2017","2018"]:
         index = {}
+        index[pyear] = {}
         for f1 in folders_to_index:
                 f1 = f1.rstrip("/")
                 print(f1)
@@ -129,8 +132,6 @@ for pyear in ["2016","2016APV","2017","2018"]:
                 sample_short = f1.split("/")[-1]
                 if year!= pyear:
                         continue
-                if not year in index:
-                        index[year] = {}
                 if not sample_short in index[year]:
                         index[year][sample_short] = {}
 
@@ -143,8 +144,6 @@ for pyear in ["2016","2016APV","2017","2018"]:
                         for f3 in f2_subfolders:
                                 print(f"\t\t/{f3}")
                                 subsample_short = f3.replace("/", "")
-                                if not subsample_short in index[year][sample_short]:
-                                        index[year][sample_short][subsample_short] = []
                                 f3_subfolders = get_subfolders(f"{f1}/{f2}/{f3}")
                                 if len(f3_subfolders) >= 2:
                                         print(f"WARNING : Found multiple timestamps for {prefix}/{f1}/{f2}/{f3}")
@@ -155,7 +154,26 @@ for pyear in ["2016","2016APV","2017","2018"]:
                                         for f5 in f4_subfolders: # 0000, 0001, ...
                                                 f5_children = get_children((f"{f1}/{f2}/{f3}/{f4}/{f5}"))
                                                 root_files = [f"{f1}/{f2}/{f3}/{f4}/{f5}/{x}".replace("//", "/") for x in f5_children if x[-5:] == ".root"]
-                                                index[year][sample_short][subsample_short].extend(root_files)
+
+                                                if year=="2016" and "HIPM" in subsample_short:
+                                                        if not sample_short in index_APV:
+                                                                index_APV[sample_short] = {}
+                                                        if not subsample_short in index_APV[sample_short]:
+                                                                index_APV[sample_short][subsample_short] = []
+                                                        index_APV[sample_short][subsample_short].extend(root_files)
+                                                else:
+                                                        if not subsample_short in index[year][sample_short]:
+                                                                index[year][sample_short][subsample_short] = []
+                                                        index[year][sample_short][subsample_short].extend(root_files)
+
+        if pyear=="2016APV":
+                for sample_short in index_APV.keys():
+                        for subsample_short in index_APV[sample_short].keys():
+                                if not sample_short in index[pyear]:
+                                        index[pyear][sample_short] = {}
+                                if  not subsample_short in index[pyear][sample_short]:
+                                        index[pyear][sample_short][subsample_short] = []
+                                index[pyear][sample_short][subsample_short] = index_APV[sample_short][subsample_short]
 
         with open(f"pfnanoindex_{pyear}.json", "w") as f:
                 json.dump(index, f, sort_keys=True, indent=2)
