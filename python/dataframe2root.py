@@ -70,7 +70,7 @@ if __name__ == "__main__":
                 # array2root(data.to_records(index=False), filename=outname, treename=args.treename, mode='RECREATE') #dont use, requires root
                 with uproot.recreate(outname) as file:
                     if args.ch != 'had':
-                        file[args.treename] = data['fj_pt']
+                        file[args.treename] = data['weight']
                     else:
                         file[args.treename] = data['fj0_pt']
 
