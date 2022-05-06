@@ -70,9 +70,9 @@ if __name__ == "__main__":
                 # array2root(data.to_records(index=False), filename=outname, treename=args.treename, mode='RECREATE') #dont use, requires root
                 with uproot.recreate(outname) as file:
                     if args.ch != 'had':
-                        file[args.treename] = data[data['fj_pt']]
+                        file[args.treename] = pd.DataFrame(data['fj_pt'])
                     else:
-                        file[args.treename] = data[data['fj0_pt']]
+                        file[args.treename] = pd.DataFrame(data['fj0_pt'])
 
                 print('Wrote rootfile ', outname)
 
