@@ -65,13 +65,13 @@ if __name__ == "__main__":
 
                 print(data.keys())
                 # here is where you can add branches to the tree, skim the selection to include fewer events, etc
-                print(data['fj_pt'])
+
                 # fill dataframe to rootfile
                 # array2root(data.to_records(index=False), filename=outname, treename=args.treename, mode='RECREATE') #dont use, requires root
                 with uproot.recreate(outname) as file:
-                    try:
+                    if args.ch != 'had':
                         file[args.treename] = data['fj_pt']
-                    except:
+                    else:
                         file[args.treename] = data['fj0_pt']
 
                 print('Wrote rootfile ', outname)
