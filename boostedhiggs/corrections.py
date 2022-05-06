@@ -119,8 +119,10 @@ def get_pog_json(obj, year):
     except:
         print(f'No json for {obj}')
     year = get_UL_year(year)
-    return f"{pog_correction_path}POG/{pog_json[0]}/{year}/{pog_json[1]}"
-
+    #return f"{pog_correction_path}POG/{pog_json[0]}/{year}/{pog_json[1]}"
+    # os.system(f"cp {pog_correction_path}POG/{pog_json[0]}/{year}/{pog_json[1]} boostedhiggs/data/POG_{pog_json[0]}_{year}_{pog_json[1]}")
+    with importlib.resources.path("boostedhiggs.data", f"POG_{pog_json[0]}_{year}_{pog_json[1]}") as filename:
+        return str(filename)
 
 """
 Lepton Scale Factors
