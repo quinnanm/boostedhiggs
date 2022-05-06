@@ -35,7 +35,6 @@ def loadJson(samplesjson="samples_pfnano.json", year='2017', pfnano=True):
                         for key, flist in files['2017']['HWW'].items():
                             if key in sample:
                                 fileset[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist]
-                break
 
     return fileset, values
 
