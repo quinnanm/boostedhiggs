@@ -153,19 +153,6 @@ Electrons:
     No SFs for RelIso?
 """
 
-# corrections not on json files.
-lepton_other_corrections = {
-    "trigger": {
-        "electron": {
-            #  note that 2016 do not exist, so taking 2017 as placeholder
-            "2016APV": "egammaEffi.txt_EGM2D_2017.root",
-            "2016": "egammaEffi.txt_EGM2D_2017.root",
-            "2017": "egammaEffi.txt_EGM2D_2017.root",
-            "2018": "egammaEffi.txt_EGM2D_2018.root",
-        },
-    },
-}
-
 lepton_corrections = {
     "trigger_iso": {
         "muon": {  # For IsoMu24 (| IsoTkMu24 )
@@ -239,18 +226,7 @@ def add_lepton_weight(weights, lepton, year, lepton_type="muon"):
             value[lepton_pt > iso_threshold] = 1.
         return value
 
-    lep_pt = np.array(ak.fill_none(lepton.pt, 0.))
-    lep_eta = np.array(ak.fill_none(lepton.eta, 0.))
-    if lepton_type == "muon":
-        lep_eta = np.abs(lep_eta)
-
-    for corr, corrDict in lepton_corrections.items():
-        if lepton_type not in corrDict.keys():
-            continue
-        if year not in corrDict[lepton_type].keys():
-            continue
-        json_map_name = corrDict[lepton_type][year]
-
+    def get_clip(lep_pt, lep_eta, lepton_type,corr=None):
         clip_pt = [0., 2000]
         clip_eta = [-2.4999, 2.4999]
         if lepton_type == "electron":
@@ -262,9 +238,22 @@ def add_lepton_weight(weights, lepton, year, lepton_type="muon"):
             clip_eta = [0., 2.3999]
             if corr == "trigger_noniso":
                 clip_pt = [52., 1000.]
-
         lepton_pt = np.clip(lep_pt, clip_pt[0], clip_pt[1])
         lepton_eta = np.clip(lep_eta, clip_eta[0], clip_eta[1])
+        return lepton_pt,lepton_eta
+
+    lep_pt = np.array(ak.fill_none(lepton.pt, 0.))
+    lep_eta = np.array(ak.fill_none(lepton.eta, 0.))
+    if lepton_type=="muon": lep_eta = np.abs(lep_eta)
+
+    for corr,corrDict in lepton_corrections.items():
+        if lepton_type not in corrDict.keys():
+            continue
+        if year not in corrDict[lepton_type].keys():
+            continue
+        json_map_name = corrDict[lepton_type][year]
+
+        lepton_pt,lepton_eta = get_clip(lep_pt, lep_eta, lepton_type, corr)
 
         values = {}
         if lepton_type == "muon":
@@ -285,6 +274,17 @@ def add_lepton_weight(weights, lepton, year, lepton_type="muon"):
 
         # add weights (for now only the nominal weight)
         weights.add(f"{corr}_{lepton_type}", values["nominal"], values["up"], values["down"])
+        
+    # quick hack to add electron trigger SFs
+    if lepton_type=="electron":
+        corr="trigger"
+        with importlib.resources.path("boostedhiggs.data", f"electron_trigger_{ul_year}_UL.json") as filename:
+            cset = correctionlib.CorrectionSet.from_file(str(filename))
+            lepton_pt,lepton_eta = get_clip(lep_pt, lep_eta, lepton_type, corr)
+            # stil need to add uncertanties..
+            values["nominal"] = cset["UL-Electron-Trigger-SF"].evaluate( lepton_eta, lepton_pt )   
+            #print(values["nominal"][lep_pt>30])
+            weights.add(f"{corr}_{lepton_type}", values["nominal"])
 
 
 def add_pileup_weight(weights, year, mod, nPU):
