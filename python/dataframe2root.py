@@ -29,12 +29,15 @@ if __name__ == "__main__":
     year = args.dir[-4:]
     indir = '/eos/uscms/store/user/fmokhtar/boostedhiggs/' + args.dir
     filetype = '.parquet'
-    outdir = './rootfiles/' + args.ch + '/'
-    print(args.proc + ' must be in file')
 
     # make directory to hold rootfiles
-    if not os.path.exists('./rootfiles'):
-        os.makedirs('./rootfiles')
+    outdir = './rootfiles/'
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+    outdir = './rootfiles/' + args.proc + '/'
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+    outdir = './rootfiles/' + args.proc + '/' + args.ch + '/'
     if not os.path.exists(outdir):
         os.makedirs(outdir)
 
