@@ -2,7 +2,7 @@
 
 jobid=$1
 
-python3 -m pip install correctionlib==2.0.0rc6
+python3 -m pip install correctionlib==2.1.0
 pip install --upgrade numpy==1.21.5
 
 # make dir for output (not really needed cz python script will make it)
