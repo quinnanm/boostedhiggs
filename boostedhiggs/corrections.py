@@ -9,7 +9,6 @@ import correctionlib
 with importlib.resources.path("boostedhiggs.data", "msdcorr.json") as filename:
     msdcorr = correctionlib.CorrectionSet.from_file(str(filename))
 
-
 def corrected_msoftdrop(fatjets):
     msdraw = np.sqrt(
         np.maximum(
@@ -30,18 +29,87 @@ def corrected_msoftdrop(fatjets):
 
     return corrected_mass
 
+with importlib.resources.path("boostedhiggs.data", "ULvjets_corrections.json") as filename:
+    vjets_kfactors = correctionlib.CorrectionSet.from_file(str(filename))
+
+def add_VJets_kFactors(weights, genpart, dataset):
+    """Revised version of add_VJets_NLOkFactor, for both NLO EW and ~NNLO QCD"""
+    def get_vpt(check_offshell=False):
+        """Only the leptonic samples have no resonance in the decay tree, and only
+        when M is beyond the configured Breit-Wigner cutoff (usually 15*width)
+        """
+        boson = ak.firsts(genpart[
+            ((genpart.pdgId == 23)|(abs(genpart.pdgId) == 24))
+            & genpart.hasFlags(["fromHardProcess", "isLastCopy"])
+        ])
+        if check_offshell:
+            offshell = genpart[
+                genpart.hasFlags(["fromHardProcess", "isLastCopy"])
+                & ak.is_none(boson)
+                & (abs(genpart.pdgId) >= 11) & (abs(genpart.pdgId) <= 16)
+            ].sum()
+            return ak.where(ak.is_none(boson.pt), offshell.pt, boson.pt)
+        return np.array(ak.fill_none(boson.pt, 0.))
+
+    common_systs = [
+        "d1K_NLO",
+        "d2K_NLO",
+        "d3K_NLO",
+        "d1kappa_EW",
+    ]
+    zsysts = common_systs + [
+        "Z_d2kappa_EW",
+        "Z_d3kappa_EW",
+    ]
+    wsysts = common_systs + [
+        "W_d2kappa_EW",
+        "W_d3kappa_EW",
+    ]
+
+    def add_systs(systlist, qcdcorr, ewkcorr, vpt):
+        ewknom = ewkcorr.evaluate("nominal", vpt)
+        weights.add("vjets_nominal", qcdcorr * ewknom if qcdcorr is not None else ewknom)
+        ones = np.ones_like(vpt)
+        for syst in systlist:
+            weights.add(syst, ones, ewkcorr.evaluate(syst + "_up", vpt) / ewknom, ewkcorr.evaluate(syst + "_down", vpt) / ewknom)
+
+    if "ZJetsToQQ_HT" in dataset or "DYJetsToLL" in dataset:
+        vpt = get_vpt()
+        qcdcorr = vjets_kfactors["ULZ_MLMtoFXFX"].evaluate(vpt)
+        ewkcorr = vjets_kfactors["Z_FixedOrderComponent"]
+        add_systs(zsysts, qcdcorr, ewkcorr, vpt)
+    elif "WJetsToQQ_HT" in dataset or "WJetsToLNu" in dataset:
+        vpt = get_vpt()
+        qcdcorr = vjets_kfactors["ULW_MLMtoFXFX"].evaluate(vpt)
+        ewkcorr = vjets_kfactors["W_FixedOrderComponent"]
+        add_systs(wsysts, qcdcorr, ewkcorr, vpt)
+
+with importlib.resources.path("boostedhiggs.data", "fatjet_triggerSF_Hbb.json") as filename:
+    jet_triggerSF = correctionlib.CorrectionSet.from_file(str(filename))
+
+def add_jetTriggerSF(weights, leadingjet, year, selection):
+    def mask(w):
+        return np.where(selection.all('oneFatjet'), w, 1.)
+    jet_pt = np.array(ak.fill_none(leadingjet.pt, 0.))
+    jet_msd = np.array(ak.fill_none(leadingjet.msoftdrop, 0.))  # note: uncorrected
+    nom = mask(jet_triggerSF[f'fatjet_triggerSF{year}'].evaluate("nominal", jet_pt, jet_msd))
+    up = mask(jet_triggerSF[f'fatjet_triggerSF{year}'].evaluate("stat_up", jet_pt, jet_msd))
+    down = mask(jet_triggerSF[f'fatjet_triggerSF{year}'].evaluate("stat_dn", jet_pt, jet_msd))
+    weights.add('trigger_had', nom, up, down)
 
 def add_pdf_weight(weights, pdf_weights):
-    nom = np.ones(len(weights.weight()))
-    up = np.ones(len(weights.weight()))
-    down = np.ones(len(weights.weight()))
+    nweights = len(weights.weight())
+    nom = np.ones(nweights)
+    up = np.ones(nweights)
+    down = np.ones(nweights)
+    docstring = pdf_weights.__doc__
 
     # NNPDF31_nnlo_hessian_pdfas
     # https://lhapdfsets.web.cern.ch/current/NNPDF31_nnlo_hessian_pdfas/NNPDF31_nnlo_hessian_pdfas.info
-    if pdf_weights is not None and "306000 - 306102" in pdf_weights.__doc__:
+    if True:
         # Hessian PDF weights
         # Eq. 21 of https://arxiv.org/pdf/1510.03865v1.pdf
-        arg = pdf_weights[:, 1:-2] - np.ones((len(weights.weight()), 100))
+        arg = pdf_weights[:, 1:-2] - np.ones((nweights, 100))
         summed = ak.sum(np.square(arg), axis=1)
         pdf_unc = np.sqrt((1. / 99.) * summed)
         weights.add('PDF_weight', nom, pdf_unc + nom)
@@ -61,13 +129,49 @@ def add_pdf_weight(weights, pdf_weights):
         weights.add('PDF_weight', nom, up, down)
         weights.add('PDFaS_weight', nom, up, down)
 
+# 7-point scale variations
+def add_scalevar_7pt(weights,var_weights):
+    docstring = var_weights.__doc__
+    nweights = len(weights.weight())
+
+    nom   = np.ones(nweights)
+    up    = np.ones(nweights)
+    down  = np.ones(nweights)
+ 
+    if len(var_weights) > 0:
+        if len(var_weights[0]) == 9: 
+            up = np.maximum.reduce([var_weights[:,0],var_weights[:,1],var_weights[:,3],var_weights[:,5],var_weights[:,7],var_weights[:,8]])
+            down = np.minimum.reduce([var_weights[:,0],var_weights[:,1],var_weights[:,3],var_weights[:,5],var_weights[:,7],var_weights[:,8]])
+        elif len(var_weights[0]) > 1:
+            print("Scale variation vector has length ", len(var_weights[0]))
+    weights.add('scalevar_7pt', nom, up, down)
+
+# 3-point scale variations
+def add_scalevar_3pt(weights,var_weights):
+    docstring = var_weights.__doc__
+    
+    nweights = len(weights.weight())
+
+    nom   = np.ones(nweights)
+    up    = np.ones(nweights)
+    down  = np.ones(nweights)
+
+    if len(var_weights) > 0:
+        if len(var_weights[0]) == 9:
+            up = np.maximum(var_weights[:,0], var_weights[:,8])
+            down = np.minimum(var_weights[:,0], var_weights[:,8])
+        elif len(var_weights[0]) > 1:
+            print("Scale variation vector has length ", len(var_weights[0]))
+
+    weights.add('scalevar_3pt', nom, up, down)
 
 def add_ps_weight(weights, ps_weights):
-    nom = np.ones(len(weights.weight()))
-    up_isr = np.ones(len(weights.weight()))
-    down_isr = np.ones(len(weights.weight()))
-    up_fsr = np.ones(len(weights.weight()))
-    down_fsr = np.ones(len(weights.weight()))
+    nweights = len(weights.weight())
+    nom = np.ones(nweights)
+    up_isr = np.ones(nweights)
+    down_isr = np.ones(nweights)
+    up_fsr = np.ones(nweights)
+    down_fsr = np.ones(nweights)
 
     if ps_weights is not None:
         if len(ps_weights[0]) == 4:
@@ -80,13 +184,10 @@ def add_ps_weight(weights, ps_weights):
     weights.add('UEPS_ISR', nom, up_isr, down_isr)
     weights.add('UEPS_FSR', nom, up_fsr, down_fsr)
 
-
 def build_lumimask(filename):
     from coffea.lumi_tools import LumiMask
     with importlib.resources.path("boostedhiggs.data", filename) as path:
         return LumiMask(path)
-
-
 lumi_masks = {
     "2016": build_lumimask("Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt"),
     "2017": build_lumimask("Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt"),
@@ -119,10 +220,13 @@ def get_pog_json(obj, year):
     except:
         print(f'No json for {obj}')
     year = get_UL_year(year)
-    #return f"{pog_correction_path}POG/{pog_json[0]}/{year}/{pog_json[1]}"
+    return f"{pog_correction_path}POG/{pog_json[0]}/{year}/{pog_json[1]}"
     # os.system(f"cp {pog_correction_path}POG/{pog_json[0]}/{year}/{pog_json[1]} boostedhiggs/data/POG_{pog_json[0]}_{year}_{pog_json[1]}")
-    with importlib.resources.path("boostedhiggs.data", f"POG_{pog_json[0]}_{year}_{pog_json[1]}") as filename:
-        return str(filename)
+    # fname = ""
+    # with importlib.resources.path("boostedhiggs.data", f"POG_{pog_json[0]}_{year}_{pog_json[1]}") as filename:
+    #     fname = str(filename)
+    # print(fname)
+    # return fname
 
 """
 Lepton Scale Factors
