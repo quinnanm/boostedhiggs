@@ -189,8 +189,8 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
 
         # data
         data = None
-        print(data_label)
-        print(h)
+        #print(data_label)
+        #print(h)
         data = h[{"samples": data_label}]
 
         # signal
@@ -266,8 +266,11 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
                 yerr = ratio_uncertainty(data.values(), tot.values(), 'poisson')
                 rax.stairs(1+yerr[1], edges=tot.axes[0].edges, baseline=1-yerr[0], **errps)
 
-                hep.histplot(data.values()/tot.values(), tot.axes[0].edges, yerr=np.sqrt(data.values())/tot.values(),
-                             ax=rax, histtype='errorbar', color='k', capsize=4)
+                if ak.all(tot.values())>0:
+                    hep.histplot(data.values()/tot.values(), tot.axes[0].edges, yerr=np.sqrt(data.values())/tot.values(),
+                                 ax=rax, histtype='errorbar', color='k', capsize=4)
+                else:
+                    print(f'Warning: no all bins filled for background histogram for {var} {ch}')
                 rax.axhline(1, ls='--', color='k')
                 rax.set_ylim(0.2, 1.8)
                 # rax.set_ylim(0.7, 1.3)
