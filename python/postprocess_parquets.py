@@ -32,7 +32,7 @@ import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
-def append_correct_weights(idir, samples, year, channels):
+def append_correct_weights(idir, samples, year, channels, reprocess=False):
     """
     Updates the processed parquet daraftames by appending the correct scaling factor/weight per event as new column 'tot_weight'
 
@@ -98,9 +98,9 @@ def append_correct_weights(idir, samples, year, channels):
                 if len(data) == 0:
                     continue
 
-                if 'tot_weight' in data.columns:
-                    print('Warning: File has already been reprocessed! - re-writing tot weight')
-                    #continue
+                if 'tot_weight' in data.columns and not reprocess:
+                    print('Warning: File has already been reprocessed! Add --reprocess to arguments if you want to re-writing tot weight.')
+                    continue
 
                 if not is_data:
                     event_weight = data['weight'] * data[f'weight_{ch}']
@@ -123,7 +123,7 @@ def main(args):
     # build samples
     samples = os.listdir(args.idir)
 
-    append_correct_weights(args.idir, samples, args.year, channels)
+    append_correct_weights(args.idir, samples, args.year, channels, args.reprocess)
 
 
 if __name__ == "__main__":
@@ -133,6 +133,7 @@ if __name__ == "__main__":
     parser.add_argument('--year',            dest='year',          choices=["2016APV","2016","2017","2018"],         help="year", required=True)
     parser.add_argument('--channels',        dest='channels',      default='ele,mu,had',                             help='channels for which to plot this variable')
     parser.add_argument('--idir',            dest='idir',          default='../results/',                            help="input directory with results")
+    parser.add_argument('--reprocess',       dest='reprocess',     action='store_true',                              help="force re-processing of parquet file to include weight")
 
     args = parser.parse_args()
 
