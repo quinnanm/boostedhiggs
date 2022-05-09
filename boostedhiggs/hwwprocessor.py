@@ -447,7 +447,7 @@ class HwwProcessor(processor.ProcessorABC):
             "lep": {
                 "fj_pt": candidatefj_lep.pt,
                 "fj_msoftdrop": candidatefj_lep.msdcorr,
-                "fj_bjets_ophem": (ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
+                "fj_bjets_ophem": ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1),
                 "lep_pt": candidatelep.pt,
                 "lep_isolation": lep_reliso,
                 "lep_misolation": lep_miso,
