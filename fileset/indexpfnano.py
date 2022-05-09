@@ -84,6 +84,9 @@ folders_to_index = [
 	"/store/user/lpcpfnano/cmantill/v2_2/2017/DYJetsToLL",
 	"/store/user/lpcpfnano/cmantill/v2_2/2018/DYJetsToLL",
 
+        "/store/user/lpcpfnano/jdickins/v2_2/2016/Diboson/",
+        "/store/user/lpcpfnano/jdickins/v2_2/2016APV/Diboson/",
+        "/store/user/lpcpfnano/jdickins/v2_2/2017/Diboson/",
         "/store/user/lpcpfnano/jdickins/v2_2/2018/Diboson/",
 
         "/store/user/lpcpfnano/jdickins/v2_2/2016/ttHToBB/"
@@ -95,6 +98,11 @@ folders_to_index = [
         "/store/user/lpcpfnano/jdickins/v2_2/2016APV/VBFHToBB/",
         "/store/user/lpcpfnano/jdickins/v2_2/2017/VBFHToBB/",
         "/store/user/lpcpfnano/jdickins/v2_2/2018/VBFHToBB/",
+
+        "/eos/uscms/store/user/lpcpfnano/jdickins/v2_2/2016/GluGluHToBB/",
+        "/eos/uscms/store/user/lpcpfnano/jdickins/v2_2/2016APV/GluGluHToBB/",
+        "/eos/uscms/store/user/lpcpfnano/jdickins/v2_2/2017/GluGluHToBB/",
+        "/eos/uscms/store/user/lpcpfnano/jdickins/v2_2/2018/GluGluHToBB/",
 
 	"/store/user/lpcpfnano/cmantill/v2_2/2016/HWW",
 	"/store/user/lpcpfnano/cmantill/v2_2/2016APV/HWW",

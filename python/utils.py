@@ -45,10 +45,7 @@ def get_sum_sumgenweight(idir, year, sample):
         # load and sum the sumgenweight of each
         with open(file, 'rb') as f:
             metadata = pkl.load(f)
-        # try:  # to use 2017 signal for 2016
         sum_sumgenweight = sum_sumgenweight + metadata[sample][year]['sumgenweight']
-        # except:
-        # sum_sumgenweight = sum_sumgenweight + metadata[sample]['2017']['sumgenweight']  # TODO: remove it
 
     return sum_sumgenweight
 
@@ -87,6 +84,7 @@ color_by_sample = {
 
 add_samples = {
     'SingleElectron': 'SingleElectron',
+    'EGamma': 'EGamma',
     'SingleMuon': 'SingleMuon',
     'JetHT': 'JetHT',
     'QCD': 'QCD_Pt',
@@ -97,7 +95,12 @@ add_samples = {
     'TTbar': 'TT',
     'WJetsLNu': 'WJetsToLNu',
     'GluGluHToWWTo4q': 'GluGluHToWWTo4q',
-    'EGamma': 'EGamma',
+}
+
+label_by_ch = {
+    'ele': 'Electron',
+    'mu': 'Muon',
+    'had': 'Hadronic',
 }
 
 axis_dict = {
@@ -107,7 +110,7 @@ axis_dict = {
     'lep_fj_m': hist2.axis.Regular(20, 0, 200, name='var', label=r'Jet - Lepton mass [GeV]', overflow=True),
     'lep_fj_bjets_ophem': hist2.axis.Regular(15, 0, 0.31, name='var', label=r'btagFlavB (opphem)', overflow=True),
     'lep_fj_dr': hist2.axis.Regular(15, 0, 0.8, name='var', label=r'$\Delta R(l, Jet)$', overflow=True),
-    'mu_mvaId': hist2.axis.Regular(20, -1, 1, name='var', label='Muon MVAID', overflow=True),
+    'lep_mvaId': hist2.axis.Regular(20, -1, 1, name='var', label='Muon MVAID', overflow=True),
     'fj_pt': hist2.axis.Regular(30, 300, 1000, name='var', label=r'Jet $p_T$ [GeV]', overflow=True),
     'fj_msoftdrop': hist2.axis.Regular(30, 25, 200, name='var', label=r'Jet $m_{sd}$ [GeV]', overflow=True),
     'fj_bjets_ophem': hist2.axis.Regular(15, 0, 0.4, name='var', label=r'btagFlavB (opphem)', overflow=True),

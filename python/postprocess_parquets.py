@@ -78,7 +78,7 @@ def append_correct_weights(idir, samples, year, channels):
                 xsec = eval(str((xsec[sample])))
 
                 # Get overall weighting of events.. each event has a genweight... sumgenweight sums over events in a chunk... sum_sumgenweight sums over chunks
-                xsec_weight = (xsec * luminosity) / get_sum_sumgenweight(idir, year, sample)
+                xsec_weight = (xsec * luminosity) / get_sum_sumgenweight(idir, year.replace('APV',''), sample)
             else:
                 xsec_weight = 1
 
@@ -98,13 +98,17 @@ def append_correct_weights(idir, samples, year, channels):
                 if len(data) == 0:
                     continue
 
+                if 'tot_weight' in data.columns:
+                    print('File has already been reprocessed')
+                    continue
+
                 if not is_data:
-                    event_weight = data['weight']
+                    event_weight = data['weight'] * data[f'weight_{ch}']
                 else:
-                    data['weight'] = 1  # for data fill a weight column with ones
+                    event_weight = 1 # for data fill a weight column with ones 
 
                 # append an additional column 'tot_weight' to the parquet dataframes
-                data['tot_weight'] = xsec_weight * data['weight']
+                data['tot_weight'] = xsec_weight * event_weight
 
                 # update parquet file (this line should overwrite the stored dataframe)
                 pq.write_table(pa.Table.from_pandas(data), parquet_file)
@@ -123,10 +127,10 @@ def main(args):
 
 
 if __name__ == "__main__":
-    # e.g. python postprocess_parquets.py --channels had --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # e.g. python postprocess_parquets.py --channels had --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/ --year 2017
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--year',            dest='year',          default='2017',                                   help="year", required=True)
+    parser.add_argument('--year',            dest='year',          choices=["2016APV","2016","2017","2018"],         help="year", required=True)
     parser.add_argument('--channels',        dest='channels',      default='ele,mu,had',                             help='channels for which to plot this variable')
     parser.add_argument('--idir',            dest='idir',          default='../results/',                            help="input directory with results")
 
