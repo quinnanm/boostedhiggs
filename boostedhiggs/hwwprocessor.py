@@ -19,6 +19,8 @@ from coffea.analysis_tools import Weights, PackedSelection
 from boostedhiggs.utils import match_HWW, getParticles
 from boostedhiggs.corrections import (
     corrected_msoftdrop,
+    add_VJets_kFactors,
+    add_jetTriggerSF,
     add_lepton_weight,
     add_pileup_weight,
 )
@@ -91,8 +93,9 @@ class HwwProcessor(processor.ProcessorABC):
             with open(path, 'r') as f:
                 self._metfilters = json.load(f)[self._year]
 
+        # b-tagging corrector
         self._btagWPs = btagWPs["deepJet"][year + yearmod]
-        # self.btagCorr = BTagCorrector("M", "deepJet", year, yearmod)
+        #self._btagSF = BTagCorrector("M", "deepJet", year, yearmod)
 
         self.selections = {}
         self.cutflows = {}
@@ -253,6 +256,13 @@ class HwwProcessor(processor.ProcessorABC):
             & events.Jet.isTight
             & (events.Jet.puId > 0)
         ]
+        # reject EE noisy jets for 2017
+        if self._year == '2017':
+            goodjets = goodjets[
+                (goodjets.pt > 50) 
+                | (abs(goodjets.eta) < 2.65) 
+                | (abs(goodjets.eta) > 3.139)
+            ]
         ht = ak.sum(goodjets.pt, axis=1)
 
         # FATJETS
@@ -303,6 +313,31 @@ class HwwProcessor(processor.ProcessorABC):
         # deltaR
         lep_fj_dr = candidatefj_lep.delta_r(candidatelep_p4)
 
+        """
+        HEM issue: Hadronic calorimeter Endcaps Minus (HEM) issue.
+        The endcaps of the hadron calorimeter failed to cover the phase space at -3 < eta < -1.3 and -1.57 < phi < -0.87 during the 2018 data C and D.
+        The transverse momentum of the jets in this region is typically under-measured, this resuls in over-measured MET. It could also result on new electrons.
+        We must veto the jets and met in this region.
+        Should we veto on AK8 jets or electrons too?
+        Let's add this as a cut to check first.
+        """
+        if self._year=="2018":
+            hem_cleaning = (
+                events.run >= 319077 &
+                ak.any((
+                    (events.Jet.pt>30.) 
+                    & (events.Jet.eta > -3.2)
+                    & (events.Jet.eta < -1.3)
+                    & (events.Jet.phi > -1.57)
+                    & (events.Jet.phi < -0.87)
+                ), -1)
+                | (
+                    (met.phi > -1.62)
+                    & (met.pt < 470.)
+                    & (met.phi < -0.62)
+                )
+            )
+            
         # event selections for semi-leptonic channels
         self.add_selection(
             name='fatjetKin',
@@ -412,7 +447,7 @@ class HwwProcessor(processor.ProcessorABC):
             "lep": {
                 "fj_pt": candidatefj_lep.pt,
                 "fj_msoftdrop": candidatefj_lep.msdcorr,
-                "fj_bjets_ophem": (ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
+                "fj_bjets_ophem": ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1),
                 "lep_pt": candidatelep.pt,
                 "lep_isolation": lep_reliso,
                 "lep_misolation": lep_miso,
@@ -462,6 +497,10 @@ class HwwProcessor(processor.ProcessorABC):
             variables["lep"]["cut_trigger_noniso"] = trigger_noiso[ch]
             variables["had"]["cut_trigger"] = trigger_noiso[ch]
 
+        # let's save the hem veto as a cut for now
+        if self._year=="2018":
+            variables["common"]["hem_cleaning"] = hem_cleaning
+            
         """
         Weights
         ------
@@ -471,7 +510,7 @@ class HwwProcessor(processor.ProcessorABC):
         - B-tagging efficiency weights (Cristina) 
         - Electron trigger scale factors (DONE)
         - Muon trigger scale factors (DONE)
-        - HT trigger scale factors
+        - HT trigger scale factors (DONE-ISH - using Hbb derived ones)
         - Electron ID scale factors and Reco scale factors (DONE)
         - Muon ID scale factors (DONE)
         - Muon Isolation scale factors (DONE)
@@ -479,8 +518,8 @@ class HwwProcessor(processor.ProcessorABC):
 
         - Jet Mass Scale (JMS) scale factor
         - Jet Mass Resolution (JMR) scale factor
-        - EWK NLO scale factors for DY(ll)
-        - EWK and QCD scale factors for W/Z(qq)
+        - NLO EWK scale factors for DY(ll)/W(lnu)/W(qq)/Z(qq) (DONE)
+        - ~NNLO QCD scale factors for DY(ll)/W(lnu)/W(qq)/Z(qq) (DONE)
         - Top pt reweighting for top
         - LHE scale weights for signal
         - LHE pdf weights for signal
@@ -489,18 +528,21 @@ class HwwProcessor(processor.ProcessorABC):
 
         Up and Down Variations (systematics included as a new variable)
         ----
-        - Pileup weight Up/Down
+        - Pileup weight Up/Down (DONE)
         - L1 prefiring weight Up/Down (DONE)
         - B-tagging efficiency Up/Down
         - Electron Trigger Up/Down 
         - Muon Trigger Up/Down (DONE)
-        - HT Trigger Up/Down
+        - HT Trigger Up/Down (DONE)
         - Electron ID Up/Down (DONE)
         - Electron Isolation Up/Down
         - Muon ID Up/Down (DONE)
         - Muon Isolation Up/Down (DONE)
         - JMS Up/Down
         - JMR Up/Down
+        - LHE scale variations for signal
+        - LHE pdf weights for signal
+        - PSweights variations for signal
         - ParticleNet tagger Up/Down
 
         Up and Down Variations (systematics included as a new output file)
@@ -516,23 +558,32 @@ class HwwProcessor(processor.ProcessorABC):
                 weights.add("L1Prefiring", events.L1PreFiringWeight.Nom, events.L1PreFiringWeight.Up, events.L1PreFiringWeight.Dn)
             add_pileup_weight(weights, self._year, self._yearmod, nPU=ak.to_numpy(events.Pileup.nPU))
 
+            add_jetTriggerSF(weights, candidatefj_had, self._year, self.selections["had"])
             add_lepton_weight(weights, candidatelep, self._year + self._yearmod, "muon")
             add_lepton_weight(weights, candidatelep, self._year + self._yearmod, "electron")
 
-            # self.btagCorr.addBtagWeight(bjets_away_lepfj, weights)
-            # self.btagCorr.addBtagWeight(bjets_away_candidatefj_had, weights)
+            # self._btagSF.addBtagWeight(bjets_away_lepfj, weights, "lep")
+            # self._btagSF.addBtagWeight(bjets_away_candidatefj_had, weights, "had")
 
-            # store the final common weight
-            variables["common"]["weight"] = weights.partial_weight(["genweight","L1Prefiring"])
+            add_VJets_kFactors(weights, events.GenPart, dataset)
+
+            # store the final common weight 
+            variables["common"]["weight"] = weights.partial_weight(["genweight","L1Prefiring","pileup"])
 
             weights_per_ch = {"ele":[],"mu":[],"had":[]}
             for key in weights._weights.keys():
+                # ignore btagSFlight/bc for now
+                if "btagSFlight" in key or "btagSFbc" in key:
+                    continue
+
                 if "muon" in key:
                     varkey = "mu"
                 elif "electron" in key:
                     varkey = "ele"
                 elif "had" in key:
                     varkey = "had"
+                elif "lep" in key:
+                    varkey = "lep"
                 else:
                     varkey = "common"
                 # store the individual weights (ONLY for now until we debug)

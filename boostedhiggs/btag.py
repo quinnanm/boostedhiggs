@@ -117,7 +117,7 @@ class BTagCorrector:
         sf = self._cset["%s_comb"%self._tagger].evaluate(syst, self._wp, np.array(j.hadronFlavour), np.array(abs(j.eta)), np.array(j.pt))
         return ak.unflatten(sf, nj)
 
-    def addBtagWeight(self, jets, weights):
+    def addBtagWeight(self, jets, weights, label=""):
         """
         Adding one common multiplicative SF (including bcjets + lightjets)
         weights: weights class from coffea
@@ -140,7 +140,6 @@ class BTagCorrector:
             untagged_sf = ak.prod(((1 - sf*eff) / (1 - eff))[~passbtag], axis=-1)
 
             return ak.fill_none(tagged_sf * untagged_sf, 1.)
-#            return tagged_sf * untagged_sf
             
         lightweight = combine(
             lightEff,
@@ -155,7 +154,7 @@ class BTagCorrector:
         
         # nominal weight = btagSF (btagSFbc*btagSFlight)
         nominal = lightweight * bcweight
-        weights.add('btagSF', nominal )
+        weights.add('btagSF'+label, nominal )
 
         # systematics:
         # btagSFlight_{year}: btagSFlight_up/down
@@ -163,7 +162,7 @@ class BTagCorrector:
         # btagSFlight_correlated: btagSFlight_up/down_correlated
         # btagSFbc_correlated:  btagSFbc_up/down_correlated
         weights.add(
-            'btagSFlight_%s'%self._year,
+            'btagSFlight_%s%s'%(label,self._year),
             np.ones(len(nominal)),
             weightUp=combine(
                 lightEff,
@@ -177,7 +176,7 @@ class BTagCorrector:
             )
         )
         weights.add(
-            'btagSFbc_%s'%self._year, 
+            'btagSFbc_%s'%(label,self._year), 
             np.ones(len(nominal)),
             weightUp=combine(
                 bcEff,
@@ -191,7 +190,7 @@ class BTagCorrector:
             )
         )
         weights.add(
-            'btagSFlight_correlated',
+            'btagSFlight_correlated_%s'%label,
             np.ones(len(nominal)),
             weightUp=combine(
                 lightEff,
@@ -205,7 +204,7 @@ class BTagCorrector:
             )
         )
         weights.add(
-            'btagSFbc_correlated',
+            'btagSFbc_correlated_%s'%label,
             np.ones(len(nominal)),
             weightUp=combine(
                 bcEff,

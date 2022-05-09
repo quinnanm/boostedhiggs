@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from utils import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch, data_by_ch_2018
+from utils import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch, data_by_ch_2018, label_by_ch
 from utils import get_simplified_label, get_sum_sumgenweight
 import pickle as pkl
 import pyarrow.parquet as pq
@@ -38,14 +38,9 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
         ch: string that represents the signal channel to look at... choices are ['ele', 'mu', 'had']
         idir: directory that holds the processed samples (e.g. {idir}/{sample}/outfiles/*_{ch}.parquet)
         odir: output directory to hold the hist object
-        samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
+        samples: the set of samples to run over (by default: the samples defined in plot_configs/samples_pfnano.json)
         vars_to_plot: the set of variables to plot a 1D-histogram of (by default: the samples with key==1 defined in plot_configs/vars.json)
     """
-
-    if year == '2018':
-        data_label = data_by_ch_2018
-    else:
-        data_label = data_by_ch
 
     # Get luminosity of year
     f = open('../fileset/luminosity.json')
@@ -64,80 +59,86 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
         )
 
     # loop over the samples
-    for sample in samples[year][ch]:
-        # check if the sample was processed
-        pkl_dir = f'{idir}/{sample}/outfiles/*.pkl'
-        pkl_files = glob.glob(pkl_dir)  #
-        if not pkl_files:  # skip samples which were not processed
-            print('- No processed files found...', pkl_dir, 'skipping sample...', sample)
-            continue
-
-        # define an isdata bool
-        is_data = False
-
-        for key in data_label.values():
-            if key in sample:
-                is_data = True
-
-        # retrieve xsections for MC and define xsec_weight=1 for data
-        if not is_data:
-            # Find xsection
-            f = open('../fileset/xsec_pfnano.json')
-            xsec = json.load(f)
-            f.close()
-            xsec = eval(str((xsec[sample])))
-
-            # Get overall weighting of events.. each event has a genweight... sumgenweight sums over events in a chunk... sum_sumgenweight sums over chunks
-            xsec_weight = (xsec * luminosity) / get_sum_sumgenweight(idir, year, sample)
+    # print(samples.keys())
+    for yr in samples.keys():
+        if yr == '2018':
+            data_label = data_by_ch_2018
         else:
-            xsec_weight = 1
-
-        # get list of parquet files that have been processed
-        parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')
-
-        if len(parquet_files) != 0:
-            print(f'Processing {ch} channel of sample', sample)
-
-        for parquet_file in parquet_files:
-            try:
-                data = pq.read_table(parquet_file).to_pandas()
-            except:
-                print('Not able to read data: ', parquet_file, ' should remove evts from scaling/lumi')
+            data_label = data_by_ch
+        for sample in samples[yr][ch]:
+            # check if the sample was processed
+            pkl_dir = f'{idir}_{yr}/{sample}/outfiles/*.pkl'
+            pkl_files = glob.glob(pkl_dir)  #
+            if not pkl_files:  # skip samples which were not processed
+                print('- No processed files found...', pkl_dir, 'skipping sample...', sample)
                 continue
+                
+            # define an isdata bool
+            is_data = False
+            for key in data_label.values():
+                if key in sample:
+                    is_data = True
 
-            for var in vars_to_plot[ch]:
-                if var not in data.keys():
+            # get list of parquet files that have been processed
+            parquet_files = glob.glob(f'{idir}_{yr}/{sample}/outfiles/*_{ch}.parquet')
+            
+            if len(parquet_files) != 0:
+                print(f'Processing {ch} channel of sample', sample)
+
+            # print(parquet_files)
+            for parquet_file in parquet_files:
+                # print('Processing ',parquet_file)
+
+                try:
+                    data = pq.read_table(parquet_file).to_pandas()
+                except:
+                    if is_data:
+                        print('Not able to read data: ', parquet_file, ' should remove evts from scaling/lumi')
+                    else:
+                        print('Not able to read data from ',parquet_file)
                     continue
-                if len(data) == 0:
+
+                try:
+                    event_weight = data['tot_weight']
+                except:
+                    print('No tot_weight variable in parquet - run pre-processing first!')
                     continue
 
-                if not is_data:
-                    event_weight = data['weight']
-                else:
-                    data['weight'] = 1  # for data fill a weight column with ones
+                for var in vars_to_plot[ch]:
+                    if var not in data.keys():
+                        print(f'Var {var} not in parquet keys')
+                        continue
+                    if len(data) == 0:
+                        print('Parquet file empty')
+                        continue
 
-                # filling histograms
-                single_sample = None
-                for single_key, key in add_samples.items():
-                    if key in sample:
-                        single_sample = single_key
+                    # filling histograms
+                    single_sample = None
+                    for single_key, key in add_samples.items():
+                        if key in sample:
+                            single_sample = single_key
 
-                # combining all pt bins of a specefic process under one name
-                if single_sample is not None:
-                    hists[var].fill(
-                        samples=single_sample,
-                        var=data[var],
-                        weight=xsec_weight * data['weight'],
-                    )
-                # otherwise give unique name
-                else:
-                    hists[var].fill(
-                        samples=sample,
-                        var=data[var],
-                        weight=xsec_weight * data['weight'],
-                    )
-
-    # TODO: combine histograms for all years here and flag them as year='combined'
+                    if year=="Run2" and is_data:
+                        single_sample = 'Data'
+                            
+                    # combining all pt bins of a specefic process under one name
+                    if single_sample is not None:
+                        # print(single_sample)
+                        hists[var].fill(
+                            samples=single_sample,
+                            var=data[var],
+                            weight=event_weight,
+                        )
+                    # otherwise give unique name
+                    else:
+                        # print(sample)
+                        hists[var].fill(
+                            samples=sample,
+                            var=data[var],
+                            weight=event_weight,
+                        )
+                        
+                    # print(hists[var])
 
     # store the hists variable
     with open(f'{odir}/{ch}_hists.pkl', 'wb') as f:  # saves the hists objects
@@ -160,7 +161,6 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
         f.close()
 
     # make the histogram plots in this directory
-
     if logy:
         if not os.path.exists(f'{odir}/{ch}_hists_log'):
             os.makedirs(f'{odir}/{ch}_hists_log')
@@ -168,16 +168,19 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
         if not os.path.exists(f'{odir}/{ch}_hists'):
             os.makedirs(f'{odir}/{ch}_hists')
 
+    data_label = data_by_ch[ch]
     if year == '2018':
         data_label = data_by_ch_2018[ch]
-    else:
-        data_label = data_by_ch[ch]
+    elif year == 'Run2':
+        data_label = 'Data'
 
+    print(vars_to_plot[ch])
     for var in vars_to_plot[ch]:
         # get histograms
         h = hists[var]
 
         if h.shape[0] == 0:     # skip empty histograms (such as lepton_pt for hadronic channel)
+            print('Empty histogram ',var)
             continue
 
         # get samples existing in histogram
@@ -187,8 +190,9 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
 
         # data
         data = None
-        if data_label in samples:
-            data = h[{"samples": data_label}]
+        #print(data_label)
+        #print(h)
+        data = h[{"samples": data_label}]
 
         # signal
         signal = [h[{"samples": label}] for label in signal_labels]
@@ -204,21 +208,22 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
             fig, (ax, rax) = plt.subplots(nrows=2,
                                           ncols=1,
                                           figsize=(8, 8),
-                                          tight_layout=True,
-                                          gridspec_kw={"height_ratios": (3, 1)},
+                                          gridspec_kw={"height_ratios": (4, 1), 'hspace': 0.07},
                                           sharex=True
                                           )
-            fig.subplots_adjust(hspace=.07)
-            rax.errorbar(
-                x=[data.axes.value(i)[0] for i in range(len(data.values()))],
-                y=data.values() / np.sum([b.values() for b in bkg], axis=0),
-                fmt="ko",
-            )
-            # NOTE: change limit later
-            rax.set_ylim(0., 1.2)
         else:
             fig, ax = plt.subplots(1, 1)
 
+            
+        errps = {
+            'hatch':'////',
+            'facecolor':'none',
+            'lw': 0,
+            'color': 'k',
+            'edgecolor':(0,0,0,.5),
+            'linewidth': 0,
+            'alpha': 0.4
+        }
         if len(bkg) > 0:
             hep.histplot(bkg,
                          ax=ax,
@@ -229,21 +234,47 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
                          )
             for handle, label in zip(*ax.get_legend_handles_labels()):
                 handle.set_color(color_by_sample[label])
+
+            tot = bkg[0].copy()
+            for i,b in enumerate(bkg):
+                if i>0: tot = tot+ b
+            ax.stairs(
+                values=tot.values() + np.sqrt(tot.values()),
+                baseline=tot.values() - np.sqrt(tot.values()),
+                edges=tot.axes[0].edges, **errps, 
+                label='Stat. unc.'
+            )
+
         if add_data and data:
             data_err_opts = {
                 'linestyle': 'none',
                 'marker': '.',
-                'markersize': 12.,
-                'elinewidth': 2,
+                'markersize': 10.,
+                'elinewidth': 1,
             }
             hep.histplot(data,
                          ax=ax,
                          histtype="errorbar",
                          color="k",
+                         capsize=4,
                          yerr=True,
                          label=get_simplified_label(data_label),
                          **data_err_opts
                          )
+
+            if len(bkg) > 0:
+                from hist.intervals import ratio_uncertainty
+                yerr = ratio_uncertainty(data.values(), tot.values(), 'poisson')
+                rax.stairs(1+yerr[1], edges=tot.axes[0].edges, baseline=1-yerr[0], **errps)
+
+                if ak.all(tot.values())>0:
+                    hep.histplot(data.values()/tot.values(), tot.axes[0].edges, yerr=np.sqrt(data.values())/tot.values(),
+                                 ax=rax, histtype='errorbar', color='k', capsize=4)
+                else:
+                    print(f'Warning: no all bins filled for background histogram for {var} {ch}')
+                rax.axhline(1, ls='--', color='k')
+                rax.set_ylim(0.2, 1.8)
+                # rax.set_ylim(0.7, 1.3)
 
         if len(signal) > 0:
             hep.histplot(signal,
@@ -251,11 +282,19 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
                          label=[get_simplified_label(sig_label) for sig_label in signal_labels],
                          color='red'
                          )
+            sig = signal[0].copy()
+            for i,s in enumerate(signal):
+                if i>0: sig = sig+ s
+            ax.stairs(
+                values=sig.values() + np.sqrt(sig.values()),
+                baseline=sig.values() - np.sqrt(sig.values()),
+                edges=sig.axes[0].edges, **errps,
+            )
 
         if logy:
             ax.set_yscale('log')
             ax.set_ylim(0.1)
-        ax.set_title(f'{ch} channel')
+        ax.set_title(f'{label_by_ch[ch]} Channel')
         ax.legend()
 
         hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
@@ -263,10 +302,10 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
 
         if logy:
             print(f'Saving to {odir}/{ch}_hists_log/{var}.pdf')
-            plt.savefig(f'{odir}/{ch}_hists_log/{var}.pdf')
+            plt.savefig(f'{odir}/{ch}_hists_log/{var}.pdf',bbox_inches='tight')
         else:
             print(f'Saving to {odir}/{ch}_hists/{var}.pdf')
-            plt.savefig(f'{odir}/{ch}_hists/{var}.pdf')
+            plt.savefig(f'{odir}/{ch}_hists/{var}.pdf',bbox_inches='tight')
         plt.close()
 
 
@@ -283,19 +322,18 @@ def main(args):
 
     channels = args.channels.split(',')
 
+    # get year
+    years = ["2016","2016APV","2017","2018"] if args.year=="Run2" else [args.year]
+    
     # get samples to make histograms
     f = open(args.samples)
     json_samples = json.load(f)
     f.close()
-
-    # build samples
     samples = {}
-    samples[args.year] = {}
-    for ch in channels:
-        samples[args.year][ch] = []
-        for key, value in json_samples[args.year][ch].items():
-            if value == 1:
-                samples[args.year][ch].append(key)
+    for year in years:
+        samples[year] = {}
+        for ch in channels:
+            samples[year][ch] = json_samples[year][ch]
 
     # get variables to plot
     f = open(args.vars)
@@ -310,13 +348,14 @@ def main(args):
 
     for ch in channels:
         if args.make_hists:
+            if len(glob.glob(f'{odir}/{ch}_hists.pkl'))>0:
+                print('Histograms already exist - remaking them')
             print('Making histograms...')
             make_stacked_hists(args.year, ch, args.idir, odir, vars_to_plot, samples)
 
         if args.plot_hists:
             print('Plotting...')
-            plot_stacked_hists(args.year, ch, odir, vars_to_plot, logy=True)
-            # plot_stacked_hists(args.year, ch, odir, vars_to_plot, logy=False)
+            plot_stacked_hists(args.year, ch, odir, vars_to_plot, logy=args.nology)
 
 
 if __name__ == "__main__":
@@ -324,15 +363,15 @@ if __name__ == "__main__":
     # run locally as:  python make_stacked_hists.py --year 2017 --odir hists --make_hists --plot_hists --channels ele --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--year',                   dest='year',                    default='2017',                               help="year")
+    parser.add_argument('--year',                   dest='year', required=True, choices=["2016","2016APV","2017","2018","Run2"],  help="year")
     parser.add_argument('--vars',                   dest='vars',                    default="plot_configs/vars.json",             help='path to json with variables to be plotted')
     parser.add_argument('--samples',                dest='samples',                 default="plot_configs/samples_pfnano.json",   help='path to json with samples to be plotted')
     parser.add_argument('--channels',               dest='channels',                default='ele,mu,had',                         help='channels for which to plot this variable')
     parser.add_argument('--odir',                   dest='odir',                    default='hists',                              help="tag for output directory... will append '_{year}' to it")
-    parser.add_argument('--idir',                   dest='idir',                    default='../results/',                        help="input directory with results")
+    parser.add_argument('--idir',                   dest='idir',                    default='../results/',                        help="input directory with results - without _{year}")
     parser.add_argument("--make_hists",             dest='make_hists',              action='store_true',                          help="Make hists")
     parser.add_argument("--plot_hists",             dest='plot_hists',              action='store_true',                          help="Plot the hists")
-    parser.add_argument("--plot_combine_years",     dest='plot_combine_years',      action='store_true',                          help="Plot the hists")
+    parser.add_argument("--nology",                 dest='nology',                  action='store_false',                         help="No logy scale")
 
     args = parser.parse_args()
 
