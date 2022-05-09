@@ -87,7 +87,8 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
 
             # print(parquet_files)
             for parquet_file in parquet_files:
-                print('Processing ',parquet_file)
+                # print('Processing ',parquet_file)
+
                 try:
                     data = pq.read_table(parquet_file).to_pandas()
                 except:

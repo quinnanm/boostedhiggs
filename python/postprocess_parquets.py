@@ -99,8 +99,8 @@ def append_correct_weights(idir, samples, year, channels):
                     continue
 
                 if 'tot_weight' in data.columns:
-                    print('File has already been reprocessed')
-                    continue
+                    print('Warning: File has already been reprocessed! - re-writing tot weight')
+                    #continue
 
                 if not is_data:
                     event_weight = data['weight'] * data[f'weight_{ch}']
