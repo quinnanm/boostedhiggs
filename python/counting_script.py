@@ -46,14 +46,14 @@ if __name__ == "__main__":
     """
 
     year = args.dir[-4:]
-    indir = '/eos/uscms/store/user/fmokhtar/boostedhiggs/' + args.dir
+    idir = '/eos/uscms/store/user/fmokhtar/boostedhiggs/' + args.dir
 
     # make directory to hold rootfiles
     outdir = f'./counts_{args.ch}/'
     if not os.path.exists(outdir):
         os.makedirs(outdir)
 
-    samples = os.listdir(f'{indir}')
+    samples = os.listdir(f'{idir}')
     num_dict = {}
 
     print(f'processing {args.ch} channel')
