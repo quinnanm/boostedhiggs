@@ -46,7 +46,7 @@ if __name__ == "__main__":
     """
 
     year = args.dir[-4:]
-    idir = '/eos/uscms/store/user/fmokhtar/boostedhiggs/' + args.dir
+    idir = '/eos/uscms/store/user/cmantill/boostedhiggs/' + args.dir
 
     if year == '2018':
         data_label = data_by_ch_2018
@@ -69,6 +69,7 @@ if __name__ == "__main__":
             if key in sample:
                 is_data = True
         if is_data:
+            print('sample is_data so skipping')
             continue
 
         combine = False
@@ -98,6 +99,7 @@ if __name__ == "__main__":
                 continue
             if len(data) == 0:
                 continue
+
             print(data['tot_weight'])
             print(data['tot_weight'].sum())
             if combine:
