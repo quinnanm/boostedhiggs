@@ -60,7 +60,7 @@ if __name__ == "__main__":
         print(f'processing {sample} sample')
         for single_key, key in add_samples.items():
             if key in sample:
-                if single_key not in num_dict.keys()
+                if single_key not in num_dict.keys():
                 num_dict[single_key] = 0
                 combine = True
             else:
