@@ -35,7 +35,7 @@ warnings.filterwarnings("ignore", message="Found duplicate branch ")
 parser = argparse.ArgumentParser()
 parser.add_argument('--channels', dest='channels',  default='ele,mu,had',  help='channels for which to plot this variable')
 parser.add_argument('--dir',      dest='dir',       default='May7_2016',   help="tag for data directory")
-parser.add_argument('--odir',     dest='odir',      default='hists',       help="tag for output directory")
+parser.add_argument('--odir',     dest='odir',      default='counts',       help="tag for output directory")
 
 args = parser.parse_args()
 
@@ -155,7 +155,7 @@ def make_pie(channels, odir):
 if __name__ == "__main__":
     """
     e.g. run locally as
-    python counting_script.py --dir May7_2016 --ch ele
+    python counting_script.py --dir May7_2016 --ch ele --odir counts
     """
 
     channels = args.channels.split(',')
