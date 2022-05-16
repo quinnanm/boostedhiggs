@@ -48,11 +48,10 @@ if __name__ == "__main__":
     year = args.dir[-4:]
     idir = '/eos/uscms/store/user/fmokhtar/boostedhiggs/' + args.dir
 
-    for year in samples.keys():
-        if year == '2018':
-            data_label = data_by_ch_2018
-        else:
-            data_label = data_by_ch
+    if year == '2018':
+        data_label = data_by_ch_2018
+    else:
+        data_label = data_by_ch
 
     # make directory to hold rootfiles
     outdir = f'./counts_{args.ch}/'
