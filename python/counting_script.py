@@ -39,7 +39,7 @@ parser.add_argument('--dir',      dest='dir',       default='May7_2016',   help=
 args = parser.parse_args()
 
 
-def compute_counts(channels, samples):
+def compute_counts(channels, samples, outdir):
     num_dict = {}
     for ch in channels:
         num_dict[ch] = {}
