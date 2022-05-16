@@ -89,8 +89,6 @@ if __name__ == "__main__":
         if len(parquet_files) == 0:
             continue
 
-        print('combine', combine)
-
         for i, parquet_file in enumerate(parquet_files):
             try:
                 data = pq.read_table(parquet_file).to_pandas()
@@ -100,8 +98,6 @@ if __name__ == "__main__":
             if len(data) == 0:
                 continue
 
-            print(data['tot_weight'])
-            print(data['tot_weight'].sum())
             if combine:
                 num_dict[single_key] = num_dict[single_key] + data['tot_weight'].sum()
             else:
