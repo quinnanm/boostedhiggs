@@ -33,8 +33,9 @@ warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--channels', dest='channels',  default='ele,mu,had',   help='channels for which to plot this variable')
-parser.add_argument('--dir',      dest='dir',       default='May7_2016',   help="tag for output directory")
+parser.add_argument('--channels', dest='channels',  default='ele,mu,had',  help='channels for which to plot this variable')
+parser.add_argument('--dir',      dest='dir',       default='May7_2016',   help="tag for data directory")
+parser.add_argument('--odir',     dest='odir',      default='hists',       help="tag for output directory")
 
 args = parser.parse_args()
 
@@ -168,9 +169,8 @@ if __name__ == "__main__":
     samples = os.listdir(f'{idir}')
 
     # make directory to hold counts
-    outdir = f'./counts/'
-    if not os.path.exists(outdir):
-        os.makedirs(outdir)
+    if not os.path.exists(args.outdir):
+        os.makedirs(args.outdir)
 
-    # compute_counts(channels, samples, outdir)
-    make_pie(channels, outdir)
+    compute_counts(channels, samples, args.outdir)
+    make_pie(channels, args.outdir)
