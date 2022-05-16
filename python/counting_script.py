@@ -144,7 +144,7 @@ def make_pie(channels, outdir):
         plt.legend(patches, labels, loc='upper left', bbox_to_anchor=(-0.1, 1.),
                    fontsize=12)
         plt.tight_layout()
-        plt.savefig(f'./counts_{ch}/pie_chart.pdf')
+        plt.savefig(f'./counts/pie_chart_{ch}.pdf')
         plt.show()
         print(f'others include {others}')
 
