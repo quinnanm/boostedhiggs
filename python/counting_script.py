@@ -51,33 +51,41 @@ if __name__ == "__main__":
     if not os.path.exists(outdir):
         os.makedirs(outdir)
 
-    print(f'processing {args.ch} channel')
+    samples = os.listdir(f'{indir}')
     num_dict = {}
-    for subdir, dirs, files in os.walk(indir):
-        print(f'processing {subdir} sample')
-        num = 0
-        for file in files:
-            # load files
-            if (f'{args.ch}.parquet' in file):
-                f = subdir + '/' + file
-                # f=f.replace("/eos/uscms/","root://cmseos.fnal.gov//")
-                outf = f
-                print('prepping input file', f, '...')
-                outname = outf[outf.rfind(year + '/') + 5:]
-                outname = outdir + outname.strip('.' + filetype) + '.root'
-                outname = outname.replace('/outfiles/', '_')
 
-                # load parquet into dataframe
-                print('loading dataframe...')
-                table = pq.read_table(f)
-                data = table.to_pandas()
-                print('# input events:', len(data))
-                if len(data) == 0:
-                    print('no skimmed events. skipping')
-                    continue
+    print(f'processing {args.ch} channel')
+    for sample in samples:
+        combine = False
+        print(f'processing {sample} sample')
+        for single_key, key in add_samples.items():
+            if key in sample:
+                if single_key not in num_dict.keys()
+                num_dict[single_key] = 0
+                combine = True
+            else:
+                if sample not in num_dict.keys()
+                num_dict[sample] = 0
 
-                num = num + len(data)
-        num_dict[subdir] = num
+        # get list of parquet files that have been processed
+        parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')
+
+        if len(parquet_files) == 0:
+            continue
+
+        for i, parquet_file in enumerate(parquet_files):
+            try:
+                data = pq.read_table(parquet_file).to_pandas()
+            except:
+                print('Not able to read data: ', parquet_file, ' should remove evts from scaling/lumi')
+                continue
+            if len(data) == 0:
+                continue
+
+            if combine:
+                num_dict[single_key] = num_dict[single_key] + len(data)
+            else:
+                num_dict[sample] = num_dict[sample] + len(data)
 
     with open(f'{outdir}/num_dict.pkl', 'wb') as f:  # saves counts
         pkl.dump(num_dict, f)
