@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from utils import add_samples
+from utils import add_samples, data_by_ch, data_by_ch_2018
 
 import pickle as pkl
 import pyarrow.parquet as pq
@@ -48,6 +48,12 @@ if __name__ == "__main__":
     year = args.dir[-4:]
     idir = '/eos/uscms/store/user/fmokhtar/boostedhiggs/' + args.dir
 
+    for year in samples.keys():
+        if year == '2018':
+            data_label = data_by_ch_2018
+        else:
+            data_label = data_by_ch
+
     # make directory to hold rootfiles
     outdir = f'./counts_{args.ch}/'
     if not os.path.exists(outdir):
@@ -58,6 +64,14 @@ if __name__ == "__main__":
 
     print(f'processing {args.ch} channel')
     for sample in samples:
+        # check if sample is data to skip
+        is_data = False
+        for key in data_label.values():
+            if key in sample:
+                is_data = True
+        if is_data:
+            continue
+
         combine = False
         print(f'processing {sample} sample')
         for single_key, key in add_samples.items():
