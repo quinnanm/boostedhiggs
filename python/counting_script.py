@@ -172,5 +172,5 @@ if __name__ == "__main__":
     if not os.path.exists(outdir):
         os.makedirs(outdir)
 
-    compute_counts(channels, samples, outdir)
+    # compute_counts(channels, samples, outdir)
     make_pie(channels, outdir)
