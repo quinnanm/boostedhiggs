@@ -53,6 +53,11 @@ color_dict = {'signal': 'red',
 
 
 def compute_counts(channels, samples, odir):
+    """
+    Given a list of samples and channels, computes the counts of events in the processed .pq files.
+    Weights the event by the 'tot_weight' column and then sums up the counts.
+    """
+
     num_dict = {}
     for ch in channels:
         num_dict[ch] = {}
