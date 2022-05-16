@@ -77,7 +77,7 @@ if __name__ == "__main__":
                     continue
 
                 num = num + len(data)
-        num_dict{subdir} = num
+        num_dict[subdir] = num
 
     with open(f'{outdir}/num_dict.pkl', 'wb') as f:  # saves counts
         pkl.dump(num_dict, f)
