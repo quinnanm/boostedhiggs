@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+from utils import add_samples
+
 import pickle as pkl
 import pyarrow.parquet as pq
 import pyarrow as pa
