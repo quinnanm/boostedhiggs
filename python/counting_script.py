@@ -45,11 +45,6 @@ def compute_counts(channels, samples):
         num_dict[ch] = {}
         print(f'processing {ch} channel')
 
-        # make directory to hold counts
-        outdir = f'./counts_{ch}/'
-        if not os.path.exists(outdir):
-            os.makedirs(outdir)
-
         for sample in samples:
             # check if sample is data to skip
             is_data = False
@@ -91,16 +86,19 @@ def compute_counts(channels, samples):
                 else:
                     num_dict[ch][sample] = num_dict[ch][sample] + data['tot_weight'].sum()
 
-    with open(f'{outdir}/num_dict.pkl', 'wb') as f:  # saves counts
+    with open(f'./{outdir}/num_dict.pkl', 'wb') as f:  # saves counts
         pkl.dump(num_dict, f)
 
-    return num_dict
 
-
-def make_pie(channels, num_dict):
+def make_pie(channels, outdir):
     """
     Makes pie chart for a given channel
     """
+
+    with open(f'{outdir}/num_dict.pkl', 'rb') as f:
+        num_dict = pkl.load(f)
+        f.close()
+
     for ch in channels:
         num_total = 0
 
@@ -157,5 +155,10 @@ if __name__ == "__main__":
 
     samples = os.listdir(f'{idir}')
 
-    num_dict = compute_counts(channels, samples)
-    plot_pie_charts(channels, num_dict)
+    # make directory to hold counts
+    outdir = f'./counts/'
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+
+    # compute_counts(channels, samples, outdir)
+    make_pie(channels, outdir)
