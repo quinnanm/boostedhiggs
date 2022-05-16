@@ -64,10 +64,11 @@ if __name__ == "__main__":
             if key in sample:
                 if single_key not in num_dict.keys():
                     num_dict[single_key] = 0
-                    combine = True
+                combine = True
                 break
         if not combine:
             num_dict[sample] = 0
+
         # get list of parquet files that have been processed
         parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{args.ch}.parquet')
 
