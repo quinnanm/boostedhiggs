@@ -108,6 +108,8 @@ def make_pie(channels, odir):
     Makes pie chart for a given channel
     """
 
+    print(f'Making pie charts...')
+
     with open(f'{odir}/num_dict.pkl', 'rb') as f:
         num_dict = pkl.load(f)
         f.close()
@@ -146,8 +148,8 @@ def make_pie(channels, odir):
                    fontsize=12)
         plt.tight_layout()
         plt.savefig(f'{odir}/pie_chart_{ch}.pdf')
-        plt.show()
-        print(f'others include {others}')
+        plt.close()
+        print(f'others for {ch} ch include {others}')
 
 
 if __name__ == "__main__":
