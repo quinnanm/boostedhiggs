@@ -98,7 +98,8 @@ if __name__ == "__main__":
                 continue
             if len(data) == 0:
                 continue
-
+            print(data['tot_weight'])
+            print(data['tot_weight'].sum())
             if combine:
                 num_dict[single_key] = num_dict[single_key] + data['tot_weight'].sum()
             else:
