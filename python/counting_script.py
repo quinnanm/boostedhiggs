@@ -52,7 +52,7 @@ color_dict = {'signal': 'red',
               }
 
 
-def compute_counts(channels, samples, outdir):
+def compute_counts(channels, samples, odir):
     num_dict = {}
     for ch in channels:
         num_dict[ch] = {}
@@ -99,16 +99,16 @@ def compute_counts(channels, samples, outdir):
                 else:
                     num_dict[ch][sample] = num_dict[ch][sample] + data['tot_weight'].sum()
 
-    with open(f'./{outdir}/num_dict.pkl', 'wb') as f:  # saves counts
+    with open(f'./{odir}/num_dict.pkl', 'wb') as f:  # saves counts
         pkl.dump(num_dict, f)
 
 
-def make_pie(channels, outdir):
+def make_pie(channels, odir):
     """
     Makes pie chart for a given channel
     """
 
-    with open(f'{outdir}/num_dict.pkl', 'rb') as f:
+    with open(f'{odir}/num_dict.pkl', 'rb') as f:
         num_dict = pkl.load(f)
         f.close()
 
@@ -145,7 +145,7 @@ def make_pie(channels, outdir):
         plt.legend(patches, labels, loc='upper left', bbox_to_anchor=(-0.1, 1.),
                    fontsize=12)
         plt.tight_layout()
-        plt.savefig(f'./counts/pie_chart_{ch}.pdf')
+        plt.savefig(f'{odir}/pie_chart_{ch}.pdf')
         plt.show()
         print(f'others include {others}')
 
@@ -169,8 +169,8 @@ if __name__ == "__main__":
     samples = os.listdir(f'{idir}')
 
     # make directory to hold counts
-    if not os.path.exists(args.outdir):
-        os.makedirs(args.outdir)
+    if not os.path.exists(args.odir):
+        os.makedirs(args.odir)
 
-    compute_counts(channels, samples, args.outdir)
-    make_pie(channels, args.outdir)
+    compute_counts(channels, samples, args.odir)
+    make_pie(channels, args.odir)
