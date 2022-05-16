@@ -87,9 +87,9 @@ if __name__ == "__main__":
                 continue
 
             if combine:
-                num_dict[single_key] = num_dict[single_key] + len(data)
+                num_dict[single_key] = num_dict[single_key] + data['tot_weight'].sum()
             else:
-                num_dict[sample] = num_dict[sample] + len(data)
+                num_dict[sample] = num_dict[sample] + data['tot_weight'].sum()
 
     with open(f'{outdir}/num_dict.pkl', 'wb') as f:  # saves counts
         pkl.dump(num_dict, f)
