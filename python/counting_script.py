@@ -70,7 +70,7 @@ if __name__ == "__main__":
                     num_dict[sample] = 0
 
         # get list of parquet files that have been processed
-        parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')
+        parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{args.ch}.parquet')
 
         if len(parquet_files) == 0:
             continue
