@@ -24,10 +24,11 @@ outdir = './rootfiles/'
 print(args.proc + ' must be in file')
 
 for subdir, dirs, files in os.walk(indir):
-    print(subdir)
     for file in files:
+        print(file)
         # load files
         if ('had.parquet' in file) and (args.proc in subdir):
+            print('YAS')
             f = subdir + '/' + file
             # f=f.replace("/eos/uscms/","root://cmseos.fnal.gov//")
             outf = f
