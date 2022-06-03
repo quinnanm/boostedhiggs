@@ -17,7 +17,7 @@ for ch in ['had', 'mu', 'ele']:
     for sample in ['QCD', 'data', 'signal', 'signal2', 'ttbar', 'wjets', 'other']:
         if os.path.isfile(f"/eos/uscms/store/user/mequinna/boostedhiggs/combinetest_23may22/merged/2017/{sample}_ele_merged.root"):
             # load in uproot
-            f = uproot.open(f"/eos/uscms/store/user/mequinna/boostedhiggs/combinetest_23may22/merged/2017/{sample}_ele_merged.root")
+            events = uproot.open(f"/eos/uscms/store/user/mequinna/boostedhiggs/combinetest_23may22/merged/2017/{sample}_ele_merged.root")
             # sum tot_weight
             num = events['Events']['tot_weight'].array(library="np").sum()
             print(f'number of events for {sample} is {num}')
