@@ -90,7 +90,7 @@ def compute_counts(channels, samples, idir, outdir, data_label):
                     continue
 
                 if 'fj_bjets_ophem' in data.keys():
-                    data.drop(['fj_bjets_ophem'], inplace=True)
+                    data.drop(columns=['fj_bjets_ophem'], inplace=True)
 
                 head, tail = os.path.split(parquet_file)    # get the file name from full path
 
