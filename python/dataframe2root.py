@@ -88,7 +88,10 @@ def compute_counts(channels, samples, idir, outdir, data_label):
                 if len(data) == 0:
                     print('no skimmed events. skipping')
                     continue
-                print(data.keys())
+
+                for key in data.keys():
+                    print(key, len(data[key]))
+
                 head, tail = os.path.split(parquet_file)    # get the file name from full path
 
                 outname = outdir + tail[:-8] + '.root'  # the slice removes the .parquet extension (to replace it with a .root extension)
