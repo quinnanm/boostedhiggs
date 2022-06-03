@@ -89,13 +89,9 @@ def compute_counts(channels, samples, idir, outdir, data_label):
                     print('no skimmed events. skipping')
                     continue
 
-                print(data['fj_bjets_ophem'].dtype == 'object')
-                print(data['fj_pt'].dtype)
-
-                sys.exit(1)
-
-                if 'fj_bjets_ophem' in data.keys():
-                    data.drop(columns=['fj_bjets_ophem'], inplace=True)
+                for key in data.keys():
+                    if data[key].dtype == 'object':
+                        data.drop(columns=[key], inplace=True)
 
                 head, tail = os.path.split(parquet_file)    # get the file name from full path
 
