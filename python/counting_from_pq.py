@@ -85,6 +85,11 @@ def compute_counts(channels, samples, odir, data_label):
                 if len(data) == 0:
                     continue
 
+                # drop AK columns
+                for key in data.keys():
+                    if data[key].dtype == 'object':
+                        data.drop(columns=[key], inplace=True)
+
                 if combine:
                     num_dict[ch][single_key] = num_dict[ch][single_key] + data['tot_weight'].sum()
                 else:
@@ -92,6 +97,8 @@ def compute_counts(channels, samples, odir, data_label):
 
         for key, value in num_dict[ch].items():
             print(f'number of events for {key} is {value}')
+
+        print(f'-----------------------------------------')
 
     with open(f'./{odir}/num_dict.pkl', 'wb') as f:  # saves counts
         pkl.dump(num_dict, f)
