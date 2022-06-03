@@ -4,7 +4,7 @@
 
 set -e
 
-mkdir -p roots
+mkdir -p merged/2017
 
 # process the cms data
 for ch in rootfiles/* ; do
@@ -15,8 +15,8 @@ for ch in rootfiles/* ; do
     echo $name
 
     if [ "$(ls -A $DIR)" ]; then
-     hadd $(echo ${name}_${channel}).root *
-     mv $(echo ${name}_${channel}).root ../../../roots/
+     hadd $(echo ${name}_${channel})_merged.root *
+     mv $(echo ${name}_${channel})_merged.root ../../../merged/2017/
     fi
 
     cd ../../..
