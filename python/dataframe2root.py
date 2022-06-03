@@ -35,7 +35,7 @@ parser.add_argument('--odir',     dest='odir',      default='rootfiles',   help=
 args = parser.parse_args()
 
 
-def compute_counts(channels, samples, outdir, data_label):
+def compute_counts(channels, samples, idir, outdir, data_label):
     """
     Given a list of samples and channels, reads the .pq files and saves them as .root files.
     """
@@ -88,8 +88,10 @@ def compute_counts(channels, samples, outdir, data_label):
                     print('no skimmed events. skipping')
                     continue
 
-                outname = outdir + parquet_file[:-8] + '.root'  # the slice removes the .parquet extension (to replace it with a .root extension)
-                with uproot.recreate(outdir + parquet_file[:-8] + '.root') as file:
+                head, tail = os.path.split(parquet_file)    # get the file name from full path
+
+                outname = outdir + tail[:-8] + '.root'  # the slice removes the .parquet extension (to replace it with a .root extension)
+                with uproot.recreate(outdir + tail[:-8] + '.root') as file:
                     file['Events'] = pd.DataFrame(data)
 
                 print('Wrote rootfile ', outname)
@@ -117,4 +119,4 @@ if __name__ == "__main__":
     if not os.path.exists(args.odir):
         os.makedirs(args.odir)
 
-    compute_counts(channels, samples, args.odir, data_label)
+    compute_counts(channels, samples, idir, args.odir, data_label)
