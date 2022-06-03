@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# run after running dataframe2root.py to merge the rootfiles
+
 set -e
 
 mkdir -p roots
