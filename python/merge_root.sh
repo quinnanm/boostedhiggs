@@ -10,6 +10,7 @@ for ch in rootfiles/* ; do
     name=$(awk -F'/' '{ a = length($NF) ? $NF : $(NF-1); print a }' <<< "$sample")
     hadd $name.root *
     mv $name.root ..
+    cd ../..
   done
 done
 
