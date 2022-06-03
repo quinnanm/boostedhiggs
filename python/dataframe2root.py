@@ -95,7 +95,7 @@ def compute_counts(channels, samples, idir, outdir, data_label):
 
                 head, tail = os.path.split(parquet_file)    # get the file name from full path
 
-                outname = outdir + tail[:-8] + '.root'  # the slice removes the .parquet extension (to replace it with a .root extension)
+                outname = outdir + '/' + tail[:-8] + '.root'  # the slice removes the .parquet extension (to replace it with a .root extension)
                 with uproot.recreate(outdir + tail[:-8] + '.root') as file:
                     file['Events'] = pd.DataFrame(data)
 
