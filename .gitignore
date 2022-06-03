@@ -41,3 +41,6 @@ binder/EGamma
 *.parquet
 
 histo
+
+
+*/num_dict.pkl

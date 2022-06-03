@@ -147,3 +147,5 @@ python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --sample Glu
 ```
 python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --json samples_pfnano.json
 ```
+
+Make parquets. Run postprocess_parquets.py to add a "tot_weight" column.
