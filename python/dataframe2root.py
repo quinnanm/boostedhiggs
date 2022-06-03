@@ -44,6 +44,8 @@ def compute_counts(channels, samples, idir, outdir, data_label):
         print(f'For {ch} channel')
 
         for sample in samples:
+            if 'QCD' not in sample:
+                continue
             print(f'For {sample} sample')
             # check if sample is data to skip
             is_data = False
