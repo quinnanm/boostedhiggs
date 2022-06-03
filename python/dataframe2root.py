@@ -89,6 +89,11 @@ def compute_counts(channels, samples, idir, outdir, data_label):
                     print('no skimmed events. skipping')
                     continue
 
+                print(data['fj_bjets_ophem'].dtype)
+                print(data['fj_pt'].dtype)
+
+                sys.exit(1)
+
                 if 'fj_bjets_ophem' in data.keys():
                     data.drop(columns=['fj_bjets_ophem'], inplace=True)
 
