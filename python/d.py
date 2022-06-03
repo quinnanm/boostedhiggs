@@ -29,11 +29,6 @@ for subdir, dirs, files in os.walk(indir):
         if ('had.parquet' in file) and ('QCD' in subdir):
             f = subdir + '/' + file
             # f=f.replace("/eos/uscms/","root://cmseos.fnal.gov//")
-            outf = f
-            print('prepping input file', f, '...')
-            outname = outf[outf.rfind(args.year + '/') + 5:]
-            outname = outdir + outname.strip('.' + filetype) + '.root'
-            outname = outname.replace('/outfiles/', '_')
 
             # load parquet into dataframe
             print('loading dataframe...')
@@ -48,6 +43,6 @@ for subdir, dirs, files in os.walk(indir):
 
             # fill dataframe to rootfile
             # array2root(data.to_records(index=False), filename=outname, treename=args.treename, mode='RECREATE') #dont use, requires root
-            file = uproot.recreate(outname)
+            file = uproot.recreate(outdir)
             file[args.treename] = uproot.newtree(data)
-            print('Wrote rootfile ', outname)
+            print('Wrote rootfile ', outdir)
