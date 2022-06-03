@@ -61,7 +61,7 @@ def compute_counts(channels, samples, odir):
     num_dict = {}
     for ch in channels:
         num_dict[ch] = {}
-        print(f'processing {ch} channel')
+        print(f'For {ch} channel')
 
         for sample in samples:
             # check if sample is data to skip
@@ -103,6 +103,8 @@ def compute_counts(channels, samples, odir):
                     num_dict[ch][single_key] = num_dict[ch][single_key] + data['tot_weight'].sum()
                 else:
                     num_dict[ch][sample] = num_dict[ch][sample] + data['tot_weight'].sum()
+
+            print(f'number of events for {sample} is {num_dict[ch][sample]}')
 
     with open(f'./{odir}/num_dict.pkl', 'wb') as f:  # saves counts
         pkl.dump(num_dict, f)
