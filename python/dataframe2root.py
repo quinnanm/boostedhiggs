@@ -41,6 +41,9 @@ def compute_counts(channels, samples, idir, outdir, data_label):
     """
 
     for ch in channels:
+        if not os.path.exists(outdir + ch):
+            os.makedirs(outdir + ch)
+
         print(f'For {ch} channel')
 
         for sample in samples:
@@ -64,6 +67,9 @@ def compute_counts(channels, samples, idir, outdir, data_label):
                 dir_name = single_key
             else:
                 dir_name = sample
+
+            if not os.path.exists(outdir + ch + '/' + dir_name):
+                os.makedirs(outdir + ch + '/' + dir_name)
 
             # get list of parquet files that have been processed
             parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')
@@ -95,8 +101,8 @@ def compute_counts(channels, samples, idir, outdir, data_label):
 
                 head, tail = os.path.split(parquet_file)    # get the file name from full path
 
-                outname = outdir + '/' + tail[:-8] + '.root'  # the slice removes the .parquet extension (to replace it with a .root extension)
-                with uproot.recreate(outdir + tail[:-8] + '.root') as file:
+                outname = outdir + ch + '/' + dir_name + '/' + tail[:-8] + '.root'  # the slice removes the .parquet extension (to replace it with a .root extension)
+                with uproot.recreate(outname) as file:
                     file['Events'] = pd.DataFrame(data)
 
                 print('Wrote rootfile ', outname)
@@ -121,7 +127,8 @@ if __name__ == "__main__":
     samples = os.listdir(f'{idir}')
 
     # make directory to hold counts
-    if not os.path.exists(args.odir):
-        os.makedirs(args.odir)
+    outdir = args.odir + '/'
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
 
-    compute_counts(channels, samples, idir, args.odir, data_label)
+    compute_counts(channels, samples, idir, outdir, data_label)
