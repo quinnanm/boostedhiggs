@@ -90,7 +90,7 @@ def compute_counts(channels, samples, idir, outdir, data_label):
                     continue
 
                 for key in data.keys():
-                    print(key, len(data[key]))
+                    print(key, data[key])
 
                 head, tail = os.path.split(parquet_file)    # get the file name from full path
 
