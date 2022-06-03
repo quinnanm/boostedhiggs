@@ -10,8 +10,8 @@ for ch in rootfiles/* ; do
     cd $sample
     name=$(awk -F'/' '{ a = length($NF) ? $NF : $(NF-1); print a }' <<< "$sample")
     echo $name
-    hadd $name_$ch.root *
-    mv $name_$ch.root ../../../roots/
+    hadd {$name}_{$ch}.root *
+    mv {$name}_{$ch}.root ../../../roots/
     cd ../../..
   done
 done
