@@ -93,6 +93,7 @@ def compute_counts(channels, samples, idir, outdir, data_label):
                     print('no skimmed events. skipping')
                     continue
 
+                # drop AK columns
                 for key in data.keys():
                     if data[key].dtype == 'object':
                         data.drop(columns=[key], inplace=True)
