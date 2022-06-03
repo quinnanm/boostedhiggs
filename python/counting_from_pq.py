@@ -70,7 +70,6 @@ def compute_counts(channels, samples, odir):
                 if key in sample:
                     is_data = True
             if is_data:
-                print('sample is_data so skipping')
                 continue
 
             combine = False
