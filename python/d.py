@@ -50,7 +50,9 @@ for subdir, dirs, files in os.walk(indir):
             # file = uproot.recreate(outdir + file[:-8] + '.root')
             # file[args.treename] = uproot.newtree(data)
             # print('Wrote rootfile ', outdir + file[5:] + '.root')
+
+            outname = outdir + file[:-8] + '.root'  # the slice replaces parquet extension with root extension
             with uproot.recreate(outdir + file[:-8] + '.root') as file:
                 file[args.treename] = pd.DataFrame(data['fj_pt'])
 
-            print('Wrote rootfile ', outdir + file[:-8] + '.root')
+            print('Wrote rootfile ', outname)
