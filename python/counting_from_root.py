@@ -10,7 +10,7 @@ import pickle as pkl
 # counts events stored in root files
 
 
-for ch in ['had', 'mu', 'ele']:
+for ch in ['ele', 'mu', 'had']:
 
     print(f'For {ch} channel')
 
