@@ -18,13 +18,12 @@ parser.add_argument("-t", "--treename", dest="treename", default='Events')
 parser.add_argument("-d", "--data", dest="isdata", default='False')
 args = parser.parse_args()
 
-indir = 'l'
+indir = '/eos/uscms/store/user/cmantill/boostedhiggs/May7_2017'
 filetype = '.parquet'
 outdir = './rootfiles/'
 print(args.proc + ' must be in file')
 
 for subdir, dirs, files in os.walk(indir):
-    print(subdir)
     for file in files:
         # load files
         if ('had.parquet' in file) and (args.proc in subdir):
