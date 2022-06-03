@@ -15,12 +15,12 @@ for ch in ['had', 'mu', 'ele']:
     print(f'For {ch} channel')
 
     # repo = '/eos/uscms/store/user/mequinna/boostedhiggs/combinetest_23may22/merged/2017/'
-    repo = '/uscms/home/fmokhtar/nobackup/boostedhiggs/python/merged/2017'
+    repo = '/uscms/home/fmokhtar/nobackup/boostedhiggs/python/merged/2017/'
 
     for merged_file in os.listdir(repo):
 
         # load in uproot
-        events = uproot.open(f"{merged_file}")
+        events = uproot.open(f"{repo+merged_file}")
         # sum tot_weight
         counts = events['Events']['tot_weight'].array(library="np").sum()
         print(f'number of events for {merged_file[:-12]} is {counts}')
