@@ -41,7 +41,6 @@ def compute_counts(channels, samples, odir, data_label):
             combine = False
             for single_key, key in add_samples.items():
                 if key in sample:
-                    if single_key not in num_dict[ch].keys():
                     combine = True
                     break
 
