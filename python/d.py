@@ -12,7 +12,7 @@ import pyarrow.parquet as pq
 pd.options.mode.chained_assignment = None  # default='warn'
 
 parser = argparse.ArgumentParser(description='converting pandas dataframe to rootfile ')
-parser.add_argument("-p", "--proc", dest="proc", default='parquet')  # specify file type like QCD
+parser.add_argument("-p", "--process", dest="proc", default='process')  # specify file type like QCD
 parser.add_argument("-y", "--year", dest="year", default='2016')
 parser.add_argument("-t", "--treename", dest="treename", default='Events')
 parser.add_argument("-d", "--data", dest="isdata", default='False')
@@ -21,7 +21,11 @@ args = parser.parse_args()
 indir = '/eos/uscms/store/user/cmantill/boostedhiggs/May7_2017'
 filetype = '.parquet'
 outdir = './rootfiles/'
-print(args.proc + ' must be in file')
+
+if not os.path.exists(outdir):
+    os.makedirs(outdir)
+
+print(args.process + ' must be in file')
 
 for subdir, dirs, files in os.walk(indir):
     for file in files:
