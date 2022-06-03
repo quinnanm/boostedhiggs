@@ -35,7 +35,7 @@ parser.add_argument('--odir',     dest='odir',      default='rootfiles',   help=
 args = parser.parse_args()
 
 
-def compute_counts(channels, samples, odir, data_label):
+def compute_counts(channels, samples, outdir, data_label):
     """
     Given a list of samples and channels, reads the .pq files and saves them as .root files.
     """
