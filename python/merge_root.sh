@@ -5,7 +5,7 @@ set -e
 
 # process the cms data
 for ch in rootfiles/* ; do
-  for sample in ch/* ; do
+  for sample in $ch/* ; do
     echo $sample
     # #generate pytorch data files from pkl files
     # python3 dataset.py --data cms --dataset $sample \
