@@ -9,7 +9,6 @@ import pickle as pkl
 
 # counts events stored in root files
 
-samples = os.listdir("./rootfiles/")
 num_dict = {}
 
 for ch in ['had', 'mu', 'ele']:
