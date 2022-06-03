@@ -6,10 +6,10 @@ set -e
 # process the cms data
 for ch in rootfiles/* ; do
   for sample in $ch/* ; do
-    echo $sample
-    # #generate pytorch data files from pkl files
-    # python3 dataset.py --data cms --dataset $sample \
-    #   --processed_dir $sample/processed --num-files-merge 1 --num-proc 1
+    cd sample
+    name=$(awk -F'/' '{ a = length($NF) ? $NF : $(NF-1); print a }' <<< "$sample")
+    hadd $name.root *
+    mv $name.root ..
   done
 done
 
