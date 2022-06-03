@@ -74,9 +74,11 @@ def compute_counts(channels, samples, odir):
                 continue
 
             combine = False
+            print('1', sample)
             for single_key, key in add_samples.items():
                 if key in sample:
                     if single_key not in num_dict.keys():
+                        print('initializing')
                         num_dict[ch][single_key] = 0
                     combine = True
                     break
