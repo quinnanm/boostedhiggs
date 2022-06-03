@@ -21,9 +21,7 @@ import uproot
 import numpy as np
 import pandas as pd
 import pyarrow.parquet as pq
-# from root_numpy import root2array, array2root, fill_hist, array2tree
-# from rootpy.tree import Tree, TreeModel, FloatCol
-# import ROOT as r
+
 pd.options.mode.chained_assignment = None  # default='warn'
 
 
@@ -111,7 +109,7 @@ def compute_counts(channels, samples, idir, outdir, data_label):
 if __name__ == "__main__":
     """
     e.g. run locally as
-    python dataframe2root.py --dir May7_2017 --ch ele --odir rootfiles
+    python dataframe2root.py --dir May7_2017 --ch ele,mu,had --odir rootfiles
     """
 
     channels = args.ch.split(',')
