@@ -74,7 +74,6 @@ def compute_counts(channels, samples, odir):
                 continue
 
             combine = False
-            print(f'processing {sample} sample')
             for single_key, key in add_samples.items():
                 if key in sample:
                     if single_key not in num_dict.keys():
@@ -104,7 +103,10 @@ def compute_counts(channels, samples, odir):
                 else:
                     num_dict[ch][sample] = num_dict[ch][sample] + data['tot_weight'].sum()
 
-            print(f'number of events for {sample} is {num_dict[ch][sample]}')
+            if combine:
+                print(f'number of events for {single_key} is {num_dict[ch][single_key]}')
+            else:
+                print(f'number of events for {sample} is {num_dict[ch][sample]}')
 
     with open(f'./{odir}/num_dict.pkl', 'wb') as f:  # saves counts
         pkl.dump(num_dict, f)
