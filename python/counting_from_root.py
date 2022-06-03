@@ -18,7 +18,8 @@ for ch in ['had', 'mu', 'ele']:
     repo = '/uscms/home/fmokhtar/nobackup/boostedhiggs/python/merged/2017/'
 
     for merged_file in os.listdir(repo):
-
+        if ch not in merged_file:
+            continue
         # load in uproot
         events = uproot.open(f"{repo+merged_file}")
         # sum tot_weight
