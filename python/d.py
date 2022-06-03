@@ -12,7 +12,7 @@ import pyarrow.parquet as pq
 pd.options.mode.chained_assignment = None  # default='warn'
 
 parser = argparse.ArgumentParser(description='converting pandas dataframe to rootfile ')
-parser.add_argument("-p", "--process", dest="proc", default='process')  # specify file type like QCD
+parser.add_argument("-p", "--process", dest="process", default='process')  # specify file type like QCD
 parser.add_argument("-y", "--year", dest="year", default='2016')
 parser.add_argument("-t", "--treename", dest="treename", default='Events')
 parser.add_argument("-d", "--data", dest="isdata", default='False')
