@@ -103,10 +103,8 @@ def compute_counts(channels, samples, odir):
                 else:
                     num_dict[ch][sample] = num_dict[ch][sample] + data['tot_weight'].sum()
 
-            if combine:
-                print(f'number of events for {single_key} is {num_dict[ch][single_key]}')
-            else:
-                print(f'number of events for {sample} is {num_dict[ch][sample]}')
+        for key, value in num_dict[ch].items():
+            print(f'number of events for {key} is {value}')
 
     with open(f'./{odir}/num_dict.pkl', 'wb') as f:  # saves counts
         pkl.dump(num_dict, f)
