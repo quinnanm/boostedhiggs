@@ -1,5 +1,7 @@
 # script for converting pandas dataframe to rootfile
 #import fastparquet
+from utils import add_samples, data_by_ch, data_by_ch_2018
+
 import os
 import uproot
 import argparse
