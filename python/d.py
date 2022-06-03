@@ -24,6 +24,7 @@ outdir = './rootfiles/'
 print(args.proc + ' must be in file')
 
 for subdir, dirs, files in os.walk(indir):
+    print(subdir)
     for file in files:
         # load files
         if ('had.parquet' in file) and (args.proc in subdir):
