@@ -7,9 +7,9 @@ mkdir -p roots
 # process the cms data
 for ch in rootfiles/* ; do
   for sample in $ch/* ; do
-    cd $sample
     name=$(awk -F'/' '{ a = length($NF) ? $NF : $(NF-1); print a }' <<< "$sample")
-    hadd $name.root *
+    cd $sample
+    hadd $name_$ch.root *
     mv $name_$ch.root ../../../roots/
     cd ../../..
   done
