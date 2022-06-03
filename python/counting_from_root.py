@@ -16,7 +16,7 @@ for ch in ['had', 'mu', 'ele']:
     print(f'For {ch} channel')
 
     # repo = '/eos/uscms/store/user/mequinna/boostedhiggs/combinetest_23may22/merged/2017/'
-    repo = '/uscms/home/fmokhtar/nobackup/boostedhiggs/python/rootfiles/'
+    repo = '/uscms/home/fmokhtar/nobackup/boostedhiggs/python/merged/2017'
 
     for sample in os.listdir(repo):
 
