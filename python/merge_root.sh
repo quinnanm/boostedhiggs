@@ -6,7 +6,7 @@ mkdir -p roots
 
 # process the cms data
 for ch in rootfiles/* ; do
-  channel=name=$(awk -F'/' '{ a = length($NF) ? $NF : $(NF-1); print a }' <<< "$ch")
+  channel=$(awk -F'/' '{ a = length($NF) ? $NF : $(NF-1); print a }' <<< "$ch")
   for sample in $ch/* ; do
     cd $sample
     name=$(awk -F'/' '{ a = length($NF) ? $NF : $(NF-1); print a }' <<< "$sample")
