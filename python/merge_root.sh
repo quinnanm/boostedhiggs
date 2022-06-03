@@ -13,8 +13,12 @@ for ch in rootfiles/* ; do
     cd $sample
     name=$(awk -F'/' '{ a = length($NF) ? $NF : $(NF-1); print a }' <<< "$sample")
     echo $name
-    hadd $(echo ${name}_${channel}).root *
-    mv $(echo ${name}_${channel}).root ../../../roots/
+
+    if [ "$(ls -A $DIR)" ]; then
+     hadd $(echo ${name}_${channel}).root *
+     mv $(echo ${name}_${channel}).root ../../../roots/
+    fi
+
     cd ../../..
   done
 done
