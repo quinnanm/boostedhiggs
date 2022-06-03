@@ -33,14 +33,14 @@ warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--channels', dest='channels',  default='ele,mu,had',  help='channels for which to plot this variable')
+parser.add_argument('--ch',       dest='ch',        default='ele,mu,had',  help='channels for which to plot this variable')
 parser.add_argument('--dir',      dest='dir',       default='May7_2017',   help="tag for data directory")
 parser.add_argument('--odir',     dest='odir',      default='counts',       help="tag for output directory")
 
 args = parser.parse_args()
 
 
-def compute_counts(channels, samples, odir):
+def compute_counts(channels, samples, odir, data_label):
     """
     Given a list of samples and channels, computes the counts of events in the processed .pq files.
     Weights the event by the 'tot_weight' column and then sums up the counts.
@@ -100,10 +100,10 @@ def compute_counts(channels, samples, odir):
 if __name__ == "__main__":
     """
     e.g. run locally as
-    python counting_script.py --dir May7_2016 --ch ele --odir counts
+    python counting_from_pq.py --dir May7_2017 --ch ele --odir counts
     """
 
-    channels = args.channels.split(',')
+    channels = args.ch.split(',')
 
     year = args.dir[-4:]
     idir = '/eos/uscms/store/user/cmantill/boostedhiggs/' + args.dir
@@ -119,4 +119,4 @@ if __name__ == "__main__":
     if not os.path.exists(args.odir):
         os.makedirs(args.odir)
 
-    compute_counts(channels, samples, args.odir)
+    compute_counts(channels, samples, args.odir, data_label)

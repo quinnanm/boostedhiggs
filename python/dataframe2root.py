@@ -11,39 +11,96 @@ import pyarrow.parquet as pq
 # import ROOT as r
 pd.options.mode.chained_assignment = None  # default='warn'
 
-parser = argparse.ArgumentParser(description='converting pandas dataframe to rootfile ')
-parser.add_argument("-p", "--process", dest="process", default='process')  # specify file type like QCD
-parser.add_argument("-y", "--year", dest="year", default='2016')
-parser.add_argument("-t", "--treename", dest="treename", default='Events')
-parser.add_argument("-d", "--data", dest="isdata", default='False')
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--ch',       dest='ch',        default='ele,mu,had',  help='channels for which to plot this variable')
+parser.add_argument('--dir',      dest='dir',       default='May7_2017',   help="tag for data directory")
+parser.add_argument('--odir',     dest='odir',      default='rootfiles',   help="tag for output directory")
+
 args = parser.parse_args()
 
-indir = '/eos/uscms/store/user/cmantill/boostedhiggs/May7_2017'
-filetype = '.parquet'
-outdir = './rootfiles/'
 
-if not os.path.exists(outdir):
-    os.makedirs(outdir)
+def compute_counts(channels, samples, odir, data_label):
+    """
+    Given a list of samples and channels, reads the .pq files and saves them as .root files.
+    """
 
-print(args.process + ' must be in file')
+    for ch in channels:
+        print(f'For {ch} channel')
 
-for subdir, dirs, files in os.walk(indir):
-    for file in files:
-        # load files
-        if ('had.parquet' in file) and ('QCD' in subdir):
-            f = subdir + '/' + file
-
-            # load parquet into dataframe
-            print('loading dataframe...')
-            table = pq.read_table(f)
-            data = table.to_pandas()
-            print('# input events:', len(data))
-            if len(data) == 0:
-                print('no skimmed events. skipping')
+        for sample in samples:
+            print(f'For {sample} sample')
+            # check if sample is data to skip
+            is_data = False
+            for key in data_label.values():
+                if key in sample:
+                    is_data = True
+            if is_data:
                 continue
 
-            outname = outdir + file[:-8] + '.root'  # the slice removes the .parquet extension (to replace it with a .root extension)
-            with uproot.recreate(outdir + file[:-8] + '.root') as file:
-                file[args.treename] = pd.DataFrame(data)
+            combine = False
+            for single_key, key in add_samples.items():
+                if key in sample:
+                    if single_key not in num_dict[ch].keys():
+                    combine = True
+                    break
 
-            print('Wrote rootfile ', outname)
+            if combine:
+                dir_name = single_key
+            else:
+                dir_name = sample
+
+            # get list of parquet files that have been processed
+            parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')
+
+            if len(parquet_files) == 0:
+                continue
+
+            for i, parquet_file in enumerate(parquet_files):
+                try:
+                    data = pq.read_table(parquet_file).to_pandas()
+                except:
+                    print('Not able to read data: ', parquet_file, ' should remove evts from scaling/lumi')
+                    continue
+                if len(data) == 0:
+                    continue
+
+                # load parquet into dataframe
+                print('loading dataframe...')
+                table = pq.read_table(parquet_file)
+                data = table.to_pandas()
+                print('# input events:', len(data))
+                if len(data) == 0:
+                    print('no skimmed events. skipping')
+                    continue
+
+                outname = outdir + parquet_file[:-8] + '.root'  # the slice removes the .parquet extension (to replace it with a .root extension)
+                with uproot.recreate(outdir + parquet_file[:-8] + '.root') as file:
+                    file['Events'] = pd.DataFrame(data)
+
+                print('Wrote rootfile ', outname)
+
+
+if __name__ == "__main__":
+    """
+    e.g. run locally as
+    python dataframe2root.py --dir May7_2017 --ch ele --odir rootfiles
+    """
+
+    channels = args.ch.split(',')
+
+    year = args.dir[-4:]
+    idir = '/eos/uscms/store/user/cmantill/boostedhiggs/' + args.dir
+
+    if year == '2018':
+        data_label = data_by_ch_2018
+    else:
+        data_label = data_by_ch
+
+    samples = os.listdir(f'{idir}')
+
+    # make directory to hold counts
+    if not os.path.exists(args.odir):
+        os.makedirs(args.odir)
+
+    compute_counts(channels, samples, args.odir, data_label)
