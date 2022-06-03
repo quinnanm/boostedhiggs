@@ -39,18 +39,6 @@ parser.add_argument('--odir',     dest='odir',      default='counts',       help
 
 args = parser.parse_args()
 
-# define color dict for plotting different samples
-color_dict = {'signal': 'red',
-              'QCD': 'blue',
-              'DYJets': 'green',
-              'TTbar': 'purple',
-              'SingleTop': 'yellow',
-              'WJetsLNu': 'brown',
-              'WQQ': 'orange',
-              'ZQQ': 'magenta',
-              'others': 'black'
-              }
-
 
 def compute_counts(channels, samples, odir):
     """
