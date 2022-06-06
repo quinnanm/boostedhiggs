@@ -19,7 +19,7 @@ args = parser.parse_args()
 if __name__ == "__main__":
     """
     e.g. run locally as
-    python counting_from_root.py --dir rootfiles/ --ch ele
+    python counting_from_root_b4_hadd.py --dir rootfiles/ --ch ele
     """
 
     channels = args.ch.split(',')

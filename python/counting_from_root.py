@@ -12,14 +12,14 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--ch',       dest='ch',        default='ele,mu,had',  help='channels for which to plot this variable')
-parser.add_argument('--dir',      dest='dir',       default='./merged/2017',   help="tag for data directory")
+parser.add_argument('--dir',      dest='dir',       default='./merged/2017/',   help="tag for data directory")
 
 args = parser.parse_args()
 
 if __name__ == "__main__":
     """
     e.g. run locally as
-    python counting_from_root.py --dir merged/2017 --ch ele
+    python counting_from_root.py --dir merged/2017/ --ch ele
     """
 
     channels = args.ch.split(',')
