@@ -98,7 +98,8 @@ def compute_counts(channels, samples, odir, data_label):
                     num_dict[ch][sample] = num_dict[ch][sample] + data['tot_weight'].sum()
 
         for key, value in num_dict[ch].items():
-            print(f'number of events for {key} is {value}')
+            if value != 0:
+                print(f'number of events for {key} is {value}')
 
         print(f'-----------------------------------------')
 
