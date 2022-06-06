@@ -95,13 +95,18 @@ def compute_counts(channels, samples, idir, outdir, data_label):
                     print('no skimmed events. skipping')
                     continue
 
+                for key in data.keys():
+                    if key == 'fj_bjets_ophem':
+                        data.drop(columns=[key], inplace=True)
+
                 # drop AK columns
                 for key in data.keys():
                     if data[key].dtype == 'object':
-                        #data.drop(columns=[key], inplace=True)
-                        # data[key]=data[key].array(library="np")
-                        data[key] = 0
+                        data.drop(columns=[key], inplace=True)
 
+                for key in data.keys():
+                    if key == 'fj_bjets_ophem':
+                        data.drop(columns=[key], inplace=True)
                 _, tail = os.path.split(parquet_file)    # get the file name from full path
 
                 outname = outdir + ch + '/' + dir_name + '/' + f'{sample}_' + tail[:-8] + '.root'  # the [:-8] slice removes the .parquet extension (to replace it with a .root extension)
