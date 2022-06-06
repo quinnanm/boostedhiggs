@@ -98,7 +98,9 @@ def compute_counts(channels, samples, idir, outdir, data_label):
                 # drop AK columns
                 for key in data.keys():
                     if data[key].dtype == 'object':
-                        data.drop(columns=[key], inplace=True)
+                        #data.drop(columns=[key], inplace=True)
+                        # data[key]=data[key].array(library="np")
+                        data[key] = 0
 
                 _, tail = os.path.split(parquet_file)    # get the file name from full path
 
