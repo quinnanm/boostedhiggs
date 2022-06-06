@@ -40,5 +40,5 @@ if __name__ == "__main__":
                 # sum tot_weight
                 counts[sample] = counts[sample] + events['Events']['tot_weight'].array(library="np").sum()
 
-        print(f'number of events for {sample} is {counts[sample]}')
+            print(f'number of events for {sample} is {counts[sample]}')
         print(f'-----------------------------------------')
