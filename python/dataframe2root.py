@@ -99,10 +99,10 @@ def compute_counts(channels, samples, idir, outdir, data_label):
                     if key == 'fj_bjets_ophem':
                         data.drop(columns=[key], inplace=True)
 
-                # drop AK columns
-                for key in data.keys():
-                    if data[key].dtype == 'object':
-                        data.drop(columns=[key], inplace=True)
+                # # drop AK columns
+                # for key in data.keys():
+                #     if data[key].dtype == 'object':
+                #         data.drop(columns=[key], inplace=True)
 
                 for key in data.keys():
                     if key == 'fj_bjets_ophem':
@@ -119,7 +119,7 @@ def compute_counts(channels, samples, idir, outdir, data_label):
 if __name__ == "__main__":
     """
     e.g. run locally as
-    python dataframe2root.py --dir May7_2017 --ch ele,mu,had --odir rootfiles
+    python dataframe2root.py --dir May7_2017 --odir rootfiles --ch ele,mu,had
     """
 
     channels = args.ch.split(',')
