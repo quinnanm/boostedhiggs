@@ -72,7 +72,7 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
             if not pkl_files:  # skip samples which were not processed
                 print('- No processed files found...', pkl_dir, 'skipping sample...', sample)
                 continue
-                
+
             # define an isdata bool
             is_data = False
             for key in data_label.values():
@@ -81,7 +81,7 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
 
             # get list of parquet files that have been processed
             parquet_files = glob.glob(f'{idir}_{yr}/{sample}/outfiles/*_{ch}.parquet')
-            
+
             if len(parquet_files) != 0:
                 print(f'Processing {ch} channel of sample', sample)
 
@@ -95,7 +95,7 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                     if is_data:
                         print('Not able to read data: ', parquet_file, ' should remove evts from scaling/lumi')
                     else:
-                        print('Not able to read data from ',parquet_file)
+                        print('Not able to read data from ', parquet_file)
                     continue
 
                 try:
@@ -118,9 +118,9 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                         if key in sample:
                             single_sample = single_key
 
-                    if year=="Run2" and is_data:
+                    if year == "Run2" and is_data:
                         single_sample = 'Data'
-                            
+
                     # combining all pt bins of a specefic process under one name
                     if single_sample is not None:
                         # print(single_sample)
@@ -137,7 +137,7 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                             var=data[var],
                             weight=event_weight,
                         )
-                        
+
                     # print(hists[var])
 
     # store the hists variable
@@ -180,7 +180,7 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
         h = hists[var]
 
         if h.shape[0] == 0:     # skip empty histograms (such as lepton_pt for hadronic channel)
-            print('Empty histogram ',var)
+            print('Empty histogram ', var)
             continue
 
         # get samples existing in histogram
@@ -190,8 +190,8 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
 
         # data
         data = None
-        #print(data_label)
-        #print(h)
+        # print(data_label)
+        # print(h)
         data = h[{"samples": data_label}]
 
         # signal
@@ -214,13 +214,12 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
         else:
             fig, ax = plt.subplots(1, 1)
 
-            
         errps = {
-            'hatch':'////',
-            'facecolor':'none',
+            'hatch': '////',
+            'facecolor': 'none',
             'lw': 0,
             'color': 'k',
-            'edgecolor':(0,0,0,.5),
+            'edgecolor': (0, 0, 0, .5),
             'linewidth': 0,
             'alpha': 0.4
         }
@@ -236,12 +235,13 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
                 handle.set_color(color_by_sample[label])
 
             tot = bkg[0].copy()
-            for i,b in enumerate(bkg):
-                if i>0: tot = tot+ b
+            for i, b in enumerate(bkg):
+                if i > 0:
+                    tot = tot + b
             ax.stairs(
                 values=tot.values() + np.sqrt(tot.values()),
                 baseline=tot.values() - np.sqrt(tot.values()),
-                edges=tot.axes[0].edges, **errps, 
+                edges=tot.axes[0].edges, **errps,
                 label='Stat. unc.'
             )
 
@@ -265,10 +265,10 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
             if len(bkg) > 0:
                 from hist.intervals import ratio_uncertainty
                 yerr = ratio_uncertainty(data.values(), tot.values(), 'poisson')
-                rax.stairs(1+yerr[1], edges=tot.axes[0].edges, baseline=1-yerr[0], **errps)
+                rax.stairs(1 + yerr[1], edges=tot.axes[0].edges, baseline=1 - yerr[0], **errps)
 
-                if ak.all(tot.values())>0:
-                    hep.histplot(data.values()/tot.values(), tot.axes[0].edges, yerr=np.sqrt(data.values())/tot.values(),
+                if ak.all(tot.values()) > 0:
+                    hep.histplot(data.values() / tot.values(), tot.axes[0].edges, yerr=np.sqrt(data.values()) / tot.values(),
                                  ax=rax, histtype='errorbar', color='k', capsize=4)
                 else:
                     print(f'Warning: no all bins filled for background histogram for {var} {ch}')
@@ -283,8 +283,9 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
                          color='red'
                          )
             sig = signal[0].copy()
-            for i,s in enumerate(signal):
-                if i>0: sig = sig+ s
+            for i, s in enumerate(signal):
+                if i > 0:
+                    sig = sig + s
             ax.stairs(
                 values=sig.values() + np.sqrt(sig.values()),
                 baseline=sig.values() - np.sqrt(sig.values()),
@@ -302,10 +303,10 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
 
         if logy:
             print(f'Saving to {odir}/{ch}_hists_log/{var}.pdf')
-            plt.savefig(f'{odir}/{ch}_hists_log/{var}.pdf',bbox_inches='tight')
+            plt.savefig(f'{odir}/{ch}_hists_log/{var}.pdf', bbox_inches='tight')
         else:
             print(f'Saving to {odir}/{ch}_hists/{var}.pdf')
-            plt.savefig(f'{odir}/{ch}_hists/{var}.pdf',bbox_inches='tight')
+            plt.savefig(f'{odir}/{ch}_hists/{var}.pdf', bbox_inches='tight')
         plt.close()
 
 
@@ -323,8 +324,8 @@ def main(args):
     channels = args.channels.split(',')
 
     # get year
-    years = ["2016","2016APV","2017","2018"] if args.year=="Run2" else [args.year]
-    
+    years = ["2016", "2016APV", "2017", "2018"] if args.year == "Run2" else [args.year]
+
     # get samples to make histograms
     f = open(args.samples)
     json_samples = json.load(f)
@@ -348,7 +349,7 @@ def main(args):
 
     for ch in channels:
         if args.make_hists:
-            if len(glob.glob(f'{odir}/{ch}_hists.pkl'))>0:
+            if len(glob.glob(f'{odir}/{ch}_hists.pkl')) > 0:
                 print('Histograms already exist - remaking them')
             print('Making histograms...')
             make_stacked_hists(args.year, ch, args.idir, odir, vars_to_plot, samples)
@@ -360,10 +361,10 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as:  python make_stacked_hists.py --year 2017 --odir hists --make_hists --plot_hists --channels ele --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # run locally as:  python make_stacked_hists.py --year 2017 --odir hists --make_hists --plot_hists --channels ele --idir /eos/uscms/store/user/cmantill/boostedhiggs/May7
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--year',                   dest='year', required=True, choices=["2016","2016APV","2017","2018","Run2"],  help="year")
+    parser.add_argument('--year',                   dest='year', required=True, choices=["2016", "2016APV", "2017", "2018", "Run2"],  help="year")
     parser.add_argument('--vars',                   dest='vars',                    default="plot_configs/vars.json",             help='path to json with variables to be plotted')
     parser.add_argument('--samples',                dest='samples',                 default="plot_configs/samples_pfnano.json",   help='path to json with samples to be plotted')
     parser.add_argument('--channels',               dest='channels',                default='ele,mu,had',                         help='channels for which to plot this variable')
