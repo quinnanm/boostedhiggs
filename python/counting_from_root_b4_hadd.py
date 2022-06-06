@@ -32,10 +32,9 @@ if __name__ == "__main__":
         # repo = '/uscms/home/fmokhtar/nobackup/boostedhiggs/python/merged/2017/'
 
         for sample in os.listdir(args.dir + ch):
-            print(sample)
             counts[sample] = 0
             for root_file in os.listdir(args.dir + ch + '/' + sample):
-
+                print('sample')
                 # load in uproot
                 events = uproot.open(f"{args.dir + ch + '/' + sample + '/' + root_file}")
                 # sum tot_weight
