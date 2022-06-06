@@ -69,7 +69,7 @@ def compute_counts(channels, samples, odir, data_label):
             if combine:
                 print(sample, combine, single_key)
             else:
-                print(sample, combine, ssample)
+                print(sample, combine)
     #
     #         if combine and single_key not in num_dict[ch].keys():   # if the counts for the combined samples has not been intialized yet
     #             num_dict[ch][single_key] = 0
