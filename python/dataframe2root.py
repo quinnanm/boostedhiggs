@@ -45,8 +45,8 @@ def compute_counts(channels, samples, idir, outdir, data_label):
         print(f'For {ch} channel')
 
         for sample in samples:
-
             print(f'For {sample} sample')
+
             # check if sample is data to skip
             is_data = False
             for key in data_label.values():
@@ -55,6 +55,7 @@ def compute_counts(channels, samples, idir, outdir, data_label):
             if is_data:
                 continue
 
+            # combine samples under one key (e.g. all DY pt bins should be saved under the same DY directory)
             combine = False
             for single_key, key in add_samples.items():
                 if key in sample:
@@ -89,6 +90,7 @@ def compute_counts(channels, samples, idir, outdir, data_label):
                 table = pq.read_table(parquet_file)
                 data = table.to_pandas()
                 print('# input events:', len(data))
+
                 if len(data) == 0:
                     print('no skimmed events. skipping')
                     continue
@@ -98,9 +100,9 @@ def compute_counts(channels, samples, idir, outdir, data_label):
                     if data[key].dtype == 'object':
                         data.drop(columns=[key], inplace=True)
 
-                head, tail = os.path.split(parquet_file)    # get the file name from full path
+                _, tail = os.path.split(parquet_file)    # get the file name from full path
 
-                outname = outdir + ch + '/' + dir_name + '/' + tail[:-8] + '.root'  # the slice removes the .parquet extension (to replace it with a .root extension)
+                outname = outdir + ch + '/' + dir_name + '/' + tail[:-8] + '.root'  # the [:-8] slice removes the .parquet extension (to replace it with a .root extension)
                 with uproot.recreate(outname) as file:
                     file['Events'] = pd.DataFrame(data)
 
@@ -115,7 +117,7 @@ if __name__ == "__main__":
 
     channels = args.ch.split(',')
 
-    year = args.dir[-4:]
+    year = args.dir[-4:]    # get the year from the --dir argument being passed
     idir = '/eos/uscms/store/user/cmantill/boostedhiggs/' + args.dir
 
     if year == '2018':

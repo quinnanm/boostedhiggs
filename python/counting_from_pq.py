@@ -52,6 +52,8 @@ def compute_counts(channels, samples, odir, data_label):
         print(f'For {ch} channel')
 
         for sample in samples:
+            print(f'For {sample} sample')
+
             # check if sample is data to skip
             is_data = False
             for key in data_label.values():
@@ -60,14 +62,16 @@ def compute_counts(channels, samples, odir, data_label):
             if is_data:
                 continue
 
+            # combine samples under one key (e.g. all DY pt bins should be combined under one single_key)
             combine = False
             for single_key, key in add_samples.items():
                 if key in sample:
-                    if single_key not in num_dict[ch].keys():
-                        num_dict[ch][single_key] = 0
                     combine = True
                     break
-            if not combine:
+
+            if combine and single_key not in num_dict[ch].keys():   # if the counts for the combined samples has not been intialized yet
+                num_dict[ch][single_key] = 0
+            elif not combine:
                 num_dict[ch][sample] = 0
 
             # get list of parquet files that have been processed
