@@ -99,13 +99,15 @@ def compute_counts(channels, samples, idir, outdir, data_label):
                     if key == 'fj_bjets_ophem':
                         data.drop(columns=[key], inplace=True)
 
-                # # drop AK columns
-                # for key in data.keys():
-                #     if data[key].dtype == 'object':
-                #         data.drop(columns=[key], inplace=True)
+                # drop AK columns
+                for key in data.keys():
+                    if data[key].dtype == 'object':
+                        print(f'dropping column {key}')
+                        data.drop(columns=[key], inplace=True)
 
                 for key in data.keys():
                     if key == 'fj_bjets_ophem':
+                        print(f'dropping column {key}')
                         data.drop(columns=[key], inplace=True)
                 _, tail = os.path.split(parquet_file)    # get the file name from full path
 
