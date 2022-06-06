@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# run after running dataframe2root.py to merge the rootfiles
+# run after running dataframe2root.py to merge the rootfiles under merged/2017
 
 set -e
 
