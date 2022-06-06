@@ -33,8 +33,8 @@ warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--channels', dest='channels',  default='ele,mu,had',  help='channels for which to plot this variable')
-parser.add_argument('--dir',      dest='dir',       default='May7_2016',   help="tag for data directory")
+parser.add_argument('--ch',       dest='ch',        default='ele,mu,had',  help='channels for which to plot this variable')
+parser.add_argument('--dir',      dest='dir',       default='May7_2017',   help="tag for data directory")
 parser.add_argument('--odir',     dest='odir',      default='counts',       help="tag for output directory")
 
 args = parser.parse_args()
@@ -51,8 +51,7 @@ color_dict = {'signal': 'red',
               'others': 'black'
               }
 
-
-def compute_counts(channels, samples, odir):
+def compute_counts(channels, samples, odir, data_label):
     """
     Given a list of samples and channels, computes the counts of events in the processed .pq files.
     Weights the event by the 'tot_weight' column and then sums up the counts.
@@ -61,27 +60,28 @@ def compute_counts(channels, samples, odir):
     num_dict = {}
     for ch in channels:
         num_dict[ch] = {}
-        print(f'processing {ch} channel')
+        print(f'For {ch} channel')
 
         for sample in samples:
+
             # check if sample is data to skip
             is_data = False
             for key in data_label.values():
                 if key in sample:
                     is_data = True
             if is_data:
-                print('sample is_data so skipping')
                 continue
 
+            # combine samples under one key (e.g. all DY pt bins should be combined under one single_key)
             combine = False
-            print(f'processing {sample} sample')
             for single_key, key in add_samples.items():
                 if key in sample:
-                    if single_key not in num_dict.keys():
-                        num_dict[ch][single_key] = 0
                     combine = True
                     break
-            if not combine:
+
+            if combine and single_key not in num_dict[ch].keys():   # if the counts for the combined samples has not been intialized yet
+                num_dict[ch][single_key] = 0
+            elif not combine:
                 num_dict[ch][sample] = 0
 
             # get list of parquet files that have been processed
@@ -99,10 +99,20 @@ def compute_counts(channels, samples, odir):
                 if len(data) == 0:
                     continue
 
+                # drop AK columns
+                for key in data.keys():
+                    if data[key].dtype == 'object':
+                        data.drop(columns=[key], inplace=True)
+
                 if combine:
                     num_dict[ch][single_key] = num_dict[ch][single_key] + data['tot_weight'].sum()
                 else:
                     num_dict[ch][sample] = num_dict[ch][sample] + data['tot_weight'].sum()
+
+        for key, value in num_dict[ch].items():
+            print(f'number of events for {key} is {value}')
+
+        print(f'-----------------------------------------')
 
     with open(f'./{odir}/num_dict.pkl', 'wb') as f:  # saves counts
         pkl.dump(num_dict, f)
@@ -160,10 +170,10 @@ def make_pie(channels, odir):
 if __name__ == "__main__":
     """
     e.g. run locally as
-    python counting_script.py --dir May7_2016 --ch ele --odir counts
+    python counting_from_pq.py --dir May7_2017 --ch ele --odir counts
     """
 
-    channels = args.channels.split(',')
+    channels = args.ch.split(',')
 
     year = args.dir[-4:]
     idir = '/eos/uscms/store/user/cmantill/boostedhiggs/' + args.dir
@@ -179,5 +189,5 @@ if __name__ == "__main__":
     if not os.path.exists(args.odir):
         os.makedirs(args.odir)
 
-    compute_counts(channels, samples, args.odir)
+    compute_counts(channels, samples, args.odir, data_label)
     make_pie(channels, args.odir)
