@@ -36,7 +36,7 @@ if __name__ == "__main__":
             for root_file in os.listdir(args.dir + ch + '/' + sample):
 
                 # load in uproot
-                events = uproot.open(f"{args.dir + ch + '/' + sample + root_file}")
+                events = uproot.open(f"{args.dir + ch + '/' + sample + '/' + root_file}")
                 # sum tot_weight
                 counts[sample] = counts[sample] + events['Events']['tot_weight'].array(library="np").sum()
 
