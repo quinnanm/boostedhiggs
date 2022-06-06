@@ -52,7 +52,6 @@ def compute_counts(channels, samples, odir, data_label):
         print(f'For {ch} channel')
 
         for sample in samples:
-
             # check if sample is data to skip
             is_data = False
             for key in data_label.values():
@@ -67,44 +66,45 @@ def compute_counts(channels, samples, odir, data_label):
                 if key in sample:
                     combine = True
                     break
-
-            if combine and single_key not in num_dict[ch].keys():   # if the counts for the combined samples has not been intialized yet
-                num_dict[ch][single_key] = 0
-            elif not combine:
-                num_dict[ch][sample] = 0
-
-            # get list of parquet files that have been processed
-            parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')
-
-            if len(parquet_files) == 0:
-                continue
-
-            for i, parquet_file in enumerate(parquet_files):
-                try:
-                    data = pq.read_table(parquet_file).to_pandas()
-                except:
-                    print('Not able to read data: ', parquet_file, ' should remove evts from scaling/lumi')
-                    continue
-                if len(data) == 0:
-                    continue
-
-                # drop AK columns
-                for key in data.keys():
-                    if data[key].dtype == 'object':
-                        data.drop(columns=[key], inplace=True)
-
-                if combine:
-                    num_dict[ch][single_key] = num_dict[ch][single_key] + data['tot_weight'].sum()
-                else:
-                    num_dict[ch][sample] = num_dict[ch][sample] + data['tot_weight'].sum()
-
-        for key, value in num_dict[ch].items():
-            print(f'number of events for {key} is {value}')
-
-        print(f'-----------------------------------------')
-
-    with open(f'./{odir}/num_dict.pkl', 'wb') as f:  # saves counts
-        pkl.dump(num_dict, f)
+            print(sample, combine, single_key)
+    #
+    #         if combine and single_key not in num_dict[ch].keys():   # if the counts for the combined samples has not been intialized yet
+    #             num_dict[ch][single_key] = 0
+    #         elif not combine:
+    #             num_dict[ch][sample] = 0
+    #
+    #         # get list of parquet files that have been processed
+    #         parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')
+    #
+    #         if len(parquet_files) == 0:
+    #             continue
+    #
+    #         for i, parquet_file in enumerate(parquet_files):
+    #             try:
+    #                 data = pq.read_table(parquet_file).to_pandas()
+    #             except:
+    #                 print('Not able to read data: ', parquet_file, ' should remove evts from scaling/lumi')
+    #                 continue
+    #             if len(data) == 0:
+    #                 continue
+    #
+    #             # drop AK columns
+    #             for key in data.keys():
+    #                 if data[key].dtype == 'object':
+    #                     data.drop(columns=[key], inplace=True)
+    #
+    #             if combine:
+    #                 num_dict[ch][single_key] = num_dict[ch][single_key] + data['tot_weight'].sum()
+    #             else:
+    #                 num_dict[ch][sample] = num_dict[ch][sample] + data['tot_weight'].sum()
+    #
+    #     for key, value in num_dict[ch].items():
+    #         print(f'number of events for {key} is {value}')
+    #
+    #     print(f'-----------------------------------------')
+    #
+    # with open(f'./{odir}/num_dict.pkl', 'wb') as f:  # saves counts
+    #     pkl.dump(num_dict, f)
 
 
 if __name__ == "__main__":
