@@ -51,6 +51,7 @@ color_dict = {'signal': 'red',
               'others': 'black'
               }
 
+
 def compute_counts(channels, samples, odir, data_label):
     """
     Given a list of samples and channels, computes the counts of events in the processed .pq files.
@@ -170,7 +171,7 @@ def make_pie(channels, odir):
 if __name__ == "__main__":
     """
     e.g. run locally as
-    python counting_from_pq.py --dir May7_2017 --ch ele --odir counts
+    python make_pie_charts.py --dir May7_2017 --odir pie_charts --ch ele,mu,had
     """
 
     channels = args.ch.split(',')
