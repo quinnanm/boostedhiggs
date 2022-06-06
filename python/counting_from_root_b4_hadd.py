@@ -33,12 +33,12 @@ if __name__ == "__main__":
 
         for sample in os.listdir(args.dir + ch):
             counts[sample] = 0
-            for root_file in os.listdir(args.dir + ch + '/' + sample)
+            for root_file in os.listdir(args.dir + ch + '/' + sample):
 
-            # load in uproot
-            events = uproot.open(f"{args.dir + ch + '/' + sample + root_file}")
-            # sum tot_weight
-            counts[sample] = counts[sample] + events['Events']['tot_weight'].array(library="np").sum()
+                # load in uproot
+                events = uproot.open(f"{args.dir + ch + '/' + sample + root_file}")
+                # sum tot_weight
+                counts[sample] = counts[sample] + events['Events']['tot_weight'].array(library="np").sum()
 
         print(f'number of events for {sample} is {counts[sample]}')
         print(f'-----------------------------------------')
