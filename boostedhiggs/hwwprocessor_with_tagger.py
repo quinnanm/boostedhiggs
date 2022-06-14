@@ -77,11 +77,12 @@ def build_p4(cand):
 
 
 class HwwProcessor(processor.ProcessorABC):
-    def __init__(self, year="2017", yearmod="", channels=["ele", "mu", "had"], output_location="./outfiles/", apply_trigger=True):
+    def __init__(self, year="2017", yearmod="", channels=["ele", "mu", "had"], output_location="./outfiles/", apply_trigger=True, save_ak15=False):
         self._year = year
         self._yearmod = yearmod
         self._channels = channels
         self._output_location = output_location
+        self.save_ak15 = save_ak15
 
         # trigger paths
         with importlib.resources.path("boostedhiggs.data", "triggers.json") as path:
