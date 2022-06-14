@@ -645,6 +645,7 @@ class HwwProcessor(processor.ProcessorABC):
 
         # TODO: adding tagger stuff
         for ch in self._channels:
+            print('channel', ch)
             print("pre-inference")
 
             pnet_vars = runInferenceTriton(
