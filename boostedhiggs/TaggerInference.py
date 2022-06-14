@@ -21,7 +21,7 @@ import tritonclient.http as triton_http
 
 from tqdm import tqdm
 
-from utils import pad_val
+from boostedhiggs.utils import pad_val
 
 
 def get_pfcands_features(
