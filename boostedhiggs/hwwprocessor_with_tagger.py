@@ -115,6 +115,11 @@ class HwwProcessor(processor.ProcessorABC):
                 "had": "JetHT",
             }
 
+        # for tagger model and preprocessing dict
+        self.tagger_resources_path = (
+            str(pathlib.Path(__file__).parent.resolve()) + "/tagger_resources/"
+        )
+
     @property
     def accumulator(self):
         return self._accumulator
