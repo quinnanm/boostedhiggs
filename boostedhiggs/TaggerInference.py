@@ -421,7 +421,7 @@ class wrapped_triton:
 
 
 def runInferenceTriton(
-    tagger_resources_path: str, events: NanoEventsArray, ak15: bool = False, jet_index: integer = 2
+    tagger_resources_path: str, events: NanoEventsArray, ak15: bool = False, jet_index: int = 2
 ) -> dict:
     total_start = time.time()
 
