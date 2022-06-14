@@ -77,12 +77,11 @@ def build_p4(cand):
 
 
 class HwwProcessor(processor.ProcessorABC):
-    def __init__(self, year="2017", yearmod="", channels=["ele", "mu", "had"], output_location="./outfiles/", apply_trigger=True, save_ak15=False):
+    def __init__(self, year="2017", yearmod="", channels=["ele", "mu", "had"], output_location="./outfiles/", apply_trigger=True):
         self._year = year
         self._yearmod = yearmod
         self._channels = channels
         self._output_location = output_location
-        self.save_ak15 = save_ak15
 
         # trigger paths
         with importlib.resources.path("boostedhiggs.data", "triggers.json") as path:
@@ -651,21 +650,11 @@ class HwwProcessor(processor.ProcessorABC):
             pnet_vars = runInferenceTriton(
                 self.tagger_resources_path, events[self.selections[ch].all(*self.selections[ch].names)], ak15=False, jet_index=1)
 
-            if self.save_ak15:
-                pnet_vars_ak15 = runInferenceTriton(
-                    self.tagger_resources_path, events[self.selections[ch].all(*self.selections[ch].names)], ak15=True, jet_index=1)
-
             print("post-inference")
             output[ch] = {
                 **output[ch],
                 **{key: value for (key, value) in pnet_vars.items()},
             }
-
-            if self.save_ak15:
-                output[ch] = {
-                    **output[ch],
-                    **{key: value for (key, value) in pnet_vars_ak15.items()},
-                }
 
             # convert arrays to pandas
             if not isinstance(output[ch], pd.DataFrame):
