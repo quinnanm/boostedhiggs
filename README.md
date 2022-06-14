@@ -50,7 +50,8 @@ conda create -n coffea-env python=3.7
 conda activate coffea-env
 
 # install packages
-pip install numpy pandas scikit-learn coffea correctionlib pyarrow tritonclient
+pip install numpy pandas scikit-learn coffea correctionlib pyarrow
+pip3 install tritonclient[all]
 
 # install xrootd
 conda install -c conda-forge xrootd
