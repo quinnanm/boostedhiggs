@@ -1,3 +1,6 @@
+from TaggerInference import runInferenceTriton
+
+
 from collections import defaultdict
 import pickle as pkl
 import pyarrow as pa
@@ -283,12 +286,14 @@ class HwwProcessor(processor.ProcessorABC):
         secondfj = ak.pad_none(good_fatjets, 2, axis=1)[:, 1]       # pick second leading pt
 
         # for hadronic channels: candidatefj is the leading pt one
+        fj_idx_had = 1
         candidatefj_had = leadingfj
 
         # for leptonic channel: first clean jets and leptons by removing overlap, then pick candidate_fj closest to the lepton
         lep_in_fj_overlap_bool = good_fatjets.delta_r(candidatelep_p4) > 0.1
         good_fatjets = good_fatjets[lep_in_fj_overlap_bool]
-        candidatefj_lep = ak.firsts(good_fatjets[ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)])      # get candidatefj for leptonic channel
+        fj_idx_lep = ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)
+        candidatefj_lep = ak.firsts(good_fatjets[fj_idx_lep])      # get candidatefj for leptonic channel
 
         # MET
         met = events.MET
@@ -633,6 +638,29 @@ class HwwProcessor(processor.ProcessorABC):
                 }
             else:
                 output[ch] = {}
+
+        # TODO: adding tagger stuff
+        for ch in self._channels:
+            print("pre-inference")
+
+            pnet_vars = runInferenceTriton(
+                self.tagger_resources_path, events[self.selections[ch].all(*self.selections[ch].names)], ak15=False, jet_index=1)
+
+            if self.save_ak15:
+                pnet_vars_ak15 = runInferenceTriton(
+                    self.tagger_resources_path, events[self.selections[ch].all(*self.selections[ch].names)], ak15=True, jet_index=1)
+
+            print("post-inference")
+            output[ch] = {
+                **output[ch],
+                **{key: value for (key, value) in pnet_vars.items()},
+            }
+
+            if self.save_ak15:
+                output[ch] = {
+                    **output[ch],
+                    **{key: value for (key, value) in pnet_vars_ak15.items()},
+                }
 
             # convert arrays to pandas
             if not isinstance(output[ch], pd.DataFrame):
