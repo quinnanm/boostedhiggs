@@ -45,8 +45,7 @@ def get_pfcands_features(
     ]
     jet_pfcands = preselected_events.PFCands[jet_ak_pfcands.pFCandsIdx]
     print('jet_pfcands', len(jet_pfcands))
-    if len(jet_pfcands) == 0:
-        return
+
     # get features
 
     # negative eta jets have -1 sign, positive eta jets have +1
