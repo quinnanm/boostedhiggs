@@ -45,6 +45,7 @@ def get_pfcands_features(
     ]
     jet_pfcands = preselected_events.PFCands[jet_ak_pfcands.pFCandsIdx]
     print('jet_pfcands', jet_pfcands)
+    print('jet_pfcands.delta_phi', jet_pfcands.delta_phi)
 
     # get features
 
