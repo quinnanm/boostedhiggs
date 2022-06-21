@@ -121,6 +121,10 @@ where:
 - number of files per job: if given all of the samples will use these number of files per job
 - script that runs processor: is `run.py` by default
 
+e.g.
+```
+python3 condor/submit.py --year 2017 --tag Jun20 --samples samples_pfnano_mc.json --pfnano --slist ggHToWWTo4Q-MH125,GluGluHToWWTo4q,GluGluHToWWTo4q-HpT190,TTToSemiLeptonic --submit
+```
 
 The `run.py` script has different options to e.g. select a different processor, run over files that go from one starting index (starti) to the end (endi).
 
