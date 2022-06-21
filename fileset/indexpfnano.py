@@ -19,6 +19,7 @@ def get_subfolders(parent):
 	return subfolders
 
 folders_to_index = [
+
         "/store/user/lpcpfnano/jekrupa/v2_2/2016APV/TTbar",
         "/store/user/lpcpfnano/jekrupa/v2_2/2016/TTbar",
         "/store/user/lpcpfnano/jekrupa/v2_2/2017/TTbar",
@@ -114,11 +115,6 @@ folders_to_index = [
 	"/store/user/lpcpfnano/cmantill/v2_2/2016APV/HTT",
 	"/store/user/lpcpfnano/cmantill/v2_2/2017/HTT",
 	"/store/user/lpcpfnano/cmantill/v2_2/2018/HTT",
-
-	"/store/user/lpcpfnano/dryu/v2_2/2016/VectorZPrime",
-	"/store/user/lpcpfnano/jkrupa/v2_2/2016APV/VectorZPrime",
-	"/store/user/lpcpfnano/jkrupa/v2_2/2017/VectorZPrime",
-	"/store/user/lpcpfnano/dryu/v2_2/2018/VectorZPrime",
 ]
 # Data path:
 # .......................f1........................|...f2.....|..........f3.......|.....f4......|.f5.|....
@@ -152,9 +148,10 @@ for pyear in ["2016","2016APV","2017","2018"]:
                         for f3 in f2_subfolders:
                                 print(f"\t\t/{f3}")
                                 subsample_short = f3.replace("/", "")
+                                subsample_short = subsample_short.replace("_ext1","")
                                 f3_subfolders = get_subfolders(f"{f1}/{f2}/{f3}")
                                 if len(f3_subfolders) >= 2:
-                                        print(f"WARNING : Found multiple timestamps for {prefix}/{f1}/{f2}/{f3}")
+                                        print(f"WARNING : Found multiple timestamps for {subsample_short}/{f1}/{f2}/{f3}")
 
                                 for f4 in f3_subfolders: # Timestamp
                                         f4_subfolders = get_subfolders(f"{f1}/{f2}/{f3}/{f4}")

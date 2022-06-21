@@ -355,7 +355,7 @@ def main(args):
 
         if args.plot_hists:
             print('Plotting...')
-            plot_stacked_hists(args.year, ch, odir, vars_to_plot, logy=args.nology)
+            plot_stacked_hists(args.year, ch, odir, vars_to_plot, logy=args.nology, add_data=args.nodata)
 
 
 if __name__ == "__main__":
@@ -372,6 +372,8 @@ if __name__ == "__main__":
     parser.add_argument("--make_hists",             dest='make_hists',              action='store_true',                          help="Make hists")
     parser.add_argument("--plot_hists",             dest='plot_hists',              action='store_true',                          help="Plot the hists")
     parser.add_argument("--nology",                 dest='nology',                  action='store_false',                         help="No logy scale")
+    parser.add_argument("--nodata",                 dest='nodata',                  action='store_false',                         help="No data")
+        
 
     args = parser.parse_args()
 

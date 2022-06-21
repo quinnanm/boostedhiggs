@@ -1,14 +1,18 @@
 import json
 
 
-def loadJson(samplesjson="samples_pfnano.json", year='2017', pfnano=True):
+def loadJson(samplesjson="samples_pfnano.json", year='2017', pfnano=True, sampleslist=None):
     samples = []
     values = {}
     with open(samplesjson, 'r') as f:
         json_samples = json.load(f)[year]
         for key, value in json_samples.items():
             if value != 0:
-                samples.append(key)
+                if sampleslist is not None and isinstance(sampleslist, list):
+                    if key in sampleslist:
+                        samples.append(key)
+                else:
+                    samples.append(key)
             if key not in values:
                 values[key] = value
 
@@ -50,7 +54,7 @@ def printPFNano(year='2017', samplesjson=None):
                     samples.append(key)
 
     if not samples:
-        desired_keys = ["QCD", "WJets", "ZJets", "TT", "ST", "Single", "DYJets", "EGamma", "JetHT", "HToWW", "ZZ", "WW", "WZ"]
+        desired_keys = ["QCD", "WJets", "ZJets", "TTbar", "ST", "Single", "DYJets", "EGamma", "JetHT", "HToWW", "ZZ", "WW", "WZ"]
 
     fname = f"fileset/pfnanoindex_{year}.json"
 
