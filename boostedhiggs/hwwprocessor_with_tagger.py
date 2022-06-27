@@ -305,6 +305,9 @@ class HwwProcessor(processor.ProcessorABC):
         # print jet index
         print('fj_idx_lep', fj_idx_lep)
 
+        print('1', events["FatJetPFCands"].jetIdx)
+        print('2', events["FatJetPFCands"].jetIdx == fj_idx_lep)
+
         jet_ak_pfcands = events.FatJetPFCands[
             events["FatJetPFCands"].jetIdx == fj_idx_lep]  # not sure if this line works but make it work
         print('done with line')
