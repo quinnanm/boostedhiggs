@@ -307,6 +307,7 @@ class HwwProcessor(processor.ProcessorABC):
 
         jet_ak_pfcands = events.FatJetPFCands[
             events["FatJetPFCands"].jetIdx == fj_idx_lep]  # not sure if this line works but make it work
+        print('done with line')
 
         # print collection of jetpfcands
         print('jet_ak_pfcands', jet_ak_pfcands)
