@@ -297,9 +297,9 @@ class HwwProcessor(processor.ProcessorABC):
         lep_in_fj_overlap_bool = good_fatjets.delta_r(candidatelep_p4) > 0.1
         good_fatjets = good_fatjets[lep_in_fj_overlap_bool]
         fj_idx_lep = ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)
-        candidatefj_lep = ak.firsts(good_fatjets[fj_idx_lep])      # get candidatefj for leptonic channel
+        candidatefj_lep = ak.firsts(good_fatjets[fj_idx_lep])
 
-        # TODO: debugging tagger
+        # TODO: get
         # print jet
         print('candidatefj_lep', candidatefj_lep)
         # print jet index
@@ -307,6 +307,7 @@ class HwwProcessor(processor.ProcessorABC):
 
         jet_ak_pfcands = events.FatJetPFCands[
             events["FatJetPFCands"].jetIdx == fj_idx_lep]  # not sure if this line works but make it work
+
         # print collection of jetpfcands
         print('jet_ak_pfcands', jet_ak_pfcands)
         # print index of pfcands associated to jet
@@ -647,25 +648,25 @@ class HwwProcessor(processor.ProcessorABC):
                 if ch == "ele" or ch == "mu":
                     keys += ["lep"]
 
-                out = {}
-                for key in keys:
-                    for var, item in variables[key].items():
-                        # pad all the variables that are not a cut with -1
-                        pad_item = item if ("cut" in var or "weight" in var) else pad_val(item, -1)
-                        # fill out dictionary
-                        out[var] = item
-
-                # fill the output dictionary after selections
-                output[ch] = {
-                    key: value[self.selections[ch].all(*self.selections[ch].names)] for (key, value) in out.items()
-                }
-            else:
-                output[ch] = {}
-
-        # TODO: adding tagger stuff
-        for ch in self._channels:
-            print('channel', ch)
-            print("pre-inference")
+        #         out = {}
+        #         for key in keys:
+        #             for var, item in variables[key].items():
+        #                 # pad all the variables that are not a cut with -1
+        #                 pad_item = item if ("cut" in var or "weight" in var) else pad_val(item, -1)
+        #                 # fill out dictionary
+        #                 out[var] = item
+        #
+        #         # fill the output dictionary after selections
+        #         output[ch] = {
+        #             key: value[self.selections[ch].all(*self.selections[ch].names)] for (key, value) in out.items()
+        #         }
+        #     else:
+        #         output[ch] = {}
+        #
+        # # TODO: adding tagger stuff
+        # for ch in self._channels:
+        #     print('channel', ch)
+        #     print("pre-inference")
 
             pnet_vars = runInferenceTriton(
                 self.tagger_resources_path, events[self.selections[ch].all(*self.selections[ch].names)], ak15=False, jet_index=1)
