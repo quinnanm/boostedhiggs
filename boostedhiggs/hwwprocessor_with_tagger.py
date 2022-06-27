@@ -299,6 +299,31 @@ class HwwProcessor(processor.ProcessorABC):
         fj_idx_lep = ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)
         candidatefj_lep = ak.firsts(good_fatjets[fj_idx_lep])      # get candidatefj for leptonic channel
 
+        # TODO: debugging tagger
+        fj_idx_lep = ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)
+
+        candidatefj_lep = ak.firsts(good_fatjets[fj_idx_lep])
+
+        print('candidatefj_lep', candidatefj_lep)
+
+        jet_ak_pfcands = events.FatJetPFCands[
+            events["FatJetPFCands"].jetIdx == fj_idx_lep]  # not sure if this line works but make it work
+
+        jet_pfcands = events.PFCands[jet_ak_pfcands.pFCandsIdx]
+
+        # print jet index
+        print(fj_idx_lep)
+        # print jet
+        print(candidatefj_lep)
+        # print collection of jetpfcands
+        print(jet_ak_pfcands)
+        # print index of pfcands associated to jet
+        print(jet_ak_pfcands.pFCandsIdx)
+        # print pfcands info
+        print(jet_pfcands)
+        # print the delta phi of jet pfcands and the jet
+        print(jet_pfcands.delta_phi(candidatefj_lep))
+
         # MET
         met = events.MET
         mt_lep_met = np.sqrt(
