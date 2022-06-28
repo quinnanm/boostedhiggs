@@ -27,7 +27,8 @@ from boostedhiggs.utils import pad_val
 def get_pfcands_features(
     tagger_vars: dict,
     preselected_events: NanoEventsArray,
-    jet_idx: int,
+    good_fatjets: ak.array,
+    fj_idx_lep: ak.array,
     fatjet_label: str = "FatJetAK15",
     pfcands_label: str = "FatJetPFCands",
     normalize: bool = True,
@@ -39,11 +40,13 @@ def get_pfcands_features(
 
     feature_dict = {}
 
-    msk = (preselected_events[pfcands_label].jetIdx == ak.firsts(jet_idx))
+    jet = good_fatjets[fj_idx_lep]
+    msk = (preselected_events[pfcands_label].jetIdx == ak.firsts(fj_idx_lep))
     jet_ak_pfcands = preselected_events[pfcands_label][msk]
 
     # get features
     jet_pfcands = preselected_events.PFCands[jet_ak_pfcands.pFCandsIdx]
+    jet_pfcands = ak.singletons(jet_pfcands)
 
     # negative eta jets have -1 sign, positive eta jets have +1
     eta_sign = ak.values_astype(jet_pfcands.eta > 0, int) * 2 - 1
@@ -52,7 +55,8 @@ def get_pfcands_features(
     feature_dict["pfcand_abseta"] = np.abs(jet_pfcands.eta)
 
     feature_dict["pfcand_pt_log_nopuppi"] = np.log(jet_pfcands.pt)
-    feature_dict["pfcand_e_log_nopuppi"] = np.log(jet_pfcands.energy)
+    # TODO: uncomment
+    # feature_dict["pfcand_e_log_nopuppi"] = np.log(jet_pfcands.energy)
 
     pdgIds = jet_pfcands.pdgId
     feature_dict["pfcand_isEl"] = np.abs(pdgIds) == 11
@@ -128,7 +132,8 @@ def get_pfcands_features(
 def get_svs_features(
     tagger_vars: dict,
     preselected_events: NanoEventsArray,
-    jet_idx: int,
+    good_fatjets: ak.array,
+    fj_idx_lep: ak.array,
     fatjet_label: str = "FatJetAK15",
     svs_label: str = "JetSVsAK15",
     normalize: bool = True,
@@ -140,13 +145,15 @@ def get_svs_features(
 
     feature_dict = {}
 
-    jet = ak.pad_none(preselected_events[fatjet_label], 2, axis=1)[:, jet_idx]
+    jet = good_fatjets[fj_idx_lep]
+    msk = (preselected_events[pfcands_label].jetIdx == ak.firsts(fj_idx_lep))
     jet_svs = preselected_events.SV[
         preselected_events[svs_label].sVIdx[
             (preselected_events[svs_label].sVIdx != -1)
-            * (preselected_events[svs_label].jetIdx == jet_idx)
+            * (msk)
         ]
     ]
+    jet_svs = ak.singletons(jet_svs)
 
     # get features
 
@@ -419,7 +426,7 @@ class wrapped_triton:
 
 
 def runInferenceTriton(
-    tagger_resources_path: str, events: NanoEventsArray, ak15: bool = False, jet_index: int = 2
+    tagger_resources_path: str, events: NanoEventsArray, ak15: bool = False, good_fatjets: ak.array, fj_idx_lep: ak.array,
 ) -> dict:
     total_start = time.time()
 
@@ -439,33 +446,32 @@ def runInferenceTriton(
 
     # prepare inputs for both fat jets
     tagger_inputs = []
-    for jet_idx in range(2):
-        feature_dict = {
-            **get_pfcands_features(tagger_vars, events, jet_idx, fatjet_label, pfcands_label),
-            **get_svs_features(tagger_vars, events, jet_idx, fatjet_label, svs_label),
-            # **get_lep_features(tagger_vars, events, jet_idx, fatjet_label, muon_label, electron_label),
+    feature_dict = {
+        **get_pfcands_features(tagger_vars, events, good_fatjets, fj_idx_lep, fatjet_label, pfcands_label),
+        **get_svs_features(tagger_vars, events, good_fatjets, fj_idx_lep, fatjet_label, svs_label),
+        # **get_lep_features(tagger_vars, events, jet_idx, fatjet_label, muon_label, electron_label),
+    }
+
+    for input_name in tagger_vars["input_names"]:
+        for key in tagger_vars[input_name]["var_names"]:
+            np.expand_dims(feature_dict[key], 1)
+
+    tagger_inputs.append(
+        {
+            f"{input_name}__{i}": np.concatenate(
+                [
+                    np.expand_dims(feature_dict[key], 1)
+                    for key in tagger_vars[input_name]["var_names"]
+                ],
+                axis=1,
+            )
+            for i, input_name in enumerate(tagger_vars["input_names"])
         }
-
-        for input_name in tagger_vars["input_names"]:
-            for key in tagger_vars[input_name]["var_names"]:
-                np.expand_dims(feature_dict[key], 1)
-
-        tagger_inputs.append(
-            {
-                f"{input_name}__{i}": np.concatenate(
-                    [
-                        np.expand_dims(feature_dict[key], 1)
-                        for key in tagger_vars[input_name]["var_names"]
-                    ],
-                    axis=1,
-                )
-                for i, input_name in enumerate(tagger_vars["input_names"])
-            }
-        )
+    )
 
     # run inference for both fat jets
     tagger_outputs = []
-    for jet_idx in range(jet_index):
+    for jet_idx in range(1):
         print(f"Running inference for Jet {jet_idx + 1}")
         start = time.time()
         tagger_outputs.append(triton_model(tagger_inputs[jet_idx]))
@@ -475,7 +481,7 @@ def runInferenceTriton(
     jet_label = "ak15" if ak15 else "ak8"
 
     pnet_vars_list = []
-    for jet_idx in range(2):
+    for jet_idx in range(1):
         if len(tagger_outputs[jet_idx]):
             pnet_vars_list.append(
                 {
