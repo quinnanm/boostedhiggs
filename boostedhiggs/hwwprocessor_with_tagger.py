@@ -299,17 +299,10 @@ class HwwProcessor(processor.ProcessorABC):
         fj_idx_lep = ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)
         candidatefj_lep = ak.firsts(good_fatjets[fj_idx_lep])
 
-        # TODO: get PFcands of the candidate jet
-        msk = (events["FatJetPFCands"].jetIdx == ak.firsts(fj_idx_lep))
-        jet_ak_pfcands = events.FatJetPFCands[msk]
-
-        # print collection of jetpfcands
-        jet_pfcands = events.PFCands[jet_ak_pfcands.pFCandsIdx]
-
-        # print the delta phi of jet pfcands and the jet
-        print('b4')
-        print('delta_phi', candidatefj_lep.delta_phi(jet_pfcands))
-        print('af')
+        # # TODO: get PFcands of the candidate jet
+        # msk = (events["FatJetPFCands"].jetIdx == ak.firsts(fj_idx_lep))
+        # jet_ak_pfcands = events.FatJetPFCands[msk]
+        # jet_pfcands = events.PFCands[jet_ak_pfcands.pFCandsIdx]
 
         # MET
         met = events.MET

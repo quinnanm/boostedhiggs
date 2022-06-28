@@ -29,7 +29,7 @@ def get_pfcands_features(
     preselected_events: NanoEventsArray,
     jet_idx: int,
     fatjet_label: str = "FatJetAK15",
-    pfcands_label: str = "FatJetAK15PFCands",
+    pfcands_label: str = "FatJetPFCands",
     normalize: bool = True,
 ) -> Dict[str, np.ndarray]:
     """
@@ -39,14 +39,11 @@ def get_pfcands_features(
 
     feature_dict = {}
 
-    jet = ak.pad_none(preselected_events[fatjet_label], 2, axis=1)[:, jet_idx]
-    jet_ak_pfcands = preselected_events[pfcands_label][
-        preselected_events[pfcands_label].jetIdx == jet_idx
-    ]
-
-    jet_pfcands = preselected_events.PFCands[jet_ak_pfcands.pFCandsIdx]
+    msk = (preselected_events[pfcands_label].jetIdx == ak.firsts(jet_idx))
+    jet_ak_pfcands = preselected_events[pfcands_label][msk]
 
     # get features
+    jet_pfcands = preselected_events.PFCands[jet_ak_pfcands.pFCandsIdx]
 
     # negative eta jets have -1 sign, positive eta jets have +1
     eta_sign = ak.values_astype(jet_pfcands.eta > 0, int) * 2 - 1
