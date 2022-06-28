@@ -437,7 +437,7 @@ class wrapped_triton:
 
 
 def runInferenceTriton(
-    tagger_resources_path: str, events: NanoEventsArray, good_fatjets: ak.array, fj_idx_lep: ak.array,
+    tagger_resources_path: str, events: NanoEventsArray, good_fatjets, fj_idx_lep,
 ) -> dict:
     total_start = time.time()
 
