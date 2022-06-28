@@ -39,13 +39,17 @@ def get_pfcands_features(
     """
 
     feature_dict = {}
-
+    print('1')
     jet = good_fatjets[fj_idx_lep]
+    print('2')
     msk = (preselected_events[pfcands_label].jetIdx == ak.firsts(fj_idx_lep))
+    print('3')
     jet_ak_pfcands = preselected_events[pfcands_label][msk]
+    print('4')
 
     # get features
     jet_pfcands = preselected_events.PFCands[jet_ak_pfcands.pFCandsIdx]
+    print('5')
     jet_pfcands = ak.singletons(jet_pfcands)
     print('building feature_dict')
 
@@ -447,7 +451,6 @@ def runInferenceTriton(
     with open(f"{tagger_resources_path}/{triton_config['model_name']}.json") as f:
         tagger_vars = json.load(f)
 
-    print("before wrap")
     triton_model = wrapped_triton(
         triton_config["model_url"], triton_config["batch_size"], torchscript=True
     )
@@ -458,7 +461,6 @@ def runInferenceTriton(
 
     # prepare inputs for both fat jets
     tagger_inputs = []
-    print("it's happening")
     feature_dict = {
         **get_pfcands_features(tagger_vars, events, good_fatjets, fj_idx_lep, fatjet_label, pfcands_label),
         **get_svs_features(tagger_vars, events, good_fatjets, fj_idx_lep, fatjet_label, svs_label),
