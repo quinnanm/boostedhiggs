@@ -437,7 +437,7 @@ class wrapped_triton:
 
 
 def runInferenceTriton(
-    tagger_resources_path: str, events: NanoEventsArray, ak15: bool = False, good_fatjets: ak.array, fj_idx_lep: ak.array,
+    tagger_resources_path: str, events: NanoEventsArray, good_fatjets: ak.array, fj_idx_lep: ak.array,
 ) -> dict:
     total_start = time.time()
 
@@ -451,9 +451,9 @@ def runInferenceTriton(
         triton_config["model_url"], triton_config["batch_size"], torchscript=True
     )
 
-    fatjet_label = "FatJetAK15" if ak15 else "FatJet"
-    pfcands_label = "FatJetAK15PFCands" if ak15 else "FatJetPFCands"
-    svs_label = "JetSVsAK15" if ak15 else "FatJetSVs"
+    fatjet_label = "FatJet"
+    pfcands_label = "FatJetPFCands"
+    svs_label = "FatJetSVs"
 
     # prepare inputs for both fat jets
     tagger_inputs = []
