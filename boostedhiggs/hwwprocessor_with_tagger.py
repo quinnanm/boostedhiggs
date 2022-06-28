@@ -307,7 +307,9 @@ class HwwProcessor(processor.ProcessorABC):
         jet_pfcands = events.PFCands[jet_ak_pfcands.pFCandsIdx]
 
         # print the delta phi of jet pfcands and the jet
+        print('b4')
         print('delta_phi', candidatefj_lep.delta_phi(jet_pfcands))
+        print('af')
 
         # MET
         met = events.MET
