@@ -290,7 +290,7 @@ class HwwProcessor(processor.ProcessorABC):
         secondfj = ak.pad_none(good_fatjets, 2, axis=1)[:, 1]       # pick second leading pt
 
         # for hadronic channels: candidatefj is the leading pt one
-        fj_idx_had = 1
+        fj_idx_had = 0
         candidatefj_had = leadingfj
 
         # for leptonic channel: first clean jets and leptons by removing overlap, then pick candidate_fj closest to the lepton
@@ -300,23 +300,14 @@ class HwwProcessor(processor.ProcessorABC):
         candidatefj_lep = ak.firsts(good_fatjets[fj_idx_lep])
 
         # TODO: get PFcands of the candidate jet
-        # print jet
         msk = (events["FatJetPFCands"].jetIdx == ak.firsts(fj_idx_lep))
-        print('b4')
-
         jet_ak_pfcands = events.FatJetPFCands[msk]
-        print('done with line')
 
         # print collection of jetpfcands
-        print('jet_ak_pfcands', jet_ak_pfcands)
-        # print index of pfcands associated to jet
-        print('jet_ak_pfcands.pFCandsIdx', jet_ak_pfcands.pFCandsIdx)
-
         jet_pfcands = events.PFCands[jet_ak_pfcands.pFCandsIdx]
-        # print pfcands info
-        print('jet_pfcands', jet_pfcands)
+
         # print the delta phi of jet pfcands and the jet
-        print('delta_phi', jet_pfcands.delta_phi(candidatefj_lep))
+        print('delta_phi', candidatefj_lep.delta_phi(jet_pfcands))
 
         # MET
         met = events.MET
