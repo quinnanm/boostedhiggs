@@ -47,6 +47,7 @@ def get_pfcands_features(
     # get features
     jet_pfcands = preselected_events.PFCands[jet_ak_pfcands.pFCandsIdx]
     jet_pfcands = ak.singletons(jet_pfcands)
+    print('building feature_dict')
 
     # negative eta jets have -1 sign, positive eta jets have +1
     eta_sign = ak.values_astype(jet_pfcands.eta > 0, int) * 2 - 1
@@ -76,6 +77,7 @@ def get_pfcands_features(
     feature_dict["pfcand_dxy"] = jet_pfcands.d0
     feature_dict["pfcand_dzsig"] = jet_pfcands.dz / jet_pfcands.dzErr
     feature_dict["pfcand_dxysig"] = jet_pfcands.d0 / jet_pfcands.d0Err
+    print('finished building feature_dict')
 
     # btag vars
     for var in tagger_vars["pf_features"]["var_names"]:
@@ -101,6 +103,7 @@ def get_pfcands_features(
         feature_dict["pfcand_mask"] = np.ones(
             (len(feature_dict["pfcand_abseta"]), tagger_vars["pf_points"]["var_length"])
         ).astype(np.float32)
+    print('finished loop')
 
     # convert to numpy arrays and normalize features
     for var in tagger_vars["pf_features"]["var_names"]:
@@ -156,6 +159,7 @@ def get_svs_features(
     jet_svs = ak.singletons(jet_svs)
 
     # get features
+    print('building feature_dict')
 
     # negative eta jets have -1 sign, positive eta jets have +1
     eta_sign = ak.values_astype(jet_svs.eta > 0, int) * 2 - 1
@@ -183,12 +187,14 @@ def get_svs_features(
             .mask
         )
     ).astype(np.float32)
+    print('finished building feature_dict')
 
     # if no padding is needed, mask will = 1.0
     if isinstance(feature_dict["sv_mask"], np.float32):
         feature_dict["sv_mask"] = np.ones(
             (len(feature_dict["sv_abseta"]), tagger_vars["sv_points"]["var_length"])
         ).astype(np.float32)
+    print('finished building feature_dict222')
 
     # convert to numpy arrays and normalize features
     for var in tagger_vars["sv_features"]["var_names"]:
@@ -272,6 +278,7 @@ def get_lep_features(
         preselected_events[electron_label].jetIdx == jet_idx
     ]
 
+    print('building feature_dict')
     # get features
     feature_dict["muon_pt"] = jet_muons.pt / jet.pt
     feature_dict["muon_eta"] = jet_muons.eta - jet.eta
@@ -313,6 +320,8 @@ def get_lep_features(
     feature_dict["elec_sieie"] = jet_electrons.sieie
     feature_dict["elec_sip3d"] = jet_electrons.sip3d
 
+    print('finished building feature_dict')
+
     # convert to numpy arrays and normalize features
     for var in tagger_vars["el_features"]["var_names"]:
         a = (
@@ -329,6 +338,8 @@ def get_lep_features(
             a = np.clip(a, info.get("lower_bound", -5), info.get("upper_bound", 5))
 
         feature_dict[var] = a
+
+    print('finished loop')
 
     for var in tagger_vars["mu_features"]["var_names"]:
         a = (
