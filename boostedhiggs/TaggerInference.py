@@ -27,8 +27,8 @@ from boostedhiggs.utils import pad_val
 def get_pfcands_features(
     tagger_vars: dict,
     preselected_events: NanoEventsArray,
-    good_fatjets: ak.array,
-    fj_idx_lep: ak.array,
+    good_fatjets,
+    fj_idx_lep,
     fatjet_label: str = "FatJetAK15",
     pfcands_label: str = "FatJetPFCands",
     normalize: bool = True,
@@ -135,8 +135,8 @@ def get_pfcands_features(
 def get_svs_features(
     tagger_vars: dict,
     preselected_events: NanoEventsArray,
-    good_fatjets: ak.array,
-    fj_idx_lep: ak.array,
+    good_fatjets,
+    fj_idx_lep,
     fatjet_label: str = "FatJetAK15",
     svs_label: str = "JetSVsAK15",
     normalize: bool = True,
