@@ -39,19 +39,12 @@ def get_pfcands_features(
     """
 
     feature_dict = {}
-    print('1')
-    jet = good_fatjets[fj_idx_lep]
-    print('2')
-    msk = (preselected_events[pfcands_label].jetIdx == ak.firsts(fj_idx_lep))
-    print('3')
-    jet_ak_pfcands = preselected_events[pfcands_label][msk]
-    print('4')
 
-    # get features
-    jet_pfcands = preselected_events.PFCands[jet_ak_pfcands.pFCandsIdx]
-    print('5')
-    jet_pfcands = ak.singletons(jet_pfcands)
-    print('building feature_dict')
+    jet = ak.firsts(preselected_events[fatjet_label][fj_idx_lep])
+
+    msk = preselected_events[pfcands_label].jetIdx == ak.firsts(fj_idx_lep)
+    jet_ak_pfcands = preselected_events[pfcands_label][msk]
+    jet_pfcands = (preselected_events.PFCands[jet_ak_pfcands.pFCandsIdx])
 
     # negative eta jets have -1 sign, positive eta jets have +1
     eta_sign = ak.values_astype(jet_pfcands.eta > 0, int) * 2 - 1
@@ -92,7 +85,7 @@ def get_pfcands_features(
         ~(
             ak.pad_none(
                 # padding to have at least one pf candidate in the graph
-                pad_val(feature_dict["pfcand_abseta"], 1, -1, axis=1, to_numpy=False, clip=False),
+                pad_val(feature_dict["pfcand_abseta"], [1], -1, axis=0, to_numpy=False, clip=False),
                 tagger_vars["pf_points"]["var_length"],
                 axis=1,
                 clip=True,
@@ -107,7 +100,6 @@ def get_pfcands_features(
         feature_dict["pfcand_mask"] = np.ones(
             (len(feature_dict["pfcand_abseta"]), tagger_vars["pf_points"]["var_length"])
         ).astype(np.float32)
-    print('finished loop')
 
     # convert to numpy arrays and normalize features
     for var in tagger_vars["pf_features"]["var_names"]:
@@ -441,7 +433,7 @@ class wrapped_triton:
 
 
 def runInferenceTriton(
-    tagger_resources_path: str, events: NanoEventsArray, good_fatjets, fj_idx_lep,
+    tagger_resources_path: str, events: NanoEventsArray, fj_idx_lep,
 ) -> dict:
     total_start = time.time()
 
@@ -462,8 +454,8 @@ def runInferenceTriton(
     # prepare inputs for both fat jets
     tagger_inputs = []
     feature_dict = {
-        **get_pfcands_features(tagger_vars, events, good_fatjets, fj_idx_lep, fatjet_label, pfcands_label),
-        **get_svs_features(tagger_vars, events, good_fatjets, fj_idx_lep, fatjet_label, svs_label),
+        **get_pfcands_features(tagger_vars, events, fj_idx_lep, fatjet_label, pfcands_label),
+        **get_svs_features(tagger_vars, events, fj_idx_lep, fatjet_label, svs_label),
         # **get_lep_features(tagger_vars, events, jet_idx, fatjet_label, muon_label, electron_label),
     }
 
