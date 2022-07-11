@@ -6,7 +6,6 @@
     - [Set up your environment](#setting-up-coffea-environments)
         - [With conda](#with-conda)
         - [With singularity shell](#with-singularity-shell)
-        - [With python environments](#with-python-environments)
     - [Structure of the repository](#structure-of-the-repository)
         - [Data fileset](#data-fileset)
     - [Submitting condor jobs!](#submitting-condor-jobs)
@@ -79,9 +78,17 @@ singularity exec -B ${PWD}:/srv -B /uscmst1b_scratch -B /eos/uscms/store/user/cm
   /bin/bash --rcfile /srv/.bashrc
 ```
 
+## Repository
+
 ### Data fileset
 
 The .json files containing the datasets to be run should be saved in the same `data/` directory.
+
+To update the fileset:
+```
+cd fileset/
+python3 indexpfnano.py
+```
 
 ## Submitting condor jobs
 
@@ -122,6 +129,10 @@ where:
 - number of files per job: if given all of the samples will use these number of files per job
 - script that runs processor: is `run.py` by default
 
+e.g.
+```
+python3 condor/submit.py --year 2017 --tag Jun20 --samples samples_pfnano_mc.json --pfnano --slist ggHToWWTo4Q-MH125,GluGluHToWWTo4q,GluGluHToWWTo4q-HpT190,TTToSemiLeptonic --submit
+```
 
 The `run.py` script has different options to e.g. select a different processor, run over files that go from one starting index (starti) to the end (endi).
 
@@ -149,4 +160,15 @@ python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --sample Glu
 python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --json samples_pfnano.json
 ```
 
-Make parquets. Run postprocess_parquets.py to add a "tot_weight" column.
+## Analysis
+
+Run postprocess_parquets.py to add a "tot_weight" column.
+e.g.
+```
+python postprocess_parquets.py --channels ele,mu,had --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --year 2017
+```
+
+Then, convert to root files using:
+```
+python convert_to_root.py --dir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --ch ele,mu,had --odir rootfiles
+```

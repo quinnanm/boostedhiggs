@@ -55,8 +55,17 @@ def get_sum_sumgenweight(idir, year, sample):
 signal_by_ch = {
     'ele': ['GluGluHToWWToLNuQQ'],
     'mu': ['GluGluHToWWToLNuQQ'],
-    'had': ['GluGluHToWWTo4q', 'GluGluHToWWTo4q_ext1'],
+    'had': ['ggHToWWTo4Q-MH125'],
 }
+# there are many signal samples for the moment:
+# - ele,mu: GluGluHToWWToLNuQQ
+# - had: 
+#   - ggHToWWTo4Q-MH125 (produced by Cristina from PKU config files Powheg+JHU) - same xsec as GluGluToHToWWTo4q
+#   - GluGluToHToWWTo4q (produced by PKU) 
+#   - GluGluHToWWTo4q (produced by Cristina w Pythia)
+#   - GluGluHToWWTo4q-HpT190 (produced by Cristina w Pythia)
+# to come: GluGluHToWW_MINLO (for ele,mu,had)
+
 data_by_ch = {
     'ele': 'SingleElectron',
     'mu': 'SingleMuon',

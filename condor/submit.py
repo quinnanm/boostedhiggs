@@ -33,7 +33,8 @@ def main(args):
     os.system(f"mkdir -p /eos/uscms/{outdir}")
 
     # build metadata.json with samples
-    files, nfiles_per_job = loadJson(args.samples, args.year, args.pfnano)
+    slist = args.slist.split(',') if args.slist is not None else None
+    files, nfiles_per_job = loadJson(args.samples, args.year, args.pfnano, slist)
     with open(f"{locdir}/metadata.json", "w") as f:
         json.dump(files, f, sort_keys=True, indent=2)
 
@@ -104,6 +105,7 @@ def main(args):
 
         # submit
         if args.submit:
+            print('Submit ',localcondor)
             os.system('condor_submit %s' % localcondor)
 
 
@@ -117,6 +119,7 @@ if __name__ == "__main__":
     parser.add_argument("--tag",       dest="tag",       default="Test",                help="process tag", type=str)
     parser.add_argument("--processor", dest="processor", default="hww",                 help="which processor", type=str, choices=["hww"])
     parser.add_argument('--samples',   dest='samples',   default="samples_pfnano.json", help='path to datafiles', type=str)
+    parser.add_argument('--slist',     dest='slist',     default=None,                  help="give sample list separated by commas")
     parser.add_argument("--test",      dest="test",      action='store_true',           help="only 2 jobs per sample will be created")
     parser.add_argument("--submit",    dest='submit',    action='store_true',           help="submit jobs when created")
     parser.add_argument("--files-per-job",               default=None,                  help="# files per condor job", type=int)
