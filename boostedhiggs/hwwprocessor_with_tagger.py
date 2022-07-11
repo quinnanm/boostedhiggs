@@ -1,4 +1,4 @@
-from boostedhiggs.TaggerInference import runInferenceTriton
+from run_tagger_inference import runInferenceTriton
 
 from collections import defaultdict
 import pickle as pkl
