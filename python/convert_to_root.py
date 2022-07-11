@@ -1,5 +1,4 @@
 # script for converting pandas dataframe to rootfile
-#import fastparquet
 from utils import add_samples, data_by_ch, data_by_ch_2018
 
 import pickle as pkl
@@ -119,13 +118,13 @@ def compute_counts(channels, samples, idir, outdir, data_label):
 if __name__ == "__main__":
     """
     e.g. run locally as
-    python dataframe2root.py --dir May7_2017 --ch ele,mu,had --odir rootfiles
+    python convert_to_root.py --dir /eos/uscms/store/user/cmantill/boostedhiggs/May7_2017 --ch ele,mu,had --odir rootfiles
     """
 
     channels = args.ch.split(',')
 
     year = args.dir[-4:]    # get the year from the --dir argument being passed
-    idir = '/eos/uscms/store/user/cmantill/boostedhiggs/' + args.dir
+    idir = args.dir
 
     if year == '2018':
         data_label = data_by_ch_2018

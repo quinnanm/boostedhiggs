@@ -1,13 +1,15 @@
 #!/bin/bash
 
-# run after running dataframe2root.py to merge the rootfiles under merged/2017
+# run after running convert_to_root.py to merge the rootfiles under merged/2017
+IDIR="rootfiles"
+ODIR="merged"
 
 set -e
 
-mkdir -p merged/2017
+mkdir -p ${ODIR}/2017
 
 # process the cms data
-for ch in rootfiles/* ; do
+for ch in ${IDIR}/* ; do
   channel=$(awk -F'/' '{ a = length($NF) ? $NF : $(NF-1); print a }' <<< "$ch") # get channel as a variable
   for sample in $ch/* ; do
     cd $sample
