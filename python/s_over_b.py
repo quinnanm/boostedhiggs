@@ -101,14 +101,14 @@ def count_s_over_b(year, channels, idir, odir, samples):
                         # c_sig = c_sig + (data['tot_weight'] * (data['lep_isolation'] < (i * 0.01))).sum()
                         # c_sig = c_sig + (data['tot_weight'] * (data['lep_misolation'] < (i * 0.01))).sum()
                         # c_sig = c_sig + (data['tot_weight'] * ((abs(data['met_fj_dphi'])) < (i * 0.01))).sum()
-                        c_sig = c_sig + (data['tot_weight'] * ((data[ch][sample]['met'] / data[ch][sample]['lep_pt']) < (i * 0.01))).sum()
+                        c_sig = c_sig + (data['tot_weight'] * ((data['met'] / data['lep_pt']) < (i * 0.01))).sum()
 
                     else:
                         print('background')
                         # c_bkg = c_bkg + (data['tot_weight'] * (data['lep_isolation'] < (i * 0.01))).sum()
                         # c_bkg = c_bkg + (data['tot_weight'] * (data['lep_misolation'] < (i * 0.01))).sum()
                         # c_bkg = c_bkg + (data['tot_weight'] * ((abs(data['met_fj_dphi'])) < (i * 0.01))).sum()
-                        c_bkg = c_bkg + (data['tot_weight'] * ((data[ch][sample]['met'] / data[ch][sample]['lep_pt']) < (i * 0.01))).sum()
+                        c_bkg = c_bkg + (data['tot_weight'] * ((data['met'] / data['lep_pt']) < (i * 0.01))).sum()
 
             count_sig[ch].append(c_sig)   # cut defined at the working point
             count_bkg[ch].append(c_bkg)   # cut defined at the working point
