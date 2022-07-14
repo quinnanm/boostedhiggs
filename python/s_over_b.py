@@ -98,6 +98,8 @@ def count_s_over_b(year, channels, idir, odir, samples):
 
         print("------------------------------------------------------------")
 
+        with open(f'{odir}/wp.pkl', 'wb') as f:  # saves the hists objects
+            pkl.dump(wp, f)
         with open(f'{odir}/count_sig.pkl', 'wb') as f:  # saves the hists objects
             pkl.dump(count_sig, f)
         with open(f'{odir}/count_bkg.pkl', 'wb') as f:  # saves the hists objects
@@ -116,6 +118,9 @@ def plot_s_over_b(year, channels, odir):
     """
 
     # load the hists
+    with open(f'{odir}/wp.pkl', 'rb') as f:
+        wp = pkl.load(f)
+        f.close()
     with open(f'{odir}/count_bkg.pkl', 'rb') as f:
         count_sig = pkl.load(f)
         f.close()
@@ -174,7 +179,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # python s_over_b.py --plot_counts --year 2017 --odir plots --channels ele --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/
+    # python s_over_b.py --make_counts --plot_counts --year 2017 --odir plots --channels ele --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',            dest='year',        default='2017',                             help="year")
