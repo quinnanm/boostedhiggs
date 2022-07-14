@@ -1,6 +1,6 @@
 {
     "2017": {
-	"mu": [
+	"mu": {
 	    "GluGluHToWWToLNuQQ": 1,
 	    "SingleMuon_Run2017B": 0,
       "SingleMuon_Run2017C": 0,
@@ -39,8 +39,8 @@
 	    "WJetsToLNu_HT-600To800": 0,
 	    "WJetsToLNu_HT-70To100": 0,
 	    "WJetsToLNu_HT-800To1200": 0
-	],
-	"ele": [
+	},
+	"ele": {
 	    "GluGluHToWWToLNuQQ": 1,
 	    "SingleElectron_Run2017B": 0,
       "SingleElectron_Run2017C": 0,
@@ -79,6 +79,6 @@
 	    "WJetsToLNu_HT-600To800": 0,
 	    "WJetsToLNu_HT-70To100": 0,
 	    "WJetsToLNu_HT-800To1200": 0
-        ]
+    }
     }
 }
