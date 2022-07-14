@@ -34,11 +34,11 @@ warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 def count_s_over_b(year, channels, idir, odir, samples):
     """
-    Makes 1D histograms
+    Counts signal and background at different working points of a cut
 
     Args:
         year: string that represents the year the processed samples are from
-        ch: string that represents the signal channel to look at... choices are ['ele', 'mu', 'had']
+        channels: list of channels... choices are ['ele', 'mu', 'had']
         idir: directory that holds the processed samples (e.g. {idir}/{sample}/outfiles/*_{ch}.parquet)
         odir: output directory to hold the hist object
         samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
@@ -50,7 +50,8 @@ def count_s_over_b(year, channels, idir, odir, samples):
         wp[ch], count_sig[ch], count_bkg[ch] = [], [], []
 
         c_sig, c_bkg = 0, 0
-        for i in range(0, 400, 4):
+        # for i in range(0, 400, 4):
+        for i in range(0, 100, 2):
             print(f'Processing working point {i * 0.01}')
             wp[ch].append(i * 0.01)      # working point
 
@@ -97,10 +98,10 @@ def count_s_over_b(year, channels, idir, odir, samples):
 
                     if sample == 'GluGluHToWWToLNuQQ':
                         print('signal')
-                        c_sig = c_sig + (data['tot_weight'] * ((abs(data['met_fj_dphi'])) < (i * 0.01))).sum()
+                        c_sig = c_sig + (data['tot_weight'] * ((abs(data['lep_isolation'])) < (i * 0.01))).sum()
                     else:
                         print('background')
-                        c_bkg = c_bkg + (data['tot_weight'] * ((abs(data['met_fj_dphi'])) < (i * 0.01))).sum()
+                        c_bkg = c_bkg + (data['tot_weight'] * ((abs(data['lep_isolation'])) < (i * 0.01))).sum()
 
             count_sig[ch].append(c_sig)   # cut defined at the working point
             count_bkg[ch].append(c_bkg)   # cut defined at the working point
@@ -160,6 +161,10 @@ def main(args):
         os.makedirs(odir + '/s_over_b/')
     odir = odir + '/s_over_b'
 
+    if not os.path.exists(odir + '/' + args.tag):
+        os.makedirs(odir + '/' + args.tag)
+    odir = odir + '/' + args.tag
+
     channels = args.channels.split(',')
     range = [args.start, args.end]
 
@@ -188,7 +193,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # python s_over_b.py --year 2017 --odir plots --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --make_counts --plot_counts
+    # python s_over_b.py --year 2017 --odir plots --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --tag iso --make_counts --plot_counts
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',            dest='year',        default='2017',                             help="year")
@@ -196,10 +201,7 @@ if __name__ == "__main__":
     parser.add_argument('--channels',        dest='channels',    default='ele,mu,had',                       help='channels for which to plot this variable')
     parser.add_argument('--odir',            dest='odir',        default='hists',                            help="tag for output directory... will append '_{year}' to it")
     parser.add_argument('--idir',            dest='idir',        default='../results/',                      help="input directory with results")
-    parser.add_argument('--var',             dest='var',         default='lep_pt',                           help='variable to plot')
-    parser.add_argument('--bins',            dest='bins',        default=50,                                 help="binning of the first variable passed",                type=int)
-    parser.add_argument('--start',           dest='start',       default=0,                                  help="starting range of the first variable passed",         type=int)
-    parser.add_argument('--end',             dest='end',         default=1,                                  help="end range of the first variable passed",              type=int)
+    parser.add_argument('--tag',             dest='tag',         default='',                           help='str to append for saving the count variables')
     parser.add_argument("--make_counts",      dest='make_counts',  action='store_true',                        help="Make hists")
     parser.add_argument("--plot_counts",      dest='plot_counts',  action='store_true',                        help="Plot the hists")
 
