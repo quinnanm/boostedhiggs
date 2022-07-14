@@ -131,10 +131,6 @@ def plot_s_over_b(year, channels, odir):
     fig, ax = plt.subplots()
 
     for ch in channels:
-        print(len(wp[ch]))
-        print(len(count_sig[ch]))
-        print(len(count_bkg[ch]))
-
         ax.plot(wp[ch], count_sig[ch] / np.sqrt(count_bkg[ch]), label=f'{ch} channel')
     # ax.set_yscale('log')
     ax.set_title(r's/$\sqrt{b}$ as a function of the dphi cut', fontsize=16)
@@ -183,7 +179,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # python s_over_b.py --make_counts --plot_counts --year 2017 --odir plots --channels ele --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/
+    # python s_over_b.py --year 2017 --odir plots --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --make_counts --plot_counts
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',            dest='year',        default='2017',                             help="year")
