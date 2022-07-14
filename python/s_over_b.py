@@ -103,7 +103,7 @@ def count_s_over_b(year, channels, idir, odir, samples):
             pkl.dump(count_bkg, f)
 
 
-def plot_s_over_b(year, channels, odir, var):
+def plot_s_over_b(year, channels, odir):
     """
     Plots 1D histograms that were made by "make_1dhists" function
 
@@ -162,15 +162,18 @@ def main(args):
             if value == 1:
                 samples[args.year][ch].append(key)
 
-    print(f'Making counts')
-    count_s_over_b(args.year, channels, args.idir, odir, samples)
-    print(f'plotting s/b')
+    if args.make_counts:
+        print(f'counting s/b')
+        count_s_over_b(args.year, channels, args.idir, odir, samples)
+
+    if args.plot_counts:
+        print(f'plotting s/b')
     plot_s_over_b(args.year, channels, odir)
 
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # python s_over_b.py --year 2017 --odir plots --channels ele --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/
+    # python s_over_b.py --plot_counts --year 2017 --odir plots --channels ele --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',            dest='year',        default='2017',                             help="year")
@@ -182,8 +185,8 @@ if __name__ == "__main__":
     parser.add_argument('--bins',            dest='bins',        default=50,                                 help="binning of the first variable passed",                type=int)
     parser.add_argument('--start',           dest='start',       default=0,                                  help="starting range of the first variable passed",         type=int)
     parser.add_argument('--end',             dest='end',         default=1,                                  help="end range of the first variable passed",              type=int)
-    parser.add_argument("--make_hists",      dest='make_hists',  action='store_true',                        help="Make hists")
-    parser.add_argument("--plot_hists",      dest='plot_hists',  action='store_true',                        help="Plot the hists")
+    parser.add_argument("--make_counts",      dest='make_counts',  action='store_true',                        help="Make hists")
+    parser.add_argument("--plot_counts",      dest='plot_counts',  action='store_true',                        help="Plot the hists")
 
     args = parser.parse_args()
 
