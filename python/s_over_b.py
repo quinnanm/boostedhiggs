@@ -88,10 +88,10 @@ def count_s_over_b(year, channels, idir, odir, samples):
 
                     if sample == 'GluGluHToWWToLNuQQ':
                         print('signal')
-                        c_sig = c_sig + data['tot_weight'] * ((abs(data['met_fj_dphi'])) < (i * 0.01)).sum()
+                        c_sig = c_sig + (data['tot_weight'] * ((abs(data['met_fj_dphi'])) < (i * 0.01))).sum()
                     else:
                         print('background')
-                        c_bkg = c_bkg + data['tot_weight'] * ((abs(data['met_fj_dphi'])) < (i * 0.01)).sum()
+                        c_bkg = c_bkg + (data['tot_weight'] * ((abs(data['met_fj_dphi'])) < (i * 0.01))).sum()
 
             count_sig[ch].append(c_sig)   # cut defined at the working point
             count_bkg[ch].append(c_bkg)   # cut defined at the working point
@@ -134,6 +134,7 @@ def plot_s_over_b(year, channels, odir):
         print(len(wp[ch]))
         print(len(count_sig[ch]))
         print(len(count_bkg[ch]))
+
         ax.plot(wp[ch], count_sig[ch] / np.sqrt(count_bkg[ch]), label=f'{ch} channel')
     # ax.set_yscale('log')
     ax.set_title(r's/$\sqrt{b}$ as a function of the dphi cut', fontsize=16)
