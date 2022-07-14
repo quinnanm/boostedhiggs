@@ -143,9 +143,12 @@ def plot_s_over_b(year, channels, odir):
     for ch in channels:
         ax.plot(wp[ch], count_sig[ch] / np.sqrt(count_bkg[ch]), label=f'{ch} channel')
     # ax.set_yscale('log')
-    ax.set_title(r's/$\sqrt{b}$ as a function of the dphi cut', fontsize=16)
+    ax.set_title(r's/$\sqrt{b}$ as a function of the lepton isolation cut', fontsize=16)
+    # ax.set_title(r's/$\sqrt{b}$ as a function of the dphi cut', fontsize=16)
+    ax.set_xlabel('lep_iso<x|', fontsize=15)
+    # ax.set_xlabel('|dphi(met, jet)<x|', fontsize=15)
+
     ax.set_ylabel(r's/$\sqrt{b}$', fontsize=15)
-    ax.set_xlabel('|dphi(met, jet)<x|', fontsize=15)
     ax.legend()
     plt.savefig(f'{odir}/s_over_b.pdf')
 
@@ -192,7 +195,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # python s_over_b.py --year 2017 --odir plots --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --tag iso --make_counts --plot_counts
+    # python s_over_b.py --year 2017 --odir plots --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --tag iso --plot_counts --make_counts
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',            dest='year',        default='2017',                             help="year")
