@@ -56,6 +56,15 @@ def count_s_over_b(year, channels, idir, odir, samples):
 
             # loop over the samples
             for sample in samples[year][ch]:
+
+                # skip data samples
+                is_data = False
+                for key in data_label.values():
+                    if key in sample:
+                        is_data = True
+                if is_data:
+                    continue
+
                 print("------------------------------------------------------------")
                 # check if the sample was processed
                 pkl_dir = f'{idir}/{sample}/outfiles/*.pkl'
