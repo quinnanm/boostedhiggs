@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from utils import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch
+from utils import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch, data_by_ch_2018, label_by_ch
 from utils import get_simplified_label, get_sum_sumgenweight
 import pickle as pkl
 import pyarrow.parquet as pq
@@ -59,7 +59,7 @@ def count_s_over_b(year, channels, idir, odir, samples):
 
                 # skip data samples
                 is_data = False
-                for key in data_label.values():
+                for key in data_by_ch.values():
                     if key in sample:
                         is_data = True
                 if is_data:
