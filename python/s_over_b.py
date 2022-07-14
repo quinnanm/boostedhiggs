@@ -51,6 +51,7 @@ def count_s_over_b(year, channels, idir, odir, samples):
 
         c_sig, c_bkg = 0, 0
         for i in range(0, 400, 4):
+            print(f'Processing working point {wp[ch]}')
             wp[ch].append(i * 0.01)      # working point
 
             # loop over the samples
@@ -67,7 +68,7 @@ def count_s_over_b(year, channels, idir, odir, samples):
                 parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')
 
                 if len(parquet_files) != 0:
-                    print(f'Processing {ch} channel of sample', sample)
+                    print(f'- Processing {ch} channel of sample', sample)
 
                 for i, parquet_file in enumerate(parquet_files):
                     try:
