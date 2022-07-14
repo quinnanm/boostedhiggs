@@ -266,7 +266,7 @@
 	    "WJetsToLNu_HT-400To600": 0,
 	    "WJetsToLNu_HT-600To800": 0,
 	    "WJetsToLNu_HT-70To100": 0,
-	    "WJetsToLNu_HT-800To1200": 0,
+	    "WJetsToLNu_HT-800To1200": 0
 	],
 	"ele": [
 	    "GluGluHToWWToLNuQQ": 1,
@@ -306,7 +306,7 @@
 	    "WJetsToLNu_HT-400To600": 0,
 	    "WJetsToLNu_HT-600To800": 0,
 	    "WJetsToLNu_HT-70To100": 0,
-	    "WJetsToLNu_HT-800To1200": 0,
+	    "WJetsToLNu_HT-800To1200": 0
         ],
 	"had": [
 	    "GluGluHToWWTo4q",
