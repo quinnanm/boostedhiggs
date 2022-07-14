@@ -166,7 +166,6 @@ def main(args):
     odir = odir + '/' + args.tag
 
     channels = args.channels.split(',')
-    range = [args.start, args.end]
 
     # get samples to make histograms
     f = open(args.samples)
