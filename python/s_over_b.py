@@ -121,11 +121,11 @@ def plot_s_over_b(year, channels, odir):
     with open(f'{odir}/wp.pkl', 'rb') as f:
         wp = pkl.load(f)
         f.close()
-    with open(f'{odir}/count_bkg.pkl', 'rb') as f:
+    with open(f'{odir}/count_sig.pkl', 'rb') as f:
         count_sig = pkl.load(f)
         f.close()
     with open(f'{odir}/count_bkg.pkl', 'rb') as f:
-        count_sig = pkl.load(f)
+        count_bkg = pkl.load(f)
         f.close()
 
     fig, ax = plt.subplots()
