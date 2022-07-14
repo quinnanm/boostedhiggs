@@ -51,7 +51,8 @@ def count_s_over_b(year, channels, idir, odir, samples):
 
         c_sig, c_bkg = 0, 0
         # for i in range(0, 400, 4):
-        for i in range(0, 100, 2):
+        # for i in range(0, 100, 2):
+        for i in range(0, 200, 2):
             print(f'Processing working point {i * 0.01}')
             wp[ch].append(i * 0.01)      # working point
 
