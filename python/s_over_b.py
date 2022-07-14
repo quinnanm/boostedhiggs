@@ -131,6 +131,9 @@ def plot_s_over_b(year, channels, odir):
     fig, ax = plt.subplots()
 
     for ch in channels:
+        print(len(wp[ch]))
+        print(len(count_sig[ch]))
+        print(len(count_bkg[ch]))
         ax.plot(wp[ch], count_sig[ch] / np.sqrt(count_bkg[ch]), label=f'{ch} channel')
     # ax.set_yscale('log')
     ax.set_title(r's/$\sqrt{b}$ as a function of the dphi cut', fontsize=16)
