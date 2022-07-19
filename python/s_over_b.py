@@ -274,7 +274,7 @@ def main(args):
             count_s_over_b(args.year, channels, args.idir, odir, samples, cut)
 
     if args.plot_counts:
-        for cut in ['iso']:
+        for cut in ['iso', 'miso', 'dphi']:
             print(f'plotting s/b')
             plot_s_over_b(args.year, channels, odir, cut)
 
