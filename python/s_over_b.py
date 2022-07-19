@@ -248,10 +248,6 @@ def main(args):
         os.makedirs(odir + '/s_over_b/')
     odir = odir + '/s_over_b'
 
-    if not os.path.exists(odir + '/' + args.tag):
-        os.makedirs(odir + '/' + args.tag)
-    odir = odir + '/' + args.tag
-
     channels = args.channels.split(',')
 
     # get samples to make histograms
@@ -281,7 +277,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # python s_over_b.py --year 2017 --odir plots --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --tag met_over_lep --plot_counts --make_counts
+    # python s_over_b.py --year 2017 --odir plots --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --plot_counts --make_counts
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',            dest='year',        default='2017',                             help="year")
