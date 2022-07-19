@@ -156,7 +156,7 @@ def plot_1dhists(year, ch, odir):
     # make plots per channel
     for sample in hists.axes[1]:
         fig, ax = plt.subplots(figsize=(8, 5))
-        hep.hist2dplot(hists[{'samples': sample}], ax=ax, cmap="plasma", norm=matplotlib.colors.LogNorm(vmin=1e-3, vmax=1000))
+        hep.hist2dplot(hists[{'samples': sample}], ax=ax, cmap="plasma")
         ax.set_title(f'Lepton pT distribution for {sample_mapping[sample]} \n for the {ch} channel at different working points', fontsize=16)
         ax.set_ylabel('lep_pt', fontsize=15)
         ax.set_xlabel('lep_miso<x', fontsize=15)
