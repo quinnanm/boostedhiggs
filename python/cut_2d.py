@@ -32,7 +32,7 @@ import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
-def make_1dhists(year, ch, idir, odir, samples):
+def make_1dhists(year, ch, idir, odir, samples, cut):
     """
     Makes 1D histograms
 
@@ -47,10 +47,16 @@ def make_1dhists(year, ch, idir, odir, samples):
     # for each cut/working point we will have a lep_pt distribution of the events passing the cut
 
     max_iso = {'ele': 120, 'mu': 55}
+    if cut == 'miso':
+        start = max_iso[ch]
+        end = 350
+    elif cut == 'iso':
+        start = 30
+        end = max_iso[ch]
 
     hists = hist2.Hist(
         hist2.axis.Regular(100, 0, 1, name='lep_miso', label='lep_miso', overflow=True),
-        hist2.axis.Regular(20, 120, 320, name='lep_pt', label='lep_pt', overflow=True),
+        hist2.axis.Regular(20, start, end, name='lep_pt', label='lep_pt', overflow=True),
         hist2.axis.StrCategory([], name='samples', growth=True),
     )
 
@@ -97,7 +103,10 @@ def make_1dhists(year, ch, idir, odir, samples):
         y_lep = []
         for i in range(0, 400, 1):
             wp.append(i * 0.01)      # working point
-            cut = (data['lep_misolation'] < (i * 0.01)) & (data['lep_pt'] > max_iso[ch])   # cut defined at the working point
+            if cut == 'miso':
+                cut = (data['lep_misolation'] < (i * 0.01)) & (data['lep_pt'] > max_iso[ch])   # cut defined at the working point
+            elif cut == 'iso':
+                cut = (data['lep_isolation'] < (i * 0.01)) & (data['lep_pt'] < max_iso[ch])   # cut defined at the working point
             y_lep.append(data['lep_pt'][cut].to_numpy())  # lepton_pt distribution of events passing the cut
 
         # to plot the 2d map -> (1) expand the wp list (2) unfold the y_lep sublists
@@ -130,11 +139,11 @@ def make_1dhists(year, ch, idir, odir, samples):
 
     print("------------------------------------------------------------")
 
-    with open(f'{odir}/2d_cut_{ch}_miso.pkl', 'wb') as f:  # saves the hists objects
+    with open(f'{odir}/2d_{cut}_{ch}.pkl', 'wb') as f:  # saves the hists objects
         pkl.dump(hists, f)
 
 
-def plot_1dhists(year, ch, odir):
+def plot_1dhists(year, ch, odir, cut):
     """
     Plots 1D histograms that were made by "make_1dhists" function
 
@@ -145,7 +154,7 @@ def plot_1dhists(year, ch, odir):
     """
 
     # load the hists
-    with open(f'{odir}/2d_cut_{ch}_miso.pkl', 'rb') as f:
+    with open(f'{odir}/2d_{cut}_{ch}.pkl', 'rb') as f:
         hists = pkl.load(f)
         f.close()
 
@@ -159,8 +168,8 @@ def plot_1dhists(year, ch, odir):
         hep.hist2dplot(hists[{'samples': sample}], ax=ax, cmap="plasma")
         ax.set_title(f'Lepton pT distribution for {sample} \n for the {ch} channel at different working points', fontsize=16)
         ax.set_ylabel('lep_pt', fontsize=15)
-        ax.set_xlabel('lep_miso<x', fontsize=15)
-        plt.savefig(f'{odir}/2d_cut_plots/2d_miso_{ch}_{sample}.pdf')
+        ax.set_xlabel(f'lep_{cut}<x', fontsize=15)
+        plt.savefig(f'{odir}/2d_cut_plots/2d_{cut}_{ch}_{sample}.pdf')
         plt.close()
 
         # normalized
@@ -168,8 +177,8 @@ def plot_1dhists(year, ch, odir):
         hep.hist2dplot(hists[{'samples': sample}], ax=ax, cmap="plasma", norm=matplotlib.colors.Normalize(0, 1))
         ax.set_title(f'Lepton pT distribution for {sample} \n for the {ch} channel at different working points', fontsize=16)
         ax.set_ylabel('lep_pt', fontsize=15)
-        ax.set_xlabel('lep_miso<x', fontsize=15)
-        plt.savefig(f'{odir}/2d_cut_plots/2d_miso_{ch}_{sample}_norm.pdf')
+        ax.set_xlabel(f'lep_{cut}<x', fontsize=15)
+        plt.savefig(f'{odir}/2d_cut_plots/2d_{cut}_{ch}_{sample}_norm.pdf')
         plt.close()
 
         # normalized
@@ -177,8 +186,8 @@ def plot_1dhists(year, ch, odir):
         hep.hist2dplot(hists[{'samples': sample}], ax=ax, cmap="plasma", norm=matplotlib.colors.LogNorm(vmin=1e-3))
         ax.set_title(f'Lepton pT distribution for {sample} \n for the {ch} channel at different working points', fontsize=16)
         ax.set_ylabel('lep_pt', fontsize=15)
-        ax.set_xlabel('lep_miso<x', fontsize=15)
-        plt.savefig(f'{odir}/2d_cut_plots/2d_miso_{ch}_{sample}_log.pdf')
+        ax.set_xlabel(f'lep_{cut}<x', fontsize=15)
+        plt.savefig(f'{odir}/2d_cut_plots/2d_{cut}_{ch}_{sample}_log.pdf')
         plt.close()
 
 
@@ -211,12 +220,14 @@ def main(args):
 
     for ch in channels:
         if args.make_hists:
-            print(f'Making iso and miso cut histograms')
-            make_1dhists(args.year, ch, args.idir, odir, samples)
+            for cut in ['iso', 'miso']:
+                print(f'Making {cut} cut 2d hists')
+                make_1dhists(args.year, ch, args.idir, odir, samples, cut)
 
         if args.plot_hists:
-            print(f'Plotting...')
-            plot_1dhists(args.year, ch, odir)
+            for cut in ['iso', 'miso']:
+                print(f'Plotting {cut} cut 2d plots...')
+                plot_1dhists(args.year, ch, odir, cut)
 
 
 if __name__ == "__main__":
