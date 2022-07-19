@@ -157,7 +157,7 @@ def plot_1dhists(year, ch, odir):
     for sample in hists.axes[2]:
         fig, ax = plt.subplots(figsize=(8, 5))
         hep.hist2dplot(hists[{'samples': sample}], ax=ax, cmap="plasma")
-        ax.set_title(f'Lepton pT distribution for {sample_mapping[sample]} \n for the {ch} channel at different working points', fontsize=16)
+        ax.set_title(f'Lepton pT distribution for {sample} \n for the {ch} channel at different working points', fontsize=16)
         ax.set_ylabel('lep_pt', fontsize=15)
         ax.set_xlabel('lep_miso<x', fontsize=15)
         plt.savefig(f'plots/2d_cut_plots/2d_miso_{ch}_{sample}.pdf')
