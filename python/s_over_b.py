@@ -51,6 +51,7 @@ def count_s_over_b(year, channels, idir, odir, samples):
         counter[ch] = {}
 
         for sample in samples:
+            single_sample = None
             for single_key, key in add_samples.items():
                 if key in sample:
                     single_sample = single_key
@@ -110,6 +111,7 @@ def count_s_over_b(year, channels, idir, odir, samples):
                         print('No tot_weight variable in parquet - run pre-processing first!')
                         continue
 
+                    single_sample = None
                     for single_key, key in add_samples.items():
                         if key in sample:
                             single_sample = single_key
