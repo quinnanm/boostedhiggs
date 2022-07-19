@@ -32,7 +32,7 @@ import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
-def count_s_over_b(year, channels, idir, odir, samples):
+def count_s_over_b(year, channels, idir, odir, samples, cut):
     """
     Counts signal and background at different working points of a cut
 
@@ -43,6 +43,9 @@ def count_s_over_b(year, channels, idir, odir, samples):
         odir: output directory to hold the hist object
         samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
     """
+
+    cuts = {'iso': [100, 2], 'miso': [100, 2], 'dphi': [400, 4], 'met_lep': [200, 2]}
+    max_iso = {'ele': 120, 'mu': 55}
 
     wp, counts, counter, s_over_b_before_cut = {}, {}, {}, {}
     for ch in channels:
@@ -68,9 +71,7 @@ def count_s_over_b(year, channels, idir, odir, samples):
 
     for ch in channels:
 
-        # for i in range(0, 400, 4):
-        # for i in range(0, 100, 2):
-        for i in range(0, 200, 2):
+        for i in range(0, cuts[cut][0], cuts[cut][1]):
 
             print(f'Processing working point {i * 0.01}')
             wp[ch].append(i * 0.01)      # working point
@@ -120,32 +121,45 @@ def count_s_over_b(year, channels, idir, odir, samples):
                             single_sample = single_key
 
                     if single_sample is not None:
-                        counter[ch][single_sample] += (data['tot_weight'] * ((data['met'] / data['lep_pt']) < (i * 0.01))).sum()
+
+                        if cut == 'met_lep':
+                            counter[ch][single_sample] += (data['tot_weight'] * ((data['met'] / data['lep_pt']) < (i * 0.01))).sum()
+                        elif cut == 'dphi':
+                            counter[ch][single_sample] += (data['tot_weight'] * ((abs(data['met_fj_dphi'])) < (i * 0.01))).sum()
+                        elif cut == 'iso':
+                            counter[ch][single_sample] += (data['tot_weight'] * ((data['lep_isolation'] < (i * 0.01)) & (data['lep_pt'] < max_iso[ch]))).sum()
+                        elif cut == 'miso':
+                            counter[ch][single_sample] += (data['tot_weight'] * ((data['lep_misolation'] < (i * 0.01)) & (data['lep_pt'] > max_iso[ch]))).sum()
+
                         if i == 0:
                             s_over_b_before_cut[ch][single_sample] += data['tot_weight'].sum()
                     else:
-                        counter[ch][sample] += (data['tot_weight'] * ((data['met'] / data['lep_pt']) < (i * 0.01))).sum()
+                        if cut == 'met_lep':
+                            counter[ch][sample] += (data['tot_weight'] * ((data['met'] / data['lep_pt']) < (i * 0.01))).sum()
+                        elif cut == 'dphi':
+                            counter[ch][sample] += (data['tot_weight'] * ((abs(data['met_fj_dphi'])) < (i * 0.01))).sum()
+                        elif cut == 'iso':
+                            counter[ch][sample] += (data['tot_weight'] * ((data['lep_isolation'] < (i * 0.01)) & (data['lep_pt'] < max_iso[ch]))).sum()
+                        elif cut == 'miso':
+                            counter[ch][sample] += (data['tot_weight'] * ((data['lep_misolation'] < (i * 0.01)) & (data['lep_pt'] > max_iso[ch]))).sum()
+
                         if i == 0:
                             s_over_b_before_cut[ch][sample] += data['tot_weight'].sum()
-
-                        # c_sig = c_sig + (data['tot_weight'] * (data['lep_isolation'] < (i * 0.01))).sum()
-                        # c_sig = c_sig + (data['tot_weight'] * (data['lep_misolation'] < (i * 0.01))).sum()
-                        # c_sig = c_sig + (data['tot_weight'] * ((abs(data['met_fj_dphi'])) < (i * 0.01))).sum()
 
             for key in counts[ch].keys():
                 counts[ch][key].append(counter[ch][key])
 
         print("------------------------------------------------------------")
 
-        with open(f'{odir}/wp.pkl', 'wb') as f:  # saves the hists objects
+        with open(f'{odir}/wp_{cut}.pkl', 'wb') as f:  # saves the hists objects
             pkl.dump(wp, f)
-        with open(f'{odir}/counts.pkl', 'wb') as f:  # saves the hists objects
+        with open(f'{odir}/counts_{cut}.pkl', 'wb') as f:  # saves the hists objects
             pkl.dump(counts, f)
-        with open(f'{odir}/counts_before.pkl', 'wb') as f:  # saves the hists objects
+        with open(f'{odir}/counts_before_{cut}.pkl', 'wb') as f:  # saves the hists objects
             pkl.dump(s_over_b_before_cut, f)
 
 
-def plot_s_over_b(year, channels, odir):
+def plot_s_over_b(year, channels, odir, cut):
     """
     Plots 1D histograms that were made by "make_1dhists" function
 
@@ -156,18 +170,18 @@ def plot_s_over_b(year, channels, odir):
     """
 
     # load the hists
-    with open(f'{odir}/wp.pkl', 'rb') as f:
+    with open(f'{odir}/wp_{cut}.pkl', 'rb') as f:
         wp = pkl.load(f)
         f.close()
-    with open(f'{odir}/counts.pkl', 'rb') as f:
+    with open(f'{odir}/counts_{cut}.pkl', 'rb') as f:
         counts = pkl.load(f)
         f.close()
-    with open(f'{odir}/counts_before.pkl', 'rb') as f:
+    with open(f'{odir}/counts_before_{cut}.pkl', 'rb') as f:
         s_over_b_before_cut = pkl.load(f)
         f.close()
 
     # s/b for b=DY,TTbar,Wjets
-    fig, ax = plt.subplots(figsize=(10, 10))
+    fig, ax = plt.subplots(figsize=(8, 8))
 
     for ch in channels:
         num = counts[ch]['GluGluHToWWToLNuQQ']
@@ -191,11 +205,11 @@ def plot_s_over_b(year, channels, odir):
 
     ax.set_ylabel(r's/$\sqrt{b}$', fontsize=15)
     ax.legend()
-    plt.savefig(f'{odir}/s_over_b_dy_tt_wjets.pdf')
+    plt.savefig(f'{odir}/{cut}_s_over_b_dy_tt_wjets.pdf')
     plt.close()
 
     # s/b for b=QCD
-    fig, ax = plt.subplots(figsize=(10, 10))
+    fig, ax = plt.subplots(figsize=(8, 8))
 
     for ch in channels:
         num = counts[ch]['GluGluHToWWToLNuQQ']
@@ -219,7 +233,7 @@ def plot_s_over_b(year, channels, odir):
 
     ax.set_ylabel(r's/$\sqrt{b}$', fontsize=15)
     ax.legend()
-    plt.savefig(f'{odir}/s_over_b_qcd.pdf')
+    plt.savefig(f'{odir}/{cut}_s_over_b_qcd.pdf')
     plt.close()
 
 
@@ -255,12 +269,14 @@ def main(args):
                 samples[args.year][ch].append(key)
 
     if args.make_counts:
-        print(f'counting s/b')
-        count_s_over_b(args.year, channels, args.idir, odir, samples)
+        for cut in ['iso']:
+            print(f'counting s/b after {cut} cut')
+            count_s_over_b(args.year, channels, args.idir, odir, samples, cut)
 
     if args.plot_counts:
-        print(f'plotting s/b')
-    plot_s_over_b(args.year, channels, odir)
+        for cut in ['iso']:
+            print(f'plotting s/b')
+            plot_s_over_b(args.year, channels, odir, cut)
 
 
 if __name__ == "__main__":
