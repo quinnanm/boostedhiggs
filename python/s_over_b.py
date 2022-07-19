@@ -187,7 +187,7 @@ def plot_s_over_b(year, channels, odir, cut):
         num = counts[ch]['GluGluHToWWToLNuQQ']
         deno = [sum(x) for x in zip(counts[ch]['DYJets'], counts[ch]['TTbar'], counts[ch]['WJetsLNu'])]
 
-        legend = s_over_b_before_cut['GluGluHToWWToLNuQQ'] / (s_over_b_before_cut[ch]['DYJets'] + s_over_b_before_cut[ch]['TTbar'] + s_over_b_before_cut[ch]['WJetsLNu'])
+        legend = s_over_b_before_cut[ch]['GluGluHToWWToLNuQQ'] / (s_over_b_before_cut[ch]['DYJets'] + s_over_b_before_cut[ch]['TTbar'] + s_over_b_before_cut[ch]['WJetsLNu'])
 
         ax.plot(wp[ch], num / np.sqrt(deno), label=f'{ch} channel, with s/b before cut = {str(round(legend,3))}')
 
@@ -215,7 +215,7 @@ def plot_s_over_b(year, channels, odir, cut):
         num = counts[ch]['GluGluHToWWToLNuQQ']
         deno = counts[ch]['QCD']
 
-        legend = s_over_b_before_cut['GluGluHToWWToLNuQQ'] / s_over_b_before_cut[ch]['QCD']
+        legend = s_over_b_before_cut[ch]['GluGluHToWWToLNuQQ'] / s_over_b_before_cut[ch]['QCD']
 
         ax.plot(wp[ch], num / np.sqrt(deno), label=f'{ch} channel, with s/b before cut = {str(round(legend,3))}')
 
