@@ -269,7 +269,7 @@ def main(args):
                 samples[args.year][ch].append(key)
 
     if args.make_counts:
-        for cut in ['iso']:
+        for cut in ['iso', 'miso', 'dphi']:
             print(f'counting s/b after {cut} cut')
             count_s_over_b(args.year, channels, args.idir, odir, samples, cut)
 
@@ -281,7 +281,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # python s_over_b.py --year 2017 --odir plots --channels ele --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --tag met_over_lep --plot_counts --make_counts
+    # python s_over_b.py --year 2017 --odir plots --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --tag met_over_lep --plot_counts --make_counts
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',            dest='year',        default='2017',                             help="year")
