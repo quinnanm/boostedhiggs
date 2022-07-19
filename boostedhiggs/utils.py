@@ -77,8 +77,8 @@ def match_HWW(genparticles, candidatefj):
            "hWW_matched": hWW_matched,
            "hWW_nprongs": hWW_nprongs,
            "matchedH": matchedH,
-           "iswlepton": iswlepton,
-           "iswstarlepton": iswstarlepton}
+           "iswlepton": iswlepton,  # truth info, higher mass is normally onshell
+           "iswstarlepton": iswstarlepton}  # truth info, lower mass is normally offshell
 
     return ret
 
