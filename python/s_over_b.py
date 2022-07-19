@@ -119,15 +119,14 @@ def count_s_over_b(year, channels, idir, odir, samples):
                         if key in sample:
                             single_sample = single_key
 
-                    print(s_over_b_before_cut.keys())
                     if single_sample is not None:
                         counter[ch][single_sample] += (data['tot_weight'] * ((data['met'] / data['lep_pt']) < (i * 0.01))).sum()
                         if i == 0:
-                            s_over_b_before_cut[single_sample] += data['tot_weight']
+                            s_over_b_before_cut[ch][single_sample] += data['tot_weight']
                     else:
                         counter[ch][sample] += (data['tot_weight'] * ((data['met'] / data['lep_pt']) < (i * 0.01))).sum()
                         if i == 0:
-                            s_over_b_before_cut[sample] += data['tot_weight']
+                            s_over_b_before_cut[ch][sample] += data['tot_weight']
 
                         # c_sig = c_sig + (data['tot_weight'] * (data['lep_isolation'] < (i * 0.01))).sum()
                         # c_sig = c_sig + (data['tot_weight'] * (data['lep_misolation'] < (i * 0.01))).sum()
