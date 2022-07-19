@@ -44,15 +44,30 @@ def count_s_over_b(year, channels, idir, odir, samples):
         samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
     """
 
-    wp, count_sig, count_bkg = {}, {}, {}
+    wp, counts, counter = {}, {}, {}
+    for ch in channels:
+        wp[ch] = []
+        counts[ch] = {}
+        counter[ch] = {}
+
+        for sample in samples:
+            for single_key, key in add_samples.items():
+                if key in sample:
+                    single_sample = single_key
+
+            if single_sample is not None:
+                counts[ch][single_sample] = []
+                counter[ch][single_sample] = 0
+            else:
+                counts[ch][sample] = []
+                counter[ch][sample] = 0
 
     for ch in channels:
-        wp[ch], count_sig[ch], count_bkg[ch] = [], [], []
 
-        c_sig, c_bkg = 0, 0
         # for i in range(0, 400, 4):
         # for i in range(0, 100, 2):
         for i in range(0, 200, 2):
+
             print(f'Processing working point {i * 0.01}')
             wp[ch].append(i * 0.01)      # working point
 
@@ -68,6 +83,7 @@ def count_s_over_b(year, channels, idir, odir, samples):
                     continue
 
                 print("------------------------------------------------------------")
+
                 # check if the sample was processed
                 pkl_dir = f'{idir}/{sample}/outfiles/*.pkl'
                 pkl_files = glob.glob(pkl_dir)  #
@@ -85,10 +101,7 @@ def count_s_over_b(year, channels, idir, odir, samples):
                     try:
                         data = pq.read_table(parquet_file).to_pandas()
                     except:
-                        if is_data:
-                            print('Not able to read data: ', parquet_file, ' should remove evts from scaling/lumi')
-                        else:
-                            print('Not able to read data from ', parquet_file)
+                        print('Not able to read data from ', parquet_file)
                         continue
 
                     try:
@@ -97,31 +110,28 @@ def count_s_over_b(year, channels, idir, odir, samples):
                         print('No tot_weight variable in parquet - run pre-processing first!')
                         continue
 
-                    if sample == 'GluGluHToWWToLNuQQ':
-                        print('signal')
+                    for single_key, key in add_samples.items():
+                        if key in sample:
+                            single_sample = single_key
+
+                    if single_sample is not None:
+                        counter[ch][single_sample] += (data['tot_weight'] * ((data['met'] / data['lep_pt']) < (i * 0.01))).sum()
+                    else:
+                        counter[ch][sample] += (data['tot_weight'] * ((data['met'] / data['lep_pt']) < (i * 0.01))).sum()
+
                         # c_sig = c_sig + (data['tot_weight'] * (data['lep_isolation'] < (i * 0.01))).sum()
                         # c_sig = c_sig + (data['tot_weight'] * (data['lep_misolation'] < (i * 0.01))).sum()
                         # c_sig = c_sig + (data['tot_weight'] * ((abs(data['met_fj_dphi'])) < (i * 0.01))).sum()
-                        c_sig = c_sig + (data['tot_weight'] * ((data['met'] / data['lep_pt']) < (i * 0.01))).sum()
 
-                    else:
-                        print('background')
-                        # c_bkg = c_bkg + (data['tot_weight'] * (data['lep_isolation'] < (i * 0.01))).sum()
-                        # c_bkg = c_bkg + (data['tot_weight'] * (data['lep_misolation'] < (i * 0.01))).sum()
-                        # c_bkg = c_bkg + (data['tot_weight'] * ((abs(data['met_fj_dphi'])) < (i * 0.01))).sum()
-                        c_bkg = c_bkg + (data['tot_weight'] * ((data['met'] / data['lep_pt']) < (i * 0.01))).sum()
-
-            count_sig[ch].append(c_sig)   # cut defined at the working point
-            count_bkg[ch].append(c_bkg)   # cut defined at the working point
+            for key in counts[ch].keys():
+                counts[ch][key].append(counter[ch][key])
 
         print("------------------------------------------------------------")
 
         with open(f'{odir}/wp.pkl', 'wb') as f:  # saves the hists objects
             pkl.dump(wp, f)
-        with open(f'{odir}/count_sig.pkl', 'wb') as f:  # saves the hists objects
-            pkl.dump(count_sig, f)
-        with open(f'{odir}/count_bkg.pkl', 'wb') as f:  # saves the hists objects
-            pkl.dump(count_bkg, f)
+        with open(f'{odir}/counts.pkl', 'wb') as f:  # saves the hists objects
+            pkl.dump(counts, f)
 
 
 def plot_s_over_b(year, channels, odir):
@@ -139,11 +149,8 @@ def plot_s_over_b(year, channels, odir):
     with open(f'{odir}/wp.pkl', 'rb') as f:
         wp = pkl.load(f)
         f.close()
-    with open(f'{odir}/count_sig.pkl', 'rb') as f:
-        count_sig = pkl.load(f)
-        f.close()
-    with open(f'{odir}/count_bkg.pkl', 'rb') as f:
-        count_bkg = pkl.load(f)
+    with open(f'{odir}/counts.pkl', 'rb') as f:
+        counts = pkl.load(f)
         f.close()
 
     fig, ax = plt.subplots()

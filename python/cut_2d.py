@@ -50,7 +50,7 @@ def make_1dhists(year, ch, idir, odir, samples):
 
     hists = hist2.Hist(
         hist2.axis.Regular(20, 0, 1, name='lep_miso<x', label='lep_miso<x', overflow=True),
-        hist2.axis.Regular(20, 30, 320, name='lep_pt', label='lep_pt', overflow=True),
+        hist2.axis.Regular(20, 120, 320, name='lep_pt', label='lep_pt', overflow=True),
         hist2.axis.StrCategory([], name='samples', growth=True),
     )
 
