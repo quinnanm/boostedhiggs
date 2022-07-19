@@ -122,11 +122,11 @@ def count_s_over_b(year, channels, idir, odir, samples):
                     if single_sample is not None:
                         counter[ch][single_sample] += (data['tot_weight'] * ((data['met'] / data['lep_pt']) < (i * 0.01))).sum()
                         if i == 0:
-                            s_over_b_before_cut[ch][single_sample] += data['tot_weight']
+                            s_over_b_before_cut[ch][single_sample] += data['tot_weight'].sum()
                     else:
                         counter[ch][sample] += (data['tot_weight'] * ((data['met'] / data['lep_pt']) < (i * 0.01))).sum()
                         if i == 0:
-                            s_over_b_before_cut[ch][sample] += data['tot_weight']
+                            s_over_b_before_cut[ch][sample] += data['tot_weight'].sum()
 
                         # c_sig = c_sig + (data['tot_weight'] * (data['lep_isolation'] < (i * 0.01))).sum()
                         # c_sig = c_sig + (data['tot_weight'] * (data['lep_misolation'] < (i * 0.01))).sum()
@@ -204,8 +204,6 @@ def plot_s_over_b(year, channels, odir):
         legend = s_over_b_before_cut[ch]['QCD']
 
         ax.plot(wp[ch], num / np.sqrt(deno), label=f'{ch} channel, with s/b before cut = {str(round(legend,3))}')
-
-    ax.text(0, 1.4, f's/b before cut = {str(legend)}')
 
     # ax.set_yscale('log')
 
