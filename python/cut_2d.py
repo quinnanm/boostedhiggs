@@ -97,7 +97,7 @@ def make_1dhists(year, ch, idir, odir, samples):
         y_lep = []
         for i in range(0, 400, 1):
             wp.append(i * 0.01)      # working point
-            cut = (data['lep_misolation'] < (i * 0.01) and data['lep_pt'] > max_iso[ch])   # cut defined at the working point
+            cut = (data['lep_misolation'] < (i * 0.01)) and (data['lep_pt'] > max_iso[ch])   # cut defined at the working point
             y_lep.append(data['lep_pt'][cut].to_numpy())  # lepton_pt distribution of events passing the cut
 
         # to plot the 2d map -> (1) expand the wp list (2) unfold the y_lep sublists
