@@ -104,10 +104,10 @@ def make_1dhists(year, ch, idir, odir, samples, cut):
         for i in range(0, 400, 1):
             wp.append(i * 0.01)      # working point
             if cut == 'miso':
-                cut = (data['lep_misolation'] < (i * 0.01)) & (data['lep_pt'] > max_iso[ch])   # cut defined at the working point
+                selection = (data['lep_misolation'] < (i * 0.01)) & (data['lep_pt'] > max_iso[ch])   # cut defined at the working point
             elif cut == 'iso':
-                cut = (data['lep_isolation'] < (i * 0.01)) & (data['lep_pt'] < max_iso[ch])   # cut defined at the working point
-            y_lep.append(data['lep_pt'][cut].to_numpy())  # lepton_pt distribution of events passing the cut
+                selection = (data['lep_isolation'] < (i * 0.01)) & (data['lep_pt'] < max_iso[ch])   # cut defined at the working point
+            y_lep.append(data['lep_pt'][selection].to_numpy())  # lepton_pt distribution of events passing the cut
 
         # to plot the 2d map -> (1) expand the wp list (2) unfold the y_lep sublists
         # recall: wp is a list of working points
