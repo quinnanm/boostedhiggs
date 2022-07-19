@@ -167,7 +167,7 @@ def plot_s_over_b(year, channels, odir):
         f.close()
 
     # s/b for b=DY,TTbar,Wjets
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10, 10))
 
     for ch in channels:
         num = counts[ch]['GluGluHToWWToLNuQQ']
@@ -175,9 +175,7 @@ def plot_s_over_b(year, channels, odir):
 
         legend = s_over_b_before_cut[ch]['DYJets'] + s_over_b_before_cut[ch]['TTbar'] + s_over_b_before_cut[ch]['WJetsLNu']
 
-        ax.plot(wp[ch], num / np.sqrt(deno), label=f'{ch} channel')
-
-    ax.text(0, 1.4, f's/b before cut = {str(legend)}')
+        ax.plot(wp[ch], num / np.sqrt(deno), label=f'{ch} channel, with s/b before cut = {str(round(legend,3))}')
 
     # ax.set_yscale('log')
 
@@ -197,7 +195,7 @@ def plot_s_over_b(year, channels, odir):
     plt.close()
 
     # s/b for b=QCD
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10, 10))
 
     for ch in channels:
         num = counts[ch]['GluGluHToWWToLNuQQ']
@@ -205,7 +203,7 @@ def plot_s_over_b(year, channels, odir):
 
         legend = s_over_b_before_cut[ch]['QCD']
 
-        ax.plot(wp[ch], num / np.sqrt(deno), label=f'{ch} channel')
+        ax.plot(wp[ch], num / np.sqrt(deno), label=f'{ch} channel, with s/b before cut = {str(round(legend,3))}')
 
     ax.text(0, 1.4, f's/b before cut = {str(legend)}')
 
