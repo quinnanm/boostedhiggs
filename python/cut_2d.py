@@ -49,7 +49,7 @@ def make_1dhists(year, ch, idir, odir, samples):
     max_iso = {'ele': 120, 'mu': 55}
 
     hists = hist2.Hist(
-        hist2.axis.Regular(20, 0, 1, name='lep_miso<x', label='lep_miso<x', overflow=True),
+        hist2.axis.Regular(20, 0, 1, name='lep_miso', label='lep_miso', overflow=True),
         hist2.axis.Regular(20, 120, 320, name='lep_pt', label='lep_pt', overflow=True),
         hist2.axis.StrCategory([], name='samples', growth=True),
     )
@@ -161,6 +161,25 @@ def plot_1dhists(year, ch, odir):
         ax.set_ylabel('lep_pt', fontsize=15)
         ax.set_xlabel('lep_miso<x', fontsize=15)
         plt.savefig(f'{odir}/2d_cut_plots/2d_miso_{ch}_{sample}.pdf')
+        plt.close()
+
+        # normalized
+        fig, ax = plt.subplots(figsize=(8, 5))
+        hep.hist2dplot(hists[{'samples': sample}], ax=ax, cmap="plasma", norm=matplotlib.colors.Normalize(0, 1))
+        ax.set_title(f'Lepton pT distribution for {sample} \n for the {ch} channel at different working points', fontsize=16)
+        ax.set_ylabel('lep_pt', fontsize=15)
+        ax.set_xlabel('lep_miso<x', fontsize=15)
+        plt.savefig(f'{odir}/2d_cut_plots/2d_miso_{ch}_{sample}_norm.pdf')
+        plt.close()
+
+        # normalized
+        fig, ax = plt.subplots(figsize=(8, 5))
+        hep.hist2dplot(hists[{'samples': sample}], ax=ax, cmap="plasma", norm=matplotlib.colors.LogNorm(vmin=1e-3))
+        ax.set_title(f'Lepton pT distribution for {sample} \n for the {ch} channel at different working points', fontsize=16)
+        ax.set_ylabel('lep_pt', fontsize=15)
+        ax.set_xlabel('lep_miso<x', fontsize=15)
+        plt.savefig(f'{odir}/2d_cut_plots/2d_miso_{ch}_{sample}_log.pdf')
+        plt.close()
 
 
 def main(args):
