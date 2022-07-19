@@ -132,8 +132,6 @@ def count_s_over_b(year, channels, idir, odir, samples):
                         # c_sig = c_sig + (data['tot_weight'] * (data['lep_misolation'] < (i * 0.01))).sum()
                         # c_sig = c_sig + (data['tot_weight'] * ((abs(data['met_fj_dphi'])) < (i * 0.01))).sum()
 
-                    if single_sample is not None:
-
             for key in counts[ch].keys():
                 counts[ch][key].append(counter[ch][key])
 
