@@ -118,7 +118,6 @@ def make_1dhists(year, ch, idir, odir, samples):
                     weight=event_weight[select_miso],
                 )
             else:
-
                 hists_iso.fill(
                     data['lep_isolation'][select_iso],
                     sample,
