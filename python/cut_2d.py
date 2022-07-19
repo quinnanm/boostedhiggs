@@ -154,7 +154,7 @@ def plot_1dhists(year, ch, odir):
         os.makedirs(f'{odir}/2d_cut_plots')
 
     # make plots per channel
-    for sample in hists_iso.axes[1]:
+    for sample in hists.axes[1]:
         fig, ax = plt.subplots(figsize=(8, 5))
         hep.hist2dplot(hists[{'samples': sample}], ax=ax, cmap="plasma", norm=matplotlib.colors.LogNorm(vmin=1e-3, vmax=1000))
         ax.set_title(f'Lepton pT distribution for {sample_mapping[sample]} \n for the {ch} channel at different working points', fontsize=16)
