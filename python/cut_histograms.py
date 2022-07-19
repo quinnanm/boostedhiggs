@@ -198,9 +198,9 @@ def main(args):
         os.makedirs(odir)
 
     # make subdirectory specefic to this script
-    if not os.path.exists(odir + '/1d_hists/'):
-        os.makedirs(odir + '/1d_hists/')
-    odir = odir + '/1d_hists/'
+    if not os.path.exists(odir + '/1d_cuts/'):
+        os.makedirs(odir + '/1d_cuts/')
+    odir = odir + '/1d_cuts/'
 
     channels = args.channels.split(',')
 
