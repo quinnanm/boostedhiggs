@@ -116,6 +116,7 @@ def count_s_over_b(year, channels, idir, odir, samples):
                         if key in sample:
                             single_sample = single_key
 
+                    print(counter[ch].keys())
                     if single_sample is not None:
                         counter[ch][single_sample] += (data['tot_weight'] * ((data['met'] / data['lep_pt']) < (i * 0.01))).sum()
                     else:
