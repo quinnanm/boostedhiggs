@@ -59,6 +59,15 @@ def make_1dhists(year, ch, idir, odir, samples):
 
     # loop over the samples
     for sample in samples[year][ch]:
+
+        # skip data samples
+        is_data = False
+        for key in data_by_ch.values():
+            if key in sample:
+                is_data = True
+        if is_data:
+            continue
+
         print("------------------------------------------------------------")
         # check if the sample was processed
         pkl_dir = f'{idir}/{sample}/outfiles/*.pkl'
@@ -82,28 +91,43 @@ def make_1dhists(year, ch, idir, odir, samples):
             if len(data) == 0:
                 continue
 
+            try:
+                event_weight = data['tot_weight']
+            except:
+                print('No tot_weight variable in parquet - run pre-processing first!')
+                continue
+
             single_sample = None
             for single_key, key in add_samples.items():
                 if key in sample:
                     single_sample = single_key
 
+            select_iso = data['lep_pt'] < max_iso[ch]
+            select_miso = data['lep_pt'] > max_iso[ch]
+
             if single_sample is not None:
                 hists_iso.fill(
-                    data['lep_isolation'][data['lep_pt'] < max_iso[ch]],
+                    data['lep_isolation'][select_iso],
                     single_sample,  # combining all events under one name
+                    weight=event_weight[select_iso],
                 )
+                selection = data['lep_pt'] > max_iso[ch]
                 hists_miso.fill(
-                    data['lep_misolation'][data['lep_pt'] > max_iso[ch]],
+                    data['lep_misolation'][select_miso],
                     single_sample,  # combining all events under one name
+                    weight=event_weight[select_miso],
                 )
             else:
+
                 hists_iso.fill(
-                    data['lep_isolation'][data['lep_pt'] < max_iso[ch]],
+                    data['lep_isolation'][select_iso],
                     sample,
+                    weight=event_weight[select_iso],
                 )
                 hists_miso.fill(
-                    data['lep_misolation'][data['lep_pt'] > max_iso[ch]],
+                    data['lep_misolation'][select_miso],
                     sample,
+                    weight=event_weight[select_miso],
                 )
 
     print("------------------------------------------------------------")
