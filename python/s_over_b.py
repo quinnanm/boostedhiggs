@@ -44,11 +44,12 @@ def count_s_over_b(year, channels, idir, odir, samples):
         samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
     """
 
-    wp, counts, counter = {}, {}, {}
+    wp, counts, counter, s_over_b_before_cut = {}, {}, {}, {}
     for ch in channels:
         wp[ch] = []
         counts[ch] = {}
         counter[ch] = {}
+        s_over_b_before_cut[ch] = {}
 
         for sample in samples[year][ch]:
             single_sample = None
@@ -59,9 +60,11 @@ def count_s_over_b(year, channels, idir, odir, samples):
             if single_sample is not None:
                 counts[ch][single_sample] = []
                 counter[ch][single_sample] = 0
+                s_over_b_before_cut[ch][single_sample] = 0
             else:
                 counts[ch][sample] = []
                 counter[ch][sample] = 0
+                s_over_b_before_cut[ch][sample] = 0
 
     for ch in channels:
 
@@ -116,15 +119,20 @@ def count_s_over_b(year, channels, idir, odir, samples):
                         if key in sample:
                             single_sample = single_key
 
-                    print(counter[ch].keys())
                     if single_sample is not None:
                         counter[ch][single_sample] += (data['tot_weight'] * ((data['met'] / data['lep_pt']) < (i * 0.01))).sum()
+                        if i == 0:
+                            s_over_b_before_cut[single_sample] += data['tot_weight']
                     else:
                         counter[ch][sample] += (data['tot_weight'] * ((data['met'] / data['lep_pt']) < (i * 0.01))).sum()
+                        if i == 0:
+                            s_over_b_before_cut[sample] += data['tot_weight']
 
                         # c_sig = c_sig + (data['tot_weight'] * (data['lep_isolation'] < (i * 0.01))).sum()
                         # c_sig = c_sig + (data['tot_weight'] * (data['lep_misolation'] < (i * 0.01))).sum()
                         # c_sig = c_sig + (data['tot_weight'] * ((abs(data['met_fj_dphi'])) < (i * 0.01))).sum()
+
+                    if single_sample is not None:
 
             for key in counts[ch].keys():
                 counts[ch][key].append(counter[ch][key])
@@ -135,6 +143,8 @@ def count_s_over_b(year, channels, idir, odir, samples):
             pkl.dump(wp, f)
         with open(f'{odir}/counts.pkl', 'wb') as f:  # saves the hists objects
             pkl.dump(counts, f)
+        with open(f'{odir}/counts_before.pkl', 'wb') as f:  # saves the hists objects
+            pkl.dump(s_over_b_before_cut, f)
 
 
 def plot_s_over_b(year, channels, odir):
@@ -156,16 +166,20 @@ def plot_s_over_b(year, channels, odir):
         counts = pkl.load(f)
         f.close()
 
+    # s/b for b=DY,TTbar,Wjets
     fig, ax = plt.subplots()
 
     for ch in channels:
-        ax.plot(wp[ch], count_sig[ch] / np.sqrt(count_bkg[ch]), label=f'{ch} channel')
+        num = counts[ch]['GluGluHToWWToLNuQQ']
+        deno = [sum(x) for x in zip(counts[ch]['DYJets'], counts[ch]['TTbar'], counts[ch]['WJetsLNu'])]
+
+        ax.plot(wp[ch], num / np.sqrt(deno), label=f'{ch} channel')
     # ax.set_yscale('log')
 
     # ax.set_title(r's/$\sqrt{b}$ as a function of the lepton isolation cut', fontsize=16)
     # ax.set_title(r's/$\sqrt{b}$ as a function of the lepton mini-isolation cut', fontsize=16)
     # ax.set_title(r's/$\sqrt{b}$ as a function of the dphi cut', fontsize=16)
-    ax.set_title(r's/$\sqrt{b}$ as a function of the met_pt/lep_pt cut', fontsize=16)
+    ax.set_title('s/$\sqrt{b}$ as a function of the met_pt/lep_pt cut \n with DY, TTbar, Wjets background', fontsize=16)
 
     # ax.set_xlabel('lep_iso<x|', fontsize=15)
     # ax.set_xlabel('lep_miso<x|', fontsize=15)
@@ -174,7 +188,33 @@ def plot_s_over_b(year, channels, odir):
 
     ax.set_ylabel(r's/$\sqrt{b}$', fontsize=15)
     ax.legend()
-    plt.savefig(f'{odir}/s_over_b.pdf')
+    plt.savefig(f'{odir}/s_over_b_dy_tt_wjets.pdf')
+    plt.close()
+
+    # s/b for b=QCD
+    fig, ax = plt.subplots()
+
+    for ch in channels:
+        num = counts[ch]['GluGluHToWWToLNuQQ']
+        deno = counts[ch]['QCD']
+
+        ax.plot(wp[ch], num / np.sqrt(deno), label=f'{ch} channel')
+    # ax.set_yscale('log')
+
+    # ax.set_title(r's/$\sqrt{b}$ as a function of the lepton isolation cut', fontsize=16)
+    # ax.set_title(r's/$\sqrt{b}$ as a function of the lepton mini-isolation cut', fontsize=16)
+    # ax.set_title(r's/$\sqrt{b}$ as a function of the dphi cut', fontsize=16)
+    ax.set_title('s/$\sqrt{b}$ as a function of the met_pt/lep_pt cut \n with QCD background', fontsize=16)
+
+    # ax.set_xlabel('lep_iso<x|', fontsize=15)
+    # ax.set_xlabel('lep_miso<x|', fontsize=15)
+    # ax.set_xlabel('|dphi(met, jet)<x|', fontsize=15)
+    ax.set_xlabel(r'$\frac{pT_{met}}{pT_{lep}}$<x', fontsize=15)
+
+    ax.set_ylabel(r's/$\sqrt{b}$', fontsize=15)
+    ax.legend()
+    plt.savefig(f'{odir}/s_over_b_qcd.pdf')
+    plt.close()
 
 
 def main(args):
@@ -219,7 +259,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # python s_over_b.py --year 2017 --odir plots --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --tag met_over_lep --plot_counts --make_counts
+    # python s_over_b.py --year 2017 --odir plots --channels ele --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --tag met_over_lep --plot_counts --make_counts
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',            dest='year',        default='2017',                             help="year")
