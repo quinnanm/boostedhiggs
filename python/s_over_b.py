@@ -153,7 +153,6 @@ def plot_s_over_b(year, channels, odir):
         year: string that represents the year the processed samples are from
         ch: string that represents the signal channel to look at... choices are ['ele', 'mu', 'had']
         odir: output directory to hold the plots
-        var: the name of the variable to plot a 1D-histogram of... see the full list of choices in plot_configs/vars.json
     """
 
     # load the hists
@@ -163,6 +162,9 @@ def plot_s_over_b(year, channels, odir):
     with open(f'{odir}/counts.pkl', 'rb') as f:
         counts = pkl.load(f)
         f.close()
+    with open(f'{odir}/counts_before.pkl', 'rb') as f:
+        s_over_b_before_cut = pkl.load(f)
+        f.close()
 
     # s/b for b=DY,TTbar,Wjets
     fig, ax = plt.subplots()
@@ -171,7 +173,12 @@ def plot_s_over_b(year, channels, odir):
         num = counts[ch]['GluGluHToWWToLNuQQ']
         deno = [sum(x) for x in zip(counts[ch]['DYJets'], counts[ch]['TTbar'], counts[ch]['WJetsLNu'])]
 
+        legend = s_over_b_before_cut[ch]['DYJets'] + s_over_b_before_cut[ch]['TTbar'] + s_over_b_before_cut[ch]['WJetsLNu']
+
         ax.plot(wp[ch], num / np.sqrt(deno), label=f'{ch} channel')
+
+    ax.text(0, 1.4, f's/b before cut = {str(legend)}')
+
     # ax.set_yscale('log')
 
     # ax.set_title(r's/$\sqrt{b}$ as a function of the lepton isolation cut', fontsize=16)
@@ -196,7 +203,12 @@ def plot_s_over_b(year, channels, odir):
         num = counts[ch]['GluGluHToWWToLNuQQ']
         deno = counts[ch]['QCD']
 
+        legend = s_over_b_before_cut[ch]['QCD']
+
         ax.plot(wp[ch], num / np.sqrt(deno), label=f'{ch} channel')
+
+    ax.text(0, 1.4, f's/b before cut = {str(legend)}')
+
     # ax.set_yscale('log')
 
     # ax.set_title(r's/$\sqrt{b}$ as a function of the lepton isolation cut', fontsize=16)
