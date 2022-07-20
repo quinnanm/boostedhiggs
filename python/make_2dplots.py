@@ -48,7 +48,7 @@ def make_2dplots(year, ch, idir, odir, samples, vars, x_bins, x_start, x_end, y_
     if vars[0] == 'lep_misolation':
         start = max_iso[ch]
         end = 350
-    elif cut == 'lep_isolation':
+    elif vars[0] == 'lep_isolation':
         start = 30
         end = max_iso[ch]
     else:
