@@ -57,8 +57,8 @@ def make_2dplots(year, ch, idir, odir, samples, vars, x_bins, x_start, x_end, y_
 
     # instantiates the histogram object
     hists = hist2.Hist(
-        hist2.axis.Regular(x_bins, start, end, name=vars[0], label=vars[0], overflow=True),
-        hist2.axis.Regular(y_bins, y_start, y_end, name=vars[1], label=vars[1], overflow=True),
+        hist2.axis.Regular(x_bins, 0, 4, name=vars[0], label=vars[0], overflow=True),
+        hist2.axis.Regular(y_bins, start, end, name=vars[1], label=vars[1], overflow=True),
         hist2.axis.StrCategory([], name='samples', growth=True),
     )
 
