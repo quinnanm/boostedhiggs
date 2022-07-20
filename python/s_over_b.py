@@ -93,26 +93,20 @@ def count_s_over_b(year, channels, idir, odir, samples, cut):
                 pkl_dir = f'{idir}/{sample}/outfiles/*.pkl'
                 pkl_files = glob.glob(pkl_dir)  #
                 if not pkl_files:  # skip samples which were not processed
-                    print('- No processed files found...', pkl_dir, 'skipping sample...', sample)
                     continue
 
                 # check if the sample was processed
                 parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')
 
-                if len(parquet_files) != 0:
-                    print(f'- Processing {ch} channel of sample', sample)
-
                 for i, parquet_file in enumerate(parquet_files):
                     try:
                         data = pq.read_table(parquet_file).to_pandas()
                     except:
-                        print('Not able to read data from ', parquet_file)
                         continue
 
                     try:
                         event_weight = data['tot_weight']
                     except:
-                        print('No tot_weight variable in parquet - run pre-processing first!')
                         continue
 
                     single_sample = None
