@@ -44,7 +44,7 @@ def count_s_over_b(year, channels, idir, odir, samples, cut):
         samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
     """
 
-    cuts = {'iso': [100, 10], 'miso': [100, 10], 'dphi': [400, 4], 'met_lep': [200, 2]}
+    cuts = {'iso': [100, 10], 'miso': [100, 10], 'dphi': [800, 4], 'met_lep': [200, 2]}
     max_iso = {'ele': 120, 'mu': 55}
 
     wp, counts, counter, s_over_b_before_cut = {}, {}, {}, {}
@@ -200,10 +200,10 @@ def plot_s_over_b(year, channels, odir, cut):
         ax.set_xlabel('|dphi(met, jet)<x|', fontsize=15)
     elif cut == 'iso':
         ax.set_title('s/$\sqrt{b}$ as a function of the lepton isolation cut \n with DY, TTbar, Wjets background', fontsize=16)
-        ax.set_xlabel('lep_iso<x|', fontsize=15)
+        ax.set_xlabel('lep_iso<x', fontsize=15)
     elif cut == 'miso':
         ax.set_title('s/$\sqrt{b}$ as a function of the lepton mini-isolation cut \n with DY, TTbar, Wjets background', fontsize=16)
-        ax.set_xlabel('lep_miso<x|', fontsize=15)
+        ax.set_xlabel('lep_miso<x', fontsize=15)
 
     ax.set_ylabel(r's/$\sqrt{b}$', fontsize=15)
     ax.legend()
@@ -228,10 +228,10 @@ def plot_s_over_b(year, channels, odir, cut):
         ax.set_xlabel('|dphi(met, jet)<x|', fontsize=15)
     elif cut == 'iso':
         ax.set_title('s/$\sqrt{b}$ as a function of the lepton isolation cut \n with QCD background', fontsize=16)
-        ax.set_xlabel('lep_iso<x|', fontsize=15)
+        ax.set_xlabel('lep_iso<x', fontsize=15)
     elif cut == 'miso':
         ax.set_title('s/$\sqrt{b}$ as a function of the lepton mini-isolation cut \n with QCD background', fontsize=16)
-        ax.set_xlabel('lep_miso<x|', fontsize=15)
+        ax.set_xlabel('lep_miso<x', fontsize=15)
 
     ax.set_ylabel(r's/$\sqrt{b}$', fontsize=15)
     ax.legend()
@@ -267,12 +267,14 @@ def main(args):
                 samples[args.year][ch].append(key)
 
     if args.make_counts:
-        for cut in ['iso', 'miso', 'dphi']:
+        # for cut in ['iso', 'miso', 'dphi']:
+        for cut in ['dphi']:
             print(f'counting s/b after {cut} cut')
             count_s_over_b(args.year, channels, args.idir, odir, samples, cut)
 
     if args.plot_counts:
-        for cut in ['iso', 'miso', 'dphi']:
+        # for cut in ['iso', 'miso', 'dphi']:
+        for cut in ['dphi']:
             print(f'plotting s/b for {cut} cut')
             plot_s_over_b(args.year, channels, odir, cut)
 

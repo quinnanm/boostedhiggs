@@ -330,7 +330,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # python cut_histograms.py --year 2017 --odir plots --channels ele --plot_hists --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --make_hists
+    # python cut_histograms.py --year 2017 --odir plots --channels ele,mu --plot_hists --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --make_hists
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',            dest='year',        default='2017',                             help="year")
