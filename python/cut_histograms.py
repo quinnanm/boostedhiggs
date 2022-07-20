@@ -137,57 +137,154 @@ def make_1dhists(year, ch, idir, odir, samples):
         pkl.dump(hists_miso, f)
 
 
-def plot_1dhists(year, ch, odir):
+def plot_stacked_hists(year, ch, odir):
     """
-    Plots 1D histograms that were made by "make_1dhists" function
-
+    Plots the stacked 1D histograms that were made by "make_stacked_hists" individually for each year
     Args:
         year: string that represents the year the processed samples are from
         ch: string that represents the signal channel to look at... choices are ['ele', 'mu', 'had']
         odir: output directory to hold the plots
+        vars_to_plot: the set of variable to plot a 1D-histogram of (by default: the samples with key==1 defined in plot_configs/vars.json)
     """
 
     # load the hists
-    with open(f'{odir}/cut_{ch}_iso.pkl', 'rb') as f:
+    with open(f'{odir}/cut_{ch}_iso.pkl, 'rb') as f:
         hists_iso = pkl.load(f)
         f.close()
-
-    with open(f'{odir}/cut_{ch}_miso.pkl', 'rb') as f:
+    with open(f'{odir}/cut_{ch}_miso.pkl, 'rb') as f:
         hists_miso = pkl.load(f)
         f.close()
 
-    # make directory to store stuff per year
+    # make the histogram plots in this directory
     if not os.path.exists(f'{odir}/cut_plots'):
         os.makedirs(f'{odir}/cut_plots')
 
-    # make plots per channel
-    fig, ax = plt.subplots(figsize=(8, 5))
-    for sample in hists_iso.axes[1]:
-        hep.histplot(hists_iso[{'samples': sample}], ax=ax, label=sample)
-    hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
-    hep.cms.text("Work in Progress", ax=ax)
-    ax.legend()
+    data_label = data_by_ch[ch]
+
+    # get samples existing in histogram
+    samples = [h.axes[1].value(i) for i in range(len(h.axes[0].edges))]
+    signal_labels = [label for label in samples if label in signal_by_ch[ch]]
+    bkg_labels = [label for label in samples if (label and label != data_label and label not in signal_labels)]
+
+    # signal
+    signal = [hists_iso[{"samples": label}] for label in signal_labels]
+
+    # background
+    bkg = [hists_iso[{"samples": label}] for label in bkg_labels]
+
+    fig, ax = plt.subplots(1, 1)
+
+    errps = {
+        'hatch': '////',
+        'facecolor': 'none',
+        'lw': 0,
+        'color': 'k',
+        'edgecolor': (0, 0, 0, .5),
+        'linewidth': 0,
+        'alpha': 0.4
+    }
+    if len(bkg) > 0:
+        hep.histplot(bkg,
+                     ax=ax,
+                     stack=True,
+                     sort='yield',
+                     histtype="fill",
+                     label=[get_simplified_label(bkg_label) for bkg_label in bkg_labels],
+                     )
+        for handle, label in zip(*ax.get_legend_handles_labels()):
+            handle.set_color(color_by_sample[label])
+
+        tot = bkg[0].copy()
+        for i, b in enumerate(bkg):
+            if i > 0:
+                tot = tot + b
+        ax.stairs(
+            values=tot.values() + np.sqrt(tot.values()),
+            baseline=tot.values() - np.sqrt(tot.values()),
+            edges=tot.axes[0].edges, **errps,
+            label='Stat. unc.'
+        )
+
+    if len(signal) > 0:
+        hep.histplot(signal,
+                     ax=ax,
+                     label=[get_simplified_label(sig_label) for sig_label in signal_labels],
+                     color='red'
+                     )
+        sig = signal[0].copy()
+        for i, s in enumerate(signal):
+            if i > 0:
+                sig = sig + s
+        ax.stairs(
+            values=sig.values() + np.sqrt(sig.values()),
+            baseline=sig.values() - np.sqrt(sig.values()),
+            edges=sig.axes[0].edges, **errps,
+        )
+
     ax.set_yscale('log')
-    ax.set_ylabel('Events')
-    ax.set_title(f'Lepton isolation \n for {ch} channel', fontsize=14)
+    ax.set_ylim(0.1)
+    ax.set_title(f'{label_by_ch[ch]} Channel')
+    ax.legend()
+
     hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
     hep.cms.text("Work in Progress", ax=ax)
-    plt.savefig(f'{odir}/cut_plots/{ch}_lep_iso.pdf')
+
+    print(f'Saving to {odir}/cut_plots/hists_iso.pdf')
+    plt.savefig(f'{odir}/cut_plots/hists_iso.pdf', bbox_inches='tight')
     plt.close()
 
-    fig, ax = plt.subplots(figsize=(8, 5))
-    for sample in hists_miso.axes[1]:
-        hep.histplot(hists_miso[{'samples': sample}], ax=ax, label=sample)
-    hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
-    hep.cms.text("Work in Progress", ax=ax)
-    ax.legend()
-    ax.set_yscale('log')
-    ax.set_ylabel('Events')
-    ax.set_title(f'Lepton misolation \n for {ch} channel', fontsize=14)
-    hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
-    hep.cms.text("Work in Progress", ax=ax)
-    plt.savefig(f'{odir}/cut_plots/{ch}_lep_miso.pdf')
-    plt.close()
+#
+# def plot_1dhists(year, ch, odir):
+#     """
+#     Plots 1D histograms that were made by "make_1dhists" function
+#
+#     Args:
+#         year: string that represents the year the processed samples are from
+#         ch: string that represents the signal channel to look at... choices are ['ele', 'mu', 'had']
+#         odir: output directory to hold the plots
+#     """
+#
+#     # load the hists
+#     with open(f'{odir}/cut_{ch}_iso.pkl', 'rb') as f:
+#         hists_iso = pkl.load(f)
+#         f.close()
+#
+#     with open(f'{odir}/cut_{ch}_miso.pkl', 'rb') as f:
+#         hists_miso = pkl.load(f)
+#         f.close()
+#
+#     # make directory to store stuff per year
+#     if not os.path.exists(f'{odir}/cut_plots'):
+#         os.makedirs(f'{odir}/cut_plots')
+#
+#     # make plots per channel
+#     fig, ax = plt.subplots(figsize=(8, 5))
+#     for sample in hists_iso.axes[1]:
+#         hep.histplot(hists_iso[{'samples': sample}], ax=ax, label=sample)
+#     hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
+#     hep.cms.text("Work in Progress", ax=ax)
+#     ax.legend()
+#     ax.set_yscale('log')
+#     ax.set_ylabel('Events')
+#     ax.set_title(f'Lepton isolation \n for {ch} channel', fontsize=14)
+#     hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
+#     hep.cms.text("Work in Progress", ax=ax)
+#     plt.savefig(f'{odir}/cut_plots/{ch}_lep_iso.pdf')
+#     plt.close()
+#
+#     fig, ax = plt.subplots(figsize=(8, 5))
+#     for sample in hists_miso.axes[1]:
+#         hep.histplot(hists_miso[{'samples': sample}], ax=ax, label=sample)
+#     hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
+#     hep.cms.text("Work in Progress", ax=ax)
+#     ax.legend()
+#     ax.set_yscale('log')
+#     ax.set_ylabel('Events')
+#     ax.set_title(f'Lepton misolation \n for {ch} channel', fontsize=14)
+#     hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
+#     hep.cms.text("Work in Progress", ax=ax)
+#     plt.savefig(f'{odir}/cut_plots/{ch}_lep_miso.pdf')
+#     plt.close()
 
 
 def main(args):
@@ -224,7 +321,8 @@ def main(args):
 
         if args.plot_hists:
             print(f'Plotting...')
-            plot_1dhists(args.year, ch, odir)
+            # plot_1dhists(args.year, ch, odir)
+            plot_stacked_hists(args.year, ch, odir)
 
 
 if __name__ == "__main__":
