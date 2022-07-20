@@ -191,7 +191,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # lep_pt vs lep_iso:   python make_2dplots.py --year 2017 --odir hists --channels ele --vars lep_pt,lep_isolation --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0   --y_end 1 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_pt vs lep_iso:   python make_2dplots.py --year 2017 --odir plots --channels mu --vars lep_pt,lep_isolation --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0   --y_end 1 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
     # lep_pt vs lep_fj_dr: python make_2dplots.py --year 2017 --odir hists --channels ele --vars lep_pt,lep_fj_dr     --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0.1 --y_end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
     # fj_pt vs lep_fj_dr:  python make_2dplots.py --year 2017 --odir hists --channels ele,mu --vars fj_pt,lep_fj_dr      --make_hists --plot_hists --x_bins 100 --x_start 200 --x_end 500 --y_bins 100 --y_start 0.1 --y_end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
     # lep_pt vs mt:        python make_2dplots.py --year 2017 --odir hists --channels ele --vars lep_pt,lep_met_mt    --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0   --y_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
