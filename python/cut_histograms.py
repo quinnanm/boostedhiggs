@@ -231,8 +231,8 @@ def plot_stacked_hists(year, ch, odir, cut):
     hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
     hep.cms.text("Work in Progress", ax=ax)
 
-    print(f'Saving to {odir}/cut_plots/hists_iso.pdf')
-    plt.savefig(f'{odir}/cut_plots/hists_iso.pdf', bbox_inches='tight')
+    print(f'Saving to {odir}/cut_plots/hists_{cut}.pdf')
+    plt.savefig(f'{odir}/cut_plots/hists_{cut}.pdf', bbox_inches='tight')
     plt.close()
 
 #
