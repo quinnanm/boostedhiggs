@@ -148,10 +148,10 @@ def plot_stacked_hists(year, ch, odir):
     """
 
     # load the hists
-    with open(f'{odir}/cut_{ch}_iso.pkl, 'rb') as f:
+    with open(f'{odir}/cut_{ch}_iso.pkl', 'rb') as f:
         hists_iso = pkl.load(f)
         f.close()
-    with open(f'{odir}/cut_{ch}_miso.pkl, 'rb') as f:
+    with open(f'{odir}/cut_{ch}_miso.pkl', 'rb') as f:
         hists_miso = pkl.load(f)
         f.close()
 
