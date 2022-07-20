@@ -103,8 +103,6 @@ def make_2dplots(year, ch, idir, odir, samples, vars, x_bins, x_start, x_end, y_
             else:
                 x = data[vars[0]]
                 y = data[vars[1]]
-            print(len(x))
-            print(len(y))
 
             # combining all pt bins of a specefic process under one name
             if single_sample is not None:
@@ -157,6 +155,7 @@ def plot_2dplots(year, ch, odir, vars):
         ax.set_title(f'{ch} channel for \n {sample}')
         hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
         hep.cms.text("Work in Progress", ax=ax)
+        plt.clim(1e-1, 1e-4)
         print(f'saving at {odir}/{ch}_{vars[0]}_{vars[1]}/{sample}_log_z.pdf')
         plt.savefig(f'{odir}/{ch}_{vars[0]}_{vars[1]}/{sample}_log_z.pdf')
         plt.close()
@@ -169,6 +168,7 @@ def plot_2dplots(year, ch, odir, vars):
         ax.set_title(f'{ch} channel for \n {sample}')
         hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
         hep.cms.text("Work in Progress", ax=ax)
+        plt.clim(1e-1, 1e-4)
         print(f'saving at {odir}/{ch}_{vars[0]}_{vars[1]}/{sample}.pdf')
         plt.savefig(f'{odir}/{ch}_{vars[0]}_{vars[1]}/{sample}.pdf')
         plt.close()
