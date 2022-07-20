@@ -104,6 +104,8 @@ def make_2dplots(year, ch, idir, odir, samples, vars, x_bins, x_start, x_end, y_
                 x = data[vars[0]]
                 y = data[vars[1]]
             print(len(x))
+            print(len(y))
+
             # combining all pt bins of a specefic process under one name
             if single_sample is not None:
                 hists.fill(
