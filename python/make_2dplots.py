@@ -157,6 +157,7 @@ def plot_2dplots(year, ch, odir, vars):
         ax.set_title(f'{ch} channel for \n {sample}')
         hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
         hep.cms.text("Work in Progress", ax=ax)
+        print(f'saving at {odir}/{ch}_{vars[0]}_{vars[1]}/{sample}_log_z.pdf')
         plt.savefig(f'{odir}/{ch}_{vars[0]}_{vars[1]}/{sample}_log_z.pdf')
         plt.close()
 
@@ -168,6 +169,7 @@ def plot_2dplots(year, ch, odir, vars):
         ax.set_title(f'{ch} channel for \n {sample}')
         hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
         hep.cms.text("Work in Progress", ax=ax)
+        print(f'saving at {odir}/{ch}_{vars[0]}_{vars[1]}/{sample}.pdf')
         plt.savefig(f'{odir}/{ch}_{vars[0]}_{vars[1]}/{sample}.pdf')
         plt.close()
 
