@@ -153,9 +153,9 @@ def plot_stacked_hists(year, ch, odir, cut):
             hists_iso = pkl.load(f)
             f.close()
     elif cut == 'miso':
-    with open(f'{odir}/cut_{ch}_miso.pkl', 'rb') as f:
-        hists_iso = pkl.load(f)
-        f.close()
+        with open(f'{odir}/cut_{ch}_miso.pkl', 'rb') as f:
+            hists_iso = pkl.load(f)
+            f.close()
 
     # make the histogram plots in this directory
     if not os.path.exists(f'{odir}/cut_plots'):
