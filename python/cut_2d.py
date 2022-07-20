@@ -55,7 +55,7 @@ def make_1dhists(year, ch, idir, odir, samples, cut):
         end = max_iso[ch]
 
     hists = hist2.Hist(
-        hist2.axis.Regular(100, 0, 1, name='lep_miso', label='lep_miso', overflow=True),
+        hist2.axis.Regular(400, 0, 4, name='lep_miso', label='lep_miso', overflow=True),
         hist2.axis.Regular(20, start, end, name='lep_pt', label='lep_pt', overflow=True),
         hist2.axis.StrCategory([], name='samples', growth=True),
     )
@@ -101,7 +101,7 @@ def make_1dhists(year, ch, idir, odir, samples, cut):
 
         wp = []
         y_lep = []
-        for i in range(0, 400, 1):
+        for i in range(0, 400, 4):
             wp.append(i * 0.01)      # working point
             if cut == 'miso':
                 selection = (data['lep_misolation'] < (i * 0.01)) & (data['lep_pt'] > max_iso[ch])   # cut defined at the working point
