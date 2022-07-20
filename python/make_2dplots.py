@@ -149,29 +149,27 @@ def plot_2dplots(year, ch, odir, vars):
     for sample in hists.axes[2]:
         # one for log z-scale
         fig, ax = plt.subplots(figsize=(8, 5))
-        hep.hist2dplot(hists[{'samples': sample}], ax=ax, cmap="plasma", norm=matplotlib.colors.LogNorm(vmin=1e-3, vmax=1000))
+        hep.hist2dplot(hists[{'samples': sample}], ax=ax, cmap="plasma", norm=matplotlib.colors.LogNorm(vmin=1e-1, vmax=10000))
         ax.set_xlabel(f"{vars[0]}")
         ax.set_ylabel(f"{vars[1]}")
         ax.set_title(f'{ch} channel for \n {sample}')
         hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
         hep.cms.text("Work in Progress", ax=ax)
-        plt.clim(1e-1, 1e-4)
         print(f'saving at {odir}/{ch}_{vars[0]}_{vars[1]}/{sample}_log_z.pdf')
         plt.savefig(f'{odir}/{ch}_{vars[0]}_{vars[1]}/{sample}_log_z.pdf')
         plt.close()
 
-        # one for non-log z-scale
-        fig, ax = plt.subplots(figsize=(8, 5))
-        hep.hist2dplot(hists[{'samples': sample}], ax=ax, cmap="plasma")
-        ax.set_xlabel(f"{vars[0]}")
-        ax.set_ylabel(f"{vars[1]}")
-        ax.set_title(f'{ch} channel for \n {sample}')
-        hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
-        hep.cms.text("Work in Progress", ax=ax)
-        plt.clim(1e-1, 1e-4)
-        print(f'saving at {odir}/{ch}_{vars[0]}_{vars[1]}/{sample}.pdf')
-        plt.savefig(f'{odir}/{ch}_{vars[0]}_{vars[1]}/{sample}.pdf')
-        plt.close()
+        # # one for non-log z-scale
+        # fig, ax = plt.subplots(figsize=(8, 5))
+        # hep.hist2dplot(hists[{'samples': sample}], ax=ax, cmap="plasma")
+        # ax.set_xlabel(f"{vars[0]}")
+        # ax.set_ylabel(f"{vars[1]}")
+        # ax.set_title(f'{ch} channel for \n {sample}')
+        # hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
+        # hep.cms.text("Work in Progress", ax=ax)
+        # print(f'saving at {odir}/{ch}_{vars[0]}_{vars[1]}/{sample}.pdf')
+        # plt.savefig(f'{odir}/{ch}_{vars[0]}_{vars[1]}/{sample}.pdf')
+        # plt.close()
 
 
 def main(args):
@@ -217,7 +215,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # lep_iso vs lep_pt:   python make_2dplots.py --year 2017 --odir plots --channels mu --vars lep_isolation,lep_pt --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0   --y_end 1 --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/
+    # lep_iso vs lep_pt:   python make_2dplots.py --year 2017 --odir plots --channels mu --vars lep_isolation,lep_pt --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0   --y_end 1 --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --make_hists
     # lep_pt vs lep_fj_dr: python make_2dplots.py --year 2017 --odir hists --channels ele --vars lep_pt,lep_fj_dr     --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0.1 --y_end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
     # fj_pt vs lep_fj_dr:  python make_2dplots.py --year 2017 --odir hists --channels ele,mu --vars fj_pt,lep_fj_dr      --make_hists --plot_hists --x_bins 100 --x_start 200 --x_end 500 --y_bins 100 --y_start 0.1 --y_end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
     # lep_pt vs mt:        python make_2dplots.py --year 2017 --odir hists --channels ele --vars lep_pt,lep_met_mt    --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0   --y_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
