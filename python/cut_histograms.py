@@ -137,7 +137,7 @@ def make_1dhists(year, ch, idir, odir, samples):
         pkl.dump(hists_miso, f)
 
 
-def plot_stacked_hists(year, ch, odir):
+def plot_stacked_hists(year, ch, odir, cut):
     """
     Plots the stacked 1D histograms that were made by "make_stacked_hists" individually for each year
     Args:
@@ -148,11 +148,13 @@ def plot_stacked_hists(year, ch, odir):
     """
 
     # load the hists
-    with open(f'{odir}/cut_{ch}_iso.pkl', 'rb') as f:
-        hists_iso = pkl.load(f)
-        f.close()
+    if cut == 'iso':
+        with open(f'{odir}/cut_{ch}_iso.pkl', 'rb') as f:
+            hists_iso = pkl.load(f)
+            f.close()
+    elif cut == 'miso:'
     with open(f'{odir}/cut_{ch}_miso.pkl', 'rb') as f:
-        hists_miso = pkl.load(f)
+        hists_iso = pkl.load(f)
         f.close()
 
     # make the histogram plots in this directory
@@ -320,9 +322,10 @@ def main(args):
             make_1dhists(args.year, ch, args.idir, odir, samples)
 
         if args.plot_hists:
-            print(f'Plotting...')
             # plot_1dhists(args.year, ch, odir)
-            plot_stacked_hists(args.year, ch, odir)
+            for cut in ['iso', 'miso']:
+                print(f'Plotting for {cut} cut...')
+                plot_stacked_hists(args.year, ch, odir, cut)
 
 
 if __name__ == "__main__":
