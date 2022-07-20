@@ -48,12 +48,12 @@ def make_1dhists(year, ch, idir, odir, samples):
 
     # isolation
     hists_iso = hist2.Hist(
-        hist2.axis.Regular(20, 0, 1, name='lep_isolation', label='lep_isolation', overflow=True),
+        hist2.axis.Regular(80, 0, 4, name='lep_isolation', label='lep_isolation', overflow=True),
         hist2.axis.StrCategory([], name='samples', growth=True),
     )
 
     hists_miso = hist2.Hist(
-        hist2.axis.Regular(20, 0, 1, name='lep_misolation', label='lep_misolation', overflow=True),
+        hist2.axis.Regular(80, 0, 4, name='lep_misolation', label='lep_misolation', overflow=True),
         hist2.axis.StrCategory([], name='samples', growth=True),
     )
 
