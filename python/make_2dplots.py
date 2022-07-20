@@ -95,24 +95,27 @@ def make_2dplots(year, ch, idir, odir, samples, vars, x_bins, x_start, x_end, y_
             if vars[0] == 'lep_isolation':
                 selection = data['lep_pt'] < max_iso[ch]
                 x = data[vars[0]][selection]
+                y = data[vars[1]][selection]
             elif vars[0] == 'lep_misolation':
                 selection = data['lep_pt'] > max_iso[ch]
                 x = data[vars[0]][selection]
+                y = data[vars[1]][selection]
             else:
                 x = data[vars[0]]
+                y = data[vars[1]]
 
             # combining all pt bins of a specefic process under one name
             if single_sample is not None:
                 hists.fill(
                     x,
-                    data[vars[1]],
+                    y,
                     single_sample,
                 )
             # otherwise give unique name
             else:
                 hists.fill(
                     x,
-                    data[vars[1]],
+                    y,
                     sample,
                 )
 
@@ -210,7 +213,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # lep_iso vs lep_pt:   python make_2dplots.py --year 2017 --odir plots --channels mu --vars lep_isolation,lep_pt --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0   --y_end 1 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_iso vs lep_pt:   python make_2dplots.py --year 2017 --odir plots --channels mu --vars lep_isolation,lep_pt --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0   --y_end 1 --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/
     # lep_pt vs lep_fj_dr: python make_2dplots.py --year 2017 --odir hists --channels ele --vars lep_pt,lep_fj_dr     --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0.1 --y_end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
     # fj_pt vs lep_fj_dr:  python make_2dplots.py --year 2017 --odir hists --channels ele,mu --vars fj_pt,lep_fj_dr      --make_hists --plot_hists --x_bins 100 --x_start 200 --x_end 500 --y_bins 100 --y_start 0.1 --y_end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
     # lep_pt vs mt:        python make_2dplots.py --year 2017 --odir hists --channels ele --vars lep_pt,lep_met_mt    --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0   --y_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
