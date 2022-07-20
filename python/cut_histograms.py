@@ -162,7 +162,7 @@ def plot_stacked_hists(year, ch, odir):
     data_label = data_by_ch[ch]
 
     # get samples existing in histogram
-    samples = [h.axes[1].value(i) for i in range(len(h.axes[0].edges))]
+    samples = [h.axes[1].value(i) for i in range(len(h.axes[1].edges))]
     signal_labels = [label for label in samples if label in signal_by_ch[ch]]
     bkg_labels = [label for label in samples if (label and label != data_label and label not in signal_labels)]
 
@@ -327,7 +327,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # python cut_histograms.py --year 2017 --odir plots --channels ele --make_hists --plot_hists --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/
+    # python cut_histograms.py --year 2017 --odir plots --channels ele --plot_hists --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --make_hists
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',            dest='year',        default='2017',                             help="year")
