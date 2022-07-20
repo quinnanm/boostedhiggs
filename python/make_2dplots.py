@@ -199,7 +199,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',            dest='year',        default='2017',                                 help="year")
-    parser.add_argument('--samples',         dest='samples',     default="plot_configs/samples_pfnano.json",     help="path to json with samples to be plotted")
+    parser.add_argument('--samples',         dest='samples',     default="plot_configs/samples_pfnano_value.json",     help="path to json with samples to be plotted")
     parser.add_argument('--channels',        dest='channels',    default='ele',                                  help="channel... choices are ['ele', 'mu', 'had']")
     parser.add_argument('--odir',            dest='odir',        default='hists',                                help="tag for output directory... will append '_{year}' to it")
     parser.add_argument('--idir',            dest='idir',        default='../results/',                          help="input directory with results")
