@@ -162,7 +162,7 @@ def plot_stacked_hists(year, ch, odir):
     data_label = data_by_ch[ch]
 
     # get samples existing in histogram
-    samples = [h.axes[1].value(i) for i in range(len(h.axes[1].edges))]
+    samples = [hists_iso.axes[1].value(i) for i in range(len(hists_iso.axes[1].edges))]
     signal_labels = [label for label in samples if label in signal_by_ch[ch]]
     bkg_labels = [label for label in samples if (label and label != data_label and label not in signal_labels)]
 
