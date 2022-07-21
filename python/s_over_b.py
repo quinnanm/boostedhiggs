@@ -73,7 +73,7 @@ def count_s_over_b(year, channels, idir, odir, samples, cut):
 
         for i in range(0, cuts[cut][0], cuts[cut][1]):
 
-            print(f'Processing working point {i * 0.01}')
+            # print(f'Processing working point {i * 0.01}')
             wp[ch].append(i * 0.01)      # working point
 
             # loop over the samples
@@ -142,6 +142,7 @@ def count_s_over_b(year, channels, idir, odir, samples, cut):
 
             for key in counts[ch].keys():
                 counts[ch][key].append(counter[ch][key])
+                print(f'wp is {i*0.01} for {key} the count is {counter[ch][key]}')
 
         print("------------------------------------------------------------")
 
