@@ -32,7 +32,7 @@ import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
-def count_s_over_b(year, channels, idir, odir, samples, cut):
+def make_roc(year, channels, idir, odir, samples):
     """
     Counts signal and background at different working points of a cut
 
@@ -43,6 +43,7 @@ def count_s_over_b(year, channels, idir, odir, samples, cut):
         odir: output directory to hold the hist object
         samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
     """
+    max_iso = {'ele': 120, 'mu': 55}
 
     for ch in channels:
         c = 0
@@ -85,30 +86,73 @@ def count_s_over_b(year, channels, idir, odir, samples, cut):
 
                 if single_sample is not None:
                     if c == 0:
-                        data1 = pd.DataFrame(data['lep_isolation'])
-                        data1['sample'] = single_sample
+                        data_iso = pd.DataFrame(data['lep_isolation'][data['lep_pt'] < max_iso[ch]])
+                        data_iso['sample'] = single_sample
+
+                        data_miso = pd.DataFrame(data['lep_misolation'][data['lep_pt'] > max_iso[ch]])
+                        data_miso['sample'] = single_sample
+
+                        data_dphi = pd.DataFrame(abs(data['met_fj_dphi']))
+                        data_dphi['sample'] = single_sample
+
+                        data_met_lep = pd.DataFrame(data['met'] / data['lep_pt'])
+                        data_met_lep['sample'] = single_sample
+
                         c = c + 1
                     else:
-                        data2 = pd.DataFrame(data['lep_isolation'])
+                        data2 = pd.DataFrame(data['lep_isolation'][data['lep_pt'] < max_iso[ch]])
                         data2['sample'] = single_sample
+                        data_iso = pd.concat([data_iso, data2])
 
-                        data1 = pd.concat([data1, data2])
+                        data2 = pd.DataFrame(data['lep_misolation'][data['lep_pt'] > max_iso[ch]])
+                        data2['sample'] = single_sample
+                        data_miso = pd.concat([data_miso, data2])
+
+                        data2 = pd.DataFrame(abs(data['met_fj_dphi']))
+                        data2['sample'] = single_sample
+                        data_dphi = pd.concat([data_dphi, data2])
+
+                        data2 = pd.DataFrame(data['met'] / data['lep_pt'])
+                        data2['sample'] = single_sample
+                        data_met_lep = pd.concat([data_met_lep, data2])
                 else:
                     if c == 0:
-                        data1 = pd.DataFrame(data['lep_isolation'])
-                        data1['sample'] = sample
+                        data_iso = pd.DataFrame(data['lep_isolation'][data['lep_pt'] < max_iso[ch]])
+                        data_iso['sample'] = sample
+
+                        data_miso = pd.DataFrame(data['lep_misolation'][data['lep_pt'] > max_iso[ch]])
+                        data_miso['sample'] = sample
+
+                        data_dphi = pd.DataFrame(abs(data['met_fj_dphi']))
+                        data_dphi['sample'] = sample
+
+                        data_met_lep = pd.DataFrame(data['met'] / data['lep_pt'])
+                        data_met_lep['sample'] = sample
+
                         c = c + 1
                     else:
-                        data2 = pd.DataFrame(data['lep_isolation'])
+                        data2 = pd.DataFrame(data['lep_isolation'][data['lep_pt'] < max_iso[ch]])
                         data2['sample'] = sample
+                        data_iso = pd.concat([data_iso, data2])
 
-                        data1 = pd.concat([data1, data2])
+                        data2 = pd.DataFrame(data['lep_misolation'][data['lep_pt'] > max_iso[ch]])
+                        data2['sample'] = sample
+                        data_miso = pd.concat([data_miso, data2])
+
+                        data2 = pd.DataFrame(abs(data['met_fj_dphi']))
+                        data2['sample'] = sample
+                        data_dphi = pd.concat([data_dphi, data2])
+
+                        data2 = pd.DataFrame(data['met'] / data['lep_pt'])
+                        data2['sample'] = sample
+                        data_met_lep = pd.concat([data_met_lep, data2])
 
             print("------------------------------------------------------------")
-        #
-        # with open(f'{odir}/data1.pkl', 'wb') as f:  # saves the hists objects
-        #     pkl.dump(data1, f)
-        data1.to_csv('data1.csv')
+
+        data_iso.to_csv(f'data_iso_{ch}.csv')
+        data_miso.to_csv(f'data_miso_{ch}.csv')
+        data_dphi.to_csv(f'data_dphi_{ch}.csv')
+        data_met_lep.to_csv(f'data_met_lep_{ch}.csv')
 
 
 def main(args):
@@ -139,10 +183,13 @@ def main(args):
                 samples[args.year][ch].append(key)
 
     if args.make_counts:
-        for cut in ['iso', 'miso', 'dphi']:
-            # for cut in ['iso']:
-            print(f'counting s/b after {cut} cut')
-            count_s_over_b(args.year, channels, args.idir, odir, samples, cut)
+        make_roc(args.year, channels, args.idir, odir, samples)
+
+    # if args.plot_counts:
+    #     for cut in ['iso', 'miso', 'dphi']:
+    #         # for cut in ['iso']:
+    #         print(f'plotting s/b for {cut} cut')
+    #         plot_s_over_b(args.year, channels, odir, cut)
 
 
 if __name__ == "__main__":
