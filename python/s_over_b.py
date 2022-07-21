@@ -87,8 +87,6 @@ def count_s_over_b(year, channels, idir, odir, samples, cut):
                 if is_data:
                     continue
 
-                print("------------------------------------------------------------")
-
                 # check if the sample was processed
                 pkl_dir = f'{idir}/{sample}/outfiles/*.pkl'
                 pkl_files = glob.glob(pkl_dir)  #
@@ -142,9 +140,12 @@ def count_s_over_b(year, channels, idir, odir, samples, cut):
 
             for key in counts[ch].keys():
                 counts[ch][key].append(counter[ch][key])
+                if i == 0:
+                    print(f'no cut for {key} the count is {s_over_b_before_cut[ch][key]}')
+
                 print(f'wp is {i*0.01} for {key} the count is {counter[ch][key]}')
 
-        print("------------------------------------------------------------")
+            print("------------------------------------------------------------")
 
         with open(f'{odir}/wp_{cut}.pkl', 'wb') as f:  # saves the hists objects
             pkl.dump(wp, f)
