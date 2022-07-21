@@ -138,14 +138,16 @@ def count_s_over_b(year, channels, idir, odir, samples, cut):
                         if j == 0:
                             s_over_b_before_cut[ch][sample] += data['tot_weight'].sum()
 
+            if j == 0:
+                for key in counts[ch].keys():
+                    print(f'no cut for {key} the count is {s_over_b_before_cut[ch][key]}')
+                print("------------------------------------------------------------")
+
             for key in counts[ch].keys():
                 counts[ch][key].append(counter[ch][key])
-                counter[ch][key] = 0
-
-                if j == 0:
-                    print(f'no cut for {key} the count is {s_over_b_before_cut[ch][key]}')
 
                 print(f'wp is {j*0.01} for {key} the count is {counter[ch][key]}')
+                counter[ch][key] = 0
 
             print("------------------------------------------------------------")
 
