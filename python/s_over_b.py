@@ -44,7 +44,7 @@ def count_s_over_b(year, channels, idir, odir, samples, cut):
         samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
     """
 
-    cuts = {'iso': [100, 10], 'miso': [100, 10], 'dphi': [800, 4], 'met_lep': [200, 2]}
+    cuts = {'iso': [100, 10], 'miso': [100, 10], 'dphi': [400, 4], 'met_lep': [200, 2]}
     max_iso = {'ele': 120, 'mu': 55}
 
     wp, counts, counter, s_over_b_before_cut = {}, {}, {}, {}
@@ -55,6 +55,13 @@ def count_s_over_b(year, channels, idir, odir, samples, cut):
         s_over_b_before_cut[ch] = {}
 
         for sample in samples[year][ch]:
+            is_data = False
+            for key in data_by_ch.values():
+                if key in sample:
+                    is_data = True
+            if is_data:
+                continue
+
             single_sample = None
             for single_key, key in add_samples.items():
                 if key in sample:
