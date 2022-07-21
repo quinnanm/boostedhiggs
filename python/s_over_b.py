@@ -140,6 +140,8 @@ def count_s_over_b(year, channels, idir, odir, samples, cut):
 
             for key in counts[ch].keys():
                 counts[ch][key].append(counter[ch][key])
+                counter[ch][key] = 0
+
                 if j == 0:
                     print(f'no cut for {key} the count is {s_over_b_before_cut[ch][key]}')
 
