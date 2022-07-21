@@ -48,6 +48,7 @@ def count_s_over_b(year, channels, idir, odir, samples, cut):
         c = 0
         # loop over the samples
         for sample in samples[year][ch]:
+            print(f"{sample}")
 
             # skip data samples
             is_data = False
@@ -231,7 +232,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # python s_over_b.py --year 2017 --odir plots --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --plot_counts --make_counts
+    # python lep_iso.py --year 2017 --odir plots --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --plot_counts --make_counts
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',            dest='year',        default='2017',                             help="year")
