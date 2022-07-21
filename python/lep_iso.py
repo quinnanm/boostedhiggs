@@ -149,10 +149,10 @@ def make_roc(year, channels, idir, odir, samples):
 
             print("------------------------------------------------------------")
 
-        data_iso.to_csv(f'data_iso_{ch}.csv')
-        data_miso.to_csv(f'data_miso_{ch}.csv')
-        data_dphi.to_csv(f'data_dphi_{ch}.csv')
-        data_met_lep.to_csv(f'data_met_lep_{ch}.csv')
+        data_iso.to_csv(f'{odir}/data_iso_{ch}.csv')
+        data_miso.to_csv(f'{odir}/data_miso_{ch}.csv')
+        data_dphi.to_csv(f'{odir}/data_dphi_{ch}.csv')
+        data_met_lep.to_csv(f'{odir}/data_met_lep_{ch}.csv')
 
 
 def main(args):
@@ -162,9 +162,9 @@ def main(args):
         os.makedirs(odir)
 
     # make subdirectory specefic to this script
-    if not os.path.exists(odir + '/s_over_b/'):
-        os.makedirs(odir + '/s_over_b/')
-    odir = odir + '/s_over_b'
+    if not os.path.exists(odir + '/roc_curves/'):
+        os.makedirs(odir + '/roc_curves/')
+    odir = odir + '/roc_curves'
 
     channels = args.channels.split(',')
 
@@ -194,7 +194,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # python lep_iso.py --year 2017 --odir plots --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --plot_counts --make_counts
+    # python lep_iso.py --year 2017 --odir plots --channels ele --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --plot_counts --make_counts
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',            dest='year',        default='2017',                             help="year")
