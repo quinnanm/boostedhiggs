@@ -274,14 +274,14 @@ def main(args):
                 samples[args.year][ch].append(key)
 
     if args.make_counts:
-        # for cut in ['iso', 'miso', 'dphi']:
-        for cut in ['iso']:
+        for cut in ['iso', 'miso', 'dphi']:
+            # for cut in ['iso']:
             print(f'counting s/b after {cut} cut')
             count_s_over_b(args.year, channels, args.idir, odir, samples, cut)
 
     if args.plot_counts:
-        # for cut in ['iso', 'miso', 'dphi']:
-        for cut in ['iso']:
+        for cut in ['iso', 'miso', 'dphi']:
+            # for cut in ['iso']:
             print(f'plotting s/b for {cut} cut')
             plot_s_over_b(args.year, channels, odir, cut)
 
