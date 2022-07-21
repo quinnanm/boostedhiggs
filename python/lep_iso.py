@@ -105,9 +105,10 @@ def count_s_over_b(year, channels, idir, odir, samples, cut):
                         data1 = pd.concat([data1, data2])
 
             print("------------------------------------------------------------")
-
-        with open(f'{odir}/data1.pkl', 'wb') as f:  # saves the hists objects
-            pkl.dump(data1, f)
+        #
+        # with open(f'{odir}/data1.pkl', 'wb') as f:  # saves the hists objects
+        #     pkl.dump(data1, f)
+        data1.to_csv('data1.csv')
 
 
 def plot_s_over_b(year, channels, odir, cut):
