@@ -71,10 +71,10 @@ def count_s_over_b(year, channels, idir, odir, samples, cut):
 
     for ch in channels:
 
-        for i in range(0, cuts[cut][0], cuts[cut][1]):
+        for j in range(0, cuts[cut][0], cuts[cut][1]):
 
             # print(f'Processing working point {i * 0.01}')
-            wp[ch].append(i * 0.01)      # working point
+            wp[ch].append(j * 0.01)      # working point
 
             # loop over the samples
             for sample in samples[year][ch]:
@@ -115,35 +115,35 @@ def count_s_over_b(year, channels, idir, odir, samples, cut):
                     if single_sample is not None:
 
                         if cut == 'met_lep':
-                            counter[ch][single_sample] += (data['tot_weight'] * ((data['met'] / data['lep_pt']) < (i * 0.01))).sum()
+                            counter[ch][single_sample] += (data['tot_weight'] * ((data['met'] / data['lep_pt']) < (j * 0.01))).sum()
                         elif cut == 'dphi':
-                            counter[ch][single_sample] += (data['tot_weight'] * ((abs(data['met_fj_dphi'])) < (i * 0.01))).sum()
+                            counter[ch][single_sample] += (data['tot_weight'] * ((abs(data['met_fj_dphi'])) < (j * 0.01))).sum()
                         elif cut == 'iso':
-                            counter[ch][single_sample] += (data['tot_weight'] * ((data['lep_isolation'] < (i * 0.01)) & (data['lep_pt'] < max_iso[ch]))).sum()
+                            counter[ch][single_sample] += (data['tot_weight'] * ((data['lep_isolation'] < (j * 0.01)) & (data['lep_pt'] < max_iso[ch]))).sum()
                         elif cut == 'miso':
-                            counter[ch][single_sample] += (data['tot_weight'] * ((data['lep_misolation'] < (i * 0.01)) & (data['lep_pt'] > max_iso[ch]))).sum()
+                            counter[ch][single_sample] += (data['tot_weight'] * ((data['lep_misolation'] < (j * 0.01)) & (data['lep_pt'] > max_iso[ch]))).sum()
 
-                        if i == 0:
+                        if j == 0:
                             s_over_b_before_cut[ch][single_sample] += data['tot_weight'].sum()
                     else:
                         if cut == 'met_lep':
-                            counter[ch][sample] += (data['tot_weight'] * ((data['met'] / data['lep_pt']) < (i * 0.01))).sum()
+                            counter[ch][sample] += (data['tot_weight'] * ((data['met'] / data['lep_pt']) < (j * 0.01))).sum()
                         elif cut == 'dphi':
-                            counter[ch][sample] += (data['tot_weight'] * ((abs(data['met_fj_dphi'])) < (i * 0.01))).sum()
+                            counter[ch][sample] += (data['tot_weight'] * ((abs(data['met_fj_dphi'])) < (j * 0.01))).sum()
                         elif cut == 'iso':
-                            counter[ch][sample] += (data['tot_weight'] * ((data['lep_isolation'] < (i * 0.01)) & (data['lep_pt'] < max_iso[ch]))).sum()
+                            counter[ch][sample] += (data['tot_weight'] * ((data['lep_isolation'] < (j * 0.01)) & (data['lep_pt'] < max_iso[ch]))).sum()
                         elif cut == 'miso':
-                            counter[ch][sample] += (data['tot_weight'] * ((data['lep_misolation'] < (i * 0.01)) & (data['lep_pt'] > max_iso[ch]))).sum()
+                            counter[ch][sample] += (data['tot_weight'] * ((data['lep_misolation'] < (j * 0.01)) & (data['lep_pt'] > max_iso[ch]))).sum()
 
-                        if i == 0:
+                        if j == 0:
                             s_over_b_before_cut[ch][sample] += data['tot_weight'].sum()
 
             for key in counts[ch].keys():
                 counts[ch][key].append(counter[ch][key])
-                if i == 0:
+                if j == 0:
                     print(f'no cut for {key} the count is {s_over_b_before_cut[ch][key]}')
 
-                print(f'wp is {i*0.01} for {key} the count is {counter[ch][key]}')
+                print(f'wp is {j*0.01} for {key} the count is {counter[ch][key]}')
 
             print("------------------------------------------------------------")
 
