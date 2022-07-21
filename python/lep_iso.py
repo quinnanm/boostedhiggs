@@ -111,86 +111,6 @@ def count_s_over_b(year, channels, idir, odir, samples, cut):
         data1.to_csv('data1.csv')
 
 
-def plot_s_over_b(year, channels, odir, cut):
-    """
-    Plots 1D histograms that were made by "make_1dhists" function
-
-    Args:
-        year: string that represents the year the processed samples are from
-        ch: string that represents the signal channel to look at... choices are ['ele', 'mu', 'had']
-        odir: output directory to hold the plots
-    """
-
-    # load the hists
-    with open(f'{odir}/wp_{cut}.pkl', 'rb') as f:
-        wp = pkl.load(f)
-        f.close()
-    with open(f'{odir}/counts_{cut}.pkl', 'rb') as f:
-        counts = pkl.load(f)
-        f.close()
-    with open(f'{odir}/counts_before_{cut}.pkl', 'rb') as f:
-        s_over_b_before_cut = pkl.load(f)
-        f.close()
-
-    # s/b for b=DY,TTbar,Wjets
-    fig, ax = plt.subplots(figsize=(8, 8))
-
-    for ch in channels:
-        num = counts[ch]['GluGluHToWWToLNuQQ']
-        deno = [sum(x) for x in zip(counts[ch]['DYJets'], counts[ch]['TTbar'], counts[ch]['WJetsLNu'])]
-
-        legend = s_over_b_before_cut[ch]['GluGluHToWWToLNuQQ'] / np.sqrt((s_over_b_before_cut[ch]['DYJets'] + s_over_b_before_cut[ch]['TTbar'] + s_over_b_before_cut[ch]['WJetsLNu']))
-
-        ax.plot(wp[ch], num / np.sqrt(deno), label=f'{ch} channel, with s/b before cut = {str(round(legend,3))}')
-
-    # ax.set_yscale('log')
-    if cut == 'met_lep':
-        ax.set_title('s/$\sqrt{b}$ as a function of the met_pt/lep_pt cut \n with DY, TTbar, Wjets background', fontsize=16)
-        ax.set_xlabel(r'$\frac{pT_{met}}{pT_{lep}}$<x', fontsize=15)
-    elif cut == 'dphi':
-        ax.set_title('s/$\sqrt{b}$ as a function of the dphi cut \n with DY, TTbar, Wjets background', fontsize=16)
-        ax.set_xlabel('|dphi(met, jet)<x|', fontsize=15)
-    elif cut == 'iso':
-        ax.set_title('s/$\sqrt{b}$ as a function of the lepton isolation cut \n with DY, TTbar, Wjets background', fontsize=16)
-        ax.set_xlabel('lep_iso<x', fontsize=15)
-    elif cut == 'miso':
-        ax.set_title('s/$\sqrt{b}$ as a function of the lepton mini-isolation cut \n with DY, TTbar, Wjets background', fontsize=16)
-        ax.set_xlabel('lep_miso<x', fontsize=15)
-
-    ax.set_ylabel(r's/$\sqrt{b}$', fontsize=15)
-    ax.legend()
-    plt.savefig(f'{odir}/{cut}_s_over_b_dy_tt_wjets.pdf')
-    plt.close()
-
-    # s/b for b=QCD
-    fig, ax = plt.subplots(figsize=(8, 8))
-    for ch in channels:
-        num = counts[ch]['GluGluHToWWToLNuQQ']
-        deno = counts[ch]['QCD']
-        legend = s_over_b_before_cut[ch]['GluGluHToWWToLNuQQ'] / np.sqrt(s_over_b_before_cut[ch]['QCD'])
-
-        ax.plot(wp[ch], num / np.sqrt(deno), label=f'{ch} channel, with s/b before cut = {str(round(legend,3))}')
-
-    # ax.set_yscale('log')
-    if cut == 'met_lep':
-        ax.set_title('s/$\sqrt{b}$ as a function of the met_pt/lep_pt cut \n with QCD background', fontsize=16)
-        ax.set_xlabel(r'$\frac{pT_{met}}{pT_{lep}}$<x', fontsize=15)
-    elif cut == 'dphi':
-        ax.set_title('s/$\sqrt{b}$ as a function of the dphi cut \n with QCD background', fontsize=16)
-        ax.set_xlabel('|dphi(met, jet)<x|', fontsize=15)
-    elif cut == 'iso':
-        ax.set_title('s/$\sqrt{b}$ as a function of the lepton isolation cut \n with QCD background', fontsize=16)
-        ax.set_xlabel('lep_iso<x', fontsize=15)
-    elif cut == 'miso':
-        ax.set_title('s/$\sqrt{b}$ as a function of the lepton mini-isolation cut \n with QCD background', fontsize=16)
-        ax.set_xlabel('lep_miso<x', fontsize=15)
-
-    ax.set_ylabel(r's/$\sqrt{b}$', fontsize=15)
-    ax.legend()
-    plt.savefig(f'{odir}/{cut}_s_over_b_qcd.pdf')
-    plt.close()
-
-
 def main(args):
     # append '_year' to the output directory
     odir = args.odir + '_' + args.year
@@ -223,12 +143,6 @@ def main(args):
             # for cut in ['iso']:
             print(f'counting s/b after {cut} cut')
             count_s_over_b(args.year, channels, args.idir, odir, samples, cut)
-
-    if args.plot_counts:
-        for cut in ['iso', 'miso', 'dphi']:
-            # for cut in ['iso']:
-            print(f'plotting s/b for {cut} cut')
-            plot_s_over_b(args.year, channels, odir, cut)
 
 
 if __name__ == "__main__":
