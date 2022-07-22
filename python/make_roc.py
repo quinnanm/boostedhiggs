@@ -182,19 +182,12 @@ def main(args):
             if value == 1:
                 samples[args.year][ch].append(key)
 
-    if args.make_counts:
-        make_roc(args.year, channels, args.idir, odir, samples)
-
-    # if args.plot_counts:
-    #     for cut in ['iso', 'miso', 'dphi']:
-    #         # for cut in ['iso']:
-    #         print(f'plotting s/b for {cut} cut')
-    #         plot_s_over_b(args.year, channels, odir, cut)
+    make_roc(args.year, channels, args.idir, odir, samples)
 
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # python lep_iso.py --year 2017 --odir plots --channels ele --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --plot_counts --make_counts
+    # python make_roc.py --year 2017 --odir plots --channels mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',            dest='year',        default='2017',                             help="year")
@@ -202,9 +195,6 @@ if __name__ == "__main__":
     parser.add_argument('--channels',        dest='channels',    default='ele,mu,had',                       help='channels for which to plot this variable')
     parser.add_argument('--odir',            dest='odir',        default='hists',                            help="tag for output directory... will append '_{year}' to it")
     parser.add_argument('--idir',            dest='idir',        default='../results/',                      help="input directory with results")
-    parser.add_argument('--tag',             dest='tag',         default='',                           help='str to append for saving the count variables')
-    parser.add_argument("--make_counts",      dest='make_counts',  action='store_true',                        help="Make hists")
-    parser.add_argument("--plot_counts",      dest='plot_counts',  action='store_true',                        help="Plot the hists")
 
     args = parser.parse_args()
 
