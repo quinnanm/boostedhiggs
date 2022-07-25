@@ -83,69 +83,51 @@ def make_roc(year, channels, idir, odir, samples):
                 for single_key, key in add_samples.items():
                     if key in sample:
                         single_sample = single_key
-
                 if single_sample is not None:
-                    if c == 0:
-                        data_iso = pd.DataFrame(data['lep_isolation'][data['lep_pt'] < max_iso[ch]])
-                        data_iso['sample'] = single_sample
-
-                        data_miso = pd.DataFrame(data['lep_misolation'][data['lep_pt'] > max_iso[ch]])
-                        data_miso['sample'] = single_sample
-
-                        data_dphi = pd.DataFrame(abs(data['met_fj_dphi']))
-                        data_dphi['sample'] = single_sample
-
-                        data_met_lep = pd.DataFrame(data['met'] / data['lep_pt'])
-                        data_met_lep['sample'] = single_sample
-
-                        c = c + 1
-                    else:
-                        data2 = pd.DataFrame(data['lep_isolation'][data['lep_pt'] < max_iso[ch]])
-                        data2['sample'] = single_sample
-                        data_iso = pd.concat([data_iso, data2])
-
-                        data2 = pd.DataFrame(data['lep_misolation'][data['lep_pt'] > max_iso[ch]])
-                        data2['sample'] = single_sample
-                        data_miso = pd.concat([data_miso, data2])
-
-                        data2 = pd.DataFrame(abs(data['met_fj_dphi']))
-                        data2['sample'] = single_sample
-                        data_dphi = pd.concat([data_dphi, data2])
-
-                        data2 = pd.DataFrame(data['met'] / data['lep_pt'])
-                        data2['sample'] = single_sample
-                        data_met_lep = pd.concat([data_met_lep, data2])
+                    sample_to_use = single_sample
                 else:
-                    if c == 0:
-                        data_iso = pd.DataFrame(data['lep_isolation'][data['lep_pt'] < max_iso[ch]])
-                        data_iso['sample'] = sample
+                    single_sample = sample
 
-                        data_miso = pd.DataFrame(data['lep_misolation'][data['lep_pt'] > max_iso[ch]])
-                        data_miso['sample'] = sample
+                if c == 0:
+                    data_iso = pd.DataFrame(data['lep_isolation'][data['lep_pt'] < max_iso[ch]])
+                    data_iso['sample'] = sample_to_use
+                    data_iso['weight'] = event_weight[data['lep_pt'] < max_iso[ch]]
 
-                        data_dphi = pd.DataFrame(abs(data['met_fj_dphi']))
-                        data_dphi['sample'] = sample
+                    data_miso = pd.DataFrame(data['lep_misolation'][data['lep_pt'] > max_iso[ch]])
+                    data_miso['sample'] = sample_to_use
+                    data_miso['weight'] = event_weight[data['lep_pt'] > max_iso[ch]]
 
-                        data_met_lep = pd.DataFrame(data['met'] / data['lep_pt'])
-                        data_met_lep['sample'] = sample
+                    data_dphi = pd.DataFrame(abs(data['met_fj_dphi']))
+                    data_dphi['sample'] = sample_to_use
+                    data_dphi['weight'] = event_weight
 
-                        c = c + 1
-                    else:
-                        data2 = pd.DataFrame(data['lep_isolation'][data['lep_pt'] < max_iso[ch]])
-                        data2['sample'] = sample
-                        data_iso = pd.concat([data_iso, data2])
+                    data_met_lep = pd.DataFrame(data['met'] / data['lep_pt'])
+                    data_met_lep['sample'] = sample_to_use
+                    data_met_lep['weight'] = event_weight
 
-                        data2 = pd.DataFrame(data['lep_misolation'][data['lep_pt'] > max_iso[ch]])
-                        data2['sample'] = sample
-                        data_miso = pd.concat([data_miso, data2])
+                    c = c + 1
+                else:
+                    data2 = pd.DataFrame(data['lep_isolation'][data['lep_pt'] < max_iso[ch]])
+                    data2['sample'] = sample_to_use
+                    data2['weight'] = event_weight[data2['lep_pt'] < max_iso[ch]]
 
-                        data2 = pd.DataFrame(abs(data['met_fj_dphi']))
-                        data2['sample'] = sample
-                        data_dphi = pd.concat([data_dphi, data2])
+                    data_iso = pd.concat([data_iso, data2])
 
-                        data2 = pd.DataFrame(data['met'] / data['lep_pt'])
-                        data2['sample'] = sample
-                        data_met_lep = pd.concat([data_met_lep, data2])
+                    data2 = pd.DataFrame(data['lep_misolation'][data['lep_pt'] > max_iso[ch]])
+                    data2['sample'] = sample_to_use
+                    data2['weight'] = event_weight[data2['lep_pt'] > max_iso[ch]]
+                    data_miso = pd.concat([data_miso, data2])
+
+                    data2 = pd.DataFrame(abs(data['met_fj_dphi']))
+                    data2['sample'] = sample_to_use
+                    data2['weight'] = event_weight
+                    data_dphi = pd.concat([data_dphi, data2])
+
+                    data2 = pd.DataFrame(data['met'] / data['lep_pt'])
+                    data2['sample'] = sample_to_use
+                    data2['weight'] = event_weight
+
+                    data_met_lep = pd.concat([data_met_lep, data2])
 
             print("------------------------------------------------------------")
 

@@ -60,7 +60,7 @@ def make_1dhists(year, ch, idir, odir, samples, cuts):
         )
     if 'dphi' in cuts:
         hists['dphi'] = hist2.Hist(
-            hist2.axis.Regular(30, 0, 4, name='dphi', label='dphi', overflow=True),
+            hist2.axis.Regular(30, 0, 3.14, name='dphi', label='dphi', overflow=True),
             hist2.axis.StrCategory([], name='samples', growth=True),
         )
     if 'met_lep' in cuts:
@@ -273,8 +273,8 @@ def main(args):
             if value == 1:
                 samples[args.year][ch].append(key)
 
-    # cuts = ['iso', 'miso']
-    cuts = ['dphi', 'met_lep']
+    # cuts = ['iso', 'miso', 'met_lep']
+    cuts = ['dphi']
 
     for ch in channels:
         if args.make_hists:
