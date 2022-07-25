@@ -32,7 +32,7 @@ import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
-def make_1dhists(year, ch, idir, odir, samples):
+def make_1dhists(year, ch, idir, odir, samples, cuts):
     """
     Makes 1D histograms
 
@@ -46,16 +46,28 @@ def make_1dhists(year, ch, idir, odir, samples):
 
     max_iso = {'ele': 120, 'mu': 55}
 
+    hists = {}
     # isolation
-    hists_iso = hist2.Hist(
-        hist2.axis.Regular(30, 0, 4, name='lep_isolation', label='lep_isolation', overflow=True),
-        hist2.axis.StrCategory([], name='samples', growth=True),
-    )
-
-    hists_miso = hist2.Hist(
-        hist2.axis.Regular(30, 0, 4, name='lep_misolation', label='lep_misolation', overflow=True),
-        hist2.axis.StrCategory([], name='samples', growth=True),
-    )
+    if 'iso' in cuts:
+        hists['iso'] = hist2.Hist(
+            hist2.axis.Regular(30, 0, 2, name='lep_isolation', label='lep_isolation', overflow=True),
+            hist2.axis.StrCategory([], name='samples', growth=True),
+        )
+    if 'miso' in cuts:
+        hists['miso'] = hist2.Hist(
+            hist2.axis.Regular(30, 0, 2, name='lep_misolation', label='lep_misolation', overflow=True),
+            hist2.axis.StrCategory([], name='samples', growth=True),
+        )
+    if 'dphi' in cuts:
+        hists['dphi'] = hist2.Hist(
+            hist2.axis.Regular(30, 0, 4, name='dphi', label='dphi', overflow=True),
+            hist2.axis.StrCategory([], name='samples', growth=True),
+        )
+    if 'met_lep' in cuts:
+        hists['met_lep'] = hist2.Hist(
+            hist2.axis.Regular(30, 0, 2, name='met_lep', label='met_lep', overflow=True),
+            hist2.axis.StrCategory([], name='samples', growth=True),
+        )
 
     # loop over the samples
     for sample in samples[year][ch]:
@@ -101,40 +113,43 @@ def make_1dhists(year, ch, idir, odir, samples):
             for single_key, key in add_samples.items():
                 if key in sample:
                     single_sample = single_key
-
-            select_iso = data['lep_pt'] < max_iso[ch]
-            select_miso = data['lep_pt'] > max_iso[ch]
-
             if single_sample is not None:
-                hists_iso.fill(
-                    data['lep_isolation'][select_iso],
-                    single_sample,  # combining all events under one name
-                    weight=event_weight[select_iso],
-                )
-                selection = data['lep_pt'] > max_iso[ch]
-                hists_miso.fill(
-                    data['lep_misolation'][select_miso],
-                    single_sample,  # combining all events under one name
-                    weight=event_weight[select_miso],
-                )
+                sample_to_use = single_sample   # combining all events under one name
             else:
-                hists_iso.fill(
+                sample_to_use = sample
+
+            if 'iso' in cuts:
+                select_iso = data['lep_pt'] < max_iso[ch]
+                hists['iso'].fill(
                     data['lep_isolation'][select_iso],
-                    sample,
+                    sample_to_use,
                     weight=event_weight[select_iso],
                 )
-                hists_miso.fill(
+            if 'miso' in cuts:
+                select_miso = data['lep_pt'] > max_iso[ch]
+                hists['miso'].fill(
                     data['lep_misolation'][select_miso],
-                    sample,
+                    sample_to_use,
                     weight=event_weight[select_miso],
+                )
+            if 'dphi' in cuts:
+                hists['dphi'].fill(
+                    abs(data['met_fj_dphi']),
+                    sample_to_use,
+                    weight=event_weight,
+                )
+            if 'met_lep' in cuts:
+                hists['met_lep'].fill(
+                    data['met'] / data['lep_pt'],
+                    sample_to_use,
+                    weight=event_weight,
                 )
 
     print("------------------------------------------------------------")
 
-    with open(f'{odir}/cut_{ch}_iso.pkl', 'wb') as f:  # saves the hists objects
-        pkl.dump(hists_iso, f)
-    with open(f'{odir}/cut_{ch}_miso.pkl', 'wb') as f:  # saves the hists objects
-        pkl.dump(hists_miso, f)
+    for cut in cuts:
+        with open(f'{odir}/cut_{ch}_{cut}.pkl', 'wb') as f:  # saves the hists objects
+            pkl.dump(hists[cut], f)
 
 
 def plot_stacked_hists(year, ch, odir, cut):
@@ -148,14 +163,9 @@ def plot_stacked_hists(year, ch, odir, cut):
     """
 
     # load the hists
-    if cut == 'iso':
-        with open(f'{odir}/cut_{ch}_iso.pkl', 'rb') as f:
-            hists_iso = pkl.load(f)
-            f.close()
-    elif cut == 'miso':
-        with open(f'{odir}/cut_{ch}_miso.pkl', 'rb') as f:
-            hists_iso = pkl.load(f)
-            f.close()
+    with open(f'{odir}/cut_{ch}_{cut}.pkl', 'rb') as f:
+        hists = pkl.load(f)
+        f.close()
 
     # make the histogram plots in this directory
     if not os.path.exists(f'{odir}/cut_plots'):
@@ -164,15 +174,15 @@ def plot_stacked_hists(year, ch, odir, cut):
     data_label = data_by_ch[ch]
 
     # get samples existing in histogram
-    samples = [hists_iso.axes[1].value(i) for i in range(len(hists_iso.axes[1].edges))]
+    samples = [hists.axes[1].value(i) for i in range(len(hists.axes[1].edges))]
     signal_labels = [label for label in samples if label in signal_by_ch[ch]]
     bkg_labels = [label for label in samples if (label and label != data_label and label not in signal_labels)]
 
     # signal
-    signal = [hists_iso[{"samples": label}] for label in signal_labels]
+    signal = [hists[{"samples": label}] for label in signal_labels]
 
     # background
-    bkg = [hists_iso[{"samples": label}] for label in bkg_labels]
+    bkg = [hists[{"samples": label}] for label in bkg_labels]
 
     fig, ax = plt.subplots(1, 1)
 
@@ -235,59 +245,6 @@ def plot_stacked_hists(year, ch, odir, cut):
     plt.savefig(f'{odir}/cut_plots/{ch}_hists_{cut}.pdf', bbox_inches='tight')
     plt.close()
 
-#
-# def plot_1dhists(year, ch, odir):
-#     """
-#     Plots 1D histograms that were made by "make_1dhists" function
-#
-#     Args:
-#         year: string that represents the year the processed samples are from
-#         ch: string that represents the signal channel to look at... choices are ['ele', 'mu', 'had']
-#         odir: output directory to hold the plots
-#     """
-#
-#     # load the hists
-#     with open(f'{odir}/cut_{ch}_iso.pkl', 'rb') as f:
-#         hists_iso = pkl.load(f)
-#         f.close()
-#
-#     with open(f'{odir}/cut_{ch}_miso.pkl', 'rb') as f:
-#         hists_miso = pkl.load(f)
-#         f.close()
-#
-#     # make directory to store stuff per year
-#     if not os.path.exists(f'{odir}/cut_plots'):
-#         os.makedirs(f'{odir}/cut_plots')
-#
-#     # make plots per channel
-#     fig, ax = plt.subplots(figsize=(8, 5))
-#     for sample in hists_iso.axes[1]:
-#         hep.histplot(hists_iso[{'samples': sample}], ax=ax, label=sample)
-#     hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
-#     hep.cms.text("Work in Progress", ax=ax)
-#     ax.legend()
-#     ax.set_yscale('log')
-#     ax.set_ylabel('Events')
-#     ax.set_title(f'Lepton isolation \n for {ch} channel', fontsize=14)
-#     hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
-#     hep.cms.text("Work in Progress", ax=ax)
-#     plt.savefig(f'{odir}/cut_plots/{ch}_lep_iso.pdf')
-#     plt.close()
-#
-#     fig, ax = plt.subplots(figsize=(8, 5))
-#     for sample in hists_miso.axes[1]:
-#         hep.histplot(hists_miso[{'samples': sample}], ax=ax, label=sample)
-#     hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
-#     hep.cms.text("Work in Progress", ax=ax)
-#     ax.legend()
-#     ax.set_yscale('log')
-#     ax.set_ylabel('Events')
-#     ax.set_title(f'Lepton misolation \n for {ch} channel', fontsize=14)
-#     hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
-#     hep.cms.text("Work in Progress", ax=ax)
-#     plt.savefig(f'{odir}/cut_plots/{ch}_lep_miso.pdf')
-#     plt.close()
-
 
 def main(args):
     # append '_year' to the output directory
@@ -316,14 +273,16 @@ def main(args):
             if value == 1:
                 samples[args.year][ch].append(key)
 
+    # cuts = ['iso', 'miso']
+    cuts = ['dphi', 'met_lep']
+
     for ch in channels:
         if args.make_hists:
             print(f'Making iso and miso cut histograms')
-            make_1dhists(args.year, ch, args.idir, odir, samples)
+            make_1dhists(args.year, ch, args.idir, odir, samples, cuts)
 
         if args.plot_hists:
-            # plot_1dhists(args.year, ch, odir)
-            for cut in ['iso', 'miso']:
+            for cut in cuts:
                 print(f'Plotting for {cut} cut...')
                 plot_stacked_hists(args.year, ch, odir, cut)
 
