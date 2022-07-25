@@ -245,6 +245,36 @@ def plot_s_over_b(year, channels, odir, cut):
     plt.savefig(f'{odir}/{cut}_s_over_b_qcd.pdf')
     plt.close()
 
+    # s/b for b=all
+    fig, ax = plt.subplots(figsize=(8, 8))
+
+    for ch in channels:
+        num = counts[ch]['GluGluHToWWToLNuQQ']
+        deno = [sum(x) for x in zip(counts[ch]['DYJets'], counts[ch]['TTbar'], counts[ch]['WJetsLNu'], counts[ch]['QCD'])]
+
+        legend = s_over_b_before_cut[ch]['GluGluHToWWToLNuQQ'] / np.sqrt((s_over_b_before_cut[ch]['DYJets'] + s_over_b_before_cut[ch]['TTbar'] + s_over_b_before_cut[ch]['WJetsLNu'] + s_over_b_before_cut[ch]['QCD']))
+
+        ax.plot(wp[ch], num / np.sqrt(deno), label=f'{ch} channel, with s/b before cut = {str(round(legend,3))}')
+
+    # ax.set_yscale('log')
+    if cut == 'met_lep':
+        ax.set_title('s/$\sqrt{b}$ as a function of the met_pt/lep_pt cut \n with DY, TTbar, Wjets, QCD background', fontsize=16)
+        ax.set_xlabel(r'$\frac{pT_{met}}{pT_{lep}}$<x', fontsize=15)
+    elif cut == 'dphi':
+        ax.set_title('s/$\sqrt{b}$ as a function of the dphi cut \n with DY, TTbar, Wjets, QCD background', fontsize=16)
+        ax.set_xlabel('|dphi(met, jet)<x|', fontsize=15)
+    elif cut == 'iso':
+        ax.set_title('s/$\sqrt{b}$ as a function of the lepton isolation cut \n with DY, TTbar, Wjets, QCD background', fontsize=16)
+        ax.set_xlabel('lep_iso<x', fontsize=15)
+    elif cut == 'miso':
+        ax.set_title('s/$\sqrt{b}$ as a function of the lepton mini-isolation cut \n with DY, TTbar, Wjets, QCD background', fontsize=16)
+        ax.set_xlabel('lep_miso<x', fontsize=15)
+
+    ax.set_ylabel(r's/$\sqrt{b}$', fontsize=15)
+    ax.legend()
+    plt.savefig(f'{odir}/{cut}_s_over_b_dy_tt_wjets_qcd.pdf')
+    plt.close()
+
 
 def main(args):
     # append '_year' to the output directory
