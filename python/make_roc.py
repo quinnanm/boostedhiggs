@@ -109,13 +109,13 @@ def make_roc(year, channels, idir, odir, samples):
                 else:
                     data2 = pd.DataFrame(data['lep_isolation'][data['lep_pt'] < max_iso[ch]])
                     data2['sample'] = sample_to_use
-                    data2['weight'] = event_weight[data2['lep_pt'] < max_iso[ch]]
+                    data2['weight'] = event_weight[data['lep_pt'] < max_iso[ch]]
 
                     data_iso = pd.concat([data_iso, data2])
 
                     data2 = pd.DataFrame(data['lep_misolation'][data['lep_pt'] > max_iso[ch]])
                     data2['sample'] = sample_to_use
-                    data2['weight'] = event_weight[data2['lep_pt'] > max_iso[ch]]
+                    data2['weight'] = event_weight[data['lep_pt'] > max_iso[ch]]
                     data_miso = pd.concat([data_miso, data2])
 
                     data2 = pd.DataFrame(abs(data['met_fj_dphi']))
