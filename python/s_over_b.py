@@ -275,13 +275,13 @@ def main(args):
 
     if args.make_counts:
         # for cut in ['iso', 'miso', 'dphi']:
-        for cut in ['iso', 'miso']:
+        for cut in ['met_lep']:
             print(f'counting s/b after {cut} cut')
             count_s_over_b(args.year, channels, args.idir, odir, samples, cut)
 
     if args.plot_counts:
         # for cut in ['iso', 'miso', 'dphi']:
-        for cut in ['iso', 'miso']:
+        for cut in ['met_lep']:
             print(f'plotting s/b for {cut} cut')
             plot_s_over_b(args.year, channels, odir, cut)
 
