@@ -112,31 +112,30 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                         print('Parquet file empty')
                         continue
 
+                    if ch == 'ele':
+                        select = (data['lep_isolation'] < 0.15)
+                    elif ch == 'mu':
+                        select = (data['lep_isolation'] < 0.15) & (data['lep_misolation'] < 0.1)
+
                     # filling histograms
                     single_sample = None
                     for single_key, key in add_samples.items():
                         if key in sample:
                             single_sample = single_key
-
                     if year == "Run2" and is_data:
                         single_sample = 'Data'
+                    if single_sample is not None:
+                        sample_to_use = single_sample
+                    else:
+                        sample_to_use = sample
 
                     # combining all pt bins of a specefic process under one name
-                    if single_sample is not None:
-                        # print(single_sample)
-                        hists[var].fill(
-                            samples=single_sample,
-                            var=data[var],
-                            weight=event_weight,
-                        )
-                    # otherwise give unique name
-                    else:
-                        # print(sample)
-                        hists[var].fill(
-                            samples=sample,
-                            var=data[var],
-                            weight=event_weight,
-                        )
+                    # print(single_sample)
+                    hists[var].fill(
+                        samples=sample_to_use,
+                        var=data[var][select],
+                        weight=event_weight[select],
+                    )
 
                     # print(hists[var])
 
@@ -374,7 +373,6 @@ if __name__ == "__main__":
     parser.add_argument("--plot_hists",             dest='plot_hists',              action='store_true',                          help="Plot the hists")
     parser.add_argument("--nology",                 dest='nology',                  action='store_false',                         help="No logy scale")
     parser.add_argument("--nodata",                 dest='nodata',                  action='store_false',                         help="No data")
-        
 
     args = parser.parse_args()
 
