@@ -133,8 +133,7 @@ def make_1dhists(year, ch, idir, odir, samples, cuts):
                     weight=event_weight[select_miso],
                 )
             if 'dphi' in cuts:
-                select = data[abs(data['met_fj_dphi']) > 1]
-                print(select)
+                select = abs(data['met_fj_dphi']) > 1
                 hists['dphi'].fill(
                     abs(data['met_fj_dphi'])[select],
                     sample_to_use,
