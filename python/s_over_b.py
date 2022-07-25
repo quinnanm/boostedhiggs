@@ -310,8 +310,8 @@ def main(args):
             count_s_over_b(args.year, channels, args.idir, odir, samples, cut)
 
     if args.plot_counts:
-        # for cut in ['iso', 'miso', 'dphi']:
-        for cut in ['met_lep']:
+        for cut in ['iso', 'miso', 'dphi']:
+            # for cut in ['met_lep']:
             print(f'plotting s/b for {cut} cut')
             plot_s_over_b(args.year, channels, odir, cut)
 
