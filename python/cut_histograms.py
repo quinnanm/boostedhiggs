@@ -118,6 +118,11 @@ def make_1dhists(year, ch, idir, odir, samples, cuts):
             else:
                 sample_to_use = sample
 
+            if ch == 'ele':
+                select = (data['lep_isolation'] < 0.15)
+            elif ch == 'mu':
+                select = (data['lep_isolation'] < 0.15) & (data['lep_misolation'] < 0.1)
+
             if 'iso' in cuts:
                 select_iso = data['lep_pt'] < max_iso[ch]
                 hists['iso'].fill(
@@ -133,14 +138,12 @@ def make_1dhists(year, ch, idir, odir, samples, cuts):
                     weight=event_weight[select_miso],
                 )
             if 'dphi' in cuts:
-                select = abs(data['met_fj_dphi']) < 1
                 hists['dphi'].fill(
                     abs(data['met_fj_dphi'])[select],
                     sample_to_use,
                     weight=event_weight[select],
                 )
             if 'met_lep' in cuts:
-                select = (data['met'] / data['lep_pt']) < 1
                 hists['met_lep'].fill(
                     (data['met'] / data['lep_pt'])[select],
                     sample_to_use,
