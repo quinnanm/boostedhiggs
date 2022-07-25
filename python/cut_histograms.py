@@ -133,16 +133,18 @@ def make_1dhists(year, ch, idir, odir, samples, cuts):
                     weight=event_weight[select_miso],
                 )
             if 'dphi' in cuts:
+                select = data[abs(data['met_fj_dphi']) > 1]
                 hists['dphi'].fill(
-                    abs(data['met_fj_dphi']),
+                    abs(data['met_fj_dphi'])[select],
                     sample_to_use,
-                    weight=event_weight,
+                    weight=event_weight[select],
                 )
             if 'met_lep' in cuts:
+                select = (data['met'] / data['lep_pt']) > 1
                 hists['met_lep'].fill(
-                    data['met'] / data['lep_pt'],
+                    (data['met'] / data['lep_pt'])[select],
                     sample_to_use,
-                    weight=event_weight,
+                    weight=event_weight[select],
                 )
 
     print("------------------------------------------------------------")
@@ -243,8 +245,8 @@ def plot_stacked_hists(year, ch, odir, cut):
     hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
     hep.cms.text("Work in Progress", ax=ax)
 
-    print(f'Saving to {odir}/cut_plots/{ch}_hists_{cut}.pdf')
-    plt.savefig(f'{odir}/cut_plots/{ch}_hists_{cut}.pdf', bbox_inches='tight')
+    print(f'Saving to {odir}/cut_plots/{ch}_hists_{cut}_after_cut.pdf')
+    plt.savefig(f'{odir}/cut_plots/{ch}_hists_{cut}_after_cut.pdf', bbox_inches='tight')
     plt.close()
 
 
@@ -276,7 +278,7 @@ def main(args):
                 samples[args.year][ch].append(key)
 
     # cuts = ['iso', 'miso', 'dphi']
-    cuts = ['met_lep']
+    cuts = ['dphi', 'met_lep']
 
     for ch in channels:
         if args.make_hists:
