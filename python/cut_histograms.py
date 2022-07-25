@@ -134,6 +134,7 @@ def make_1dhists(year, ch, idir, odir, samples, cuts):
                 )
             if 'dphi' in cuts:
                 select = data[abs(data['met_fj_dphi']) > 1]
+                print(select)
                 hists['dphi'].fill(
                     abs(data['met_fj_dphi'])[select],
                     sample_to_use,
