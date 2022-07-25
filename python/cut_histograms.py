@@ -238,7 +238,7 @@ def plot_stacked_hists(year, ch, odir, cut):
     ax.set_title(f'{label_by_ch[ch]} Channel')
     ax.legend()
     if cut == 'met_lep':
-        ax.set_xlabel(r'$\frac{pT_{met}}{pT_{lep}}$<x', fontsize=15)
+        ax.set_xlabel(r'$\frac{pT_{met}}{pT_{lep}}$', fontsize=15)
 
     hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
     hep.cms.text("Work in Progress", ax=ax)
