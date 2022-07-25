@@ -86,7 +86,7 @@ def make_roc(year, channels, idir, odir, samples):
                 if single_sample is not None:
                     sample_to_use = single_sample
                 else:
-                    single_sample = sample
+                    sample_to_use = sample
 
                 if c == 0:
                     data_iso = pd.DataFrame(data['lep_isolation'][data['lep_pt'] < max_iso[ch]])
