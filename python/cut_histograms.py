@@ -65,7 +65,7 @@ def make_1dhists(year, ch, idir, odir, samples, cuts):
         )
     if 'met_lep' in cuts:
         hists['met_lep'] = hist2.Hist(
-            hist2.axis.Regular(30, 0, 2, name='met_lep', label='met_lep', overflow=True),
+            hist2.axis.Regular(30, 1, 2, name='met_lep', label='met_lep', overflow=True),
             hist2.axis.StrCategory([], name='samples', growth=True),
         )
 
