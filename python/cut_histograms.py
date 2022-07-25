@@ -237,6 +237,8 @@ def plot_stacked_hists(year, ch, odir, cut):
     ax.set_ylim(0.1)
     ax.set_title(f'{label_by_ch[ch]} Channel')
     ax.legend()
+    if cut == 'met_lep':
+        ax.set_xlabel(r'$\frac{pT_{met}}{pT_{lep}}$<x', fontsize=15)
 
     hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
     hep.cms.text("Work in Progress", ax=ax)
@@ -273,8 +275,8 @@ def main(args):
             if value == 1:
                 samples[args.year][ch].append(key)
 
-    # cuts = ['iso', 'miso', 'met_lep']
-    cuts = ['dphi']
+    # cuts = ['iso', 'miso', 'dphi']
+    cuts = ['met_lep']
 
     for ch in channels:
         if args.make_hists:
