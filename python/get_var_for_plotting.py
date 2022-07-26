@@ -99,9 +99,9 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=''):
                 print(sample_to_use)
 
                 if c == 0:
-                    data = pd.DataFrame(data['gen_Hpt'][select])
-                    data['sample'] = sample_to_use
-                    data['weight'] = event_weight[select]
+                    data_all = pd.DataFrame(data['gen_Hpt'][select])
+                    data_all['sample'] = sample_to_use
+                    data_all['weight'] = event_weight[select]
 
                     c = c + 1
                 else:
@@ -109,12 +109,12 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=''):
                     data2['sample'] = sample_to_use
                     data2['weight'] = event_weight[select]
 
-                    data = pd.concat([data, data2])
-                print(data)
+                    data_all = pd.concat([data_all, data2])
+                print(data_all)
 
             print("------------------------------------------------------------")
 
-        data.to_csv(f'{odir}/data_{tag}.csv')
+        data_all.to_csv(f'{odir}/data_{tag}.csv')
 
 
 def main(args):
