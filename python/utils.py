@@ -85,7 +85,7 @@ color_by_sample = {
     "TTbar": 'tab:blue',
     "ZQQ": 'tab:pink',
     "WQQ": 'tab:red',
-    "SingleTop": 'tab:gray',
+    "SingleTop": 'tab:cyan',
 }
 # available tab colors
 # 'tab:cyan'

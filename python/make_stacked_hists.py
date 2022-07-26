@@ -236,6 +236,7 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
                          ax=ax,
                          stack=True,
                          sort='yield',
+                         edgecolor='black',
                          histtype="fill",
                          label=[get_simplified_label(bkg_label) for bkg_label in bkg_labels],
                          )
@@ -311,7 +312,7 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
                 hep.histplot(other,
                              ax=ax,
                              label=other_labeling[others_labels[i]],
-                             #                      color='red'
+                             # color='red'
                              )
                 sig = signal[0].copy()
                 for i, s in enumerate(signal):
