@@ -284,7 +284,7 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
             for i, sig in enumerate(signal):
                 hep.histplot(sig,
                              ax=ax,
-                             label=f'10 * {simplified_label[signal_labels[i]]}',  # ggH-LNuQQ
+                             label=f'10 * {simplified_labels[signal_labels[i]]}',  # ggH-LNuQQ
                              #                      color='red'
                              )
                 sig = signal[i].copy()
