@@ -110,6 +110,7 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=''):
                     data2['weight'] = event_weight[select]
 
                     data = pd.concat([data, data2])
+                print(data)
 
             print("------------------------------------------------------------")
 
