@@ -193,7 +193,6 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
             signal_labels.remove('VBFHToWWToLNuQQ-MH125')
         # data
         data = None
-        print('data_label', data_label)
         if data_label in h.axes[0]:
             data = h[{"samples": data_label}]
 
@@ -204,8 +203,6 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
 
         # background
         bkg = [h[{"samples": label}] for label in bkg_labels]
-
-        # print(data,signal,bkg)
 
         if add_data and data and len(bkg) > 0:
             fig, (ax, rax) = plt.subplots(nrows=2,
@@ -233,7 +230,8 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
                          sort='yield',
                          edgecolor='black',
                          histtype="fill",
-                         label=[get_simplified_label(bkg_label) for bkg_label in bkg_labels],
+                         # label=[get_simplified_label(bkg_label) for bkg_label in bkg_labels],
+                         label=bkg_label
                          )
             for handle, label in zip(*ax.get_legend_handles_labels()):
                 handle.set_color(color_by_sample[label])
@@ -262,7 +260,8 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
                          color="k",
                          capsize=4,
                          yerr=True,
-                         label=get_simplified_label(data_label),
+                         # label=get_simplified_label(data_label),
+                         label=data_label,
                          **data_err_opts
                          )
 
