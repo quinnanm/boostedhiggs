@@ -118,9 +118,9 @@ def main(args):
         os.makedirs(odir)
 
     # make subdirectory specefic to this script
-    if not os.path.exists(odir + '/roc_curves/'):
-        os.makedirs(odir + '/roc_curves/')
-    odir = odir + '/roc_curves'
+    if not os.path.exists(odir + '/extra/'):
+        os.makedirs(odir + '/extra/')
+    odir = odir + '/extra'
 
     channels = args.channels.split(',')
 
