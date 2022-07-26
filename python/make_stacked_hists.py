@@ -229,7 +229,7 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
             hep.histplot(bkg,
                          ax=ax,
                          stack=True,
-                         sort='yield_r',
+                         sort='yield',
                          edgecolor='black',
                          linewidth=1,
                          histtype="fill",
