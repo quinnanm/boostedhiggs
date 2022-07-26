@@ -170,8 +170,8 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
     data_label = data_by_ch[ch]
     if year == '2018':
         data_label = data_by_ch_2018[ch]
-    # elif year == 'Run2':
-    #     data_label = 'Data'
+    elif year == 'Run2':
+        data_label = 'Data'
 
     print(vars_to_plot[ch])
     for var in vars_to_plot[ch]:
@@ -189,10 +189,10 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
 
         # data
         data = None
-        print('data_label', data_label)
-        print('h', h)
-
-        data = h[{"samples": data_label}]
+        # print('data_label', data_label)
+        # print('h', h)
+        #
+        # data = h[{"samples": data_label}]
 
         # signal
         signal = [h[{"samples": label}] for label in signal_labels]
