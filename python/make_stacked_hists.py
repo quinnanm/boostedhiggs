@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 from utils import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch, data_by_ch_2018, label_by_ch
-from utils import get_simplified_label, get_sum_sumgenweight
+from utils import get_simplified_label, simplified_labels, get_sum_sumgenweight
 import pickle as pkl
 import pyarrow.parquet as pq
 import pyarrow as pa
@@ -284,8 +284,7 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
             for i, sig in enumerate(signal):
                 hep.histplot(sig,
                              ax=ax,
-                             #                  label=[get_simplified_label(sig_label) for sig_label in signal_labels],
-                             label=f'10 * {get_simplified_label[signal_labels[i]]}',  # ggH-LNuQQ
+                             label=f'10 * {simplified_label[signal_labels[i]]}',  # ggH-LNuQQ
                              #                      color='red'
                              )
                 sig = signal[i].copy()
