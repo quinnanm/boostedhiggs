@@ -188,13 +188,14 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
         samples = [h.axes[0].value(i) for i in range(len(h.axes[0].edges))]
 
         signal_labels = [label for label in samples if label in signal_by_ch[ch]]
-        others_labels = ['ttHToNonbb_M125', 'GluGluHToWW_Pt-200ToInf_M-125', 'ALL_VH_SIGNALS_COMBINED', 'VBFHToWWToLNuQQ-MH125']
         bkg_labels = [label for label in samples if (label and label != data_label and label not in signal_labels and label not in others_labels)]
-
+        if 'VBFHToWWToLNuQQ-MH125' in signal_labels:
+            signal_labels.remove('VBFHToWWToLNuQQ-MH125')
         # data
         data = None
         print('data_label', data_label)
-        data = h[{"samples": data_label}]
+        if data_label in h.axes[0]:
+            data = h[{"samples": data_label}]
 
         # signal
         signal = [h[{"samples": label}] for label in signal_labels]
@@ -284,37 +285,16 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
                 # rax.set_ylim(0.7, 1.3)
 
         if len(signal) > 0:
-            hep.histplot(signal,
-                         ax=ax,
-                         label=[get_simplified_label(sig_label) for sig_label in signal_labels],
-                         color='red'
-                         )
-            sig = signal[0].copy()
-            for i, s in enumerate(signal):
-                if i > 0:
-                    sig = sig + s
-            ax.stairs(
-                values=sig.values() + np.sqrt(sig.values()),
-                baseline=sig.values() - np.sqrt(sig.values()),
-                edges=sig.axes[0].edges, **errps,
-            )
-
-        other_labeling = {'ttHToNonbb_M125': 'ttH',
-                          'GluGluHToWW_Pt-200ToInf_M-125': 'ggH-Pt200',
-                          'ALL_VH_SIGNALS_COMBINED': 'VH',
-                          'VBFHToWWToLNuQQ-MH125': 'VBF-LNuQQ',
-                          }
-
-        if len(others) > 0:
-            for i, other in enumerate(others):
-                hep.histplot(other,
+            for i, sig in enumerate(signal):
+                hep.histplot(sig,
                              ax=ax,
-                             label=other_labeling[others_labels[i]],
-                             # color='red'
+                             #                  label=[get_simplified_label(sig_label) for sig_label in signal_labels],
+                             label=f'10 * {get_simplified_label[signal_labels[i]]}',  # ggH-LNuQQ
+                             #                      color='red'
                              )
-                sig = signal[0].copy()
-                for i, s in enumerate(signal):
-                    if i > 0:
+                sig = signal[i].copy()
+                for j, s in enumerate(signal):
+                    if j > 0:
                         sig = sig + s
                 ax.stairs(
                     values=sig.values() + np.sqrt(sig.values()),
