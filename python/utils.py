@@ -50,6 +50,15 @@ def get_sum_sumgenweight(idir, year, sample):
     return sum_sumgenweight
 
 
+simplified_labels = {
+    "GluGluHToWWToLNuQQ": "ggH-LNuQQ",
+    "ttHToNonbb_M125": "ttH",
+    "GluGluHToWW_Pt-200ToInf_M-125": "ggH-Pt200",
+    "ALL_VH_SIGNALS_COMBINED": "VH",
+    "VBFHToWWToLNuQQ-MH125": "VBF-LNuQQ",
+}
+
+
 # define the axes for the different variables to be plotted
 # define samples
 signal_by_ch = {
