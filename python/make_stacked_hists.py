@@ -230,8 +230,7 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
                          sort='yield',
                          edgecolor='black',
                          histtype="fill",
-                         # label=[get_simplified_label(bkg_label) for bkg_label in bkg_labels],
-                         label=bkg_label
+                         label=[bkg_label for bkg_label in bkg_labels],
                          )
             for handle, label in zip(*ax.get_legend_handles_labels()):
                 handle.set_color(color_by_sample[label])
