@@ -225,16 +225,18 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
             'alpha': 0.4
         }
         if len(bkg) > 0:
+
+        if len(bkg) > 0:
             hep.histplot(bkg,
                          ax=ax,
                          stack=True,
-                         sort='yield',
+                         sort='yield_r',
                          edgecolor='black',
+                         linewidth=1,
                          histtype="fill",
                          label=[bkg_label for bkg_label in bkg_labels],
+                         color=[color_by_sample[bkg_label] for bkg_label in bkg_labels]
                          )
-            for handle, label in zip(*ax.get_legend_handles_labels()):
-                handle.set_color(color_by_sample[label])
 
             tot = bkg[0].copy()
             for i, b in enumerate(bkg):
@@ -279,21 +281,23 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
                 # rax.set_ylim(0.7, 1.3)
 
         if len(signal) > 0:
+            sigg = None
             for i, sig in enumerate(signal):
                 hep.histplot(sig,
                              ax=ax,
-                             label=f'10 * {simplified_labels[signal_labels[i]]}',  # ggH-LNuQQ
-                             #                      color='red'
+                             label=f'10 * {simplified_labels[signal_labels[i]]}',
+                             linewidth=3,
+                             color=color_by_sample[signal_labels[i]]
                              )
-                sig = signal[i].copy()
-                for j, s in enumerate(signal):
-                    if j > 0:
-                        sig = sig + s
-                ax.stairs(
-                    values=sig.values() + np.sqrt(sig.values()),
-                    baseline=sig.values() - np.sqrt(sig.values()),
-                    edges=sig.axes[0].edges, **errps,
-                )
+                if sigg == None:
+                    sigg = signal[i].copy()
+                else:
+                    sigg = sigg + sig
+            ax.stairs(
+                values=sigg.values() + np.sqrt(sigg.values()),
+                baseline=sigg.values() - np.sqrt(sigg.values()),
+                edges=sig.axes[0].edges, **errps,
+            )
 
         if rax != None:
             ax.set_xlabel("")

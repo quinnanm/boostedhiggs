@@ -95,6 +95,11 @@ color_by_sample = {
     "ZQQ": 'tab:pink',
     "WQQ": 'tab:red',
     "SingleTop": 'tab:cyan',
+    "GluGluHToWWToLNuQQ": 'tab:red',
+    "ttHToNonbb_M125": 'tab:olive',
+    "GluGluHToWW_Pt-200ToInf_M-125": "tab:orange",
+    "ALL_VH_SIGNALS_COMBINED": "tab:brown",
+    "VBFHToWWToLNuQQ-MH125": "tab:gray",
 }
 # available tab colors
 # 'tab:cyan'
