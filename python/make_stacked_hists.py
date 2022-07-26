@@ -188,7 +188,7 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
         samples = [h.axes[0].value(i) for i in range(len(h.axes[0].edges))]
 
         signal_labels = [label for label in samples if label in signal_by_ch[ch]]
-        bkg_labels = [label for label in samples if (label and label != data_label and label not in signal_labels and label not in others_labels)]
+        bkg_labels = [label for label in samples if (label and label != data_label and label not in signal_labels)]
         if 'VBFHToWWToLNuQQ-MH125' in signal_labels:
             signal_labels.remove('VBFHToWWToLNuQQ-MH125')
         # data
