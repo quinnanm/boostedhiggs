@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 from utils import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch, data_by_ch_2018, label_by_ch
-from utils import get_simplified_label, simplified_labels, get_sum_sumgenweight
+from utils import simplified_labels, get_sum_sumgenweight
 import pickle as pkl
 import pyarrow.parquet as pq
 import pyarrow as pa
@@ -259,7 +259,6 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
                          color="k",
                          capsize=4,
                          yerr=True,
-                         # label=get_simplified_label(data_label),
                          label=data_label,
                          **data_err_opts
                          )
