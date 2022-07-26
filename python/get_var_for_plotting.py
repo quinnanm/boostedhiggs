@@ -49,6 +49,9 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=''):
         c = 0
         # loop over the samples
         for sample in samples[year][ch]:
+            if sample != 'VBFHToWWToLNuQQ-MH125':
+                continue
+
             # skip data samples
             is_data = False
             for key in data_by_ch.values():
@@ -97,6 +100,9 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=''):
                     continue
 
                 print(sample_to_use)
+
+                if sample_to_use == 'VBFHToWWToLNuQQ-MH125':
+                    print(data['gen_Hpt'][select])
 
                 if c == 0:  # just so that the first iteration the dataframe is initialized (then for further iterations we can just concat)
                     data_all = pd.DataFrame(data['gen_Hpt'][select])
