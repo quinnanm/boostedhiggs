@@ -93,6 +93,11 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=''):
                 elif ch == 'mu':
                     select = ((data['lep_isolation'] < 0.15) & (data['lep_pt'] < max_iso[ch])) | ((data['lep_misolation'] < 0.1) & (data['lep_pt'] > max_iso[ch]))
 
+                if 'gen_Hpt' not in data.keys():
+                    continue
+
+                print(sample_to_use)
+
                 if c == 0:
                     data = pd.DataFrame(data['gen_Hpt'][select])
                     data['sample'] = sample_to_use
