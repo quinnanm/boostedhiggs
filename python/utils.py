@@ -137,7 +137,7 @@ axis_dict = {
     'lep_fj_bjets_ophem': hist2.axis.Regular(15, 0, 0.31, name='var', label=r'btagFlavB (opphem)', overflow=True),
     'lep_fj_dr': hist2.axis.Regular(15, 0, 0.8, name='var', label=r'$\Delta R(l, Jet)$', overflow=True),
     'lep_mvaId': hist2.axis.Variable([0, 1, 2, 3, 4, 5], name='var', label='Muon MVAID', overflow=True),
-    'fj_pt': hist2.axis.Regular(40, 200, 1000, name='var', label=r'Jet $p_T$ [GeV]', overflow=True),
+    'fj_pt': hist2.axis.Regular(30, 200, 1000, name='var', label=r'Jet $p_T$ [GeV]', overflow=True),
     'fj_msoftdrop': hist2.axis.Regular(30, 25, 200, name='var', label=r'Jet $m_{sd}$ [GeV]', overflow=True),
     'fj_bjets_ophem': hist2.axis.Regular(15, 0, 0.4, name='var', label=r'btagFlavB (opphem)', overflow=True),
     'fj_pnh4q': hist2.axis.Regular(30, 0, 1, name='var', label=r'Jet$_0$ PNH4q non-MD', overflow=True),
