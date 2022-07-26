@@ -49,8 +49,6 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=''):
         c = 0
         # loop over the samples
         for sample in samples[year][ch]:
-            print(f"{sample}")
-
             # skip data samples
             is_data = False
             for key in data_by_ch.values():
@@ -88,17 +86,19 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=''):
                 else:
                     sample_to_use = sample
 
+                # add iso and miso selection cuts
                 if ch == 'ele':
                     select = (data['lep_isolation'] < 0.15) & (data['lep_pt'] < max_iso[ch]) | (data['lep_pt'] > max_iso[ch])
                 elif ch == 'mu':
                     select = ((data['lep_isolation'] < 0.15) & (data['lep_pt'] < max_iso[ch])) | ((data['lep_misolation'] < 0.1) & (data['lep_pt'] > max_iso[ch]))
 
+                # specefy variable to save
                 if 'gen_Hpt' not in data.keys():
                     continue
 
                 print(sample_to_use)
 
-                if c == 0:
+                if c == 0:  # just so that the first iteration the dataframe is initialized (then for further iterations we can just concat)
                     data_all = pd.DataFrame(data['gen_Hpt'][select])
                     data_all['sample'] = sample_to_use
                     data_all['weight'] = event_weight[select]
@@ -114,7 +114,7 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=''):
 
             print("------------------------------------------------------------")
 
-        data_all.to_csv(f'{odir}/data_{tag}.csv')
+        data_all.to_csv(f'{odir}/data_{ch}_{tag}.csv')
 
 
 def main(args):
@@ -149,7 +149,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # python get_var_for_plotting.py --year 2017 --odir plots --channels mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --tag l
+    # python get_var_for_plotting.py --year 2017 --odir plots --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --tag gen_Hpt
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',            dest='year',        default='2017',                             help="year")
@@ -157,7 +157,7 @@ if __name__ == "__main__":
     parser.add_argument('--channels',        dest='channels',    default='ele,mu,had',                       help='channels for which to plot this variable')
     parser.add_argument('--odir',            dest='odir',        default='hists',                            help="tag for output directory... will append '_{year}' to it")
     parser.add_argument('--idir',            dest='idir',        default='../results/',                      help="input directory with results")
-    parser.add_argument('--tag',            dest='tag',        default='l',                      help="input directory with results")
+    parser.add_argument('--tag',             dest='tag',        default='',                      help="input directory with results")
 
     args = parser.parse_args()
 
