@@ -188,7 +188,7 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
         samples = [h.axes[0].value(i) for i in range(len(h.axes[0].edges))]
 
         signal_labels = [label for label in samples if label in signal_by_ch[ch]]
-        others_labels = ['ttHToNonbb_M125', 'ALL_VH_SIGNALS_COMBINED', 'VBFHToWWToLNuQQ-MH125']
+        others_labels = ['ttHToNonbb_M125', 'GluGluHToWW_Pt-200ToInf_M-125', 'ALL_VH_SIGNALS_COMBINED', 'VBFHToWWToLNuQQ-MH125']
         bkg_labels = [label for label in samples if (label and label != data_label and label not in signal_labels and label not in others_labels)]
 
         # data
@@ -301,7 +301,7 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
             )
 
         other_labeling = {'ttHToNonbb_M125': 'ttH',
-                          # 'GluGluHToWW_Pt-200ToInf_M-125': 'ggH-Pt200',
+                          'GluGluHToWW_Pt-200ToInf_M-125': 'ggH-Pt200',
                           'ALL_VH_SIGNALS_COMBINED': 'VH',
                           'VBFHToWWToLNuQQ-MH125': 'VBF-LNuQQ',
                           }
