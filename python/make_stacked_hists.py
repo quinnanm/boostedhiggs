@@ -189,8 +189,9 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
 
         # data
         data = None
-        # print(data_label)
-        # print(h)
+        print('data_label', data_label)
+        print('h', h)
+
         data = h[{"samples": data_label}]
 
         # signal
@@ -360,7 +361,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as:  python make_stacked_hists.py --year 2017 --odir hists --make_hists --plot_hists --channels ele --idir /eos/uscms/store/user/cmantill/boostedhiggs/May7
+    # run locally as:  python make_stacked_hists.py --year 2017 --odir hists --plot_hists --channels ele --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20 --make_hists
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',                   dest='year', required=True, choices=["2016", "2016APV", "2017", "2018", "Run2"],  help="year")

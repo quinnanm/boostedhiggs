@@ -42,3 +42,5 @@ histo
 
 */num_dict.pkl
 condor/
+
+roc_curves/
