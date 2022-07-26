@@ -300,7 +300,7 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
 
         if rax != None:
             ax.set_xlabel("")
-            rax.set_xlabel('lep pT')
+            rax.set_xlabel(f'{var}')
 
         # sort the legend
         order_dic = {}
@@ -390,7 +390,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as:  python make_stacked_hists.py --year 2017 --odir hists --channels ele --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20 --make_hists --plot_hists
+    # run locally as:  python make_stacked_hists.py --year 2017 --odir hists --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20 --make_hists --plot_hists
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',                   dest='year', required=True, choices=["2016", "2016APV", "2017", "2018", "Run2"],  help="year")
