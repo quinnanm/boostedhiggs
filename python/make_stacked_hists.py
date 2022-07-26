@@ -326,7 +326,6 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
             ax.set_yscale('log')
             ax.set_ylim(0.1)
         ax.set_title(f'{label_by_ch[ch]} Channel')
-        ax.legend()
 
         hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
         hep.cms.text("Work in Progress", ax=ax)
