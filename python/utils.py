@@ -57,11 +57,13 @@ signal_by_ch = {
     'mu': ['GluGluHToWWToLNuQQ'],
     'had': ['ggHToWWTo4Q-MH125'],
 }
+
+
 # there are many signal samples for the moment:
 # - ele,mu: GluGluHToWWToLNuQQ
-# - had: 
+# - had:
 #   - ggHToWWTo4Q-MH125 (produced by Cristina from PKU config files Powheg+JHU) - same xsec as GluGluToHToWWTo4q
-#   - GluGluToHToWWTo4q (produced by PKU) 
+#   - GluGluToHToWWTo4q (produced by PKU)
 #   - GluGluHToWWTo4q (produced by Cristina w Pythia)
 #   - GluGluHToWWTo4q-HpT190 (produced by Cristina w Pythia)
 # to come: GluGluHToWW_MINLO (for ele,mu,had)
@@ -104,6 +106,7 @@ add_samples = {
     'TTbar': 'TT',
     'WJetsLNu': 'WJetsToLNu',
     'GluGluHToWWTo4q': 'GluGluHToWWTo4q',
+    'ALL_VH_SIGNALS_COMBINED': 'HToWW_M-125'
 }
 
 label_by_ch = {
@@ -113,13 +116,13 @@ label_by_ch = {
 }
 
 axis_dict = {
-    'lep_pt': hist2.axis.Variable(list(range(20,300,5))+[350,400,500], name='var', label=r'Lepton $p_T$ [GeV]', overflow=True),
+    'lep_pt': hist2.axis.Variable(list(range(20, 300, 5)) + [350, 400, 500], name='var', label=r'Lepton $p_T$ [GeV]', overflow=True),
     'lep_isolation': hist2.axis.Regular(20, 0, 3.5, name='var', label=r'Lepton iso', overflow=True),
     'lep_misolation': hist2.axis.Regular(20, 0, 3.5, name='var', label=r'Lepton mini iso', overflow=True),
     'lep_fj_m': hist2.axis.Regular(20, 0, 200, name='var', label=r'Jet - Lepton mass [GeV]', overflow=True),
     'lep_fj_bjets_ophem': hist2.axis.Regular(15, 0, 0.31, name='var', label=r'btagFlavB (opphem)', overflow=True),
     'lep_fj_dr': hist2.axis.Regular(15, 0, 0.8, name='var', label=r'$\Delta R(l, Jet)$', overflow=True),
-    'lep_mvaId': hist2.axis.Variable([0,1,2,3,4,5], name='var', label='Muon MVAID', overflow=True),
+    'lep_mvaId': hist2.axis.Variable([0, 1, 2, 3, 4, 5], name='var', label='Muon MVAID', overflow=True),
     'fj_pt': hist2.axis.Regular(40, 200, 1000, name='var', label=r'Jet $p_T$ [GeV]', overflow=True),
     'fj_msoftdrop': hist2.axis.Regular(30, 25, 200, name='var', label=r'Jet $m_{sd}$ [GeV]', overflow=True),
     'fj_bjets_ophem': hist2.axis.Regular(15, 0, 0.4, name='var', label=r'btagFlavB (opphem)', overflow=True),
