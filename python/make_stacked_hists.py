@@ -184,8 +184,10 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
 
         # get samples existing in histogram
         samples = [h.axes[0].value(i) for i in range(len(h.axes[0].edges))]
+
         signal_labels = [label for label in samples if label in signal_by_ch[ch]]
-        bkg_labels = [label for label in samples if (label and label != data_label and label not in signal_labels)]
+        others_labels = ['ttHToNonbb_M125', 'ALL_VH_SIGNALS_COMBINED', 'VBFHToWWToLNuQQ-MH125']
+        bkg_labels = [label for label in samples if (label and label != data_label and label not in signal_labels and label not in others_labels)]
 
         # data
         data = None
@@ -201,6 +203,10 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
 
         # background
         bkg = [h[{"samples": label}] for label in bkg_labels]
+
+        others = []
+        for label in others_labels:
+            others.append(h[{"samples": label}])
 
         # print(data,signal,bkg)
 
@@ -291,6 +297,29 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
                 baseline=sig.values() - np.sqrt(sig.values()),
                 edges=sig.axes[0].edges, **errps,
             )
+
+        other_labeling = {'ttHToNonbb_M125': 'ttH',
+                          # 'GluGluHToWW_Pt-200ToInf_M-125': 'ggH-Pt200',
+                          'ALL_VH_SIGNALS_COMBINED': 'VH',
+                          'VBFHToWWToLNuQQ-MH125': 'VBF-LNuQQ',
+                          }
+
+        if len(others) > 0:
+            for i, other in enumerate(others):
+                hep.histplot(other,
+                             ax=ax,
+                             label=other_labeling[others_labels[i]],
+                             #                      color='red'
+                             )
+                sig = signal[0].copy()
+                for i, s in enumerate(signal):
+                    if i > 0:
+                        sig = sig + s
+                ax.stairs(
+                    values=sig.values() + np.sqrt(sig.values()),
+                    baseline=sig.values() - np.sqrt(sig.values()),
+                    edges=sig.axes[0].edges, **errps,
+                )
 
         if logy:
             ax.set_yscale('log')
