@@ -224,7 +224,6 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
             'linewidth': 0,
             'alpha': 0.4
         }
-        if len(bkg) > 0:
 
         if len(bkg) > 0:
             hep.histplot(bkg,
