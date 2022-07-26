@@ -213,6 +213,7 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
                                           )
         else:
             fig, ax = plt.subplots(1, 1)
+            rax = None
 
         errps = {
             'hatch': '////',
@@ -293,6 +294,10 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
                     baseline=sig.values() - np.sqrt(sig.values()),
                     edges=sig.axes[0].edges, **errps,
                 )
+
+        if rax != None:
+            ax.set_xlabel("")
+            rax.set_xlabel('lep pT')
 
         if logy:
             ax.set_yscale('log')
