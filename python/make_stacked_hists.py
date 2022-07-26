@@ -114,10 +114,20 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                         print('Parquet file empty')
                         continue
 
+                    # if ch == 'ele':
+                    #     select = (data['lep_isolation'] < 0.15) & (data['lep_pt'] < max_iso[ch]) | (data['lep_pt'] > max_iso[ch])
+                    # elif ch == 'mu':
+                    #     select = ((data['lep_isolation'] < 0.15) & (data['lep_pt'] < max_iso[ch])) | ((data['lep_misolation'] < 0.1) & (data['lep_pt'] > max_iso[ch]))
+
                     if ch == 'ele':
-                        select = (data['lep_isolation'] < 0.15) & (data['lep_pt'] < max_iso[ch]) | (data['lep_pt'] > max_iso[ch])
+                        select = (data['lep_isolation'] < 0.15) & (data['lep_pt'] < max_iso[ch])
                     elif ch == 'mu':
-                        select = ((data['lep_isolation'] < 0.15) & (data['lep_pt'] < max_iso[ch])) | ((data['lep_misolation'] < 0.1) & (data['lep_pt'] > max_iso[ch]))
+                        select = ((data['lep_isolation'] < 0.15) & (data['lep_pt'] < max_iso[ch]))
+
+                    # if ch == 'ele':
+                    #     select = (data['lep_pt'] > max_iso[ch])
+                    # elif ch == 'mu':
+                    #     select = ((data['lep_misolation'] < 0.1) & (data['lep_pt'] > max_iso[ch]))
 
                     # filling histograms
                     single_sample = None
@@ -132,7 +142,6 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                         sample_to_use = sample
 
                     # combining all pt bins of a specefic process under one name
-                    print(sample_to_use)
                     hists[var].fill(
                         samples=sample_to_use,
                         var=data[var][select],
