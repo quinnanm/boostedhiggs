@@ -302,6 +302,24 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
             ax.set_xlabel("")
             rax.set_xlabel('lep pT')
 
+        # sort the legend
+        order_dic = {}
+        for bkg_label in bkg_labels:
+            order_dic[bkg_label] = hists['fj_pt'][{'samples': bkg_label}].sum()
+
+        summ = []
+        for label in labels[:len(bkg_labels)]:
+            summ.append(order_dic[label])
+        order = []
+        for i in range(len(summ)):
+            order.append(np.argmax(np.array(summ)))
+            summ[np.argmax(np.array(summ))] = -100
+
+        hand = [handles[i] for i in order] + handles[len(bkg):]
+        lab = [labels[i] for i in order] + labels[len(bkg):]
+
+        ax.legend([hand[idx] for idx in range(len(hand))], [lab[idx] for idx in range(len(lab))])
+
         if logy:
             ax.set_yscale('log')
             ax.set_ylim(0.1)
