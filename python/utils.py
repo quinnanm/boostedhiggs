@@ -53,8 +53,8 @@ def get_sum_sumgenweight(idir, year, sample):
 # define the axes for the different variables to be plotted
 # define samples
 signal_by_ch = {
-    'ele': ['GluGluHToWWToLNuQQ'],
-    'mu': ['GluGluHToWWToLNuQQ'],
+    'ele': ['GluGluHToWWToLNuQQ', 'ttHToNonbb_M125', 'GluGluHToWW_Pt-200ToInf_M-125', 'ALL_VH_SIGNALS_COMBINED', 'VBFHToWWToLNuQQ-MH125'],
+    'mu': ['GluGluHToWWToLNuQQ', 'ttHToNonbb_M125', 'GluGluHToWW_Pt-200ToInf_M-125', 'ALL_VH_SIGNALS_COMBINED', 'VBFHToWWToLNuQQ-MH125'],
     'had': ['ggHToWWTo4Q-MH125'],
 }
 
