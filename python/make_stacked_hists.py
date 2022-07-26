@@ -205,10 +205,6 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
         # background
         bkg = [h[{"samples": label}] for label in bkg_labels]
 
-        others = []
-        for label in others_labels:
-            others.append(h[{"samples": label}])
-
         # print(data,signal,bkg)
 
         if add_data and data and len(bkg) > 0:
