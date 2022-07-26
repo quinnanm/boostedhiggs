@@ -307,7 +307,9 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
         for bkg_label in bkg_labels:
             order_dic[bkg_label] = hists['fj_pt'][{'samples': bkg_label}].sum()
 
+        handles, labels = ax.get_legend_handles_labels()
         summ = []
+
         for label in labels[:len(bkg_labels)]:
             summ.append(order_dic[label])
         order = []
