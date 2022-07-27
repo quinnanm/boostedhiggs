@@ -2,7 +2,7 @@
     "ele": {
 	"fj_pt": 1,
 	"fj_msoftdrop": 1,
-  "fj_bjets_ophem": 1,
+  "fj_bjets_ophem": 0,
 	"lep_pt": 1,
 	"lep_isolation": 1,
 	"lep_misolation": 1,
@@ -19,7 +19,7 @@
 	"lep_mvaId": 1,
 	"fj_pt": 1,
 	"fj_msoftdrop": 1,
-  "fj_bjets_ophem": 1,
+  "fj_bjets_ophem": 0,
   "lep_pt": 1,
   "lep_isolation": 1,
   "lep_misolation": 1,
@@ -35,7 +35,7 @@
     "had": {
 	"fj_pt": 1,
 	"fj_msoftdrop": 1,
-	"fj_bjets_ophem": 1,
+	"fj_bjets_ophem": 0,
 	"fj_pnh4q": 1,
 	"fj_sl_pt": 1,
 	"fj_sl_msoftdrop": 1,
