@@ -123,10 +123,10 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
 
                     # for plotting iso and miso use differentr pt cut
                     if var == 'lep_isolation':
-                        pt_cut = (data['lep_pt'] < max_iso[ch])
+                        pt_cut = (data['lep_pt'] > max_iso[ch])
                         select = (iso_cut | miso_cut) & pt_cut
                     elif var == 'lep_misolation':
-                        pt_cut = (data['lep_pt'] > max_iso[ch])
+                        pt_cut = (data['lep_pt'] < max_iso[ch])
                         select = (iso_cut | miso_cut) & pt_cut
                     else:
                         select = (iso_cut | miso_cut)
