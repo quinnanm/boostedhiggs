@@ -114,12 +114,6 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                         print('Parquet file empty')
                         continue
 
-                    if (var != 'lep_misolation') & (var != 'lep_isolation'):
-                        if ch == 'ele':
-                            select = ((data['lep_isolation'] < 0.15) & (data['lep_pt'] < max_iso[ch])) | (data['lep_pt'] > max_iso[ch])
-                        elif ch == 'mu':
-                            select = ((data['lep_isolation'] < 0.15) & (data['lep_pt'] < max_iso[ch])) | ((data['lep_misolation'] < 0.1) & (data['lep_pt'] > max_iso[ch]))
-
                     # for plotting iso and miso
                     iso_cut = (data['lep_isolation'] < 0.15) & (data['lep_pt'] < max_iso[ch])
                     if ch == 'ele':
