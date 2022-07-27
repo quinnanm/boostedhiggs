@@ -123,16 +123,16 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                     # for plotting miso
                     if var == 'lep_misolation':
                         if ch == 'ele':
-                            select = (((data['lep_isolation'] < 0.15) & (data['lep_pt'] < max_iso[ch]) | (data['lep_pt'] > max_iso[ch])) & (data['lep_pt'] > max_iso[ch])) & (data['lep_pt'] > max_iso[ch])
+                            select = (((data['lep_isolation'] < 0.15) & (data['lep_pt'] < max_iso[ch]) | (data['lep_pt'] > max_iso[ch])) & (data['lep_pt'] > max_iso[ch])) & (data['lep_pt'] < max_iso[ch])
                         elif ch == 'mu':
-                            select = (((data['lep_isolation'] < 0.15) & (data['lep_pt'] < max_iso[ch])) | ((data['lep_misolation'] < 0.1) & (data['lep_pt'] > max_iso[ch]))) & (data['lep_pt'] > max_iso[ch])
+                            select = (((data['lep_isolation'] < 0.15) & (data['lep_pt'] < max_iso[ch])) | ((data['lep_misolation'] < 0.1) & (data['lep_pt'] > max_iso[ch]))) & (data['lep_pt'] < max_iso[ch])
 
                     # # for plotting iso
                     if var == 'lep_isolation':
                         if ch == 'ele':
-                            select = (((data['lep_isolation'] < 0.15) & (data['lep_pt'] < max_iso[ch]) | (data['lep_pt'] > max_iso[ch])) & (data['lep_pt'] < max_iso[ch])) & (data['lep_pt'] < max_iso[ch])
+                            select = (((data['lep_isolation'] < 0.15) & (data['lep_pt'] < max_iso[ch]) | (data['lep_pt'] > max_iso[ch])) & (data['lep_pt'] < max_iso[ch])) & (data['lep_pt'] > max_iso[ch])
                         elif ch == 'mu':
-                            select = (((data['lep_isolation'] < 0.15) & (data['lep_pt'] < max_iso[ch])) | ((data['lep_misolation'] < 0.1) & (data['lep_pt'] > max_iso[ch]))) & (data['lep_pt'] < max_iso[ch])
+                            select = (((data['lep_isolation'] < 0.15) & (data['lep_pt'] < max_iso[ch])) | ((data['lep_misolation'] < 0.1) & (data['lep_pt'] > max_iso[ch]))) & (data['lep_pt'] > max_iso[ch])
 
                     # filling histograms
                     single_sample = None
@@ -409,7 +409,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as:  python make_stacked_hists.py --year 2017 --odir hists --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20 --make_hists --plot_hists
+    # run locally as: python make_stacked_hists.py --year 2017 --odir hists --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20 --make_hists --plot_hists
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',                   dest='year', required=True, choices=["2016", "2016APV", "2017", "2018", "Run2"],  help="year")
