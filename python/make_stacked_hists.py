@@ -289,7 +289,7 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
                     hep.histplot(data.values() / tot.values(), tot.axes[0].edges, yerr=np.sqrt(data.values()) / tot.values(),
                                  ax=rax, histtype='errorbar', color='k', capsize=4)
                 else:
-                    print(f'Warning: no all bins filled for background histogram for {var} {ch}')
+                    print(f'Warning: not all bins filled for background histogram for {var} {ch}')
                 rax.axhline(1, ls='--', color='k')
                 rax.set_ylim(0.2, 1.8)
                 # rax.set_ylim(0.7, 1.3)
