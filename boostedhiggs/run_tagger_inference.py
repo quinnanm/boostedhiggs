@@ -156,13 +156,7 @@ def runInferenceTriton(
         tagger_outputs = triton_model(tagger_inputs)
     except:
         print("---can't run inference due to error with the event---")
-        pnet_vars = {
-            f"{jet_label}FatJetParticleNetHWWMD_probQCD": np.array([]),
-            f"{jet_label}FatJetParticleNetHWWMD_probHWW3q": np.array([]),
-            f"{jet_label}FatJetParticleNetHWWMD_probHWW4q": np.array([]),
-            f"{jet_label}FatJetParticleNetHWWMD_THWW4q": np.array([]),
-        }
-        return pnet_vars
+        return None
 
     time_taken = time.time() - start
 
