@@ -155,7 +155,7 @@ def runInferenceTriton(
     try:
         tagger_outputs = triton_model(tagger_inputs)
     except:
-        print("---can't run inference due to error with the event---")
+        print("---can't run inference due to error with the event (possibly had channel)---")
         return None
 
     time_taken = time.time() - start
@@ -166,17 +166,21 @@ def runInferenceTriton(
     pnet_vars_list = []
     if len(tagger_outputs):
         pnet_vars = {
-            f"{jet_label}FatJetParticleNetHWWMD_probQCD": np.sum(tagger_outputs[:, :5], axis=1),
-            f"{jet_label}FatJetParticleNetHWWMD_probHWW3q": tagger_outputs[:, -2],
-            f"{jet_label}FatJetParticleNetHWWMD_probHWW4q": tagger_outputs[:, -1],
-            f"{jet_label}FatJetParticleNetHWWMD_THWW4q": (tagger_outputs[:, -2] + tagger_outputs[:, -1]) / np.sum(tagger_outputs, axis=1),
+            f"fj_ttbar_bmerged": tagger_outputs[:, 0],
+            f"fj_ttbar_bsplit": tagger_outputs[:, 1],
+            f"fj_wjets_label": tagger_outputs[:, 2],
+            f"fj_isHVV_elenuqq": tagger_outputs[:, 3],
+            f"fj_isHVV_munuqq": tagger_outputs[:, 4],
+            f"fj_isHVV_taunuqq": tagger_outputs[:, 5],
         }
     else:
         pnet_vars = {
-            f"{jet_label}FatJetParticleNetHWWMD_probQCD": np.array([]),
-            f"{jet_label}FatJetParticleNetHWWMD_probHWW3q": np.array([]),
-            f"{jet_label}FatJetParticleNetHWWMD_probHWW4q": np.array([]),
-            f"{jet_label}FatJetParticleNetHWWMD_THWW4q": np.array([]),
+            f"fj_ttbar_bmerged": np.array([]),
+            f"fj_ttbar_bsplit": np.array([]),
+            f"fj_wjets_label": np.array([]),
+            f"fj_isHVV_elenuqq": np.array([]),
+            f"fj_isHVV_munuqq": np.array([]),
+            f"fj_isHVV_taunuqq": tnp.array([]),
         }
 
     print(f"Total time taken: {time.time() - total_start:.1f}s")
