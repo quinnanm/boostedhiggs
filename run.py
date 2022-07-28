@@ -101,11 +101,14 @@ def main(args):
         else:
             executor = processor.IterativeExecutor(status=True)
 
+    # run = processor.Runner(
+    #     executor=executor, savemetrics=True, schema=nanoevents.NanoAODSchema, chunksize=args.chunksize
+    # )
+    nanoevents.PFNanoAODSchema.mixins["SV"] = "PFCand"
     run = processor.Runner(
-        executor=executor, savemetrics=True, schema=nanoevents.NanoAODSchema, chunksize=args.chunksize
+        executor=executor, savemetrics=True, schema=nanoevents.PFNanoAODSchema, chunksize=args.chunksize
     )
 
-    print('fileset', fileset)
     out, metrics = run(
         fileset, "Events", processor_instance=p
     )
