@@ -169,7 +169,7 @@ def runInferenceTriton(
                 f"{jet_label}FatJetParticleNetHWWMD_THWW4q": (
                     tagger_outputs[:, -2] + tagger_outputs[:, -1]
                 )
-                / np.sum(tagger_outputs[jet_idx], axis=1),
+                / np.sum(tagger_outputs, axis=1),
             }
         )
     else:
@@ -182,13 +182,14 @@ def runInferenceTriton(
             }
         )
 
-    pnet_vars_combined = {
-        key: np.concatenate(
-            [pnet_vars_list[0][key][:, np.newaxis], pnet_vars_list[1][key][:, np.newaxis]], axis=1
-        )
-        for key in pnet_vars_list[0]
-    }
+    # pnet_vars_combined = {
+    #     key: np.concatenate(
+    #         [pnet_vars_list[0][key][:, np.newaxis], pnet_vars_list[1][key][:, np.newaxis]], axis=1
+    #     )
+    #     for key in pnet_vars_list[0]
+    # }
 
     print(f"Total time taken: {time.time() - total_start:.1f}s")
-    return pnet_vars_combined
+    # return pnet_vars_combined
+    return pnet_vars_list[0]
     # return tagger_outputs
