@@ -155,7 +155,7 @@ def runInferenceTriton(
     try:
         tagger_outputs = triton_model(tagger_inputs)
     except:
-        print("can't run inference due to error")
+        print("---can't run inference due to error with the event---")
         pnet_vars = {
             f"{jet_label}FatJetParticleNetHWWMD_probQCD": np.array([]),
             f"{jet_label}FatJetParticleNetHWWMD_probHWW3q": np.array([]),

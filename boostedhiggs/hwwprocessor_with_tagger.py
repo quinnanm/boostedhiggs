@@ -650,13 +650,11 @@ class HwwProcessor(processor.ProcessorABC):
                 )
                 print("post-inference")
 
-                print('pnet_vars.keys()', pnet_vars.keys())
-
-                # # fill the output dictionary after selections
-                # output[ch] = {
-                #     **{key: value[self.selections[ch].all(*self.selections[ch].names)] for (key, value) in out.items()},
-                #     **{key: value for (key, value) in pnet_vars.items()}
-                # }
+                # fill the output dictionary after selections
+                output[ch] = {
+                    **{key: value[self.selections[ch].all(*self.selections[ch].names)] for (key, value) in out.items()},
+                    **{key: value for (key, value) in pnet_vars.items()}
+                }
                 output[ch] = {
                     key: value[self.selections[ch].all(*self.selections[ch].names)] for (key, value) in out.items()
                 }
