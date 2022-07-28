@@ -143,45 +143,47 @@ def runInferenceTriton(
         for i, input_name in enumerate(tagger_vars["input_names"])
     }
 
-    # run inference for the candidate jet
+    # run inference for both fat jets
     tagger_outputs = []
     print(f"Running inference for candidate Jet")
     start = time.time()
     tagger_outputs = triton_model(tagger_inputs)
     time_taken = time.time() - start
     print(f"Inference took {time_taken:.1f}s")
+    return tagger_outputs
 
-    pnet_vars_list = []
-    if len(tagger_outputs):
-        pnet_vars_list.append(
-            {
-                f"{jet_label}FatJetParticleNetHWWMD_probQCD": np.sum(
-                    tagger_outputs[:, :5], axis=1
-                ),
-                f"{jet_label}FatJetParticleNetHWWMD_probHWW3q": tagger_outputs[:, -2],
-                f"{jet_label}FatJetParticleNetHWWMD_probHWW4q": tagger_outputs[:, -1],
-                f"{jet_label}FatJetParticleNetHWWMD_THWW4q": (
-                    tagger_outputs[:, -2] + tagger_outputs[:, -1]
-                )
-                / np.sum(tagger_outputs[jet_idx], axis=1),
-            }
-        )
-    else:
-        pnet_vars_list.append(
-            {
-                f"{jet_label}FatJetParticleNetHWWMD_probQCD": np.array([]),
-                f"{jet_label}FatJetParticleNetHWWMD_probHWW3q": np.array([]),
-                f"{jet_label}FatJetParticleNetHWWMD_probHWW4q": np.array([]),
-                f"{jet_label}FatJetParticleNetHWWMD_THWW4q": np.array([]),
-            }
-        )
-
-    pnet_vars_combined = {
-        key: np.concatenate(
-            [pnet_vars_list[0][key][:, np.newaxis], pnet_vars_list[1][key][:, np.newaxis]], axis=1
-        )
-        for key in pnet_vars_list[0]
-    }
-
-    print(f"Total time taken: {time.time() - total_start:.1f}s")
-    return pnet_vars_combined
+    # pnet_vars_list = []
+    # if len(tagger_outputs):
+    #     pnet_vars_list.append(
+    #         {
+    #             f"{jet_label}FatJetParticleNetHWWMD_probQCD": np.sum(
+    #                 tagger_outputs[:, :5], axis=1
+    #             ),
+    #             f"{jet_label}FatJetParticleNetHWWMD_probHWW3q": tagger_outputs[:, -2],
+    #             f"{jet_label}FatJetParticleNetHWWMD_probHWW4q": tagger_outputs[:, -1],
+    #             f"{jet_label}FatJetParticleNetHWWMD_THWW4q": (
+    #                 tagger_outputs[:, -2] + tagger_outputs[:, -1]
+    #             )
+    #             / np.sum(tagger_outputs[jet_idx], axis=1),
+    #         }
+    #     )
+    # else:
+    #     pnet_vars_list.append(
+    #         {
+    #             f"{jet_label}FatJetParticleNetHWWMD_probQCD": np.array([]),
+    #             f"{jet_label}FatJetParticleNetHWWMD_probHWW3q": np.array([]),
+    #             f"{jet_label}FatJetParticleNetHWWMD_probHWW4q": np.array([]),
+    #             f"{jet_label}FatJetParticleNetHWWMD_THWW4q": np.array([]),
+    #         }
+    #     )
+    #
+    # pnet_vars_combined = {
+    #     key: np.concatenate(
+    #         [pnet_vars_list[0][key][:, np.newaxis], pnet_vars_list[1][key][:, np.newaxis]], axis=1
+    #     )
+    #     for key in pnet_vars_list[0]
+    # }
+    #
+    # print(f"Total time taken: {time.time() - total_start:.1f}s")
+    # return pnet_vars_combined
+    return tagger_outputs
