@@ -644,13 +644,15 @@ class HwwProcessor(processor.ProcessorABC):
                 # fill the output dictionary after selections
 
                 # adding tagger stuff
-                print("pre-inference")
-                pnet_vars = runInferenceTriton(
-                    self.tagger_resources_path,
-                    events[self.selections[ch].all(*self.selections[ch].names)],
-                    fj_idx_lep=fj_idx_lep[self.selections[ch].all(*self.selections[ch].names)]
-                )
-                print("post-inference")
+                # print("pre-inference")
+                # pnet_vars = runInferenceTriton(
+                #     self.tagger_resources_path,
+                #     events[self.selections[ch].all(*self.selections[ch].names)],
+                #     fj_idx_lep=fj_idx_lep[self.selections[ch].all(*self.selections[ch].names)]
+                # )
+                # print("post-inference")
+                #
+                # print('pnet_vars.keys()', pnet_vars.keys())
 
                 # output[ch] = {
                 #     **{key: value[self.selections[ch].all(*self.selections[ch].names)] for (key, value) in out.items()},
