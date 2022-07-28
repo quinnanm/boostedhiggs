@@ -26,30 +26,20 @@ def get_pfcands_features(
 
     feature_dict = {}
 
-    print('fatjet_label', fatjet_label)
-    print('fj_idx_lep', fj_idx_lep)
-    print('preselected_events', preselected_events)
-    print('preselected_events[fatjet_label]', preselected_events[fatjet_label])
     jet = ak.firsts(preselected_events[fatjet_label][fj_idx_lep])
-    jet = ak.firsts(preselected_events[fatjet_label][fj_idx_lep])
-
-    print('2')
 
     msk = preselected_events[pfcands_label].jetIdx == ak.firsts(fj_idx_lep)
     jet_ak_pfcands = preselected_events[pfcands_label][msk]
     jet_pfcands = (preselected_events.PFCands[jet_ak_pfcands.pFCandsIdx])
-    print('3')
 
     # negative eta jets have -1 sign, positive eta jets have +1
     eta_sign = ak.values_astype(jet_pfcands.eta > 0, int) * 2 - 1
     feature_dict["pfcand_etarel"] = eta_sign * (jet_pfcands.eta - jet.eta)
     feature_dict["pfcand_phirel"] = jet.delta_phi(jet_pfcands)
     feature_dict["pfcand_abseta"] = np.abs(jet_pfcands.eta)
-    print('4')
 
     feature_dict["pfcand_pt_log_nopuppi"] = np.log(jet_pfcands.pt)
     feature_dict["pfcand_e_log_nopuppi"] = np.log(jet_pfcands.energy)
-    print('5')
 
     pdgIds = jet_pfcands.pdgId
     feature_dict["pfcand_isEl"] = np.abs(pdgIds) == 11
@@ -57,13 +47,11 @@ def get_pfcands_features(
     feature_dict["pfcand_isChargedHad"] = np.abs(pdgIds) == 211
     feature_dict["pfcand_isGamma"] = np.abs(pdgIds) == 22
     feature_dict["pfcand_isNeutralHad"] = np.abs(pdgIds) == 130
-    print('6')
 
     feature_dict["pfcand_charge"] = jet_pfcands.charge
     feature_dict["pfcand_VTX_ass"] = jet_pfcands.pvAssocQuality
     feature_dict["pfcand_lostInnerHits"] = jet_pfcands.lostInnerHits
     feature_dict["pfcand_quality"] = jet_pfcands.trkQuality
-    print('7')
 
     feature_dict["pfcand_normchi2"] = np.floor(jet_pfcands.trkChi2)
 
