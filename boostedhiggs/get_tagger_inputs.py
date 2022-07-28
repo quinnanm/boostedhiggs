@@ -59,17 +59,14 @@ def get_pfcands_features(
     feature_dict["pfcand_dxy"] = jet_pfcands.d0
     feature_dict["pfcand_dzsig"] = jet_pfcands.dz / jet_pfcands.dzErr
     feature_dict["pfcand_dxysig"] = jet_pfcands.d0 / jet_pfcands.d0Err
-    print('8')
 
     # btag vars
     for var in tagger_vars["pf_features"]["var_names"]:
         if "btag" in var:
             feature_dict[var] = jet_ak_pfcands[var[len("pfcand_"):]]
-    print('9')
 
     # pfcand mask
     feature_dict["pfcand_mask"] = (~(ak.pad_none(feature_dict["pfcand_abseta"], tagger_vars["pf_points"]["var_length"], axis=1, clip=True).to_numpy().mask)).astype(np.float32)
-    print('10')
 
     # convert to numpy arrays and normalize features
     for var in tagger_vars["pf_features"]["var_names"]:
