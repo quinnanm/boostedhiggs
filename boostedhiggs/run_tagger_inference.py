@@ -190,5 +190,6 @@ def runInferenceTriton(
     }
 
     print(f"Total time taken: {time.time() - total_start:.1f}s")
+    print('pnet_vars_combined', pnet_vars_combined.items())
     return pnet_vars_combined
     # return tagger_outputs
