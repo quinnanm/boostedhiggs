@@ -123,14 +123,18 @@ def runInferenceTriton(
     # prepare inputs for both fat jets
     tagger_inputs = []
 
+    print('getting cands')
     feature_dict = {
         **get_pfcands_features(tagger_vars, events, fj_idx_lep, fatjet_label, pfcands_label),
         **get_svs_features(tagger_vars, events, fj_idx_lep, fatjet_label, svs_label),
     }
+    print('got cands')
 
     for input_name in tagger_vars["input_names"]:
         for key in tagger_vars[input_name]["var_names"]:
             np.expand_dims(feature_dict[key], 1)
+
+    print('building inputs')
 
     tagger_inputs = {
         f"{input_name}__{i}": np.concatenate(
