@@ -26,8 +26,13 @@ def get_pfcands_features(
 
     feature_dict = {}
 
-    print('1')
+    print('fatjet_label', fatjet_label)
+    print('fj_idx_lep', fj_idx_lep)
+    print('preselected_events', preselected_events)
+    print('preselected_events[fatjet_label]', preselected_events[fatjet_label])
     jet = ak.firsts(preselected_events[fatjet_label][fj_idx_lep])
+    jet = ak.firsts(preselected_events[fatjet_label][fj_idx_lep])
+
     print('2')
 
     msk = preselected_events[pfcands_label].jetIdx == ak.firsts(fj_idx_lep)
