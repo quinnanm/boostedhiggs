@@ -652,6 +652,7 @@ class HwwProcessor(processor.ProcessorABC):
         # for ch in self._channels:
         #     print('channel', ch)
             print("pre-inference")
+            print(self.tagger_resources_path)
 
             pnet_vars = runInferenceTriton(
                 self.tagger_resources_path, events[self.selections[ch].all(*self.selections[ch].names)], fj_idx_lep=fj_idx_lep)
