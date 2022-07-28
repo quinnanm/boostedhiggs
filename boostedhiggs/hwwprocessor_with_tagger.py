@@ -665,6 +665,9 @@ class HwwProcessor(processor.ProcessorABC):
             #     **output[ch],
             #     **{key: value for (key, value) in pnet_vars.items()},
             # }
+            output[ch] = {
+                key: value[self.selections[ch].all(*self.selections[ch].names)] for (key, value) in out.items()
+            }
 
             # convert arrays to pandas
             if not isinstance(output[ch], pd.DataFrame):
