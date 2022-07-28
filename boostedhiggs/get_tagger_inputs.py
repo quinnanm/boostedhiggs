@@ -26,20 +26,25 @@ def get_pfcands_features(
 
     feature_dict = {}
 
+    print('1')
     jet = ak.firsts(preselected_events[fatjet_label][fj_idx_lep])
+    print('2')
 
     msk = preselected_events[pfcands_label].jetIdx == ak.firsts(fj_idx_lep)
     jet_ak_pfcands = preselected_events[pfcands_label][msk]
     jet_pfcands = (preselected_events.PFCands[jet_ak_pfcands.pFCandsIdx])
+    print('3')
 
     # negative eta jets have -1 sign, positive eta jets have +1
     eta_sign = ak.values_astype(jet_pfcands.eta > 0, int) * 2 - 1
     feature_dict["pfcand_etarel"] = eta_sign * (jet_pfcands.eta - jet.eta)
     feature_dict["pfcand_phirel"] = jet.delta_phi(jet_pfcands)
     feature_dict["pfcand_abseta"] = np.abs(jet_pfcands.eta)
+    print('4')
 
     feature_dict["pfcand_pt_log_nopuppi"] = np.log(jet_pfcands.pt)
     feature_dict["pfcand_e_log_nopuppi"] = np.log(jet_pfcands.energy)
+    print('5')
 
     pdgIds = jet_pfcands.pdgId
     feature_dict["pfcand_isEl"] = np.abs(pdgIds) == 11
@@ -47,11 +52,13 @@ def get_pfcands_features(
     feature_dict["pfcand_isChargedHad"] = np.abs(pdgIds) == 211
     feature_dict["pfcand_isGamma"] = np.abs(pdgIds) == 22
     feature_dict["pfcand_isNeutralHad"] = np.abs(pdgIds) == 130
+    print('6')
 
     feature_dict["pfcand_charge"] = jet_pfcands.charge
     feature_dict["pfcand_VTX_ass"] = jet_pfcands.pvAssocQuality
     feature_dict["pfcand_lostInnerHits"] = jet_pfcands.lostInnerHits
     feature_dict["pfcand_quality"] = jet_pfcands.trkQuality
+    print('7')
 
     feature_dict["pfcand_normchi2"] = np.floor(jet_pfcands.trkChi2)
 
@@ -59,14 +66,17 @@ def get_pfcands_features(
     feature_dict["pfcand_dxy"] = jet_pfcands.d0
     feature_dict["pfcand_dzsig"] = jet_pfcands.dz / jet_pfcands.dzErr
     feature_dict["pfcand_dxysig"] = jet_pfcands.d0 / jet_pfcands.d0Err
+    print('8')
 
     # btag vars
     for var in tagger_vars["pf_features"]["var_names"]:
         if "btag" in var:
             feature_dict[var] = jet_ak_pfcands[var[len("pfcand_"):]]
+    print('9')
 
     # pfcand mask
     feature_dict["pfcand_mask"] = (~(ak.pad_none(feature_dict["pfcand_abseta"], tagger_vars["pf_points"]["var_length"], axis=1, clip=True).to_numpy().mask)).astype(np.float32)
+    print('10')
 
     # convert to numpy arrays and normalize features
     for var in tagger_vars["pf_features"]["var_names"]:
@@ -84,6 +94,7 @@ def get_pfcands_features(
             a = np.clip(a, info.get("lower_bound", -5), info.get("upper_bound", 5))
 
         feature_dict[var] = a
+    print('11')
 
     if normalize:
         var = "pfcand_normchi2"

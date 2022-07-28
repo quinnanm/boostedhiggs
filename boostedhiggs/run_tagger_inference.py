@@ -128,6 +128,7 @@ def runInferenceTriton(
         **get_pfcands_features(tagger_vars, events, fj_idx_lep, fatjet_label, pfcands_label),
         **get_svs_features(tagger_vars, events, fj_idx_lep, fatjet_label, svs_label),
     }
+
     print('got cands')
 
     for input_name in tagger_vars["input_names"]:
