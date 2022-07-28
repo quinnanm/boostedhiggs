@@ -633,21 +633,21 @@ class HwwProcessor(processor.ProcessorABC):
                 if ch == "ele" or ch == "mu":
                     keys += ["lep"]
 
-        #         out = {}
-        #         for key in keys:
-        #             for var, item in variables[key].items():
-        #                 # pad all the variables that are not a cut with -1
-        #                 pad_item = item if ("cut" in var or "weight" in var) else pad_val(item, -1)
-        #                 # fill out dictionary
-        #                 out[var] = item
-        #
-        #         # fill the output dictionary after selections
-        #         output[ch] = {
-        #             key: value[self.selections[ch].all(*self.selections[ch].names)] for (key, value) in out.items()
-        #         }
-        #     else:
-        #         output[ch] = {}
-        #
+                out = {}
+                for key in keys:
+                    for var, item in variables[key].items():
+                        # pad all the variables that are not a cut with -1
+                        pad_item = item if ("cut" in var or "weight" in var) else pad_val(item, -1)
+                        # fill out dictionary
+                        out[var] = item
+
+                # fill the output dictionary after selections
+                output[ch] = {
+                    key: value[self.selections[ch].all(*self.selections[ch].names)] for (key, value) in out.items()
+                }
+            else:
+                output[ch] = {}
+
         # # TODO: adding tagger stuff
         # for ch in self._channels:
         #     print('channel', ch)
