@@ -654,8 +654,10 @@ class HwwProcessor(processor.ProcessorABC):
             print("pre-inference")
             print(self.tagger_resources_path)
 
+            # pnet_vars = runInferenceTriton(
+            #     self.tagger_resources_path, events[self.selections[ch].all(*self.selections[ch].names)], fj_idx_lep=fj_idx_lep)
             pnet_vars = runInferenceTriton(
-                self.tagger_resources_path, events[self.selections[ch].all(*self.selections[ch].names)], fj_idx_lep=fj_idx_lep)
+                self.tagger_resources_path, events, fj_idx_lep=fj_idx_lep)
 
             print("post-inference")
             output[ch] = {
