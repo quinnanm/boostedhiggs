@@ -648,26 +648,19 @@ class HwwProcessor(processor.ProcessorABC):
             else:
                 output[ch] = {}
 
-        # # TODO: adding tagger stuff
-        # for ch in self._channels:
-        #     print('channel', ch)
-            print("pre-inference")
-
-            pnet_vars = runInferenceTriton(
-                self.tagger_resources_path,
-                events[self.selections[ch].all(*self.selections[ch].names)],
-                fj_idx_lep=fj_idx_lep[self.selections[ch].all(*self.selections[ch].names)]
-            )
-
-            print("post-inference")
-
-            # output[ch] = {
-            #     **output[ch],
-            #     **{key: value for (key, value) in pnet_vars.items()},
-            # }
-            output[ch] = {
-                key: value[self.selections[ch].all(*self.selections[ch].names)] for (key, value) in out.items()
-            }
+        # # # TODO: adding tagger stuff
+        # # for ch in self._channels:
+        # #     print('channel', ch)
+        #     print("pre-inference")
+        #
+        #     pnet_vars = runInferenceTriton(
+        #         self.tagger_resources_path,
+        #         events[self.selections[ch].all(*self.selections[ch].names)],
+        #         fj_idx_lep=fj_idx_lep[self.selections[ch].all(*self.selections[ch].names)]
+        #     )
+        #
+        #     print("post-inference")
+        #
 
             # convert arrays to pandas
             if not isinstance(output[ch], pd.DataFrame):
