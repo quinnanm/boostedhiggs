@@ -155,7 +155,6 @@ def runInferenceTriton(
     tagger_outputs = triton_model(tagger_inputs)
     time_taken = time.time() - start
     print(f"Inference took {time_taken:.1f}s")
-    return tagger_outputs
 
     pnet_vars_list = []
     if len(tagger_outputs):
