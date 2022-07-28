@@ -22,7 +22,8 @@ def main(args):
     if not os.path.exists('./outfiles'):
         os.makedirs('./outfiles')
 
-    channels = ["ele", "mu", "had"]
+    # channels = ["ele", "mu", "had"]
+    channels = ["ele", "mu"]
     starti = args.starti
     job_name = '/' + str(starti)
     if args.n != -1:

@@ -650,6 +650,7 @@ class HwwProcessor(processor.ProcessorABC):
                 )
                 print("post-inference")
 
+                # fill with -1 and don't discard the events
                 if pnet_vars is None:
                     print('a None found')
                     output[ch] = {}
