@@ -105,6 +105,7 @@ def main(args):
         executor=executor, savemetrics=True, schema=nanoevents.NanoAODSchema, chunksize=args.chunksize
     )
 
+    print('fileset', fileset)
     out, metrics = run(
         fileset, "Events", processor_instance=p
     )
