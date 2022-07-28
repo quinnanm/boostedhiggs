@@ -84,7 +84,6 @@ def get_pfcands_features(
             a = np.clip(a, info.get("lower_bound", -5), info.get("upper_bound", 5))
 
         feature_dict[var] = a
-    print('11')
 
     if normalize:
         var = "pfcand_normchi2"
