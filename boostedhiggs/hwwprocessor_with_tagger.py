@@ -660,6 +660,7 @@ class HwwProcessor(processor.ProcessorABC):
                 output[ch] = {
                     key: value[self.selections[ch].all(*self.selections[ch].names)] for (key, value) in out.items()
                 }
+                print('filled')
             else:
                 output[ch] = {}
 
