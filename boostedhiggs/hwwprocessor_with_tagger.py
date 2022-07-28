@@ -422,7 +422,7 @@ class HwwProcessor(processor.ProcessorABC):
             channel=['ele']
         )
 
-        if 'had' in channels:
+        if 'had' in self._channelschannels:
             # event selections for hadronic channel
             self.add_selection(
                 name='oneFatjet',
