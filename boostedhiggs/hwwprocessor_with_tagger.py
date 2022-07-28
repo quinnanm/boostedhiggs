@@ -627,7 +627,6 @@ class HwwProcessor(processor.ProcessorABC):
             # only fill output for that channel if the selections yield any events
             if np.sum(self.selections[ch].all(*self.selections[ch].names)) <= 0:
                 fill_output = False
-            print('num of events after selections', np.sum(self.selections[ch].all(*self.selections[ch].names)))
 
             if fill_output:
                 keys = ["common", ch]

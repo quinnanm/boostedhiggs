@@ -60,7 +60,7 @@ class wrapped_triton:
 
         # manually split into batches for gpu inference
         input_size = input_dict[list(input_dict.keys())[0]].shape[0]
-        print(f"size of input = {input_size}")
+        print(f"size of input (number of events) = {input_size}")
 
         outs = [
             self._do_inference(
@@ -147,7 +147,7 @@ def runInferenceTriton(
         )
         for i, input_name in enumerate(tagger_vars["input_names"])
     }
-    print('input shape', tagger_inputs['pf_points__0'].shape)
+
     # run inference for both fat jets
     tagger_outputs = []
     print(f"Running inference for candidate Jet")
