@@ -129,7 +129,7 @@
 	"DYJetsToLL_Pt-60ToInf": 0,
 	"QCD_Pt_00to0": 0,
 	"QCD_Pt_0to1800": 0,
-	"QCD_Pt_1800to200": 1,
+	"QCD_Pt_1800to200": 0,
 	"QCD_Pt_200to3200": 0,
 	"QCD_Pt_300to470": 0,
 	"QCD_Pt_3200toInf": 0,
@@ -164,7 +164,8 @@
 	"WJetsToQQ_HT-800toInf": 0,
 	"ZJetsToQQ_HT-00to00": 0,
 	"ZJetsToQQ_HT-00to800": 0,
-	"ZJetsToQQ_HT-800toInf": 0
+	"ZJetsToQQ_HT-800toInf": 0,
+  "DYJetsToLL_Pt-250To400": 1
     },
     "2018": {
 	"JetHT_Run2018A": 0,
