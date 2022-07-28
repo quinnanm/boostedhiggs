@@ -147,7 +147,7 @@ def runInferenceTriton(
         )
         for i, input_name in enumerate(tagger_vars["input_names"])
     }
-
+    print('input shape', tagger_inputs['pf_points__0'].shape)
     # run inference for both fat jets
     tagger_outputs = []
     print(f"Running inference for candidate Jet")
