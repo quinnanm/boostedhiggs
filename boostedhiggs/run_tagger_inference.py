@@ -152,8 +152,20 @@ def runInferenceTriton(
     tagger_outputs = []
     print(f"Running inference for candidate Jet")
     start = time.time()
-    tagger_outputs = triton_model(tagger_inputs)
+    try:
+        tagger_outputs = triton_model(tagger_inputs)
+    except:
+        print("can't run inference due to error")
+        pnet_vars = {
+            f"{jet_label}FatJetParticleNetHWWMD_probQCD": np.array([]),
+            f"{jet_label}FatJetParticleNetHWWMD_probHWW3q": np.array([]),
+            f"{jet_label}FatJetParticleNetHWWMD_probHWW4q": np.array([]),
+            f"{jet_label}FatJetParticleNetHWWMD_THWW4q": np.array([]),
+        }
+        return pnet_vars
+
     time_taken = time.time() - start
+
     print(f"Inference took {time_taken:.1f}s")
 
     print('tagger_outputs shape', tagger_outputs.shape)
