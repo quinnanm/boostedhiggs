@@ -97,7 +97,7 @@ class HwwProcessor(processor.ProcessorABC):
 
         # b-tagging corrector
         self._btagWPs = btagWPs["deepJet"][year + yearmod]
-        #self._btagSF = BTagCorrector("M", "deepJet", year, yearmod)
+        # self._btagSF = BTagCorrector("M", "deepJet", year, yearmod)
 
         self.selections = {}
         self.cutflows = {}
@@ -642,25 +642,23 @@ class HwwProcessor(processor.ProcessorABC):
                         out[var] = item
 
                 # fill the output dictionary after selections
+
+                # adding tagger stuff
+                print("pre-inference")
+                pnet_vars = runInferenceTriton(
+                    self.tagger_resources_path,
+                    events[self.selections[ch].all(*self.selections[ch].names)],
+                    fj_idx_lep=fj_idx_lep[self.selections[ch].all(*self.selections[ch].names)]
+                )
+                print("post-inference")
+
                 output[ch] = {
-                    key: value[self.selections[ch].all(*self.selections[ch].names)] for (key, value) in out.items()
+                    key: value[self.selections[ch].all(*self.selections[ch].names)] for (key, value) in out.items(),
+                    **{key: value for (key, value) in pnet_vars.items()
                 }
+
             else:
                 output[ch] = {}
-
-        # # # TODO: adding tagger stuff
-        # # for ch in self._channels:
-        # #     print('channel', ch)
-        #     print("pre-inference")
-        #
-        #     pnet_vars = runInferenceTriton(
-        #         self.tagger_resources_path,
-        #         events[self.selections[ch].all(*self.selections[ch].names)],
-        #         fj_idx_lep=fj_idx_lep[self.selections[ch].all(*self.selections[ch].names)]
-        #     )
-        #
-        #     print("post-inference")
-        #
 
             # convert arrays to pandas
             if not isinstance(output[ch], pd.DataFrame):
