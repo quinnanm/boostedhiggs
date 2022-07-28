@@ -21,7 +21,7 @@ import tritonclient.http as triton_http
 
 from tqdm import tqdm
 
-from get_tagger_inputs import get_pfcands_features, get_svs_features
+from .get_tagger_inputs import get_pfcands_features, get_svs_features
 
 
 # adapted from https://github.com/lgray/hgg-coffea/blob/triton-bdts/src/hgg_coffea/tools/chained_quantile.py
