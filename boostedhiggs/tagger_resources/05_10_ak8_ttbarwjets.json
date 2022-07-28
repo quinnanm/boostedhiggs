@@ -1,12 +1,11 @@
 {
   "output_names": [
-    "fj_isQCDb",
-    "fj_isQCDbb",
-    "fj_isQCDc",
-    "fj_isQCDcc",
-    "fj_isQCDothers",
-    "fj_H_VV_4q_3q",
-    "fj_H_VV_4q_4q"
+    "fj_ttbar_bmerged",
+    "fj_ttbar_bsplit",
+    "fj_wjets_label",
+    "fj_isHVV_elenuqq",
+    "fj_isHVV_munuqq",
+    "fj_isHVV_taunuqq"
   ],
   "input_names": [
     "pf_points",
