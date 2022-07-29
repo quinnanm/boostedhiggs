@@ -1,9 +1,15 @@
+"""
+Methods for deriving input variables for the tagger.
+Author(s): Raghav Kansal, Cristina Mantilla Suarez, Melissa Quinnan, Farouk Mokhtar
+"""
+
 from typing import Dict
 from coffea.nanoevents.methods.base import NanoEventsArray
 import awkward as ak
 import numpy as np
 
 import json
+
 
 def get_pfcands_features(
     tagger_vars: dict,

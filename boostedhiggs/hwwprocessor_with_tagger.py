@@ -1,3 +1,5 @@
+from .run_tagger_inference import runInferenceTriton
+
 from collections import defaultdict
 import pickle as pkl
 import pyarrow as pa
@@ -95,7 +97,7 @@ class HwwProcessor(processor.ProcessorABC):
 
         # b-tagging corrector
         self._btagWPs = btagWPs["deepJet"][year + yearmod]
-        #self._btagSF = BTagCorrector("M", "deepJet", year, yearmod)
+        # self._btagSF = BTagCorrector("M", "deepJet", year, yearmod)
 
         self.selections = {}
         self.cutflows = {}
@@ -112,6 +114,11 @@ class HwwProcessor(processor.ProcessorABC):
                 "mu": "SingleMuon",
                 "had": "JetHT",
             }
+
+        # for tagger model and preprocessing dict
+        self.tagger_resources_path = (
+            str(pathlib.Path(__file__).parent.resolve()) + "/tagger_resources/"
+        )
 
     @property
     def accumulator(self):
@@ -283,21 +290,25 @@ class HwwProcessor(processor.ProcessorABC):
         secondfj = ak.pad_none(good_fatjets, 2, axis=1)[:, 1]       # pick second leading pt
 
         # for hadronic channels: candidatefj is the leading pt one
+        fj_idx_had = 0
         candidatefj_had = leadingfj
 
         # for leptonic channel: first clean jets and leptons by removing overlap, then pick candidate_fj closest to the lepton
         lep_in_fj_overlap_bool = good_fatjets.delta_r(candidatelep_p4) > 0.1
         good_fatjets = good_fatjets[lep_in_fj_overlap_bool]
-        candidatefj_lep = ak.firsts(good_fatjets[ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)])      # get candidatefj for leptonic channel
+        fj_idx_lep = ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)
+        candidatefj_lep = ak.firsts(good_fatjets[fj_idx_lep])
+
+        # # TODO: get PFcands of the candidate jet
+        # msk = (events["FatJetPFCands"].jetIdx == ak.firsts(fj_idx_lep))
+        # jet_ak_pfcands = events.FatJetPFCands[msk]
+        # jet_pfcands = events.PFCands[jet_ak_pfcands.pFCandsIdx]
 
         # MET
         met = events.MET
         mt_lep_met = np.sqrt(
             2. * candidatelep_p4.pt * met.pt * (ak.ones_like(met.pt) - np.cos(candidatelep_p4.delta_phi(met)))
         )
-        # delta phi MET and higgs candidate
-        met_fjlep_dphi = candidatefj_lep.delta_phi(met)
-        met_fjhad_dphi = candidatefj_had.delta_phi(met)        
 
         # for leptonic channel: pick candidate_fj closest to the MET
         # candidatefj_lep = ak.firsts(good_fatjets[ak.argmin(good_fatjets.delta_phi(met), axis=1, keepdims=True)])      # get candidatefj for leptonic channel
@@ -352,11 +363,11 @@ class HwwProcessor(processor.ProcessorABC):
             sel=(ht > 200),
             channel=['mu', 'ele']
         )
-        # self.add_selection(
-        #     name='mt',
-        #     sel=(mt_lep_met < 100),
-        #     channel=['mu', 'ele']
-        # )
+        self.add_selection(
+            name='mt',
+            sel=(mt_lep_met < 100),
+            channel=['mu', 'ele']
+        )
         self.add_selection(
             name='antibjettag',
             sel=(ak.max(bjets_away_candidatefj_had.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
@@ -384,12 +395,11 @@ class HwwProcessor(processor.ProcessorABC):
             sel=(n_loose_taus_mu == 0),
             channel=['mu']
         )
-        # self.add_selection(
-        #     'leptonIsolation',
-        #     sel=(((candidatelep.pt > 30) & (candidatelep.pt < 55) & (lep_reliso < 0.25)) | ((candidatelep.pt >= 55) & (candidatelep.miniPFRelIso_all < 0.2))),
-        #     channel=['mu']
-        # )
-
+        self.add_selection(
+            'leptonIsolation',
+            sel=(((candidatelep.pt > 30) & (candidatelep.pt < 55) & (lep_reliso < 0.25)) | ((candidatelep.pt >= 55) & (candidatelep.miniPFRelIso_all < 0.2))),
+            channel=['mu']
+        )
         # event selections for electron channel
         self.add_selection(
             name='leptonKin',
@@ -406,59 +416,59 @@ class HwwProcessor(processor.ProcessorABC):
             sel=(n_loose_taus_ele == 0),
             channel=['ele']
         )
-        # self.add_selection(
-        #     'leptonIsolation',
-        #     sel=(((candidatelep.pt > 30) & (candidatelep.pt < 120) & (lep_reliso < 0.3)) | ((candidatelep.pt >= 120) & (candidatelep.miniPFRelIso_all < 0.2))),
-        #     channel=['ele']
-        # )
+        self.add_selection(
+            'leptonIsolation',
+            sel=(((candidatelep.pt > 30) & (candidatelep.pt < 120) & (lep_reliso < 0.3)) | ((candidatelep.pt >= 120) & (candidatelep.miniPFRelIso_all < 0.2))),
+            channel=['ele']
+        )
 
-        # event selections for hadronic channel
-        self.add_selection(
-            name='oneFatjet',
-            sel=(n_fatjets >= 1) &
-                (n_good_muons == 0) & (n_loose_muons == 0) &
-                (n_good_electrons == 0) & (n_loose_electrons == 0),
-            channel=['had']
-        )
-        self.add_selection(
-            name='fatjetKin',
-            sel=candidatefj_had.pt > 300,
-            channel=['had']
-        )
-        self.add_selection(
-            name='fatjetSoftdrop',
-            sel=candidatefj_had.msdcorr > 30,
-            channel=['had']
-        )
-        self.add_selection(
-            name='qcdrho',
-            sel=(candidatefj_had.qcdrho > -7) & (candidatefj_had.qcdrho < -2.0),
-            channel=['had']
-        )
-        self.add_selection(
-            name='met',
-            sel=(met.pt < 200),
-            channel=['had']
-        )
-        self.add_selection(
-            name='antibjettag',
-            sel=(ak.max(bjets_away_candidatefj_had.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
-            channel=['had']
-        )
+        if 'had' in self._channels:
+            # event selections for hadronic channel
+            self.add_selection(
+                name='oneFatjet',
+                sel=(n_fatjets >= 1) &
+                    (n_good_muons == 0) & (n_loose_muons == 0) &
+                    (n_good_electrons == 0) & (n_loose_electrons == 0),
+                channel=['had']
+            )
+            self.add_selection(
+                name='fatjetKin',
+                sel=candidatefj_had.pt > 300,
+                channel=['had']
+            )
+            self.add_selection(
+                name='fatjetSoftdrop',
+                sel=candidatefj_had.msdcorr > 30,
+                channel=['had']
+            )
+            self.add_selection(
+                name='qcdrho',
+                sel=(candidatefj_had.qcdrho > -7) & (candidatefj_had.qcdrho < -2.0),
+                channel=['had']
+            )
+            self.add_selection(
+                name='met',
+                sel=(met.pt < 200),
+                channel=['had']
+            )
+            self.add_selection(
+                name='antibjettag',
+                sel=(ak.max(bjets_away_candidatefj_had.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
+                channel=['had']
+            )
 
         # fill tuple variables
         variables = {
             "lep": {
                 "fj_pt": candidatefj_lep.pt,
                 "fj_msoftdrop": candidatefj_lep.msdcorr,
-                # "fj_bjets_ophem": ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1),
+                "fj_bjets_ophem": ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1),
                 "lep_pt": candidatelep.pt,
                 "lep_isolation": lep_reliso,
                 "lep_misolation": lep_miso,
                 "lep_fj_m": lep_fj_m,
                 "lep_fj_dr": lep_fj_dr,
                 "lep_met_mt": mt_lep_met,
-                "met_fj_dphi": met_fjlep_dphi,
             },
             "ele": {},
             "mu": {
@@ -467,17 +477,15 @@ class HwwProcessor(processor.ProcessorABC):
             "had": {
                 "fj_pt": candidatefj_had.pt,
                 "fj_msoftdrop": candidatefj_had.msdcorr,
-                # "fj_bjets_ophem": ak.max(bjets_away_candidatefj_had.btagDeepFlavB, axis=1),
+                "fj_bjets_ophem": ak.max(bjets_away_candidatefj_had.btagDeepFlavB, axis=1),
                 "fj_pnh4q": candidatefj_had.particleNet_H4qvsQCD,
                 "fj_sl_pt":  secondfj.pt,
                 "fj_sl_msoftdrop": secondfj.msdcorr,
                 "fj_sl_pnh4q": secondfj.particleNet_H4qvsQCD,
-                "met_fj_dphi": met_fjhad_dphi,
             },
             "common": {
                 "met": met.pt,
                 "ht": ht,
-                "nfj": n_fatjets,
             },
         }
 
@@ -490,8 +498,9 @@ class HwwProcessor(processor.ProcessorABC):
             variables["lep"]["gen_Hnprongs"] = match_HWW_lep["hWW_nprongs"]
             variables["lep"]["gen_iswlepton"] = match_HWW_lep["iswlepton"]
             variables["lep"]["gen_iswstarlepton"] = match_HWW_lep["iswstarlepton"]
-            variables["had"]["gen_Hpt"] = ak.firsts(match_HWW_had["matchedH"].pt)
-            variables["had"]["gen_Hnprongs"] = match_HWW_had["hWW_nprongs"]
+            if 'had' in self._channels:
+                variables["had"]["gen_Hpt"] = ak.firsts(match_HWW_had["matchedH"].pt)
+                variables["had"]["gen_Hnprongs"] = match_HWW_had["hWW_nprongs"]
 
         if ('DY' in dataset) and isMC:
             Z = getParticles(events.GenPart, lowid=23, highid=23, flags=['fromHardProcess', 'isLastCopy'])
@@ -502,7 +511,8 @@ class HwwProcessor(processor.ProcessorABC):
         if not self.apply_trigger:
             variables["lep"]["cut_trigger_iso"] = trigger_iso[ch]
             variables["lep"]["cut_trigger_noniso"] = trigger_noiso[ch]
-            variables["had"]["cut_trigger"] = trigger_noiso[ch]
+            if 'had' in self._channels:
+                variables["had"]["cut_trigger"] = trigger_noiso[ch]
 
         # let's save the hem veto as a cut for now
         if self._year == "2018":
@@ -566,8 +576,8 @@ class HwwProcessor(processor.ProcessorABC):
             if self._year in ("2016", "2017"):
                 weights.add("L1Prefiring", events.L1PreFiringWeight.Nom, events.L1PreFiringWeight.Up, events.L1PreFiringWeight.Dn)
             add_pileup_weight(weights, self._year, self._yearmod, nPU=ak.to_numpy(events.Pileup.nPU))
-
-            add_jetTriggerSF(weights, candidatefj_had, self._year, self.selections["had"])
+            if 'had' in self._channels:
+                add_jetTriggerSF(weights, candidatefj_had, self._year, self.selections["had"])
             add_lepton_weight(weights, candidatelep, self._year + self._yearmod, "muon")
             add_lepton_weight(weights, candidatelep, self._year + self._yearmod, "electron")
 
@@ -579,7 +589,8 @@ class HwwProcessor(processor.ProcessorABC):
             # store the final common weight
             variables["common"]["weight"] = weights.partial_weight(["genweight", "L1Prefiring", "pileup"])
 
-            weights_per_ch = {"ele": [], "mu": [], "had": []}
+            # weights_per_ch = {"ele": [], "mu": [], "had": []}
+            weights_per_ch = {"ele": [], "mu": []}
             for key in weights._weights.keys():
                 # ignore btagSFlight/bc for now
                 if "btagSFlight" in key or "btagSFbc" in key:
@@ -634,10 +645,24 @@ class HwwProcessor(processor.ProcessorABC):
                         # fill out dictionary
                         out[var] = item
 
-                # fill the output dictionary after selections
-                output[ch] = {
-                    key: value[self.selections[ch].all(*self.selections[ch].names)] for (key, value) in out.items()
-                }
+                # adding tagger stuff
+                print("pre-inference")
+                pnet_vars = runInferenceTriton(
+                    self.tagger_resources_path,
+                    events[self.selections[ch].all(*self.selections[ch].names)],
+                    fj_idx_lep=fj_idx_lep[self.selections[ch].all(*self.selections[ch].names)]
+                )
+                print("post-inference")
+
+                # 1- fill with -1 and don't discard the events
+                if pnet_vars is None:
+                    output[ch] = {}
+                else:
+                    # fill the output dictionary after selections
+                    output[ch] = {
+                        **{key: value[self.selections[ch].all(*self.selections[ch].names)] for (key, value) in out.items()},
+                        **{key: value for (key, value) in pnet_vars.items()}
+                    }
             else:
                 output[ch] = {}
 

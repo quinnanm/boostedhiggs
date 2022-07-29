@@ -35,7 +35,8 @@ warnings.filterwarnings("ignore", message="Found duplicate branch ")
 parser = argparse.ArgumentParser()
 parser.add_argument('--ch',       dest='ch',        default='ele,mu,had',  help='channels for which to plot this variable')
 parser.add_argument('--dir',      dest='dir',       default='May7_2017',   help="tag for data directory")
-parser.add_argument('--odir',     dest='odir',      default='counts',       help="tag for output directory")
+parser.add_argument('--odir',     dest='odir',      default='counts',      help="tag for output directory")
+parser.add_argument("--compute_counts",   dest='compute_counts', action='store_true', help="Plot the hists")
 
 args = parser.parse_args()
 
@@ -50,6 +51,7 @@ color_dict = {'signal': 'red',
               'ZQQ': 'magenta',
               'others': 'black'
               }
+
 
 def compute_counts(channels, samples, odir, data_label):
     """
@@ -170,7 +172,7 @@ def make_pie(channels, odir):
 if __name__ == "__main__":
     """
     e.g. run locally as
-    python counting_from_pq.py --dir May7_2017 --ch ele --odir counts
+    python make_pie_charts.py --dir May7_2017 --odir pie_charts --ch ele,mu,had --compute_counts
     """
 
     channels = args.ch.split(',')
@@ -189,5 +191,6 @@ if __name__ == "__main__":
     if not os.path.exists(args.odir):
         os.makedirs(args.odir)
 
-    compute_counts(channels, samples, args.odir, data_label)
+    if args.compute_counts:
+        compute_counts(channels, samples, args.odir, data_label)
     make_pie(channels, args.odir)

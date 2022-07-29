@@ -22,7 +22,8 @@ def main(args):
     if not os.path.exists('./outfiles'):
         os.makedirs('./outfiles')
 
-    channels = ["ele", "mu", "had"]
+    # channels = ["ele", "mu", "had"]
+    channels = ["ele", "mu"]
     starti = args.starti
     job_name = '/' + str(starti)
     if args.n != -1:
@@ -66,7 +67,8 @@ def main(args):
 
     # define processor
     if args.processor == 'hww':
-        from boostedhiggs.hwwprocessor import HwwProcessor
+        # from boostedhiggs.hwwprocessor import HwwProcessor
+        from boostedhiggs.hwwprocessor_with_tagger import HwwProcessor
         if 'APV' in args.year:
             p = HwwProcessor(year='2016', yearmod='APV', channels=channels, output_location='./outfiles' + job_name)
         else:
@@ -100,8 +102,12 @@ def main(args):
         else:
             executor = processor.IterativeExecutor(status=True)
 
+    # run = processor.Runner(
+    #     executor=executor, savemetrics=True, schema=nanoevents.NanoAODSchema, chunksize=args.chunksize
+    # )
+    nanoevents.PFNanoAODSchema.mixins["SV"] = "PFCand"
     run = processor.Runner(
-        executor=executor, savemetrics=True, schema=nanoevents.NanoAODSchema, chunksize=args.chunksize
+        executor=executor, savemetrics=True, schema=nanoevents.PFNanoAODSchema, chunksize=args.chunksize
     )
 
     out, metrics = run(

@@ -1,4 +1,9 @@
 {
+  "GluGluHToWWToLNuQQ": "ggH-LNuQQ",
+  "ttHToNonbb_M125": "ttH",
+  "GluGluHToWW_Pt-200ToInf_M-125": "ggH-Pt200",
+  "ALL_VH_SIGNALS_COMBINED": "VH",
+  "VBFHToWWToLNuQQ-MH125": "VBF-LNuQQ",
   "GluGluHToWWToLNuQQ_M125_TuneCP5_PSweight_13TeV-powheg2-jhugen727-pythia8": "GluGluHToWWToLNuQQ",
   "QCD_HT1000to1500_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8": "QCD_HT1000to1500",
   "QCD_HT1500to2000_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8": "QCD_HT1500to2000",

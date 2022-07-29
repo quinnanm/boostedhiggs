@@ -101,11 +101,15 @@ def compute_counts(channels, samples, idir, outdir, data_label):
                 # drop AK columns
                 for key in data.keys():
                     if data[key].dtype == 'object':
+                        print(f'dropping column {key}')
                         data.drop(columns=[key], inplace=True)
 
+                # explicitly drop fj_bjets_ophem
                 for key in data.keys():
                     if key == 'fj_bjets_ophem':
+                        print(f'dropping column {key}')
                         data.drop(columns=[key], inplace=True)
+
                 _, tail = os.path.split(parquet_file)    # get the file name from full path
 
                 outname = outdir + ch + '/' + dir_name + '/' + f'{sample}_' + tail[:-8] + '.root'  # the [:-8] slice removes the .parquet extension (to replace it with a .root extension)

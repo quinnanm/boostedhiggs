@@ -44,11 +44,21 @@ def make_2dplots(year, ch, idir, odir, samples, vars, x_bins, x_start, x_end, y_
         samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
         vars: a list of two variable names to plot against each other... see the full list of choices in plot_configs/vars.json
     """
+    max_iso = {'ele': 120, 'mu': 55}
+    if vars[0] == 'lep_misolation':
+        start = max_iso[ch]
+        end = 350
+    elif vars[0] == 'lep_isolation':
+        start = 30
+        end = max_iso[ch]
+    else:
+        start = x_start
+        end = x_end
 
     # instantiates the histogram object
     hists = hist2.Hist(
-        hist2.axis.Regular(x_bins, x_start, x_end, name=vars[0], label=vars[0], overflow=True),
-        hist2.axis.Regular(y_bins, y_start, y_end, name=vars[1], label=vars[1], overflow=True),
+        hist2.axis.Regular(x_bins, 0, 4, name=vars[0], label=vars[0], overflow=True),
+        hist2.axis.Regular(y_bins, start, end, name=vars[1], label=vars[1], overflow=True),
         hist2.axis.StrCategory([], name='samples', growth=True),
     )
 
@@ -82,18 +92,30 @@ def make_2dplots(year, ch, idir, odir, samples, vars, x_bins, x_start, x_end, y_
                 if key in sample:
                     single_sample = single_key
 
+            if vars[0] == 'lep_isolation':
+                selection = data['lep_pt'] < max_iso[ch]
+                x = data[vars[0]][selection]
+                y = data[vars[1]][selection]
+            elif vars[0] == 'lep_misolation':
+                selection = data['lep_pt'] > max_iso[ch]
+                x = data[vars[0]][selection]
+                y = data[vars[1]][selection]
+            else:
+                x = data[vars[0]]
+                y = data[vars[1]]
+
             # combining all pt bins of a specefic process under one name
             if single_sample is not None:
                 hists.fill(
-                    data[vars[0]],
-                    data[vars[1]],
+                    x,
+                    y,
                     single_sample,
                 )
             # otherwise give unique name
             else:
                 hists.fill(
-                    data[vars[0]],
-                    data[vars[1]],
+                    x,
+                    y,
                     sample,
                 )
 
@@ -127,25 +149,27 @@ def plot_2dplots(year, ch, odir, vars):
     for sample in hists.axes[2]:
         # one for log z-scale
         fig, ax = plt.subplots(figsize=(8, 5))
-        hep.hist2dplot(hists[{'samples': sample}], ax=ax, cmap="plasma", norm=matplotlib.colors.LogNorm(vmin=1e-3, vmax=1000))
+        hep.hist2dplot(hists[{'samples': sample}], ax=ax, cmap="plasma", norm=matplotlib.colors.LogNorm(vmin=1e-1, vmax=10000))
         ax.set_xlabel(f"{vars[0]}")
         ax.set_ylabel(f"{vars[1]}")
         ax.set_title(f'{ch} channel for \n {sample}')
         hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
         hep.cms.text("Work in Progress", ax=ax)
+        print(f'saving at {odir}/{ch}_{vars[0]}_{vars[1]}/{sample}_log_z.pdf')
         plt.savefig(f'{odir}/{ch}_{vars[0]}_{vars[1]}/{sample}_log_z.pdf')
         plt.close()
 
-        # one for non-log z-scale
-        fig, ax = plt.subplots(figsize=(8, 5))
-        hep.hist2dplot(hists[{'samples': sample}], ax=ax, cmap="plasma")
-        ax.set_xlabel(f"{vars[0]}")
-        ax.set_ylabel(f"{vars[1]}")
-        ax.set_title(f'{ch} channel for \n {sample}')
-        hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
-        hep.cms.text("Work in Progress", ax=ax)
-        plt.savefig(f'{odir}/{ch}_{vars[0]}_{vars[1]}/{sample}.pdf')
-        plt.close()
+        # # one for non-log z-scale
+        # fig, ax = plt.subplots(figsize=(8, 5))
+        # hep.hist2dplot(hists[{'samples': sample}], ax=ax, cmap="plasma")
+        # ax.set_xlabel(f"{vars[0]}")
+        # ax.set_ylabel(f"{vars[1]}")
+        # ax.set_title(f'{ch} channel for \n {sample}')
+        # hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
+        # hep.cms.text("Work in Progress", ax=ax)
+        # print(f'saving at {odir}/{ch}_{vars[0]}_{vars[1]}/{sample}.pdf')
+        # plt.savefig(f'{odir}/{ch}_{vars[0]}_{vars[1]}/{sample}.pdf')
+        # plt.close()
 
 
 def main(args):
@@ -191,7 +215,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # lep_pt vs lep_iso:   python make_2dplots.py --year 2017 --odir hists --channels ele --vars lep_pt,lep_isolation --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0   --y_end 1 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_iso vs lep_pt:   python make_2dplots.py --year 2017 --odir plots --channels ele,mu --vars lep_isolation,lep_pt --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0   --y_end 1 --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --make_hists
     # lep_pt vs lep_fj_dr: python make_2dplots.py --year 2017 --odir hists --channels ele --vars lep_pt,lep_fj_dr     --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0.1 --y_end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
     # fj_pt vs lep_fj_dr:  python make_2dplots.py --year 2017 --odir hists --channels ele,mu --vars fj_pt,lep_fj_dr      --make_hists --plot_hists --x_bins 100 --x_start 200 --x_end 500 --y_bins 100 --y_start 0.1 --y_end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
     # lep_pt vs mt:        python make_2dplots.py --year 2017 --odir hists --channels ele --vars lep_pt,lep_met_mt    --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0   --y_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
@@ -199,7 +223,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',            dest='year',        default='2017',                                 help="year")
-    parser.add_argument('--samples',         dest='samples',     default="plot_configs/samples_pfnano.json",     help="path to json with samples to be plotted")
+    parser.add_argument('--samples',         dest='samples',     default="plot_configs/samples_pfnano_value.json",     help="path to json with samples to be plotted")
     parser.add_argument('--channels',        dest='channels',    default='ele',                                  help="channel... choices are ['ele', 'mu', 'had']")
     parser.add_argument('--odir',            dest='odir',        default='hists',                                help="tag for output directory... will append '_{year}' to it")
     parser.add_argument('--idir',            dest='idir',        default='../results/',                          help="input directory with results")

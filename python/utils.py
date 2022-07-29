@@ -50,18 +50,29 @@ def get_sum_sumgenweight(idir, year, sample):
     return sum_sumgenweight
 
 
+simplified_labels = {
+    "GluGluHToWWToLNuQQ": "ggH-LNuQQ",
+    "ttHToNonbb_M125": "ttH",
+    "GluGluHToWW_Pt-200ToInf_M-125": "ggH-Pt200",
+    "ALL_VH_SIGNALS_COMBINED": "VH",
+    "VBFHToWWToLNuQQ-MH125": "VBF-LNuQQ",
+}
+
+
 # define the axes for the different variables to be plotted
 # define samples
 signal_by_ch = {
-    'ele': ['GluGluHToWWToLNuQQ'],
-    'mu': ['GluGluHToWWToLNuQQ'],
+    'ele': ['GluGluHToWWToLNuQQ', 'ttHToNonbb_M125', 'GluGluHToWW_Pt-200ToInf_M-125', 'ALL_VH_SIGNALS_COMBINED', 'VBFHToWWToLNuQQ-MH125'],
+    'mu': ['GluGluHToWWToLNuQQ', 'ttHToNonbb_M125', 'GluGluHToWW_Pt-200ToInf_M-125', 'ALL_VH_SIGNALS_COMBINED', 'VBFHToWWToLNuQQ-MH125'],
     'had': ['ggHToWWTo4Q-MH125'],
 }
+
+
 # there are many signal samples for the moment:
 # - ele,mu: GluGluHToWWToLNuQQ
-# - had: 
+# - had:
 #   - ggHToWWTo4Q-MH125 (produced by Cristina from PKU config files Powheg+JHU) - same xsec as GluGluToHToWWTo4q
-#   - GluGluToHToWWTo4q (produced by PKU) 
+#   - GluGluToHToWWTo4q (produced by PKU)
 #   - GluGluHToWWTo4q (produced by Cristina w Pythia)
 #   - GluGluHToWWTo4q-HpT190 (produced by Cristina w Pythia)
 # to come: GluGluHToWW_MINLO (for ele,mu,had)
@@ -83,7 +94,12 @@ color_by_sample = {
     "TTbar": 'tab:blue',
     "ZQQ": 'tab:pink',
     "WQQ": 'tab:red',
-    "SingleTop": 'tab:gray',
+    "SingleTop": 'tab:cyan',
+    "GluGluHToWWToLNuQQ": 'tab:red',
+    "ttHToNonbb_M125": 'tab:olive',
+    "GluGluHToWW_Pt-200ToInf_M-125": "tab:orange",
+    "ALL_VH_SIGNALS_COMBINED": "tab:brown",
+    "VBFHToWWToLNuQQ-MH125": "tab:gray",
 }
 # available tab colors
 # 'tab:cyan'
@@ -104,6 +120,7 @@ add_samples = {
     'TTbar': 'TT',
     'WJetsLNu': 'WJetsToLNu',
     'GluGluHToWWTo4q': 'GluGluHToWWTo4q',
+    'ALL_VH_SIGNALS_COMBINED': 'HToWW_M-125'
 }
 
 label_by_ch = {
@@ -113,14 +130,14 @@ label_by_ch = {
 }
 
 axis_dict = {
-    'lep_pt': hist2.axis.Variable(list(range(20,300,5))+[350,400,500], name='var', label=r'Lepton $p_T$ [GeV]', overflow=True),
+    'lep_pt': hist2.axis.Variable(list(range(20, 300, 5)) + [350, 400, 500], name='var', label=r'Lepton $p_T$ [GeV]', overflow=True),
     'lep_isolation': hist2.axis.Regular(20, 0, 3.5, name='var', label=r'Lepton iso', overflow=True),
     'lep_misolation': hist2.axis.Regular(20, 0, 3.5, name='var', label=r'Lepton mini iso', overflow=True),
     'lep_fj_m': hist2.axis.Regular(20, 0, 200, name='var', label=r'Jet - Lepton mass [GeV]', overflow=True),
     'lep_fj_bjets_ophem': hist2.axis.Regular(15, 0, 0.31, name='var', label=r'btagFlavB (opphem)', overflow=True),
     'lep_fj_dr': hist2.axis.Regular(15, 0, 0.8, name='var', label=r'$\Delta R(l, Jet)$', overflow=True),
-    'lep_mvaId': hist2.axis.Variable([0,1,2,3,4,5], name='var', label='Muon MVAID', overflow=True),
-    'fj_pt': hist2.axis.Regular(40, 200, 1000, name='var', label=r'Jet $p_T$ [GeV]', overflow=True),
+    'lep_mvaId': hist2.axis.Variable([0, 1, 2, 3, 4, 5], name='var', label='Muon MVAID', overflow=True),
+    'fj_pt': hist2.axis.Regular(30, 200, 1000, name='var', label=r'Jet $p_T$ [GeV]', overflow=True),
     'fj_msoftdrop': hist2.axis.Regular(30, 25, 200, name='var', label=r'Jet $m_{sd}$ [GeV]', overflow=True),
     'fj_bjets_ophem': hist2.axis.Regular(15, 0, 0.4, name='var', label=r'btagFlavB (opphem)', overflow=True),
     'fj_pnh4q': hist2.axis.Regular(30, 0, 1, name='var', label=r'Jet$_0$ PNH4q non-MD', overflow=True),

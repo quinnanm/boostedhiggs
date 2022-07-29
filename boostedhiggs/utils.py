@@ -1,3 +1,5 @@
+import numpy as np
+from coffea.analysis_tools import PackedSelection
 import awkward as ak
 
 
@@ -75,8 +77,8 @@ def match_HWW(genparticles, candidatefj):
            "hWW_matched": hWW_matched,
            "hWW_nprongs": hWW_nprongs,
            "matchedH": matchedH,
-           "iswlepton": iswlepton,
-           "iswstarlepton": iswstarlepton}
+           "iswlepton": iswlepton,  # truth info, higher mass is normally onshell
+           "iswstarlepton": iswstarlepton}  # truth info, lower mass is normally offshell
 
     return ret
 
@@ -106,3 +108,46 @@ def match_Htt(genparticles, candidatefj):
     htt_matched = (ak.sum(matchedH.pt > 0, axis=1) == 1) * 1 + (ak.sum(dr_daughters < 0.8, axis=1) == 1) * 3 + (ak.sum(dr_daughters < 0.8, axis=1) == 2) * 5
 
     return htt_flavor, htt_matched, matchedH, higgs
+
+
+def pad_val(
+    arr: ak.Array,
+    target: int,
+    value: float,
+    axis: int = 0,
+    to_numpy: bool = True,
+    clip: bool = True,
+):
+    """
+    pads awkward array up to ``target`` index along axis ``axis`` with value ``value``,
+    optionally converts to numpy array
+    """
+    ret = ak.fill_none(ak.pad_none(arr, target, axis=axis, clip=clip), value, axis=None)
+    return ret.to_numpy() if to_numpy else ret
+
+
+def add_selection(
+    name: str,
+    sel: np.ndarray,
+    selection: PackedSelection,
+    cutflow: dict,
+    isData: bool,
+    signGenWeights: ak.Array,
+):
+    """adds selection to PackedSelection object and the cutflow dictionary"""
+    selection.add(name, sel)
+    cutflow[name] = (
+        np.sum(selection.all(*selection.names))
+        if isData
+        # add up sign of genWeights for MC
+        else np.sum(signGenWeights[selection.all(*selection.names)])
+    )
+
+
+def add_selection_no_cutflow(
+    name: str,
+    sel: np.ndarray,
+    selection: PackedSelection,
+):
+    """adds selection to PackedSelection object"""
+    selection.add(name, ak.fill_none(sel, False))
