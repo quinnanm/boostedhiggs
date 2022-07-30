@@ -117,6 +117,10 @@ class HwwProcessor(processor.ProcessorABC):
 
         # do inference
         self.inference = inference
+        # for tagger model and preprocessing dict
+        self.tagger_resources_path = (
+            str(pathlib.Path(__file__).parent.resolve()) + "/tagger_resources/"
+        )
 
     @property
     def accumulator(self):
@@ -252,7 +256,7 @@ class HwwProcessor(processor.ProcessorABC):
         # JETS
         goodjets = events.Jet[
             (events.Jet.pt > 30)
-            & (abs(events.Jet.eta) < 2.5)
+            & (abs(events.Jet.eta) < 5.0)
             & events.Jet.isTight
             & (events.Jet.puId > 0)
         ]
@@ -307,6 +311,15 @@ class HwwProcessor(processor.ProcessorABC):
 
         # deltaR
         lep_fj_dr = candidatefj_lep.delta_r(candidatelep_p4)
+
+        # VBF variables
+        # ak4_outside_ak8 = goodjets[goodjets.delta_r(candidatefj_lep)>0.8]
+        # jet1 = ak4_outside_ak8[:, 0:1]
+        # jet2 = ak4_outside_ak8[:, 1:2]
+        # deta = abs(ak.firsts(jet1).eta - ak.firsts(jet2).eta)
+        # mjj = ( ak.firsts(jet1) + ak.firsts(jet2) ).mass
+        # isvbf = ((deta > 3.5) & (mjj > 1000))
+        # isvbf = ak.fill_none(isvbf,False)
 
         """
         HEM issue: Hadronic calorimeter Endcaps Minus (HEM) issue.
@@ -376,11 +389,17 @@ class HwwProcessor(processor.ProcessorABC):
             sel=(n_loose_taus_mu == 0),
             channel=['mu']
         )
-        # self.add_selection(
-        #     'leptonIsolation',
-        #     sel=(((candidatelep.pt > 30) & (candidatelep.pt < 55) & (lep_reliso < 0.25)) | ((candidatelep.pt >= 55) & (candidatelep.miniPFRelIso_all < 0.2))),
-        #     channel=['mu']
-        # )
+        self.add_selection(
+            name='leptonIsolation',
+            sel=( (candidatelep.pt > 30) & (candidatelep.pt < 55) & (lep_reliso < 0.15) ) | (candidatelep.pt >= 55),
+            channel=['mu']
+        )
+        self.add_selection(
+            name='leptonMiniIsolation',
+            sel=( (candidatelep.pt >= 55) & (candidatelep.miniPFRelIso_all < 0.1) ) | (candidatelep.pt < 55),
+            # sel= (candidatelep.miniPFRelIso_all < 0.1),
+            channel=['mu']
+        )
 
         # event selections for electron channel
         self.add_selection(
@@ -398,18 +417,18 @@ class HwwProcessor(processor.ProcessorABC):
             sel=(n_loose_taus_ele == 0),
             channel=['ele']
         )
-        # self.add_selection(
-        #     'leptonIsolation',
-        #     sel=(((candidatelep.pt > 30) & (candidatelep.pt < 120) & (lep_reliso < 0.3)) | ((candidatelep.pt >= 120) & (candidatelep.miniPFRelIso_all < 0.2))),
-        #     channel=['ele']
-        # )
+        self.add_selection(
+            name='leptonIsolation',
+            sel=( (candidatelep.pt > 30) & (candidatelep.pt < 120) & (lep_reliso < 0.15) ) | (candidatelep.pt >= 120),
+            channel=['ele']
+        )
 
         # fill tuple variables
         variables = {
             "lep": {
                 "fj_pt": candidatefj_lep.pt,
                 "fj_msoftdrop": candidatefj_lep.msdcorr,
-                # "fj_bjets_ophem": ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1),
+                "fj_bjets_ophem": ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1),
                 "lep_pt": candidatelep.pt,
                 "lep_isolation": lep_reliso,
                 "lep_misolation": lep_miso,
@@ -432,7 +451,6 @@ class HwwProcessor(processor.ProcessorABC):
         # gen matching
         if (('HToWW' or 'HWW') in dataset) and isMC:
             match_HWW_lep = match_HWW(events.GenPart, candidatefj_lep)
-
             variables["lep"]["gen_Hpt"] = ak.firsts(match_HWW_lep["matchedH"].pt)
             variables["lep"]["gen_Hnprongs"] = match_HWW_lep["hWW_nprongs"]
             variables["lep"]["gen_iswlepton"] = match_HWW_lep["iswlepton"]
@@ -458,30 +476,30 @@ class HwwProcessor(processor.ProcessorABC):
         - Gen weight (DONE)
         - Pileup weight (DONE)
         - L1 prefiring weight for 2016/2017 (DONE)
-        - B-tagging efficiency weights (Cristina)
+        - B-tagging efficiency weights (ToDo)
         - Electron trigger scale factors (DONE)
         - Muon trigger scale factors (DONE)
         - Electron ID scale factors and Reco scale factors (DONE)
         - Muon ID scale factors (DONE)
         - Muon Isolation scale factors (DONE)
-        - Electron Isolation scale factors
+        - Electron Isolation scale factors (ToDo)
 
-        - Jet Mass Scale (JMS) scale factor
-        - Jet Mass Resolution (JMR) scale factor
+        - Jet Mass Scale (JMS) scale factor (ToDo)
+        - Jet Mass Resolution (JMR) scale factor (ToDo)
         - NLO EWK scale factors for DY(ll)/W(lnu)/W(qq)/Z(qq) (DONE)
         - ~NNLO QCD scale factors for DY(ll)/W(lnu)/W(qq)/Z(qq) (DONE)
-        - Top pt reweighting for top
         - LHE scale weights for signal
         - LHE pdf weights for signal
         - PSweights for signal
+
         - ParticleNet tagger efficiency
 
         Up and Down Variations (systematics included as a new variable)
         ----
         - Pileup weight Up/Down (DONE)
         - L1 prefiring weight Up/Down (DONE)
-        - B-tagging efficiency Up/Down
-        - Electron Trigger Up/Down
+        - B-tagging efficiency Up/Down (ToDo)
+        - Electron Trigger Up/Down (ToDo)
         - Muon Trigger Up/Down (DONE)
         - Electron ID Up/Down (DONE)
         - Electron Isolation Up/Down
@@ -492,6 +510,7 @@ class HwwProcessor(processor.ProcessorABC):
         - LHE scale variations for signal
         - LHE pdf weights for signal
         - PSweights variations for signal
+
         - ParticleNet tagger Up/Down
 
         Up and Down Variations (systematics included as a new output file)
@@ -559,21 +578,6 @@ class HwwProcessor(processor.ProcessorABC):
             # only fill output for that channel if the selections yield any events
             if np.sum(selection_ch) <= 0:
                 fill_output = False
-            else:
-                # only perform inference if there are any events in the selection
-                if self.inference:
-                    # TODO: Add try and catch?
-                    print("pre-inference")
-                    pnet_vars = runInferenceTriton(
-                        self.tagger_resources_path,
-                        events[selection_ch],
-                        fj_idx_lep[selection_ch]
-                    )
-                    print("post-inference")
-                    # TODO: catch events where pnet_vars are None and fill w. -1 to debug
-                    if pnet_vars is None:
-                        print('Pnet vars is None')
-                        fill_output = False
 
             if fill_output:
                 keys = ["common", ch]
@@ -594,7 +598,6 @@ class HwwProcessor(processor.ProcessorABC):
                 }
 
                 # fill inference
-                # TODO: Add try and catch?
                 if self.inference:
                     print("pre-inference")
                     pnet_vars = runInferenceTriton(
