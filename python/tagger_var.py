@@ -70,6 +70,8 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=''):
             # check if the sample was processed
             parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')
 
+            print(f'Processing {ch} channel of sample', sample)
+
             for i, parquet_file in enumerate(parquet_files):
                 try:
                     data = pq.read_table(parquet_file).to_pandas()
