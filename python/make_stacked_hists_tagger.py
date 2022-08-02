@@ -195,6 +195,7 @@ def plot_stacked_hists(year, ch, odir, logy=True, add_data=True):
     bkg_labels = [label for label in samples if (label and label != data_label and label not in signal_labels)]
     if 'VBFHToWWToLNuQQ-MH125' in signal_labels:
         signal_labels.remove('VBFHToWWToLNuQQ-MH125')
+
     # data
     data = None
     if data_label in h.axes[0]:
@@ -309,7 +310,7 @@ def plot_stacked_hists(year, ch, odir, logy=True, add_data=True):
     # sort the legend
     order_dic = {}
     for bkg_label in bkg_labels:
-        order_dic[bkg_label] = hists['fj_pt'][{'samples': bkg_label}].sum()
+        order_dic[bkg_label] = hists[{'samples': bkg_label}].sum()
 
     handles, labels = ax.get_legend_handles_labels()
 
