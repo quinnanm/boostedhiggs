@@ -61,6 +61,7 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=''):
                 continue
 
             # check if the sample was processed
+            print(pkl_dir)
             pkl_dir = f'{idir}/{sample}/outfiles/*.pkl'
             pkl_files = glob.glob(pkl_dir)  #
             if not pkl_files:  # skip samples which were not processed
@@ -159,7 +160,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # python get_var_for_plotting.py --year 2017 --odir plots --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --tag tagger_score
+    # python tagger_var.py --year 2017 --odir plots --channels ele,mu --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/Jul28_2017 --tag tagger_score
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',            dest='year',        default='2017',                             help="year")
