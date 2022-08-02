@@ -115,7 +115,9 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                         continue
 
                     # make iso and miso cuts (different for each channel)
-                    iso_cut = (data['lep_isolation'] < 0.15) & (data['lep_pt'] < max_iso[ch])
+                    # iso_cut = (data['lep_isolation'] < 0.15) & (data['lep_pt'] < max_iso[ch])
+                    iso_cut = (data['lep_isolation'] < 0.15) & (data['lep_pt'] < max_iso[ch]) | (data['lep_pt'] > max_iso[ch])
+
                     if ch == 'ele':
                         miso_cut = (data['lep_pt'] > max_iso[ch])
                     elif ch == 'mu':
