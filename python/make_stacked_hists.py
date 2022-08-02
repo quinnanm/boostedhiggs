@@ -128,13 +128,13 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                     if var == 'lep_isolation':
                         # pt_cut = (data['lep_pt'] > max_iso[ch])
                         # select = (iso_cut | miso_cut) & pt_cut
-                        select = (iso_cut | miso_cut)
+                        select = (iso_cut & miso_cut)
                     elif var == 'lep_misolation':
                         # pt_cut = (data['lep_pt'] < max_iso[ch])
                         # select = (iso_cut | miso_cut) & pt_cut
-                        select = (iso_cut | miso_cut)
+                        select = (iso_cut & miso_cut)
                     else:
-                        select = (iso_cut | miso_cut)
+                        select = (iso_cut & miso_cut)
 
                     # filling histograms
                     single_sample = None
