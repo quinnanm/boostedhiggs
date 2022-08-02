@@ -197,10 +197,8 @@ def plot_stacked_hists(year, ch, odir, logy=True, add_data=True):
 
     # get histograms
     h = hists
-
     if h.shape[0] == 0:     # skip empty histograms (such as lepton_pt for hadronic channel)
         print('Empty histogram')
-        continue
 
     # get samples existing in histogram
     samples = [h.axes[0].value(i) for i in range(len(h.axes[0].edges))]
