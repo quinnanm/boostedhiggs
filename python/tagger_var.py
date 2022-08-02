@@ -116,10 +116,10 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=''):
                     c = c + 1
                 else:
                     if ch == 'ele':
-                        data2 = pd.DataFrame(data['fj_isHVV_elenuqq'] / (data['fj_ttbar_bmerged'] + data['fj_ttbar_bsplit'] + data['fj_wjets_label']), columns=['tagger_score'])
+                        data2 = pd.DataFrame(data['fj_isHVV_elenuqq'] / (data['fj_isHVV_elenuqq'] + data['fj_ttbar_bmerged'] + data['fj_ttbar_bsplit'] + data['fj_wjets_label']), columns=['tagger_score'])
 
                     elif ch == 'mu':
-                        data2 = pd.DataFrame(data['fj_isHVV_munuqq'] / (data['fj_ttbar_bmerged'] + data['fj_ttbar_bsplit'] + data['fj_wjets_label']), columns=['tagger_score'])
+                        data2 = pd.DataFrame(data['fj_isHVV_munuqq'] / (data['fj_isHVV_munuqq'] + data['fj_ttbar_bmerged'] + data['fj_ttbar_bsplit'] + data['fj_wjets_label']), columns=['tagger_score'])
 
                     data2['sample'] = sample_to_use
                     data2['weight'] = event_weight
