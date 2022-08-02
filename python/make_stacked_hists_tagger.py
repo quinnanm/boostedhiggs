@@ -158,7 +158,7 @@ def make_stacked_hists(year, ch, idir, odir, samples):
                 # combining all pt bins of a specefic process under one name
                 hists.fill(
                     samples=sample_to_use,
-                    var=x,
+                    tagger_score=x,
                     weight=event_weight,
                 )
 
