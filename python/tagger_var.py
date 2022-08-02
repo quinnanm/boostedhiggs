@@ -49,8 +49,8 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=''):
         c = 0
         # loop over the samples
         for sample in samples[year][ch]:
-            if sample != 'VBFHToWWToLNuQQ-MH125':
-                continue
+            # if sample != 'VBFHToWWToLNuQQ-MH125':
+            #     continue
 
             # skip data samples
             is_data = False
@@ -61,9 +61,9 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=''):
                 continue
 
             # check if the sample was processed
-            print(pkl_dir)
             pkl_dir = f'{idir}/{sample}/outfiles/*.pkl'
             pkl_files = glob.glob(pkl_dir)  #
+            print(pkl_dir)
             if not pkl_files:  # skip samples which were not processed
                 continue
 
