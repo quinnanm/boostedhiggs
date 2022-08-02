@@ -112,18 +112,6 @@ def make_stacked_hists(year, ch, idir, odir, samples):
                 #     # miso_cut = (data['lep_misolation'] < 0.1) & (data['lep_pt'] > max_iso[ch])
                 #     miso_cut = (data['lep_misolation'] < 0.1)
                 #
-                # # for plotting iso and miso use different pt cut
-                # if var == 'lep_isolation':
-                #     # pt_cut = (data['lep_pt'] > max_iso[ch])
-                #     # select = (iso_cut | miso_cut) & pt_cut
-                #     select = (iso_cut & miso_cut)
-                # elif var == 'lep_misolation':
-                #     # pt_cut = (data['lep_pt'] < max_iso[ch])
-                #     # select = (iso_cut | miso_cut) & pt_cut
-                #     select = (iso_cut & miso_cut)
-                # else:
-                #     select = (iso_cut & miso_cut)
-
                 # if ch == 'mu':
                 #     miso_cut = (data['lep_misolation'] < 0.1)
                 #     select = (iso_cut & miso_cut)
@@ -290,7 +278,7 @@ def plot_stacked_hists(year, ch, odir, logy=True, add_data=True):
                 hep.histplot(data.values() / tot.values(), tot.axes[0].edges, yerr=np.sqrt(data.values()) / tot.values(),
                              ax=rax, histtype='errorbar', color='k', capsize=4)
             else:
-                print(f'Warning: not all bins filled for background histogram for {var} {ch}')
+                print(f'Warning: not all bins filled for background histogram for {ch}')
             rax.axhline(1, ls='--', color='k')
             rax.set_ylim(0.2, 1.8)
             # rax.set_ylim(0.7, 1.3)
@@ -316,7 +304,7 @@ def plot_stacked_hists(year, ch, odir, logy=True, add_data=True):
 
     if rax != None:
         ax.set_xlabel("")
-        rax.set_xlabel(f'{var}')
+        rax.set_xlabel(f'Tagger score')
 
     # sort the legend
     order_dic = {}
