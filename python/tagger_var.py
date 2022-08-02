@@ -79,13 +79,17 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=''):
                     print("can't read data")
                     continue
 
-                # select the jet pT [400-600] GeV and the mSD [30 -150 ]
-                select_fj_pt = (data['fj_pt'] > 400) & (data['fj_pt'] < 600)
-                select_fj_msd = (data['fj_msoftdrop'] > 30) & (data['fj_msoftdrop'] < 150)
+                try:
+                    # select the jet pT [400-600] GeV and the mSD [30 -150 ]
+                    select_fj_pt = (data['fj_pt'] > 400) & (data['fj_pt'] < 600)
+                    select_fj_msd = (data['fj_msoftdrop'] > 30) & (data['fj_msoftdrop'] < 150)
 
-                select = select_fj_pt & select_fj_msd
+                    select = select_fj_pt & select_fj_msd
 
-                data = data[select]
+                    data = data[select]
+                except:
+                    print(f'something is wrong with {sample}')
+                    continue
 
                 try:
                     event_weight = data['tot_weight']
