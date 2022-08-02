@@ -74,6 +74,7 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=''):
                 try:
                     data = pq.read_table(parquet_file).to_pandas()
                 except:
+                    print("can't read data")
                     continue
 
                 try:
