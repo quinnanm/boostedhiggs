@@ -110,7 +110,7 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=''):
                         data_all = pd.DataFrame(data['fj_isHVV_munuqq'] / (data['fj_ttbar_bmerged'] + data['fj_ttbar_bsplit'] + data['fj_wjets_label']), columns=['tagger_score'])
 
                     data_all['sample'] = sample_to_use
-                    data_all['weight'] = event_weight[select]
+                    data_all['weight'] = event_weight
 
                     c = c + 1
                 else:
@@ -121,7 +121,7 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=''):
                         data2 = pd.DataFrame(data['fj_isHVV_munuqq'] / (data['fj_ttbar_bmerged'] + data['fj_ttbar_bsplit'] + data['fj_wjets_label']), columns=['tagger_score'])
 
                     data2['sample'] = sample_to_use
-                    data2['weight'] = event_weight[select]
+                    data2['weight'] = event_weight
 
                     data_all = pd.concat([data_all, data2])
 
