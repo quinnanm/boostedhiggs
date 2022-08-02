@@ -136,7 +136,7 @@ def make_stacked_hists(year, ch, idir, odir, samples):
 
                 select = select_fj_pt & select_fj_msd
                 data = data[select]
-                event_weight[select]
+                event_weight = event_weight[select]
 
                 if ch == 'ele':
                     x = data['fj_isHVV_elenuqq'] / (data['fj_isHVV_elenuqq'] + data['fj_ttbar_bmerged'] + data['fj_ttbar_bsplit'] + data['fj_wjets_label'])
