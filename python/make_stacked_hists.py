@@ -117,24 +117,30 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                     # make iso and miso cuts (different for each channel)
                     # iso_cut = (data['lep_isolation'] < 0.15) & (data['lep_pt'] < max_iso[ch])
                     iso_cut = (data['lep_isolation'] < 0.15) & (data['lep_pt'] < max_iso[ch]) | (data['lep_pt'] > max_iso[ch])
+                    #
+                    # if ch == 'ele':
+                    #     miso_cut = (data['lep_pt'] > max_iso[ch])
+                    # elif ch == 'mu':
+                    #     # miso_cut = (data['lep_misolation'] < 0.1) & (data['lep_pt'] > max_iso[ch])
+                    #     miso_cut = (data['lep_misolation'] < 0.1)
+                    #
+                    # # for plotting iso and miso use different pt cut
+                    # if var == 'lep_isolation':
+                    #     # pt_cut = (data['lep_pt'] > max_iso[ch])
+                    #     # select = (iso_cut | miso_cut) & pt_cut
+                    #     select = (iso_cut & miso_cut)
+                    # elif var == 'lep_misolation':
+                    #     # pt_cut = (data['lep_pt'] < max_iso[ch])
+                    #     # select = (iso_cut | miso_cut) & pt_cut
+                    #     select = (iso_cut & miso_cut)
+                    # else:
+                    #     select = (iso_cut & miso_cut)
 
-                    if ch == 'ele':
-                        miso_cut = (data['lep_pt'] > max_iso[ch])
-                    elif ch == 'mu':
-                        # miso_cut = (data['lep_misolation'] < 0.1) & (data['lep_pt'] > max_iso[ch])
+                    if ch == 'mu':
                         miso_cut = (data['lep_misolation'] < 0.1)
-
-                    # for plotting iso and miso use different pt cut
-                    if var == 'lep_isolation':
-                        # pt_cut = (data['lep_pt'] > max_iso[ch])
-                        # select = (iso_cut | miso_cut) & pt_cut
-                        select = (iso_cut & miso_cut)
-                    elif var == 'lep_misolation':
-                        # pt_cut = (data['lep_pt'] < max_iso[ch])
-                        # select = (iso_cut | miso_cut) & pt_cut
                         select = (iso_cut & miso_cut)
                     else:
-                        select = (iso_cut & miso_cut)
+                        select = iso_cut
 
                     # filling histograms
                     single_sample = None
