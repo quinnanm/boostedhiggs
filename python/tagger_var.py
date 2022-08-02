@@ -94,10 +94,10 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=''):
 
                 # add iso and miso selection cuts
                 if ch == 'ele':
-                    data['fj_isHVV_elenuqq'] / (data['fj_ttbar_merged'] + data['fj_ttbar_split'] + data['fj_wjets_label'])
+                    data['fj_isHVV_elenuqq'] / (data['fj_ttbar_bmerged'] + data['fj_ttbar_bsplit'] + data['fj_wjets_label'])
 
                 elif ch == 'mu':
-                    data['fj_isHVV_munuqq'] / (data['fj_ttbar_merged'] + data['fj_ttbar_split'] + data['fj_wjets_label'])
+                    data['fj_isHVV_munuqq'] / (data['fj_ttbar_bmerged'] + data['fj_ttbar_bsplit'] + data['fj_wjets_label'])
 
                 # specefy variable to save
                 print(sample_to_use)
