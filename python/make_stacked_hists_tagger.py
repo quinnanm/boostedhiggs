@@ -52,7 +52,7 @@ def make_stacked_hists(year, ch, idir, odir, samples):
     # instantiates the histogram object
 
     hists = hist2.Hist(
-        sample_axis,
+        hist2.axis.StrCategory([], name='samples', growth=True),
         hist2.axis.Regular(30, 0, 1, name='tagger_score', label=r'Tagger score', overflow=True),
     )
 
