@@ -123,19 +123,14 @@ def runInferenceTriton(
     # prepare inputs for both fat jets
     tagger_inputs = []
 
-    print('getting cands')
     feature_dict = {
         **get_pfcands_features(tagger_vars, events, fj_idx_lep, fatjet_label, pfcands_label),
         **get_svs_features(tagger_vars, events, fj_idx_lep, fatjet_label, svs_label),
     }
 
-    print('got cands')
-
     for input_name in tagger_vars["input_names"]:
         for key in tagger_vars[input_name]["var_names"]:
             np.expand_dims(feature_dict[key], 1)
-
-    print('building inputs')
 
     tagger_inputs = {
         f"{input_name}__{i}": np.concatenate(
@@ -150,7 +145,7 @@ def runInferenceTriton(
 
     # run inference for both fat jets
     tagger_outputs = []
-    print(f"Running inference for candidate Jet")
+
     start = time.time()
     try:
         tagger_outputs = triton_model(tagger_inputs)
@@ -162,7 +157,7 @@ def runInferenceTriton(
 
     print(f"Inference took {time_taken:.1f}s")
 
-    print('tagger_outputs shape', tagger_outputs.shape)
+    # print('tagger_outputs shape', tagger_outputs.shape)
     pnet_vars_list = []
     if len(tagger_outputs):
         pnet_vars = {
@@ -180,7 +175,7 @@ def runInferenceTriton(
             f"fj_wjets_label": np.array([]),
             f"fj_isHVV_elenuqq": np.array([]),
             f"fj_isHVV_munuqq": np.array([]),
-            f"fj_isHVV_taunuqq": tnp.array([]),
+            f"fj_isHVV_taunuqq": np.array([]),
         }
 
     print(f"Total time taken: {time.time() - total_start:.1f}s")

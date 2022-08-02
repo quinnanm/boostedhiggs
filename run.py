@@ -64,15 +64,15 @@ def main(args):
             fileset[sample] = flist
 
     print(len(list(fileset.keys())), 'Samples in fileset to be processed: ', list(fileset.keys()))
+    print(fileset)
 
     # define processor
     if args.processor == 'hww':
-        # from boostedhiggs.hwwprocessor import HwwProcessor
-        from boostedhiggs.hwwprocessor_with_tagger import HwwProcessor
+        from boostedhiggs.hwwprocessor import HwwProcessor
         if 'APV' in args.year:
-            p = HwwProcessor(year='2016', yearmod='APV', channels=channels, output_location='./outfiles' + job_name)
+            p = HwwProcessor(year='2016', yearmod='APV', channels=channels, inference=args.inference, output_location='./outfiles' + job_name)
         else:
-            p = HwwProcessor(year=args.year, channels=channels, output_location='./outfiles' + job_name)
+            p = HwwProcessor(year=args.year, channels=channels, inference=args.inference, output_location='./outfiles' + job_name)
 
     tic = time.time()
     if args.executor == "dask":
@@ -102,9 +102,6 @@ def main(args):
         else:
             executor = processor.IterativeExecutor(status=True)
 
-    # run = processor.Runner(
-    #     executor=executor, savemetrics=True, schema=nanoevents.NanoAODSchema, chunksize=args.chunksize
-    # )
     nanoevents.PFNanoAODSchema.mixins["SV"] = "PFCand"
     run = processor.Runner(
         executor=executor, savemetrics=True, schema=nanoevents.PFNanoAODSchema, chunksize=args.chunksize
@@ -151,7 +148,8 @@ if __name__ == "__main__":
         choices=["futures", "iterative", "dask"],
         help="type of processor executor",
     )
-    parser.add_argument("--local",      dest='local', action='store_true')
+    parser.add_argument("--local",       dest='local', action='store_true')
+    parser.add_argument("--inference",   dest='inference', action='store_true')
     parser.add_argument("--pfnano",      dest='pfnano', action='store_true')
     parser.add_argument("--no-pfnano",   dest='pfnano', action='store_false')
     parser.set_defaults(pfnano=True)
