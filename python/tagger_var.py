@@ -63,7 +63,7 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=''):
             # check if the sample was processed
             pkl_dir = f'{idir}/{sample}/outfiles/*.pkl'
             pkl_files = glob.glob(pkl_dir)  #
-            print(pkl_dir)
+            # print(pkl_dir)
             if not pkl_files:  # skip samples which were not processed
                 continue
 
