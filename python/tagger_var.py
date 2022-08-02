@@ -57,8 +57,8 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=''):
             for key in data_by_ch.values():
                 if key in sample:
                     is_data = True
-            if is_data:
-                continue
+            # if is_data:
+            #     continue
 
             # check if the sample was processed
             pkl_dir = f'{idir}/{sample}/outfiles/*.pkl'
