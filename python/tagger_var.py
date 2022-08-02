@@ -94,7 +94,7 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=''):
                 else:
                     sample_to_use = sample
 
-                if c == 0:  # just so that the first iteration the dataframe is initialized (then for further iterations we can just concat)
+                if c == 0:  # for the first iteration the dataframe is initialized (then for further iterations we can just concat)
                     if ch == 'ele':
                         data_all = pd.DataFrame(data['fj_isHVV_elenuqq'] / (data['fj_isHVV_elenuqq'] + data['fj_ttbar_bmerged'] + data['fj_ttbar_bsplit'] + data['fj_wjets_label']), columns=['tagger_score'])
 
