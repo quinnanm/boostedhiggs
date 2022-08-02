@@ -100,7 +100,6 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=''):
                     data['fj_isHVV_munuqq'] / (data['fj_ttbar_bmerged'] + data['fj_ttbar_bsplit'] + data['fj_wjets_label'])
 
                 # specefy variable to save
-                print(sample_to_use)
 
                 if c == 0:  # just so that the first iteration the dataframe is initialized (then for further iterations we can just concat)
                     if ch == 'ele':
