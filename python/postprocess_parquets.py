@@ -75,10 +75,14 @@ def append_correct_weights(idir, samples, year, channels, reprocess=False):
                 f = open('../fileset/xsec_pfnano.json')
                 xsec = json.load(f)
                 f.close()
-                xsec = eval(str((xsec[sample])))
+                try:
+                    xsec = eval(str((xsec[sample])))
+                except:
+                    print(f"sample {sample} doesn't have xsecs defined in xsec_pfnano.json so will skip it")
+                    continue
 
                 # Get overall weighting of events.. each event has a genweight... sumgenweight sums over events in a chunk... sum_sumgenweight sums over chunks
-                xsec_weight = (xsec * luminosity) / get_sum_sumgenweight(idir, year.replace('APV',''), sample)
+                xsec_weight = (xsec * luminosity) / get_sum_sumgenweight(idir, year.replace('APV', ''), sample)
             else:
                 xsec_weight = 1
 
@@ -105,7 +109,7 @@ def append_correct_weights(idir, samples, year, channels, reprocess=False):
                 if not is_data:
                     event_weight = data['weight'] * data[f'weight_{ch}']
                 else:
-                    event_weight = 1 # for data fill a weight column with ones 
+                    event_weight = 1  # for data fill a weight column with ones
 
                 # append an additional column 'tot_weight' to the parquet dataframes
                 data['tot_weight'] = xsec_weight * event_weight
@@ -130,7 +134,7 @@ if __name__ == "__main__":
     # e.g. python postprocess_parquets.py --channels had --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/ --year 2017
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--year',            dest='year',          choices=["2016APV","2016","2017","2018"],         help="year", required=True)
+    parser.add_argument('--year',            dest='year',          choices=["2016APV", "2016", "2017", "2018"],         help="year", required=True)
     parser.add_argument('--channels',        dest='channels',      default='ele,mu,had',                             help='channels for which to plot this variable')
     parser.add_argument('--idir',            dest='idir',          default='../results/',                            help="input directory with results")
     parser.add_argument('--reprocess',       dest='reprocess',     action='store_true',                              help="force re-processing of parquet file to include weight")
