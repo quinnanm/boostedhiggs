@@ -134,9 +134,9 @@ def main(args):
         os.makedirs(odir)
 
     # make subdirectory specefic to this script
-    if not os.path.exists(odir + '/extra/'):
-        os.makedirs(odir + '/extra/')
-    odir = odir + '/extra'
+    if not os.path.exists(odir + '/tagger/'):
+        os.makedirs(odir + '/tagger/')
+    odir = odir + '/tagger'
 
     channels = args.channels.split(',')
 
