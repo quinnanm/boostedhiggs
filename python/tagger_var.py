@@ -94,19 +94,19 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=''):
 
                 # add iso and miso selection cuts
                 if ch == 'ele':
-                    data['fj_isHVV_elenuqq'] / (data['fj_ttbar_bmerged'] + data['fj_ttbar_bsplit'] + data['fj_wjets_label'])
+                    data['fj_isHVV_elenuqq'] / (data['fj_isHVV_elenuqq'] + data['fj_ttbar_bmerged'] + data['fj_ttbar_bsplit'] + data['fj_wjets_label'])
 
                 elif ch == 'mu':
-                    data['fj_isHVV_munuqq'] / (data['fj_ttbar_bmerged'] + data['fj_ttbar_bsplit'] + data['fj_wjets_label'])
+                    data['fj_isHVV_munuqq'] / (data['fj_isHVV_munuqq'] + data['fj_ttbar_bmerged'] + data['fj_ttbar_bsplit'] + data['fj_wjets_label'])
 
                 # specefy variable to save
 
                 if c == 0:  # just so that the first iteration the dataframe is initialized (then for further iterations we can just concat)
                     if ch == 'ele':
-                        data_all = pd.DataFrame(data['fj_isHVV_elenuqq'] / (data['fj_ttbar_bmerged'] + data['fj_ttbar_bsplit'] + data['fj_wjets_label']), columns=['tagger_score'])
+                        data_all = pd.DataFrame(data['fj_isHVV_elenuqq'] / (data['fj_isHVV_elenuqq'] + data['fj_ttbar_bmerged'] + data['fj_ttbar_bsplit'] + data['fj_wjets_label']), columns=['tagger_score'])
 
                     elif ch == 'mu':
-                        data_all = pd.DataFrame(data['fj_isHVV_munuqq'] / (data['fj_ttbar_bmerged'] + data['fj_ttbar_bsplit'] + data['fj_wjets_label']), columns=['tagger_score'])
+                        data_all = pd.DataFrame(data['fj_isHVV_munuqq'] / (data['fj_isHVV_munuqq'] + data['fj_ttbar_bmerged'] + data['fj_ttbar_bsplit'] + data['fj_wjets_label']), columns=['tagger_score'])
 
                     data_all['sample'] = sample_to_use
                     data_all['weight'] = event_weight
