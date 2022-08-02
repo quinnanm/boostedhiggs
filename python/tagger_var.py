@@ -80,6 +80,7 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=''):
                 try:
                     event_weight = data['tot_weight']
                 except:
+                    print("files haven't been postprocessed to store tot_weight")
                     continue
 
                 single_sample = None
