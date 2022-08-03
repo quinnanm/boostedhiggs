@@ -454,7 +454,9 @@ class HwwProcessor(processor.ProcessorABC):
 
         match_HWW_lep = match_HWW(events.GenPart, candidatefj_lep)
         print('matched')
-        print(events.GenPart)
+        print('1', events.GenPart)
+        print('2', events.GenPart[0])
+        print('3', candidatefj_lep)
 
         # gen matching
         if (('HToWW' or 'HWW') in dataset) and isMC:
