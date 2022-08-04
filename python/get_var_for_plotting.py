@@ -154,7 +154,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # python get_var_for_plotting.py --year 2017 --odir plots --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --tag gen_Hpt
+    # python get_var_for_plotting.py --year 2017 --odir plots --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --tag gen_Hpt_with_iso
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',            dest='year',        default='2017',                             help="year")
