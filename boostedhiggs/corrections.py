@@ -32,24 +32,25 @@ def corrected_msoftdrop(fatjets):
 with importlib.resources.path("boostedhiggs.data", "ULvjets_corrections.json") as filename:
     vjets_kfactors = correctionlib.CorrectionSet.from_file(str(filename))
 
+def get_vpt(check_offshell=False):
+    """Only the leptonic samples have no resonance in the decay tree, and only                                                                                                                                                            
+    when M is beyond the configured Breit-Wigner cutoff (usually 15*width)                                                                                                                                                                
+    """
+    boson = ak.firsts(genpart[
+        ((genpart.pdgId == 23)|(abs(genpart.pdgId) == 24))
+        & genpart.hasFlags(["fromHardProcess", "isLastCopy"])
+    ])
+    if check_offshell:
+        offshell = genpart[
+            genpart.hasFlags(["fromHardProcess", "isLastCopy"])
+            & ak.is_none(boson)
+            & (abs(genpart.pdgId) >= 11) & (abs(genpart.pdgId) <= 16)
+        ].sum()
+        return ak.where(ak.is_none(boson.pt), offshell.pt, boson.pt)
+    return np.array(ak.fill_none(boson.pt, 0.))
+
 def add_VJets_kFactors(weights, genpart, dataset):
     """Revised version of add_VJets_NLOkFactor, for both NLO EW and ~NNLO QCD"""
-    def get_vpt(check_offshell=False):
-        """Only the leptonic samples have no resonance in the decay tree, and only
-        when M is beyond the configured Breit-Wigner cutoff (usually 15*width)
-        """
-        boson = ak.firsts(genpart[
-            ((genpart.pdgId == 23)|(abs(genpart.pdgId) == 24))
-            & genpart.hasFlags(["fromHardProcess", "isLastCopy"])
-        ])
-        if check_offshell:
-            offshell = genpart[
-                genpart.hasFlags(["fromHardProcess", "isLastCopy"])
-                & ak.is_none(boson)
-                & (abs(genpart.pdgId) >= 11) & (abs(genpart.pdgId) <= 16)
-            ].sum()
-            return ak.where(ak.is_none(boson.pt), offshell.pt, boson.pt)
-        return np.array(ak.fill_none(boson.pt, 0.))
 
     common_systs = [
         "d1K_NLO",
