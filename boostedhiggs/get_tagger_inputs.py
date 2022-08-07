@@ -7,6 +7,7 @@ from typing import Dict
 from coffea.nanoevents.methods.base import NanoEventsArray
 import awkward as ak
 import numpy as np
+import numpy.ma as ma
 
 import json
 
@@ -66,7 +67,7 @@ def get_pfcands_features(
             feature_dict[var] = jet_ak_pfcands[var[len("pfcand_"):]]
 
     # pfcand mask
-    feature_dict["pfcand_mask"] = (~(ak.pad_none(feature_dict["pfcand_abseta"], tagger_vars["pf_points"]["var_length"], axis=1, clip=True).to_numpy().mask)).astype(np.float32)
+    feature_dict["pfcand_mask"] = (~(ma.masked_invalid( ak.pad_none(feature_dict["pfcand_abseta"], tagger_vars["pf_points"]["var_length"], axis=1, clip=True).to_numpy() ).mask) ).astype(np.float32)
 
     # convert to numpy arrays and normalize features
     for var in tagger_vars["pf_features"]["var_names"]:

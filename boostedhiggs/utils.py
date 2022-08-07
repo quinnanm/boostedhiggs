@@ -2,6 +2,21 @@ import numpy as np
 from coffea.analysis_tools import PackedSelection
 import awkward as ak
 
+d_PDGID = 1
+b_PDGID = 5
+g_PDGID = 21
+TOP_PDGID = 6
+
+ELE_PDGID = 11
+vELE_PDGID = 12
+MU_PDGID = 13
+vMU_PDGID = 14
+TAU_PDGID = 15
+vTAU_PDGID = 16
+
+Z_PDGID = 23
+W_PDGID = 24
+HIGGS_PDGID = 25
 
 def getParticles(genparticles, lowid=22, highid=25, flags=['fromHardProcess', 'isLastCopy']):
     """
@@ -88,6 +103,7 @@ def to_label(array: ak.Array) -> ak.Array:
 def match_V(genparticles, candidatefj):
     vs = getParticles(genparticles, lowid=23, highid=24)
     matched_vs = vs[ak.argmin(candidatefj.delta_r(vs), axis=1, keepdims=True)]
+    matched_vs_mask = ak.any(candidatefj.delta_r(matched_vs) < 0.8, axis=1)
 
     daughters = ak.flatten(matched_vs.distinctChildren, axis=2)
     daughters = daughters[daughters.hasFlags(["fromHardProcess", "isLastCopy"])]
@@ -104,7 +120,7 @@ def match_V(genparticles, candidatefj):
     )
 
     matched_vdaus_mask = ak.any(candidatefj.delta_r(daughters) < 0.8, axis=1)
-    matched_mask = matched_vs & matched_vdaus_mask
+    matched_mask = matched_vs_mask & matched_vdaus_mask
     genVars = {
         "gen_isVlep": to_label( ((decay == 3) | (decay == 5) | (decay == 7)) & matched_mask),
         "gen_isVqq": to_label( (decay==1) & matched_mask),
@@ -117,9 +133,10 @@ def match_Top(genparticles, candidatefj):
     matched_tops_mask = ak.any(candidatefj.delta_r(matched_tops) < 0.8, axis=1)
     daughters = ak.flatten(matched_tops.distinctChildren, axis=2)
     daughters = daughters[daughters.hasFlags(["fromHardProcess", "isLastCopy"])]
+    daughters_pdgId = abs(daughters.pdgId)
 
     wboson_daughters = ak.flatten(daughters[(daughters_pdgId == 24)].distinctChildren, axis=2)
-    wboson_daughters = wboson_daughters[wboson_daughters.hasFlags(GEN_FLAGS)]
+    wboson_daughters = wboson_daughters[wboson_daughters.hasFlags(["fromHardProcess", "isLastCopy"])]
     wboson_daughters_pdgId = abs(wboson_daughters.pdgId)
     decay = (
         # 2 quarks
@@ -132,9 +149,9 @@ def match_Top(genparticles, candidatefj):
         + (ak.sum(wboson_daughters_pdgId == TAU_PDGID, axis=1) == 1) * 7
     )
     bquark = daughters[(daughters_pdgId == 5)]
-    matched_b = ak.sum(fatjets.delta_r(bquark) < 0.8, axis=1)
+    matched_b = ak.sum(candidatefj.delta_r(bquark) < 0.8, axis=1)
 
-    matched_topdaus_mask = ak.any(fatjets.delta_r(daughters) < 0.8, axis=1)
+    matched_topdaus_mask = ak.any(candidatefj.delta_r(daughters) < 0.8, axis=1)
     matched_mask = matched_tops_mask & matched_topdaus_mask
 
     genVars = {

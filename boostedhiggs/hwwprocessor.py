@@ -17,7 +17,7 @@ from coffea import processor
 from coffea.nanoevents.methods import candidate, vector
 from coffea.analysis_tools import Weights, PackedSelection
 
-from boostedhiggs.utils import match_HWW, getParticles, match_V
+from boostedhiggs.utils import match_HWW, getParticles, match_V, match_Top
 from boostedhiggs.corrections import (
     corrected_msoftdrop,
     add_VJets_kFactors,
@@ -33,6 +33,7 @@ import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", message="Missing cross-reference index ")
+warnings.filterwarnings("ignore", message="divide by zero encountered in log")
 np.seterr(invalid='ignore')
 
 def dsum(*dicts):
@@ -621,6 +622,7 @@ class HwwProcessor(processor.ProcessorABC):
                         fj_idx_lep[selection_ch]
                     )
                     print("post-inference")
+                    print(pnet_vars)
                     output[ch] = {
                         **output[ch],
                         **{key: value for (key, value) in pnet_vars.items()}
@@ -631,8 +633,6 @@ class HwwProcessor(processor.ProcessorABC):
             # convert arrays to pandas
             if not isinstance(output[ch], pd.DataFrame):
                 output[ch] = self.ak_to_pandas(output[ch])
-
-        print(output)
 
         # now save pandas dataframes
         fname = events.behavior["__events_factory__"]._partition_key.replace("/", "_")
