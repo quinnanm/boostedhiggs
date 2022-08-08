@@ -136,11 +136,11 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                     # else:
                     #     select = (iso_cut & miso_cut)
 
-                    if ch == 'mu':
-                        miso_cut = (data['lep_misolation'] < 0.1)
-                        select = (iso_cut & miso_cut)
-                    else:
-                        select = iso_cut
+                    # if ch == 'mu':
+                    #     miso_cut = (data['lep_misolation'] < 0.1)
+                    #     select = (iso_cut & miso_cut)
+                    # else:
+                    #     select = iso_cut
 
                     # filling histograms
                     single_sample = None
@@ -155,17 +155,16 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                         sample_to_use = sample
 
                     # combining all pt bins of a specefic process under one name
-                    hists[var].fill(
-                        samples=sample_to_use,
-                        var=data[var][select],
-                        weight=event_weight[select],
-                    )
                     # hists[var].fill(
                     #     samples=sample_to_use,
-                    #     var=data[var],
-                    #     weight=event_weight,
+                    #     var=data[var][select],
+                    #     weight=event_weight[select],
                     # )
-                    # print(hists[var])
+                    hists[var].fill(
+                        samples=sample_to_use,
+                        var=data[var],
+                        weight=event_weight,
+                    )
 
     # store the hists variable
     with open(f'{odir}/{ch}_hists.pkl', 'wb') as f:  # saves the hists objects
