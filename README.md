@@ -165,10 +165,12 @@ python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --json sampl
 Run postprocess_parquets.py to add a "tot_weight" column.
 e.g.
 ```
-python postprocess_parquets.py --channels ele,mu,had --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --year 2017
+python postprocess_parquets.py --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --year 2017
 ```
 
 Then, convert to root files using:
 ```
-python convert_to_root.py --dir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --ch ele,mu,had --odir rootfiles
+python convert_to_root.py --dir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --ch ele,mu --odir rootfiles
 ```
+
+## Plotting
