@@ -10,10 +10,9 @@ mkdir outfiles
 
 # run code
 # pip install --user onnxruntime
-python SCRIPTNAME --year YEAR --processor PROCESSOR PFNANO --n NUMJOBS --starti ${jobid} --sample SAMPLE
+python SCRIPTNAME --year YEAR --processor PROCESSOR PFNANO --n NUMJOBS --starti ${jobid} --sample SAMPLE --inference
 
 # remove incomplete jobs
-rm -rf outfiles/*had
 rm -rf outfiles/*mu
 rm -rf outfiles/*ele
 
