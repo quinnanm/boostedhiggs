@@ -392,11 +392,11 @@ class HwwProcessor(processor.ProcessorABC):
             sel=(n_loose_taus_mu == 0),
             channel=['mu']
         )
-        self.add_selection(
-            name='leptonIsolation',
-            sel=( (candidatelep.pt > 30) & (candidatelep.pt < 55) & (lep_reliso < 0.15) ) | (candidatelep.pt >= 55),
-            channel=['mu']
-        )
+        # self.add_selection(
+        #     name='leptonIsolation',
+        #     sel=( (candidatelep.pt > 30) & (candidatelep.pt < 55) & (lep_reliso < 0.15) ) | (candidatelep.pt >= 55),
+        #     channel=['mu']
+        # )
         # self.add_selection(
         #     name='leptonMiniIsolation',
         #     sel=( (candidatelep.pt >= 55) & (candidatelep.miniPFRelIso_all < 0.1) ) | (candidatelep.pt < 55),
@@ -420,11 +420,11 @@ class HwwProcessor(processor.ProcessorABC):
             sel=(n_loose_taus_ele == 0),
             channel=['ele']
         )
-        self.add_selection(
-            name='leptonIsolation',
-            sel=( (candidatelep.pt > 30) & (candidatelep.pt < 120) & (lep_reliso < 0.15) ) | (candidatelep.pt >= 120),
-            channel=['ele']
-        )
+        # self.add_selection(
+        #     name='leptonIsolation',
+        #     sel=( (candidatelep.pt > 30) & (candidatelep.pt < 120) & (lep_reliso < 0.15) ) | (candidatelep.pt >= 120),
+        #     channel=['ele']
+        # )
 
         # fill tuple variables
         variables = {
