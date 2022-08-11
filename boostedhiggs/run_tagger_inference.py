@@ -147,6 +147,7 @@ def runInferenceTriton(
     tagger_outputs = []
 
     start = time.time()
+    print('tagger_inputs', tagger_inputs)
     try:
         tagger_outputs = triton_model(tagger_inputs)
     except:
