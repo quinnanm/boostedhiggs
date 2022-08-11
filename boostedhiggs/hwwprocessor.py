@@ -169,17 +169,34 @@ class HwwProcessor(processor.ProcessorABC):
         trigger_noiso = {}
         trigger_iso = {}
         for ch in self._channels:
-            # apply trigger to both data and MC
-            trigger = np.zeros(nevents, dtype='bool')
-            trigger_noiso[ch] = np.zeros(nevents, dtype='bool')
-            trigger_iso[ch] = np.zeros(nevents, dtype='bool')
-            for t in self._HLTs[ch]:
-                if t in events.HLT.fields:
-                    if "Iso" in t or "WPTight_Gsf" in t:
-                        trigger_iso[ch] = trigger_iso[ch] | events.HLT[t]
-                    else:
-                        trigger_noiso[ch] = trigger_noiso[ch] | events.HLT[t]
-                    trigger = trigger | events.HLT[t]
+            # # apply trigger to both data and MC
+            # trigger = np.zeros(nevents, dtype='bool')
+            # trigger_noiso[ch] = np.zeros(nevents, dtype='bool')
+            # trigger_iso[ch] = np.zeros(nevents, dtype='bool')
+            # for t in self._HLTs[ch]:
+            #     if t in events.HLT.fields:
+            #         if "Iso" in t or "WPTight_Gsf" in t:
+            #             trigger_iso[ch] = trigger_iso[ch] | events.HLT[t]
+            #         else:
+            #             trigger_noiso[ch] = trigger_noiso[ch] | events.HLT[t]
+            #         trigger = trigger | events.HLT[t]
+
+            if ch == "had" and isMC:
+                trigger = np.ones(nevents, dtype='bool')
+                trigger_noiso[ch] = np.zeros(nevents, dtype='bool')
+                trigger_iso[ch] = np.zeros(nevents, dtype='bool')
+            else:
+                # apply trigger to both data and MC (except for hadronic channel)
+                trigger = np.zeros(nevents, dtype='bool')
+                trigger_noiso[ch] = np.zeros(nevents, dtype='bool')
+                trigger_iso[ch] = np.zeros(nevents, dtype='bool')
+                for t in self._HLTs[ch]:
+                    if t in events.HLT.fields:
+                        if "Iso" in t or "WPTight_Gsf" in t:
+                            trigger_iso[ch] = trigger_iso[ch] | events.HLT[t]
+                        else:
+                            trigger_noiso[ch] = trigger_noiso[ch] | events.HLT[t]
+                        trigger = trigger | events.HLT[t]
             if self.apply_trigger:
                 # apply trigger selection
                 self.add_selection("trigger", trigger, [ch])
