@@ -163,7 +163,7 @@ To start triton server with kubernetes in PRP:
     ```
 - IMPORTANT: Delete deployments when you are done:
   ```
-  kubeclt delete deployments triton -n triton
+  kubectl delete deployments triton -n triton
   ```
 
 ### First time setup with a new model
