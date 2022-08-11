@@ -25,7 +25,7 @@ from boostedhiggs.corrections import (
     add_lepton_weight,
     add_pileup_weight,
 )
-from boostedhiggs.btag import btagWPs,BTagCorrector
+from boostedhiggs.btag import btagWPs, BTagCorrector
 
 from .run_tagger_inference import runInferenceTriton
 
@@ -145,7 +145,7 @@ class HwwProcessor(processor.ProcessorABC):
 
     def add_selection(self, name: str, sel: np.ndarray, channel: list = None):
         """Adds selection to PackedSelection object and the cutflow dictionary"""
-        channels = channel if (channel and channel in self._channels) else self._channels
+        channels = channel if channel else self._channels
         for ch in channels:
             self.selections[ch].add(name, sel)
             self.cutflows[ch][name] = np.sum(self.selections[ch].all(*self.selections[ch].names))
@@ -324,6 +324,7 @@ class HwwProcessor(processor.ProcessorABC):
         jet2 = ak4_outside_ak8[:, 1:2]
         deta = abs(ak.firsts(jet1).eta - ak.firsts(jet2).eta)
         mjj = ( ak.firsts(jet1) + ak.firsts(jet2) ).mass
+
         # to optimize
         # isvbf = ((deta > 3.5) & (mjj > 1000))
         # isvbf = ak.fill_none(isvbf,False)
@@ -430,7 +431,6 @@ class HwwProcessor(processor.ProcessorABC):
         #     channel=['ele']
         # )
 
-
         # fill tuple variables
         variables = {
             "lep": {
@@ -461,7 +461,7 @@ class HwwProcessor(processor.ProcessorABC):
             },
         }
 
-
+        # gen matching for signal
         if (('HToWW' or 'HWW') in dataset) and isMC:
             matchHWW = match_HWW(events.GenPart, candidatefj)
             variables["lep"]["gen_Hpt"] = ak.firsts(matchHWW["matchedH"].pt)
@@ -481,7 +481,7 @@ class HwwProcessor(processor.ProcessorABC):
             variables["lep"]["gen_isTop"] = matchT["gen_isTopbmerged"]
             variables["lep"]["gen_isToplep"] = matchT["gen_isToplep"]
             variables["lep"]["gen_isTopqq"] = matchT["gen_isTopqq"]
-            
+
         # if trigger is not applied then save the trigger variables
         if not self.apply_trigger:
             variables["lep"]["cut_trigger_iso"] = trigger_iso[ch]
@@ -504,7 +504,6 @@ class HwwProcessor(processor.ProcessorABC):
         - Muon ID scale factors (DONE)
         - Muon Isolation scale factors (DONE)
         - Electron Isolation scale factors (ToDo)
-
         - Jet Mass Scale (JMS) scale factor (ToDo)
         - Jet Mass Resolution (JMR) scale factor (ToDo)
         - NLO EWK scale factors for DY(ll)/W(lnu)/W(qq)/Z(qq) (DONE)
@@ -512,9 +511,7 @@ class HwwProcessor(processor.ProcessorABC):
         - LHE scale weights for signal
         - LHE pdf weights for signal
         - PSweights for signal
-
         - ParticleNet tagger efficiency
-
         Up and Down Variations (systematics included as a new variable)
         ----
         - Pileup weight Up/Down (DONE)
@@ -531,9 +528,7 @@ class HwwProcessor(processor.ProcessorABC):
         - LHE scale variations for signal
         - LHE pdf weights for signal
         - PSweights variations for signal
-
         - ParticleNet tagger Up/Down
-
         Up and Down Variations (systematics included as a new output file)
         ----
         - Jet Energy Scale (JES)
@@ -628,6 +623,7 @@ class HwwProcessor(processor.ProcessorABC):
                     )
                     print("post-inference")
                     print(pnet_vars)
+
                     output[ch] = {
                         **output[ch],
                         **{key: value for (key, value) in pnet_vars.items()}

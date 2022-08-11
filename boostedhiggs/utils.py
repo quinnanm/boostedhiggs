@@ -150,7 +150,6 @@ def match_Top(genparticles, candidatefj):
     )
     bquark = daughters[(daughters_pdgId == 5)]
     matched_b = ak.sum(candidatefj.delta_r(bquark) < 0.8, axis=1)
-
     matched_topdaus_mask = ak.any(candidatefj.delta_r(daughters) < 0.8, axis=1)
     matched_mask = matched_tops_mask & matched_topdaus_mask
 
