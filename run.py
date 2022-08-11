@@ -73,7 +73,7 @@ def main(args):
             p = HwwProcessor(year='2016', yearmod='APV', channels=channels, inference=args.inference, output_location='./outfiles' + job_name)
         else:
             p = HwwProcessor(year=args.year, channels=channels, inference=args.inference, output_location='./outfiles' + job_name)
-            # p = HwwProcessor(year=args.year, channels=channels, output_location='./outfiles' + job_name)
+            # p = HwwProcessor(year=args.year, channels=channels, output_location='./outfiles' + job_name)      # for june_20 processor debugging
 
     tic = time.time()
     if args.executor == "dask":
