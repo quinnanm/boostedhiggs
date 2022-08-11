@@ -127,6 +127,9 @@ class HwwProcessor(processor.ProcessorABC):
             str(pathlib.Path(__file__).parent.resolve()) + "/tagger_resources/"
         )
 
+        self.selections = {}
+        self.cutflows = {}
+
     @property
     def accumulator(self):
         return self._accumulator
@@ -143,9 +146,16 @@ class HwwProcessor(processor.ProcessorABC):
             output[field] = ak.to_numpy(output_collection[field])
         return output
 
+    # def add_selection(self, name: str, sel: np.ndarray, channel: list = None):
+    #     """Adds selection to PackedSelection object and the cutflow dictionary"""
+    #     channels = channel if (channel and channel in self._channels) else self._channels
+    #     for ch in channels:
+    #         self.selections[ch].add(name, sel)
+    #         self.cutflows[ch][name] = np.sum(self.selections[ch].all(*self.selections[ch].names))
+
     def add_selection(self, name: str, sel: np.ndarray, channel: list = None):
         """Adds selection to PackedSelection object and the cutflow dictionary"""
-        channels = channel if (channel and channel in self._channels) else self._channels
+        channels = channel if channel else self._channels
         for ch in channels:
             self.selections[ch].add(name, sel)
             self.cutflows[ch][name] = np.sum(self.selections[ch].all(*self.selections[ch].names))
