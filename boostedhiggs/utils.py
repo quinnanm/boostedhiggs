@@ -18,7 +18,6 @@ Z_PDGID = 23
 W_PDGID = 24
 HIGGS_PDGID = 25
 
-
 def getParticles(genparticles, lowid=22, highid=25, flags=['fromHardProcess', 'isLastCopy']):
     """
     returns the particle objects that satisfy a low id,
@@ -29,7 +28,6 @@ def getParticles(genparticles, lowid=22, highid=25, flags=['fromHardProcess', 'i
         ((absid >= lowid) & (absid <= highid))
         & genparticles.hasFlags(flags)
     ]
-
 
 def match_HWW(genparticles, candidatefj):
     """
@@ -96,13 +94,11 @@ def match_HWW(genparticles, candidatefj):
         "matchedH": matchedH,
         "iswlepton": iswlepton,  # truth info, higher mass is normally onshell
         "iswstarlepton": iswstarlepton}  # truth info, lower mass is normally offshell
-
+    
     return genVars
-
 
 def to_label(array: ak.Array) -> ak.Array:
     return ak.values_astype(array, np.int32)
-
 
 def match_V(genparticles, candidatefj):
     vs = getParticles(genparticles, lowid=23, highid=24)
@@ -113,24 +109,23 @@ def match_V(genparticles, candidatefj):
     daughters = daughters[daughters.hasFlags(["fromHardProcess", "isLastCopy"])]
     daughters_pdgId = abs(daughters.pdgId)
     decay = (
-        # 2 quarks * 1
+        # 2 quarks * 1                                                                                                                                                                                                                
         (ak.sum(daughters_pdgId < b_PDGID, axis=1) == 2) * 1
-        # 1 electron * 3
+        # 1 electron * 3                                                                                                                                                                                                              
         + (ak.sum(daughters_pdgId == ELE_PDGID, axis=1) == 1) * 3
-        # 1 muon * 5
+        # 1 muon * 5                                                                                                                                                                                                                  
         + (ak.sum(daughters_pdgId == MU_PDGID, axis=1) == 1) * 5
-        # 1 tau * 7
+        # 1 tau * 7                                                                                                                                                                                                                   
         + (ak.sum(daughters_pdgId == TAU_PDGID, axis=1) == 1) * 7
     )
 
     matched_vdaus_mask = ak.any(candidatefj.delta_r(daughters) < 0.8, axis=1)
     matched_mask = matched_vs_mask & matched_vdaus_mask
     genVars = {
-        "gen_isVlep": to_label(((decay == 3) | (decay == 5) | (decay == 7)) & matched_mask),
-        "gen_isVqq": to_label((decay == 1) & matched_mask),
+        "gen_isVlep": to_label( ((decay == 3) | (decay == 5) | (decay == 7)) & matched_mask),
+        "gen_isVqq": to_label( (decay==1) & matched_mask),
     }
     return genVars
-
 
 def match_Top(genparticles, candidatefj):
     tops = getParticles(genparticles, lowid=5, highid=5)
@@ -155,17 +150,15 @@ def match_Top(genparticles, candidatefj):
     )
     bquark = daughters[(daughters_pdgId == 5)]
     matched_b = ak.sum(candidatefj.delta_r(bquark) < 0.8, axis=1)
-
     matched_topdaus_mask = ak.any(candidatefj.delta_r(daughters) < 0.8, axis=1)
     matched_mask = matched_tops_mask & matched_topdaus_mask
 
     genVars = {
         "gen_isTopbmerged": to_label(matched_b == 1),
-        "gen_isToplep": to_label(((decay == 3) | (decay == 5) | (decay == 7)) & matched_mask),
-        "gen_isTopqq": to_label((decay == 1) & matched_mask),
+        "gen_isToplep": to_label( ((decay == 3) | (decay == 5) | (decay == 7)) & matched_mask),
+        "gen_isTopqq": to_label( (decay==1) & matched_mask),
     }
     return genVars
-
 
 def match_Htt(genparticles, candidatefj, tau_visible):
     higgs = getParticles(genparticles, 25)
@@ -191,7 +184,6 @@ def match_Htt(genparticles, candidatefj, tau_visible):
     htt_matched = (ak.sum(matchedH.pt > 0, axis=1) == 1) * 1 + (ak.sum(dr_daughters < 0.8, axis=1) == 1) * 3 + (ak.sum(dr_daughters < 0.8, axis=1) == 2) * 5
 
     return htt_flavor, htt_matched, matchedH, higgs
-
 
 def pad_val(
     arr: ak.Array,

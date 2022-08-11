@@ -7,19 +7,11 @@ import pyarrow.parquet as pq
 import pyarrow as pa
 import awkward as ak
 import numpy as np
-import pandas as pd
 import json
-import os
-import glob
-import shutil
-import pathlib
+import os,glob,shutil,pathlib
 from typing import List, Optional
 
 import argparse
-from coffea import processor
-from coffea.nanoevents.methods import candidate, vector
-from coffea.analysis_tools import Weights, PackedSelection
-
 import hist as hist2
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
@@ -115,32 +107,13 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                         continue
 
                     # make iso and miso cuts (different for each channel)
-                    # iso_cut = (data['lep_isolation'] < 0.15) & (data['lep_pt'] < max_iso[ch])
-                    iso_cut = (data['lep_isolation'] < 0.15) & (data['lep_pt'] < max_iso[ch]) | (data['lep_pt'] > max_iso[ch])
-                    #
-                    # if ch == 'ele':
-                    #     miso_cut = (data['lep_pt'] > max_iso[ch])
-                    # elif ch == 'mu':
-                    #     # miso_cut = (data['lep_misolation'] < 0.1) & (data['lep_pt'] > max_iso[ch])
-                    #     miso_cut = (data['lep_misolation'] < 0.1)
-                    #
-                    # # for plotting iso and miso use different pt cut
-                    # if var == 'lep_isolation':
-                    #     # pt_cut = (data['lep_pt'] > max_iso[ch])
-                    #     # select = (iso_cut | miso_cut) & pt_cut
-                    #     select = (iso_cut & miso_cut)
-                    # elif var == 'lep_misolation':
-                    #     # pt_cut = (data['lep_pt'] < max_iso[ch])
-                    #     # select = (iso_cut | miso_cut) & pt_cut
-                    #     select = (iso_cut & miso_cut)
-                    # else:
-                    #     select = (iso_cut & miso_cut)
+                    iso_cut = ((data['lep_isolation'] < 0.15) & (data['lep_pt'] < max_iso[ch])) | (data['lep_pt'] > max_iso[ch])
+                    if  ch == 'mu':
+                        miso_cut = ((data['lep_misolation'] < 0.1) & (data['lep_pt'] >= max_iso[ch])) | (data['lep_pt'] < max_iso[ch])
+                    else:
+                        miso_cut = (data['lep_pt'] > 10)
 
-                    # if ch == 'mu':
-                    #     miso_cut = (data['lep_misolation'] < 0.1)
-                    #     select = (iso_cut & miso_cut)
-                    # else:
-                    #     select = iso_cut
+                    select = (iso_cut) & (miso_cut)
 
                     # filling histograms
                     single_sample = None
@@ -155,15 +128,10 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                         sample_to_use = sample
 
                     # combining all pt bins of a specefic process under one name
-                    # hists[var].fill(
-                    #     samples=sample_to_use,
-                    #     var=data[var][select],
-                    #     weight=event_weight[select],
-                    # )
                     hists[var].fill(
                         samples=sample_to_use,
-                        var=data[var],
-                        weight=event_weight,
+                        var=data[var][select],
+                        weight=event_weight[select],
                     )
 
     # store the hists variable
@@ -417,13 +385,12 @@ def main(args):
 if __name__ == "__main__":
     # e.g.
     # run locally as: python make_stacked_hists.py --year 2017 --odir hists --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Aug8 --make_hists --plot_hists
-    # run locally as: python make_stacked_hists.py --year 2017 --odir hists --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Aug8 --make_hists --plot_hists
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',                   dest='year', required=True, choices=["2016", "2016APV", "2017", "2018", "Run2"],  help="year")
     parser.add_argument('--vars',                   dest='vars',                    default="plot_configs/vars.json",             help='path to json with variables to be plotted')
     parser.add_argument('--samples',                dest='samples',                 default="plot_configs/samples_pfnano.json",   help='path to json with samples to be plotted')
-    parser.add_argument('--channels',               dest='channels',                default='ele,mu,had',                         help='channels for which to plot this variable')
+    parser.add_argument('--channels',               dest='channels',                default='ele,mu',                         help='channels for which to plot this variable')
     parser.add_argument('--odir',                   dest='odir',                    default='hists',                              help="tag for output directory... will append '_{year}' to it")
     parser.add_argument('--idir',                   dest='idir',                    default='../results/',                        help="input directory with results - without _{year}")
     parser.add_argument("--make_hists",             dest='make_hists',              action='store_true',                          help="Make hists")

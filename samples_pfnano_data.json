@@ -20,16 +20,16 @@
 	"SingleElectron_Run2016F_HIPM": 40
     },
     "2017": {
-	"SingleMuon_Run2017B": 40,
-	"SingleMuon_Run2017C": 40,
-	"SingleMuon_Run2017D": 40,
-	"SingleMuon_Run2017E": 40,
-	"SingleMuon_Run2017F": 40,
-	"SingleElectron_Run2017B": 40,
-	"SingleElectron_Run2017C": 40,
-	"SingleElectron_Run2017D": 40,
-	"SingleElectron_Run2017E": 40,
-	"SingleElectron_Run2017F": 40
+	"SingleMuon_Run2017B": 20,
+	"SingleMuon_Run2017C": 20,
+	"SingleMuon_Run2017D": 20,
+	"SingleMuon_Run2017E": 20,
+	"SingleMuon_Run2017F": 20,
+	"SingleElectron_Run2017B": 20,
+	"SingleElectron_Run2017C": 20,
+	"SingleElectron_Run2017D": 20,
+	"SingleElectron_Run2017E": 20,
+	"SingleElectron_Run2017F": 20
     },
     "2018": {
 	"SingleMuon_Run2018A": 30,

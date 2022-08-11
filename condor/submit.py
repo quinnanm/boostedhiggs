@@ -35,7 +35,8 @@ def main(args):
     # build metadata.json with samples
     slist = args.slist.split(',') if args.slist is not None else None
     files, nfiles_per_job = loadJson(args.samples, args.year, args.pfnano, slist)
-    with open(f"{locdir}/metadata.json", "w") as f:
+    metadata_file = f"metadata_{args.samples}"
+    with open(f"{locdir}/{metadata_file}", "w") as f:
         json.dump(files, f, sort_keys=True, indent=2)
 
     # submit a cluster of jobs per sample
@@ -74,6 +75,7 @@ def main(args):
             line = line.replace("DIRECTORY", locdir)
             line = line.replace("PREFIX", sample)
             line = line.replace("JOBIDS_FILE", jobids_file)
+            line = line.replace("METADATAFILE", metadata_file)
             line = line.replace("PROXY", proxy)
             condor_file.write(line)
         condor_file.close()
@@ -88,6 +90,7 @@ def main(args):
             line = line.replace("SCRIPTNAME", args.script)
             line = line.replace("YEAR", args.year)
             line = line.replace("PROCESSOR", args.processor)
+            line = line.replace("METADATAFILE", metadata_file)
             line = line.replace("NUMJOBS", files_per_job)
             line = line.replace("SAMPLE", sample)
             line = line.replace("EOSOUTPKL", eosoutput_pkl)
@@ -95,6 +98,10 @@ def main(args):
                 line = line.replace("PFNANO", "--pfnano")
             else:
                 line = line.replace("PFNANO", "--no-pfnano")
+            if args.inference:
+                line = line.replace("INFERENCE", "--inference")
+            else:
+                line = line.replace("INFERENCE", "--no-inference")
             sh_file.write(line)
         sh_file.close()
         sh_templ_file.close()
@@ -111,7 +118,7 @@ def main(args):
 
 if __name__ == "__main__":
     """
-    python condor/submit.py --year 2017 --tag Jul28 --samples samples_pfnano_condor.json --pfnano --submit
+    python condor/submit.py --year 2017 --tag Aug11 --samples samples_pfnano_mc.json --pfnano --submit --inference
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("--script",    dest="script",    default="run.py",              help="script to run", type=str)
@@ -125,7 +132,10 @@ if __name__ == "__main__":
     parser.add_argument("--files-per-job",               default=None,                  help="# files per condor job", type=int)
     parser.add_argument("--pfnano",    dest='pfnano', action='store_true')
     parser.add_argument("--no-pfnano", dest='pfnano', action='store_false')
+    parser.add_argument("--inference",   dest='inference', action='store_true')
+    parser.add_argument("--no-inference", dest='inference', action='store_false')
     parser.set_defaults(pfnano=True)
+    parser.set_defaults(inference=True)
     args = parser.parse_args()
 
     main(args)

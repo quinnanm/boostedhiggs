@@ -145,7 +145,6 @@ class HwwProcessor(processor.ProcessorABC):
 
     def add_selection(self, name: str, sel: np.ndarray, channel: list = None):
         """Adds selection to PackedSelection object and the cutflow dictionary"""
-        # channels = channel if (channel and channel in self._channels) else self._channels
         channels = channel if channel else self._channels
         for ch in channels:
             self.selections[ch].add(name, sel)
@@ -320,11 +319,12 @@ class HwwProcessor(processor.ProcessorABC):
         lep_fj_dr = candidatefj.delta_r(candidatelep_p4)
 
         # VBF variables
-        ak4_outside_ak8 = goodjets[goodjets.delta_r(candidatefj) > 0.8]
+        ak4_outside_ak8 = goodjets[goodjets.delta_r(candidatefj)>0.8]
         jet1 = ak4_outside_ak8[:, 0:1]
         jet2 = ak4_outside_ak8[:, 1:2]
         deta = abs(ak.firsts(jet1).eta - ak.firsts(jet2).eta)
-        mjj = (ak.firsts(jet1) + ak.firsts(jet2)).mass
+        mjj = ( ak.firsts(jet1) + ak.firsts(jet2) ).mass
+
         # to optimize
         # isvbf = ((deta > 3.5) & (mjj > 1000))
         # isvbf = ak.fill_none(isvbf,False)
@@ -623,9 +623,7 @@ class HwwProcessor(processor.ProcessorABC):
                     )
                     print("post-inference")
                     print(pnet_vars)
-                    # if pnet_vars == None:
-                    # print('pnet_vars is None!!!... skipping storage')
-                    # else:
+
                     output[ch] = {
                         **output[ch],
                         **{key: value for (key, value) in pnet_vars.items()}

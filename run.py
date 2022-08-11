@@ -22,7 +22,6 @@ def main(args):
     if not os.path.exists('./outfiles'):
         os.makedirs('./outfiles')
 
-    # channels = ["ele", "mu", "had"]
     channels = ["ele", "mu"]
     starti = args.starti
     job_name = '/' + str(starti)
@@ -40,7 +39,7 @@ def main(args):
                         files[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist]
     else:
         # get samples
-        if args.json == 'metadata.json':
+        if "metadata" in args.json:
             with open(args.json, 'r') as f:
                 files = json.load(f)
         else:
@@ -73,7 +72,6 @@ def main(args):
             p = HwwProcessor(year='2016', yearmod='APV', channels=channels, inference=args.inference, output_location='./outfiles' + job_name)
         else:
             p = HwwProcessor(year=args.year, channels=channels, inference=args.inference, output_location='./outfiles' + job_name)
-            # p = HwwProcessor(year=args.year, channels=channels, output_location='./outfiles' + job_name)      # for june_20 processor debugging
 
     tic = time.time()
     if args.executor == "dask":
@@ -151,10 +149,11 @@ if __name__ == "__main__":
     )
     parser.add_argument("--local",       dest='local', action='store_true')
     parser.add_argument("--inference",   dest='inference', action='store_true')
+    parser.add_argument("--no-inference", dest='inference', action='store_false')
     parser.add_argument("--pfnano",      dest='pfnano', action='store_true')
     parser.add_argument("--no-pfnano",   dest='pfnano', action='store_false')
     parser.set_defaults(pfnano=True)
-
+    parser.set_defaults(inference=True)
     args = parser.parse_args()
 
     main(args)
