@@ -256,8 +256,8 @@ class HwwProcessor(processor.ProcessorABC):
         lep_reliso = candidatelep.pfRelIso04_all if hasattr(candidatelep, "pfRelIso04_all") else candidatelep.pfRelIso03_all    # reliso for candidate lepton
         lep_miso = candidatelep.miniPFRelIso_all    # miniso for candidate lepton
         mu_mvaId = candidatelep.mvaId if hasattr(candidatelep, "mvaId") else np.zeros(nevents)      # MVA-ID for candidate lepton
-        mu_highPtId = ak.firsts(events.Muon[good_muons]).highPtId
-        ele_highPtId = ak.firsts(events.Electron[good_electrons]).cutBased_HEEP
+        # mu_highPtId = ak.firsts(events.Muon[good_muons]).highPtId
+        # ele_highPtId = ak.firsts(events.Electron[good_electrons]).cutBased_HEEP
 
         # jets
         goodjets = events.Jet[
@@ -444,12 +444,12 @@ class HwwProcessor(processor.ProcessorABC):
                 "lep_met_mt": mt_lep_met,
                 "met_fj_dphi": met_fjlep_dphi,
             },
-            "ele": {
-                "ele_highPtId": ele_highPtId,
-            },
+            # "ele": {
+            #     "ele_highPtId": ele_highPtId,
+            # },
             "mu": {
                 "mu_mvaId": mu_mvaId,
-                "mu_highPtId": mu_highPtId,
+                # "mu_highPtId": mu_highPtId,
             },
             "common": {
                 "met": met.pt,
@@ -460,35 +460,35 @@ class HwwProcessor(processor.ProcessorABC):
             },
         }
 
-        # gen matching for signal
-        if (('HToWW' or 'HWW') in dataset) and isMC:
-            matchHWW = match_HWW(events.GenPart, candidatefj)
-            variables["lep"]["gen_Hpt"] = ak.firsts(matchHWW["matchedH"].pt)
-            variables["lep"]["gen_Hnprongs"] = matchHWW["hWW_nprongs"]
-            variables["lep"]["gen_iswlepton"] = matchHWW["iswlepton"]
-            variables["lep"]["gen_iswstarlepton"] = matchHWW["iswstarlepton"]
-
-        # gen matching for background
-        if ('WJets' in dataset) or ('ZJets' in dataset) and isMC:
-            matchV = match_V(events.GenPart, candidatefj)
-            if ('WJetsToLNu' in dataset):
-                variables["lep"]["gen_isVlep"] = matchV["gen_isVlep"]
-            if ('WJetsToQQ' in dataset) or ('ZJetsToQQ' in dataset):
-                variables["lep"]["gen_isVqq"] = matchV["gen_isVqq"]
-        if ('TT' in dataset) and isMC:
-            matchT = match_Top(events.GenPart, candidatefj)
-            variables["lep"]["gen_isTop"] = matchT["gen_isTopbmerged"]
-            variables["lep"]["gen_isToplep"] = matchT["gen_isToplep"]
-            variables["lep"]["gen_isTopqq"] = matchT["gen_isTopqq"]
-
-        # if trigger is not applied then save the trigger variables
-        if not self.apply_trigger:
-            variables["lep"]["cut_trigger_iso"] = trigger_iso[ch]
-            variables["lep"]["cut_trigger_noniso"] = trigger_noiso[ch]
-
-        # let's save the hem veto as a cut for now
-        if self._year == "2018":
-            variables["common"]["hem_cleaning"] = hem_cleaning
+        # # gen matching for signal
+        # if (('HToWW' or 'HWW') in dataset) and isMC:
+        #     matchHWW = match_HWW(events.GenPart, candidatefj)
+        #     variables["lep"]["gen_Hpt"] = ak.firsts(matchHWW["matchedH"].pt)
+        #     variables["lep"]["gen_Hnprongs"] = matchHWW["hWW_nprongs"]
+        #     variables["lep"]["gen_iswlepton"] = matchHWW["iswlepton"]
+        #     variables["lep"]["gen_iswstarlepton"] = matchHWW["iswstarlepton"]
+        #
+        # # gen matching for background
+        # if ('WJets' in dataset) or ('ZJets' in dataset) and isMC:
+        #     matchV = match_V(events.GenPart, candidatefj)
+        #     if ('WJetsToLNu' in dataset):
+        #         variables["lep"]["gen_isVlep"] = matchV["gen_isVlep"]
+        #     if ('WJetsToQQ' in dataset) or ('ZJetsToQQ' in dataset):
+        #         variables["lep"]["gen_isVqq"] = matchV["gen_isVqq"]
+        # if ('TT' in dataset) and isMC:
+        #     matchT = match_Top(events.GenPart, candidatefj)
+        #     variables["lep"]["gen_isTop"] = matchT["gen_isTopbmerged"]
+        #     variables["lep"]["gen_isToplep"] = matchT["gen_isToplep"]
+        #     variables["lep"]["gen_isTopqq"] = matchT["gen_isTopqq"]
+        #
+        # # if trigger is not applied then save the trigger variables
+        # if not self.apply_trigger:
+        #     variables["lep"]["cut_trigger_iso"] = trigger_iso[ch]
+        #     variables["lep"]["cut_trigger_noniso"] = trigger_noiso[ch]
+        #
+        # # let's save the hem veto as a cut for now
+        # if self._year == "2018":
+        #     variables["common"]["hem_cleaning"] = hem_cleaning
 
         """
         Weights
