@@ -826,10 +826,10 @@ class HwwProcessor(processor.ProcessorABC):
             if not isMC and self.dataset_per_ch[ch] not in dataset:
                 fill_output = False
 
-            selection_ch = self.selections[ch].all(*self.selections[ch].names)
+            # selection_ch = self.selections[ch].all(*self.selections[ch].names)
 
             # only fill output for that channel if the selections yield any events
-            if np.sum(selection_ch) <= 0:
+            if np.sum(self.selections[ch].all(*self.selections[ch].names)) <= 0:
                 fill_output = False
 
             if fill_output:
@@ -847,23 +847,23 @@ class HwwProcessor(processor.ProcessorABC):
 
                 # fill the output dictionary after selections
                 output[ch] = {
-                    key: value[selection_ch] for (key, value) in out.items()
+                    key: value[self.selections[ch].all(*self.selections[ch].names)] for (key, value) in out.items()
                 }
 
-                # fill inference
-                if self.inference:
-                    print("pre-inference")
-                    pnet_vars = runInferenceTriton(
-                        self.tagger_resources_path,
-                        events[selection_ch],
-                        fj_idx_lep[selection_ch]
-                    )
-                    print("post-inference")
-                    print(pnet_vars)
-                    output[ch] = {
-                        **output[ch],
-                        **{key: value for (key, value) in pnet_vars.items()}
-                    }
+                # # fill inference
+                # if self.inference:
+                #     print("pre-inference")
+                #     pnet_vars = runInferenceTriton(
+                #         self.tagger_resources_path,
+                #         events[selection_ch],
+                #         fj_idx_lep[selection_ch]
+                #     )
+                #     print("post-inference")
+                #     print(pnet_vars)
+                #     output[ch] = {
+                #         **output[ch],
+                #         **{key: value for (key, value) in pnet_vars.items()}
+                #     }
             else:
                 output[ch] = {}
 
