@@ -16,7 +16,8 @@ import importlib.resources
 from coffea import processor
 from coffea.nanoevents.methods import candidate, vector
 from coffea.analysis_tools import Weights, PackedSelection
-from boostedhiggs.utils import match_HWW, getParticles
+
+from boostedhiggs.utils import match_HWW, getParticles, match_V, match_Top
 from boostedhiggs.corrections import (
     corrected_msoftdrop,
     add_VJets_kFactors,
@@ -24,8 +25,7 @@ from boostedhiggs.corrections import (
     add_lepton_weight,
     add_pileup_weight,
 )
-from boostedhiggs.btag import btagWPs
-from boostedhiggs.btag import BTagCorrector
+from boostedhiggs.btag import btagWPs, BTagCorrector
 
 from .run_tagger_inference import runInferenceTriton
 
@@ -33,6 +33,7 @@ import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", message="Missing cross-reference index ")
+warnings.filterwarnings("ignore", message="divide by zero encountered in log")
 np.seterr(invalid='ignore')
 
 
@@ -192,7 +193,7 @@ class HwwProcessor(processor.ProcessorABC):
                 metfilters = metfilters & events.Flag[mf]
         self.add_selection("metfilters", metfilters)
 
-        # define tau objects for starters (will be needed in the end to avoid picking taus)
+        # taus (will need to refine to avoid overlap with htt)
         loose_taus_mu = (
             (events.Tau.pt > 20)
             & (abs(events.Tau.eta) < 2.3)
@@ -206,8 +207,7 @@ class HwwProcessor(processor.ProcessorABC):
         n_loose_taus_mu = ak.sum(loose_taus_mu, axis=1)
         n_loose_taus_ele = ak.sum(loose_taus_ele, axis=1)
 
-        # Object definitions:
-        # define muon objects
+        # muons
         loose_muons = (
             (((events.Muon.pt > 30) & (events.Muon.pfRelIso04_all < 0.25)) |
              (events.Muon.pt > 55))
@@ -226,7 +226,7 @@ class HwwProcessor(processor.ProcessorABC):
         )
         n_good_muons = ak.sum(good_muons, axis=1)
 
-        # define electron objects
+        # electrons
         loose_electrons = (
             (((events.Electron.pt > 38) & (events.Electron.pfRelIso03_all < 0.25)) |
              (events.Electron.pt > 120))
@@ -256,8 +256,10 @@ class HwwProcessor(processor.ProcessorABC):
         lep_reliso = candidatelep.pfRelIso04_all if hasattr(candidatelep, "pfRelIso04_all") else candidatelep.pfRelIso03_all    # reliso for candidate lepton
         lep_miso = candidatelep.miniPFRelIso_all    # miniso for candidate lepton
         mu_mvaId = candidatelep.mvaId if hasattr(candidatelep, "mvaId") else np.zeros(nevents)      # MVA-ID for candidate lepton
+        mu_highPtId = ak.firsts(events.Muon[good_muons]).highPtId
+        ele_highPtId = ak.firsts(events.Electron[good_electrons]).cutBased_HEEP
 
-        # JETS
+        # jets
         goodjets = events.Jet[
             (events.Jet.pt > 30)
             & (abs(events.Jet.eta) < 5.0)
@@ -273,7 +275,7 @@ class HwwProcessor(processor.ProcessorABC):
             ]
         ht = ak.sum(goodjets.pt, axis=1)
 
-        # FATJETS
+        # fatjets
         fatjets = events.FatJet
         fatjets["msdcorr"] = corrected_msoftdrop(fatjets)
         fatjets["qcdrho"] = 2 * np.log(fatjets.msdcorr / fatjets.pt)
@@ -292,7 +294,7 @@ class HwwProcessor(processor.ProcessorABC):
         lep_in_fj_overlap_bool = good_fatjets.delta_r(candidatelep_p4) > 0.1
         good_fatjets = good_fatjets[lep_in_fj_overlap_bool]
         fj_idx_lep = ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)
-        candidatefj_lep = ak.firsts(good_fatjets[fj_idx_lep])
+        candidatefj = ak.firsts(good_fatjets[fj_idx_lep])
 
         # MET
         met = events.MET
@@ -300,28 +302,29 @@ class HwwProcessor(processor.ProcessorABC):
             2. * candidatelep_p4.pt * met.pt * (ak.ones_like(met.pt) - np.cos(candidatelep_p4.delta_phi(met)))
         )
         # delta phi MET and higgs candidate
-        met_fjlep_dphi = candidatefj_lep.delta_phi(met)
+        met_fjlep_dphi = candidatefj.delta_phi(met)
 
         # for leptonic channel: pick candidate_fj closest to the MET
-        # candidatefj_lep = ak.firsts(good_fatjets[ak.argmin(good_fatjets.delta_phi(met), axis=1, keepdims=True)])      # get candidatefj for leptonic channel
+        # candidatefj = ak.firsts(good_fatjets[ak.argmin(good_fatjets.delta_phi(met), axis=1, keepdims=True)])      # get candidatefj for leptonic channel
 
         # lepton and fatjet mass
-        lep_fj_m = (candidatefj_lep - candidatelep_p4).mass  # mass of fatjet without lepton
+        lep_fj_m = (candidatefj - candidatelep_p4).mass  # mass of fatjet without lepton
 
         # b-jets
         # in event, pick highest b score in opposite direction from signal (we will make cut here to avoid tt background events producing bjets)
-        dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj_lep))
+        dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj))
         bjets_away_lepfj = goodjets[dphi_jet_lepfj > np.pi / 2]
 
         # deltaR
-        lep_fj_dr = candidatefj_lep.delta_r(candidatelep_p4)
+        lep_fj_dr = candidatefj.delta_r(candidatelep_p4)
 
         # VBF variables
-        # ak4_outside_ak8 = goodjets[goodjets.delta_r(candidatefj_lep)>0.8]
-        # jet1 = ak4_outside_ak8[:, 0:1]
-        # jet2 = ak4_outside_ak8[:, 1:2]
-        # deta = abs(ak.firsts(jet1).eta - ak.firsts(jet2).eta)
-        # mjj = ( ak.firsts(jet1) + ak.firsts(jet2) ).mass
+        ak4_outside_ak8 = goodjets[goodjets.delta_r(candidatefj) > 0.8]
+        jet1 = ak4_outside_ak8[:, 0:1]
+        jet2 = ak4_outside_ak8[:, 1:2]
+        deta = abs(ak.firsts(jet1).eta - ak.firsts(jet2).eta)
+        mjj = (ak.firsts(jet1) + ak.firsts(jet2)).mass
+        # to optimize
         # isvbf = ((deta > 3.5) & (mjj > 1000))
         # isvbf = ak.fill_none(isvbf,False)
 
@@ -353,7 +356,7 @@ class HwwProcessor(processor.ProcessorABC):
         # event selections for semi-leptonic channels
         self.add_selection(
             name='fatjetKin',
-            sel=candidatefj_lep.pt > 200,
+            sel=candidatefj.pt > 200,
             channel=['mu', 'ele']
         )
         self.add_selection(
@@ -393,17 +396,17 @@ class HwwProcessor(processor.ProcessorABC):
             sel=(n_loose_taus_mu == 0),
             channel=['mu']
         )
-        self.add_selection(
-            name='leptonIsolation',
-            sel=((candidatelep.pt > 30) & (candidatelep.pt < 55) & (lep_reliso < 0.15)) | (candidatelep.pt >= 55),
-            channel=['mu']
-        )
-        self.add_selection(
-            name='leptonMiniIsolation',
-            sel=((candidatelep.pt >= 55) & (candidatelep.miniPFRelIso_all < 0.1)) | (candidatelep.pt < 55),
-            # sel= (candidatelep.miniPFRelIso_all < 0.1),
-            channel=['mu']
-        )
+        # self.add_selection(
+        #     name='leptonIsolation',
+        #     sel=( (candidatelep.pt > 30) & (candidatelep.pt < 55) & (lep_reliso < 0.15) ) | (candidatelep.pt >= 55),
+        #     channel=['mu']
+        # )
+        # self.add_selection(
+        #     name='leptonMiniIsolation',
+        #     sel=( (candidatelep.pt >= 55) & (candidatelep.miniPFRelIso_all < 0.1) ) | (candidatelep.pt < 55),
+        #     # sel= (candidatelep.miniPFRelIso_all < 0.1),
+        #     channel=['mu']
+        # )
 
         # event selections for electron channel
         self.add_selection(
@@ -421,17 +424,17 @@ class HwwProcessor(processor.ProcessorABC):
             sel=(n_loose_taus_ele == 0),
             channel=['ele']
         )
-        self.add_selection(
-            name='leptonIsolation',
-            sel=((candidatelep.pt > 30) & (candidatelep.pt < 120) & (lep_reliso < 0.15)) | (candidatelep.pt >= 120),
-            channel=['ele']
-        )
+        # self.add_selection(
+        #     name='leptonIsolation',
+        #     sel=( (candidatelep.pt > 30) & (candidatelep.pt < 120) & (lep_reliso < 0.15) ) | (candidatelep.pt >= 120),
+        #     channel=['ele']
+        # )
 
         # fill tuple variables
         variables = {
             "lep": {
-                "fj_pt": candidatefj_lep.pt,
-                "fj_msoftdrop": candidatefj_lep.msdcorr,
+                "fj_pt": candidatefj.pt,
+                "fj_msoftdrop": candidatefj.msdcorr,
                 "fj_bjets_ophem": ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1),
                 "lep_pt": candidatelep.pt,
                 "lep_isolation": lep_reliso,
@@ -441,35 +444,42 @@ class HwwProcessor(processor.ProcessorABC):
                 "lep_met_mt": mt_lep_met,
                 "met_fj_dphi": met_fjlep_dphi,
             },
-            "ele": {},
+            "ele": {
+                "ele_highPtId": ele_highPtId,
+            },
             "mu": {
-                "lep_mvaId": mu_mvaId,
+                "mu_mvaId": mu_mvaId,
+                "mu_highPtId": mu_highPtId,
             },
             "common": {
                 "met": met.pt,
                 "ht": ht,
                 "nfj": n_fatjets,
+                "deta": deta,
+                "mjj": mjj,
             },
         }
 
-        match_HWW_lep = match_HWW(events.GenPart, candidatefj_lep)
-        print('matched')
-        print('1', events.GenPart)
-        print('2', events.GenPart[0])
-        print('3', candidatefj_lep)
-
-        # gen matching
+        # gen matching for signal
         if (('HToWW' or 'HWW') in dataset) and isMC:
-            match_HWW_lep = match_HWW(events.GenPart, candidatefj_lep)
-            variables["lep"]["gen_Hpt"] = ak.firsts(match_HWW_lep["matchedH"].pt)
-            variables["lep"]["gen_Hnprongs"] = match_HWW_lep["hWW_nprongs"]
-            variables["lep"]["gen_iswlepton"] = match_HWW_lep["iswlepton"]
-            variables["lep"]["gen_iswstarlepton"] = match_HWW_lep["iswstarlepton"]
+            matchHWW = match_HWW(events.GenPart, candidatefj)
+            variables["lep"]["gen_Hpt"] = ak.firsts(matchHWW["matchedH"].pt)
+            variables["lep"]["gen_Hnprongs"] = matchHWW["hWW_nprongs"]
+            variables["lep"]["gen_iswlepton"] = matchHWW["iswlepton"]
+            variables["lep"]["gen_iswstarlepton"] = matchHWW["iswstarlepton"]
 
-        if ('DY' in dataset) and isMC:
-            Z = getParticles(events.GenPart, lowid=23, highid=23, flags=['fromHardProcess', 'isLastCopy'])
-            Z = ak.firsts(Z)
-            lep_Z_dr = Z.delta_r(candidatelep_p4)   # get dr between Z and lepton
+        # gen matching for background
+        if ('WJets' in dataset) or ('ZJets' in dataset) and isMC:
+            matchV = match_V(events.GenPart, candidatefj)
+            if ('WJetsToLNu' in dataset):
+                variables["lep"]["gen_isVlep"] = matchV["gen_isVlep"]
+            if ('WJetsToQQ' in dataset) or ('ZJetsToQQ' in dataset):
+                variables["lep"]["gen_isVqq"] = matchV["gen_isVqq"]
+        if ('TT' in dataset) and isMC:
+            matchT = match_Top(events.GenPart, candidatefj)
+            variables["lep"]["gen_isTop"] = matchT["gen_isTopbmerged"]
+            variables["lep"]["gen_isToplep"] = matchT["gen_isToplep"]
+            variables["lep"]["gen_isTopqq"] = matchT["gen_isTopqq"]
 
         # if trigger is not applied then save the trigger variables
         if not self.apply_trigger:
@@ -493,7 +503,6 @@ class HwwProcessor(processor.ProcessorABC):
         - Muon ID scale factors (DONE)
         - Muon Isolation scale factors (DONE)
         - Electron Isolation scale factors (ToDo)
-
         - Jet Mass Scale (JMS) scale factor (ToDo)
         - Jet Mass Resolution (JMR) scale factor (ToDo)
         - NLO EWK scale factors for DY(ll)/W(lnu)/W(qq)/Z(qq) (DONE)
@@ -501,9 +510,7 @@ class HwwProcessor(processor.ProcessorABC):
         - LHE scale weights for signal
         - LHE pdf weights for signal
         - PSweights for signal
-
         - ParticleNet tagger efficiency
-
         Up and Down Variations (systematics included as a new variable)
         ----
         - Pileup weight Up/Down (DONE)
@@ -520,9 +527,7 @@ class HwwProcessor(processor.ProcessorABC):
         - LHE scale variations for signal
         - LHE pdf weights for signal
         - PSweights variations for signal
-
         - ParticleNet tagger Up/Down
-
         Up and Down Variations (systematics included as a new output file)
         ----
         - Jet Energy Scale (JES)
@@ -616,6 +621,7 @@ class HwwProcessor(processor.ProcessorABC):
                         fj_idx_lep[selection_ch]
                     )
                     print("post-inference")
+                    print(pnet_vars)
                     output[ch] = {
                         **output[ch],
                         **{key: value for (key, value) in pnet_vars.items()}
