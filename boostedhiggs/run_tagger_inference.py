@@ -150,7 +150,7 @@ def runInferenceTriton(
     try:
         tagger_outputs = triton_model(tagger_inputs)
     except:
-        print("---can't run inference due to error with the event--")
+        print("---can't run inference due to error with the event or the serve is not running--")
         return {}
 
     time_taken = time.time() - start
