@@ -127,8 +127,8 @@ class HwwProcessor(processor.ProcessorABC):
             str(pathlib.Path(__file__).parent.resolve()) + "/tagger_resources/"
         )
 
-        self.selections = {}
-        self.cutflows = {}
+        # self.selections = {}
+        # self.cutflows = {}
 
     @property
     def accumulator(self):
