@@ -2,6 +2,22 @@ import numpy as np
 from coffea.analysis_tools import PackedSelection
 import awkward as ak
 
+d_PDGID = 1
+b_PDGID = 5
+g_PDGID = 21
+TOP_PDGID = 6
+
+ELE_PDGID = 11
+vELE_PDGID = 12
+MU_PDGID = 13
+vMU_PDGID = 14
+TAU_PDGID = 15
+vTAU_PDGID = 16
+
+Z_PDGID = 23
+W_PDGID = 24
+HIGGS_PDGID = 25
+
 
 def getParticles(genparticles, lowid=22, highid=25, flags=['fromHardProcess', 'isLastCopy']):
     """
@@ -73,25 +89,92 @@ def match_HWW(genparticles, candidatefj):
     iswlepton = (leptons_mass == higgs_w_mass)
     iswstarlepton = (leptons_mass == higgs_wstar_mass)
 
-    ret = {"hWW_flavor": hWW_flavor,
-           "hWW_matched": hWW_matched,
-           "hWW_nprongs": hWW_nprongs,
-           "matchedH": matchedH,
-           "iswlepton": iswlepton,  # truth info, higher mass is normally onshell
-           "iswstarlepton": iswstarlepton}  # truth info, lower mass is normally offshell
+    genVars = {
+        "hWW_flavor": hWW_flavor,
+        "hWW_matched": hWW_matched,
+        "hWW_nprongs": hWW_nprongs,
+        "matchedH": matchedH,
+        "iswlepton": iswlepton,  # truth info, higher mass is normally onshell
+        "iswstarlepton": iswstarlepton}  # truth info, lower mass is normally offshell
 
-    return ret
+    return genVars
 
 
-def match_Htt(genparticles, candidatefj):
+def to_label(array: ak.Array) -> ak.Array:
+    return ak.values_astype(array, np.int32)
+
+
+def match_V(genparticles, candidatefj):
+    vs = getParticles(genparticles, lowid=23, highid=24)
+    matched_vs = vs[ak.argmin(candidatefj.delta_r(vs), axis=1, keepdims=True)]
+    matched_vs_mask = ak.any(candidatefj.delta_r(matched_vs) < 0.8, axis=1)
+
+    daughters = ak.flatten(matched_vs.distinctChildren, axis=2)
+    daughters = daughters[daughters.hasFlags(["fromHardProcess", "isLastCopy"])]
+    daughters_pdgId = abs(daughters.pdgId)
+    decay = (
+        # 2 quarks * 1
+        (ak.sum(daughters_pdgId < b_PDGID, axis=1) == 2) * 1
+        # 1 electron * 3
+        + (ak.sum(daughters_pdgId == ELE_PDGID, axis=1) == 1) * 3
+        # 1 muon * 5
+        + (ak.sum(daughters_pdgId == MU_PDGID, axis=1) == 1) * 5
+        # 1 tau * 7
+        + (ak.sum(daughters_pdgId == TAU_PDGID, axis=1) == 1) * 7
+    )
+
+    matched_vdaus_mask = ak.any(candidatefj.delta_r(daughters) < 0.8, axis=1)
+    matched_mask = matched_vs_mask & matched_vdaus_mask
+    genVars = {
+        "gen_isVlep": to_label(((decay == 3) | (decay == 5) | (decay == 7)) & matched_mask),
+        "gen_isVqq": to_label((decay == 1) & matched_mask),
+    }
+    return genVars
+
+
+def match_Top(genparticles, candidatefj):
+    tops = getParticles(genparticles, lowid=5, highid=5)
+    matched_tops = tops[ak.argmin(candidatefj.delta_r(tops), axis=1, keepdims=True)]
+    matched_tops_mask = ak.any(candidatefj.delta_r(matched_tops) < 0.8, axis=1)
+    daughters = ak.flatten(matched_tops.distinctChildren, axis=2)
+    daughters = daughters[daughters.hasFlags(["fromHardProcess", "isLastCopy"])]
+    daughters_pdgId = abs(daughters.pdgId)
+
+    wboson_daughters = ak.flatten(daughters[(daughters_pdgId == 24)].distinctChildren, axis=2)
+    wboson_daughters = wboson_daughters[wboson_daughters.hasFlags(["fromHardProcess", "isLastCopy"])]
+    wboson_daughters_pdgId = abs(wboson_daughters.pdgId)
+    decay = (
+        # 2 quarks
+        (ak.sum(wboson_daughters_pdgId < b_PDGID, axis=1) == 2) * 1
+        # 1 electron * 3
+        + (ak.sum(wboson_daughters_pdgId == ELE_PDGID, axis=1) == 1) * 3
+        # 1 muon * 5
+        + (ak.sum(wboson_daughters_pdgId == MU_PDGID, axis=1) == 1) * 5
+        # 1 tau * 7
+        + (ak.sum(wboson_daughters_pdgId == TAU_PDGID, axis=1) == 1) * 7
+    )
+    bquark = daughters[(daughters_pdgId == 5)]
+    matched_b = ak.sum(candidatefj.delta_r(bquark) < 0.8, axis=1)
+
+    matched_topdaus_mask = ak.any(candidatefj.delta_r(daughters) < 0.8, axis=1)
+    matched_mask = matched_tops_mask & matched_topdaus_mask
+
+    genVars = {
+        "gen_isTopbmerged": to_label(matched_b == 1),
+        "gen_isToplep": to_label(((decay == 3) | (decay == 5) | (decay == 7)) & matched_mask),
+        "gen_isTopqq": to_label((decay == 1) & matched_mask),
+    }
+    return genVars
+
+
+def match_Htt(genparticles, candidatefj, tau_visible):
     higgs = getParticles(genparticles, 25)
     is_htt = ak.all(abs(higgs.children.pdgId) == 15, axis=2)
 
     higgs = higgs[is_htt]
 
-    fromtau_electron = getParticles(events.GenPart, 11, 11, ['isDirectTauDecayProduct'])
-    fromtau_muon = getParticles(events.GenPart, 13, 13, ['isDirectTauDecayProduct'])
-    tau_visible = events.GenVisTau
+    fromtau_electron = getParticles(genparticles, 11, 11, ['isDirectTauDecayProduct'])
+    fromtau_muon = getParticles(genparticles, 13, 13, ['isDirectTauDecayProduct'])
 
     n_visibletaus = ak.sum(tau_visible.pt > 0, axis=1)
     n_electrons_fromtaus = ak.sum(fromtau_electron.pt > 0, axis=1)
