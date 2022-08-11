@@ -444,9 +444,10 @@ class HwwProcessor(processor.ProcessorABC):
                 "lep_met_mt": mt_lep_met,
                 "met_fj_dphi": met_fjlep_dphi,
             },
-            # "ele": {
-            #     "ele_highPtId": ele_highPtId,
-            # },
+            "ele": {
+                " met_fj_dphi2": met_fjlep_dphi,
+                #     "ele_highPtId": ele_highPtId,
+            },
             "mu": {
                 "mu_mvaId": mu_mvaId,
                 # "mu_highPtId": mu_highPtId,
