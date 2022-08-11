@@ -148,8 +148,8 @@ class HwwProcessor(processor.ProcessorABC):
 
     def add_selection(self, name: str, sel: np.ndarray, channel: list = None):
         """Adds selection to PackedSelection object and the cutflow dictionary"""
-        # channels = channel if (channel and channel in self._channels) else self._channels
-        channels = channel if channel else self._channels
+        channels = channel if (channel and channel in self._channels) else self._channels
+        # channels = channel if channel else self._channels
         for ch in channels:
             self.selections[ch].add(name, sel)
             self.cutflows[ch][name] = np.sum(self.selections[ch].all(*self.selections[ch].names))
