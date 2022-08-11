@@ -623,13 +623,13 @@ class HwwProcessor(processor.ProcessorABC):
                     )
                     print("post-inference")
                     print(pnet_vars)
-                    if pnet_vars == None:
-                        print('pnet_vars is None!!!... skipping storage')
-                    else:
-                        output[ch] = {
-                            **output[ch],
-                            **{key: value for (key, value) in pnet_vars.items()}
-                        }
+                    # if pnet_vars == None:
+                    # print('pnet_vars is None!!!... skipping storage')
+                    # else:
+                    output[ch] = {
+                        **output[ch],
+                        **{key: value for (key, value) in pnet_vars.items()}
+                    }
             else:
                 output[ch] = {}
 

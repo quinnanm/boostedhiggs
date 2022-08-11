@@ -147,37 +147,24 @@ def runInferenceTriton(
     tagger_outputs = []
 
     start = time.time()
-    print('tagger_inputs', tagger_inputs)
     try:
         tagger_outputs = triton_model(tagger_inputs)
     except:
-        print("---can't run inference due to error with the event (possibly had channel)---")
-        return None
+        print("---can't run inference due to error with the event--")
+        return {}
 
     time_taken = time.time() - start
 
     print(f"Inference took {time_taken:.1f}s")
 
-    # print('tagger_outputs shape', tagger_outputs.shape)
-    pnet_vars_list = []
-    if len(tagger_outputs):
-        pnet_vars = {
-            f"fj_ttbar_bmerged": tagger_outputs[:, 0],
-            f"fj_ttbar_bsplit": tagger_outputs[:, 1],
-            f"fj_wjets_label": tagger_outputs[:, 2],
-            f"fj_isHVV_elenuqq": tagger_outputs[:, 3],
-            f"fj_isHVV_munuqq": tagger_outputs[:, 4],
-            f"fj_isHVV_taunuqq": tagger_outputs[:, 5],
-        }
-    else:
-        pnet_vars = {
-            f"fj_ttbar_bmerged": np.array([]),
-            f"fj_ttbar_bsplit": np.array([]),
-            f"fj_wjets_label": np.array([]),
-            f"fj_isHVV_elenuqq": np.array([]),
-            f"fj_isHVV_munuqq": np.array([]),
-            f"fj_isHVV_taunuqq": np.array([]),
-        }
+    pnet_vars = {
+        f"fj_ttbar_bmerged": tagger_outputs[:, 0],
+        f"fj_ttbar_bsplit": tagger_outputs[:, 1],
+        f"fj_wjets_label": tagger_outputs[:, 2],
+        f"fj_isHVV_elenuqq": tagger_outputs[:, 3],
+        f"fj_isHVV_munuqq": tagger_outputs[:, 4],
+        f"fj_isHVV_taunuqq": tagger_outputs[:, 5],
+    }
 
     print(f"Total time taken: {time.time() - total_start:.1f}s")
     return pnet_vars
