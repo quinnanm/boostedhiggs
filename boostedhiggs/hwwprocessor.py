@@ -36,12 +36,14 @@ warnings.filterwarnings("ignore", message="Missing cross-reference index ")
 warnings.filterwarnings("ignore", message="divide by zero encountered in log")
 np.seterr(invalid='ignore')
 
+
 def dsum(*dicts):
     ret = defaultdict(int)
     for d in dicts:
         for k, v in d.items():
             ret[k] += v
     return dict(ret)
+
 
 def pad_val(
     arr: ak.Array,
@@ -61,6 +63,7 @@ def pad_val(
         ret = ak.fill_none(arr, value, axis=None)
     return ret.to_numpy() if to_numpy else ret
 
+
 def build_p4(cand):
     return ak.zip(
         {
@@ -74,13 +77,14 @@ def build_p4(cand):
         behavior=candidate.behavior,
     )
 
+
 class HwwProcessor(processor.ProcessorABC):
-    def __init__(self, 
-                 year="2017", 
-                 yearmod="", 
+    def __init__(self,
+                 year="2017",
+                 yearmod="",
                  channels=["ele", "mu"],
-                 output_location="./outfiles/", 
-                 inference = False,
+                 output_location="./outfiles/",
+                 inference=False,
                  apply_trigger=True):
 
         self._year = year
@@ -426,6 +430,7 @@ class HwwProcessor(processor.ProcessorABC):
         #     channel=['ele']
         # )
 
+
         # fill tuple variables
         variables = {
             "lep": {
@@ -456,7 +461,7 @@ class HwwProcessor(processor.ProcessorABC):
             },
         }
 
-        # gen matching for signal
+
         if (('HToWW' or 'HWW') in dataset) and isMC:
             matchHWW = match_HWW(events.GenPart, candidatefj)
             variables["lep"]["gen_Hpt"] = ak.firsts(matchHWW["matchedH"].pt)

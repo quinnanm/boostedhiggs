@@ -49,35 +49,52 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=''):
         c = 0
         # loop over the samples
         for sample in samples[year][ch]:
-            if sample != 'VBFHToWWToLNuQQ-MH125':
-                continue
+            # if sample != 'VBFHToWWToLNuQQ-MH125':
+            #     continue
 
             # skip data samples
             is_data = False
             for key in data_by_ch.values():
                 if key in sample:
                     is_data = True
-            if is_data:
-                continue
+            # if is_data:
+            #     continue
 
             # check if the sample was processed
             pkl_dir = f'{idir}/{sample}/outfiles/*.pkl'
             pkl_files = glob.glob(pkl_dir)  #
+            # print(pkl_dir)
             if not pkl_files:  # skip samples which were not processed
                 continue
 
             # check if the sample was processed
             parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')
 
+            print(f'Processing {ch} channel of sample', sample)
+
             for i, parquet_file in enumerate(parquet_files):
                 try:
                     data = pq.read_table(parquet_file).to_pandas()
                 except:
+                    print("can't read data")
+                    continue
+
+                try:
+                    # select the jet pT [400-600] GeV and the mSD [30 -150 ]
+                    select_fj_pt = (data['fj_pt'] > 400) & (data['fj_pt'] < 600)
+                    select_fj_msd = (data['fj_msoftdrop'] > 30) & (data['fj_msoftdrop'] < 150)
+
+                    select = select_fj_pt & select_fj_msd
+
+                    data = data[select]
+                except:
+                    print(f'something is wrong with {sample}')
                     continue
 
                 try:
                     event_weight = data['tot_weight']
                 except:
+                    print("files haven't been postprocessed to store tot_weight")
                     continue
 
                 single_sample = None
@@ -89,31 +106,26 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=''):
                 else:
                     sample_to_use = sample
 
-                # add iso and miso selection cuts
-                if ch == 'ele':
-                    select = (data['lep_isolation'] < 0.15) & (data['lep_pt'] < max_iso[ch]) | (data['lep_pt'] > max_iso[ch])
-                elif ch == 'mu':
-                    select = ((data['lep_isolation'] < 0.15) & (data['lep_pt'] < max_iso[ch])) | ((data['lep_misolation'] < 0.1) & (data['lep_pt'] > max_iso[ch]))
+                if c == 0:  # for the first iteration the dataframe is initialized (then for further iterations we can just concat)
+                    if ch == 'ele':
+                        data_all = pd.DataFrame(data['fj_isHVV_elenuqq'] / (data['fj_isHVV_elenuqq'] + data['fj_ttbar_bmerged'] + data['fj_ttbar_bsplit'] + data['fj_wjets_label']), columns=['tagger_score'])
 
-                # specefy variable to save
-                if 'gen_Hpt' not in data.keys():
-                    continue
+                    elif ch == 'mu':
+                        data_all = pd.DataFrame(data['fj_isHVV_munuqq'] / (data['fj_isHVV_munuqq'] + data['fj_ttbar_bmerged'] + data['fj_ttbar_bsplit'] + data['fj_wjets_label']), columns=['tagger_score'])
 
-                print(sample_to_use)
-
-                if sample_to_use == 'VBFHToWWToLNuQQ-MH125':
-                    print(data['gen_Hpt'][select])
-
-                if c == 0:  # just so that the first iteration the dataframe is initialized (then for further iterations we can just concat)
-                    data_all = pd.DataFrame(data['gen_Hpt'][select])
                     data_all['sample'] = sample_to_use
-                    data_all['weight'] = event_weight[select]
+                    data_all['weight'] = event_weight
 
                     c = c + 1
                 else:
-                    data2 = pd.DataFrame(data['gen_Hpt'][select])
+                    if ch == 'ele':
+                        data2 = pd.DataFrame(data['fj_isHVV_elenuqq'] / (data['fj_isHVV_elenuqq'] + data['fj_ttbar_bmerged'] + data['fj_ttbar_bsplit'] + data['fj_wjets_label']), columns=['tagger_score'])
+
+                    elif ch == 'mu':
+                        data2 = pd.DataFrame(data['fj_isHVV_munuqq'] / (data['fj_isHVV_munuqq'] + data['fj_ttbar_bmerged'] + data['fj_ttbar_bsplit'] + data['fj_wjets_label']), columns=['tagger_score'])
+
                     data2['sample'] = sample_to_use
-                    data2['weight'] = event_weight[select]
+                    data2['weight'] = event_weight
 
                     data_all = pd.concat([data_all, data2])
 
@@ -129,9 +141,9 @@ def main(args):
         os.makedirs(odir)
 
     # make subdirectory specefic to this script
-    if not os.path.exists(odir + '/extra/'):
-        os.makedirs(odir + '/extra/')
-    odir = odir + '/extra'
+    if not os.path.exists(odir + '/tagger/'):
+        os.makedirs(odir + '/tagger/')
+    odir = odir + '/tagger'
 
     channels = args.channels.split(',')
 
@@ -154,7 +166,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # python get_var_for_plotting.py --year 2017 --odir plots --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --tag gen_Hpt_with_iso
+    # python tagger_var.py --year 2017 --odir plots --channels ele,mu --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/Jul28_2017 --tag tagger_score
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',            dest='year',        default='2017',                             help="year")

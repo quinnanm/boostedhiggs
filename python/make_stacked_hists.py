@@ -7,19 +7,11 @@ import pyarrow.parquet as pq
 import pyarrow as pa
 import awkward as ak
 import numpy as np
-import pandas as pd
 import json
-import os
-import glob
-import shutil
-import pathlib
+import os,glob,shutil,pathlib
 from typing import List, Optional
 
 import argparse
-from coffea import processor
-from coffea.nanoevents.methods import candidate, vector
-from coffea.analysis_tools import Weights, PackedSelection
-
 import hist as hist2
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
@@ -115,21 +107,13 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                         continue
 
                     # make iso and miso cuts (different for each channel)
-                    iso_cut = (data['lep_isolation'] < 0.15) & (data['lep_pt'] < max_iso[ch])
-                    if ch == 'ele':
-                        miso_cut = (data['lep_pt'] > max_iso[ch])
-                    elif ch == 'mu':
-                        miso_cut = (data['lep_misolation'] < 0.1) & (data['lep_pt'] > max_iso[ch])
-
-                    # for plotting iso and miso use different pt cut
-                    if var == 'lep_isolation':
-                        pt_cut = (data['lep_pt'] > max_iso[ch])
-                        select = (iso_cut | miso_cut) & pt_cut
-                    elif var == 'lep_misolation':
-                        pt_cut = (data['lep_pt'] < max_iso[ch])
-                        select = (iso_cut | miso_cut) & pt_cut
+                    iso_cut = ((data['lep_isolation'] < 0.15) & (data['lep_pt'] < max_iso[ch])) | (data['lep_pt'] > max_iso[ch])
+                    if  ch == 'mu':
+                        miso_cut = ((data['lep_misolation'] < 0.1) & (data['lep_pt'] >= max_iso[ch])) | (data['lep_pt'] < max_iso[ch])
                     else:
-                        select = (iso_cut | miso_cut)
+                        miso_cut = (data['lep_pt'] > 10)
+
+                    select = (iso_cut) & (miso_cut)
 
                     # filling histograms
                     single_sample = None
@@ -149,12 +133,6 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                         var=data[var][select],
                         weight=event_weight[select],
                     )
-                    # hists[var].fill(
-                    #     samples=sample_to_use,
-                    #     var=data[var],
-                    #     weight=event_weight,
-                    # )
-                    # print(hists[var])
 
     # store the hists variable
     with open(f'{odir}/{ch}_hists.pkl', 'wb') as f:  # saves the hists objects
@@ -406,7 +384,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as: python make_stacked_hists.py --year 2017 --odir hists --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20 --make_hists --plot_hists
+    # run locally as: python make_stacked_hists.py --year 2017 --odir hists --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Aug8/ --make_hists --plot_hists
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',                   dest='year', required=True, choices=["2016", "2016APV", "2017", "2018", "Run2"],  help="year")

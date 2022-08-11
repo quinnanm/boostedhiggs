@@ -112,13 +112,13 @@ def main(args):
 
         # submit
         if args.submit:
-            print('Submit ',localcondor)
+            print('Submit ', localcondor)
             os.system('condor_submit %s' % localcondor)
 
 
 if __name__ == "__main__":
     """
-    python condor/submit.py --year 2017 --tag Apr7 --samples samples_pfnano.json --pfnano --submit
+    python condor/submit.py --year 2017 --tag Jul28 --samples samples_pfnano_condor.json --pfnano --submit
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("--script",    dest="script",    default="run.py",              help="script to run", type=str)
