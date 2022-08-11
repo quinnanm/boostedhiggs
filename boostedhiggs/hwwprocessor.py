@@ -352,11 +352,10 @@ class HwwProcessor(processor.ProcessorABC):
                     & (met.phi < -0.62)
                 )
             )
-
         # event selections for semi-leptonic channels
         self.add_selection(
             name='fatjetKin',
-            sel=candidatefj.pt > 200,
+            sel=candidatefj_lep.pt > 200,
             channel=['mu', 'ele']
         )
         self.add_selection(
@@ -371,7 +370,7 @@ class HwwProcessor(processor.ProcessorABC):
         # )
         self.add_selection(
             name='antibjettag',
-            sel=(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
+            sel=(ak.max(bjets_away_candidatefj_had.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
             channel=['mu', 'ele']
         )
         self.add_selection(
@@ -397,14 +396,8 @@ class HwwProcessor(processor.ProcessorABC):
             channel=['mu']
         )
         # self.add_selection(
-        #     name='leptonIsolation',
-        #     sel=( (candidatelep.pt > 30) & (candidatelep.pt < 55) & (lep_reliso < 0.15) ) | (candidatelep.pt >= 55),
-        #     channel=['mu']
-        # )
-        # self.add_selection(
-        #     name='leptonMiniIsolation',
-        #     sel=( (candidatelep.pt >= 55) & (candidatelep.miniPFRelIso_all < 0.1) ) | (candidatelep.pt < 55),
-        #     # sel= (candidatelep.miniPFRelIso_all < 0.1),
+        #     'leptonIsolation',
+        #     sel=(((candidatelep.pt > 30) & (candidatelep.pt < 55) & (lep_reliso < 0.25)) | ((candidatelep.pt >= 55) & (candidatelep.miniPFRelIso_all < 0.2))),
         #     channel=['mu']
         # )
 
@@ -425,10 +418,87 @@ class HwwProcessor(processor.ProcessorABC):
             channel=['ele']
         )
         # self.add_selection(
-        #     name='leptonIsolation',
-        #     sel=( (candidatelep.pt > 30) & (candidatelep.pt < 120) & (lep_reliso < 0.15) ) | (candidatelep.pt >= 120),
+        #     'leptonIsolation',
+        #     sel=(((candidatelep.pt > 30) & (candidatelep.pt < 120) & (lep_reliso < 0.3)) | ((candidatelep.pt >= 120) & (candidatelep.miniPFRelIso_all < 0.2))),
         #     channel=['ele']
         # )
+
+        # # event selections for semi-leptonic channels
+        # self.add_selection(
+        #     name='fatjetKin',
+        #     sel=candidatefj.pt > 200,
+        #     channel=['mu', 'ele']
+        # )
+        # self.add_selection(
+        #     name='ht',
+        #     sel=(ht > 200),
+        #     channel=['mu', 'ele']
+        # )
+        # # self.add_selection(
+        # #     name='mt',
+        # #     sel=(mt_lep_met < 100),
+        # #     channel=['mu', 'ele']
+        # # )
+        # self.add_selection(
+        #     name='antibjettag',
+        #     sel=(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
+        #     channel=['mu', 'ele']
+        # )
+        # self.add_selection(
+        #     name='leptonInJet',
+        #     sel=(lep_fj_dr < 0.8),
+        #     channel=['mu', 'ele']
+        # )
+        #
+        # # event selection for muon channel
+        # self.add_selection(
+        #     name='leptonKin',
+        #     sel=(candidatelep.pt > 30),
+        #     channel=['mu']
+        # )
+        # self.add_selection(
+        #     name='oneLepton',
+        #     sel=(n_good_muons == 1) & (n_good_electrons == 0) & (n_loose_electrons == 0) & ~ak.any(loose_muons & ~good_muons, 1),
+        #     channel=['mu']
+        # )
+        # self.add_selection(
+        #     name='notaus',
+        #     sel=(n_loose_taus_mu == 0),
+        #     channel=['mu']
+        # )
+        # # self.add_selection(
+        # #     name='leptonIsolation',
+        # #     sel=( (candidatelep.pt > 30) & (candidatelep.pt < 55) & (lep_reliso < 0.15) ) | (candidatelep.pt >= 55),
+        # #     channel=['mu']
+        # # )
+        # # self.add_selection(
+        # #     name='leptonMiniIsolation',
+        # #     sel=( (candidatelep.pt >= 55) & (candidatelep.miniPFRelIso_all < 0.1) ) | (candidatelep.pt < 55),
+        # #     # sel= (candidatelep.miniPFRelIso_all < 0.1),
+        # #     channel=['mu']
+        # # )
+        #
+        # # event selections for electron channel
+        # self.add_selection(
+        #     name='leptonKin',
+        #     sel=(candidatelep.pt > 40),
+        #     channel=['ele']
+        # )
+        # self.add_selection(
+        #     name='oneLepton',
+        #     sel=(n_good_muons == 0) & (n_loose_muons == 0) & (n_good_electrons == 1) & ~ak.any(loose_electrons & ~good_electrons, 1),
+        #     channel=['ele']
+        # )
+        # self.add_selection(
+        #     name='notaus',
+        #     sel=(n_loose_taus_ele == 0),
+        #     channel=['ele']
+        # )
+        # # self.add_selection(
+        # #     name='leptonIsolation',
+        # #     sel=( (candidatelep.pt > 30) & (candidatelep.pt < 120) & (lep_reliso < 0.15) ) | (candidatelep.pt >= 120),
+        # #     channel=['ele']
+        # # )
 
         # fill tuple variables
         variables = {
