@@ -113,16 +113,17 @@ def make_stacked_hists(year, ch, idir, odir, samples):
                     miso_cut = data["lep_pt"] > 10
 
                 select = (iso_cut) & (miso_cut)
-                # select = data[var] > -999999999  # selects all events (i.e. no cut)
-                data = data[select]
 
                 # # select the jet pT [400-600] GeV and the mSD [30 -150]
                 # select_fj_pt = (data['fj_pt'] > 400) & (data['fj_pt'] < 600)
                 # select_fj_msd = (data['fj_msoftdrop'] > 30) & (data['fj_msoftdrop'] < 150)
                 #
                 # select = select_fj_pt & select_fj_msd
-                # data = data[select]
-                # event_weight = event_weight[select]
+
+                # if if you want to select all
+                # select = data['lep_pt'] > 0  # selects all events (i.e. no cut)
+                data = data[select]
+                event_weight = event_weight[select]
 
                 if ch == "ele":
                     x = data["fj_isHVV_elenuqq"] / (
@@ -391,8 +392,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as: python make_stacked_hists.py --year 2017 --odir hists --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20 --make_hists --plot_hists
-    # run locally as: python make_stacked_hists_tagger.py --year 2017 --odir hists --channels ele,mu --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/Jul28 --make_hists --plot_hists
+    # run locally as: python make_stacked_hists_tagger.py --year 2017 --odir hists --channels ele,mu --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/Aug11 --make_hists --plot_hists
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
