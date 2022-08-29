@@ -107,17 +107,17 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=""):
                 else:
                     sample_to_use = sample
 
-                # make iso and miso cuts (different for each channel)
-                iso_cut = ((data["lep_isolation"] < 0.15) & (data["lep_pt"] < max_iso[ch])) | (data["lep_pt"] > max_iso[ch])
-                if ch == "mu":
-                    miso_cut = ((data["lep_misolation"] < 0.1) & (data["lep_pt"] >= max_iso[ch])) | (
-                        data["lep_pt"] < max_iso[ch]
-                    )
-                else:
-                    miso_cut = data["lep_pt"] > 10
-
-                select = (iso_cut) & (miso_cut)
-                # select = data[var] > -999999999  # selects all events (i.e. no cut)
+                # # make iso and miso cuts (different for each channel)
+                # iso_cut = ((data["lep_isolation"] < 0.15) & (data["lep_pt"] < max_iso[ch])) | (data["lep_pt"] > max_iso[ch])
+                # if ch == "mu":
+                #     miso_cut = ((data["lep_misolation"] < 0.1) & (data["lep_pt"] >= max_iso[ch])) | (
+                #         data["lep_pt"] < max_iso[ch]
+                #     )
+                # else:
+                #     miso_cut = data["lep_pt"] > 10
+                #
+                # select = (iso_cut) & (miso_cut)
+                select = data["lep_pt"] > 0  # selects all events (i.e. no cut)
 
                 # for the first iteration the dataframe is initialized (then for further iterations we can just concat)
                 if c == 0:
