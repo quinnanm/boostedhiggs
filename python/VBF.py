@@ -29,10 +29,11 @@ import mplhep as hep
 from hist.intervals import clopper_pearson_interval
 
 import warnings
+
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
-def make_big_dataframe(year, channels, idir, odir, samples, tag=''):
+def make_big_dataframe(year, channels, idir, odir, samples, tag=""):
     """
     Counts signal and background at different working points of a cut
 
@@ -43,13 +44,13 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=''):
         odir: output directory to hold the hist object
         samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
     """
-    max_iso = {'ele': 120, 'mu': 55}
+    max_iso = {"ele": 120, "mu": 55}
 
     for ch in channels:
         c = 0
         # loop over the samples
         for sample in samples[year][ch]:
-            if sample != 'VBFHToWWToLNuQQ-MH125':
+            if sample != "VBFHToWWToLNuQQ-MH125":
                 continue
 
             # skip data samples
@@ -61,16 +62,16 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=''):
             #     continue
 
             # check if the sample was processed
-            pkl_dir = f'{idir}/{sample}/outfiles/*.pkl'
+            pkl_dir = f"{idir}/{sample}/outfiles/*.pkl"
             pkl_files = glob.glob(pkl_dir)  #
             # print(pkl_dir)
             if not pkl_files:  # skip samples which were not processed
                 continue
 
             # check if the sample was processed
-            parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')
+            parquet_files = glob.glob(f"{idir}/{sample}/outfiles/*_{ch}.parquet")
 
-            print(f'Processing {ch} channel of sample', sample)
+            print(f"Processing {ch} channel of sample", sample)
 
             for i, parquet_file in enumerate(parquet_files):
                 try:
@@ -92,7 +93,7 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=''):
                 #     continue
 
                 try:
-                    event_weight = data['tot_weight']
+                    event_weight = data["tot_weight"]
                 except:
                     print("files haven't been postprocessed to store tot_weight")
                     continue
@@ -106,30 +107,43 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=''):
                 else:
                     sample_to_use = sample
 
-                if c == 0:  # for the first iteration the dataframe is initialized (then for further iterations we can just concat)
-                    data_all = data
+                # make iso and miso cuts (different for each channel)
+                iso_cut = ((data["lep_isolation"] < 0.15) & (data["lep_pt"] < max_iso[ch])) | (data["lep_pt"] > max_iso[ch])
+                if ch == "mu":
+                    miso_cut = ((data["lep_misolation"] < 0.1) & (data["lep_pt"] >= max_iso[ch])) | (
+                        data["lep_pt"] < max_iso[ch]
+                    )
+                else:
+                    miso_cut = data["lep_pt"] > 10
+
+                select = (iso_cut) & (miso_cut)
+                # select = data[var] > -999999999  # selects all events (i.e. no cut)
+
+                # for the first iteration the dataframe is initialized (then for further iterations we can just concat)
+                if c == 0:
+                    data_all = data[select]
                     c = c + 1
                 else:
-                    data2 = pd.DataFrame(data)
+                    data2 = pd.DataFrame(data[select])
+                    print(f"num of events passing the cuts (and iso/miso) is {len(data2)}")
                     data_all = pd.concat([data_all, data2])
-
             print("------------------------------------------------------------")
 
-        data_all.to_csv(f'{odir}/data_{ch}_{tag}.csv')
+        data_all.to_csv(f"{odir}/data_{ch}_{tag}.csv")
 
 
 def main(args):
     # append '_year' to the output directory
-    odir = args.odir + '_' + args.year
+    odir = args.odir + "_" + args.year
     if not os.path.exists(odir):
         os.makedirs(odir)
 
     # make subdirectory specefic to this script
-    if not os.path.exists(odir + '/VBF/'):
-        os.makedirs(odir + '/VBF/')
-    odir = odir + '/VBF'
+    if not os.path.exists(odir + "/VBF/"):
+        os.makedirs(odir + "/VBF/")
+    odir = odir + "/VBF"
 
-    channels = args.channels.split(',')
+    channels = args.channels.split(",")
 
     # get samples to make histograms
     f = open(args.samples)
@@ -150,15 +164,22 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # python VBF.py --year 2017 --odir plots --channels ele,mu --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/Jul28_2017 --tag vbf
+    # python VBF.py --year 2017 --odir plots --channels ele,mu --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/Aug11_2017 --tag vbf
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--year',            dest='year',        default='2017',                             help="year")
-    parser.add_argument('--samples',         dest='samples',     default="plot_configs/samples_pfnano_value.json", help='path to json with samples to be plotted')
-    parser.add_argument('--channels',        dest='channels',    default='ele,mu,had',                       help='channels for which to plot this variable')
-    parser.add_argument('--odir',            dest='odir',        default='hists',                            help="tag for output directory... will append '_{year}' to it")
-    parser.add_argument('--idir',            dest='idir',        default='../results/',                      help="input directory with results")
-    parser.add_argument('--tag',             dest='tag',        default='',                      help="input directory with results")
+    parser.add_argument("--year", dest="year", default="2017", help="year")
+    parser.add_argument(
+        "--samples",
+        dest="samples",
+        default="plot_configs/samples_pfnano_value.json",
+        help="path to json with samples to be plotted",
+    )
+    parser.add_argument("--channels", dest="channels", default="ele,mu,had", help="channels for which to plot this variable")
+    parser.add_argument(
+        "--odir", dest="odir", default="hists", help="tag for output directory... will append '_{year}' to it"
+    )
+    parser.add_argument("--idir", dest="idir", default="../results/", help="input directory with results")
+    parser.add_argument("--tag", dest="tag", default="", help="input directory with results")
 
     args = parser.parse_args()
 
