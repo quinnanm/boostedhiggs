@@ -114,11 +114,11 @@ def make_stacked_hists(year, ch, idir, odir, samples):
 
                 select = (iso_cut) & (miso_cut)
 
-                # # select the jet pT [400-600] GeV and the mSD [30 -150]
-                # select_fj_pt = (data['fj_pt'] > 400) & (data['fj_pt'] < 600)
-                # select_fj_msd = (data['fj_msoftdrop'] > 30) & (data['fj_msoftdrop'] < 150)
-                #
-                # select = select_fj_pt & select_fj_msd
+                # select the jet pT [400-600] GeV and the mSD [30 -150]
+                select_fj_pt = (data["fj_pt"] > 400) & (data["fj_pt"] < 600)
+                select_fj_msd = (data["fj_msoftdrop"] > 30) & (data["fj_msoftdrop"] < 150)
+
+                select = select & select_fj_pt & select_fj_msd
 
                 # if if you want to select all
                 # select = data['lep_pt'] > 0  # selects all events (i.e. no cut)
