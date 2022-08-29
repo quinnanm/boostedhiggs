@@ -110,18 +110,19 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                         print("Parquet file empty")
                         continue
 
-                    # make iso and miso cuts (different for each channel)
-                    iso_cut = ((data["lep_isolation"] < 0.15) & (data["lep_pt"] < max_iso[ch])) | (
-                        data["lep_pt"] > max_iso[ch]
-                    )
-                    if ch == "mu":
-                        miso_cut = ((data["lep_misolation"] < 0.1) & (data["lep_pt"] >= max_iso[ch])) | (
-                            data["lep_pt"] < max_iso[ch]
-                        )
-                    else:
-                        miso_cut = data["lep_pt"] > 10
-
-                    select = (iso_cut) & (miso_cut)
+                    # # make iso and miso cuts (different for each channel)
+                    # iso_cut = ((data["lep_isolation"] < 0.15) & (data["lep_pt"] < max_iso[ch])) | (
+                    #     data["lep_pt"] > max_iso[ch]
+                    # )
+                    # if ch == "mu":
+                    #     miso_cut = ((data["lep_misolation"] < 0.1) & (data["lep_pt"] >= max_iso[ch])) | (
+                    #         data["lep_pt"] < max_iso[ch]
+                    #     )
+                    # else:
+                    #     miso_cut = data["lep_pt"] > 10
+                    #
+                    # select = (iso_cut) & (miso_cut)
+                    select = data[var] > -999999999  # selects all events (i.e. no cut)
 
                     # filling histograms
                     single_sample = None
