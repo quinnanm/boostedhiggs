@@ -106,6 +106,7 @@ def sum_cutflows(year, channels, idir, odir, samples):
                 if sample_to_use not in cut_values.keys():
                     cut_values[sample_to_use] = [0] * len(cut_keys)  # initialize
 
+                print("0", metadata)
                 print("1", metadata[sample])
                 print("2", metadata[sample][year])
                 print("3", metadata[sample][year]["cutflows"])
