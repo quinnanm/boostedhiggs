@@ -109,13 +109,7 @@ def sum_cutflows(year, channels, idir, odir, samples):
                 with open(pkl_file, "rb") as f:
                     metadata = pkl.load(f)
 
-                print("0", metadata)
-                print("1", metadata[sample])
-                print("2", metadata[sample][year])
-                print("3", metadata[sample][year]["cutflows"])
-
                 cutflows = metadata[sample][year]["cutflows"][ch]
-                print("cutflows", cutflows)
                 cutflows_sorted = sorted(cutflows.items(), key=lambda x: x[1], reverse=True)
 
                 for i, elem in enumerate(cutflows_sorted):
