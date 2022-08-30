@@ -136,7 +136,7 @@ def main(args):
             if value == 1:
                 samples[args.year][ch].append(key)
 
-    sum_cutflows(args.year, channels, args.idir, odir, samples)
+    sum_cutflows(args.year, channels, args.idir, args.odir, samples)
 
 
 if __name__ == "__main__":
