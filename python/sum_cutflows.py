@@ -107,6 +107,7 @@ def sum_cutflows(year, channels, idir, odir, samples):
                     cut_values[sample_to_use] = [0] * len(cut_keys)  # initialize
 
                 cutflows = metadata[sample][year]["cutflows"][ch]
+                print("cutflows", cutflows)
                 cutflows_sorted = sorted(cutflows.items(), key=lambda x: x[1], reverse=True)
 
                 for i, elem in enumerate(cutflows_sorted):
