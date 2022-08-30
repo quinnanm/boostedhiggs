@@ -106,6 +106,10 @@ def sum_cutflows(year, channels, idir, odir, samples):
                 if sample_to_use not in cut_values.keys():
                     cut_values[sample_to_use] = [0] * len(cut_keys)  # initialize
 
+                print("1", metadata[sample])
+                print("2", metadata[sample][year])
+                print("3", metadata[sample][year]["cutflows"])
+
                 cutflows = metadata[sample][year]["cutflows"][ch]
                 print("cutflows", cutflows)
                 cutflows_sorted = sorted(cutflows.items(), key=lambda x: x[1], reverse=True)
@@ -145,7 +149,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # python sum_cutflows.py --year 2017 --odir cutflows --channels ele,mu,had --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/Aug11
+    # python sum_cutflows.py --year 2017 --odir cutflows --channels ele,mu,had --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/Aug11_2017
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--year", dest="year", default="2017", help="year")
