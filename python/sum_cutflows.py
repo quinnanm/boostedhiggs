@@ -120,6 +120,9 @@ def sum_cutflows(year, channels, idir, odir, samples):
 
 def main(args):
 
+    if not os.path.exists(args.odir):
+        os.makedirs(args.odir)
+
     channels = args.channels.split(",")
 
     # get samples to make histograms
