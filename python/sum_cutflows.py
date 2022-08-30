@@ -119,15 +119,6 @@ def sum_cutflows(year, channels, idir, odir, samples):
 
 
 def main(args):
-    # append '_year' to the output directory
-    odir = args.odir + "_" + args.year
-    if not os.path.exists(odir):
-        os.makedirs(odir)
-
-    # make subdirectory specefic to this script
-    if not os.path.exists(odir + "/s_over_b/"):
-        os.makedirs(odir + "/s_over_b/")
-    odir = odir + "/s_over_b"
 
     channels = args.channels.split(",")
 
