@@ -76,19 +76,29 @@ def sum_cutflows(year, channels, idir, odir, samples):
         # loop over the samples
         for sample in samples[year][ch]:
             print(f"Processing sample {sample}")
-            # # skip data samples
-            # is_data = False
-            # for key in data_by_ch.values():
-            #     if key in sample:
-            #         is_data = True
-            # if is_data:
-            #     continue
 
             # check if the sample was processed
             pkl_dir = f"{idir}/{sample}/outfiles/*.pkl"
             pkl_files = glob.glob(pkl_dir)  #
             if not pkl_files:  # skip samples which were not processed
                 continue
+
+            is_data = False
+            for key in data_by_ch.values():
+                if key in sample:
+                    is_data = True
+
+            if not is_data:
+                # Find xsection
+                f = open("../fileset/xsec_pfnano.json")
+                xsec = json.load(f)
+                f.close()
+                try:
+                    xsec = eval(str((xsec[sample])))
+                except:
+                    if not is_data:
+                        print(f"sample {sample} doesn't have xsecs defined in xsec_pfnano.json so will skip it")
+                        continue
 
             for i, pkl_file in enumerate(pkl_files):
 
@@ -113,7 +123,7 @@ def sum_cutflows(year, channels, idir, odir, samples):
                 cutflows_sorted = sorted(cutflows.items(), key=lambda x: x[1], reverse=True)
 
                 for i, elem in enumerate(cutflows_sorted):
-                    cut_values[sample_to_use][i] += elem[1]
+                    cut_values[sample_to_use][i] += elem[1] * xsec
 
             print("------------------------------------------------------------")
 
