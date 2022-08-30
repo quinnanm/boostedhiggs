@@ -76,13 +76,13 @@ def sum_cutflows(year, channels, idir, odir, samples):
         # loop over the samples
         for sample in samples[year][ch]:
             print(f"Processing sample {sample}")
-            # skip data samples
-            is_data = False
-            for key in data_by_ch.values():
-                if key in sample:
-                    is_data = True
-            if is_data:
-                continue
+            # # skip data samples
+            # is_data = False
+            # for key in data_by_ch.values():
+            #     if key in sample:
+            #         is_data = True
+            # if is_data:
+            #     continue
 
             # check if the sample was processed
             pkl_dir = f"{idir}/{sample}/outfiles/*.pkl"
