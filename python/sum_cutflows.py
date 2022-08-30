@@ -90,7 +90,7 @@ def sum_cutflows(year, channels, idir, odir, samples):
             if not pkl_files:  # skip samples which were not processed
                 continue
 
-            for i, metadata in enumerate(pkl_files):
+            for i, pkl_file in enumerate(pkl_files):
 
                 single_sample = None
                 for single_key, key in add_samples.items():
@@ -105,6 +105,9 @@ def sum_cutflows(year, channels, idir, odir, samples):
 
                 if sample_to_use not in cut_values.keys():
                     cut_values[sample_to_use] = [0] * len(cut_keys)  # initialize
+
+                with open(pkl_file, "rb") as f:
+                    metadata = pkl.load(f)
 
                 print("0", metadata)
                 print("1", metadata[sample])
