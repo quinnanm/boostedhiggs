@@ -75,7 +75,7 @@ def sum_cutflows(year, channels, idir, odir, samples):
 
         # loop over the samples
         for sample in samples[year][ch]:
-
+            print(f"Processing sample {sample}")
             # skip data samples
             is_data = False
             for key in data_by_ch.values():
@@ -145,7 +145,7 @@ def main(args):
             if value == 1:
                 samples[args.year][ch].append(key)
 
-    sum_cutflows(args.year, channels, args.idir, odir, samples, cut)
+    sum_cutflows(args.year, channels, args.idir, odir, samples)
 
 
 if __name__ == "__main__":
