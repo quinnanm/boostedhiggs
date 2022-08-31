@@ -33,7 +33,7 @@ import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
-def make_big_dataframe(year, channels, idir, odir, samples, tag=""):
+def sum_cutflows(year, channels, idir, odir, samples):
     """
     Counts signal and background at different working points of a cut
 
@@ -44,104 +44,101 @@ def make_big_dataframe(year, channels, idir, odir, samples, tag=""):
         odir: output directory to hold the hist object
         samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
     """
-    max_iso = {"ele": 120, "mu": 55}
 
     for ch in channels:
-        c = 0
+        if ch == "had":
+            cut_keys = [
+                "none",
+                "trigger",
+                "metfilters",
+                "oneFatjet",
+                "fatjetKin",
+                "fatjetSoftdrop",
+                "qcdrho",
+                "met",
+                "antibjettag",
+            ]
+        else:
+            cut_keys = [
+                "none",
+                "trigger",
+                "metfilters",
+                "fatjetKin",
+                "ht",
+                "antibjettag",
+                "leptonInJet",
+                "leptonKin",
+                "oneLepton",
+                "notaus",
+            ]
+        cut_values = {}
+
         # loop over the samples
         for sample in samples[year][ch]:
-            if sample != "VBFHToWWToLNuQQ-MH125":
-                continue
-
-            # skip data samples
-            is_data = False
-            for key in data_by_ch.values():
-                if key in sample:
-                    is_data = True
-            # if is_data:
-            #     continue
+            print(f"Processing sample {sample}")
 
             # check if the sample was processed
             pkl_dir = f"{idir}/{sample}/outfiles/*.pkl"
             pkl_files = glob.glob(pkl_dir)  #
-            # print(pkl_dir)
             if not pkl_files:  # skip samples which were not processed
                 continue
 
-            # check if the sample was processed
-            parquet_files = glob.glob(f"{idir}/{sample}/outfiles/*_{ch}.parquet")
+            is_data = False
+            for key in data_by_ch.values():
+                if key in sample:
+                    is_data = True
 
-            print(f"Processing {ch} channel of sample", sample)
-
-            for i, parquet_file in enumerate(parquet_files):
+            if not is_data:
+                # Find xsection
+                f = open("../fileset/xsec_pfnano.json")
+                xsec = json.load(f)
+                f.close()
                 try:
-                    data = pq.read_table(parquet_file).to_pandas()
+                    xsec = eval(str((xsec[sample])))
                 except:
-                    print("can't read data")
-                    continue
+                    if not is_data:
+                        print(f"sample {sample} doesn't have xsecs defined in xsec_pfnano.json so will skip it")
+                        continue
 
-                # try:
-                #     # select the jet pT [400-600] GeV and the mSD [30 -150 ]
-                #     select_fj_pt = (data['fj_pt'] > 400) & (data['fj_pt'] < 600)
-                #     select_fj_msd = (data['fj_msoftdrop'] > 30) & (data['fj_msoftdrop'] < 150)
-                #
-                #     select = select_fj_pt & select_fj_msd
-                #
-                #     data = data[select]
-                # except:
-                #     print(f'something is wrong with {sample}')
-                #     continue
-
-                try:
-                    event_weight = data["tot_weight"]
-                except:
-                    print("files haven't been postprocessed to store tot_weight")
-                    continue
+            for i, pkl_file in enumerate(pkl_files):
 
                 single_sample = None
                 for single_key, key in add_samples.items():
                     if key in sample:
                         single_sample = single_key
+                if year == "Run2" and is_data:
+                    single_sample = "Data"
                 if single_sample is not None:
                     sample_to_use = single_sample
                 else:
                     sample_to_use = sample
 
-                # # make iso and miso cuts (different for each channel)
-                # iso_cut = ((data["lep_isolation"] < 0.15) & (data["lep_pt"] < max_iso[ch])) | (data["lep_pt"] > max_iso[ch])
-                # if ch == "mu":
-                #     miso_cut = ((data["lep_misolation"] < 0.1) & (data["lep_pt"] >= max_iso[ch])) | (
-                #         data["lep_pt"] < max_iso[ch]
-                #     )
-                # else:
-                #     miso_cut = data["lep_pt"] > 10
-                #
-                # select = (iso_cut) & (miso_cut)
-                select = data["lep_pt"] > 0  # selects all events (i.e. no cut)
+                if sample_to_use not in cut_values.keys():
+                    cut_values[sample_to_use] = [0] * len(cut_keys)  # initialize
 
-                # for the first iteration the dataframe is initialized (then for further iterations we can just concat)
-                if c == 0:
-                    data_all = data[select]
-                    c = c + 1
-                else:
-                    data2 = pd.DataFrame(data[select])
-                    print(f"num of events passing the cuts (and iso/miso) is {len(data2)}")
-                    data_all = pd.concat([data_all, data2])
+                with open(pkl_file, "rb") as f:
+                    metadata = pkl.load(f)
+
+                cutflows = metadata[sample][year]["cutflows"][ch]
+                cutflows_sorted = sorted(cutflows.items(), key=lambda x: x[1], reverse=True)
+                sumgenweight = metadata[sample][year]["sumgenweight"]
+
+                if sumgenweight == 0:
+                    sumgenweight = 1
+
+                for i, elem in enumerate(cutflows_sorted):
+                    cut_values[sample_to_use][i] += elem[1] * xsec / sumgenweight
+
             print("------------------------------------------------------------")
 
-        data_all.to_csv(f"{odir}/data_{ch}_{tag}.csv")
+        with open(f"{odir}/cut_values_{ch}.pkl", "wb") as f:  # saves the objects
+            pkl.dump(cut_values, f)
 
 
 def main(args):
-    # append '_year' to the output directory
-    odir = args.odir + "_" + args.year
-    if not os.path.exists(odir):
-        os.makedirs(odir)
 
-    # make subdirectory specefic to this script
-    if not os.path.exists(odir + "/VBF/"):
-        os.makedirs(odir + "/VBF/")
-    odir = odir + "/VBF"
+    if not os.path.exists(args.odir):
+        os.makedirs(args.odir)
 
     channels = args.channels.split(",")
 
@@ -159,12 +156,12 @@ def main(args):
             if value == 1:
                 samples[args.year][ch].append(key)
 
-    make_big_dataframe(args.year, channels, args.idir, odir, samples, args.tag)
+    sum_cutflows(args.year, channels, args.idir, args.odir, samples)
 
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # python VBF.py --year 2017 --odir plots --channels ele,mu --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/Aug11_2017 --tag vbf
+    # python sum_cutflows.py --year 2017 --odir cutflows --channels ele,mu,had --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/Aug11_2017
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--year", dest="year", default="2017", help="year")
@@ -179,7 +176,6 @@ if __name__ == "__main__":
         "--odir", dest="odir", default="hists", help="tag for output directory... will append '_{year}' to it"
     )
     parser.add_argument("--idir", dest="idir", default="../results/", help="input directory with results")
-    parser.add_argument("--tag", dest="tag", default="", help="input directory with results")
 
     args = parser.parse_args()
 
