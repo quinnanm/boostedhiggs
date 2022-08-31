@@ -99,6 +99,12 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                     continue
 
                 for var in vars_to_plot[ch]:
+                    if ch == 'ele':
+                        data['ele_score'] = data['fj_isHVV_elenuqq'] / (data['fj_isHVV_elenuqq'] + data['fj_ttbar_bmerged'] + data['fj_ttbar_bsplit'] + data['fj_wjets_label'])
+                    if ch == 'mu':
+                        data['mu_score'] = data['fj_isHVV_munuqq'] / (data['fj_isHVV_munuqq'] + data['fj_ttbar_bmerged'] + data['fj_ttbar_bsplit'] + data['fj_wjets_label'])
+
+
                     if var not in data.keys():
                         print(f'Var {var} not in parquet keys')
                         continue
@@ -182,8 +188,7 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
 
         signal_labels = [label for label in samples if label in signal_by_ch[ch]]
         bkg_labels = [label for label in samples if (label and label != data_label and label not in signal_labels)]
-        if 'VBFHToWWToLNuQQ-MH125' in signal_labels:
-            signal_labels.remove('VBFHToWWToLNuQQ-MH125')
+
         # data
         data = None
         if data_label in h.axes[0]:
@@ -234,9 +239,12 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
             for i, b in enumerate(bkg):
                 if i > 0:
                     tot = tot + b
+                    
+            tot_err = np.sqrt(tot.values())
+            tot_err[np.isnan(tot_err)] = 0
             ax.stairs(
-                values=tot.values() + np.sqrt(tot.values()),
-                baseline=tot.values() - np.sqrt(tot.values()),
+                values=tot.values() + tot_err,
+                baseline=tot.values() - tot_err,
                 edges=tot.axes[0].edges, **errps,
                 label='Stat. unc.'
             )
@@ -314,7 +322,7 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
         hand = [handles[i] for i in order] + handles[len(bkg):]
         lab = [labels[i] for i in order] + labels[len(bkg):]
 
-        ax.legend([hand[idx] for idx in range(len(hand))], [lab[idx] for idx in range(len(lab))])
+        ax.legend([hand[idx] for idx in range(len(hand))], [lab[idx] for idx in range(len(lab))], bbox_to_anchor=(1.05, 1), loc='upper left')
 
         if logy:
             ax.set_yscale('log')
