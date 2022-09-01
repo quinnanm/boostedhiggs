@@ -128,6 +128,8 @@ class HwwProcessor(processor.ProcessorABC):
         # for tagger model and preprocessing dict
         self.tagger_resources_path = str(pathlib.Path(__file__).parent.resolve()) + "/tagger_resources/"
 
+        self.common_weights = ["genweight", "L1Prefiring", "pileup"]
+
     @property
     def accumulator(self):
         return self._accumulator
@@ -151,7 +153,7 @@ class HwwProcessor(processor.ProcessorABC):
             self.selections[ch].add(name, sel)
             selection_ch = self.selections[ch].all(*self.selections[ch].names)
             if self.isMC:
-                weight = self.weights.partial_weight(self.weights_per_ch[ch])
+                weight = self.weights.partial_weight(self.weights_per_ch[ch] + self.common_weights)
                 self.cutflows[ch][name] = float(weight[selection_ch].sum())
             else:
                 self.cutflows[ch][name] = np.sum(selection_ch)
@@ -466,7 +468,7 @@ class HwwProcessor(processor.ProcessorABC):
             add_VJets_kFactors(self.weights, events.GenPart, dataset)
 
             # store the final common weight
-            variables["common"]["weight"] = self.weights.partial_weight(["genweight", "L1Prefiring", "pileup"])
+            variables["common"]["weight"] = self.weights.partial_weight(self.common_weights)
 
             for key in self.weights._weights.keys():
                 # ignore btagSFlight/bc for now
