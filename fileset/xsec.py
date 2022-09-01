@@ -25,7 +25,7 @@ xs = {}
 # GluGluToHToWWPt200
 # - From powheg: 0.4716 pb
 # - PKU uses 0.1014pb after BR
-xs["GluGluToHToWWPt200"] = 0.4716*BR_HWW
+xs["GluGluHToWW_Pt-200ToInf_M-125"] = 0.4716*BR_HWW
 
 # GluGluHToWWToLNuQQ
 # - From GenXsecAnalyzer: 28.87 pb
