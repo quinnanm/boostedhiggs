@@ -475,7 +475,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as: python make_stacked_hists.py --year 2017 --odir hists --channels ele,mu --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/Aug11 --make_hists --plot_hists
+    # run locally as: python make_stacked_hists.py --year 2017 --odir hists --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Aug31 --make_hists --plot_hists
 
     parser = argparse.ArgumentParser()
     parser.add_argument(

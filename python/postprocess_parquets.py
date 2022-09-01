@@ -134,7 +134,7 @@ def main(args):
 
 
 if __name__ == "__main__":
-    # e.g. python postprocess_parquets.py --channels ele,mu --year 2017 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/Aug11_2017
+    # e.g. python postprocess_parquets.py --channels ele,mu --year 2017 --idir /eos/uscms/store/user/cmantill/boostedhiggs/Aug31_2017/
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--year", dest="year", choices=["2016APV", "2016", "2017", "2018"], help="year", required=True)
