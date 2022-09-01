@@ -121,13 +121,13 @@ def sum_cutflows(year, channels, idir, odir, samples):
 
                 cutflows = metadata[sample][year]["cutflows"][ch]
                 cutflows_sorted = sorted(cutflows.items(), key=lambda x: x[1], reverse=True)
-                sumgenweight = metadata[sample][year]["sumgenweight"]
-
-                if sumgenweight == 0:
-                    sumgenweight = 1
+                # sumgenweight = metadata[sample][year]["sumgenweight"]
+                #
+                # if sumgenweight == 0:
+                #     sumgenweight = 1
 
                 for i, elem in enumerate(cutflows_sorted):
-                    cut_values[sample_to_use][i] += elem[1] * xsec / sumgenweight
+                    cut_values[sample_to_use][i] += elem[1]
 
             print("------------------------------------------------------------")
 
