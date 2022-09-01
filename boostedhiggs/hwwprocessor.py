@@ -149,29 +149,36 @@ class HwwProcessor(processor.ProcessorABC):
         channels = channel if channel else self._channels
         for ch in channels:
             self.selections[ch].add(name, sel)
-            self.cutflows[ch][name] = np.sum(self.selections[ch].all(*self.selections[ch].names))
+            selection_ch = self.selections[ch].all(*self.selections[ch].names)
+            if self.isMC:
+                weight = self.weights.partial_weight(self.weights_per_ch[ch])
+                self.cutflows[ch][name] = float(weight[selection_ch].sum())
+            else:
+                self.cutflows[ch][name] = np.sum(selection_ch)
 
     def process(self, events: ak.Array):
         """Returns skimmed events which pass preselection cuts and with the branches listed in self._skimvars"""
         dataset = events.metadata["dataset"]
-        isMC = hasattr(events, "genWeight")
-        sumgenweight = ak.sum(events.genWeight) if isMC else 0
         nevents = len(events)
 
-        # empty selections and cutflows
+        self.isMC = hasattr(events, "genWeight")
+        self.weights = Weights(nevents, storeIndividual=True)
+        self.weights_per_ch = {}
         self.selections = {}
         self.cutflows = {}
         for ch in self._channels:
+            self.weights_per_ch[ch] = []
             self.selections[ch] = PackedSelection()
             self.cutflows[ch] = {}
-            self.cutflows[ch]["all"] = nevents
+
+        sumgenweight = ak.sum(events.genWeight) if self.isMC else 0
 
         # trigger
+        trigger = {}
         trigger_noiso = {}
         trigger_iso = {}
         for ch in self._channels:
-            # apply trigger to both data and MC
-            trigger = np.zeros(nevents, dtype="bool")
+            trigger[ch] = np.zeros(nevents, dtype="bool")
             trigger_noiso[ch] = np.zeros(nevents, dtype="bool")
             trigger_iso[ch] = np.zeros(nevents, dtype="bool")
             for t in self._HLTs[ch]:
@@ -180,19 +187,14 @@ class HwwProcessor(processor.ProcessorABC):
                         trigger_iso[ch] = trigger_iso[ch] | events.HLT[t]
                     else:
                         trigger_noiso[ch] = trigger_noiso[ch] | events.HLT[t]
-                    trigger = trigger | events.HLT[t]
-            if self.apply_trigger:
-                # apply trigger selection
-                self.add_selection("trigger", trigger, [ch])
-            del trigger
+                    trigger[ch] = trigger[ch] | events.HLT[t]
 
         # metfilters
         metfilters = np.ones(nevents, dtype="bool")
-        metfilterkey = "mc" if isMC else "data"
+        metfilterkey = "mc" if self.isMC else "data"
         for mf in self._metfilters[metfilterkey]:
             if mf in events.Flag.fields:
                 metfilters = metfilters & events.Flag[mf]
-        self.add_selection("metfilters", metfilters)
 
         # taus (will need to refine to avoid overlap with htt)
         loose_taus_mu = (events.Tau.pt > 20) & (abs(events.Tau.eta) < 2.3) & (events.Tau.idAntiMu >= 1)  # loose antiMu ID
@@ -308,6 +310,7 @@ class HwwProcessor(processor.ProcessorABC):
 
         # VBF variables
         ak4_outside_ak8 = goodjets[goodjets.delta_r(candidatefj) > 0.8]
+        n_jets_outside_ak8 = ak.sum(goodjets.delta_r(candidatefj) > 0.8, axis=1)
         jet1 = ak4_outside_ak8[:, 0:1]
         jet2 = ak4_outside_ak8[:, 1:2]
         deta = abs(ak.firsts(jet1).eta - ak.firsts(jet2).eta)
@@ -342,62 +345,7 @@ class HwwProcessor(processor.ProcessorABC):
                 | ((met.phi > -1.62) & (met.pt < 470.0) & (met.phi < -0.62))
             )
 
-        # event selections for semi-leptonic channels
-        self.add_selection(name="fatjetKin", sel=candidatefj.pt > 200, channel=["mu", "ele"])
-        self.add_selection(name="ht", sel=(ht > 200), channel=["mu", "ele"])
-        # self.add_selection(
-        #     name='mt',
-        #     sel=(mt_lep_met < 100),
-        #     channel=['mu', 'ele']
-        # )
-        self.add_selection(
-            name="antibjettag",
-            sel=(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"]),
-            channel=["mu", "ele"],
-        )
-        self.add_selection(name="leptonInJet", sel=(lep_fj_dr < 0.8), channel=["mu", "ele"])
-
-        # event selection for muon channel
-        self.add_selection(name="leptonKin", sel=(candidatelep.pt > 30), channel=["mu"])
-        self.add_selection(
-            name="oneLepton",
-            sel=(n_good_muons == 1)
-            & (n_good_electrons == 0)
-            & (n_loose_electrons == 0)
-            & ~ak.any(loose_muons & ~good_muons, 1),
-            channel=["mu"],
-        )
-        self.add_selection(name="notaus", sel=(n_loose_taus_mu == 0), channel=["mu"])
-        # self.add_selection(
-        #     name='leptonIsolation',
-        #     sel=( (candidatelep.pt > 30) & (candidatelep.pt < 55) & (lep_reliso < 0.15) ) | (candidatelep.pt >= 55),
-        #     channel=['mu']
-        # )
-        # self.add_selection(
-        #     name='leptonMiniIsolation',
-        #     sel=( (candidatelep.pt >= 55) & (candidatelep.miniPFRelIso_all < 0.1) ) | (candidatelep.pt < 55),
-        #     # sel= (candidatelep.miniPFRelIso_all < 0.1),
-        #     channel=['mu']
-        # )
-
-        # event selections for electron channel
-        self.add_selection(name="leptonKin", sel=(candidatelep.pt > 40), channel=["ele"])
-        self.add_selection(
-            name="oneLepton",
-            sel=(n_good_muons == 0)
-            & (n_loose_muons == 0)
-            & (n_good_electrons == 1)
-            & ~ak.any(loose_electrons & ~good_electrons, 1),
-            channel=["ele"],
-        )
-        self.add_selection(name="notaus", sel=(n_loose_taus_ele == 0), channel=["ele"])
-        # self.add_selection(
-        #     name='leptonIsolation',
-        #     sel=( (candidatelep.pt > 30) & (candidatelep.pt < 120) & (lep_reliso < 0.15) ) | (candidatelep.pt >= 120),
-        #     channel=['ele']
-        # )
-
-        # fill tuple variables
+        # output tuple variables
         variables = {
             "lep": {
                 "fj_pt": candidatefj.pt,
@@ -422,13 +370,14 @@ class HwwProcessor(processor.ProcessorABC):
                 "met": met.pt,
                 "ht": ht,
                 "nfj": n_fatjets,
+                "nj": n_jets_outside_ak8,
                 "deta": deta,
                 "mjj": mjj,
             },
         }
 
         # gen matching for signal
-        if (("HToWW" or "HWW") in dataset) and isMC:
+        if (("HToWW" or "HWW") in dataset) and self.isMC:
             matchHWW = match_HWW(events.GenPart, candidatefj)
             variables["lep"]["gen_Hpt"] = ak.firsts(matchHWW["matchedH"].pt)
             variables["lep"]["gen_Hnprongs"] = matchHWW["hWW_nprongs"]
@@ -436,13 +385,13 @@ class HwwProcessor(processor.ProcessorABC):
             variables["lep"]["gen_iswstarlepton"] = matchHWW["iswstarlepton"]
 
         # gen matching for background
-        if ("WJets" in dataset) or ("ZJets" in dataset) and isMC:
+        if ("WJets" in dataset) or ("ZJets" in dataset) and self.isMC:
             matchV = match_V(events.GenPart, candidatefj)
             if "WJetsToLNu" in dataset:
                 variables["lep"]["gen_isVlep"] = matchV["gen_isVlep"]
             if ("WJetsToQQ" in dataset) or ("ZJetsToQQ" in dataset):
                 variables["lep"]["gen_isVqq"] = matchV["gen_isVqq"]
-        if ("TT" in dataset) and isMC:
+        if ("TT" in dataset) and self.isMC:
             matchT = match_Top(events.GenPart, candidatefj)
             variables["lep"]["gen_isTop"] = matchT["gen_isTopbmerged"]
             variables["lep"]["gen_isToplep"] = matchT["gen_isToplep"]
@@ -501,27 +450,25 @@ class HwwProcessor(processor.ProcessorABC):
         - Jet Energy Resolution (JER)
         - MET unclustered up/down
         """
-        if isMC:
-            weights = Weights(nevents, storeIndividual=True)
-            weights.add("genweight", events.genWeight)
+        if self.isMC:
+            self.weights.add("genweight", events.genWeight)
             if self._year in ("2016", "2017"):
-                weights.add(
+                self.weights.add(
                     "L1Prefiring", events.L1PreFiringWeight.Nom, events.L1PreFiringWeight.Up, events.L1PreFiringWeight.Dn
                 )
-            add_pileup_weight(weights, self._year, self._yearmod, nPU=ak.to_numpy(events.Pileup.nPU))
+            add_pileup_weight(self.weights, self._year, self._yearmod, nPU=ak.to_numpy(events.Pileup.nPU))
 
-            add_lepton_weight(weights, candidatelep, self._year + self._yearmod, "muon")
-            add_lepton_weight(weights, candidatelep, self._year + self._yearmod, "electron")
+            add_lepton_weight(self.weights, candidatelep, self._year + self._yearmod, "muon")
+            add_lepton_weight(self.weights, candidatelep, self._year + self._yearmod, "electron")
 
-            # self._btagSF.addBtagWeight(bjets_away_lepfj, weights, "lep")
+            # self._btagSF.addBtagWeight(bjets_away_lepfj, self.weights, "lep")
 
-            add_VJets_kFactors(weights, events.GenPart, dataset)
+            add_VJets_kFactors(self.weights, events.GenPart, dataset)
 
             # store the final common weight
-            variables["common"]["weight"] = weights.partial_weight(["genweight", "L1Prefiring", "pileup"])
+            variables["common"]["weight"] = self.weights.partial_weight(["genweight", "L1Prefiring", "pileup"])
 
-            weights_per_ch = {"ele": [], "mu": []}
-            for key in weights._weights.keys():
+            for key in self.weights._weights.keys():
                 # ignore btagSFlight/bc for now
                 if "btagSFlight" in key or "btagSFbc" in key:
                     continue
@@ -535,18 +482,57 @@ class HwwProcessor(processor.ProcessorABC):
                 else:
                     varkey = "common"
                 # store the individual weights (ONLY for now until we debug)
-                variables[varkey][f"weight_{key}"] = weights.partial_weight([key])
-                if varkey in weights_per_ch.keys():
-                    weights_per_ch[varkey].append(key)
+                variables[varkey][f"weight_{key}"] = self.weights.partial_weight([key])
+                if varkey in self.weights_per_ch.keys():
+                    self.weights_per_ch[varkey].append(key)
 
             # store the per channel weight
-            for ch in weights_per_ch.keys():
-                if len(weights_per_ch[ch]) > 0:
-                    variables[ch][f"weight_{ch}"] = weights.partial_weight(weights_per_ch[ch])
+            for ch in self._channels:
+                if len(self.weights_per_ch[ch]) > 0:
+                    variables[ch][f"weight_{ch}"] = self.weights.partial_weight(self.weights_per_ch[ch])
 
             # NOTE: to add variations:
-            # for var in weights.variations:
-            #     variables["common"][f"weight_{key}"] = weights.weight(key)
+            # for var in self.weights.variations:
+            #     variables["common"][f"weight_{key}"] = self.weights.weight(key)
+
+        """
+        Selection and cutflows.
+        """
+        self.add_selection("all", np.ones(nevents, dtype="bool"))
+        self.add_selection("metfilters", metfilters)
+        if self.apply_trigger:
+            for ch in self._channels:
+                self.add_selection("trigger", trigger[ch], [ch])
+        self.add_selection(name="fatjetKin", sel=candidatefj.pt > 200)
+        self.add_selection(name="ht", sel=(ht > 200))
+        self.add_selection(
+            name="antibjettag",
+            sel=(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"])
+        )
+        self.add_selection(name="leptonInJet", sel=(lep_fj_dr < 0.8))
+
+        self.add_selection(name="leptonKin", sel=(candidatelep.pt > 30), channel=["mu"])
+        self.add_selection(name="leptonKin", sel=(candidatelep.pt > 40), channel=["ele"])
+
+        self.add_selection(
+            name="oneLepton",
+            sel=(n_good_muons == 1)
+            & (n_good_electrons == 0)
+            & (n_loose_electrons == 0)
+            & ~ak.any(loose_muons & ~good_muons, 1),
+            channel=["mu"],
+        )
+        self.add_selection(
+            name="oneLepton",
+            sel=(n_good_muons == 0)
+            & (n_loose_muons == 0)
+            & (n_good_electrons == 1)
+            & ~ak.any(loose_electrons & ~good_electrons, 1),
+            channel=["ele"],
+        )
+
+        self.add_selection(name="notaus", sel=(n_loose_taus_mu == 0), channel=["mu"])
+        self.add_selection(name="notaus", sel=(n_loose_taus_ele == 0), channel=["ele"])
 
         # initialize pandas dataframe
         output = {}
@@ -554,7 +540,7 @@ class HwwProcessor(processor.ProcessorABC):
         for ch in self._channels:
             fill_output = True
             # for data, only fill output for the dataset needed
-            if not isMC and self.dataset_per_ch[ch] not in dataset:
+            if not self.isMC and self.dataset_per_ch[ch] not in dataset:
                 fill_output = False
 
             selection_ch = self.selections[ch].all(*self.selections[ch].names)
@@ -609,7 +595,7 @@ class HwwProcessor(processor.ProcessorABC):
             self.save_dfs_parquet(fname, output[ch], ch)
 
         # return dictionary with cutflows
-        return {dataset: {"mc": isMC, self._year: {"sumgenweight": sumgenweight, "cutflows": self.cutflows}}}
+        return {dataset: {"mc": self.isMC, self._year: {"sumgenweight": sumgenweight, "cutflows": self.cutflows}}}
 
     def postprocess(self, accumulator):
         return accumulator
