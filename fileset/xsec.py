@@ -10,7 +10,7 @@ https://github.com/jennetd/hbb-coffea/blob/master/xsec-json.ipynb
 # Branching ratio of H to WW (LHC-XS-WG)
 BR_HWW = 0.2137
 # Branching ratio of WW to LNuQQ (0.21664272)
-BR_WW_lnuqq = (0.1046+0.1050+0.1075)*(0.6832)
+BR_WW_lnuqq = (0.1046+0.1050+0.1075)*(0.6832)*2
 # Branching ratio of WW to 4Q (0.46676224)
 BR_WW_qqqq = 0.6832**2
 
@@ -34,7 +34,9 @@ xs["GluGluHToWW_Pt-200ToInf_M-125"] = 0.4716*BR_HWW
 #    - ggF: 48.58 pb (N3LO)
 #           44.14 pb (NNLO + NNLL)
 #      - Times BR: 48.58*0.2137*0.21664272 = 2.2491 pb
-xs["GluGluHToWWToLNuQQ"] = 48.58 * BR_HWW * BR_WW_lnuqq
+#  - From PKU:
+#    - ggF: 48.61 pb
+xs["GluGluHToWWToLNuQQ"] = 48.58 * BR_HWW * BR_WW_lnuqq 
 
 # VBFHToWWToLNuQQ-MH125
 #  - From GenXsecAnalyzer: 3.892 pb
