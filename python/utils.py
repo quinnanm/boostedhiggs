@@ -131,7 +131,7 @@ axis_dict = {
     'lep_isolation': hist2.axis.Regular(20, 0, 5, name='var', label=r'Lepton iso', overflow=True),
     'lep_misolation': hist2.axis.Regular(35, 0, 2., name='var', label=r'Lepton mini iso', overflow=True),
     'lep_fj_m': hist2.axis.Regular(35, 0, 280, name='var', label=r'Jet - Lepton mass [GeV]', overflow=True),
-    'lep_fj_bjets_ophem': hist2.axis.Regular(15, 0, 0.31, name='var', label=r'btagFlavB (opphem)', overflow=True),
+    'fj_bjets_ophem': hist2.axis.Regular(15, 0, 0.31, name='var', label=r'btagFlavB (opphem)', overflow=True),
     'lep_fj_dr': hist2.axis.Regular(35, 0., 0.8, name='var', label=r'$\Delta R(l, Jet)$', overflow=True),
     'mu_mvaId': hist2.axis.Variable([0, 1, 2, 3, 4, 5], name='var', label='Muon MVAID', overflow=True),
     'ele_highPtId': hist2.axis.Regular(5, 0, 5, name='var', label='Electron high pT ID', overflow=True),
@@ -152,3 +152,8 @@ axis_dict = {
     'lep_nprongs': hist2.axis.Regular(20, 0, 4, name='var', label=r'num of prongs', overflow=True),
     'had_nprongs': hist2.axis.Regular(20, 0, 4, name='var', label=r'num of prongs', overflow=True),
 }
+
+axis_dict['lep_isolation_lowpt'] = hist2.axis.Regular(20, 0, 0.15, name='var', label=r'Lepton iso (low $p_T$)', overflow=True)
+axis_dict['lep_isolation_highpt'] = hist2.axis.Regular(20, 0, 5, name='var', label=r'Lepton iso (high $p_T$)', overflow=True)
+axis_dict['lep_misolation_lowpt'] = hist2.axis.Regular(35, 0, 2., name='var', label=r'Lepton mini iso (low $p_T$)', overflow=True)
+axis_dict['lep_misolation_highpt'] = hist2.axis.Regular(35, 0, 0.15, name='var', label=r'Lepton mini iso (high $p_T$)', overflow=True)
