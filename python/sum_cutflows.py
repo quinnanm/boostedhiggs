@@ -3,35 +3,18 @@
 from utils import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch, data_by_ch_2018, label_by_ch
 from utils import get_simplified_label, get_sum_sumgenweight
 import pickle as pkl
-import pyarrow.parquet as pq
-import pyarrow as pa
-import awkward as ak
-import numpy as np
-import pandas as pd
 import json
-import os
-import sys
-import glob
-import shutil
-import pathlib
-from typing import List, Optional
+import os,sys,glob
 
 import argparse
-from coffea import processor
-from coffea.nanoevents.methods import candidate, vector
-from coffea.analysis_tools import Weights, PackedSelection
 
-import hist as hist2
-import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import mplhep as hep
+
 from hist.intervals import clopper_pearson_interval
 
-import warnings
-
-warnings.filterwarnings("ignore", message="Found duplicate branch ")
-
+plt.style.use(hep.style.CMS)
 
 def sum_cutflows(year, channels, idir, odir, samples):
     """
@@ -45,32 +28,31 @@ def sum_cutflows(year, channels, idir, odir, samples):
         samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
     """
 
+    cut_keys = [
+            "none",
+            "trigger",
+            "metfilters",
+            "fatjetKin",
+            "ht",
+            "antibjettag",
+            "leptonInJet",
+            "leptonKin",
+            "oneLepton",
+            "notaus",
+        ]
+
+    # Get luminosity of year
+    f = open("../fileset/luminosity.json")
+    luminosity = json.load(f)[year]
+    f.close()
+    print(f"Processing samples from year {year} with luminosity {luminosity}")
+
+    if year == "2018":
+        data_label = data_by_ch_2018
+    else:
+        data_label = data_by_ch
+
     for ch in channels:
-        if ch == "had":
-            cut_keys = [
-                "none",
-                "trigger",
-                "metfilters",
-                "oneFatjet",
-                "fatjetKin",
-                "fatjetSoftdrop",
-                "qcdrho",
-                "met",
-                "antibjettag",
-            ]
-        else:
-            cut_keys = [
-                "none",
-                "trigger",
-                "metfilters",
-                "fatjetKin",
-                "ht",
-                "antibjettag",
-                "leptonInJet",
-                "leptonKin",
-                "oneLepton",
-                "notaus",
-            ]
         cut_values = {}
 
         # loop over the samples
@@ -84,7 +66,7 @@ def sum_cutflows(year, channels, idir, odir, samples):
                 continue
 
             is_data = False
-            for key in data_by_ch.values():
+            for key in data_label.values():
                 if key in sample:
                     is_data = True
 
@@ -99,6 +81,7 @@ def sum_cutflows(year, channels, idir, odir, samples):
                     if not is_data:
                         print(f"sample {sample} doesn't have xsecs defined in xsec_pfnano.json so will skip it")
                         continue
+                xsec_weight = (xsec * luminosity) / get_sum_sumgenweight(idir, year.replace("APV", ""), sample)
 
             for i, pkl_file in enumerate(pkl_files):
 
@@ -106,6 +89,7 @@ def sum_cutflows(year, channels, idir, odir, samples):
                 for single_key, key in add_samples.items():
                     if key in sample:
                         single_sample = single_key
+
                 if year == "Run2" and is_data:
                     single_sample = "Data"
                 if single_sample is not None:
@@ -118,16 +102,13 @@ def sum_cutflows(year, channels, idir, odir, samples):
 
                 with open(pkl_file, "rb") as f:
                     metadata = pkl.load(f)
-
                 cutflows = metadata[sample][year]["cutflows"][ch]
                 cutflows_sorted = sorted(cutflows.items(), key=lambda x: x[1], reverse=True)
-                sumgenweight = metadata[sample][year]["sumgenweight"]
-
-                if sumgenweight == 0:
-                    sumgenweight = 1
 
                 for i, elem in enumerate(cutflows_sorted):
-                    cut_values[sample_to_use][i] += elem[1] * xsec / sumgenweight
+                    cut_values[sample_to_use][i] += elem[1] * xsec_weight
+
+            print(cut_values)
 
             print("------------------------------------------------------------")
 
