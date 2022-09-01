@@ -591,7 +591,7 @@ def main(args):
         if args.plot_hists:
             print("Plotting...")
             plot_stacked_hists(args.year, ch, odir, vars_to_plot, logy=True, add_data=args.nodata)
-            #plot_stacked_hists(args.year, ch, odir, vars_to_plot, logy=False, add_data=args.nodata)
+            plot_stacked_hists(args.year, ch, odir, vars_to_plot, logy=False, add_data=args.nodata)
 
 
 if __name__ == "__main__":
