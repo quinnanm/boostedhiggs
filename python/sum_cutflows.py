@@ -161,7 +161,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # python sum_cutflows.py --year 2017 --odir cutflows --channels ele,mu,had --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/Aug11_2017
+    # python sum_cutflows.py --year 2017 --odir cutflows --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Aug31_2017/
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--year", dest="year", default="2017", help="year")
