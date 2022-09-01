@@ -2,29 +2,21 @@
 
 from utils import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch, data_by_ch_2018, label_by_ch
 from utils import simplified_labels, get_sum_sumgenweight
+
 import pickle as pkl
 import pyarrow.parquet as pq
-import pyarrow as pa
-import awkward as ak
 import numpy as np
 import json
-import os
-import glob
-import shutil
-import pathlib
-from typing import List, Optional
-
+import os,glob
 import argparse
+
 import hist as hist2
+
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import mplhep as hep
-from hist.intervals import clopper_pearson_interval
-
-import warnings
-
-warnings.filterwarnings("ignore", message="Found duplicate branch ")
-
+plt.style.use(hep.style.CMS)
+plt.rcParams.update({'font.size': 20})
 
 def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
     """
@@ -37,9 +29,10 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
         samples: the set of samples to run over (by default: the samples defined in plot_configs/samples_pfnano.json)
         vars_to_plot: the set of variables to plot a 1D-histogram of (by default: the samples with key==1 defined in plot_configs/vars.json)
     """
-
+    
+    # Define cuts
     max_iso = {"ele": 120, "mu": 55}
-
+    
     # Get luminosity of year
     f = open("../fileset/luminosity.json")
     luminosity = json.load(f)[year]
@@ -80,8 +73,8 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
             # get list of parquet files that have been processed
             parquet_files = glob.glob(f"{idir}_{yr}/{sample}/outfiles/*_{ch}.parquet")
 
-            if len(parquet_files) != 0:
-                print(f"Processing {ch} channel of sample", sample)
+            #if len(parquet_files) != 0:
+            #    print(f"Processing {ch} channel of sample", sample)
 
             # print(parquet_files)
             for parquet_file in parquet_files:
@@ -158,7 +151,7 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
         pkl.dump(hists, f)
 
 
-def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
+def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, add_soverb=True):
     """
     Plots the stacked 1D histograms that were made by "make_stacked_hists" individually for each year
     Args:
@@ -212,19 +205,35 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
 
         # signal
         signal = [h[{"samples": label}] for label in signal_labels]
-        if not logy:
-            signal = [s * 10 for s in signal]  # if not log, scale the signal
+        # scale signal for non-log plots
+        if logy:
+            mult_factor = 1
+        else:
+            mult_factor = 100
+        signal_mult = [s*mult_factor for s in signal]
 
         # background
         bkg = [h[{"samples": label}] for label in bkg_labels]
 
         if add_data and data and len(bkg) > 0:
-            fig, (ax, rax) = plt.subplots(
-                nrows=2, ncols=1, figsize=(8, 8), gridspec_kw={"height_ratios": (4, 1), "hspace": 0.07}, sharex=True
-            )
+            if add_soverb and len(signal)>0:
+                fig, (ax, rax, sax) = plt.subplots(
+                    nrows=3, ncols=1, figsize=(8, 8), gridspec_kw={"height_ratios": (4, 1, 1), "hspace": 0.07}, sharex=True
+                )
+            else:
+                fig, (ax, rax) = plt.subplots(
+                    nrows=2, ncols=1, figsize=(8, 8), gridspec_kw={"height_ratios": (4, 1), "hspace": 0.07}, sharex=True
+                )
+                sax = None
         else:
-            fig, ax = plt.subplots(1, 1)
-            rax = None
+            if add_soverb and len(signal)>0:
+                fig, (ax, sax) = plt.subplots(
+                    nrows=2, ncols=1, figsize=(8, 8), gridspec_kw={"height_ratios": (4, 1), "hspace": 0.07}, sharex=True
+                )
+            else:
+                fig, ax = plt.subplots(1, 1)
+                rax = None
+                sax = None
 
         errps = {
             "hatch": "////",
@@ -236,33 +245,19 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
             "alpha": 0.4,
         }
 
+        # sum all of the background
         if len(bkg) > 0:
-            hep.histplot(
-                bkg,
-                ax=ax,
-                stack=True,
-                sort="yield",
-                edgecolor="black",
-                linewidth=1,
-                histtype="fill",
-                label=[bkg_label for bkg_label in bkg_labels],
-                color=[color_by_sample[bkg_label] for bkg_label in bkg_labels],
-            )
-
             tot = bkg[0].copy()
             for i, b in enumerate(bkg):
                 if i > 0:
                     tot = tot + b
-                    
-            tot_err = np.sqrt(tot.values())
-            tot_err[np.isnan(tot_err)] = 0
-            ax.stairs(
-                values=tot.values() + tot_err,
-                baseline=tot.values() - tot_err,
-                edges=tot.axes[0].edges, 
-                **errps,
-                label='Stat. unc.'
-            )
+
+            tot_val = tot.values()
+            tot_val_zero_mask = (tot_val==0)
+            tot_val[tot_val_zero_mask] = 1
+
+            tot_err = np.sqrt(tot_val)
+            tot_err[tot_val_zero_mask] = 0
 
         if add_data and data:
             data_err_opts = {
@@ -278,49 +273,114 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
             if len(bkg) > 0:
                 from hist.intervals import ratio_uncertainty
 
-                yerr = ratio_uncertainty(data.values(), tot.values(), "poisson")
-                rax.stairs(1 + yerr[1], edges=tot.axes[0].edges, baseline=1 - yerr[0], **errps)
+                data_val = data.values()
+                data_val[tot_val_zero_mask] = 1
 
-                if ak.all(tot.values()) > 0:
-                    hep.histplot(
-                        data.values() / tot.values(),
-                        tot.axes[0].edges,
-                        yerr=np.sqrt(data.values()) / tot.values(),
-                        ax=rax,
-                        histtype="errorbar",
-                        color="k",
-                        capsize=4,
-                    )
-                else:
-                    print(f"Warning: not all bins filled for background histogram for {var} {ch}")
+                yerr = ratio_uncertainty(data_val, tot_val, "poisson")
+                # rax.stairs(
+                #     1 + yerr[1], 
+                #     edges=tot.axes[0].edges, 
+                #     baseline=1 - yerr[0], 
+                #     **errps
+                # )
+
+                hep.histplot(
+                    data_val/tot_val,
+                    tot.axes[0].edges,
+                    #yerr=np.sqrt(data_val) / tot_val,
+                    yerr=yerr,
+                    ax=rax,
+                    histtype="errorbar",
+                    color="k",
+                    capsize=4,
+                )
+
                 rax.axhline(1, ls="--", color="k")
                 rax.set_ylim(0.2, 1.8)
                 # rax.set_ylim(0.7, 1.3)
-
+                
+        # plot the background
+        if len(bkg) > 0:
+            hep.histplot(
+                bkg,
+                ax=ax,
+                stack=True,
+                sort="yield",
+                edgecolor="black",
+                linewidth=1,
+                histtype="fill",
+                label=[bkg_label for bkg_label in bkg_labels],
+                color=[color_by_sample[bkg_label] for bkg_label in bkg_labels],
+            )
+            ax.stairs(
+                values=tot.values() + tot_err,
+                baseline=tot.values() - tot_err,
+                edges=tot.axes[0].edges,
+                **errps,
+                label='Stat. unc.'
+            )
+                
+        # plot the signal (times 10)
         if len(signal) > 0:
-            sigg = None
-            for i, sig in enumerate(signal):
+            tot_signal = None
+            for i, sig in enumerate(signal_mult):
+                lab_sig_mult = f"{mult_factor} * {simplified_labels[signal_labels[i]]}"
+                if mult_factor==1:
+                    lab_sig_mult = f"{simplified_labels[signal_labels[i]]}"
                 hep.histplot(
                     sig,
                     ax=ax,
-                    label=f"10 * {simplified_labels[signal_labels[i]]}",
+                    label=lab_sig_mult,
                     linewidth=3,
                     color=color_by_sample[signal_labels[i]],
                 )
-                if sigg == None:
-                    sigg = signal[i].copy()
+
+                if tot_signal == None:
+                    tot_signal = signal[i].copy()
                 else:
-                    sigg = sigg + sig
+                    tot_signal = tot_signal + signal[i]
+
+            # plot the total signal (w/o scaling)
+            hep.histplot(
+                tot_signal,
+                ax=ax,
+                label=f"Total signal",
+                linewidth=3,
+                color='tab:red'
+            )
+            # add MC stat errors
             ax.stairs(
-                values=sigg.values() + np.sqrt(sigg.values()),
-                baseline=sigg.values() - np.sqrt(sigg.values()),
+                values=tot_signal.values() + np.sqrt(tot_signal.values()),
+                baseline=tot_signal.values() - np.sqrt(tot_signal.values()),
                 edges=sig.axes[0].edges,
                 **errps,
             )
+            
+            if sax is not None:
+                totsignal_val = tot_signal.values()
+                # replace values where bkg is 0
+                totsignal_val[tot_val==0] = 0
+                soverb_val = totsignal_val / np.sqrt(tot_val)
+                hep.histplot(
+                    soverb_val,
+                    tot_signal.axes[0].edges,
+                    label='Total Signal',
+                    ax=sax,
+                    linewidth=3,
+                    color='tab:red',
+                )
+                sax.legend()
 
-        if rax != None:
+        ax.set_ylabel("Events")
+        rax.set_ylabel("Data/MC",fontsize=20)
+        sax.set_ylabel("S/sqrt(B)",fontsize=20)
+        if sax is not None:
             ax.set_xlabel("")
-            rax.set_xlabel(f"{var}")
+            rax.set_xlabel("")
+            sax.set_xlabel(f"{axis_dict[var].label}")
+        elif rax is not None:
+            ax.set_xlabel("")
+            rax.set_xlabel(f"{axis_dict[var].label}")
 
         # sort the legend
         order_dic = {}
@@ -338,18 +398,21 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True):
             order.append(np.argmax(np.array(summ)))
             summ[np.argmax(np.array(summ))] = -100
 
-        hand = [handles[i] for i in order] + handles[len(bkg) :]
-        lab = [labels[i] for i in order] + labels[len(bkg) :]
+        hand = [handles[-1]] + [handles[i] for i in order] + handles[len(bkg):-1]
+        lab = [labels[-1]] + [labels[i] for i in order] + labels[len(bkg):-1]
 
-        ax.legend([hand[idx] for idx in range(len(hand))], [lab[idx] for idx in range(len(lab))], bbox_to_anchor=(1.05, 1), loc='upper left')
-
+        ax.legend(
+            [hand[idx] for idx in range(len(hand))], 
+            [lab[idx] for idx in range(len(lab))], bbox_to_anchor=(1.05, 1), 
+            loc='upper left', title=f"{label_by_ch[ch]} Channel"
+        )
+        
         if logy:
             ax.set_yscale("log")
             ax.set_ylim(0.1)
-        ax.set_title(f"{label_by_ch[ch]} Channel")
 
-        hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
-        hep.cms.text("Work in Progress", ax=ax)
+        hep.cms.lumitext(f"{year} (13 TeV)", ax=ax, fontsize=20)
+        hep.cms.text("Work in Progress", ax=ax, fontsize=20)
 
         if logy:
             print(f"Saving to {odir}/{ch}_hists_log/{var}.pdf")
@@ -406,7 +469,8 @@ def main(args):
 
         if args.plot_hists:
             print("Plotting...")
-            plot_stacked_hists(args.year, ch, odir, vars_to_plot, logy=args.nology, add_data=args.nodata)
+            plot_stacked_hists(args.year, ch, odir, vars_to_plot, logy=True, add_data=args.nodata)
+            plot_stacked_hists(args.year, ch, odir, vars_to_plot, logy=False, add_data=args.nodata)
 
 
 if __name__ == "__main__":
@@ -433,7 +497,6 @@ if __name__ == "__main__":
     parser.add_argument("--idir", dest="idir", default="../results/", help="input directory with results - without _{year}")
     parser.add_argument("--make_hists", dest="make_hists", action="store_true", help="Make hists")
     parser.add_argument("--plot_hists", dest="plot_hists", action="store_true", help="Plot the hists")
-    parser.add_argument("--nology", dest="nology", action="store_false", help="No logy scale")
     parser.add_argument("--nodata", dest="nodata", action="store_false", help="No data")
 
     args = parser.parse_args()
