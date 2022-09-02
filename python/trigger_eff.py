@@ -38,19 +38,6 @@ def match_HWW(genparticles, candidatefj):
     return matchedH
 
 
-# "ele": [
-#     "Ele35_WPTight_Gsf",
-#     "Ele115_CaloIdVT_GsfTrkIdT",
-#     "Photon200"
-# ],
-# "mu": [
-#     "Mu50",
-#     "IsoMu27",
-#     "OldMu100",
-#     "TkMu100"
-# ],
-
-
 class TriggerEfficienciesProcessor(ProcessorABC):
     """Accumulates histograms from all input events: 1) before triggers, and 2) after triggers"""
 
@@ -79,7 +66,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
 
         self._channels = ["ele", "mu"]
 
-    def pad_val(self, arr: ak.Array, target: int, value: float, axis: int = 0, to_numpy: bool = True):
+    def pad_val(self, arr, target, value, axis=0, to_numpy=True):
         """pads awkward array up to `target` index along axis `axis` with value `value`, optionally converts to numpy array"""
         ret = ak.fill_none(ak.pad_none(arr, target, axis=axis, clip=True), value)
         return ret.to_numpy() if to_numpy else ret
