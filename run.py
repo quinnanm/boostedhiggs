@@ -68,10 +68,14 @@ def main(args):
     # define processor
     if args.processor == 'hww':
         from boostedhiggs.hwwprocessor import HwwProcessor
+        from boostedhiggs.trigger_efficiencies_processor import TriggerEfficienciesProcessor
+
         if 'APV' in args.year:
-            p = HwwProcessor(year='2016', yearmod='APV', channels=channels, inference=args.inference, output_location='./outfiles' + job_name)
+            p = HwwProcessor(year='2016', yearmod='APV', channels=channels,
+                             inference=args.inference, output_location='./outfiles' + job_name)
         else:
-            p = HwwProcessor(year=args.year, channels=channels, inference=args.inference, output_location='./outfiles' + job_name)
+            # p = HwwProcessor(year=args.year, channels=channels, inference=args.inference, output_location='./outfiles' + job_name)
+            p = TriggerEfficienciesProcessor(year=args.year, output_location='./outfiles' + job_name)
 
     tic = time.time()
     if args.executor == "dask":
@@ -133,13 +137,20 @@ if __name__ == "__main__":
     # run locally on lpc as: python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --json samples_pfnano.json
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--year',        dest='year',           default='2017',                     help="year",                                type=str)
-    parser.add_argument('--starti',      dest='starti',         default=0,                          help="start index of files",                type=int)
-    parser.add_argument('--n',           dest='n',              default=-1,                         help="number of files to process",          type=int)
-    parser.add_argument('--json',        dest='json',           default="metadata.json",            help='path to datafiles',                   type=str)
-    parser.add_argument('--sample',      dest='sample',         default=None,                       help='specify sample',                      type=str)
-    parser.add_argument("--processor",   dest="processor",      default="hww",                      help="HWW processor",                       type=str)
-    parser.add_argument("--chunksize",   dest='chunksize',      default=10000,                      help="chunk size in processor",             type=int)
+    parser.add_argument('--year',        dest='year',           default='2017',
+                        help="year",                                type=str)
+    parser.add_argument('--starti',      dest='starti',         default=0,
+                        help="start index of files",                type=int)
+    parser.add_argument('--n',           dest='n',              default=-1,
+                        help="number of files to process",          type=int)
+    parser.add_argument('--json',        dest='json',           default="metadata.json",
+                        help='path to datafiles',                   type=str)
+    parser.add_argument('--sample',      dest='sample',         default=None,
+                        help='specify sample',                      type=str)
+    parser.add_argument("--processor",   dest="processor",      default="hww",
+                        help="HWW processor",                       type=str)
+    parser.add_argument("--chunksize",   dest='chunksize',      default=10000,
+                        help="chunk size in processor",             type=int)
     parser.add_argument(
         "--executor",
         type=str,
