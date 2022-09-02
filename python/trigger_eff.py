@@ -77,7 +77,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         n_events = len(events)
         isRealData = not hasattr(events, "genWeight")
 
-        def pad_val_nevents(arr: ak.Array):
+        def pad_val_nevents(arr):
             """pad values with the length equal to the number of events"""
             return self.pad_val(arr, n_events, -1)
 
