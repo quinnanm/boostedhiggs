@@ -68,7 +68,6 @@ def main(args):
     # define processor
     if args.processor == 'hww':
         from boostedhiggs.hwwprocessor import HwwProcessor
-        from boostedhiggs.trigger_efficiencies_processor import TriggerEfficienciesProcessor
 
         if 'APV' in args.year:
             p = HwwProcessor(year='2016', yearmod='APV', channels=channels,
@@ -77,6 +76,7 @@ def main(args):
             p = HwwProcessor(year=args.year, channels=channels, inference=args.inference,
                              output_location='./outfiles' + job_name)
     else:
+        from boostedhiggs.trigger_efficiencies_processor import TriggerEfficienciesProcessor
         p = TriggerEfficienciesProcessor(year=args.year)
 
     tic = time.time()
