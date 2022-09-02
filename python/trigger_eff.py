@@ -9,6 +9,13 @@ import matplotlib.pyplot as plt
 import mplhep as hep
 from hist.intervals import clopper_pearson_interval
 
+import json
+import uproot
+import pickle as pkl
+from coffea.nanoevents import NanoEventsFactory, NanoAODSchema, BaseSchema
+
+from coffea.processor import IterativeExecutor, Runner, DaskExecutor
+
 # we suppress ROOT warnings where our input ROOT tree has duplicate branches - these are handled correctly.
 import warnings
 
@@ -191,16 +198,10 @@ if __name__ == "__main__":
     python trigger_eff.py
     """
 
-    import json
-
     with open("../fileset/pfnanoindex_2017.json") as f:
         sig = json.load(f)["2017"]["HWW"]["GluGluHToWWToLNuQQ"]
 
-    import uproot
-    import pickle as pkl
-    from coffea.nanoevents import NanoEventsFactory, NanoAODSchema, BaseSchema
-
-    from coffea.processor import IterativeExecutor, Runner, DaskExecutor
+    sig_xrootd = ["root://cmsxrootd.fnal.gov/" + file for file in sig]
 
     # define fileset
     fileset = {"HToWW": sig_xrootd}
