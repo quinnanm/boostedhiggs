@@ -74,8 +74,11 @@ def main(args):
             p = HwwProcessor(year='2016', yearmod='APV', channels=channels,
                              inference=args.inference, output_location='./outfiles' + job_name)
         else:
-            # p = HwwProcessor(year=args.year, channels=channels, inference=args.inference, output_location='./outfiles' + job_name)
-            p = TriggerEfficienciesProcessor(year=args.year, output_location='./outfiles' + job_name)
+            if args.processor == 'hww':
+                p = HwwProcessor(year=args.year, channels=channels, inference=args.inference,
+                                 output_location='./outfiles' + job_name)
+            else:
+                p = TriggerEfficienciesProcessor(year=args.year)
 
     tic = time.time()
     if args.executor == "dask":
@@ -124,17 +127,19 @@ def main(args):
     filehandler.close()
 
     # merge parquet
-    for ch in channels:
-        data = pd.read_parquet('./outfiles/' + job_name + ch + '/parquet')
-        data.to_parquet('./outfiles/' + job_name + '_' + ch + '.parquet')
+    if args.processor == 'hww':
+        for ch in channels:
+            data = pd.read_parquet('./outfiles/' + job_name + ch + '/parquet')
+            data.to_parquet('./outfiles/' + job_name + '_' + ch + '.parquet')
 
-        # remove old parquet files
-        os.system('rm -rf ./outfiles/' + job_name + ch)
+            # remove old parquet files
+            os.system('rm -rf ./outfiles/' + job_name + ch)
 
 
 if __name__ == "__main__":
     # e.g.
     # run locally on lpc as: python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --json samples_pfnano.json
+    # run locally on lpc as: python run.py --year 2017 --processor trigger --pfnano --n 1 --starti 0 --json samples_pfnano.json
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',        dest='year',           default='2017',
