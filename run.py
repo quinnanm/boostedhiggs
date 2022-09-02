@@ -74,11 +74,10 @@ def main(args):
             p = HwwProcessor(year='2016', yearmod='APV', channels=channels,
                              inference=args.inference, output_location='./outfiles' + job_name)
         else:
-            if args.processor == 'hww':
-                p = HwwProcessor(year=args.year, channels=channels, inference=args.inference,
-                                 output_location='./outfiles' + job_name)
-            else:
-                p = TriggerEfficienciesProcessor(year=args.year)
+            p = HwwProcessor(year=args.year, channels=channels, inference=args.inference,
+                             output_location='./outfiles' + job_name)
+    else:
+        p = TriggerEfficienciesProcessor(year=args.year)
 
     tic = time.time()
     if args.executor == "dask":
