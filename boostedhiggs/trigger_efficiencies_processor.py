@@ -149,7 +149,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             out[channel]["lep_pt"] = pad_val_nevents(candidatelep.pt)
 
             if "HToWW" in dataset:
-                matchedH = match_HWW(events.GenPart, candidatefj)
+                matchedH = simple_match_HWW(events.GenPart, candidatefj)
                 matchedH_pt = ak.firsts(matchedH.pt)
             else:
                 matchedH_pt = ak.zeros_like(candidatefj.pt)
@@ -170,4 +170,17 @@ class TriggerEfficienciesProcessor(ProcessorABC):
                         key: value.value for (key, value) in output["skimmed_events"][channel].items()
                     }
 
+        return accumulator
+
+        # now save pandas dataframes
+        for ch in self._channels:  # creating directories for each channel
+            if not os.path.exists(self._output_location + ch):
+                os.makedirs(self._output_location + ch)
+            if not os.path.exists(self._output_location + ch + "/parquet"):
+                os.makedirs(self._output_location + ch + "/parquet")
+
+        # return dictionary with cutflows
+        return {dataset: {"mc": isMC, self._year: {"sumgenweight": sumgenweight, "cutflows": self.cutflows}}}
+
+    def postprocess(self, accumulator):
         return accumulator
