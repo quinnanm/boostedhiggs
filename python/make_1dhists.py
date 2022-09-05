@@ -180,22 +180,32 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # lep_pt:    python make_1dhists.py --year 2017 --odir hists --channels ele --var lep_pt    --make_hists --plot_hists --bins 100 --start 0 --end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # lep_fj_dr: python make_1dhists.py --year 2017 --odir hists --channels ele --var lep_fj_dr --make_hists --plot_hists --bins 100 --start 0 --end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # fj_pt:     python make_1dhists.py --year 2017 --odir hists --channels had --var fj_pt     --make_hists --plot_hists --bins 100 --start 300 --end 1000 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_pt:    python make_1dhists.py --year 2017 --odir hists --channels ele --var lep_pt    --make_hists --plot_hists --bins 100 --start 0 --end 500 --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2
+    # lep_fj_dr: python make_1dhists.py --year 2017 --odir hists --channels ele --var lep_fj_dr --make_hists --plot_hists --bins 100 --start 0 --end 2 --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2
+    # fj_pt:     python make_1dhists.py --year 2017 --odir hists --channels had --var fj_pt     --make_hists --plot_hists --bins 100 --start 300 --end 1000 --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',            dest='year',        default='2017',                             help="year")
-    parser.add_argument('--samples',         dest='samples',     default="plot_configs/samples_pfnano.json", help='path to json with samples to be plotted')
-    parser.add_argument('--channels',        dest='channels',    default='ele,mu,had',                       help='channels for which to plot this variable')
-    parser.add_argument('--odir',            dest='odir',        default='hists',                            help="tag for output directory... will append '_{year}' to it")
-    parser.add_argument('--idir',            dest='idir',        default='../results/',                      help="input directory with results")
-    parser.add_argument('--var',             dest='var',         default='lep_pt',                           help='variable to plot')
-    parser.add_argument('--bins',            dest='bins',        default=50,                                 help="binning of the first variable passed",                type=int)
-    parser.add_argument('--start',           dest='start',       default=0,                                  help="starting range of the first variable passed",         type=int)
-    parser.add_argument('--end',             dest='end',         default=1,                                  help="end range of the first variable passed",              type=int)
-    parser.add_argument("--make_hists",      dest='make_hists',  action='store_true',                        help="Make hists")
-    parser.add_argument("--plot_hists",      dest='plot_hists',  action='store_true',                        help="Plot the hists")
+    parser.add_argument('--samples',         dest='samples',     default="plot_configs/samples_pfnano.json",
+                        help='path to json with samples to be plotted')
+    parser.add_argument('--channels',        dest='channels',    default='ele,mu,had',
+                        help='channels for which to plot this variable')
+    parser.add_argument('--odir',            dest='odir',        default='hists',
+                        help="tag for output directory... will append '_{year}' to it")
+    parser.add_argument('--idir',            dest='idir',        default='../results/',
+                        help="input directory with results")
+    parser.add_argument('--var',             dest='var',         default='lep_pt',
+                        help='variable to plot')
+    parser.add_argument('--bins',            dest='bins',        default=50,
+                        help="binning of the first variable passed",                type=int)
+    parser.add_argument('--start',           dest='start',       default=0,
+                        help="starting range of the first variable passed",         type=int)
+    parser.add_argument('--end',             dest='end',         default=1,
+                        help="end range of the first variable passed",              type=int)
+    parser.add_argument("--make_hists",      dest='make_hists',
+                        action='store_true',                        help="Make hists")
+    parser.add_argument("--plot_hists",      dest='plot_hists',
+                        action='store_true',                        help="Plot the hists")
 
     args = parser.parse_args()
 
