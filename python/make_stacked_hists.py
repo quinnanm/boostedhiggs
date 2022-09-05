@@ -300,7 +300,10 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
         # get total yield of backgrounds per label
         # (sort by yield in fixed fj_pt hisrogram after pre-sel)
         order_dic = {}
+        print('hists["fj_pt"]', hists["fj_pt"])
         for bkg_label in bkg_labels:
+            print('bkg_label', bkg_label)
+
             order_dic[simplified_labels[bkg_label]] = hists["fj_pt"][{"samples": bkg_label}].sum()
 
         # if "VBFHToWWToLNuQQ-MH125" in signal_labels:
