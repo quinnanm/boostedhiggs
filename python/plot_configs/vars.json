@@ -16,7 +16,7 @@
 	"gen_Hpt": 0
     },
     "mu": {
-	"lep_mvaId": 1,
+	"lep_mvaId": 0,
 	"fj_pt": 1,
 	"fj_msoftdrop": 1,
   "fj_bjets_ophem": 0,
