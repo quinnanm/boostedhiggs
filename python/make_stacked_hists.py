@@ -303,7 +303,7 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
         print('hists["fj_pt"]', hists["fj_pt"])
         for bkg_label in bkg_labels:
             print('bkg_label', bkg_label)
-            print('1', simplified_labels[bkg_label])
+            print('1', simplified_labels.keys())
 
             order_dic[simplified_labels[bkg_label]] = hists["fj_pt"][{"samples": bkg_label}].sum()
 
