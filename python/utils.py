@@ -56,6 +56,7 @@ simplified_labels = {
     "GluGluHToWW_Pt-200ToInf_M-125": "ggH-Pt200",
     "ALL_VH_SIGNALS_COMBINED": "VH",
     "VBFHToWWToLNuQQ-MH125": "VBF-LNuQQ",
+    "DYJets": "DYJets"
 }
 
 
