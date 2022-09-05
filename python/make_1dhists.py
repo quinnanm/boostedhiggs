@@ -117,10 +117,6 @@ def plot_1dhists(year, channels, odir, var):
             hists[ch] = pkl.load(f)
             f.close()
 
-        # make directory to store stuff per year
-        if not os.path.exists(f'{odir}/{ch}_{var}'):
-            os.makedirs(f'{odir}/{ch}_{var}')
-
     # make plots per channel
     for sample in hists[channels[0]].axes[1]:
         fig, ax = plt.subplots(figsize=(8, 5))
@@ -131,7 +127,7 @@ def plot_1dhists(year, channels, odir, var):
         hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
         hep.cms.text("Work in Progress", ax=ax)
         ax.legend()
-        plt.savefig(f'{odir}/1dhist_{var}/{sample}.pdf')
+        plt.savefig(f'{odir}/1dhist_{var}_{sample}.pdf')
         plt.close()
 
         fig, ax = plt.subplots(figsize=(8, 5))
@@ -143,7 +139,7 @@ def plot_1dhists(year, channels, odir, var):
         hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
         hep.cms.text("Work in Progress", ax=ax)
         ax.legend()
-        plt.savefig(f'{odir}/1dhist_{var}/{sample}.pdf')
+        plt.savefig(f'{odir}/1dhist_{var}_{sample}.pdf')
         plt.close()
 
 
