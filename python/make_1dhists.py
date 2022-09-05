@@ -81,6 +81,7 @@ def make_1dhists(year, ch, idir, odir, samples, var, bins, range):
                 if key in sample:
                     single_sample = single_key
 
+            print(data.keys())
             if single_sample is not None:
                 hists.fill(
                     data[var],
