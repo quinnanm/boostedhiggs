@@ -60,6 +60,7 @@ def make_1dhists(year, ch, idir, odir, samples, var, bins, range):
         if not pkl_files:  # skip samples which were not processed
             print('- No processed files found...', pkl_dir, 'skipping sample...', sample)
             continue
+        print(f"Processing sample {sample}")
 
         # check if the sample was processed
         parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')
