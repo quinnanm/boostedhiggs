@@ -99,7 +99,7 @@ def make_1dhists(year, ch, idir, odir, samples, var, bins, range):
         pkl.dump(hists, f)
 
 
-def plot_1dhists(year, ch, odir, var):
+def plot_1dhists(year, channels, odir, var):
     """
     Plots 1D histograms that were made by "make_1dhists" function
 
@@ -111,33 +111,39 @@ def plot_1dhists(year, ch, odir, var):
     """
 
     # load the hists
-    with open(f'{odir}/{ch}_{var}.pkl', 'rb') as f:
-        hists = pkl.load(f)
-        f.close()
+    hists = {}
+    for ch in channels:
+        with open(f'{odir}/{ch}_{var}.pkl', 'rb') as f:
+            hists[ch] = pkl.load(f)
+            f.close()
 
-    # make directory to store stuff per year
-    if not os.path.exists(f'{odir}/{ch}_{var}'):
-        os.makedirs(f'{odir}/{ch}_{var}')
+        # make directory to store stuff per year
+        if not os.path.exists(f'{odir}/{ch}_{var}'):
+            os.makedirs(f'{odir}/{ch}_{var}')
 
     # make plots per channel
     for sample in hists.axes[1]:
         fig, ax = plt.subplots(figsize=(8, 5))
-        hep.histplot(hists[{'samples': sample}], ax=ax)
+        for ch in channels:
+            hep.histplot(hists[ch][{'samples': sample}], ax=ax, label=ch)
         ax.set_xlabel(f"{var}")
         ax.set_title(f'{ch} channel for \n {sample}')
         hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
         hep.cms.text("Work in Progress", ax=ax)
-        plt.savefig(f'{odir}/{ch}_{var}/{sample}.pdf')
+        ax.legend()
+        plt.savefig(f'{odir}/1dhist_{var}/{sample}.pdf')
         plt.close()
 
         fig, ax = plt.subplots(figsize=(8, 5))
-        hep.histplot(hists[{'samples': sample}], ax=ax)
+        for ch in channels:
+            hep.histplot(hists[{'samples': sample}], ax=ax, label=ch)
         ax.set_xlabel(f"{var}")
         ax.set_title(f'{ch} channel for \n {sample}')
         ax.set_yscale('log')
         hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
         hep.cms.text("Work in Progress", ax=ax)
-        plt.savefig(f'{odir}/{ch}_{var}/{sample}.pdf')
+        ax.legend()
+        plt.savefig(f'{odir}/1dhist_{var}/{sample}.pdf')
         plt.close()
 
 
@@ -174,9 +180,9 @@ def main(args):
             print(f'Making {args.var} histogram')
             make_1dhists(args.year, ch, args.idir, odir, samples, args.var, args.bins, range)
 
-        if args.plot_hists:
-            print(f'Plotting...')
-            plot_1dhists(args.year, ch, odir, args.var)
+    if args.plot_hists:
+        print(f'Plotting...')
+        plot_1dhists(args.year, channels, odir, args.var)
 
 
 if __name__ == "__main__":
