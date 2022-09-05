@@ -51,19 +51,26 @@ def get_sum_sumgenweight(idir, year, sample):
 
 
 simplified_labels = {
-    "GluGluHToWWToLNuQQ": "ggH-LNuQQ",
-    "ttHToNonbb_M125": "ttH",
-    "GluGluHToWW_Pt-200ToInf_M-125": "ggH-Pt200",
-    "ALL_VH_SIGNALS_COMBINED": "VH",
-    "VBFHToWWToLNuQQ-MH125": "VBF-LNuQQ",
+    "GluGluHToWWToLNuQQ": r"ggH(WW) $(qq\ell\nu)$",
+    "ttHToNonbb_M125": "ttH(WW)",
+    "GluGluHToWW_Pt-200ToInf_M-125": "ggH(WW)-Pt200",
+    "ALL_VH_SIGNALS_COMBINED": "VH(WW)",
+    "VBFHToWWToLNuQQ-MH125": r"VBFH(WW) $(qq\ell\nu)$",
+    "QCD": "Multijet",
+    "DYJets": r"Z$(\ell\ell)$+jets",
+    "WJetsLNu": r"W$(\ell\nu)$+jets",
+    "TTbar": r"$t\bar{t}$+jets",
+    "WZQQ": r"W/Z$(qq)$",
+    "SingleTop": r"Single Top",
+    "VBFHToWWToLNuQQ_M-125_withDipoleRecoil": r"VBFH(WW) $(qq\ell\nu)$",
 }
 
 
 # define the axes for the different variables to be plotted
 # define samples
 signal_by_ch = {
-    'ele': ['GluGluHToWWToLNuQQ', 'ttHToNonbb_M125', 'GluGluHToWW_Pt-200ToInf_M-125', 'ALL_VH_SIGNALS_COMBINED', 'VBFHToWWToLNuQQ-MH125'],
-    'mu': ['GluGluHToWWToLNuQQ', 'ttHToNonbb_M125', 'GluGluHToWW_Pt-200ToInf_M-125', 'ALL_VH_SIGNALS_COMBINED', 'VBFHToWWToLNuQQ-MH125'],
+    'ele': ['ttHToNonbb_M125', 'GluGluHToWW_Pt-200ToInf_M-125', 'ALL_VH_SIGNALS_COMBINED', 'VBFHToWWToLNuQQ_M-125_withDipoleRecoil'],
+    'mu': ['ttHToNonbb_M125', 'GluGluHToWW_Pt-200ToInf_M-125', 'ALL_VH_SIGNALS_COMBINED', 'VBFHToWWToLNuQQ_M-125_withDipoleRecoil'],
 }
 
 
@@ -91,14 +98,14 @@ color_by_sample = {
     "DYJets": 'tab:purple',
     "WJetsLNu": 'tab:green',
     "TTbar": 'tab:blue',
-    "ZQQ": 'tab:pink',
-    "WQQ": 'tab:red',
+    "WZQQ": 'tab:pink',
     "SingleTop": 'tab:cyan',
     "GluGluHToWWToLNuQQ": 'darkred',
     "ttHToNonbb_M125": 'tab:olive',
     "GluGluHToWW_Pt-200ToInf_M-125": "coral",
     "ALL_VH_SIGNALS_COMBINED": "tab:brown",
     "VBFHToWWToLNuQQ-MH125": "tab:gray",
+    "VBFHToWWToLNuQQ_M-125_withDipoleRecoil": "tab:gray",
 }
 # available tab colors
 # 'tab:cyan'
@@ -113,8 +120,7 @@ add_samples = {
     'JetHT': 'JetHT',
     'QCD': 'QCD_Pt',
     'DYJets': 'DYJets',
-    'ZQQ': 'ZJetsToQQ',
-    'WQQ': 'WJetsToQQ',
+    'WZQQ': 'JetsToQQ',
     'SingleTop': 'ST',
     'TTbar': 'TT',
     'WJetsLNu': 'WJetsToLNu',

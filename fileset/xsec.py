@@ -43,10 +43,9 @@ xs["GluGluHToWWToLNuQQ"] = 48.58 * BR_HWW * BR_WW_lnuqq
 #  - From LHC-XS-WG: 
 #    - VBF: 3.782E pb (NNLO QCD + NLO EW)
 #      - Times BR: 3.782*0.2137*0.21664272 = 0.1751 pb
+vbf_xsec = 3.782 * BR_HWW * BR_WW_lnuqq
 xs["VBFHToWWToLNuQQ-MH125"] = 3.782 * BR_HWW * BR_WW_lnuqq
-
-## Note: will need to add DipoleRecoilOn sample at some point
-# xs["VBFHToWWDipoleRecoilOn"] = xs["VBFHToWWToLNuQQ-MH125"]
+xs["VBFHToWWToLNuQQ_M-125_withDipoleRecoil"] = vbf_xsec
 
 xs["ttHToNonbb_M125"] = 5.013e-01 * (1-BR_HBB)
 
@@ -80,6 +79,7 @@ xs["TTToHadronic"] = 6.871e+02 * BR_THadronic**2
 xs["TTToSemiLeptonic"] = 6.871e+02 * 2 * BR_TLeptonic * BR_THadronic
 
 # Single Top
+xs["ST_s-channel_4f_hadronicDecays"] = 3.549e+00 * BR_THadronic
 xs["ST_s-channel_4f_leptonDecays"] = 3.549e+00 * BR_TLeptonic
 xs["ST_t-channel_antitop_4f_InclusiveDecays"] = 6.793e+01
 xs["ST_t-channel_antitop_5f_InclusiveDecays"] = 7.174e+01

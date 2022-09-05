@@ -1,7 +1,8 @@
 {
     "GluGluHToWW_Pt-200ToInf_M-125": 0.10078092000000001,
-    "GluGluHToWWToLNuQQ": 2.2490863632451203,
-    "VBFHToWWToLNuQQ-MH125": 0.175093549316448,
+    "GluGluHToWWToLNuQQ": 4.498172726490241,
+    "VBFHToWWToLNuQQ-MH125": 0.350187098632896,
+    "VBFHToWWToLNuQQ_M-125_withDipoleRecoil": 0.350187098632896,
     "ttHToNonbb_M125": 0.21009483,
     "HWminusJ_HToWW_M-125": 0.11635965,
     "HWplusJ_HToWW_M-125": 0.1863464,
@@ -25,6 +26,7 @@
     "TTTo2L2Nu": 77.10979749999998,
     "TTToHadronic": 303.8527975,
     "TTToSemiLeptonic": 306.137405,
+    "ST_s-channel_4f_hadronicDecays": 2.360085,
     "ST_s-channel_4f_leptonDecays": 1.188915,
     "ST_t-channel_antitop_4f_InclusiveDecays": 67.93,
     "ST_t-channel_antitop_5f_InclusiveDecays": 71.74,

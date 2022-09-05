@@ -30,6 +30,7 @@ cut_keys = [
     "leptonKin",
     "oneLepton",
     "notaus",
+    "pre-sel",
 ]
 global axis_dict
 axis_dict["cutflow"] = hist2.axis.Regular(len(cut_keys), 0, len(cut_keys), name='var', label=r'Event Cutflow', overflow=True)
@@ -113,56 +114,23 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
             # get xsec weight for cutflow
             from postprocess_parquets import get_xsecweight
             xsec_weight = get_xsecweight(f"{idir}_{yr}",yr,sample,is_data,luminosity)
-            # if not is_data:
-            #     f = open("../fileset/xsec_pfnano.json")
-            #     xsec = json.load(f)
-            #     f.close()
-            #     try:
-            #         xsec = eval(str((xsec[sample])))
-            #     except:
-            #         print(f"sample {sample} doesn't have xsecs defined in xsec_pfnano.json so will skip it")
-            #         continue
-            # else:
-            #     xsec = 1
 
             # get combined sample
             sample_to_use = get_sample_to_use(sample,yr)
 
             # get cutflow
+            if sample_to_use not in cut_values.keys():
+                cut_values[sample_to_use] = {}
+                for key in cut_keys:
+                    cut_values[sample_to_use][key] = 0
+
             for ik,pkl_file in enumerate(pkl_files):
-
-                if sample_to_use not in cut_values.keys():
-                    cut_values[sample_to_use] = {}
-                    for key in cut_keys:
-                        cut_values[sample_to_use][key] = 0
-
                 with open(pkl_file, "rb") as f:
                     metadata = pkl.load(f)
-                    cutflows = metadata[sample][year]["cutflows"][ch]
-                    cutflows_sorted = sorted(cutflows.items(), key=lambda x: x[1], reverse=True)
-
-                    # not sure if this is the better method... ( I don't think so)
-                    # xsec_weight = (xsec * luminosity) / (metadata[sample][year]['sumgenweight'])
-
-                for i, elem in enumerate(cutflows_sorted):
-                    if elem[0] in cut_keys:
-                        cut_values[sample_to_use][elem[0]] += elem[1] * xsec_weight
-
-                    #if elem[0]=='all':
-                    #    print('all ',ik,elem[1])
-
-            # print(sample_to_use,sample,cut_values[sample_to_use]['notaus'])
-
-            # fill cutflow histogram
-            for key,numevents in cut_values[sample_to_use].items():
-                cut_index = cut_keys.index(key)
-                # print('filling ',cut_index,numevents,sample_to_use)
-                hists["cutflow"].fill(
-                    samples=sample_to_use,
-                    var=cut_index,
-                    weight=numevents
-                )
-            ##hists["cutflow"] = hists["cutflow"]*xsec_weight
+                    cutflows = metadata[sample][yr.replace("APV","")]["cutflows"][ch]
+                    for key in cut_keys:
+                        if key in cutflows.keys():
+                            cut_values[sample_to_use][key] += cutflows[key] * xsec_weight
 
             #if len(parquet_files) != 0:
             #    print(f"Processing {ch} channel of sample", sample)
@@ -181,68 +149,87 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                         print("Not able to read data from ", parquet_file)
                     continue
 
+                if len(data) == 0:
+                    print("Parquet file empty")
+                    continue
+
                 try:
                     event_weight = data["tot_weight"]
                 except:
                     print("No tot_weight variable in parquet - run pre-processing first!")
                     continue
+                    
+                if args.add_score:
+                    if ch=="ele":
+                        data['ele_score'] = data['fj_isHVV_elenuqq'] / (data['fj_isHVV_elenuqq'] + data['fj_ttbar_bmerged'] + data['fj_ttbar_bsplit'] + data['fj_wjets_label'])
+                    else:
+                        data['mu_score'] = data['fj_isHVV_munuqq'] / (data['fj_isHVV_munuqq'] + data['fj_ttbar_bmerged'] + data['fj_ttbar_bsplit'] + data['fj_wjets_label'])
+
+                # make cuts
+                pt_cut = (data["fj_pt"] > 400) & (data["fj_pt"] < 600)
+                msd_cut = (data["fj_msoftdrop"] > 30) & (data["fj_msoftdrop"] < 150)
+                
+                iso_cut = (
+                    ((data["lep_isolation"] < 0.15) & (data["lep_pt"] < pt_iso[ch])) |
+                    (data["lep_pt"] > pt_iso[ch])
+                )
+                if ch == "mu":
+                    miso_cut = (
+                        ((data["lep_misolation"] < 0.1) & (data["lep_pt"] >= pt_iso[ch])) |
+                        (data["lep_pt"] < pt_iso[ch])
+                    )
+                else:
+                    miso_cut = data["lep_pt"] > 10
+
+                # extra selection
+                select = (iso_cut) & (miso_cut)
+                # select = data[var_plot] > -99999  # selects all events (i.e. no cut)  
+
+                # account yield for extra selection
+                sample_yield += np.sum(event_weight[select])
 
                 for var in vars_to_plot[ch]:
                     if var=="cutflow": continue
 
-                    if ch == 'ele':
-                        data['ele_score'] = data['fj_isHVV_elenuqq'] / (data['fj_isHVV_elenuqq'] + data['fj_ttbar_bmerged'] + data['fj_ttbar_bsplit'] + data['fj_wjets_label'])
-                    if ch == 'mu':
-                        data['mu_score'] = data['fj_isHVV_munuqq'] / (data['fj_isHVV_munuqq'] + data['fj_ttbar_bmerged'] + data['fj_ttbar_bsplit'] + data['fj_wjets_label'])
+                    if var==f"{ch}_score" and not args.add_score: continue
 
                     var_plot = var.replace('_lowpt','').replace('_highpt','')
                     if var_plot not in data.keys():
                         print(f"Var {var_plot} not in parquet keys")
                         continue
-                    if len(data) == 0:
-                        print("Parquet file empty")
-                        continue
-
-                    # make iso and miso cuts (different for each channel)
-                    iso_cut = ((data["lep_isolation"] < 0.15) & (data["lep_pt"] < pt_iso[ch])) | (
-                        data["lep_pt"] > pt_iso[ch]
-                    )
-                    if ch == "mu":
-                        miso_cut = ((data["lep_misolation"] < 0.1) & (data["lep_pt"] >= pt_iso[ch])) | (
-                            data["lep_pt"] < pt_iso[ch]
-                        )
-                    else:
-                        miso_cut = data["lep_pt"] > 10
-
-                    # pt and msd cuts
-                    pt_cut = (data["fj_pt"] > 400) & (data["fj_pt"] < 600)
-                    msd_cut = (data["fj_msoftdrop"] > 30) & (data["fj_msoftdrop"] < 150)
-                        
-                    select = (iso_cut) & (miso_cut)
-
-                    # select = data[var_plot] > -99999  # selects all events (i.e. no cut)
 
                     # for specific variables select only low or high pt electrons
                     if "lowpt" in var:
-                        select = select & (data["lep_pt"] < pt_iso[ch])
-                    if "highpt" in var:
-                        select = select& (data["lep_pt"] > pt_iso[ch])
+                        select_var = select & (data["lep_pt"] < pt_iso[ch])
+                    elif "highpt" in var:
+                        select_var = select & (data["lep_pt"] > pt_iso[ch])
+                    else:
+                        select_var = select
 
                     # filling histograms
                     hists[var].fill(
                         samples=sample_to_use,
-                        var=data[var_plot][select],
-                        weight=event_weight[select],
+                        var=data[var_plot][select_var],
+                        weight=event_weight[select_var],
                     )
 
-                    if var=="fj_pt":
-                        sample_yield += np.sum(event_weight[select])
+            # print(f'Sample {sample} yield after extra selection ',sample_yield)
+            cut_values[sample_to_use]["pre-sel"] += sample_yield
 
-            # print('Sample yield fj_pt ',sample_yield)
+            # fill cutflow histogram once we have all the values
+            for key,numevents in cut_values[sample_to_use].items():
+                cut_index = cut_keys.index(key)
+                # print('filling ',cut_index,numevents,sample_to_use)
+                hists["cutflow"].fill(
+                    samples=sample_to_use,
+                    var=cut_index,
+                    weight=numevents
+                )
 
         # save and pretty print cutflow
         with open(f"{odir}/cut_values_{ch}.pkl", "wb") as f:
             pkl.dump(cut_values, f)
+
         import pprint
         pp = pprint.PrettyPrinter(depth=4)
         # pp.pprint(cut_values)
@@ -274,11 +261,18 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
         if not os.path.exists(f"{odir}/{ch}_hists"):
             os.makedirs(f"{odir}/{ch}_hists")
 
+    # data label
     data_label = data_by_ch[ch]
     if year == "2018":
         data_label = data_by_ch_2018[ch]
     elif year == "Run2":
         data_label = "Data"
+
+    # luminosity
+    f = open("../fileset/luminosity.json")
+    luminosity = json.load(f)[year]
+    luminosity = luminosity/1000.
+    f.close()
 
     for var in vars_to_plot[ch]:
         # print(var)
@@ -292,9 +286,14 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
 
         # get samples existing in histogram
         samples = [h.axes[0].value(i) for i in range(len(h.axes[0].edges))]
-
         signal_labels = [label for label in samples if label in signal_by_ch[ch]]
         bkg_labels = [label for label in samples if (label and label != data_label and label not in signal_labels)]
+
+        # get total yield of backgrounds per label 
+        # (sort by yield in fixed fj_pt hisrogram after pre-sel)  
+        order_dic = {}
+        for bkg_label in bkg_labels:
+            order_dic[simplified_labels[bkg_label]] = hists["fj_pt"][{"samples": bkg_label}].sum()
 
         # if "VBFHToWWToLNuQQ-MH125" in signal_labels:
         #     signal_labels.remove("VBFHToWWToLNuQQ-MH125")
@@ -404,17 +403,42 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
                 
         # plot the background
         if len(bkg) > 0:
-            hep.histplot(
-                bkg,
-                ax=ax,
-                stack=True,
-                sort="yield",
-                edgecolor="black",
-                linewidth=1,
-                histtype="fill",
-                label=[bkg_label for bkg_label in bkg_labels],
-                color=[color_by_sample[bkg_label] for bkg_label in bkg_labels],
-            )
+            if var=="cutflow":
+                # sort bkg for cutflow
+                summ = []
+                for label in bkg_labels:
+                    summ.append(order_dic[simplified_labels[label]])
+                # get indices of labels arranged by yield
+                order = []
+                for i in range(len(summ)):
+                    order.append(np.argmax(np.array(summ)))
+                    summ[np.argmax(np.array(summ))] = -100
+
+                bkg_ordered = [bkg[i] for i in order]
+                bkg_labels_ordered = [bkg_labels[i] for i in order]
+
+                hep.histplot(
+                    bkg_ordered,
+                    ax=ax,
+                    stack=True,
+                    edgecolor="black",
+                    linewidth=1,
+                    histtype="fill",
+                    label=[simplified_labels[bkg_label] for bkg_label in bkg_labels_ordered],
+                    color=[color_by_sample[bkg_label] for bkg_label in bkg_labels_ordered],
+                )
+            else:
+                hep.histplot(
+                    bkg,
+                    ax=ax,
+                    stack=True,
+                    sort="yield",
+                    edgecolor="black",
+                    linewidth=1,
+                    histtype="fill",
+                    label=[simplified_labels[bkg_label] for bkg_label in bkg_labels],
+                    color=[color_by_sample[bkg_label] for bkg_label in bkg_labels],
+                )
             ax.stairs(
                 values=tot.values() + tot_err,
                 baseline=tot.values() - tot_err,
@@ -485,39 +509,39 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
                 sax.legend()
 
         ax.set_ylabel("Events")
-        rax.set_ylabel("Data/MC",fontsize=20)
-        sax.set_ylabel("S/sqrt(B)",fontsize=20)
         if sax is not None:
             ax.set_xlabel("")
             rax.set_xlabel("")
+            sax.set_ylabel("S/sqrt(B)",fontsize=20)
             sax.set_xlabel(f"{axis_dict[var].label}")
+            rax.set_ylabel("Data/MC",fontsize=20)
+            if var=="cutflow":
+                sax.set_xticks(range(len(cut_keys)), cut_keys, rotation=60)
+
         elif rax is not None:
             ax.set_xlabel("")
             rax.set_xlabel(f"{axis_dict[var].label}")
+            rax.set_ylabel("Data/MC",fontsize=20)
+            if var=="cutflow":
+                rax.set_xticks(range(len(cut_keys)), cut_keys, rotation=60)
+        else:
+            if var=="cutflow":
+                ax.set_xticks(range(len(cut_keys)), cut_keys, rotation=60)
 
-        # sort the legend
-        order_dic = {}
-        for bkg_label in bkg_labels:
-            # order_dic[bkg_label] = hists["fj_pt"][{"samples": bkg_label}].sum()
-            order_dic[bkg_label] = hists["cutflow"][{"samples": bkg_label}].sum()
-
+        # get handles and labels of legend
         handles, labels = ax.get_legend_handles_labels()
-        #if var=="cutflow":
-        #    print(handles)
-        #    print(labels)
 
+        # append legend labels in order to a list
         summ = []
         for label in labels[: len(bkg_labels)]:
             summ.append(order_dic[label])
-            
-        #if var=="cutflow":
-        #    print('summ ',summ)
-
+        # get indices of labels arranged by yield
         order = []
         for i in range(len(summ)):
             order.append(np.argmax(np.array(summ)))
             summ[np.argmax(np.array(summ))] = -100
 
+        # plot data first, then bkg, then signal
         hand = [handles[-1]] + [handles[i] for i in order] + handles[len(bkg):-1]
         lab = [labels[-1]] + [labels[i] for i in order] + labels[len(bkg):-1]
 
@@ -531,14 +555,14 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
             ax.set_yscale("log")
             ax.set_ylim(0.1)
 
-        hep.cms.lumitext(f"{year} (13 TeV)", ax=ax, fontsize=20)
-        hep.cms.text("Work in Progress", ax=ax, fontsize=20)
+        hep.cms.lumitext("%.1f "%luminosity+r"fb$^{-1}$ (13 TeV)", ax=ax, fontsize=20)
+        hep.cms.text("Work in Progress", ax=ax, fontsize=15)
 
         if logy:
-            print(f"Saving to {odir}/{ch}_hists_log/{var}.pdf")
+            # print(f"Saving to {odir}/{ch}_hists_log/{var}.pdf")
             plt.savefig(f"{odir}/{ch}_hists_log/{var}.pdf", bbox_inches="tight")
         else:
-            print(f"Saving to {odir}/{ch}_hists/{var}.pdf")
+            # print(f"Saving to {odir}/{ch}_hists/{var}.pdf")
             plt.savefig(f"{odir}/{ch}_hists/{var}.pdf", bbox_inches="tight")
         plt.close()
 
@@ -619,6 +643,7 @@ if __name__ == "__main__":
     parser.add_argument("--make_hists", dest="make_hists", action="store_true", help="Make hists")
     parser.add_argument("--plot_hists", dest="plot_hists", action="store_true", help="Plot the hists")
     parser.add_argument("--nodata", dest="nodata", action="store_false", help="No data")
+    parser.add_argument("--add_score", dest="add_score",  action="store_true", help="Add inference score")
 
     args = parser.parse_args()
 
