@@ -404,6 +404,7 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
         # plot the background
         if len(bkg) > 0:
             if var=="cutflow":
+                """
                 # sort bkg for cutflow
                 summ = []
                 for label in bkg_labels:
@@ -416,16 +417,18 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
 
                 bkg_ordered = [bkg[i] for i in order]
                 bkg_labels_ordered = [bkg_labels[i] for i in order]
-
+                """
                 hep.histplot(
-                    bkg_ordered,
+                    bkg,
                     ax=ax,
                     stack=True,
+                    sort="yield",
                     edgecolor="black",
                     linewidth=1,
+                    alpha=0.5,
                     histtype="fill",
-                    label=[simplified_labels[bkg_label] for bkg_label in bkg_labels_ordered],
-                    color=[color_by_sample[bkg_label] for bkg_label in bkg_labels_ordered],
+                    label=[simplified_labels[bkg_label] for bkg_label in bkg_labels],
+                    color=[color_by_sample[bkg_label] for bkg_label in bkg_labels],
                 )
             else:
                 hep.histplot(
