@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 from utils import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch
-from utils import get_simplified_label, get_sum_sumgenweight
+from utils import get_simplified_label, get_sum_sumgenweight, simplified_labels
 import pickle as pkl
 import pyarrow.parquet as pq
 import pyarrow as pa
@@ -125,7 +125,7 @@ def plot_1dhists(year, ch, odir, var):
     # make plots per channel
     fig, ax = plt.subplots(figsize=(8, 5))
     for sample in hists.axes[1]:
-        hep.histplot(hists[{'samples': sample}], ax=ax, label=get_simplified_label[sample])
+        hep.histplot(hists[{'samples': sample}], ax=ax, label=simplified_labels[sample])
     ax.set_xlabel(f"{var}")
     ax.set_title(f'{ch} channel for the signal')
     hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
@@ -136,7 +136,7 @@ def plot_1dhists(year, ch, odir, var):
 
     fig, ax = plt.subplots(figsize=(8, 5))
     for sample in hists.axes[1]:
-        hep.histplot(hists[{'samples': sample}], ax=ax, label=get_simplified_label[sample])
+        hep.histplot(hists[{'samples': sample}], ax=ax, label=simplified_labels[sample])
     ax.set_xlabel(f"{var}")
     ax.set_title(f'{ch} channel for the signal')
     ax.set_yscale('log')
