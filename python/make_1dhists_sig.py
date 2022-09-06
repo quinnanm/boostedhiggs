@@ -54,6 +54,7 @@ def make_1dhists(year, ch, idir, odir, samples, var, bins, range):
     # loop over the samples
     for sample in samples[year][ch]:
         print("------------------------------------------------------------")
+        print('sample', sample)
         # check if the sample was processed
         pkl_dir = f'{idir}/{sample}/outfiles/*.pkl'
         pkl_files = glob.glob(pkl_dir)  #
