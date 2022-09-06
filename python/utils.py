@@ -50,17 +50,24 @@ def get_sum_sumgenweight(idir, year, sample):
     return sum_sumgenweight
 
 
+# define the axes for the different variables to be plotted
+# define samples
+signal_by_ch = {
+    'ele': ['ttHToNonbb_M125', 'GluGluHToWW_Pt-200ToInf_M-125', 'ALL_VH_SIGNALS_COMBINED', 'VBFHToWWToLNuQQ_M-125_withDipoleRecoil'],
+    'mu': ['ttHToNonbb_M125', 'GluGluHToWW_Pt-200ToInf_M-125', 'ALL_VH_SIGNALS_COMBINED', 'VBFHToWWToLNuQQ_M-125_withDipoleRecoil'],
+}
+
 simplified_labels = {
-    "GluGluHToWWToLNuQQ": "ggH-LNuQQ",
-    "ttHToNonbb_M125": "ttH",
-    "GluGluHToWW_Pt-200ToInf_M-125": "ggH-Pt200",
-    "ALL_VH_SIGNALS_COMBINED": "VH",
-    "VBFHToWWToLNuQQ-MH125": "VBF-LNuQQ",
+    "ttHToNonbb_M125": "ttH(WW)",
+    "GluGluHToWW_Pt-200ToInf_M-125": "ggH(WW)-Pt200",
+    "ALL_VH_SIGNALS_COMBINED": "VH(WW)",
+    "VBFHToWWToLNuQQ-MH125": r"VBFH(WW) $(qq\ell\nu)$",
+    "VBFHToWWToLNuQQ_M-125_withDipoleRecoil": r"VBFH(WW) $(qq\ell\nu)$"
     "DYJets": "DYJets",
     "QCD": "QCD",
     "TTbar": "TTbar",
     "SingleTop": "SingleTop",
-    "WJetsLNu": "WJetsLNu"
+    "WJetsLNu": "WJetsLNu",
 }
 
 

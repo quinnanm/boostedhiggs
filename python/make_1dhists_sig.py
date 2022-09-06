@@ -76,11 +76,11 @@ def make_1dhists(year, ch, idir, odir, samples, var, bins, range):
                 continue
             if len(data) == 0:
                 continue
-            print(data.keys())
-            single_sample = None
-            for single_key, key in add_samples.items():
-                if key in sample:
-                    single_sample = single_key
+
+            single_sample = sample
+            # for single_key, key in add_samples.items():
+            #     if key in sample:
+            #         single_sample = single_key
 
             if single_sample is not None:
                 hists.fill(
@@ -119,7 +119,7 @@ def plot_1dhists(year, ch, odir, var):
     # make plots per channel
     fig, ax = plt.subplots(figsize=(8, 5))
     for sample in hists.axes[1]:
-        hep.histplot(hists[{'samples': sample}], ax=ax, label=sample)
+        hep.histplot(hists[{'samples': sample}], ax=ax, label=simplified_labels[sample])
     ax.set_xlabel(f"{var}")
     ax.set_title(f'{ch} channel for the signal')
     hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
@@ -130,7 +130,7 @@ def plot_1dhists(year, ch, odir, var):
 
     fig, ax = plt.subplots(figsize=(8, 5))
     for sample in hists.axes[1]:
-        hep.histplot(hists[{'samples': sample}], ax=ax, label=sample)
+        hep.histplot(hists[{'samples': sample}], ax=ax, label=simplified_labels[sample])
     ax.set_xlabel(f"{var}")
     ax.set_title(f'{ch} channel for the signal')
     ax.set_yscale('log')
