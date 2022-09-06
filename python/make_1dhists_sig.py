@@ -149,7 +149,7 @@ def plot_1dhists(year, ch, odir, var):
               )
     hep.cms.lumitext("%.1f " % luminosity + r"fb$^{-1}$ (13 TeV)", ax=ax, fontsize=20)
     hep.cms.text("Work in Progress", ax=ax, fontsize=15)
-    plt.savefig(f'{odir}/1dhist_sig_{ch}_{var}.pdf')
+    plt.savefig(f'{odir}/1dhist_sig_{ch}_{var}.pdf', bbox_inches="tight")
     plt.close()
 
     # fig, ax = plt.subplots(figsize=(8, 5))
@@ -169,7 +169,7 @@ def plot_1dhists(year, ch, odir, var):
               )
     hep.cms.lumitext("%.1f " % luminosity + r"fb$^{-1}$ (13 TeV)", ax=ax, fontsize=20)
     hep.cms.text("Work in Progress", ax=ax, fontsize=15)
-    plt.savefig(f'{odir}/1dhist_sig_{ch}_{var}_log.pdf')
+    plt.savefig(f'{odir}/1dhist_sig_{ch}_{var}_log.pdf', bbox_inches="tight")
     plt.close()
 
 
@@ -218,7 +218,8 @@ if __name__ == "__main__":
     # lep_fj_m:     python make_1dhists_sig.py --year 2017 --odir sig --channels ele --var lep_fj_m --bins 25 --start 25 --end 200 --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2_2017 --plot_hists --make_hists
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--year',            dest='year',        default='2017',                             help="year")
+    parser.add_argument('--year',            dest='year',
+                        default='2017',                             help="year")
     parser.add_argument('--samples',         dest='samples',     default="plot_configs/samples_pfnano_value.json",
                         help='path to json with samples to be plotted')
     parser.add_argument('--channels',        dest='channels',    default='ele,mu,had',
