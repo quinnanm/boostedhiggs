@@ -129,7 +129,7 @@ add_samples = {
     'GluGluHToWW_Pt-200ToInf_M-125': 'ggF',
     'VBFHToWWToLNuQQ_M-125_withDipoleRecoil': 'VBFH',
     'J_HToWW_M-125': 'VH',
-    'ttHToNonbb_M125': ttH
+    'ttHToNonbb_M125': 'ttH'
 }
 
 
