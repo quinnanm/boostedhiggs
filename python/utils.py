@@ -125,8 +125,13 @@ add_samples = {
     'TTbar': 'TT',
     'WJetsLNu': 'WJetsToLNu',
     'GluGluHToWWTo4q': 'GluGluHToWWTo4q',
-    'ALL_VH_SIGNALS_COMBINED': 'HToWW_M-125'
+    # 'ALL_VH_SIGNALS_COMBINED': 'HToWW_M-125',
+    'GluGluHToWW_Pt-200ToInf_M-125': 'ggF',
+    'VBFHToWWToLNuQQ_M-125_withDipoleRecoil': 'VBFH',
+    'J_HToWW_M-125': 'VH',
+    'ttHToNonbb_M125': ttH
 }
+
 
 label_by_ch = {
     'ele': 'Electron',
