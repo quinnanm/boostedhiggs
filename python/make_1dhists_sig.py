@@ -3,7 +3,7 @@
 import warnings
 from hist.intervals import clopper_pearson_interval
 from utils import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch
-from utils import get_simplified_label, get_sum_sumgenweight, simplified_labels
+from utils import get_simplified_label, get_sum_sumgenweight, simplified_labels, label_by_ch
 import pickle as pkl
 import pyarrow.parquet as pq
 import pyarrow as pa
