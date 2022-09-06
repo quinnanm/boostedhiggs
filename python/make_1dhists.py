@@ -186,8 +186,10 @@ if __name__ == "__main__":
     # lep_pt:    python make_1dhists.py --year 2017 --odir hists --channels ele --var lep_pt   --bins 100 --start 0 --end 500 --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2_2017 --plot_hists --make_hists
     # lep_fj_dr: python make_1dhists.py --year 2017 --odir hists --channels ele --var lep_fj_d --bins 100 --start 0 --end 2 --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2_2017 --plot_hists --make_hists
     # fj_pt:     python make_1dhists.py --year 2017 --odir hists --channels had --var fj_pt   --bins 100 --start 300 --end 1000 --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2_2017 --plot_hists --make_hists
-    # gen_Hpt_pt:     python make_1dhists.py --year 2017 --odir test --channels ele --var gen_Hpt    --bins 50 --start 300 --end 1000 --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2_2017 --plot_hists --make_hists
-    # fj_msoftdrop:     python make_1dhists.py --year 2017 --odir test --channels ele,mu --var fj_msoftdrop --bins 50 --start 25 --end 200 --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2_2017 --plot_hists --make_hists
+
+    # gen_Hpt_pt:   python make_1dhists.py --year 2017 --odir test --channels ele,mu --var gen_Hpt    --bins 50 --start 300 --end 1000 --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2_2017 --plot_hists --make_hists
+    # fj_msoftdrop: python make_1dhists.py --year 2017 --odir test --channels ele,mu --var fj_msoftdrop --bins 50 --start 25 --end 200 --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2_2017 --plot_hists --make_hists
+    # lep_fj_m:     python make_1dhists.py --year 2017 --odir test --channels ele,mu --var lep_fj_m --bins 50 --start 25 --end 200 --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2_2017 --plot_hists --make_hists
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',            dest='year',        default='2017',                             help="year")
