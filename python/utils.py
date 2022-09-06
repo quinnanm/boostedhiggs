@@ -62,12 +62,12 @@ simplified_labels = {
     "GluGluHToWW_Pt-200ToInf_M-125": "ggH(WW)-Pt200",
     "ALL_VH_SIGNALS_COMBINED": "VH(WW)",
     "VBFHToWWToLNuQQ-MH125": r"VBFH(WW) $(qq\ell\nu)$",
-    "VBFHToWWToLNuQQ_M-125_withDipoleRecoil": r"VBFH(WW) $(qq\ell\nu)$"
+    "VBFHToWWToLNuQQ_M-125_withDipoleRecoil": r"VBFH(WW) $(qq\ell\nu)$",
     "DYJets": "DYJets",
     "QCD": "QCD",
     "TTbar": "TTbar",
     "SingleTop": "SingleTop",
-    "WJetsLNu": "WJetsLNu",
+    "WJetsLNu": "WJetsLNu"
 }
 
 
