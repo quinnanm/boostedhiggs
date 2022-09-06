@@ -77,6 +77,12 @@ def make_1dhists(year, ch, idir, odir, samples, var, bins, range):
             if len(data) == 0:
                 continue
 
+            try:
+                data[var]
+            except:
+                print(f"{sample} doesn't have {var} stored")
+                continue    # if sample doesn't have stored variable
+
             single_sample = sample
             # for single_key, key in add_samples.items():
             #     if key in sample:
