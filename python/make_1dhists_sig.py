@@ -76,7 +76,7 @@ def make_1dhists(year, ch, idir, odir, samples, var, bins, range):
                 continue
             if len(data) == 0:
                 continue
-
+            print(data.keys)
             single_sample = None
             for single_key, key in add_samples.items():
                 if key in sample:
