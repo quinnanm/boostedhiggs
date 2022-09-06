@@ -105,14 +105,14 @@ color_by_sample = {
     "DYJets": 'tab:purple',
     "WJetsLNu": 'tab:green',
     "TTbar": 'tab:blue',
-    "ZQQ": 'tab:pink',
-    "WQQ": 'tab:red',
+    "WZQQ": 'tab:pink',
     "SingleTop": 'tab:cyan',
-    "GluGluHToWWToLNuQQ": 'tab:red',
+    "GluGluHToWWToLNuQQ": 'darkred',
     "ttHToNonbb_M125": 'tab:olive',
-    "GluGluHToWW_Pt-200ToInf_M-125": "tab:orange",
+    "GluGluHToWW_Pt-200ToInf_M-125": "coral",
     "ALL_VH_SIGNALS_COMBINED": "tab:brown",
     "VBFHToWWToLNuQQ-MH125": "tab:gray",
+    "VBFHToWWToLNuQQ_M-125_withDipoleRecoil": "tab:gray",
 }
 # available tab colors
 # 'tab:cyan'
