@@ -133,7 +133,7 @@ def plot_1dhists(year, ch, odir, var):
         f.close()
 
     # make plots per channel
-    fig, ax = plt.subplots(figsize=(10, 8))
+    fig, ax = plt.subplots(1, 1)
     for sample in hists.axes[1]:
         hep.histplot(hists[{'samples': sample}],
                      ax=ax,
