@@ -140,7 +140,7 @@ def plot_1dhists(year, ch, odir, var):
                      label=simplified_labels[sample],
                      color=color_by_sample[sample],
                      linewidth=3)
-    ax.set_xlabel(f"{var}")
+    ax.set_xlabel(f"{axis_dict[var].label}")
     ax.set_ylabel("Events")
     ax.set_yscale("log")
     ax.set_ylim(0.1)
@@ -160,7 +160,7 @@ def plot_1dhists(year, ch, odir, var):
                      label=simplified_labels[sample],
                      color=color_by_sample[sample],
                      linewidth=3)
-    ax.set_xlabel(f"{var}")
+    ax.set_xlabel(f"{axis_dict[var].label}")
     ax.set_ylabel("Events")
     ax.set_yscale("log")
     ax.set_ylim(0.1)
