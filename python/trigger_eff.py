@@ -1,15 +1,24 @@
+# import fastparquet
+import numpy as np
 from coffea.analysis_tools import Weights, PackedSelection
 from coffea.nanoevents.methods import candidate, vector
 from coffea.processor import ProcessorABC, column_accumulator
 import pandas as pd
-import numpy as np
-import warnings
 import awkward as ak
 import matplotlib.pyplot as plt
 import mplhep as hep
 from hist.intervals import clopper_pearson_interval
 
+import json
+import uproot
+import pickle as pkl
+from coffea.nanoevents import NanoEventsFactory, NanoAODSchema, BaseSchema
+
+from coffea.processor import IterativeExecutor, Runner, DaskExecutor
+
 # we suppress ROOT warnings where our input ROOT tree has duplicate branches - these are handled correctly.
+import warnings
+
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
@@ -22,7 +31,7 @@ def getParticles(genparticles, lowid=22, highid=25, flags=["fromHardProcess", "i
     return genparticles[((absid >= lowid) & (absid <= highid)) & genparticles.hasFlags(flags)]
 
 
-def simple_match_HWW(genparticles, candidatefj):
+def match_HWW(genparticles, candidatefj):
     """
     return the number of matched objects (hWW*),daughters,
     and gen flavor (enuqq, munuqq, taunuqq)
@@ -32,14 +41,12 @@ def simple_match_HWW(genparticles, candidatefj):
     is_hWW = ak.all(abs(higgs.children.pdgId) == 24, axis=2)
 
     higgs = higgs[is_hWW]
-
     matchedH = candidatefj.nearest(higgs, axis=1, threshold=0.8)  # choose higgs closest to fj
-
     return matchedH
 
 
 class TriggerEfficienciesProcessor(ProcessorABC):
-    """Accumulates yields from all input events: 1) before triggers, and 2) after triggers"""
+    """Accumulates histograms from all input events: 1) before triggers, and 2) after triggers"""
 
     def __init__(self, year=2017):
         super(TriggerEfficienciesProcessor, self).__init__()
@@ -66,7 +73,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
 
         self._channels = ["ele", "mu"]
 
-    def pad_val(self, arr: ak.Array, target: int, value: float, axis: int = 0, to_numpy: bool = True):
+    def pad_val(self, arr, target, value, axis=0, to_numpy=True):
         """pads awkward array up to `target` index along axis `axis` with value `value`, optionally converts to numpy array"""
         ret = ak.fill_none(ak.pad_none(arr, target, axis=axis, clip=True), value)
         return ret.to_numpy() if to_numpy else ret
@@ -77,7 +84,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         n_events = len(events)
         isRealData = not hasattr(events, "genWeight")
 
-        def pad_val_nevents(arr: ak.Array):
+        def pad_val_nevents(arr):
             """pad values with the length equal to the number of events"""
             return self.pad_val(arr, n_events, -1)
 
@@ -147,13 +154,25 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             out[channel]["fj_pt"] = pad_val_nevents(candidatefj.pt)
             out[channel]["fj_msoftdrop"] = pad_val_nevents(candidatefj.msoftdrop)
             out[channel]["lep_pt"] = pad_val_nevents(candidatelep.pt)
+            #             if channel=="mu":
+            #                 out[channel]["lep_isolation"] = pad_val_nevents(mu_iso)
+            #             elif channel=="ele":
+            #                 out[channel]["lep_isolation"] = pad_val_nevents(ele_iso)
+            #             out[channel]["fj_lep_mass"] = pad_val_nevents((candidatefj - candidatelep).mass)
+            #             out[channel]["fj_lep_dR"] = pad_val_nevents(dr_lep_fj)
+            #             out[channel]["ht"] = pad_val_nevents(ak.sum(candidatejet.pt, axis=1))
 
             if "HToWW" in dataset:
-                matchedH = simple_match_HWW(events.GenPart, candidatefj)
+                #                 matchedH,iswlepton,iswstarlepton = match_HWWlepqq(events.GenPart,candidatefj)
+                matchedH = match_HWW(events.GenPart, candidatefj)
                 matchedH_pt = ak.firsts(matchedH.pt)
             else:
                 matchedH_pt = ak.zeros_like(candidatefj.pt)
+            #                 iswlepton = ak.ones_like(candidatefj.pt, dtype=bool)
+            #                 iswstarlepton = ak.ones_like(candidatefj.pt, dtype=bool)
             out[channel]["higgspt"] = pad_val_nevents(matchedH_pt)
+            #             out[channel]["iswlepton"] = pad_val_nevents(iswlepton)
+            #             out[channel]["iswstarlepton"] = pad_val_nevents(iswstarlepton)
 
             # use column accumulators
             out[channel] = {
@@ -172,15 +191,33 @@ class TriggerEfficienciesProcessor(ProcessorABC):
 
         return accumulator
 
-        # now save pandas dataframes
-        for ch in self._channels:  # creating directories for each channel
-            if not os.path.exists(self._output_location + ch):
-                os.makedirs(self._output_location + ch)
-            if not os.path.exists(self._output_location + ch + "/parquet"):
-                os.makedirs(self._output_location + ch + "/parquet")
 
-        # return dictionary with cutflows
-        return {dataset: {"mc": isMC, self._year: {"sumgenweight": sumgenweight, "cutflows": self.cutflows}}}
+if __name__ == "__main__":
+    """
+    e.g. run locally as
+    python trigger_eff.py
+    """
 
-    def postprocess(self, accumulator):
-        return accumulator
+    with open("../fileset/pfnanoindex_2017.json") as f:
+        sig = json.load(f)["2017"]["HWW"]["GluGluHToWWToLNuQQ"]
+
+    sig_xrootd = ["root://cmsxrootd.fnal.gov/" + file for file in sig]
+
+    # define fileset
+    fileset = {"HToWW": sig_xrootd}
+
+    # define processor
+    p = TriggerEfficienciesProcessor(year=2017)
+
+    # define iterative executor (to run locally)
+    executor = IterativeExecutor(compression=1, status=True, workers=1)
+
+    # define the runner (with NanoAODSchema)
+    run = Runner(executor=executor, savemetrics=True, chunksize=10000, schema=NanoAODSchema)
+
+    # run
+    out, _ = run(fileset, "Events", processor_instance=p)
+
+    with open("trigger_eff.pkl", "wb") as handle:
+        pkl.dump(out, handle, protocol=pkl.HIGHEST_PROTOCOL)
+    # counts events stored in root files

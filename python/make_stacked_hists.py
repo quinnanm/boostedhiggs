@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 from utils import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch, data_by_ch_2018, label_by_ch
 from utils import simplified_labels, get_sum_sumgenweight
 
@@ -35,7 +33,7 @@ cut_keys = [
 global axis_dict
 axis_dict["cutflow"] = hist2.axis.Regular(len(cut_keys), 0, len(cut_keys), name='var', label=r'Event Cutflow', overflow=True)
 
-def get_sample_to_use(sample,year):
+def get_sample_to_use(sample, year):
     """
     Get name of sample that adds small subsamples
     """
@@ -132,9 +130,6 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                         if key in cutflows.keys():
                             cut_values[sample_to_use][key] += cutflows[key] * xsec_weight
 
-            #if len(parquet_files) != 0:
-            #    print(f"Processing {ch} channel of sample", sample)
-
             # print(parquet_files)
             sample_yield = 0
             for parquet_file in parquet_files:
@@ -188,11 +183,42 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                 # account yield for extra selection
                 sample_yield += np.sum(event_weight[select])
 
+                if args.add_score:
+                    if ch == "ele":
+                        data['ele_score'] = data['fj_isHVV_elenuqq'] / \
+                            (data['fj_isHVV_elenuqq'] + data['fj_ttbar_bmerged'] +
+                             data['fj_ttbar_bsplit'] + data['fj_wjets_label'])
+                    else:
+                        data['mu_score'] = data['fj_isHVV_munuqq'] / \
+                            (data['fj_isHVV_munuqq'] + data['fj_ttbar_bmerged'] +
+                             data['fj_ttbar_bsplit'] + data['fj_wjets_label'])
+
+                # make cuts
+                pt_cut = (data["fj_pt"] > 400) & (data["fj_pt"] < 600)
+                msd_cut = (data["fj_msoftdrop"] > 30) & (data["fj_msoftdrop"] < 150)
+
+                iso_cut = (
+                    ((data["lep_isolation"] < 0.15) & (data["lep_pt"] < pt_iso[ch])) |
+                    (data["lep_pt"] > pt_iso[ch])
+                )
+                if ch == "mu":
+                    miso_cut = (
+                        ((data["lep_misolation"] < 0.1) & (data["lep_pt"] >= pt_iso[ch])) |
+                        (data["lep_pt"] < pt_iso[ch])
+                    )
+                else:
+                    miso_cut = data["lep_pt"] > 10
+
+                # extra selection
+                select = (iso_cut) & (miso_cut)
+                # select = data[var_plot] > -99999  # selects all events (i.e. no cut)
+
+                # account yield for extra selection
+                sample_yield += np.sum(event_weight[select])
+
                 for var in vars_to_plot[ch]:
                     if var=="cutflow": continue
-
                     if var==f"{ch}_score" and not args.add_score: continue
-
                     var_plot = var.replace('_lowpt','').replace('_highpt','')
                     if var_plot not in data.keys():
                         print(f"Var {var_plot} not in parquet keys")
@@ -217,7 +243,7 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
             cut_values[sample_to_use]["pre-sel"] += sample_yield
 
             # fill cutflow histogram once we have all the values
-            for key,numevents in cut_values[sample_to_use].items():
+            for key, numevents in cut_values[sample_to_use].items():
                 cut_index = cut_keys.index(key)
                 # print('filling ',cut_index,numevents,sample_to_use)
                 hists["cutflow"].fill(
@@ -237,6 +263,7 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
     # store the hists variable
     with open(f"{odir}/{ch}_hists.pkl", "wb") as f:  # saves the hists objects
         pkl.dump(hists, f)
+
 
 def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, add_soverb=True):
     """
@@ -271,7 +298,7 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
     # luminosity
     f = open("../fileset/luminosity.json")
     luminosity = json.load(f)[year]
-    luminosity = luminosity/1000.
+    luminosity = luminosity / 1000.
     f.close()
 
     for var in vars_to_plot[ch]:
@@ -289,15 +316,12 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
         signal_labels = [label for label in samples if label in signal_by_ch[ch]]
         bkg_labels = [label for label in samples if (label and label != data_label and label not in signal_labels)]
 
-        # get total yield of backgrounds per label 
-        # (sort by yield in fixed fj_pt hisrogram after pre-sel)  
+        # get total yield of backgrounds per label
+        # (sort by yield in fixed fj_pt hisrogram after pre-sel)
         order_dic = {}
         for bkg_label in bkg_labels:
             order_dic[simplified_labels[bkg_label]] = hists["fj_pt"][{"samples": bkg_label}].sum()
 
-        # if "VBFHToWWToLNuQQ-MH125" in signal_labels:
-        #     signal_labels.remove("VBFHToWWToLNuQQ-MH125")
-        
         # data
         data = None
         if data_label in h.axes[0]:
@@ -310,13 +334,13 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
             mult_factor = 1
         else:
             mult_factor = 100
-        signal_mult = [s*mult_factor for s in signal]
+        signal_mult = [s * mult_factor for s in signal]
 
         # background
         bkg = [h[{"samples": label}] for label in bkg_labels]
 
         if add_data and data and len(bkg) > 0:
-            if add_soverb and len(signal)>0:
+            if add_soverb and len(signal) > 0:
                 fig, (ax, rax, sax) = plt.subplots(
                     nrows=3, ncols=1, figsize=(8, 8), gridspec_kw={"height_ratios": (4, 1, 1), "hspace": 0.07}, sharex=True
                 )
@@ -326,7 +350,7 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
                 )
                 sax = None
         else:
-            if add_soverb and len(signal)>0:
+            if add_soverb and len(signal) > 0:
                 fig, (ax, sax) = plt.subplots(
                     nrows=2, ncols=1, figsize=(8, 8), gridspec_kw={"height_ratios": (4, 1), "hspace": 0.07}, sharex=True
                 )
@@ -353,7 +377,7 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
                     tot = tot + b
 
             tot_val = tot.values()
-            tot_val_zero_mask = (tot_val==0)
+            tot_val_zero_mask = (tot_val == 0)
             tot_val[tot_val_zero_mask] = 1
 
             tot_err = np.sqrt(tot_val)
@@ -380,14 +404,14 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
 
                 yerr = ratio_uncertainty(data_val, tot_val, "poisson")
                 # rax.stairs(
-                #     1 + yerr[1], 
-                #     edges=tot.axes[0].edges, 
-                #     baseline=1 - yerr[0], 
+                #     1 + yerr[1],
+                #     edges=tot.axes[0].edges,
+                #     baseline=1 - yerr[0],
                 #     **errps
                 # )
 
                 hep.histplot(
-                    data_val/tot_val,
+                    data_val / tot_val,
                     tot.axes[0].edges,
                     #yerr=np.sqrt(data_val) / tot_val,
                     yerr=yerr,
@@ -449,13 +473,13 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
                 **errps,
                 label='Stat. unc.'
             )
-                
+
         # plot the signal (times 10)
         if len(signal) > 0:
             tot_signal = None
             for i, sig in enumerate(signal_mult):
                 lab_sig_mult = f"{mult_factor} * {simplified_labels[signal_labels[i]]}"
-                if mult_factor==1:
+                if mult_factor == 1:
                     lab_sig_mult = f"{simplified_labels[signal_labels[i]]}"
                 hep.histplot(
                     sig,
@@ -472,7 +496,8 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
                 #         print(f'Signal yield for {signal_labels[i]}: ',np.sum(signal[i].values()))
 
                 # do not include GluGluHToWWToLNuQQ in the sum since ggH-pT200 is there
-                if signal_labels[i]=="GluGluHToWWToLNuQQ":
+
+                if signal_labels[i] == "GluGluHToWWToLNuQQ":
                     continue
 
                 if tot_signal == None:
@@ -500,6 +525,21 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
                 totsignal_val = tot_signal.values()
                 # replace values where bkg is 0
                 totsignal_val[tot_val==0] = 0
+                soverb_val = totsignal_val / np.sqrt(tot_val)
+                hep.histplot(
+                    soverb_val,
+                    tot_signal.axes[0].edges,
+                    label='Total Signal',
+                    ax=sax,
+                    linewidth=3,
+                    color='tab:red',
+                )
+                sax.legend()
+
+            if sax is not None:
+                totsignal_val = tot_signal.values()
+                # replace values where bkg is 0
+                totsignal_val[tot_val == 0] = 0
                 soverb_val = totsignal_val / np.sqrt(tot_val)
                 hep.histplot(
                     soverb_val,
@@ -558,7 +598,7 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
             ax.set_yscale("log")
             ax.set_ylim(0.1)
 
-        hep.cms.lumitext("%.1f "%luminosity+r"fb$^{-1}$ (13 TeV)", ax=ax, fontsize=20)
+        hep.cms.lumitext("%.1f " % luminosity + r"fb$^{-1}$ (13 TeV)", ax=ax, fontsize=20)
         hep.cms.text("Work in Progress", ax=ax, fontsize=15)
 
         if logy:
@@ -623,7 +663,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as: python make_stacked_hists.py --year 2017 --odir hists --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Aug31 --make_hists --plot_hists
+    # run locally as: python make_stacked_hists.py --year 2017 --odir hists --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2 --make_hists --plot_hists
 
     parser = argparse.ArgumentParser()
     parser.add_argument(

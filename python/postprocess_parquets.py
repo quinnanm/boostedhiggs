@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 from utils import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch, data_by_ch_2018
 from utils import get_simplified_label, get_sum_sumgenweight
 import pickle as pkl
@@ -53,10 +51,31 @@ def get_xsecweight(idir,year,sample,is_data,luminosity):
         xsec_weight = 1
     return xsec_weight
 
+def get_xsecweight(idir, year, sample, is_data, luminosity):
+    if not is_data:
+        # Find xsection
+        f = open("../fileset/xsec_pfnano.json")
+        xsec = json.load(f)
+        f.close()
+        try:
+            xsec = eval(str((xsec[sample])))
+        except:
+            print(f"sample {sample} doesn't have xsecs defined in xsec_pfnano.json so will skip it")
+            return None
+
+        # print(idir,year.replace("APV", ""),sample)
+        # print(get_sum_sumgenweight(idir, year.replace("APV", ""), sample))
+
+        # Get overall weighting of events.. each event has a genweight... sumgenweight sums over events in a chunk... sum_sumgenweight sums over chunks
+        xsec_weight = (xsec * luminosity) / get_sum_sumgenweight(idir, year.replace("APV", ""), sample)
+    else:
+        xsec_weight = 1
+    return xsec_weight
+
+
 def append_correct_weights(idir, samples, year, channels, reprocess=False):
     """
     Updates the processed parquet daraftames by appending the correct scaling factor/weight per event as new column 'tot_weight'
-
     Args:
         samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
     """
@@ -91,8 +110,9 @@ def append_correct_weights(idir, samples, year, channels, reprocess=False):
                     is_data = True
 
             # retrieve xsections for MC and define xsec_weight=1 for data
-            xsec_weight = get_xsecweight(idir,year,sample,is_data,luminosity)
-            if xsec_weight is None: continue
+            xsec_weight = get_xsecweight(idir, year, sample, is_data, luminosity)
+            if xsec_weight is None:
+                continue
 
             # get list of parquet files that have been processed
             parquet_files = glob.glob(f"{idir}/{sample}/outfiles/*_{ch}.parquet")

@@ -124,12 +124,16 @@ if __name__ == "__main__":
     parser.add_argument("--script",    dest="script",    default="run.py",              help="script to run", type=str)
     parser.add_argument("--year",      dest="year",      default="2017",                help="year", type=str)
     parser.add_argument("--tag",       dest="tag",       default="Test",                help="process tag", type=str)
-    parser.add_argument("--processor", dest="processor", default="hww",                 help="which processor", type=str, choices=["hww"])
+    parser.add_argument("--processor", dest="processor", default="hww",
+                        help="which processor", type=str, choices=["hww", "trigger"])
     parser.add_argument('--samples',   dest='samples',   default="samples_pfnano.json", help='path to datafiles', type=str)
-    parser.add_argument('--slist',     dest='slist',     default=None,                  help="give sample list separated by commas")
-    parser.add_argument("--test",      dest="test",      action='store_true',           help="only 2 jobs per sample will be created")
+    parser.add_argument('--slist',     dest='slist',     default=None,
+                        help="give sample list separated by commas")
+    parser.add_argument("--test",      dest="test",      action='store_true',
+                        help="only 2 jobs per sample will be created")
     parser.add_argument("--submit",    dest='submit',    action='store_true',           help="submit jobs when created")
-    parser.add_argument("--files-per-job",               default=None,                  help="# files per condor job", type=int)
+    parser.add_argument("--files-per-job",               default=None,
+                        help="# files per condor job", type=int)
     parser.add_argument("--pfnano",    dest='pfnano', action='store_true')
     parser.add_argument("--no-pfnano", dest='pfnano', action='store_false')
     parser.add_argument("--inference",   dest='inference', action='store_true')

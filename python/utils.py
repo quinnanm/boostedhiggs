@@ -49,7 +49,6 @@ def get_sum_sumgenweight(idir, year, sample):
 
     return sum_sumgenweight
 
-
 simplified_labels = {
     "GluGluHToWWToLNuQQ": r"ggH(WW) $(qq\ell\nu)$",
     "ttHToNonbb_M125": "ttH(WW)",
@@ -64,7 +63,6 @@ simplified_labels = {
     "SingleTop": r"Single Top",
     "VBFHToWWToLNuQQ_M-125_withDipoleRecoil": r"VBFH(WW) $(qq\ell\nu)$",
 }
-
 
 # define the axes for the different variables to be plotted
 # define samples
@@ -113,6 +111,7 @@ color_by_sample = {
 # 'tab:gray'
 # 'tab:brown':
 
+
 add_samples = {
     'SingleElectron': 'SingleElectron',
     'EGamma': 'EGamma',
@@ -126,6 +125,7 @@ add_samples = {
     'WJetsLNu': 'WJetsToLNu',
     'ALL_VH_SIGNALS_COMBINED': 'HToWW_M-125'
 }
+
 
 label_by_ch = {
     'ele': 'Electron',
@@ -157,6 +157,7 @@ axis_dict = {
     'had_matchedH': hist2.axis.Regular(20, 100, 400, name='var', label=r'gen H $p_T$ [GeV]', overflow=True),
     'lep_nprongs': hist2.axis.Regular(20, 0, 4, name='var', label=r'num of prongs', overflow=True),
     'had_nprongs': hist2.axis.Regular(20, 0, 4, name='var', label=r'num of prongs', overflow=True),
+    'gen_Hpt': hist2.axis.Regular(20, 30, 350, name='var', label=r'Higgs $p_T$ [GeV]', overflow=True),
 }
 
 axis_dict['lep_isolation_lowpt'] = hist2.axis.Regular(20, 0, 0.15, name='var', label=r'Lepton iso (low $p_T$)', overflow=True)
