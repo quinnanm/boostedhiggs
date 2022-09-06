@@ -63,8 +63,8 @@ simplified_labels = {
     "ALL_VH_SIGNALS_COMBINED": "VH(WW)",
     # "VBFHToWWToLNuQQ-MH125": r"VBFH(WW) $(qq\ell\nu)$",
     "VBFHToWWToLNuQQ_M-125_withDipoleRecoil": r"VBFH(WW) $(qq\ell\nu)$",
-    "HWminusJ_HToWW_M-125": "HW-"
-    "HWplusJ_HToWW_M-125": "HW+"
+    "HWminusJ_HToWW_M-125": "HW-",
+    "HWplusJ_HToWW_M-125": "HW+",
     "DYJets": "DYJets",
     "QCD": "QCD",
     "TTbar": "TTbar",
