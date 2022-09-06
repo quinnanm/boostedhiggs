@@ -149,7 +149,8 @@ def plot_1dhists(year, ch, odir, var):
     plt.savefig(f'{odir}/1dhist_sig_{ch}_{var}.pdf')
     plt.close()
 
-    fig, ax = plt.subplots(figsize=(8, 5))
+    # fig, ax = plt.subplots(figsize=(8, 5))
+    fig, ax = plt.subplots(1, 1)
     for sample in hists.axes[1]:
         hep.histplot(hists[{'samples': sample}],
                      ax=ax,
@@ -158,14 +159,11 @@ def plot_1dhists(year, ch, odir, var):
                      linewidth=3)
     ax.set_xlabel(f"{var}")
     ax.set_ylabel("Events")
-    ax.set_title(f'{ch} channel for the signal')
     ax.set_yscale("log")
     ax.set_ylim(0.1)
-
     ax.legend(bbox_to_anchor=(1.05, 1),
               loc='upper left', title=f"{label_by_ch[ch]} Channel"
               )
-
     hep.cms.lumitext("%.1f " % luminosity + r"fb$^{-1}$ (13 TeV)", ax=ax, fontsize=20)
     hep.cms.text("Work in Progress", ax=ax, fontsize=15)
     plt.savefig(f'{odir}/1dhist_sig_{ch}_{var}_log.pdf')
