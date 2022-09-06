@@ -83,10 +83,10 @@ def make_1dhists(year, ch, idir, odir, samples, var, bins, range):
                 print(f"{sample} doesn't have {var} stored")
                 continue    # if sample doesn't have stored variable
 
-            single_sample = sample
-            # for single_key, key in add_samples.items():
-            #     if key in sample:
-            #         single_sample = single_key
+            single_sample = None
+            for single_key, key in add_samples.items():
+                if key in sample:
+                    single_sample = single_key
 
             if single_sample is not None:
                 hists.fill(

@@ -58,20 +58,19 @@ signal_by_ch = {
 }
 
 simplified_labels = {
+    "GluGluHToWWToLNuQQ": r"ggH(WW) $(qq\ell\nu)$",
     "ttHToNonbb_M125": "ttH(WW)",
     "GluGluHToWW_Pt-200ToInf_M-125": "ggH(WW)-Pt200",
     "ALL_VH_SIGNALS_COMBINED": "VH(WW)",
-    # "VBFHToWWToLNuQQ-MH125": r"VBFH(WW) $(qq\ell\nu)$",
+    "VBFHToWWToLNuQQ-MH125": r"VBFH(WW) $(qq\ell\nu)$",
+    "QCD": "Multijet",
+    "DYJets": r"Z$(\ell\ell)$+jets",
+    "WJetsLNu": r"W$(\ell\nu)$+jets",
+    "TTbar": r"$t\bar{t}$+jets",
+    "WZQQ": r"W/Z$(qq)$",
+    "SingleTop": r"Single Top",
     "VBFHToWWToLNuQQ_M-125_withDipoleRecoil": r"VBFH(WW) $(qq\ell\nu)$",
-    "HWminusJ_HToWW_M-125": "HW-",
-    "HWplusJ_HToWW_M-125": "HW+",
-    "DYJets": "DYJets",
-    "QCD": "QCD",
-    "TTbar": "TTbar",
-    "SingleTop": "SingleTop",
-    "WJetsLNu": "WJetsLNu"
 }
-
 
 # define the axes for the different variables to be plotted
 # define samples
@@ -121,6 +120,7 @@ color_by_sample = {
 # 'tab:gray'
 # 'tab:brown':
 
+
 add_samples = {
     'SingleElectron': 'SingleElectron',
     'EGamma': 'EGamma',
@@ -128,17 +128,11 @@ add_samples = {
     'JetHT': 'JetHT',
     'QCD': 'QCD_Pt',
     'DYJets': 'DYJets',
-    'ZQQ': 'ZJetsToQQ',
-    'WQQ': 'WJetsToQQ',
+    'WZQQ': 'JetsToQQ',
     'SingleTop': 'ST',
     'TTbar': 'TT',
     'WJetsLNu': 'WJetsToLNu',
-    'GluGluHToWWTo4q': 'GluGluHToWWTo4q',
-    # 'ALL_VH_SIGNALS_COMBINED': 'HToWW_M-125',
-    'GluGluHToWW_Pt-200ToInf_M-125': 'ggF',
-    'VBFHToWWToLNuQQ_M-125_withDipoleRecoil': 'VBFH',
-    'J_HToWW_M-125': 'VH',
-    'ttHToNonbb_M125': 'ttH'
+    'ALL_VH_SIGNALS_COMBINED': 'HToWW_M-125'
 }
 
 
