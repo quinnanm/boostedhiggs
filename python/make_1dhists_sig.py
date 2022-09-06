@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+import warnings
+from hist.intervals import clopper_pearson_interval
 from utils import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch
 from utils import get_simplified_label, get_sum_sumgenweight, simplified_labels
 import pickle as pkl
@@ -23,12 +25,14 @@ from coffea.analysis_tools import Weights, PackedSelection
 
 import hist as hist2
 import matplotlib
+
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import mplhep as hep
-from hist.intervals import clopper_pearson_interval
+plt.style.use(hep.style.CMS)
+plt.rcParams.update({'font.size': 20})
 
-import warnings
+
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
@@ -116,6 +120,12 @@ def plot_1dhists(year, ch, odir, var):
         var: the name of the variable to plot a 1D-histogram of... see the full list of choices in plot_configs/vars.json
     """
 
+    # luminosity
+    f = open("../fileset/luminosity.json")
+    luminosity = json.load(f)[year]
+    luminosity = luminosity / 1000.
+    f.close()
+
     # load the hists
     hists = {}
     with open(f'{odir}/{ch}_{var}.pkl', 'rb') as f:
@@ -125,8 +135,13 @@ def plot_1dhists(year, ch, odir, var):
     # make plots per channel
     fig, ax = plt.subplots(figsize=(8, 5))
     for sample in hists.axes[1]:
-        hep.histplot(hists[{'samples': sample}], ax=ax, label=simplified_labels[sample], color=color_by_sample[sample])
+        hep.histplot(hists[{'samples': sample}],
+                     ax=ax,
+                     label=simplified_labels[sample],
+                     color=color_by_sample[sample],
+                     linewidth=3)
     ax.set_xlabel(f"{var}")
+    ax.set_ylabel("Events")
     ax.set_title(f'{ch} channel for the signal')
     hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
     hep.cms.text("Work in Progress", ax=ax)
@@ -136,13 +151,23 @@ def plot_1dhists(year, ch, odir, var):
 
     fig, ax = plt.subplots(figsize=(8, 5))
     for sample in hists.axes[1]:
-        hep.histplot(hists[{'samples': sample}], ax=ax, label=simplified_labels[sample], color=color_by_sample[sample])
+        hep.histplot(hists[{'samples': sample}],
+                     ax=ax,
+                     label=simplified_labels[sample],
+                     color=color_by_sample[sample],
+                     linewidth=3)
     ax.set_xlabel(f"{var}")
+    ax.set_ylabel("Events")
     ax.set_title(f'{ch} channel for the signal')
-    ax.set_yscale('log')
-    hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
-    hep.cms.text("Work in Progress", ax=ax)
-    ax.legend()
+    ax.set_yscale("log")
+    ax.set_ylim(0.1)
+
+    ax.legend(bbox_to_anchor=(1.05, 1),
+              loc='upper left', title=f"{label_by_ch[ch]} Channel"
+              )
+
+    hep.cms.lumitext("%.1f " % luminosity + r"fb$^{-1}$ (13 TeV)", ax=ax, fontsize=20)
+    hep.cms.text("Work in Progress", ax=ax, fontsize=15)
     plt.savefig(f'{odir}/1dhist_sig_{ch}_{var}_log.pdf')
     plt.close()
 
@@ -187,9 +212,9 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # gen_Hpt_pt:   python make_1dhists_sig.py --year 2017 --odir sig --channels ele --var gen_Hpt    --bins 50 --start 300 --end 1000 --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2_2017 --plot_hists --make_hists
-    # fj_msoftdrop: python make_1dhists_sig.py --year 2017 --odir sig --channels ele,mu --var fj_msoftdrop --bins 50 --start 25 --end 200 --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2_2017 --plot_hists --make_hists
-    # lep_fj_m:     python make_1dhists_sig.py --year 2017 --odir sig --channels ele,mu --var lep_fj_m --bins 50 --start 25 --end 200 --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2_2017 --plot_hists --make_hists
+    # gen_Hpt_pt:   python make_1dhists_sig.py --year 2017 --odir sig --channels ele --var gen_Hpt    --bins 25 --start 300 --end 1000 --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2_2017 --plot_hists --make_hists
+    # fj_msoftdrop: python make_1dhists_sig.py --year 2017 --odir sig --channels ele --var fj_msoftdrop --bins 25 --start 25 --end 200 --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2_2017 --plot_hists --make_hists
+    # lep_fj_m:     python make_1dhists_sig.py --year 2017 --odir sig --channels ele --var lep_fj_m --bins 25 --start 25 --end 200 --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2_2017 --plot_hists --make_hists
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',            dest='year',        default='2017',                             help="year")
