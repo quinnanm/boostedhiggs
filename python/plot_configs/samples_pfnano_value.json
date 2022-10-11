@@ -70,7 +70,7 @@
     "QCD_Pt_800to1000": 0,
     "GluGluHToWWToLNuQQ": 0,
     "GluGluHToWW_Pt-200ToInf_M-125": 1,
-    "VBFHToWWToLNuQQ_M-125_withDipoleRecoil": 1,
+    "VBFHToWWToLNuQQ_M-125_withDipoleRecoil": 0,
     "VBFHToWWToLNuQQ-MH125": 0,
     "HWminusJ_HToWW_M-125": 1,
     "HWplusJ_HToWW_M-125": 1,
