@@ -65,8 +65,8 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
         hists[var] = hist2.Hist(
             sample_axis,
             axis_dict[var],
-            hist2.axis.Regular(50, 0, 1, name='met_over_pt', label='MET/pt [GeV]', overflow=True),
-            hist2.axis.Regular(50, 0, 1, name='tagger_score', label='tagger_score', overflow=True),
+            hist2.axis.Regular(50, 0, 1, name='met_over_pt', label='MET/pt [GeV]', overflow=False),
+            hist2.axis.Regular(50, 0, 1, name='tagger_score', label='tagger_score', overflow=False),
         )
 
     # loop over the samples
@@ -238,7 +238,7 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
         all_regions = []
         for met_over_pt in tuple_met_over_pt:
             for tagger_score in tuple_tagger_score:
-                all_regions.append(hists[var][{'tagger_score': slice((tagger_score[0]), tagger_score[1]),
+                all_regions.append(hists[var][{'tagger_score': slice(tagger_score[0], tagger_score[1]),
                                                'met_over_pt': slice(met_over_pt[0], met_over_pt[1])}])
 
         for numb, region in enumerate(all_regions):
