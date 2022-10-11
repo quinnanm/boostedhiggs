@@ -606,7 +606,7 @@ def main(args):
             for key, value in json_samples[year][ch].items():
                 if value == 1:
                     samples[year][ch].append(key)
-
+    print(samples)
     # get variables to plot
     f = open(args.vars)
     variables = json.load(f)
@@ -634,7 +634,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as: python make_stacked_hists.py --year 2017 --odir hists --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2 --make_hists --plot_hists
+    # run locally as: python make_stacked_hists.py --year 2017 --odir hists --channels ele --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2 --make_hists --plot_hists
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
