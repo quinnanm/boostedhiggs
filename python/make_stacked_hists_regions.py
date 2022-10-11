@@ -17,23 +17,6 @@ import mplhep as hep
 plt.style.use(hep.style.CMS)
 plt.rcParams.update({'font.size': 20})
 
-# cut keys for cutflow
-cut_keys = [
-    "all",
-    "metfilters",
-    "trigger",
-    "fatjetKin",
-    "ht",
-    "antibjettag",
-    "leptonInJet",
-    "leptonKin",
-    "oneLepton",
-    "notaus",
-    "pre-sel",
-]
-global axis_dict
-axis_dict["cutflow"] = hist2.axis.Regular(len(cut_keys), 0, len(cut_keys), name='var', label=r'Event Cutflow', overflow=True)
-
 
 def get_sample_to_use(sample, year):
     """
@@ -86,9 +69,6 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
             hist2.axis.Regular(50, 0, 1, name='tagger_score', label='tagger_score', overflow=True),
         )
 
-    # cutflow dictionary
-    cut_values = {}
-
     # loop over the samples
     for yr in samples.keys():
         if yr == "2018":
@@ -113,26 +93,12 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                 if key in sample:
                     is_data = True
 
-            # get xsec weight for cutflow
+            # get xsec weight
             from postprocess_parquets import get_xsecweight
             xsec_weight = get_xsecweight(f"{idir}_{yr}", yr, sample, is_data, luminosity)
 
             # get combined sample
             sample_to_use = get_sample_to_use(sample, yr)
-
-            # get cutflow
-            if sample_to_use not in cut_values.keys():
-                cut_values[sample_to_use] = {}
-                for key in cut_keys:
-                    cut_values[sample_to_use][key] = 0
-
-            for ik, pkl_file in enumerate(pkl_files):
-                with open(pkl_file, "rb") as f:
-                    metadata = pkl.load(f)
-                    cutflows = metadata[sample][yr.replace("APV", "")]["cutflows"][ch]
-                    for key in cut_keys:
-                        if key in cutflows.keys():
-                            cut_values[sample_to_use][key] += cutflows[key] * xsec_weight
 
             sample_yield = 0
             for parquet_file in parquet_files:
@@ -188,8 +154,6 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                 sample_yield += np.sum(event_weight[iso_cut & miso_cut])
 
                 for var in vars_to_plot[ch]:
-                    if var == "cutflow":
-                        continue
                     if var == f"{ch}_score" and not args.add_score:
                         continue
                     var_plot = var.replace('_lowpt', '').replace('_highpt', '')
@@ -214,23 +178,8 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                         weight=event_weight[select_var],
                     )
 
-            cut_values[sample_to_use]["pre-sel"] += sample_yield
-
-            # fill cutflow histogram once we have all the values
-            for key, numevents in cut_values[sample_to_use].items():
-                cut_index = cut_keys.index(key)
-                hists["cutflow"].fill(
-                    samples=sample_to_use,
-                    var=cut_index,
-                    weight=numevents
-                )
-
-        # save cutflow values
-        with open(f"{odir}/cut_values_{ch}.pkl", "wb") as f:
-            pkl.dump(cut_values, f)
-
     # store the hists variable
-    with open(f"{odir}/{ch}_hists.pkl", "wb") as f:
+    with open(f"{odir}/{ch}_hists_regions.pkl", "wb") as f:
         pkl.dump(hists, f)
 
 
@@ -245,17 +194,17 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, regions, logy=True, add_dat
     """
 
     # load the hists
-    with open(f"{odir}/{ch}_hists.pkl", "rb") as f:
+    with open(f"{odir}/{ch}_hists_regions.pkl", "rb") as f:
         hists = pkl.load(f)
         f.close()
 
     # make the histogram plots in this directory
     if logy:
-        if not os.path.exists(f"{odir}/{ch}_hists_log"):
-            os.makedirs(f"{odir}/{ch}_hists_log")
+        if not os.path.exists(f"{odir}/{ch}__hists_regions_log"):
+            os.makedirs(f"{odir}/{ch}_hists_regions_log")
     else:
-        if not os.path.exists(f"{odir}/{ch}_hists"):
-            os.makedirs(f"{odir}/{ch}_hists")
+        if not os.path.exists(f"{odir}/{ch}_hists_regions"):
+            os.makedirs(f"{odir}/{ch}_hists_regions")
 
     # data label
     data_label = data_by_ch[ch]
@@ -396,44 +345,17 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, regions, logy=True, add_dat
 
         # plot the background
         if len(bkg) > 0:
-            if var == "cutflow":
-                """
-                # sort bkg for cutflow
-                summ = []
-                for label in bkg_labels:
-                    summ.append(order_dic[simplified_labels[label]])
-                # get indices of labels arranged by yield
-                order = []
-                for i in range(len(summ)):
-                    order.append(np.argmax(np.array(summ)))
-                    summ[np.argmax(np.array(summ))] = -100
-                bkg_ordered = [bkg[i] for i in order]
-                bkg_labels_ordered = [bkg_labels[i] for i in order]
-                """
-                hep.histplot(
-                    bkg,
-                    ax=ax,
-                    stack=True,
-                    sort="yield",
-                    edgecolor="black",
-                    linewidth=1,
-                    alpha=0.5,
-                    histtype="fill",
-                    label=[simplified_labels[bkg_label] for bkg_label in bkg_labels],
-                    color=[color_by_sample[bkg_label] for bkg_label in bkg_labels],
-                )
-            else:
-                hep.histplot(
-                    bkg,
-                    ax=ax,
-                    stack=True,
-                    sort="yield",
-                    edgecolor="black",
-                    linewidth=1,
-                    histtype="fill",
-                    label=[simplified_labels[bkg_label] for bkg_label in bkg_labels],
-                    color=[color_by_sample[bkg_label] for bkg_label in bkg_labels],
-                )
+            hep.histplot(
+                bkg,
+                ax=ax,
+                stack=True,
+                sort="yield",
+                edgecolor="black",
+                linewidth=1,
+                histtype="fill",
+                label=[simplified_labels[bkg_label] for bkg_label in bkg_labels],
+                color=[color_by_sample[bkg_label] for bkg_label in bkg_labels],
+            )
             ax.stairs(
                 values=tot.values() + tot_err,
                 baseline=tot.values() - tot_err,
@@ -456,14 +378,6 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, regions, logy=True, add_dat
                     linewidth=3,
                     color=color_by_sample[signal_labels[i]],
                 )
-
-                # if signal_labels[i]=="GluGluHToWWToLNuQQ" or signal_labels[i]=="GluGluHToWW_Pt-200ToInf_M-125":
-                #     if var=="cutflow":
-                #         print(f'Signal yield for {signal_labels[i]}: ',signal[i].values()[-1])
-                #     else:
-                #         print(f'Signal yield for {signal_labels[i]}: ',np.sum(signal[i].values()))
-
-                # do not include GluGluHToWWToLNuQQ in the sum since ggH-pT200 is there
 
                 if signal_labels[i] == "GluGluHToWWToLNuQQ":
                     continue
@@ -526,18 +440,11 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, regions, logy=True, add_dat
             sax.set_ylabel("S/sqrt(B)", fontsize=20)
             sax.set_xlabel(f"{axis_dict[var].label}")
             rax.set_ylabel("Data/MC", fontsize=20)
-            if var == "cutflow":
-                sax.set_xticks(range(len(cut_keys)), cut_keys, rotation=60)
 
         elif rax is not None:
             ax.set_xlabel("")
             rax.set_xlabel(f"{axis_dict[var].label}")
             rax.set_ylabel("Data/MC", fontsize=20)
-            if var == "cutflow":
-                rax.set_xticks(range(len(cut_keys)), cut_keys, rotation=60)
-        else:
-            if var == "cutflow":
-                ax.set_xticks(range(len(cut_keys)), cut_keys, rotation=60)
 
         # get handles and labels of legend
         handles, labels = ax.get_legend_handles_labels()
@@ -571,10 +478,10 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, regions, logy=True, add_dat
 
         if logy:
             # print(f"Saving to {odir}/{ch}_hists_log/{var}.pdf")
-            plt.savefig(f"{odir}/{ch}_hists_log/{var}.pdf", bbox_inches="tight")
+            plt.savefig(f"{odir}/{ch}_hists_regions_log/{var}.pdf", bbox_inches="tight")
         else:
             # print(f"Saving to {odir}/{ch}_hists/{var}.pdf")
-            plt.savefig(f"{odir}/{ch}_hists/{var}.pdf", bbox_inches="tight")
+            plt.savefig(f"{odir}/{ch}_hists_regions/{var}.pdf", bbox_inches="tight")
         plt.close()
 
 
@@ -625,7 +532,6 @@ def main(args):
         for key, value in variables[ch].items():
             if value == 1:
                 vars_to_plot[ch].append(key)
-        vars_to_plot[ch].append("cutflow")
 
     regions = {}
     regions['met_over_pt'] = [0.3, 0.6, 1]
@@ -633,7 +539,7 @@ def main(args):
 
     for ch in channels:
         if args.make_hists:
-            if len(glob.glob(f"{odir}/{ch}_hists.pkl")) > 0:
+            if len(glob.glob(f"{odir}/{ch}_hists_regions.pkl")) > 0:
                 print("Histograms already exist - remaking them")
             print("Making histograms...")
             make_stacked_hists(args.year, ch, args.idir, odir, vars_to_plot, samples)
