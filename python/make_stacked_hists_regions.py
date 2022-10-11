@@ -82,8 +82,8 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
         hists[var] = hist2.Hist(
             sample_axis,
             axis_dict[var],
-            axis_dict[met_over_pt],
-            axis_dict[tagger_score],
+            axis_dict['met_over_pt'],
+            axis_dict['tagger_score'],
         )
 
     # cutflow dictionary
