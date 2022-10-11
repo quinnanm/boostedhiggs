@@ -646,8 +646,8 @@ def main(args):
         vars_to_plot[ch].append("tagger_score")
 
     regions = {}
-    regions[met_over_pt] = [0.3, 0.6, 1]
-    regions[tagger_score] = [0, 0.5, 0.9, 1]
+    regions['met_over_pt'] = [0.3, 0.6, 1]
+    regions['tagger_score'] = [0, 0.5, 0.9, 1]
 
     for ch in channels:
         if args.make_hists:
