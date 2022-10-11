@@ -13,7 +13,7 @@
 	"met": 0,
 	"lep_matchedH": 0,
 	"lep_nprongs": 0,
-	"gen_Hpt": 1
+	"gen_Hpt": 0
     },
     "mu": {
 	"lep_mvaId": 0,
@@ -30,7 +30,7 @@
 	"met": 0,
 	"lep_matchedH": 0,
 	"lep_nprongs": 0,
-	"gen_Hpt": 1
+	"gen_Hpt": 0
     },
     "had": {
 	"fj_pt": 0,
