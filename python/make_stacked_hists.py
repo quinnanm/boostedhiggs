@@ -168,6 +168,7 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                              data['fj_ttbar_bsplit'] + data['fj_wjets_label'])
 
                 # make cuts
+                print(data.keys())
                 pt_cut = (data["fj_pt"] > 400) & (data["fj_pt"] < 600)
                 msd_cut = (data["fj_msoftdrop"] > 30) & (data["fj_msoftdrop"] < 150)
 
@@ -671,7 +672,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as: python make_stacked_hists.py --year 2017 --odir hists --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2 --make_hists --plot_hists
+    # run locally as: python make_stacked_hists.py --year 2017 --odir hists --channels ele --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2 --make_hists --plot_hists
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
