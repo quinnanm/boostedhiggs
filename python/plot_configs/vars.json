@@ -1,6 +1,6 @@
 {
     "ele": {
-	"fj_pt": 0,
+	"fj_pt": 1,
 	"fj_msoftdrop": 1,
   "fj_bjets_ophem": 0,
 	"lep_pt": 0,
@@ -17,7 +17,7 @@
     },
     "mu": {
 	"lep_mvaId": 0,
-	"fj_pt": 0,
+	"fj_pt": 1,
 	"fj_msoftdrop": 1,
   "fj_bjets_ophem": 0,
   "lep_pt": 0,

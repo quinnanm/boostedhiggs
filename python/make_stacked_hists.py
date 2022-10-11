@@ -327,7 +327,7 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
         bkg_labels = [label for label in samples if (label and label != data_label and label not in signal_labels)]
 
         # get total yield of backgrounds per label
-        # (sort by yield in fixed fj_pt hisrogram after pre-sel)
+        # (sort by yield in fixed fj_pt histogram after pre-sel)
         order_dic = {}
         for bkg_label in bkg_labels:
             print(hists.keys())
