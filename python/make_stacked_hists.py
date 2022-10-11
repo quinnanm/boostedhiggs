@@ -596,11 +596,16 @@ def main(args):
     f = open(args.samples)
     json_samples = json.load(f)
     f.close()
+
+    # build samples
     samples = {}
     for year in years:
         samples[year] = {}
         for ch in channels:
-            samples[year][ch] = json_samples[year][ch]
+            samples[year][ch] = []
+            for key, value in json_samples[year][ch].items():
+                if value == 1:
+                    samples[year][ch].append(key)
 
     # get variables to plot
     f = open(args.vars)
@@ -641,7 +646,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--samples",
         dest="samples",
-        default="plot_configs/samples_pfnano.json",
+        default="plot_configs/samples_pfnano_value.json",
         help="path to json with samples to be plotted",
     )
     parser.add_argument("--channels", dest="channels", default="ele,mu", help="channels for which to plot this variable")
