@@ -160,6 +160,4 @@ axis_dict = {
     'lep_nprongs': hist2.axis.Regular(20, 0, 4, name='var', label=r'num of prongs', overflow=True),
     'had_nprongs': hist2.axis.Regular(20, 0, 4, name='var', label=r'num of prongs', overflow=True),
     'gen_Hpt': hist2.axis.Regular(20, 30, 350, name='var', label=r'Higgs $p_T$ [GeV]', overflow=True),
-    'met_over_pt': hist2.axis.Regular(50, 0, 1, name='var', label='MET/pt [GeV]', overflow=True),
-    'tagger_score': hist2.axis.Regular(50, 0, 1, name='var', label='tagger_score', overflow=True),
 }

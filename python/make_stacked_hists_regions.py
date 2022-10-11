@@ -82,8 +82,8 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
         hists[var] = hist2.Hist(
             sample_axis,
             axis_dict[var],
-            axis_dict['met_over_pt'],
-            axis_dict['tagger_score'],
+            hist2.axis.Regular(50, 0, 1, name='met_over_pt', label='MET/pt [GeV]', overflow=True),
+            hist2.axis.Regular(50, 0, 1, name='tagger_score', label='tagger_score', overflow=True),
         )
 
     # cutflow dictionary
@@ -210,7 +210,7 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                         samples=sample_to_use,
                         var=data[var_plot][select_var],
                         met_over_pt=(data['met'] / data['fj_pt'])[select_var],
-                        tagger_score=data[f'{ch}_score'][select_var],
+                        tagger_score=data[f'{ch}_score'][select_var],   # will only work if args.add_score
                         weight=event_weight[select_var],
                     )
 
