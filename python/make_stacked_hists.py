@@ -133,9 +133,6 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                         if key in cutflows.keys():
                             cut_values[sample_to_use][key] += cutflows[key] * xsec_weight
 
-            # if len(parquet_files) != 0:
-            #    print(f"Processing {ch} channel of sample", sample)
-
             # print(parquet_files)
             sample_yield = 0
             for parquet_file in parquet_files:
@@ -193,13 +190,44 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                 # account yield for extra selection
                 sample_yield += np.sum(event_weight[select])
 
+                if args.add_score:
+                    if ch == "ele":
+                        data['ele_score'] = data['fj_isHVV_elenuqq'] / \
+                            (data['fj_isHVV_elenuqq'] + data['fj_ttbar_bmerged'] +
+                             data['fj_ttbar_bsplit'] + data['fj_wjets_label'])
+                    else:
+                        data['mu_score'] = data['fj_isHVV_munuqq'] / \
+                            (data['fj_isHVV_munuqq'] + data['fj_ttbar_bmerged'] +
+                             data['fj_ttbar_bsplit'] + data['fj_wjets_label'])
+
+                # make cuts
+                pt_cut = (data["fj_pt"] > 400) & (data["fj_pt"] < 600)
+                msd_cut = (data["fj_msoftdrop"] > 30) & (data["fj_msoftdrop"] < 150)
+
+                iso_cut = (
+                    ((data["lep_isolation"] < 0.15) & (data["lep_pt"] < pt_iso[ch])) |
+                    (data["lep_pt"] > pt_iso[ch])
+                )
+                if ch == "mu":
+                    miso_cut = (
+                        ((data["lep_misolation"] < 0.1) & (data["lep_pt"] >= pt_iso[ch])) |
+                        (data["lep_pt"] < pt_iso[ch])
+                    )
+                else:
+                    miso_cut = data["lep_pt"] > 10
+
+                # extra selection
+                select = (iso_cut) & (miso_cut)
+                # select = data[var_plot] > -99999  # selects all events (i.e. no cut)
+
+                # account yield for extra selection
+                sample_yield += np.sum(event_weight[select])
+
                 for var in vars_to_plot[ch]:
                     if var == "cutflow":
                         continue
-
                     if var == f"{ch}_score" and not args.add_score:
                         continue
-
                     var_plot = var.replace('_lowpt', '').replace('_highpt', '')
                     if var_plot not in data.keys():
                         print(f"Var {var_plot} not in parquet keys")
@@ -302,9 +330,6 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
         order_dic = {}
         for bkg_label in bkg_labels:
             order_dic[simplified_labels[bkg_label]] = hists["fj_pt"][{"samples": bkg_label}].sum()
-
-        # if "VBFHToWWToLNuQQ-MH125" in signal_labels:
-        #     signal_labels.remove("VBFHToWWToLNuQQ-MH125")
 
         # data
         data = None
@@ -412,29 +437,30 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
         # plot the background
         if len(bkg) > 0:
             if var == "cutflow":
+                """
                 # sort bkg for cutflow
                 summ = []
                 for label in bkg_labels:
                     summ.append(order_dic[simplified_labels[label]])
-
                 # get indices of labels arranged by yield
                 order = []
                 for i in range(len(summ)):
                     order.append(np.argmax(np.array(summ)))
                     summ[np.argmax(np.array(summ))] = -100
-
                 bkg_ordered = [bkg[i] for i in order]
                 bkg_labels_ordered = [bkg_labels[i] for i in order]
-
+                """
                 hep.histplot(
-                    bkg_ordered,
+                    bkg,
                     ax=ax,
                     stack=True,
+                    sort="yield",
                     edgecolor="black",
                     linewidth=1,
+                    alpha=0.5,
                     histtype="fill",
-                    label=[simplified_labels[bkg_label] for bkg_label in bkg_labels_ordered],
-                    color=[color_by_sample[bkg_label] for bkg_label in bkg_labels_ordered],
+                    label=[simplified_labels[bkg_label] for bkg_label in bkg_labels],
+                    color=[color_by_sample[bkg_label] for bkg_label in bkg_labels],
                 )
             else:
                 hep.histplot(
@@ -478,6 +504,7 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
                 #         print(f'Signal yield for {signal_labels[i]}: ',np.sum(signal[i].values()))
 
                 # do not include GluGluHToWWToLNuQQ in the sum since ggH-pT200 is there
+
                 if signal_labels[i] == "GluGluHToWWToLNuQQ":
                     continue
 
@@ -501,6 +528,21 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
                 edges=sig.axes[0].edges,
                 **errps,
             )
+
+            if sax is not None:
+                totsignal_val = tot_signal.values()
+                # replace values where bkg is 0
+                totsignal_val[tot_val == 0] = 0
+                soverb_val = totsignal_val / np.sqrt(tot_val)
+                hep.histplot(
+                    soverb_val,
+                    tot_signal.axes[0].edges,
+                    label='Total Signal',
+                    ax=sax,
+                    linewidth=3,
+                    color='tab:red',
+                )
+                sax.legend()
 
             if sax is not None:
                 totsignal_val = tot_signal.values()
@@ -596,17 +638,12 @@ def main(args):
     f = open(args.samples)
     json_samples = json.load(f)
     f.close()
-
-    # build samples
     samples = {}
     for year in years:
         samples[year] = {}
         for ch in channels:
-            samples[year][ch] = []
-            for key, value in json_samples[year][ch].items():
-                if value == 1:
-                    samples[year][ch].append(key)
-    print(samples)
+            samples[year][ch] = json_samples[year][ch]
+
     # get variables to plot
     f = open(args.vars)
     variables = json.load(f)
@@ -634,7 +671,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as: python make_stacked_hists.py --year 2017 --odir hists --channels ele --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2 --make_hists --plot_hists
+    # run locally as: python make_stacked_hists.py --year 2017 --odir hists --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2 --make_hists --plot_hists
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -646,7 +683,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--samples",
         dest="samples",
-        default="plot_configs/samples_pfnano_value.json",
+        default="plot_configs/samples_pfnano.json",
         help="path to json with samples to be plotted",
     )
     parser.add_argument("--channels", dest="channels", default="ele,mu", help="channels for which to plot this variable")
