@@ -192,8 +192,16 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                         continue
                     var_plot = var.replace('_lowpt', '').replace('_highpt', '')
                     if var_plot not in data.keys():
-                        print(f"Var {var_plot} not in parquet keys")
-                        continue
+                        if (var_plot == 'met_over_pt'):
+                            data[var_plot] = data['met'] / data['fj_pt']
+                        elif (var_plot == 'tagger_score'):
+                            if ch == 'mu':
+                                data[var_plot] = data['mu_score']
+                            elif ch == 'ele':
+                                data[var_plot] = data['ele_score']
+                        else:
+                            print(f"Var {var_plot} not in parquet keys")
+                            continue
 
                     # for specific variables iso_cut & miso_cut only low or high pt electrons
                     if "lowpt" in var:
@@ -204,31 +212,11 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                         select_var = iso_cut & miso_cut
 
                     # filling histograms
-                    if (var != 'met_over_pt') and (var != 'tagger_score'):
-                        hists[var].fill(
-                            samples=sample_to_use,
-                            var=data[var_plot][select_var],
-                            weight=event_weight[select_var],
-                        )
-                    elif (var != 'met_over_pt'):
-                        hists[var].fill(
-                            samples=sample_to_use,
-                            var=(data['met'] / data['fj_pt'])[select_var],
-                            weight=event_weight[select_var],
-                        )
-                    elif (var != 'tagger_score'):
-                        if ch == 'mu':
-                            hists[var].fill(
-                                samples=sample_to_use,
-                                var=data['mu_score'][select_var],
-                                weight=event_weight[select_var],
-                            )
-                        elif ch == 'ele':
-                            hists[var].fill(
-                                samples=sample_to_use,
-                                var=data['ele_score'][select_var],
-                                weight=event_weight[select_var],
-                            )
+                    hists[var].fill(
+                        samples=sample_to_use,
+                        var=data[var_plot][select_var],
+                        weight=event_weight[select_var],
+                    )
 
             cut_values[sample_to_use]["pre-sel"] += sample_yield
 
