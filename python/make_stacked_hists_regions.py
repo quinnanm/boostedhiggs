@@ -502,10 +502,10 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
 
             if logy:
                 # print(f"Saving to {odir}/{ch}_hists_log/{var}.pdf")
-                plt.savefig(f"{odir}/{ch}_hists_regions_log/{var}.pdf", bbox_inches="tight")
+                plt.savefig(f"{odir}/{ch}_hists_regions_log/{var}_{numb}.pdf", bbox_inches="tight")
             else:
                 # print(f"Saving to {odir}/{ch}_hists/{var}.pdf")
-                plt.savefig(f"{odir}/{ch}_hists_regions/{var}.pdf", bbox_inches="tight")
+                plt.savefig(f"{odir}/{ch}_hists_regions/{var}_{numb}.pdf", bbox_inches="tight")
             plt.close()
 
 
