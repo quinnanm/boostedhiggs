@@ -168,7 +168,6 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                              data['fj_ttbar_bsplit'] + data['fj_wjets_label'])
 
                 # make cuts
-                print(data.keys())
                 pt_cut = (data["fj_pt"] > 400) & (data["fj_pt"] < 600)
                 msd_cut = (data["fj_msoftdrop"] > 30) & (data["fj_msoftdrop"] < 150)
 
@@ -330,7 +329,6 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
         # (sort by yield in fixed fj_pt histogram after pre-sel)
         order_dic = {}
         for bkg_label in bkg_labels:
-            print(hists.keys())
             order_dic[simplified_labels[bkg_label]] = hists["fj_pt"][{"samples": bkg_label}].sum()
 
         # data
@@ -673,7 +671,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as: python make_stacked_hists.py --year 2017 --odir hists --channels ele --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2 --make_hists --plot_hists
+    # run locally as: python make_stacked_hists.py --year 2017 --odir hists --channels ele --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2 --plot_hists --make_hists
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
