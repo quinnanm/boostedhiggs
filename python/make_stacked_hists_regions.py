@@ -183,7 +183,7 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
         pkl.dump(hists, f)
 
 
-def plot_stacked_hists(year, ch, odir, vars_to_plot, regions, logy=True, add_data=True, add_soverb=True):
+def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, add_soverb=True):
     """
     Plots the stacked 1D histograms that were made by "make_stacked_hists" individually for each year
     Args:
@@ -566,8 +566,8 @@ def main(args):
 
         if args.plot_hists:
             print("Plotting...")
-            plot_stacked_hists(args.year, ch, odir, vars_to_plot, regions, logy=True, add_data=args.nodata)
-            plot_stacked_hists(args.year, ch, odir, vars_to_plot, regions, logy=False, add_data=args.nodata)
+            plot_stacked_hists(args.year, ch, odir, vars_to_plot, logy=True, add_data=args.nodata)
+            plot_stacked_hists(args.year, ch, odir, vars_to_plot, logy=False, add_data=args.nodata)
 
 
 if __name__ == "__main__":
