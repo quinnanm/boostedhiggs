@@ -190,39 +190,6 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                 # account yield for extra selection
                 sample_yield += np.sum(event_weight[select])
 
-                if args.add_score:
-                    if ch == "ele":
-                        data['ele_score'] = data['fj_isHVV_elenuqq'] / \
-                            (data['fj_isHVV_elenuqq'] + data['fj_ttbar_bmerged'] +
-                             data['fj_ttbar_bsplit'] + data['fj_wjets_label'])
-                    else:
-                        data['mu_score'] = data['fj_isHVV_munuqq'] / \
-                            (data['fj_isHVV_munuqq'] + data['fj_ttbar_bmerged'] +
-                             data['fj_ttbar_bsplit'] + data['fj_wjets_label'])
-
-                # make cuts
-                pt_cut = (data["fj_pt"] > 400) & (data["fj_pt"] < 600)
-                msd_cut = (data["fj_msoftdrop"] > 30) & (data["fj_msoftdrop"] < 150)
-
-                iso_cut = (
-                    ((data["lep_isolation"] < 0.15) & (data["lep_pt"] < pt_iso[ch])) |
-                    (data["lep_pt"] > pt_iso[ch])
-                )
-                if ch == "mu":
-                    miso_cut = (
-                        ((data["lep_misolation"] < 0.1) & (data["lep_pt"] >= pt_iso[ch])) |
-                        (data["lep_pt"] < pt_iso[ch])
-                    )
-                else:
-                    miso_cut = data["lep_pt"] > 10
-
-                # extra selection
-                select = (iso_cut) & (miso_cut)
-                # select = data[var_plot] > -99999  # selects all events (i.e. no cut)
-
-                # account yield for extra selection
-                sample_yield += np.sum(event_weight[select])
-
                 for var in vars_to_plot[ch]:
                     if var == "cutflow":
                         continue
