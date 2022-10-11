@@ -82,6 +82,8 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
         hists[var] = hist2.Hist(
             sample_axis,
             axis_dict[var],
+            axis_dict[met_over_pt],
+            axis_dict[tagger_score],
         )
 
     # cutflow dictionary
@@ -192,16 +194,8 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                         continue
                     var_plot = var.replace('_lowpt', '').replace('_highpt', '')
                     if var_plot not in data.keys():
-                        if (var_plot == 'met_over_pt'):
-                            data[var_plot] = data['met'] / data['fj_pt']
-                        elif (var_plot == 'tagger_score'):
-                            if ch == 'mu':
-                                data[var_plot] = data['mu_score']
-                            elif ch == 'ele':
-                                data[var_plot] = data['ele_score']
-                        else:
-                            print(f"Var {var_plot} not in parquet keys")
-                            continue
+                        print(f"Var {var_plot} not in parquet keys")
+                        continue
 
                     # for specific variables iso_cut & miso_cut only low or high pt electrons
                     if "lowpt" in var:
@@ -215,6 +209,8 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                     hists[var].fill(
                         samples=sample_to_use,
                         var=data[var_plot][select_var],
+                        met_over_pt=(data['met'] / data['fj_pt'])[select_var],
+                        tagger_score=data[f'{ch}_score'][select_var],
                         weight=event_weight[select_var],
                     )
 
@@ -630,8 +626,6 @@ def main(args):
             if value == 1:
                 vars_to_plot[ch].append(key)
         vars_to_plot[ch].append("cutflow")
-        vars_to_plot[ch].append("met_over_pt")
-        vars_to_plot[ch].append("tagger_score")
 
     regions = {}
     regions['met_over_pt'] = [0.3, 0.6, 1]
