@@ -536,21 +536,6 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
                 )
                 sax.legend()
 
-            if sax is not None:
-                totsignal_val = tot_signal.values()
-                # replace values where bkg is 0
-                totsignal_val[tot_val == 0] = 0
-                soverb_val = totsignal_val / np.sqrt(tot_val)
-                hep.histplot(
-                    soverb_val,
-                    tot_signal.axes[0].edges,
-                    label='Total Signal',
-                    ax=sax,
-                    linewidth=3,
-                    color='tab:red',
-                )
-                sax.legend()
-
         ax.set_ylabel("Events")
         if sax is not None:
             ax.set_xlabel("")
