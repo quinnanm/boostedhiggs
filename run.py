@@ -75,6 +75,17 @@ def main(args):
         else:
             p = HwwProcessor(year=args.year, channels=channels, inference=args.inference,
                              output_location='./outfiles' + job_name)
+
+    elif args.processor == 'vh':
+        from boostedhiggs.vhprocessor import vhProcessor
+        if 'APV' in args.year:
+            p = vhProcessor(year='2016', yearmod='APV', channels=channels,
+                             inference=args.inference, output_location='./outfiles' + job_name)
+        else:
+            p = vhProcessor(year=args.year, channels=channels, inference=args.inference,
+                             output_location='./outfiles' + job_name)
+
+
     else:
         from boostedhiggs.trigger_efficiencies_processor import TriggerEfficienciesProcessor
         p = TriggerEfficienciesProcessor()  # year=args.year)
