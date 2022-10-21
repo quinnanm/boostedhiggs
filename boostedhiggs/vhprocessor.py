@@ -79,11 +79,18 @@ def build_p4(cand):
     )
 
 
+<<<<<<< HEAD
 class vhProcessor(processor.ProcessorABC):
 #class HwwProcessor(processor.ProcessorABC):
     def __init__(
         self,
         year="2017", #note that this has been hardcoded!! need to be careful of the year or change to make it adapt/year
+=======
+class HwwProcessor(processor.ProcessorABC):
+    def __init__(
+        self,
+        year="2017",
+>>>>>>> fc0ae8c1ec9a2b94edc024d066d9e9a181a8fbf3
         yearmod="",
         channels=["ele", "mu"],
         output_location="./outfiles/",
