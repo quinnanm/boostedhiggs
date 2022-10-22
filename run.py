@@ -137,7 +137,8 @@ def main(args):
     filehandler.close()
 
     # merge parquet
-    if args.processor == 'hww':
+    #if args.processor == 'hww':
+    if args.processor == 'hww' or 'vh':
         for ch in channels:
             data = pd.read_parquet('./outfiles/' + job_name + ch + '/parquet')
             data.to_parquet('./outfiles/' + job_name + '_' + ch + '.parquet')
