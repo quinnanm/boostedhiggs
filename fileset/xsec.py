@@ -22,6 +22,12 @@ BR_Htt = 0.06272
 
 xs = {}
 
+##VH - this needs to be checked for qqZH, also need to add ggZH
+#pp->ZH 8.839E-01
+xs["HZJ_HToWW_M-125"] = 0.8839*BR_HWW
+
+
+
 # GluGluToHToWWPt200
 # - From powheg: 0.4716 pb
 # - PKU uses 0.1014pb after BR
