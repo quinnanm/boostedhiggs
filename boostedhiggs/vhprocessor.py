@@ -517,19 +517,15 @@ class vhProcessor(processor.ProcessorABC):
         self.add_selection(name="leptonKin", sel=(candidatelep.pt > 40), channel=["ele"])
 
         self.add_selection(
-            name="oneLepton",
-            sel=(n_good_muons == 1)
-            & (n_good_electrons == 0)
-            & (n_loose_electrons == 0)
-            & ~ak.any(loose_muons & ~good_muons, 1),
+            name="TwoOrMoreLeptons",
+            sel=((n_good_muons >= 2) | (n_good_electrons >= 2)) & (n_loose_electrons == 0) & (n_loose_muons == 0),
+	    #need to add a selection for muon based on flavor of candidate lepton
             channel=["mu"],
         )
         self.add_selection(
-            name="oneLepton",
-            sel=(n_good_muons == 0)
-            & (n_loose_muons == 0)
-            & (n_good_electrons == 1)
-            & ~ak.any(loose_electrons & ~good_electrons, 1),
+            name="TwoOrMoreLeptons",
+            sel=((n_good_muons >= 2) | (n_good_electrons >= 2)) & (n_loose_electrons == 0) & (n_loose_muons == 0),
+	    #need to add a selection for muon based on flavor of candidate lepton
             channel=["ele"],
         )
 
