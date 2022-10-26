@@ -251,7 +251,33 @@ class vhProcessor(processor.ProcessorABC):
             [events.Muon[good_muons], events.Electron[good_electrons]], axis=1
         )  # concat muons and electrons
         goodleptons = goodleptons[ak.argsort(goodleptons.pt, ascending=False)]  # sort by pt
-        candidatelep = ak.firsts(goodleptons)  # pick highest pt
+
+
+#************************************************************************************************************
+#add this section below - get the leptons that belong to the Z, then get the other leptons - use the highest pt lepton of the latter for the candidate lepton
+#note: need to redo this slightly to get info for electron/muon channel
+
+        minThreeLeptonsMask = ak.num(goodleptons, axis=1) >= 3
+        minThreeLeptons = ak.mask(goodleptons, minThreeLeptonsMask[:,None])
+
+        lepton_pairs = ak.argcombinations(minThreeLeptons, 2, fields=['first', 'second'])
+        lepton_pairs = ak.fill_none(lepton_pairs, [], axis=0)
+
+        closest_pairs = lepton_pairs[ak.local_index(lepton_pairs) == ak.argmin(np.abs((minThreeLeptons[lepton_pairs['first']] + minThreeLeptons[lepton_pairs['second']]).mass - 91.2), axis=1)]
+        closest_pairs = ak.fill_none(closest_pairs, [], axis=0)
+
+        new1 = closest_pairs.first #this gives the index of the first lepton in the lepton pair that adds us best to the invariant mass of the Z
+        new2 = closest_pairs.second #this gives the index of the second lepton
+
+        #invariant Z mass
+        ZLeptonMass = ((minThreeLeptons[closest_pairs.first]+minThreeLeptons[closest_pairs.second]).mass)
+        desired_length = np.max(ak.num(ZLeptonMass))
+        ZLepMass = ak.to_numpy(ak.fill_none(ak.pad_none(ZLeptonMass, desired_length), 0))
+
+
+        remainingLeptons = minThreeLeptons[ (ak.local_index(minThreeLeptons)!= ak.any(new1, axis=1))& (ak.local_index(minThreeLeptons) != ak.any(new2, axis=1))]                   
+
+        candidatelep = ak.firsts(remainingLeptons)  # pick highest pt 
 
         candidatelep_p4 = build_p4(candidatelep)  # build p4 for candidate lepton
         lep_reliso = (
@@ -363,6 +389,7 @@ class vhProcessor(processor.ProcessorABC):
             },
             "ele": {
                 "ele_highPtId": ele_highPtId,
+		"Zmass": ZLepMass, #for now put this in the electron channel, will need to separate by channel
             },
             "mu": {
                 "mu_mvaId": mu_mvaId,
