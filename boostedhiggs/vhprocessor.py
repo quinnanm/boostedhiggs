@@ -543,18 +543,16 @@ class vhProcessor(processor.ProcessorABC):
         self.add_selection(name="leptonKin", sel=(candidatelep.pt > 30), channel=["mu"])
         self.add_selection(name="leptonKin", sel=(candidatelep.pt > 40), channel=["ele"])
 
-        self.add_selection(
-            name="TwoOrMoreLeptons",
-            sel=((n_good_muons >= 2) | (n_good_electrons >= 2)) & (n_loose_electrons == 0) & (n_loose_muons == 0),
+        #self.add_selection(
+         #   name="TwoOrMoreLeptons",
 	    #need to add a selection for muon based on flavor of candidate lepton
-            channel=["mu"],
-        )
-        self.add_selection(
-            name="TwoOrMoreLeptons",
-            sel=((n_good_muons >= 2) | (n_good_electrons >= 2)) & (n_loose_electrons == 0) & (n_loose_muons == 0),
+           # channel=["mu"],
+       # )
+       # self.add_selection(
+        #    name="TwoOrMoreLeptons",
 	    #need to add a selection for muon based on flavor of candidate lepton
-            channel=["ele"],
-        )
+          #  channel=["ele"],
+       # )
 
         self.add_selection(name="notaus", sel=(n_loose_taus_mu == 0), channel=["mu"])
         self.add_selection(name="notaus", sel=(n_loose_taus_ele == 0), channel=["ele"])
