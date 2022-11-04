@@ -67,14 +67,6 @@ def get_sum_sumgenweight(idir, year, sample):
 
     return sum_sumgenweight
 
-
-# define the axes for the different variables to be plotted
-# define samples
-signal_by_ch = {
-    'ele': ['ttHToNonbb_M125', 'GluGluHToWW_Pt-200ToInf_M-125', 'ALL_VH_SIGNALS_COMBINED', 'VBFHToWWToLNuQQ_M-125_withDipoleRecoil'],
-    'mu': ['ttHToNonbb_M125', 'GluGluHToWW_Pt-200ToInf_M-125', 'ALL_VH_SIGNALS_COMBINED', 'VBFHToWWToLNuQQ_M-125_withDipoleRecoil'],
-}
-
 simplified_labels = {
     "GluGluHToWWToLNuQQ": r"ggH(WW) $(qq\ell\nu)$",
     "ttHToNonbb_M125": "ttH(WW)",
@@ -93,9 +85,8 @@ simplified_labels = {
 # define the axes for the different variables to be plotted
 # define samples
 signal_by_ch = {
-    'ele': ['GluGluHToWWToLNuQQ', 'ttHToNonbb_M125', 'GluGluHToWW_Pt-200ToInf_M-125', 'ALL_VH_SIGNALS_COMBINED', 'VBFHToWWToLNuQQ-MH125'],
-    'mu': ['GluGluHToWWToLNuQQ', 'ttHToNonbb_M125', 'GluGluHToWW_Pt-200ToInf_M-125', 'ALL_VH_SIGNALS_COMBINED', 'VBFHToWWToLNuQQ-MH125'],
-    'had': ['ggHToWWTo4Q-MH125'],
+    'ele': ['ttHToNonbb_M125', 'GluGluHToWW_Pt-200ToInf_M-125', 'ALL_VH_SIGNALS_COMBINED', 'VBFHToWWToLNuQQ_M-125_withDipoleRecoil'],
+    'mu': ['ttHToNonbb_M125', 'GluGluHToWW_Pt-200ToInf_M-125', 'ALL_VH_SIGNALS_COMBINED', 'VBFHToWWToLNuQQ_M-125_withDipoleRecoil'],
 }
 
 
@@ -157,26 +148,38 @@ add_samples = {
 label_by_ch = {
     'ele': 'Electron',
     'mu': 'Muon',
-    'had': 'Hadronic',
 }
 
 axis_dict = {
-    'lep_pt': hist2.axis.Regular(20, 30, 350, name='var', label=r'Lepton $p_T$ [GeV]', overflow=True),
-    'lep_isolation': hist2.axis.Regular(20, 0, 3.5, name='var', label=r'Lepton iso', overflow=True),
-    'lep_misolation': hist2.axis.Regular(20, 0, 8, name='var', label=r'Lepton mini iso', overflow=True),
-    'lep_fj_m': hist2.axis.Regular(20, 0, 200, name='var', label=r'Jet - Lepton mass [GeV]', overflow=True),
-    'lep_fj_bjets_ophem': hist2.axis.Regular(15, 0, 0.31, name='var', label=r'btagFlavB (opphem)', overflow=True),
-    'lep_fj_dr': hist2.axis.Regular(15, 0, 0.8, name='var', label=r'$\Delta R(l, Jet)$', overflow=True),
-    'lep_mvaId': hist2.axis.Variable([0, 1, 2, 3, 4, 5], name='var', label='Muon MVAID', overflow=True),
+    'lep_pt': hist2.axis.Regular(40, 30, 450, name='var', label=r'Lepton $p_T$ [GeV]', overflow=True),
+    'lep_isolation': hist2.axis.Regular(20, 0, 5, name='var', label=r'Lepton iso', overflow=True),
+    'lep_misolation': hist2.axis.Regular(35, 0, 2., name='var', label=r'Lepton mini iso', overflow=True),
+    'lep_fj_m': hist2.axis.Regular(35, 0, 280, name='var', label=r'Jet - Lepton mass [GeV]', overflow=True),
+    'fj_bjets_ophem': hist2.axis.Regular(15, 0, 0.31, name='var', label=r'btagFlavB (opphem)', overflow=True),
+    'lep_fj_dr': hist2.axis.Regular(35, 0., 0.8, name='var', label=r'$\Delta R(l, Jet)$', overflow=True),
+    'mu_mvaId': hist2.axis.Variable([0, 1, 2, 3, 4, 5], name='var', label='Muon MVAID', overflow=True),
+    'ele_highPtId': hist2.axis.Regular(5, 0, 5, name='var', label='Electron high pT ID', overflow=True),
+    'mu_highPtId': hist2.axis.Regular(5, 0, 5,name='var', label='Muon high pT ID', overflow=True),
     'fj_pt': hist2.axis.Regular(30, 200, 1000, name='var', label=r'Jet $p_T$ [GeV]', overflow=True),
-    'fj_msoftdrop': hist2.axis.Regular(30, 25, 200, name='var', label=r'Jet $m_{sd}$ [GeV]', overflow=True),
+    'fj_msoftdrop': hist2.axis.Regular(45, 20, 400, name='var', label=r'Jet $m_{sd}$ [GeV]', overflow=True),
+    'ele_score': hist2.axis.Regular(25, 0, 1, name='var', label=r'Electron PN score [GeV]', overflow=True),
+    'mu_score': hist2.axis.Regular(25, 0, 1, name='var', label=r'Muon PN score [GeV]', overflow=True),
     'lep_met_mt': hist2.axis.Regular(20, 0, 300, name='var', label=r'$m_T(lep, p_T^{miss})$ [GeV]', overflow=True),
-    'ht': hist2.axis.Regular(20, 180, 1500, name='var', label='HT [GeV]', overflow=True),
-    'met': hist2.axis.Regular(50, 0, 200, name='var', label='MET [GeV]', overflow=True),
-    'lep_matchedH': hist2.axis.Regular(20, 100, 400, name='var', label=r'matchedH $p_T$ [GeV]', overflow=True),
-    'had_matchedH': hist2.axis.Regular(20, 100, 400, name='var', label=r'matchedH $p_T$ [GeV]', overflow=True),
+    'ht': hist2.axis.Regular(35, 180, 2000, name='var', label='HT [GeV]', overflow=True),
+    'met': hist2.axis.Regular(40, 0, 450, name='var', label='MET [GeV]', overflow=True),
+    'nfj':  hist2.axis.Regular(4, 1, 5, name='var', label='Num AK8 jets', overflow=True),
+    'nj': hist2.axis.Regular(8, 0, 8, name='var', label='Num AK4 jets outside of AK8', overflow=True),
+    'deta': hist2.axis.Regular(35, 0, 7,  name='var', label=r'\Delta \eta (j,j)', overflow=True),
+    'mjj': hist2.axis.Regular(50, 0, 7500,  name='var', label=r'M(j,j) [GeV]', overflow=True), 
+    'lep_matchedH': hist2.axis.Regular(20, 100, 400, name='var', label=r'gen H $p_T$ [GeV]', overflow=True),
+    'had_matchedH': hist2.axis.Regular(20, 100, 400, name='var', label=r'gen H $p_T$ [GeV]', overflow=True),
     'lep_nprongs': hist2.axis.Regular(20, 0, 4, name='var', label=r'num of prongs', overflow=True),
     'had_nprongs': hist2.axis.Regular(20, 0, 4, name='var', label=r'num of prongs', overflow=True),
     'gen_Hpt': hist2.axis.Regular(20, 30, 350, name='var', label=r'Higgs $p_T$ [GeV]', overflow=True),
     'met_fj_dphi': hist2.axis.Regular(30, -5, 5, name='var', label=r'$\Delta $\Phi(Jet, MET)$', overflow=True),
 }
+
+axis_dict['lep_isolation_lowpt'] = hist2.axis.Regular(20, 0, 0.15, name='var', label=r'Lepton iso (low $p_T$)', overflow=True)
+axis_dict['lep_isolation_highpt'] = hist2.axis.Regular(20, 0, 5, name='var', label=r'Lepton iso (high $p_T$)', overflow=True)
+axis_dict['lep_misolation_lowpt'] = hist2.axis.Regular(35, 0, 2., name='var', label=r'Lepton mini iso (low $p_T$)', overflow=True)
+axis_dict['lep_misolation_highpt'] = hist2.axis.Regular(35, 0, 0.15, name='var', label=r'Lepton mini iso (high $p_T$)', overflow=True)

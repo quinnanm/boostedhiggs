@@ -136,7 +136,7 @@ def get_svs_features(
     svpAngle = jet_svs.pAngle
     feature_dict["sv_costhetasvpv"] = -np.cos(svpAngle)
 
-    feature_dict["sv_mask"] = (~(ak.pad_none(feature_dict["sv_etarel"], tagger_vars["sv_points"]["var_length"], axis=1, clip=True).to_numpy().mask)).astype(np.float32)
+    feature_dict["sv_mask"] = (~(ma.masked_invalid( ak.pad_none(feature_dict["sv_etarel"], tagger_vars["sv_points"]["var_length"], axis=1, clip=True).to_numpy() ).mask) ).astype(np.float32)
 
     # convert to numpy arrays and normalize features
     for var in tagger_vars["sv_features"]["var_names"]:
