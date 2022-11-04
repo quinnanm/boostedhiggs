@@ -22,11 +22,7 @@ def main(args):
     if not os.path.exists('./outfiles'):
         os.makedirs('./outfiles')
 
-    channels = ["ele", "mu"]
-    starti = args.starti
-    job_name = '/' + str(starti*args.n)
-    if args.n != -1:
-        job_name += '-' + str(args.starti*args.n + args.n)
+    channels = args.channels.split(',')
 
     # if --local is specefied in args, process only the args.sample provided
     if args.local:
@@ -53,6 +49,10 @@ def main(args):
 
     # build fileset with files to run per job
     fileset = {}
+    starti = args.starti
+    job_name = '/' + str(starti*args.n)
+    if args.n != -1:
+        job_name += '-' + str(args.starti*args.n + args.n)
     for sample, flist in files.items():
         if args.sample:
             if sample not in args.sample.split(','):
@@ -69,12 +69,13 @@ def main(args):
     if args.processor == 'hww':
         from boostedhiggs.hwwprocessor import HwwProcessor
 
+        yearmod = ''
         if 'APV' in args.year:
-            p = HwwProcessor(year='2016', yearmod='APV', channels=channels,
-                             inference=args.inference, output_location='./outfiles' + job_name)
-        else:
-            p = HwwProcessor(year=args.year, channels=channels, inference=args.inference,
-                             output_location='./outfiles' + job_name)
+            yearmod = 'APV'
+        p = HwwProcessor(year=args.year, yearmod=yearmod, 
+                         channels=channels, 
+                         inference=args.inference,
+                         output_location='./outfiles' + job_name)
     else:
         from boostedhiggs.trigger_efficiencies_processor import TriggerEfficienciesProcessor
         p = TriggerEfficienciesProcessor()  # year=args.year)
@@ -155,6 +156,8 @@ if __name__ == "__main__":
                         help="HWW processor",                       type=str)
     parser.add_argument("--chunksize",   dest='chunksize',      default=10000,
                         help="chunk size in processor",             type=int)
+    parser.add_argument("--channels",    dest='channels',       default="ele,mu",
+                        help='channels separated by commas')
     parser.add_argument(
         "--executor",
         type=str,
