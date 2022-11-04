@@ -24,9 +24,9 @@ def main(args):
 
     channels = ["ele", "mu"]
     starti = args.starti
-    job_name = '/' + str(starti)
+    job_name = '/' + str(starti*args.n)
     if args.n != -1:
-        job_name += '-' + str(args.starti + args.n)
+        job_name += '-' + str(args.starti*args.n + args.n)
 
     # if --local is specefied in args, process only the args.sample provided
     if args.local:
@@ -58,7 +58,7 @@ def main(args):
             if sample not in args.sample.split(','):
                 continue
         if args.n != -1:
-            fileset[sample] = flist[args.starti:args.starti + args.n]
+            fileset[sample] = flist[args.starti*args.n:args.starti*args.n + args.n]
         else:
             fileset[sample] = flist
 
