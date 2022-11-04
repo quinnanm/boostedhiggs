@@ -19,8 +19,6 @@ plt.rcParams.update({'font.size': 20})
 
 # cut keys for cutflow
 cut_keys = [
-    "all",
-    "metfilters",
     "trigger",
     "fatjetKin",
     "ht",
@@ -164,7 +162,7 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                              data['fj_ttbar_bsplit'] + data['fj_wjets_label'])
 
                 # make kinematic cuts
-                pt_cut = (data["fj_pt"] > 400) & (data["fj_pt"] < 600)
+                pt_cut = (data["fj_pt"] > 200) & (data["fj_pt"] < 600)
                 msd_cut = (data["fj_msoftdrop"] > 30) & (data["fj_msoftdrop"] < 150)
 
                 # make isolation cuts
@@ -500,21 +498,6 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
                 )
                 sax.legend()
 
-            if sax is not None:
-                totsignal_val = tot_signal.values()
-                # replace values where bkg is 0
-                totsignal_val[tot_val == 0] = 0
-                soverb_val = totsignal_val / np.sqrt(tot_val)
-                hep.histplot(
-                    soverb_val,
-                    tot_signal.axes[0].edges,
-                    label='Total Signal',
-                    ax=sax,
-                    linewidth=3,
-                    color='tab:red',
-                )
-                sax.legend()
-
         ax.set_ylabel("Events")
         if sax is not None:
             ax.set_xlabel("")
@@ -567,10 +550,12 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
 
         if logy:
             # print(f"Saving to {odir}/{ch}_hists_log/{var}.pdf")
-            plt.savefig(f"{odir}/{ch}_hists_log/{var}.pdf", bbox_inches="tight")
+            # plt.savefig(f"{odir}/{ch}_hists_log/{var}.pdf", bbox_inches="tight")
+            plt.savefig(f"{odir}/{ch}_hists_log/{var}.png", bbox_inches="tight")
         else:
             # print(f"Saving to {odir}/{ch}_hists/{var}.pdf")
-            plt.savefig(f"{odir}/{ch}_hists/{var}.pdf", bbox_inches="tight")
+            # plt.savefig(f"{odir}/{ch}_hists/{var}.pdf", bbox_inches="tight")
+            plt.savefig(f"{odir}/{ch}_hists/{var}.png", bbox_inches="tight")
         plt.close()
 
 
@@ -633,12 +618,12 @@ def main(args):
         if args.plot_hists:
             print("Plotting...")
             plot_stacked_hists(args.year, ch, odir, vars_to_plot, logy=True, add_data=args.nodata)
-            plot_stacked_hists(args.year, ch, odir, vars_to_plot, logy=False, add_data=args.nodata)
+            # plot_stacked_hists(args.year, ch, odir, vars_to_plot, logy=False, add_data=args.nodata)
 
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as: python make_stacked_hists.py --year 2017 --odir hists --channels ele --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2 --plot_hists --make_hists
+    # run locally as: python make_stacked_hists.py --year 2017 --odir cutflowssss --channels ele --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2 --plot_hists --make_hists
 
     parser = argparse.ArgumentParser()
     parser.add_argument(

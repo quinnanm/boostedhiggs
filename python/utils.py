@@ -28,6 +28,24 @@ import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
+def get_sample_to_use(sample, year):
+    """
+    Get name of sample that adds small subsamples
+    """
+    single_sample = None
+    for single_key, key in add_samples.items():
+        if key in sample:
+            single_sample = single_key
+
+    if year == "Run2" and is_data:
+        single_sample = "Data"
+
+    if single_sample is not None:
+        sample_to_use = single_sample
+    else:
+        sample_to_use = sample
+    return sample_to_use
+    
 def get_simplified_label(sample):   # get simplified "alias" names of the samples for plotting purposes
     f = open('plot_configs/simplified_labels.json')
     name = json.load(f)
@@ -160,4 +178,5 @@ axis_dict = {
     'lep_nprongs': hist2.axis.Regular(20, 0, 4, name='var', label=r'num of prongs', overflow=True),
     'had_nprongs': hist2.axis.Regular(20, 0, 4, name='var', label=r'num of prongs', overflow=True),
     'gen_Hpt': hist2.axis.Regular(20, 30, 350, name='var', label=r'Higgs $p_T$ [GeV]', overflow=True),
+    'met_fj_dphi': hist2.axis.Regular(30, -5, 5, name='var', label=r'$\Delta $\Phi(Jet, MET)$', overflow=True),
 }
