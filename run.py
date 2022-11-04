@@ -79,7 +79,7 @@ def main(args):
     elif args.processor == 'lumi':        
         from boostedhiggs.lumi_processor import LumiProcessor
         p = LumiProcessor(year=args.year, yearmod=yearmod, 
-                         channels=channels, output_location='./outfiles' + job_name)
+                          output_location='./outfiles' + job_name)
                          
     else:
         from boostedhiggs.trigger_efficiencies_processor import TriggerEfficienciesProcessor

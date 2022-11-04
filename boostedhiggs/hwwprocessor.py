@@ -306,7 +306,7 @@ class HwwProcessor(processor.ProcessorABC):
         # in event, pick highest b score in opposite direction from signal (we will make cut here to avoid tt background events producing bjets)
         dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj))
         bjets_away_lepfj = goodjets[dphi_jet_lepfj > np.pi / 2]
-        bjets_away_lepfj = goodjets # not necessarily opposite hemisphere
+        bjets = goodjets # not necessarily opposite hemisphere
 
         # deltaR
         lep_fj_dr = candidatefj.delta_r(candidatelep_p4)
@@ -354,6 +354,7 @@ class HwwProcessor(processor.ProcessorABC):
                 "fj_pt": candidatefj.pt,
                 "fj_msoftdrop": candidatefj.msdcorr,
                 "fj_bjets_ophem": ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1),
+                "fj_bjets": ak.max(bjets.btagDeepFlavB, axis=1),
                 "lep_pt": candidatelep.pt,
                 "lep_isolation": lep_reliso,
                 "lep_misolation": lep_miso,
@@ -508,22 +509,15 @@ class HwwProcessor(processor.ProcessorABC):
         """
         Selection and cutflows.
         """
-        self.add_selection("all", np.ones(nevents, dtype="bool"))
-        self.add_selection("metfilters", metfilters)
+        # self.add_selection("all", np.ones(nevents, dtype="bool"))
         if self.apply_trigger:
             for ch in self._channels:
-                self.add_selection("trigger", trigger[ch], [ch])
-        self.add_selection(name="fatjetKin", sel=candidatefj.pt > 200)
-        self.add_selection(name="ht", sel=(ht > 200))
-        self.add_selection(
-            name="antibjettag",
-            sel=(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"])
-        )
-        self.add_selection(name="leptonInJet", sel=(lep_fj_dr < 0.8))
-
+                self.add_selection(name="trigger", sel=trigger[ch], channel=[ch])
+        self.add_selection(name="metfilters", sel=metfilters)
         self.add_selection(name="leptonKin", sel=(candidatelep.pt > 30), channel=["mu"])
         self.add_selection(name="leptonKin", sel=(candidatelep.pt > 40), channel=["ele"])
-
+        self.add_selection(name="fatjetKin", sel=candidatefj.pt > 200)
+        self.add_selection(name="ht", sel=(ht > 200))
         self.add_selection(
             name="oneLepton",
             sel=(n_good_muons == 1)
@@ -540,9 +534,15 @@ class HwwProcessor(processor.ProcessorABC):
             & ~ak.any(loose_electrons & ~good_electrons, 1),
             channel=["ele"],
         )
-
         self.add_selection(name="notaus", sel=(n_loose_taus_mu == 0), channel=["mu"])
         self.add_selection(name="notaus", sel=(n_loose_taus_ele == 0), channel=["ele"])
+
+        self.add_selection(name="leptonInJet", sel=(lep_fj_dr < 0.8))
+        # self.add_selection(
+        #     name="antibjettag",
+        #     # sel=(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"])
+        #     sel=(ak.max(bjets.btagDeepFlavB, axis=1) < self._btagWPs["M"])
+        # )
 
         # initialize pandas dataframe
         output = {}
@@ -601,16 +601,10 @@ class HwwProcessor(processor.ProcessorABC):
                 os.makedirs(self._output_location + ch)
             if not os.path.exists(self._output_location + ch + "/parquet"):
                 os.makedirs(self._output_location + ch + "/parquet")
-
             self.save_dfs_parquet(fname, output[ch], ch)
         
-
-        
-        # from coffea import lumi_tools
-        # lumilist = coffea.lumi_tools.LumiList(f['LuminosityBlocks']['run'].array(), f["LuminosityBlocks"]["luminosityBlock"].array())
-
         # return dictionary with cutflows
-        return {dataset: {"mc": self.isMC, self._year: {"sumgenweight": sumgenweight, "cutflows": self.cutflows}}}
+        return {dataset: {"mc": self.isMC, self._year + self._yearmod: {"sumgenweight": sumgenweight, "cutflows": self.cutflows}}}
 
     def postprocess(self, accumulator):
         return accumulator
