@@ -125,7 +125,7 @@ if __name__ == "__main__":
     parser.add_argument("--year",      dest="year",      default="2017",                help="year", type=str)
     parser.add_argument("--tag",       dest="tag",       default="Test",                help="process tag", type=str)
     parser.add_argument("--processor", dest="processor", default="hww",
-                        help="which processor", type=str, choices=["hww", "trigger"])
+                        help="which processor", type=str, choices=["hww", "trigger", "lumi"])
     parser.add_argument('--samples',   dest='samples',   default="samples_pfnano.json", help='path to datafiles', type=str)
     parser.add_argument('--slist',     dest='slist',     default=None,
                         help="give sample list separated by commas")

@@ -15,18 +15,13 @@ import pickle as pkl
 import pandas as pd
 import os
 
-
 def main(args):
 
     # make directory for output
     if not os.path.exists('./outfiles'):
         os.makedirs('./outfiles')
 
-    channels = ["ele", "mu"]
-    starti = args.starti
-    job_name = '/' + str(starti)
-    if args.n != -1:
-        job_name += '-' + str(args.starti + args.n)
+    channels = args.channels.split(',')
 
     # if --local is specefied in args, process only the args.sample provided
     if args.local:
@@ -53,12 +48,16 @@ def main(args):
 
     # build fileset with files to run per job
     fileset = {}
+    starti = args.starti
+    job_name = '/' + str(starti*args.n)
+    if args.n != -1:
+        job_name += '-' + str(args.starti*args.n + args.n)
     for sample, flist in files.items():
         if args.sample:
             if sample not in args.sample.split(','):
                 continue
         if args.n != -1:
-            fileset[sample] = flist[args.starti:args.starti + args.n]
+            fileset[sample] = flist[args.starti*args.n:args.starti*args.n + args.n]
         else:
             fileset[sample] = flist
 
@@ -66,15 +65,22 @@ def main(args):
     print(fileset)
 
     # define processor
+    yearmod = ''
+    if 'APV' in args.year:
+        yearmod = 'APV'  
+
     if args.processor == 'hww':
         from boostedhiggs.hwwprocessor import HwwProcessor
+        p = HwwProcessor(year=args.year, yearmod=yearmod, 
+                         channels=channels, 
+                         inference=args.inference,
+                         output_location='./outfiles' + job_name)
 
-        if 'APV' in args.year:
-            p = HwwProcessor(year='2016', yearmod='APV', channels=channels,
-                             inference=args.inference, output_location='./outfiles' + job_name)
-        else:
-            p = HwwProcessor(year=args.year, channels=channels, inference=args.inference,
-                             output_location='./outfiles' + job_name)
+    elif args.processor == 'lumi':        
+        from boostedhiggs.lumi_processor import LumiProcessor
+        p = LumiProcessor(year=args.year, yearmod=yearmod, 
+                         channels=channels, output_location='./outfiles' + job_name)
+                         
     else:
         from boostedhiggs.trigger_efficiencies_processor import TriggerEfficienciesProcessor
         p = TriggerEfficienciesProcessor()  # year=args.year)
@@ -138,7 +144,7 @@ def main(args):
 if __name__ == "__main__":
     # e.g.
     # run locally on lpc as: python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --json samples_pfnano.json
-    # run locally on lpc as: python run.py --year 2017 --processor trigger --pfnano --n 1 --starti 0 --json samples_pfnano.json
+    # run locally on lpc as: python run.py --year 2017 --processor lumi --pfnano --n 1 --starti 0 --json samples_pfnano_data.json
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',        dest='year',           default='2017',
@@ -155,6 +161,8 @@ if __name__ == "__main__":
                         help="HWW processor",                       type=str)
     parser.add_argument("--chunksize",   dest='chunksize',      default=10000,
                         help="chunk size in processor",             type=int)
+    parser.add_argument("--channels",    dest='channels',       default="ele,mu",
+                        help='channels separated by commas')
     parser.add_argument(
         "--executor",
         type=str,
