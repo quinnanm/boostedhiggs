@@ -30,6 +30,26 @@ import warnings
 
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
+def get_xsecweight(idir,year,sample,is_data,luminosity):
+    if not is_data:
+        # Find xsection                                                                                                                                                                                                                                                 
+        f = open("../fileset/xsec_pfnano.json")
+        xsec = json.load(f)
+        f.close()
+        try:
+            xsec = eval(str((xsec[sample])))
+        except:
+            print(f"sample {sample} doesn't have xsecs defined in xsec_pfnano.json so will skip it")
+            return None
+
+        # print(idir,year.replace("APV", ""),sample)
+        # print(get_sum_sumgenweight(idir, year.replace("APV", ""), sample))
+            
+        # Get overall weighting of events.. each event has a genweight... sumgenweight sums over events in a chunk... sum_sumgenweight sums over chunks                                                                                                                 
+        xsec_weight = (xsec * luminosity) / get_sum_sumgenweight(idir, year.replace("APV", ""), sample)
+    else:
+        xsec_weight = 1
+    return xsec_weight
 
 def get_xsecweight(idir, year, sample, is_data, luminosity):
     if not is_data:

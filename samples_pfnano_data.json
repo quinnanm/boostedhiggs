@@ -1,23 +1,23 @@
 {
     "2016": {
-	"SingleMuon_Run2016F": 40,
-	"SingleMuon_Run2016G": 40,
-	"SingleMuon_Run2016H": 40,
-	"SingleElectron_Run2016F": 40,
-	"SingleElectron_Run2016G": 40,
-	"SingleElectron_Run2016H": 40
+	"SingleMuon_Run2016F": 20,
+	"SingleMuon_Run2016G": 20,
+	"SingleMuon_Run2016H": 20,
+	"SingleElectron_Run2016F": 20,
+	"SingleElectron_Run2016G": 20,
+	"SingleElectron_Run2016H": 20
     },
     "2016APV": {
-	"SingleMuon_Run2016B_ver2_HIPM": 40,
-	"SingleMuon_Run2016C_HIPM": 40,
-	"SingleMuon_Run2016D_HIPM": 40,
-	"SingleMuon_Run2016E_HIPM": 40,
-	"SingleMuon_Run2016F_HIPM": 40,
-	"SingleElectron_Run2016B_ver2_HIPM": 40,
-	"SingleElectron_Run2016C_HIPM": 40,
-	"SingleElectron_Run2016D_HIPM": 40,
-	"SingleElectron_Run2016E_HIPM": 40,
-	"SingleElectron_Run2016F_HIPM": 40
+	"SingleMuon_Run2016B_ver2_HIPM": 20,
+	"SingleMuon_Run2016C_HIPM": 20,
+	"SingleMuon_Run2016D_HIPM": 20,
+	"SingleMuon_Run2016E_HIPM": 20,
+	"SingleMuon_Run2016F_HIPM": 20,
+	"SingleElectron_Run2016B_ver2_HIPM": 20,
+	"SingleElectron_Run2016C_HIPM": 20,
+	"SingleElectron_Run2016D_HIPM": 20,
+	"SingleElectron_Run2016E_HIPM": 20,
+	"SingleElectron_Run2016F_HIPM": 20
     },
     "2017": {
 	"SingleMuon_Run2017B": 20,
@@ -32,13 +32,13 @@
 	"SingleElectron_Run2017F": 20
     },
     "2018": {
-	"SingleMuon_Run2018A": 30,
-	"SingleMuon_Run2018B": 30,
-	"SingleMuon_Run2018C": 30,
-	"SingleMuon_Run2018D": 30,
-	"EGamma_Run2018A": 30,
-	"EGamma_Run2018B": 30,
-	"EGamma_Run2018C": 30,
-	"EGamma_Run2018D": 30
+	"SingleMuon_Run2018A": 20,
+	"SingleMuon_Run2018B": 20,
+	"SingleMuon_Run2018C": 20,
+	"SingleMuon_Run2018D": 20,
+	"EGamma_Run2018A": 20,
+	"EGamma_Run2018B": 20,
+	"EGamma_Run2018C": 20,
+	"EGamma_Run2018D": 20
     }
 }
