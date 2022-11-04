@@ -44,15 +44,11 @@ class LumiProcessor(processor.ProcessorABC):
         self,
         year="2017",
         yearmod="",
-        channels=["ele", "mu"],
         output_location="./outfiles/",
-        inference=False,
-        apply_trigger=True,
     ):
 
         self._year = year
         self._yearmod = yearmod
-        self._channels = channels
 
     @property
     def accumulator(self):
@@ -69,7 +65,7 @@ class LumiProcessor(processor.ProcessorABC):
         print(lumilist)
 
         # return dictionary with cutflows
-        return {dataset: {"mc": isMC, self._year: {"lumilist": lumilist}}}
+        return {dataset: {"mc": isMC, self._year + self.year_mod: {"lumilist": lumilist}}}
 
     def postprocess(self, accumulator):
         return accumulator

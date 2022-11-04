@@ -610,7 +610,7 @@ class HwwProcessor(processor.ProcessorABC):
         # lumilist = coffea.lumi_tools.LumiList(f['LuminosityBlocks']['run'].array(), f["LuminosityBlocks"]["luminosityBlock"].array())
 
         # return dictionary with cutflows
-        return {dataset: {"mc": self.isMC, self._year: {"sumgenweight": sumgenweight, "cutflows": self.cutflows}}}
+        return {dataset: {"mc": self.isMC, self._year + self._yearmod: {"sumgenweight": sumgenweight, "cutflows": self.cutflows}}}
 
     def postprocess(self, accumulator):
         return accumulator
