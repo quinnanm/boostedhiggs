@@ -591,9 +591,15 @@ class HwwProcessor(processor.ProcessorABC):
                 os.makedirs(self._output_location + ch + "/parquet")
 
             self.save_dfs_parquet(fname, output[ch], ch)
+        
+
+        
+        # from coffea import lumi_tools
+        # lumilist = coffea.lumi_tools.LumiList(f['LuminosityBlocks']['run'].array(), f["LuminosityBlocks"]["luminosityBlock"].array())
 
         # return dictionary with cutflows
-        return {dataset: {"mc": isMC, self._year: {"sumgenweight": sumgenweight, "cutflows": self.cutflows}}}
+        # return {dataset: {"mc": isMC, self._year: {"sumgenweight": sumgenweight, "cutflows": self.cutflows, "lumilist": lumilist}}}
+        return {dataset: {"mc": isMC, self._year: {"sumgenweight": sumgenweight, "cutflows": self.cutflows, "lumilist": lumilist}}}
 
     def postprocess(self, accumulator):
         return accumulator

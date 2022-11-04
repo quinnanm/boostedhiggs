@@ -64,7 +64,9 @@ class LumiProcessor(processor.ProcessorABC):
         isMC = hasattr(events, "genWeight")
         nevents = len(events)
         
-        lumilist = coffea.lumi_tools.LumiList(events.run.to_numpy(), events.luminosityBlock.to_numpy())
+        # lumilist = coffea.lumi_tools.LumiList(events.run.to_numpy(), events.luminosityBlock.to_numpy())
+        lumilist = set(zip(events.run, events.luminosityBlock))
+        print(lumilist)
 
         # return dictionary with cutflows
         return {dataset: {"mc": isMC, self._year: {"lumilist": lumilist}}}
