@@ -63,6 +63,7 @@ class LumiProcessor(processor.ProcessorABC):
         # lumilist = coffea.lumi_tools.LumiList(events.run.to_numpy(), events.luminosityBlock.to_numpy())
         lumilist = set(zip(events.run, events.luminosityBlock))
 
+        # TODO: if possible, get lumi value per file and accumulate
         # return dictionary with cutflows
         return {dataset: {"mc": isMC, self._year + self._yearmod: {"lumilist": lumilist}}}
 
