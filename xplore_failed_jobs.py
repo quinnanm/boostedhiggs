@@ -1,8 +1,7 @@
 #!/usr/bin/python
 
 """
-Splits the total fileset and creates condor job submission files for the specified run script.
-Author(s): Cristina Mantilla, Raghav Kansal, Farouk Mokhtar
+Explores unproduced files due to condor job errors.
 """
 import json
 import argparse
