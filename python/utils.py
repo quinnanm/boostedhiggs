@@ -206,7 +206,7 @@ axis_dict = {
     'lep_nprongs': hist2.axis.Regular(20, 0, 4, name='var', label=r'num of prongs', overflow=True),
     'had_nprongs': hist2.axis.Regular(20, 0, 4, name='var', label=r'num of prongs', overflow=True),
     'gen_Hpt': hist2.axis.Regular(20, 30, 350, name='var', label=r'Higgs $p_T$ [GeV]', overflow=True),
-    'met_fj_dphi': hist2.axis.Regular(30, -5, 5, name='var', label=r'$\Delta $\Phi(Jet, MET)$', overflow=True),
+    'met_fj_dphi': hist2.axis.Regular(30, -5, 5, name='var', label=r'$\Delta \Phi(Jet, MET)$', overflow=True),
 }
 
 axis_dict['lep_isolation_lowpt'] = hist2.axis.Regular(20, 0, 0.15, name='var', label=r'Lepton iso (low $p_T$)', overflow=True)

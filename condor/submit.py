@@ -28,6 +28,9 @@ def main(args):
     logdir = locdir + "/logs"
     os.system(f"mkdir -p {logdir}")
 
+    # copy the json samples file to the locdir
+    os.system(f"cp {args.samples} {locdir}")
+
     # and condor directory
     print("CONDOR work dir: " + outdir)
     os.system(f"mkdir -p /eos/uscms/{outdir}")
