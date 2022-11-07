@@ -14,7 +14,7 @@ BR_WW_lnuqq = (0.1046+0.1050+0.1075)*(0.6832)*2
 # Branching ratio of WW to 4Q (0.46676224)
 BR_WW_qqqq = 0.6832**2
 
-BR_THadronic = 0.665
+BR_THadronic = 0.667
 BR_TLeptonic = 1 - BR_THadronic
 
 BR_HBB = 0.5809
@@ -74,9 +74,11 @@ xs["QCD_Pt_2400to3200"] = 5.237e-03
 xs["QCD_Pt_3200toInf"] = 1.353e-04
 
 # TTbar
-xs["TTTo2L2Nu"] = 6.871e+02 * BR_TLeptonic**2
-xs["TTToHadronic"] = 6.871e+02 * BR_THadronic**2
-xs["TTToSemiLeptonic"] = 6.871e+02 * 2 * BR_TLeptonic * BR_THadronic
+# xstt = 6.871e+02
+xstt = 670.3*1.24088
+xs["TTTo2L2Nu"] = xstt * BR_TLeptonic**2
+xs["TTToHadronic"] = xstt * BR_THadronic**2 # pku 380.094
+xs["TTToSemiLeptonic"] = xstt * 2 * BR_TLeptonic * BR_THadronic # pku 364.351
 
 # Single Top
 xs["ST_s-channel_4f_hadronicDecays"] = 3.549e+00 * BR_THadronic
@@ -130,13 +132,15 @@ xs["DYJetsToLL_Pt-650ToInf"] = 4.678e-02
 xs["WW"] = 7.583e+01
 xs["WZ"] = 2.756e+01
 xs["ZZ"] = 1.214e+01
-xs["WWTo1L1Nu2Q"] = 5.090e+01
-xs["WWTo4Q"] = 5.157e+01
-xs["WZTo1L1Nu2Q"] = 9.152e+00
-xs["WZTo2Q2L"] = 6.422e+00
-xs["ZZTo2Q2L"] = 3.705e+00
-xs["ZZTo2Q2Nu"] = 4.498e+00
-xs["ZZTo4Q"] = 3.295e+00
+
+# VV NLO
+xs['WWTo1L1Nu2Q_NLO'] = 5.090e+01
+xs['WWTo4Q_NLO'] = 5.157e+01
+xs['WZTo1L1Nu2Q_NLO'] = 9.152e+00
+xs['WZTo2Q2L_NLO'] = 6.422e+00
+xs['ZZTo2Q2L_NLO'] = 3.705e+00
+xs['ZZTo2Q2Nu_NLO'] = 4.498e+00
+xs['ZZTo4Q_NLO'] = 3.295e+00
 
 # EWK Z
 xs["EWKZ_ZToQQ"] = 9.791e+00
