@@ -38,10 +38,11 @@ def main(args):
 
         if njobs_produced!=njobs:   # debug which pkl file wasn't produced
             print(f"-----> SAMPLE HAS RAN INTO ERROR")
-            for i in range(0, njobs*nfiles_per_job[sample], nfiles_per_job[sample]):
-                fname = f"{i}-{i+nfiles_per_job[sample]}"
+            for i, x in enumerate(range(0, njobs*nfiles_per_job[sample], nfiles_per_job[sample])):
+                fname = f"{x}-{x+nfiles_per_job[sample]}"
                 if not os.path.exists(f"{outdir}/{sample}/outfiles/{fname}.pkl"):
-                    print(f"file {fname}.pkl wasn't produced..")
+                    print(f"file {fname}.pkl wasn't produced which means job_idx {i} failed..")
+
         print("-----------------------------------------------------------------------------------------")
 
 
