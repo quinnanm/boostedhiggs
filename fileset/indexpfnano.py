@@ -36,10 +36,6 @@ folders_to_index = [
 
     "/store/user/lpcpfnano/drankin/v2_2/2016/SingleElectron2016",
     "/store/user/lpcpfnano/drankin/v2_2/2017/SingleElectron2017",
-    "/store/user/lpcpfnano/drankin/v2_2/2018/SingleElectron2018",
-
-    "/store/user/lpcpfnano/drankin/v2_2/2016/EGamma2016",
-    "/store/user/lpcpfnano/drankin/v2_2/2017/EGamma2017",
     "/store/user/lpcpfnano/drankin/v2_2/2018/EGamma2018",
 
     "/store/user/lpcpfnano/jekrupa/v2_2/2016APV/TTbar",
@@ -95,6 +91,10 @@ folders_to_index = [
     "/store/user/lpcpfnano/jdickins/v2_2/2016/Diboson/",
     "/store/user/lpcpfnano/jdickins/v2_2/2017/Diboson/",
     "/store/user/lpcpfnano/jdickins/v2_2/2018/Diboson/",
+
+    "/store/user/lpcpfnano/jdickins/v2_2/2016/DibosonNLO/",
+    "/store/user/lpcpfnano/jdickins/v2_2/2017/DibosonNLO/",
+    "/store/user/lpcpfnano/jdickins/v2_2/2018/DibosonNLO/",
 
     "/store/user/lpcpfnano/jdickins/v2_2/2016/ttHToBB/"
     "/store/user/lpcpfnano/jdickins/v2_2/2016APV/ttHToBB/",
