@@ -208,48 +208,52 @@ class vhProcessor(processor.ProcessorABC):
         n_loose_taus_mu = ak.sum(loose_taus_mu, axis=1)
         n_loose_taus_ele = ak.sum(loose_taus_ele, axis=1)
 
-        # muons
+
+
+        #add flavor tag to muons and electrons
+        good_muons = ak.with_field(events.Muon,0, 'flavor')
+        good_electrons = ak.with_field(events.Electron,1, 'flavor')
+
         loose_muons = (
-            (((events.Muon.pt > 30) & (events.Muon.pfRelIso04_all < 0.25)) | (events.Muon.pt > 55))
-            & (np.abs(events.Muon.eta) < 2.4)
-            & (events.Muon.looseId)
+            good_muons[  (((good_muons.pt > 30) & (good_muons.pfRelIso04_all < 0.25)) | (good_muons.pt > 55))
+            & (np.abs(good_muons.eta) < 2.4)
+            & (good_muons.looseId) ]
         )
+        print('loose_muons', loose_muons)
         n_loose_muons = ak.sum(loose_muons, axis=1)
 
         good_muons = (
-            (events.Muon.pt > 30)
-            & (np.abs(events.Muon.eta) < 2.4)
-            & (np.abs(events.Muon.dz) < 0.1)
-            & (np.abs(events.Muon.dxy) < 0.05)
-            & (events.Muon.sip3d <= 4.0)
-            & events.Muon.mediumId
+            good_muons[(good_muons.pt > 30)
+            & (np.abs(good_muons.eta) < 2.4)
+            & (np.abs(good_muons.dz) < 0.1)
+            & (np.abs(good_muons.dxy) < 0.05)
+            & (good_muons.sip3d <= 4.0)
+            & good_muons.mediumId ]
         )
         n_good_muons = ak.sum(good_muons, axis=1)
 
-        # electrons
         loose_electrons = (
-            (((events.Electron.pt > 38) & (events.Electron.pfRelIso03_all < 0.25)) | (events.Electron.pt > 120))
-            & (np.abs(events.Electron.eta) < 2.4)
-            & ((np.abs(events.Electron.eta) < 1.44) | (np.abs(events.Electron.eta) > 1.57))
-            & (events.Electron.cutBased >= events.Electron.LOOSE)
+            good_electrons[(((good_electrons.pt > 38) & (good_electrons.pfRelIso03_all < 0.25)) | (good_electrons.pt > 120))
+            & (np.abs(good_electrons.eta) < 2.4)
+            & ((np.abs(good_electrons.eta) < 1.44) | (np.abs(good_electrons.eta) > 1.57))
+            & (good_electrons.cutBased >= good_electrons.LOOSE)]
         )
-        n_loose_electrons = ak.sum(loose_electrons, axis=1)
+        #n_loose_electrons = ak.sum(loose_electrons, axis=1)
 
         good_electrons = (
-            (events.Electron.pt > 38)
-            & (np.abs(events.Electron.eta) < 2.4)
-            & ((np.abs(events.Electron.eta) < 1.44) | (np.abs(events.Electron.eta) > 1.57))
-            & (np.abs(events.Electron.dz) < 0.1)
-            & (np.abs(events.Electron.dxy) < 0.05)
-            & (events.Electron.sip3d <= 4.0)
-            & (events.Electron.mvaFall17V2noIso_WP90)
+            good_electrons[(good_electrons.pt > 38)
+            & (np.abs(good_electrons.eta) < 2.4)
+            & ((np.abs(good_electrons.eta) < 1.44) | (np.abs(good_electrons.eta) > 1.57))
+            & (np.abs(good_electrons.dz) < 0.1)
+            & (np.abs(good_electrons.dxy) < 0.05)
+            & (good_electrons.sip3d <= 4.0)
+            & (good_electrons.mvaFall17V2noIso_WP90)  ]
         )
-        n_good_electrons = ak.sum(good_electrons, axis=1)
 
-        # get candidate lepton
-        goodleptons = ak.concatenate(
-            [events.Muon[good_muons], events.Electron[good_electrons]], axis=1
-        )  # concat muons and electrons
+        n_good_electrons = ak.sum(good_electrons, axis=1)
+        
+        goodleptons = ak.concatenate([good_muons,good_electrons ], axis=1)  
+
         goodleptons = goodleptons[ak.argsort(goodleptons.pt, ascending=False)]  # sort by pt
 
 
@@ -263,11 +267,9 @@ class vhProcessor(processor.ProcessorABC):
         lepton_pairs = ak.argcombinations(minThreeLeptons, 2, fields=['first', 'second'])
         lepton_pairs = ak.fill_none(lepton_pairs, [], axis=0)
 
-        OS_pairs = lepton_pairs[minThreeLeptons[lepton_pairs['first']].charge != minThreeLeptons[lepton_pairs['second']].charge]
+        OSSF_pairs = lepton_pairs[    (minThreeLeptons[lepton_pairs['first']].charge != minThreeLeptons[lepton_pairs['second']].charge) & (minThreeLeptons[lepton_pairs['first']].flavor != minThreeLeptons[lepton_pairs['second']].flavor  )  ]
 
-
-        closest_pairs = OS_pairs[ak.local_index(OS_pairs) == ak.argmin(np.abs((minThreeLeptons[OS_pairs['first']] + minThreeLeptons[OS_pairs['second']]).mass - 91.2), axis=1)]
-        #closest_pairs = lepton_pairs[ak.local_index(lepton_pairs) == ak.argmin(np.abs((minThreeLeptons[lepton_pairs['first']] + minThreeLeptons[lepton_pairs['second']]).mass - 91.2), axis=1)]
+        closest_pairs = OSSF_pairs[ak.local_index(OSSF_pairs) == ak.argmin(np.abs((minThreeLeptons[OSSF_pairs['first']] + minThreeLeptons[OSSF_pairs['second']]).mass - 91.2), axis=1)]
         closest_pairs = ak.fill_none(closest_pairs, [], axis=0)
 
         new1 = closest_pairs.first #this gives the index of the first lepton in the lepton pair that adds us best to the invariant mass of the Z
@@ -277,7 +279,6 @@ class vhProcessor(processor.ProcessorABC):
         ZLeptonMass = ((minThreeLeptons[closest_pairs.first]+minThreeLeptons[closest_pairs.second]).mass)
         desired_length = np.max(ak.num(ZLeptonMass))
         ZLepMass = ak.to_numpy(ak.fill_none(ak.pad_none(ZLeptonMass, desired_length), 0))
-
 
         remainingLeptons = minThreeLeptons[ (ak.local_index(minThreeLeptons)!= ak.any(new1, axis=1))& (ak.local_index(minThreeLeptons) != ak.any(new2, axis=1))]                   
 
@@ -289,8 +290,11 @@ class vhProcessor(processor.ProcessorABC):
         )  # reliso for candidate lepton
         lep_miso = candidatelep.miniPFRelIso_all  # miniso for candidate lepton
         mu_mvaId = candidatelep.mvaId if hasattr(candidatelep, "mvaId") else np.zeros(nevents)  # MVA-ID for candidate lepton
-        mu_highPtId = ak.firsts(events.Muon[good_muons]).highPtId
-        ele_highPtId = ak.firsts(events.Electron[good_electrons]).cutBased_HEEP
+
+
+        #for now, comment this out, since we don't need specifically muon/lepton; can add one for lepton i guess, be careful can't use 'events' here 
+        #mu_highPtId = ak.firsts(events.Muon[good_muons]).highPtId
+        #ele_highPtId = ak.firsts(events.Electron[good_electrons]).cutBased_HEEP
 
         # jets
         goodjets = events.Jet[
@@ -392,12 +396,12 @@ class vhProcessor(processor.ProcessorABC):
                 "met_fj_dphi": met_fjlep_dphi,
             },
             "ele": {
-                "ele_highPtId": ele_highPtId,
+                #"ele_highPtId": ele_highPtId,
 		"Zmass": ZLepMass, #for now put this in the electron channel, will need to separate by channel
             },
             "mu": {
                 "mu_mvaId": mu_mvaId,
-                "mu_highPtId": mu_highPtId,
+                #"mu_highPtId": mu_highPtId,
             },
             "common": {
                 "met": met.pt,
