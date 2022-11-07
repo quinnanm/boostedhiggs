@@ -1,57 +1,62 @@
 {
-	"ele": {
-		"fj_pt": 1,
-		"fj_msoftdrop": 0,
-		"fj_bjets_ophem": 0,
-		"lep_pt": 0,
-		"lep_isolation": 0,
-		"lep_misolation": 0,
-		"lep_fj_m": 0,
-		"lep_fj_dr": 0,
-		"lep_met_mt": 0,
-		"ht": 0,
-		"met": 0,
-		"lep_matchedH": 0,
-		"lep_nprongs": 0,
-		"gen_Hpt": 0,
-		"fj_wjets_label": 0,
-		"fj_ttbar_bmerged": 0,
-		"fj_ttbar_bsplit": 0,
-		"met_fj_dphi": 0
+    "ele": {
+	"vars": {
+	    "cutflow": 1,
+	    "fj_pt": 1,
+	    "fj_msoftdrop": 1,
+	    "fj_bjets_ophem": 1,
+	    "fj_bjets": 1,
+	    "lep_pt": 1,
+	    "lep_isolation": 1,
+	    "lep_misolation": 1,
+	    "lep_fj_m": 1,
+	    "lep_fj_dr": 1,
+	    "lep_met_mt": 1,
+	    "ht": 1,
+	    "met": 1,
+	    "met_fj_dphi": 1
 	},
-	"mu": {
-		"lep_mvaId": 0,
-		"fj_pt": 1,
-		"fj_msoftdrop": 1,
-		"fj_bjets_ophem": 0,
-		"lep_pt": 1,
-		"lep_isolation": 0,
-		"lep_misolation": 0,
-		"lep_fj_m": 0,
-		"lep_fj_dr": 1,
-		"lep_met_mt": 0,
-		"ht": 0,
-		"met": 1,
-		"lep_matchedH": 0,
-		"lep_nprongs": 0,
-		"gen_Hpt": 0,
-		"fj_wjets_label": 0,
-		"fj_ttbar_bmerged": 0,
-		"fj_ttbar_bsplit": 0,
-		"met_fj_dphi": 1
-	},
-	"had": {
-		"fj_pt": 0,
-		"fj_msoftdrop": 0,
-		"fj_bjets_ophem": 0,
-		"fj_pnh4q": 0,
-		"fj_sl_pt": 0,
-		"fj_sl_msoftdrop": 0,
-		"fj_sl_pnh4q": 0,
-		"ht": 0,
-		"met": 0,
-		"had_matchedH": 0,
-		"had_nprongs": 0,
-		"gen_Hpt": 0
+	"pre-sel": [
+	    "(( (lep_pt < 120) & (lep_isolation < 0.15) ) | (lep_pt > 120))",
+	    "(fj_pt > 400)"
+	],
+	"weights": {
+	    "weight_genweight": 1,
+	    "weight_L1Prefiring": 1,
+	    "weight_pileup": 1,
+	    "weight_trigger_electron": 1,
+	    "weight_reco_electron": 1,
+            "weight_id_electron": 1
 	}
+    },
+    "mu": {
+	"vars": {
+	    "cutflow": 1,
+	    "fj_pt": 1,
+	    "fj_msoftdrop": 1,
+	    "fj_bjets_ophem": 1,
+	    "fj_bjets":1,
+	    "lep_pt": 1,
+	    "lep_isolation": 1,
+	    "lep_misolation": 1,
+	    "lep_fj_m": 1,
+	    "lep_fj_dr": 1,
+	    "lep_met_mt": 0,
+	    "ht": 1,
+	    "met": 1,
+	    "met_fj_dphi": 1
+	},
+        "pre-sel": [
+            "(( (lep_pt < 50) & (lep_isolation < 0.1) ) | (lep_pt > 50))"
+	],
+	"weights": {
+	    "weight_genweight",
+            "weight_L1Prefiring",
+            "weight_pileup",
+            "weight_trigger_iso_muon",
+	    "weight_trigger_noniso_muon",
+	    "weight_isolation_muon",
+	    "weight_id_muon"
+        ]
+    }
 }

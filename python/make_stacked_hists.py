@@ -1,5 +1,5 @@
-from utils import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch, data_by_ch_2018, label_by_ch
-from utils import simplified_labels, get_sum_sumgenweight
+from utils import axis_dict, color_by_sample, signal_by_ch, data_by_ch, data_by_ch_2018, label_by_ch
+from utils import simplified_labels, get_cutflow, get_xsecweight, get_sample_to_use, get_cutflow_axis
 
 import pickle as pkl
 import pyarrow.parquet as pq
@@ -9,47 +9,28 @@ import os,glob
 import argparse
 
 import hist as hist2
-
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import mplhep as hep
 plt.style.use(hep.style.CMS)
 plt.rcParams.update({'font.size': 20})
 
-# cut keys for cutflow
 cut_keys = [
     "trigger",
+    "leptonKin",
     "fatjetKin",
     "ht",
-    "antibjettag",
-    "leptonInJet",
-    "leptonKin",
     "oneLepton",
     "notaus",
+    "leptonInJet",
     "pre-sel",
 ]
+
 global axis_dict
-axis_dict["cutflow"] = hist2.axis.Regular(len(cut_keys), 0, len(cut_keys), name='var', label=r'Event Cutflow', overflow=True)
+axis_dict["cutflow"] = get_cutflow_axis(cut_keys)
+print('Cutflow with key names: ',cut_keys)
 
-def get_sample_to_use(sample, year):
-    """
-    Get name of sample that adds small subsamples
-    """
-    single_sample = None
-    for single_key, key in add_samples.items():
-        if key in sample:
-            single_sample = single_key
-
-    if year == "Run2" and is_data:
-        single_sample = "Data"
-
-    if single_sample is not None:
-        sample_to_use = single_sample
-    else:
-        sample_to_use = sample
-    return sample_to_use
-
-def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
+def make_hists(year, ch, idir, odir, vars_to_plot, weights, presel, samples):
     """
     Makes 1D histograms to be plotted as stacked over the different samples
     Args:
@@ -57,14 +38,13 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
         ch: string that represents the signal channel to look at... choices are ['ele', 'mu', 'had']
         idir: directory that holds the processed samples (e.g. {idir}/{sample}/outfiles/*_{ch}.parquet)
         odir: output directory to hold the hist object
-        samples: the set of samples to run over (by default: the samples defined in plot_configs/samples_pfnano.json)
         vars_to_plot: the set of variables to plot a 1D-histogram of (by default: the samples with key==1 defined in plot_configs/vars.json)
+        presel: pre-selection string
+        weights: weights to be applied to MC
+        samples: the set of samples to run over (by default: the samples defined in plot_configs/samples_pfnano.json)
     """
     
-    # Define cuts to make later
-    pt_iso = {"ele": 120, "mu": 55}
-    
-    # Get luminosity of year
+    # get luminosity of year
     f = open("../fileset/luminosity.json")
     luminosity = json.load(f)[year]
     f.close()
@@ -73,7 +53,9 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
     # define histograms
     hists = {}
     sample_axis = hist2.axis.StrCategory([], name="samples", growth=True)
-    for var in vars_to_plot[ch]:
+    plot_vars = vars_to_plot
+    plot_vars.append("cutflow")
+    for var in plot_vars:
         hists[var] = hist2.Hist(
             sample_axis,
             axis_dict[var],
@@ -106,26 +88,18 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                 if key in sample:
                     is_data = True
 
-            # get xsec weight for cutflow
-            from postprocess_parquets import get_xsecweight
-            xsec_weight = get_xsecweight(f"{idir}_{yr}",yr,sample,is_data,luminosity)
-
             # get combined sample
             sample_to_use = get_sample_to_use(sample,yr)
 
             # get cutflow
+            xsec_weight = get_xsecweight(pkl_files,yr,sample,is_data,luminosity)
             if sample_to_use not in cut_values.keys():
-                cut_values[sample_to_use] = {}
-                for key in cut_keys:
-                    cut_values[sample_to_use][key] = 0
+                cut_values[sample_to_use] = dict.fromkeys(cut_keys,0)
+            cutflow = get_cutflow(cut_keys,pkl_files,yr,sample,xsec_weight,ch)
+            for key,val in cutflow.items():
+                cut_values[sample_to_use][key] += val
 
-            for ik,pkl_file in enumerate(pkl_files):
-                with open(pkl_file, "rb") as f:
-                    metadata = pkl.load(f)
-                    cutflows = metadata[sample][yr.replace("APV","")]["cutflows"][ch]
-                    for key in cut_keys:
-                        if key in cutflows.keys():
-                            cut_values[sample_to_use][key] += cutflows[key] * xsec_weight
+            cut_values[sample_to_use]["pre-sel"] = 0
 
             sample_yield = 0
             for parquet_file in parquet_files:
@@ -139,70 +113,43 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
                     continue
 
                 if len(data) == 0:
-                    print("Parquet file empty")
+                    print(f"WARNING: Parquet file empty {yr} {ch} {sample} {parquet_file}")
                     continue
 
-                try:
-                    event_weight = data["tot_weight"]
-                except:
-                    print("No tot_weight variable in parquet - run pre-processing first!")
-                    continue
+                # modify dataframe with pre-selection query
+                data = data.query(presel)
+
+                if not is_data:
+                    event_weight = xsec_weight
+                    weight_ones = np.ones_like(data["weight_genweight"])
+                    for w in weights:
+                        try:
+                            event_weight *= data[w]
+                        except:
+                            print("No {w} variable in parquet")
+                            # break
+                else:
+                    weight_ones = np.ones_like(data["lep_pt"])
+                    event_weight = 1
                     
-                if args.add_score:
-                    if ch == "mu":
-                        data['mu_score'] = data['fj_isHVV_munuqq'] / \
-                            (data['fj_isHVV_munuqq'] + data['fj_ttbar_bmerged'] +
-                             data['fj_ttbar_bsplit'] + data['fj_wjets_label'])
-                    elif ch == "ele":
-                        data['ele_score'] = data['fj_isHVV_elenuqq'] / \
-                            (data['fj_isHVV_elenuqq'] + data['fj_ttbar_bmerged'] +
-                             data['fj_ttbar_bsplit'] + data['fj_wjets_label'])
+                # account yield for extra selection (with only the xsec weight)
+                sample_yield += np.sum(weight_ones*xsec_weight)
 
-                # make kinematic cuts
-                pt_cut = (data["fj_pt"] > 200) & (data["fj_pt"] < 600)
-                msd_cut = (data["fj_msoftdrop"] > 30) & (data["fj_msoftdrop"] < 150)
-
-                # make isolation cuts
-                iso_cut = (
-                    ((data["lep_isolation"] < 0.15) & (data["lep_pt"] < pt_iso[ch])) |
-                    (data["lep_pt"] > pt_iso[ch])
-                )
-
-                # make mini-isolation cuts
-                if ch == "mu":
-                    miso_cut = (
-                        ((data["lep_misolation"] < 0.1) & (data["lep_pt"] >= pt_iso[ch])) |
-                        (data["lep_pt"] < pt_iso[ch])
-                    )
-                elif ch == "ele":
-                    miso_cut = data["lep_pt"] > 10
-
-                # account yield for extra selection
-                sample_yield += np.sum(event_weight[iso_cut & miso_cut])
-
-                for var in vars_to_plot[ch]:
+                for var in plot_vars:
                     if var == "cutflow":
                         continue
-                    if var == f"{ch}_score" and not args.add_score:
-                        continue
-                    var_plot = var.replace('_lowpt', '').replace('_highpt', '')
-                    if var_plot not in data.keys():
-                        print(f"Var {var_plot} not in parquet keys")
+                    if var == "score" and not args.add_score:
                         continue
 
-                    # for specific variables iso_cut & miso_cut only low or high pt electrons
-                    if "lowpt" in var:
-                        select_var = iso_cut & miso_cut & (data["lep_pt"] < pt_iso[ch])
-                    elif "highpt" in var:
-                        select_var = iso_cut & miso_cut & (data["lep_pt"] > pt_iso[ch])
-                    else:
-                        select_var = iso_cut & miso_cut
+                    if var not in data.keys():
+                        print(f"Var {var} not in parquet keys")
+                        continue
 
                     # filling histograms
                     hists[var].fill(
                         samples=sample_to_use,
-                        var=data[var_plot][select_var],
-                        weight=event_weight[select_var],
+                        var=data[var],
+                        weight=event_weight,
                     )
 
             cut_values[sample_to_use]["pre-sel"] += sample_yield
@@ -227,7 +174,7 @@ def make_stacked_hists(year, ch, idir, odir, vars_to_plot, samples):
 
 def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, add_soverb=True):
     """
-    Plots the stacked 1D histograms that were made by "make_stacked_hists" individually for each year
+    Plots the stacked 1D histograms that were made by "make_hists" individually for each year
     Args:
         year: string that represents the year the processed samples are from
         ch: string that represents the signal channel to look at... choices are ['ele', 'mu', 'had']
@@ -448,14 +395,7 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
                     color=color_by_sample[signal_labels[i]],
                 )
 
-                # if signal_labels[i]=="GluGluHToWWToLNuQQ" or signal_labels[i]=="GluGluHToWW_Pt-200ToInf_M-125":
-                #     if var=="cutflow":
-                #         print(f'Signal yield for {signal_labels[i]}: ',signal[i].values()[-1])
-                #     else:
-                #         print(f'Signal yield for {signal_labels[i]}: ',np.sum(signal[i].values()))
-
                 # do not include GluGluHToWWToLNuQQ in the sum since ggH-pT200 is there
-
                 if signal_labels[i] == "GluGluHToWWToLNuQQ":
                     continue
 
@@ -578,12 +518,6 @@ def main(args):
     f.close()
 
     # build samples
-    # samples = {}
-    # for year in years:
-    #     samples[year] = {}
-    #     for ch in channels:
-    #         samples[year][ch] = json_samples[year][ch]
-
     samples = {}
     for year in years:
         samples[year] = {}
@@ -593,34 +527,49 @@ def main(args):
                 if value == 1:
                     samples[year][ch].append(key)
 
-    # get variables to plot
     f = open(args.vars)
     variables = json.load(f)
     f.close()
+
+    # variables to plot
     vars_to_plot = {}
+    # list of weights to apply to MC
+    weights = {}
+    # pre-selection string
+    presel = {}
     for ch in variables.keys():
         vars_to_plot[ch] = []
-        for key, value in variables[ch].items():
+        for key, value in variables[ch]["vars"].items():
             if value == 1:
                 vars_to_plot[ch].append(key)
-        vars_to_plot[ch].append("cutflow")
 
+        weights[ch] = []
+        for key, value in variables[ch]["weights"].items():
+            if value == 1:
+                weights[ch].append(key)
+
+        presel_str = ""
+        for sel in variables[ch]["pre-sel"]:
+            presel_str += f"{sel} & "
+        presel[ch] = presel_str[:-3]
+    
     for ch in channels:
         if args.make_hists:
             if len(glob.glob(f"{odir}/{ch}_hists.pkl")) > 0:
                 print("Histograms already exist - remaking them")
-            print("Making histograms...")
-            make_stacked_hists(args.year, ch, args.idir, odir, vars_to_plot, samples)
+            print("Making histograms for {ch}...")
+            print("Weights: ",weights[ch])
+            print("Pre-selection: ",presel[ch])
+            make_hists(args.year, ch, args.idir, odir, vars_to_plot[ch], weights[ch], presel[ch], samples)
 
         if args.plot_hists:
-            print("Plotting...")
-            plot_stacked_hists(args.year, ch, odir, vars_to_plot, logy=True, add_data=args.nodata)
-            # plot_stacked_hists(args.year, ch, odir, vars_to_plot, logy=False, add_data=args.nodata)
+            print("Plotting for {ch}...")
+            plot_stacked_hists(args.year, ch, odir, vars_to_plot, logy=args.logy, add_data=args.nodata)
 
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as: python make_stacked_hists.py --year 2017 --odir cutflowssss --channels ele --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2 --plot_hists --make_hists
+    # run locally as: python make_stacked_hists.py --year 2017 --odir Sep2 --channels ele --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2 --plot_hists --make_hists
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -632,7 +581,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--samples",
         dest="samples",
-        default="plot_configs/samples_pfnano_value.json",
+        default="plot_configs/samples_pfnano.json",
         help="path to json with samples to be plotted",
     )
     parser.add_argument("--channels", dest="channels", default="ele,mu", help="channels for which to plot this variable")
@@ -642,6 +591,7 @@ if __name__ == "__main__":
     parser.add_argument("--idir", dest="idir", default="../results/", help="input directory with results - without _{year}")
     parser.add_argument("--make_hists", dest="make_hists", action="store_true", help="Make hists")
     parser.add_argument("--plot_hists", dest="plot_hists", action="store_true", help="Plot the hists")
+    parser.add_argument("--logy", dest="logy", action="store_true", help="Log y axis")
     parser.add_argument("--nodata", dest="nodata", action="store_false", help="No data")
     parser.add_argument("--add_score", dest="add_score",  action="store_true", help="Add inference score")
 
