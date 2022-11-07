@@ -263,7 +263,11 @@ class vhProcessor(processor.ProcessorABC):
         lepton_pairs = ak.argcombinations(minThreeLeptons, 2, fields=['first', 'second'])
         lepton_pairs = ak.fill_none(lepton_pairs, [], axis=0)
 
-        closest_pairs = lepton_pairs[ak.local_index(lepton_pairs) == ak.argmin(np.abs((minThreeLeptons[lepton_pairs['first']] + minThreeLeptons[lepton_pairs['second']]).mass - 91.2), axis=1)]
+        OS_pairs = lepton_pairs[minThreeLeptons[lepton_pairs['first']].charge != minThreeLeptons[lepton_pairs['second']].charge]
+
+
+        closest_pairs = OS_pairs[ak.local_index(OS_pairs) == ak.argmin(np.abs((minThreeLeptons[OS_pairs['first']] + minThreeLeptons[OS_pairs['second']]).mass - 91.2), axis=1)]
+        #closest_pairs = lepton_pairs[ak.local_index(lepton_pairs) == ak.argmin(np.abs((minThreeLeptons[lepton_pairs['first']] + minThreeLeptons[lepton_pairs['second']]).mass - 91.2), axis=1)]
         closest_pairs = ak.fill_none(closest_pairs, [], axis=0)
 
         new1 = closest_pairs.first #this gives the index of the first lepton in the lepton pair that adds us best to the invariant mass of the Z
