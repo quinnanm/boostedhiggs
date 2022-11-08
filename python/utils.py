@@ -39,7 +39,9 @@ add_samples = {
     'TTbar': 'TT',
     'WJetsLNu': 'WJetsToLNu',
     'Diboson': ['WW','WZ','ZZ'],
-    'VH': 'HToWW_M-125'
+    'VH': 'HToWW_M-125',
+    'GluGluHToWW_Pt-200ToInf_M-125': 'GluGluHToWW',
+    'VBFHToWWToLNuQQ_M-125_withDipoleRecoil': 'VBFHToWW',
 }
 
 def get_sample_to_use(sample, year):
@@ -119,6 +121,7 @@ simplified_labels = {
     "VH": "VH(WW)",
     "VBFHToWWToLNuQQ-MH125": r"VBFH(WW) $(qq\ell\nu)$",
     "QCD": "Multijet",
+    "Diboson": "VV",
     "DYJets": r"Z$(\ell\ell)$+jets",
     "WJetsLNu": r"W$(\ell\nu)$+jets",
     "TTbar": r"$t\bar{t}$+jets",
@@ -159,9 +162,9 @@ color_by_sample = {
     "DYJets": 'tab:purple',
     "WJetsLNu": 'tab:green',
     "TTbar": 'tab:blue',
-    "WZQQ": 'tab:pink',
+    "WZQQ": 'salmon',
     "SingleTop": 'tab:cyan',
-    "Diboson": 'tab:orchid',
+    "Diboson": 'orchid',
     "ttHToNonbb_M125": 'tab:olive',
     "GluGluHToWW_Pt-200ToInf_M-125": "coral",
     "VH": "tab:brown",
@@ -181,11 +184,9 @@ label_by_ch = {
 
 axis_dict = {
     'lep_pt': hist2.axis.Regular(40, 30, 450, name='var', label=r'Lepton $p_T$ [GeV]', overflow=True),
-    'lep_isolation': hist2.axis.Regular(20, 0, 5, name='var', label=r'Lepton iso', overflow=True),
-    'lep_misolation': hist2.axis.Regular(35, 0, 2., name='var', label=r'Lepton mini iso', overflow=True),
     'lep_fj_m': hist2.axis.Regular(35, 0, 280, name='var', label=r'Jet - Lepton mass [GeV]', overflow=True),
-    'fj_bjets_ophem': hist2.axis.Regular(15, 0, 0.31, name='var', label=r'max btagFlavB (opphem)', overflow=True),
-    'fj_bjets': hist2.axis.Regular(15, 0, 0.31, name='var', label=r'max btagFlavB', overflow=True),
+    'fj_bjets_ophem': hist2.axis.Regular(35, 0, 1, name='var', label=r'max btagFlavB (opphem)', overflow=True),
+    'fj_bjets': hist2.axis.Regular(35, 0, 1, name='var', label=r'max btagFlavB', overflow=True),
     'lep_fj_dr': hist2.axis.Regular(35, 0., 0.8, name='var', label=r'$\Delta R(l, Jet)$', overflow=True),
     'mu_mvaId': hist2.axis.Variable([0, 1, 2, 3, 4, 5], name='var', label='Muon MVAID', overflow=True),
     'ele_highPtId': hist2.axis.Regular(5, 0, 5, name='var', label='Electron high pT ID', overflow=True),

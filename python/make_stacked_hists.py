@@ -64,6 +64,9 @@ def make_hists(year, ch, idir, odir, vars_to_plot, weights, presel, samples):
     # cutflow dictionary
     cut_values = {}
 
+    # pt cuts for variables
+    pt_iso = {"ele": 120, "mu": 55}
+
     # loop over the samples
     for yr in samples.keys():
         if yr == "2018":
@@ -130,7 +133,7 @@ def make_hists(year, ch, idir, odir, vars_to_plot, weights, presel, samples):
                             # break
                 else:
                     weight_ones = np.ones_like(data["lep_pt"])
-                    event_weight = 1
+                    event_weight = weight_ones
                     
                 # account yield for extra selection (with only the xsec weight)
                 sample_yield += np.sum(weight_ones*xsec_weight)
@@ -141,15 +144,24 @@ def make_hists(year, ch, idir, odir, vars_to_plot, weights, presel, samples):
                     if var == "score" and not args.add_score:
                         continue
 
-                    if var not in data.keys():
+                    # for specific variables introduce cut
+                    if "lowpt" in var:
+                        select_var = (data["lep_pt"] < pt_iso[ch])
+                    elif "highpt" in var:
+                        select_var = (data["lep_pt"] > pt_iso[ch])
+                    else:
+                        select_var = (data["lep_pt"] > 0)
+                        
+                    var_plot = var.replace('_lowpt', '').replace('_highpt', '')
+                    if var_plot not in data.keys():
                         print(f"Var {var} not in parquet keys")
                         continue
 
                     # filling histograms
                     hists[var].fill(
                         samples=sample_to_use,
-                        var=data[var],
-                        weight=event_weight,
+                        var=data[var_plot][select_var],
+                        weight=event_weight[select_var],
                     )
 
             cut_values[sample_to_use]["pre-sel"] += sample_yield
@@ -163,9 +175,15 @@ def make_hists(year, ch, idir, odir, vars_to_plot, weights, presel, samples):
                     weight=numevents
                 )
 
+            #samples = [hists["cutflow"].axes[0].value(i) for i in range(len(hists["cutflow"].axes[0].edges))]
+            #print(sample,samples)
+
         # save cutflow values
         with open(f"{odir}/cut_values_{ch}.pkl", "wb") as f:
             pkl.dump(cut_values, f)
+
+    samples = [hists["cutflow"].axes[0].value(i) for i in range(len(hists["cutflow"].axes[0].edges))]
+    print(samples)
 
     # store the hists variable
     with open(f"{odir}/{ch}_hists.pkl", "wb") as f:
@@ -395,10 +413,6 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
                     color=color_by_sample[signal_labels[i]],
                 )
 
-                # do not include GluGluHToWWToLNuQQ in the sum since ggH-pT200 is there
-                if signal_labels[i] == "GluGluHToWWToLNuQQ":
-                    continue
-
                 if tot_signal == None:
                     tot_signal = signal[i].copy()
                 else:
@@ -557,13 +571,13 @@ def main(args):
         if args.make_hists:
             if len(glob.glob(f"{odir}/{ch}_hists.pkl")) > 0:
                 print("Histograms already exist - remaking them")
-            print("Making histograms for {ch}...")
+            print(f"Making histograms for {ch}...")
             print("Weights: ",weights[ch])
             print("Pre-selection: ",presel[ch])
             make_hists(args.year, ch, args.idir, odir, vars_to_plot[ch], weights[ch], presel[ch], samples)
 
         if args.plot_hists:
-            print("Plotting for {ch}...")
+            print(f"Plotting for {ch}...")
             plot_stacked_hists(args.year, ch, odir, vars_to_plot, logy=args.logy, add_data=args.nodata)
 
 

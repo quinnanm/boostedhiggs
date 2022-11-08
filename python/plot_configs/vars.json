@@ -7,8 +7,10 @@
 	    "fj_bjets_ophem": 1,
 	    "fj_bjets": 1,
 	    "lep_pt": 1,
-	    "lep_isolation": 1,
-	    "lep_misolation": 1,
+	    "lep_isolation_lowpt": 1,
+            "lep_isolation_highpt": 1,
+            "lep_misolation_lowpt": 1,
+            "lep_misolation_highpt": 1,
 	    "lep_fj_m": 1,
 	    "lep_fj_dr": 1,
 	    "lep_met_mt": 1,
@@ -36,8 +38,10 @@
 	    "fj_bjets_ophem": 1,
 	    "fj_bjets":1,
 	    "lep_pt": 1,
-	    "lep_isolation": 1,
-	    "lep_misolation": 1,
+	    "lep_isolation_lowpt": 1,
+            "lep_isolation_highpt": 1,
+	    "lep_misolation_lowpt": 1,
+            "lep_misolation_highpt": 1,
 	    "lep_fj_m": 1,
 	    "lep_fj_dr": 1,
 	    "lep_met_mt": 1,
@@ -47,16 +51,16 @@
 	},
         "pre-sel": [
             "(( (lep_pt < 50) & (lep_isolation < 0.15) ) | (lep_pt > 50))",
-            "(( (lep_misolation< 0.1) & (lep_pt >= 50) ) | (lep_pt > 50))"
+            "(( (lep_misolation< 0.1) & (lep_pt >= 50) ) | (lep_pt < 50))"
 	],
 	"weights": {
-	    "weight_genweight",
-            "weight_L1Prefiring",
-            "weight_pileup",
-            "weight_trigger_iso_muon",
-	    "weight_trigger_noniso_muon",
-	    "weight_isolation_muon",
-	    "weight_id_muon"
-        ]
+	    "weight_genweight": 1,
+            "weight_L1Prefiring": 1,
+            "weight_pileup": 1,
+            "weight_trigger_iso_muon": 1,
+	    "weight_trigger_noniso_muon": 1,
+	    "weight_isolation_muon": 1,
+	    "weight_id_muon": 1
+        }
     }
 }
