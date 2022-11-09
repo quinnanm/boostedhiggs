@@ -546,13 +546,13 @@ class vhProcessor(processor.ProcessorABC):
             sel=(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"])
         )
         self.add_selection(
-            name="TwoOrMoreLeptons", sel=(minThreeLeptonsMask == True),
+            name="ThreeOrMoreLeptons", sel=(minThreeLeptonsMask == True),
         )
-        #self.add_selection(name="leptonKin", sel=(candidatelep.pt > 30), channel=["mu"])
-        #self.add_selection(name="leptonKin", sel=(candidatelep.pt > 40), channel=["ele"])
+        self.add_selection(name="leptonKin", sel=(candidatelep.pt > 30), channel=["mu"])
+        self.add_selection(name="leptonKin", sel=(candidatelep.pt > 40), channel=["ele"])
 
-        #self.add_selection(name="fatjetKin", sel=candidatefj.pt > 200)
-        #self.add_selection(name="leptonInJet", sel=(lep_fj_dr < 0.8))
+        self.add_selection(name="fatjetKin", sel=candidatefj.pt > 200)
+        self.add_selection(name="leptonInJet", sel=(lep_fj_dr < 0.8))
 
         #self.add_selection(name="notaus", sel=(n_loose_taus_mu == 0), channel=["mu"])
         #self.add_selection(name="notaus", sel=(n_loose_taus_ele == 0), channel=["ele"])
