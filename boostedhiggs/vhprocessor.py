@@ -267,7 +267,7 @@ class vhProcessor(processor.ProcessorABC):
         lepton_pairs = ak.argcombinations(minThreeLeptons, 2, fields=['first', 'second'])
         lepton_pairs = ak.fill_none(lepton_pairs, [], axis=0)
 
-        OSSF_pairs = lepton_pairs[    (minThreeLeptons[lepton_pairs['first']].charge != minThreeLeptons[lepton_pairs['second']].charge) & (minThreeLeptons[lepton_pairs['first']].flavor != minThreeLeptons[lepton_pairs['second']].flavor  )  ]
+        OSSF_pairs = lepton_pairs[    (minThreeLeptons[lepton_pairs['first']].charge != minThreeLeptons[lepton_pairs['second']].charge) & (minThreeLeptons[lepton_pairs['first']].flavor == minThreeLeptons[lepton_pairs['second']].flavor  )  ]
 
         closest_pairs = OSSF_pairs[ak.local_index(OSSF_pairs) == ak.argmin(np.abs((minThreeLeptons[OSSF_pairs['first']] + minThreeLeptons[OSSF_pairs['second']]).mass - 91.2), axis=1)]
         closest_pairs = ak.fill_none(closest_pairs, [], axis=0)
@@ -536,25 +536,23 @@ class vhProcessor(processor.ProcessorABC):
         Selection and cutflows.
         """
         self.add_selection("all", np.ones(nevents, dtype="bool"))
-        self.add_selection("metfilters", metfilters)
         if self.apply_trigger:
             for ch in self._channels:
                 self.add_selection("trigger", trigger[ch], [ch])
-        self.add_selection(name="fatjetKin", sel=candidatefj.pt > 200)
+        self.add_selection("metfilters", metfilters)
         self.add_selection(name="ht", sel=(ht > 200))
         self.add_selection(
             name="antibjettag",
             sel=(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"])
         )
-
         self.add_selection(
             name="TwoOrMoreLeptons", sel=(minThreeLeptonsMask == True),
         )
+        #self.add_selection(name="leptonKin", sel=(candidatelep.pt > 30), channel=["mu"])
+        #self.add_selection(name="leptonKin", sel=(candidatelep.pt > 40), channel=["ele"])
 
-        self.add_selection(name="leptonInJet", sel=(lep_fj_dr < 0.8))
-        self.add_selection(name="leptonKin", sel=(candidatelep.pt > 30), channel=["mu"])
-        self.add_selection(name="leptonKin", sel=(candidatelep.pt > 40), channel=["ele"])
-
+        #self.add_selection(name="fatjetKin", sel=candidatefj.pt > 200)
+        #self.add_selection(name="leptonInJet", sel=(lep_fj_dr < 0.8))
 
         #self.add_selection(name="notaus", sel=(n_loose_taus_mu == 0), channel=["mu"])
         #self.add_selection(name="notaus", sel=(n_loose_taus_ele == 0), channel=["ele"])
