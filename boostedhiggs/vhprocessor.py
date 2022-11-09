@@ -219,8 +219,7 @@ class vhProcessor(processor.ProcessorABC):
             & (np.abs(good_muons.eta) < 2.4)
             & (good_muons.looseId) ]
         )
-        print('loose_muons', loose_muons)
-        n_loose_muons = ak.sum(loose_muons, axis=1)
+        #n_loose_muons = ak.sum(loose_muons, axis=1) #note since i changed to recors to add flavor, this summing doesn't work
 
         good_muons = (
             good_muons[(good_muons.pt > 30)
@@ -230,7 +229,7 @@ class vhProcessor(processor.ProcessorABC):
             & (good_muons.sip3d <= 4.0)
             & good_muons.mediumId ]
         )
-        n_good_muons = ak.sum(good_muons, axis=1)
+        #n_good_muons = ak.sum(good_muons, axis=1)
 
         loose_electrons = (
             good_electrons[(((good_electrons.pt > 38) & (good_electrons.pfRelIso03_all < 0.25)) | (good_electrons.pt > 120))
@@ -241,7 +240,8 @@ class vhProcessor(processor.ProcessorABC):
         #n_loose_electrons = ak.sum(loose_electrons, axis=1)
 
         good_electrons = (
-            good_electrons[(good_electrons.pt > 38)
+            good_electrons[(good_electrons.pt > 38) 
+            #good_electrons[(good_electrons.pt > 40) #for the selection later, asks for pt > 40
             & (np.abs(good_electrons.eta) < 2.4)
             & ((np.abs(good_electrons.eta) < 1.44) | (np.abs(good_electrons.eta) > 1.57))
             & (np.abs(good_electrons.dz) < 0.1)
@@ -250,19 +250,19 @@ class vhProcessor(processor.ProcessorABC):
             & (good_electrons.mvaFall17V2noIso_WP90)  ]
         )
 
-        n_good_electrons = ak.sum(good_electrons, axis=1)
-        
         goodleptons = ak.concatenate([good_muons,good_electrons ], axis=1)  
 
         goodleptons = goodleptons[ak.argsort(goodleptons.pt, ascending=False)]  # sort by pt
 
-
 #************************************************************************************************************
 #add this section below - get the leptons that belong to the Z, then get the other leptons - use the highest pt lepton of the latter for the candidate lepton
-#note: need to redo this slightly to get info for electron/muon channel
+#note: need to get rid of two sep. channels or combine
 
         minThreeLeptonsMask = ak.num(goodleptons, axis=1) >= 3
         minThreeLeptons = ak.mask(goodleptons, minThreeLeptonsMask[:,None])
+
+        print('minThreeLeptonsMask', minThreeLeptonsMask)
+        print('minThreeLeptons', minThreeLeptons)
 
         lepton_pairs = ak.argcombinations(minThreeLeptons, 2, fields=['first', 'second'])
         lepton_pairs = ak.fill_none(lepton_pairs, [], axis=0)
@@ -546,24 +546,18 @@ class vhProcessor(processor.ProcessorABC):
             name="antibjettag",
             sel=(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"])
         )
-        self.add_selection(name="leptonInJet", sel=(lep_fj_dr < 0.8))
 
+        self.add_selection(
+            name="TwoOrMoreLeptons", sel=(minThreeLeptonsMask == True),
+        )
+
+        self.add_selection(name="leptonInJet", sel=(lep_fj_dr < 0.8))
         self.add_selection(name="leptonKin", sel=(candidatelep.pt > 30), channel=["mu"])
         self.add_selection(name="leptonKin", sel=(candidatelep.pt > 40), channel=["ele"])
 
-        #self.add_selection(
-         #   name="TwoOrMoreLeptons",
-	    #need to add a selection for muon based on flavor of candidate lepton
-           # channel=["mu"],
-       # )
-       # self.add_selection(
-        #    name="TwoOrMoreLeptons",
-	    #need to add a selection for muon based on flavor of candidate lepton
-          #  channel=["ele"],
-       # )
 
-        self.add_selection(name="notaus", sel=(n_loose_taus_mu == 0), channel=["mu"])
-        self.add_selection(name="notaus", sel=(n_loose_taus_ele == 0), channel=["ele"])
+        #self.add_selection(name="notaus", sel=(n_loose_taus_mu == 0), channel=["mu"])
+        #self.add_selection(name="notaus", sel=(n_loose_taus_ele == 0), channel=["ele"])
 
         # initialize pandas dataframe
         output = {}
