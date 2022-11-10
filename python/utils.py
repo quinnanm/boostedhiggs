@@ -209,10 +209,10 @@ axis_dict = {
     'met_fj_dphi': hist2.axis.Regular(30, -5, 5, name='var', label=r'$\Delta \Phi(Jet, MET)$', overflow=True),
 }
 
-axis_dict['lep_isolation_lowpt'] = hist2.axis.Regular(20, 0, 0.15, name='var', label=r'Lepton iso (low $p_T$)', overflow=True)
+axis_dict['lep_isolation_lowpt'] = hist2.axis.Regular(20, 0, 2., name='var', label=r'Lepton iso (low $p_T$)', overflow=True)
 axis_dict['lep_isolation_highpt'] = hist2.axis.Regular(20, 0, 5, name='var', label=r'Lepton iso (high $p_T$)', overflow=True)
 axis_dict['lep_misolation_lowpt'] = hist2.axis.Regular(35, 0, 2., name='var', label=r'Lepton mini iso (low $p_T$)', overflow=True)
-axis_dict['lep_misolation_highpt'] = hist2.axis.Regular(35, 0, 0.15, name='var', label=r'Lepton mini iso (high $p_T$)', overflow=True)
+axis_dict['lep_misolation_highpt'] = hist2.axis.Regular(35, 0, 2., name='var', label=r'Lepton mini iso (high $p_T$)', overflow=True)
 
 def get_cutflow_axis(cut_keys):
     return hist2.axis.Regular(len(cut_keys), 0, len(cut_keys), name='var', label=r'Event Cutflow', overflow=True)

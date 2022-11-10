@@ -453,11 +453,12 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
         if sax is not None:
             ax.set_xlabel("")
             rax.set_xlabel("")
-            sax.set_ylabel("S/sqrt(B)",fontsize=20)
+            sax.set_ylabel(r"S/$\sqrt{B}$",fontsize=20)
             sax.set_xlabel(f"{axis_dict[var].label}")
             rax.set_ylabel("Data/MC",fontsize=20)
             if var=="cutflow":
                 sax.set_xticks(range(len(cut_keys)), cut_keys, rotation=60)
+
 
         elif rax is not None:
             ax.set_xlabel("")
@@ -583,7 +584,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as: python make_stacked_hists.py --year 2017 --odir Sep2 --channels ele --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2 --plot_hists --make_hists
+    # run locally as: python make_stacked_hists.py --year 2017 --odir Nov4 --channels ele --idir /eos/uscms/store/user/cmantill/boostedhiggs/Nov4 --plot_hists --make_hists
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
