@@ -5,7 +5,7 @@ import pickle as pkl
 import pyarrow.parquet as pq
 import numpy as np
 import json
-import os,glob
+import os, glob, sys
 import argparse
 
 import hist as hist2
@@ -75,6 +75,7 @@ def make_hists(year, ch, idir, odir, vars_to_plot, weights, presel, samples):
             data_label = data_by_ch
 
         for sample in samples[yr][ch]:
+            print(f"Sample {sample}")
             # check if the sample was processed
             pkl_dir = f"{idir}_{yr}/{sample}/outfiles/*.pkl"
             pkl_files = glob.glob(pkl_dir)
@@ -226,8 +227,9 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
     luminosity = luminosity / 1000.
     f.close()
 
+
     for var in vars_to_plot[ch]:
-        # print(var)
+        print(var)
 
         # get histograms
         h = hists[var]
@@ -240,6 +242,8 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
         samples = [h.axes[0].value(i) for i in range(len(h.axes[0].edges))]
         signal_labels = [label for label in samples if label in signal_by_ch[ch]]
         bkg_labels = [label for label in samples if (label and label != data_label and label not in signal_labels)]
+        signal_labels.remove('ttHToNonbb_M125')
+        # signal_labels.remove('VH')
 
         # get total yield of backgrounds per label
         # (sort by yield in fixed fj_pt histogram after pre-sel)
@@ -422,7 +426,8 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
             hep.histplot(
                 tot_signal,
                 ax=ax,
-                label=f"ggF+VBF+VH+ttH",
+                #label=f"ggF+VBF+VH+ttH",
+                label=f"ggF+VBF+VH",
                 linewidth=3,
                 color='tab:red'
             )
@@ -447,7 +452,16 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
                     linewidth=3,
                     color='tab:red',
                 )
-                sax.legend()
+                # integrate soverb in a given range for lep_fj_m (which, intentionally, is the first variable we pass)
+                if var=="lep_fj_m":
+                    range_ = 150    
+                    dx_ = tot_signal.axes[0].edges[1] - tot_signal.axes[0].edges[0] # get bin
+                    dx_ = 1 # don't use width of bin
+                    F_ = soverb_val[soverb_val<range_]  # restrict the function (or the array of values) to a range
+                    def integrate(F_, dx_):
+                        return F_.sum() * dx_
+                    soverb_integrated = round(integrate(F_, dx_).item(),2)
+                sax.legend(title=f"S/sqrt(b) (in 0-150)={soverb_integrated}")
 
         ax.set_ylabel("Events")
         if sax is not None:
@@ -583,7 +597,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as: python make_stacked_hists.py --year 2017 --odir Sep2 --channels ele --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2 --plot_hists --make_hists
+    # run locally as: python make_stacked_hists.py --year 2017 --odir Nov10 --channels ele --idir /eos/uscms/store/user/cmantill/boostedhiggs/Nov4 --plot_hists --make_hists
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
