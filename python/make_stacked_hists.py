@@ -242,8 +242,6 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
         samples = [h.axes[0].value(i) for i in range(len(h.axes[0].edges))]
         signal_labels = [label for label in samples if label in signal_by_ch[ch]]
         bkg_labels = [label for label in samples if (label and label != data_label and label not in signal_labels)]
-        signal_labels.remove('ttHToNonbb_M125')
-        # signal_labels.remove('VH')
 
         # get total yield of backgrounds per label
         # (sort by yield in fixed fj_pt histogram after pre-sel)
@@ -426,8 +424,7 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
             hep.histplot(
                 tot_signal,
                 ax=ax,
-                #label=f"ggF+VBF+VH+ttH",
-                label=f"ggF+VBF+VH",
+                label=f"ggF+VBF+VH+ttH",
                 linewidth=3,
                 color='tab:red'
             )
@@ -454,14 +451,19 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
                 )
                 # integrate soverb in a given range for lep_fj_m (which, intentionally, is the first variable we pass)
                 if var=="lep_fj_m":
-                    range_ = 150    
-                    dx_ = tot_signal.axes[0].edges[1] - tot_signal.axes[0].edges[0] # get bin
-                    dx_ = 1 # don't use width of bin
-                    F_ = soverb_val[soverb_val<range_]  # restrict the function (or the array of values) to a range
-                    def integrate(F_, dx_):
-                        return F_.sum() * dx_
-                    soverb_integrated = round(integrate(F_, dx_).item(),2)
-                sax.legend(title=f"S/sqrt(b) (in 0-150)={soverb_integrated}")
+                    
+                    bin_array = tot_signal.axes[0].edges[:-1] # remove last element since bins have one extra element
+                    range_max = 150
+                    range_min = 0
+
+                    condition = (bin_array>=range_min) & (bin_array<=range_max)
+            
+                    s = totsignal_val[condition].sum()  # sum/integrate signal counts in the range
+                    b = np.sqrt(tot_val[condition].sum())   # sum/integrate bkg counts in the range and take sqrt
+
+                    soverb_integrated = round((s/b).item(),2)
+
+                sax.legend(title=f"S/sqrt(B) (in 0-150)={soverb_integrated}")
 
         ax.set_ylabel("Events")
         if sax is not None:
