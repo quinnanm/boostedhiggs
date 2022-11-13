@@ -189,11 +189,20 @@ To start triton server with kubernetes in PRP:
 SingleElectron: 41476.02
 SingleMuon: 41475.26
 
-### Histograms and normalization
+### Normalization
 
 To convert to root files using:
 ```
 python convert_to_root.py --dir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --ch ele,mu --odir rootfiles
+```
+
+### Histograms
+```
+python make_hists.py --year 2017 --odir Nov4_gen --channels ele,mu --idir  /eos/uscms/store/user/cmantill/boostedhiggs/Nov4 --vars plot_configs/genvars.yaml
+```
+and
+```
+python plot_1dhists.py --year 2017 --odir Nov4_gen --var gen_Hpt --samples GluGluHToWW_Pt-200ToInf_M-125,VH,VBFHToWWToLNuQQ_M-125_withDipoleRecoil --tag signal --logy
 ```
 
 ## Setting up coffea environments
