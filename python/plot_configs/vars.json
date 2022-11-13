@@ -27,7 +27,8 @@
 	    "weight_pileup": 1,
 	    "weight_trigger_electron": 1,
 	    "weight_reco_electron": 1,
-            "weight_id_electron": 1
+            "weight_id_electron": 1,
+	    "vjets_nominal": 1
 	}
     },
     "mu": {
@@ -60,7 +61,8 @@
             "weight_trigger_iso_muon": 1,
 	    "weight_trigger_noniso_muon": 1,
 	    "weight_isolation_muon": 1,
-	    "weight_id_muon": 1
+	    "weight_id_muon": 1,
+            "vjets_nominal": 1
         }
     }
 }

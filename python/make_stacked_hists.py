@@ -45,8 +45,12 @@ def make_hists(year, ch, idir, odir, vars_to_plot, weights, presel, samples):
     """
     
     # get luminosity of year
+    data_label = data_by_ch[ch]
+    if yr == "2018":
+        data_label = data_by_ch_2018[ch]
+
     f = open("../fileset/luminosity.json")
-    luminosity = json.load(f)[year]
+    luminosity = json.load(f)[data_label][year]
     f.close()
     print(f"Processing samples from year {year} with luminosity {luminosity} for channel {ch}")
 
@@ -69,11 +73,6 @@ def make_hists(year, ch, idir, odir, vars_to_plot, weights, presel, samples):
 
     # loop over the samples
     for yr in samples.keys():
-        if yr == "2018":
-            data_label = data_by_ch_2018
-        else:
-            data_label = data_by_ch
-
         for sample in samples[yr][ch]:
             # check if the sample was processed
             pkl_dir = f"{idir}_{yr}/{sample}/outfiles/*.pkl"
@@ -87,9 +86,8 @@ def make_hists(year, ch, idir, odir, vars_to_plot, weights, presel, samples):
 
             # define an is_data boolean
             is_data = False
-            for key in data_label.values():
-                if key in sample:
-                    is_data = True
+            if key in data_label:
+                is_data = True
 
             # get combined sample
             sample_to_use = get_sample_to_use(sample,yr)
@@ -217,14 +215,15 @@ def plot_stacked_hists(year, ch, odir, vars_to_plot, logy=True, add_data=True, a
     data_label = data_by_ch[ch]
     if year == "2018":
         data_label = data_by_ch_2018[ch]
-    elif year == "Run2":
-        data_label = "Data"
 
     # luminosity
     f = open("../fileset/luminosity.json")
-    luminosity = json.load(f)[year]
+    luminosity = json.load(f)[data_label][year]
     luminosity = luminosity / 1000.
     f.close()
+
+    if year == "Run2":
+        data_label = "Data"
 
     for var in vars_to_plot[ch]:
         # print(var)
