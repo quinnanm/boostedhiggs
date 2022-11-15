@@ -174,20 +174,35 @@ To start triton server with kubernetes in PRP:
     ```
     python make_jittable.py --data-config /hwwtaggervol/melissa-weaver/data/mq_ntuples/melissa_dataconfig_semilep_ttbarwjets.yaml -n networks/particle_net_pf_sv_4_layers_pyg_ef.py -m 05_10_ak8_ttbarwjets
     ```
+    or
+    ```
+    python make_jittable.py --data-config models/particlenet_hww_inclv2_pre2/data/ak8_MD_vminclv2_pre2.yaml -n networks/particle_net_pf_sv_hybrid.py -m models/particlenet_hww_inclv2_pre2/data/net
+    ```
   - Copy this jittable file, the config file with labels and the json file to the PR.
 - Create a pod in the triton server and use `sudo` to pull changes from this repository.
 
 ## Analysis
 
-Run postprocess_parquets.py to add a "tot_weight" column.
-e.g.
-```
-python postprocess_parquets.py --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --year 2017
-```
+### Luminosities
 
-Then, convert to root files using:
+2017: nominal 41480.0
+SingleElectron: 41476.02
+SingleMuon: 41475.26
+
+### Normalization
+
+To convert to root files using:
 ```
 python convert_to_root.py --dir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --ch ele,mu --odir rootfiles
+```
+
+### Histograms
+```
+python make_hists.py --year 2017 --odir Nov4_gen --channels ele,mu --idir  /eos/uscms/store/user/cmantill/boostedhiggs/Nov4 --vars plot_configs/genvars.yaml
+```
+and
+```
+python plot_1dhists.py --year 2017 --odir Nov4_gen --var gen_Hpt --samples GluGluHToWW_Pt-200ToInf_M-125,VH,VBFHToWWToLNuQQ_M-125_withDipoleRecoil --tag signal --logy
 ```
 
 ## Setting up coffea environments
