@@ -83,7 +83,7 @@ def main(args):
                          
     else:
         from boostedhiggs.trigger_efficiencies_processor import TriggerEfficienciesProcessor
-        p = TriggerEfficienciesProcessor()  # year=args.year)
+        p = TriggerEfficienciesProcessor(year=args.year)
 
     tic = time.time()
     if args.executor == "dask":

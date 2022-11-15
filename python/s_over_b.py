@@ -16,7 +16,7 @@ plt.style.use(hep.style.CMS)
 plt.rcParams.update({'font.size': 20})
 
 
-def compute_soverb(year, hists, ch, range_min=0, range_max=150, logy=True):
+def compute_soverb(year, hists, ch, range_min=0, range_max=150, remove_ttH=True):
     """
     Computes soverb over range [range_min, range_max] of (jet-lep).mass.
     Assumes lep_fj_m is an axis of the histogram.
@@ -34,12 +34,18 @@ def compute_soverb(year, hists, ch, range_min=0, range_max=150, logy=True):
         data_label = "Data"
 
     # get histograms
-    h = hists["lep_fj_m"]
-
+    try:
+        h = hists["lep_fj_m"]
+    except:
+        h = hists
+    
     # get samples existing in histogram
     samples = [h.axes[0].value(i) for i in range(len(h.axes[0].edges))]
     signal_labels = [label for label in samples if label in signal_by_ch[ch]]
     bkg_labels = [label for label in samples if (label and label != data_label and label not in signal_labels)]
+
+    if remove_ttH:
+        signal_labels.remove("ttHToNonbb_M125")
 
     # data
     data = None
@@ -84,12 +90,11 @@ def compute_soverb(year, hists, ch, range_min=0, range_max=150, logy=True):
     
     soverb_integrated = round((s/b).item(),2)
     print(f"S/sqrt(B) in range [{range_min}, {range_max}] of (Jet-Lep).mass is: {soverb_integrated}")
-
+    return soverb_integrated
 
 def main(args):
     # append '_year' to the output directory
     odir = args.odir + "_" + args.year + "/stacked_hists/"
-
 
     channels = args.channels.split(",")
 
@@ -122,7 +127,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as: python s_over_b.py --year 2017 --odir Nov10 --channels ele
+    # run locally as: python s_over_b.py --year 2017 --odir Nov11 --channels ele
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
