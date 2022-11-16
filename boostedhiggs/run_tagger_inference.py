@@ -86,7 +86,7 @@ class wrapped_triton:
             input.set_data_from_numpy(input_dict[key])
             inputs.append(input)
 
-        out_name = "softmax__0" if self._torchscript else "softmax"
+        out_name = "output__0"
 
         output = triton_protocol.InferRequestedOutput(out_name)
 
