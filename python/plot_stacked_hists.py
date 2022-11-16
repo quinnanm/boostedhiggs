@@ -31,7 +31,7 @@ global axis_dict
 axis_dict["cutflow"] = get_cutflow_axis(cut_keys)
 print('Cutflow with key names: ',cut_keys)
 
-def plot_stacked_hists(year, ch, odir, logy=True, add_data=True, add_soverb=True):
+def plot_stacked_hists(vars_to_plot, year, ch, odir, logy=True, add_data=True, add_soverb=True):
     """
     Plots the stacked 1D histograms that were made by "make_hists" individually for each year
     Args:
@@ -41,7 +41,7 @@ def plot_stacked_hists(year, ch, odir, logy=True, add_data=True, add_soverb=True
     """
 
     # load the hists
-    with open(f"{odir}/{ch}_hists.pkl", "rb") as f:
+    with open(f"{odir}/../{ch}_hists.pkl", "rb") as f:
         hists = pkl.load(f)
         f.close()
 
@@ -67,7 +67,10 @@ def plot_stacked_hists(year, ch, odir, logy=True, add_data=True, add_soverb=True
     if year == "Run2":
         data_label = "Data"
 
-    for var in hists.keys():
+    for var in vars_to_plot:
+        if var not in hists.keys():
+            continue
+
         if 'gen' in var: 
             continue
 
@@ -123,6 +126,7 @@ def plot_stacked_hists(year, ch, odir, logy=True, add_data=True, add_soverb=True
                 fig, (ax, sax) = plt.subplots(
                     nrows=2, ncols=1, figsize=(8, 8), gridspec_kw={"height_ratios": (4, 1), "hspace": 0.07}, sharex=True
                 )
+                rax = None
             else:
                 fig, ax = plt.subplots(1, 1)
                 rax = None
@@ -309,10 +313,11 @@ def plot_stacked_hists(year, ch, odir, logy=True, add_data=True, add_soverb=True
         ax.set_ylabel("Events")
         if sax is not None:
             ax.set_xlabel("")
-            rax.set_xlabel("")
+            if rax is not None:
+                rax.set_xlabel("")
+                rax.set_ylabel("Data/MC",fontsize=20)
             sax.set_ylabel(r"S/$\sqrt{B}$",fontsize=20)
             sax.set_xlabel(f"{axis_dict[var].label}")
-            rax.set_ylabel("Data/MC",fontsize=20)
             if var=="cutflow":
                 sax.set_xticks(range(len(cut_keys)), cut_keys, rotation=60)
 
@@ -370,19 +375,32 @@ def plot_stacked_hists(year, ch, odir, logy=True, add_data=True, add_soverb=True
 
 def main(args):
     # append '_year' to the output directory
-    odir = args.odir + "_" + args.year
+    odir = args.odir + "/" + args.year
     if not os.path.exists(odir):
         os.makedirs(odir)
     odir = odir + "/stacked_hists/"
-    if not os.path.exists(odir)
+    if not os.path.exists(odir):
         os.makedirs(odir)
 
     channels = args.channels.split(",")
 
+    vars_to_plot = {}
+    if args.var is not None:
+        for ch in channels:
+            vars_to_plot[ch] = args.var.split(',')
+    else:
+        with open(args.vars) as f:
+            variables = yaml.safe_load(f)
+        for ch in variables.keys():
+            vars_to_plot[ch] = []
+            for key, value in variables[ch]["vars"].items():
+                if value == 1:
+                    vars_to_plot[ch].append(key)
+
     for ch in channels:
         print(f"Plotting for {ch}...")
-        plot_stacked_hists(args.year, ch, odir, logy=True, add_data=args.nodata)
-        plot_stacked_hists(args.year, ch, odir, logy=False, add_data=args.nodata)
+        plot_stacked_hists(vars_to_plot[ch], args.year, ch, odir, logy=True, add_data=args.nodata)
+        plot_stacked_hists(vars_to_plot[ch], args.year, ch, odir, logy=False, add_data=args.nodata)
 
 if __name__ == "__main__":
     # e.g.
@@ -404,6 +422,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--odir", dest="odir", default="hists", help="tag for output directory... will append '_{year}' to it"
     )
+    parser.add_argument('--var',             dest='var',         default=None,
+                        help='variable to plot')
     parser.add_argument("--nodata", dest="nodata", action="store_false", help="No data")
 
     args = parser.parse_args()

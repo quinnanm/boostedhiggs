@@ -106,7 +106,7 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples):
             cut_values[sample_to_use]["pre-sel"] = 0
 
             sample_yield = 0
-            for parquet_file in parquet_files:
+            for i,parquet_file in enumerate(parquet_files):
                 try:
                     data = pq.read_table(parquet_file).to_pandas()
                 except:
@@ -117,7 +117,8 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples):
                     continue
 
                 # print parquet content
-                # print(data.columns)
+                #if i==0:
+                #    print(sample, data.columns)
 
                 if len(data) == 0:
                     print(f"WARNING: Parquet file empty {yr} {ch} {sample} {parquet_file}")

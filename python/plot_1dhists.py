@@ -103,7 +103,7 @@ if __name__ == "__main__":
                         help='channels for which to plot this variable')
     parser.add_argument('--odir',            dest='odir',        default='hists',
                         help="tag for output directory... will append '/{year}' to it")
-    parser.add_argument('--var',             dest='var',         default='lep_pt',
+    parser.add_argument('--var',             dest='var',         default=None,  required=True,
                         help='variable to plot')
     parser.add_argument("--logy", dest="logy", action="store_true", help="Log y axis")
     args = parser.parse_args()
