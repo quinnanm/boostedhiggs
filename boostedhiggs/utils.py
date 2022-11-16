@@ -63,14 +63,16 @@ def match_HWW(genparticles, candidatefj):
     hWW_flavor = (n_quarks == 2) * 1 + (n_electrons == 1) * 3 + (n_muons == 1) * 5 + (n_taus == 1) * 7 + (n_quarks == 4) * 11
 
     matchedH = candidatefj.nearest(higgs, axis=1, threshold=0.8)    # choose higgs closest to fj
-    matchedW = candidatefj.nearest(higgs_w, axis=1, threshold=0.8)  # choose W closest to fj
-    matchedWstar = candidatefj.nearest(higgs_wstar, axis=1, threshold=0.8)  # choose Wstar closest to fj
+    matchedW = candidatefj.nearest(ak.firsts(higgs_w), axis=1, threshold=0.8)  # choose W closest to fj
+    matchedWstar = candidatefj.nearest(ak.firsts(higgs_wstar), axis=1, threshold=0.8)  # choose Wstar closest to fj
 
     # 1 (H only), 4(W), 6(W star), 9(H, W and Wstar)
     hWW_matched = (
         (ak.sum(matchedH.pt > 0, axis=1) == 1) * 1
-        + (ak.sum(ak.flatten(matchedW.pt > 0, axis=2), axis=1) == 1) * 3
-        + (ak.sum(ak.flatten(matchedWstar.pt > 0, axis=2), axis=1) == 1) * 5
+        #+ (ak.sum(ak.flatten(matchedW.pt > 0, axis=2), axis=1) == 1) * 3
+        #+ (ak.sum(ak.flatten(matchedWstar.pt > 0, axis=2), axis=1) == 1) * 5
+        + (ak.sum(matchedW.pt > 0, axis=1) == 1) * 3
+        + (ak.sum(matchedWstar.pt > 0, axis=1) == 1) * 5
     )
 
     # leptons matched
@@ -81,12 +83,11 @@ def match_HWW(genparticles, candidatefj):
 
     # leptons coming from W or W*
     leptons_mass = ak.firsts(leptons.distinctParent.mass)   # # TODO: why need firsts
-    higgs_w_mass = ak.firsts(ak.flatten(higgs_w.mass))[ak.firsts(leptons.pt > 0)]
-    higgs_wstar_mass = ak.firsts(ak.flatten(higgs_wstar.mass))[ak.firsts(leptons.pt > 0)]
+    higgs_w_mass = ak.firsts(higgs_w.mass)[ak.firsts(leptons.pt > 0)]
+    higgs_wstar_mass = ak.firsts(higgs_wstar.mass)[ak.firsts(leptons.pt > 0)]
 
     iswlepton = (leptons_mass == higgs_w_mass)
     iswstarlepton = (leptons_mass == higgs_wstar_mass)
-
     genVars = {
         "hWW_flavor": hWW_flavor,
         "hWW_matched": hWW_matched,
@@ -226,3 +227,30 @@ def add_selection_no_cutflow(
 ):
     """adds selection to PackedSelection object"""
     selection.add(name, ak.fill_none(sel, False))
+
+
+def get_neutrino_z(vis,inv,h_mass=125):
+    """
+    Reconstruct the mass by taking qq jet, lepton and MET
+    Then, solve for the z component of the neutrino momentum
+    by requiring that the invariant mass of the group of objects is the Higgs mass = 125
+    """
+    a = h_mass*h_mass - vis.mass*vis.mass + 2*vis.x*inv.x + 2*vis.y*inv.y
+    A = 4*(vis.t*vis.t - vis.z*vis.z)
+    B = -4*a*vis.z
+    C = 4*vis.t*vis.t*(inv.x*inv.x + inv.y*inv.y) - a*a
+    delta = B*B - 4*A*C
+    neg = -B/(2*A)
+    neg = ak.nan_to_num(neg)
+    pos = np.maximum( (-B + np.sqrt(delta))/(2*A), (-B - np.sqrt(delta))/(2*A))
+    pos = ak.nan_to_num(pos)
+
+    invZ = ((delta<0)*neg
+            + (delta>0)*pos )
+    neutrino =  ak.zip({"x": inv.x,
+                        "y": inv.y,
+                        "z": invZ,
+                        "t": np.sqrt(inv.x*inv.x + inv.y*inv.y + invZ*invZ),
+                    },
+                       with_name="LorentzVector")
+    return neutrino

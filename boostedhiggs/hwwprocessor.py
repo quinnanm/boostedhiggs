@@ -17,7 +17,7 @@ from coffea import processor
 from coffea.nanoevents.methods import candidate, vector
 from coffea.analysis_tools import Weights, PackedSelection
 
-from boostedhiggs.utils import match_HWW, getParticles, match_V, match_Top
+from boostedhiggs.utils import match_HWW, getParticles, match_V, match_Top, get_neutrino_z
 from boostedhiggs.corrections import (
     corrected_msoftdrop,
     add_VJets_kFactors,
@@ -77,7 +77,6 @@ def build_p4(cand):
         with_name="PtEtaPhiMCandidate",
         behavior=candidate.behavior,
     )
-
 
 class HwwProcessor(processor.ProcessorABC):
     def __init__(
@@ -278,7 +277,6 @@ class HwwProcessor(processor.ProcessorABC):
 
         good_fatjets = (fatjets.pt > 200) & (abs(fatjets.eta) < 2.5) & fatjets.isTight
         n_fatjets = ak.sum(good_fatjets, axis=1)
-
         good_fatjets = fatjets[good_fatjets]  # select good fatjets
         good_fatjets = good_fatjets[ak.argsort(good_fatjets.pt, ascending=False)]  # sort them by pt
 
@@ -299,8 +297,12 @@ class HwwProcessor(processor.ProcessorABC):
         # for leptonic channel: pick candidate_fj closest to the MET
         # candidatefj = ak.firsts(good_fatjets[ak.argmin(good_fatjets.delta_phi(met), axis=1, keepdims=True)])      # get candidatefj for leptonic channel
 
-        # lepton and fatjet mass
-        lep_fj_m = (candidatefj - candidatelep_p4).mass  # mass of fatjet without lepton
+        # fatjet - lepton mass
+        lep_fj_mass = (candidatefj - candidatelep_p4).mass  # mass of fatjet without lepton
+
+        # fatjet + neutrino
+        candidateNeutrino = get_neutrino_z(candidatefj, met)
+        rec_higgs_mass = (candidatefj+candidateNeutrino).mass # mass of fatjet with lepton + neutrino
 
         # b-jets
         # in event, pick highest b score in opposite direction from signal (we will make cut here to avoid tt background events producing bjets)
@@ -358,10 +360,11 @@ class HwwProcessor(processor.ProcessorABC):
                 "lep_pt": candidatelep.pt,
                 "lep_isolation": lep_reliso,
                 "lep_misolation": lep_miso,
-                "lep_fj_m": lep_fj_m,
+                "lep_fj_m": lep_fj_mass,
                 "lep_fj_dr": lep_fj_dr,
                 "lep_met_mt": mt_lep_met,
                 "met_fj_dphi": met_fjlep_dphi,
+                "rec_higgs_m": rec_higgs_mass,
             },
             "ele": {
                 "ele_highPtId": ele_highPtId,
@@ -392,7 +395,7 @@ class HwwProcessor(processor.ProcessorABC):
         # variables["ele"]["notaus"] = (n_loose_taus_ele == 0)
 
         # gen matching for signal
-        if (("HToWW" or "HWW") in dataset) and self.isMC:
+        if (("HToWW" in dataset) or ("HWW" in dataset) or ("ttH" in dataset)) and self.isMC:
             matchHWW = match_HWW(events.GenPart, candidatefj)
             variables["lep"]["gen_Hpt"] = ak.firsts(matchHWW["matchedH"].pt)
             variables["lep"]["gen_Hnprongs"] = matchHWW["hWW_nprongs"]
@@ -492,6 +495,7 @@ class HwwProcessor(processor.ProcessorABC):
                     varkey = "lep"
                 else:
                     varkey = "common"
+
                 # store the individual weights (ONLY for now until we debug)
                 variables[varkey][f"weight_{key}"] = self.weights.partial_weight([key])
                 if varkey in self.weights_per_ch.keys():
@@ -536,7 +540,6 @@ class HwwProcessor(processor.ProcessorABC):
         )
         self.add_selection(name="notaus", sel=(n_loose_taus_mu == 0), channel=["mu"])
         self.add_selection(name="notaus", sel=(n_loose_taus_ele == 0), channel=["ele"])
-
         self.add_selection(name="leptonInJet", sel=(lep_fj_dr < 0.8))
         # self.add_selection(
         #     name="antibjettag",
@@ -582,7 +585,6 @@ class HwwProcessor(processor.ProcessorABC):
                         self.tagger_resources_path, events[selection_ch], fj_idx_lep[selection_ch]
                     )
                     print("post-inference")
-                    print(pnet_vars)
 
                     output[ch] = {**output[ch], **{key: value for (key, value) in pnet_vars.items()}}
             else:

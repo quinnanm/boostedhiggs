@@ -59,7 +59,7 @@ We use the `submit.py` script to submit jobs.
 
 For example:
 ```
-python condor/submit.py --year 2017 --tag Feb21 --samples samples_pfnano_mc.json --pfnano
+python condor/submit.py --year 2017 --tag ${TAG} --samples samples_pfnano_mc.json --pfnano
 ```
 where:
 - year: this determines which fileset to read
@@ -72,7 +72,7 @@ where:
 
 e.g.
 ```
-python3 condor/submit.py --year 2017 --tag Jun20 --samples samples_pfnano_mc.json --pfnano --slist ggHToWWTo4Q-MH125,GluGluHToWWTo4q,GluGluHToWWTo4q-HpT190,TTToSemiLeptonic --submit
+python3 condor/submit.py --year 2017 --tag ${TAG} --samples samples_pfnano_mc.json --pfnano --slist GluGluHToWW_Pt-200ToInf_M-125,TTToSemiLeptonic --submit
 ```
 
 The `run.py` script has different options to e.g. select a different processor, run over files that go from one starting index (starti) to the end (endi).
@@ -96,7 +96,7 @@ If you see no jobs listed it means they have all finished.
 
 #### Testing jobs locally per single sample:
 ```
-python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --sample GluGluHToWWToLNuQQ --local
+python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local
 ```
 
 #### Testing jobs with inference (and triton server running):
@@ -106,7 +106,7 @@ python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --sample Glu
 
 #### Testing jobs locally over multiple samples specified in the json:
 ```
-python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --json samples_pfnano.json
+python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --json samples_pfnano_mc.json
 ```
 
 ## Triton server setup
@@ -180,29 +180,56 @@ To start triton server with kubernetes in PRP:
     ```
   - Copy this jittable file, the config file with labels and the json file to the PR.
 - Create a pod in the triton server and use `sudo` to pull changes from this repository.
+  ```
+  kubectl create -f tritonpod.yml
+  ```
+  and
+  ```
+  cd /triton/sonic-models/
+  sudo git pull origin master
+  ```
 
 ## Analysis
 
+The output will be stored in ${ODIR}, e.g.: `/eos/uscms/store/user/cmantill/boostedhiggs/Nov4`.
+
 ### Luminosities
 
+```
 2017: nominal 41480.0
 SingleElectron: 41476.02
 SingleMuon: 41475.26
+```
 
 ### Normalization
 
 To convert to root files using:
 ```
-python convert_to_root.py --dir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --ch ele,mu --odir rootfiles
+python convert_to_root.py --dir ${ODIR} --ch ele,mu --odir rootfiles
 ```
 
 ### Histograms
+
+The configs to make histograms are under `plot_configs`.
+
+Make histograms with correct normalization:
 ```
-python make_hists.py --year 2017 --odir Nov4_gen --channels ele,mu --idir  /eos/uscms/store/user/cmantill/boostedhiggs/Nov4 --vars plot_configs/genvars.yaml
+python make_hists.py --year 2017 --odir ${TAG} --channels ele,mu --idir ${ODIR} --vars plot_configs/vars.yaml
 ```
-and
+and make stacked histograms with:
 ```
-python plot_1dhists.py --year 2017 --odir Nov4_gen --var gen_Hpt --samples GluGluHToWW_Pt-200ToInf_M-125,VH,VBFHToWWToLNuQQ_M-125_withDipoleRecoil --tag signal --logy
+python plot_stacked_hists.py --year 2017 --odir ${TAG}
+# e.g. for variable=cutflow with no data
+python plot_stacked_hists.py --year 2017 --odir ${TAG} --var cutflow --nodata
+```
+
+You can also customize the `vars.yaml` file. For example:
+```
+python make_hists.py --year 2017 --odir ${CUSTOM_TAG} --channels ele,mu --idir ${ODIR} --vars plot_configs/genvars.yaml
+```
+and use `plot_1dhists.py` to create 1D hists for specific variables. Use `samples` to customize samples to compare.
+```
+python plot_1dhists.py --year 2017 --odir ${CUSTOM_TAG} --var gen_Hpt --samples GluGluHToWW_Pt-200ToInf_M-125,VH,VBFHToWWToLNuQQ_M-125_withDipoleRecoil --tag signal --logy
 ```
 
 ## Setting up coffea environments
