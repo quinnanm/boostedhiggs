@@ -205,9 +205,9 @@ class TriggerEfficienciesProcessor(ProcessorABC):
                 selection.add("muonkin", (candidatelep.pt > 30))
             elif channel == "ele":
                 add_lepton_weight(self.weights, candidatelep, self._year, "electron")
-                selection.add("oneelectron", ((n_good_muons == 0) & (n_loose_muons == 0) & (n_good_electrons == 1) & ~ak.any(loose_electrons & ~good_electrons, 1)))
-                selection.add("electronkin", (candidatelep.pt > 40))
-            selection.add("fatjetKin", candidatefj.pt > 200)     
+                # selection.add("oneelectron", ((n_good_muons == 0) & (n_loose_muons == 0) & (n_good_electrons == 1) & ~ak.any(loose_electrons & ~good_electrons, 1)))
+                # selection.add("electronkin", (candidatelep.pt > 40))
+            selection.add("fatjetKin", candidatefj.pt > 0)     
 
             """ Define other variables to save """
             out[channel]["fj_pt"] = pad_val_nevents(candidatefj.pt)
@@ -247,3 +247,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
                     }
 
         return accumulator
+
+
+
+        
