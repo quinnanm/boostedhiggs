@@ -399,8 +399,8 @@ class HwwProcessor(processor.ProcessorABC):
             matchHWW = match_HWW(events.GenPart, candidatefj)
             variables["lep"]["gen_Hpt"] = ak.firsts(matchHWW["matchedH"].pt)
             variables["lep"]["gen_Hnprongs"] = matchHWW["hWW_nprongs"]
-            variables["lep"]["gen_iswlepton"] = matchHWW["iswlepton"]
-            variables["lep"]["gen_iswstarlepton"] = matchHWW["iswstarlepton"]
+            variables["lep"]["gen_iswlepton"] = ak.firsts(matchHWW["iswlepton"])
+            variables["lep"]["gen_iswstarlepton"] = ak.firsts(matchHWW["iswstarlepton"])
 
         # gen matching for background
         if ("WJets" in dataset) or ("ZJets" in dataset) and self.isMC:

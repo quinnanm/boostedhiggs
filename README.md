@@ -69,10 +69,12 @@ where:
 --no-pfnano: do not use pfnano
 - number of files per job: if given all of the samples will use these number of files per job
 - script that runs processor: is `run.py` by default
+--no-inference: do not use inference
+--inference: (true by default)
 
 e.g.
 ```
-python3 condor/submit.py --year 2017 --tag ${TAG} --samples samples_pfnano_mc.json --pfnano --slist GluGluHToWW_Pt-200ToInf_M-125,TTToSemiLeptonic --submit
+python3 condor/submit.py --year 2017 --tag ${TAG} --samples samples_pfnano_mc.json --pfnano --slist GluGluHToWW_Pt-200ToInf_M-125,TTToSemiLeptonic --submit --no-inference
 ```
 
 The `run.py` script has different options to e.g. select a different processor, run over files that go from one starting index (starti) to the end (endi).
@@ -259,7 +261,7 @@ export PATH="$HOME/miniconda3/bin:$PATH"
 #### Set up a conda environment and install the required packages
 ```
 # create a new conda environment
-conda create -n coffea-env python=3.7
+conda create -n coffea-env python=3.8
 
 # activate the environment
 conda activate coffea-env
