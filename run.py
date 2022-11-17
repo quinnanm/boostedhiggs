@@ -65,20 +65,21 @@ def main(args):
     print(fileset)
 
     # define processor
+    year = args.year.replace('APV','')
     yearmod = ''
     if 'APV' in args.year:
-        yearmod = 'APV'  
+        yearmod = 'APV'
 
     if args.processor == 'hww':
         from boostedhiggs.hwwprocessor import HwwProcessor
-        p = HwwProcessor(year=args.year, yearmod=yearmod, 
+        p = HwwProcessor(year=year, yearmod=yearmod, 
                          channels=channels, 
                          inference=args.inference,
                          output_location='./outfiles' + job_name)
 
     elif args.processor == 'lumi':        
         from boostedhiggs.lumi_processor import LumiProcessor
-        p = LumiProcessor(year=args.year, yearmod=yearmod, 
+        p = LumiProcessor(year=year, yearmod=yearmod, 
                           output_location='./outfiles' + job_name)
                          
     else:

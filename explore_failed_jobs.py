@@ -29,20 +29,20 @@ def main(args):
         njobs = ceil(tot_files / nfiles_per_job[sample])
         files_per_job = str(nfiles_per_job[sample])
 
-        print(f"Sample {sample} should produce {njobs} files")
+        # print(f"Sample {sample} should produce {njobs} files")
 
         import glob
         njobs_produced = len(glob.glob1(f"{outdir}/{sample}/outfiles","*.pkl"))
-        print(f"Sample {sample} produced {njobs_produced} files")
+        # print(f"Sample {sample} produced {njobs_produced} files")
 
         if njobs_produced!=njobs:   # debug which pkl file wasn't produced
-            print(f"-----> SAMPLE HAS RAN INTO ERROR")
+            print(f"-----> SAMPLE {sample} HAS RAN INTO ERROR")
             for i, x in enumerate(range(0, njobs*nfiles_per_job[sample], nfiles_per_job[sample])):
                 fname = f"{x}-{x+nfiles_per_job[sample]}"
                 if not os.path.exists(f"{outdir}/{sample}/outfiles/{fname}.pkl"):
                     print(f"file {fname}.pkl wasn't produced which means job_idx {i} failed..")
 
-        print("-----------------------------------------------------------------------------------------")
+        # print("-----------------------------------------------------------------------------------------")
 
 
 if __name__ == "__main__":
