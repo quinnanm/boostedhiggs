@@ -70,7 +70,7 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples):
         if yr == "2018":
             data_label = data_by_ch_2018[ch]
         f = open("../fileset/luminosity.json")
-        luminosity = json.load(f)[data_label][yr]
+        luminosity = json.load(f)[ch][yr]
         f.close()
         print(f"Processing samples from year {yr} with luminosity {luminosity} for channel {ch}")
 

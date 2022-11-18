@@ -198,9 +198,14 @@ The output will be stored in ${ODIR}, e.g.: `/eos/uscms/store/user/cmantill/boos
 ### Luminosities
 
 ```
-2017: nominal 41480.0
+2017: 
+nominal 41480.0
 SingleElectron: 41476.02
 SingleMuon: 41475.26
+2018:
+nominal: 59830.0
+EGamma: 59816.23
+SingleMuon: 59781.96
 ```
 
 ### Normalization

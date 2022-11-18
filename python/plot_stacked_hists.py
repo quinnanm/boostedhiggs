@@ -60,7 +60,7 @@ def plot_stacked_hists(vars_to_plot, year, ch, odir, logy=True, add_data=True, a
 
     # luminosity
     f = open("../fileset/luminosity.json")
-    luminosity = json.load(f)[data_label][year]
+    luminosity = json.load(f)[ch][year]
     luminosity = luminosity / 1000.
     f.close()
 
