@@ -45,6 +45,10 @@ def plot_stacked_hists(year, ch, odir, logy=True, add_data=True, add_soverb=True
         hists = pkl.load(f)
         f.close()
 
+    odir += "/stacked_hists/"
+    if not os.path.exists(odir):
+        os.makedirs(odir)
+
     # make the histogram plots in this directory
     if logy:
         if not os.path.exists(f"{odir}/{ch}_hists_log"):
@@ -60,7 +64,7 @@ def plot_stacked_hists(year, ch, odir, logy=True, add_data=True, add_soverb=True
 
     # luminosity
     f = open("../fileset/luminosity.json")
-    luminosity = json.load(f)[data_label][year]
+    luminosity = json.load(f)[ch][year]
     luminosity = luminosity / 1000.
     f.close()
 
@@ -304,7 +308,7 @@ def plot_stacked_hists(year, ch, odir, logy=True, add_data=True, add_soverb=True
                     b = np.sqrt(tot_val[condition].sum())   # sum/integrate bkg counts in the range and take sqrt
 
                     soverb_integrated = round((s/b).item(),2)
-                    sax.legend(title=f"S/sqrt(B) (in 0-150)={soverb_integrated}")
+                sax.legend(title=f"S/sqrt(B) (in 0-150)={soverb_integrated}")
 
         ax.set_ylabel("Events")
         if sax is not None:
@@ -370,13 +374,7 @@ def plot_stacked_hists(year, ch, odir, logy=True, add_data=True, add_soverb=True
 
 def main(args):
     # append '_year' to the output directory
-    odir = args.odir + "_" + args.year
-    if not os.path.exists(odir):
-        os.makedirs(odir)
-    odir = odir + "/stacked_hists/"
-    if not os.path.exists(odir)
-        os.makedirs(odir)
-
+    odir = args.odir + "/" + args.year 
     channels = args.channels.split(",")
 
     for ch in channels:
@@ -386,7 +384,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as: python plot_stacked_hists.py --year 2017 --odir Nov4 --channels ele
+    # run locally as: python plot_stacked_hists.py --year 2017 --odir Nov15 --channels ele
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--year", dest="year", required=True, choices=["2016", "2016APV", "2017", "2018", "Run2"], help="year"
