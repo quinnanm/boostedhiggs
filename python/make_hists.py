@@ -135,7 +135,10 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples):
                         try:
                             event_weight *= data[w]
                         except:
-                            if w!="weight_vjets_nominal":
+                            print_warning = True
+                            if w=="weight_vjets_nominal" or (w=="weight_L1Prefiring" and yr=="2018"):
+                                print_warning = False
+                            if print_warning:
                                 print(f"No {w} variable in parquet for sample {sample}")
                             # break
                 else:
