@@ -308,7 +308,7 @@ def plot_stacked_hists(year, ch, odir, logy=True, add_data=True, add_soverb=True
                     b = np.sqrt(tot_val[condition].sum())   # sum/integrate bkg counts in the range and take sqrt
 
                     soverb_integrated = round((s/b).item(),2)
-                sax.legend(title=f"S/sqrt(B) (in 0-150)={soverb_integrated}")
+                    sax.legend(title=f"S/sqrt(B) (in 0-150)={soverb_integrated}")
 
         ax.set_ylabel("Events")
         if sax is not None:

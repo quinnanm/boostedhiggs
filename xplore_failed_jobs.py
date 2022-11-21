@@ -22,6 +22,7 @@ def main(args):
     # TODO: this args.samples should be the one copied over in the condor/ directory at the moment the job was submitted
     files, nfiles_per_job = loadJson(args.samples, args.year, args.pfnano, slist)
 
+
     # submit a cluster of jobs per sample
     for sample in files.keys():
         tot_files = len(files[sample])
@@ -48,7 +49,7 @@ def main(args):
 if __name__ == "__main__":
     """
     python xplore_failed_jobs.py --pfnano --year 2017 --username cmantill --tag Nov4 --samples samples_pfnano_mc.json 
-    python xplore_failed_jobs.py --pfnano --year 2017 --username fmokhtar --tag lumi --samples samples_pfnano_data.json 
+    python xplore_failed_jobs.py --pfnano --year 2018 --username fmokhtar --tag lumiv3 --samples samples_pfnano_data.json 
     """
 
     parser = argparse.ArgumentParser()

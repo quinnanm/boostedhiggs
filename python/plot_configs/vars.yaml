@@ -1,6 +1,7 @@
 ele:
   vars:
     cutflow: 1
+    lep_fj_m: 1
     fj_pt: 1
     fj_msoftdrop: 1
     fj_bjets_ophem: 1
@@ -11,7 +12,6 @@ ele:
     lep_isolation_highpt: 1
     lep_misolation_lowpt: 1
     lep_misolation_highpt: 1
-    lep_fj_m: 1
     lep_fj_dr: 1
     lep_met_mt: 1
     ht: 1
@@ -21,8 +21,8 @@ ele:
     - (( (lep_pt < 120) & (lep_isolation < 0.15) ) | (lep_pt >= 120))
     # - (( (lep_pt < 120) & (lep_isolation < 0.1) ) | (lep_pt >= 120))
     # - (( (lep_pt >= 120) & (lep_misolation < 0.4) ) | (lep_pt < 120))
-    - (( (lep_pt >= 120) & (lep_misolation < 0.1) ) | (lep_pt < 120)) # dylan's selection
-    - (fj_bjets < 0.340)
+    # - (( (lep_pt >= 120) & (lep_misolation < 0.1) ) | (lep_pt < 120)) # dylan's selection
+    # - (fj_bjets < 0.340)
   weights:
     weight_genweight: 1
     weight_L1Prefiring: 1
@@ -30,10 +30,11 @@ ele:
     weight_trigger_electron: 1
     weight_reco_electron: 1
     weight_id_electron: 1
-    weight_vjets_nominal: 1
+    weight_vjets_nominal: 0
 mu:
   vars:
     cutflow: 1
+    lep_fj_m: 1
     fj_pt: 1
     fj_msoftdrop: 1
     fj_bjets_ophem: 1
@@ -43,7 +44,6 @@ mu:
     lep_isolation_highpt: 1
     lep_misolation_lowpt: 1
     lep_misolation_highpt: 1
-    lep_fj_m: 1
     lep_fj_dr: 1
     lep_met_mt: 1
     ht: 1
@@ -51,10 +51,10 @@ mu:
     met_fj_dphi: 1
   pre-sel:
     - (( (lep_pt < 50) & (lep_isolation < 0.15) ) | (lep_pt >= 50))
-    # - (( (lep_pt >= 50) & (lep_misolation < 0.1) ) | (lep_pt < 50))
+    - (( (lep_pt >= 50) & (lep_misolation < 0.1) ) | (lep_pt < 50))
     # - (( (lep_pt < 50) & (lep_isolation < 0.25) ) | (lep_pt >= 50))
-    - (( (lep_pt >= 50) & (lep_misolation < 0.2) ) | (lep_pt < 50)) # dylan's selection
-    - (fj_bjets < 0.340)
+    # - (( (lep_pt >= 50) & (lep_misolation < 0.2) ) | (lep_pt < 50)) # dylan's selection
+    # - (fj_bjets < 0.340)
   weights:
     weight_genweight: 1
     weight_L1Prefiring: 1
@@ -63,4 +63,4 @@ mu:
     weight_trigger_noniso_muon: 1
     weight_isolation_muon: 1
     weight_id_muon: 1
-    weight_vjets_nominal: 1
+    weight_vjets_nominal: 0
