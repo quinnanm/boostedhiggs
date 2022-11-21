@@ -272,6 +272,8 @@ def main(args):
 if __name__ == "__main__":
     # e.g.
     # run locally as: python make_hists.py --year 2017 --odir Nov4 --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Nov4
+    # run locally as: python make_hists.py --year 2016 --odir Nov21 --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Nov16
+    
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--year", dest="year", required=True, choices=["2016", "2016APV", "2017", "2018", "Run2"], help="year"

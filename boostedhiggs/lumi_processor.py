@@ -65,7 +65,7 @@ class LumiProcessor(processor.ProcessorABC):
 
         # TODO: if possible, get lumi value per file and accumulate
         # return dictionary with cutflows
-        return {dataset: {"mc": isMC, self._year + self._yearmod: {"lumilist": lumilist}}}
+        return {dataset: {self._year + self._yearmod: {"lumilist": lumilist}}}
 
     def postprocess(self, accumulator):
         return accumulator

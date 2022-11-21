@@ -199,17 +199,29 @@ The output will be stored in ${ODIR}, e.g.: `/eos/uscms/store/user/cmantill/boos
 
 ```
 2016:
-nominsal: 16830.0
+nominal: 16830.0
 SingleElectron: 16809.97
 SingleMuon: 16810.81
+
+2016APV:
+nominal: 19500.0
+SingleElectron: 19492.72
+SingleMuon: 19436.16
+
 2017: 
 nominal 41480.0
 SingleElectron: 41476.02
 SingleMuon: 41475.26
+
 2018:
 nominal: 59830.0
 EGamma: 59816.23
 SingleMuon: 59781.96
+
+Run2:
+nominal: 137640.0
+ele: 137594.94
+mu: 137504.19
 ```
 
 ### Normalization

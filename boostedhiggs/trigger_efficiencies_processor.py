@@ -1,6 +1,7 @@
 from coffea.analysis_tools import Weights, PackedSelection
 from coffea.nanoevents.methods import candidate, vector
 from coffea.processor import ProcessorABC, column_accumulator
+import os, sys
 import pandas as pd
 import numpy as np
 import warnings
@@ -8,6 +9,15 @@ import awkward as ak
 import matplotlib.pyplot as plt
 import mplhep as hep
 from hist.intervals import clopper_pearson_interval
+
+from boostedhiggs.utils import match_HWW, getParticles, match_V, match_Top
+from boostedhiggs.corrections import (
+    corrected_msoftdrop,
+    add_VJets_kFactors,
+    add_jetTriggerSF,
+    add_lepton_weight,
+    add_pileup_weight,
+)
 
 # we suppress ROOT warnings where our input ROOT tree has duplicate branches - these are handled correctly.
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
@@ -37,23 +47,31 @@ def simple_match_HWW(genparticles, candidatefj):
 
     return matchedH
 
+def build_p4(cand):
+    return ak.zip(
+        {
+            "pt": cand.pt,
+            "eta": cand.eta,
+            "phi": cand.phi,
+            "mass": cand.mass,
+            "charge": cand.charge,
+        },
+        with_name="PtEtaPhiMCandidate",
+        behavior=candidate.behavior,
+    )
 
 class TriggerEfficienciesProcessor(ProcessorABC):
     """Accumulates yields from all input events: 1) before triggers, and 2) after triggers"""
 
-    def __init__(self, year=2017):
+    def __init__(self, year="2017"):
         super(TriggerEfficienciesProcessor, self).__init__()
         self._year = year
         self._trigger_dict = {
-            2017: {
-                "ele35": [
-                    "Ele35_WPTight_Gsf",
-                ],
+            "2017": {
+                "ele35": ["Ele35_WPTight_Gsf"],
                 "ele115": ["Ele115_CaloIdVT_GsfTrkIdT"],
                 "Photon200": ["Photon200"],
-                "Mu50": [
-                    "Mu50",
-                ],
+                "Mu50": ["Mu50"],
                 "IsoMu27": ["IsoMu27"],
                 "OldMu100": ["OldMu100"],
                 "TkMu100": ["TkMu100"],
@@ -74,12 +92,14 @@ class TriggerEfficienciesProcessor(ProcessorABC):
     def process(self, events):
         """Returns pre- (den) and post- (num) trigger histograms from input NanoAOD events"""
         dataset = events.metadata["dataset"]
-        n_events = len(events)
-        isRealData = not hasattr(events, "genWeight")
+        nevents = len(events)
+        self.isMC = hasattr(events, "genWeight")
+        self.weights = Weights(nevents, storeIndividual=True)
+        self.weights_per_ch = {}
 
         def pad_val_nevents(arr: ak.Array):
             """pad values with the length equal to the number of events"""
-            return self.pad_val(arr, n_events, -1)
+            return self.pad_val(arr, nevents, -1)
 
         # skimmed events for different channels
         out = {}
@@ -93,55 +113,101 @@ class TriggerEfficienciesProcessor(ProcessorABC):
                 HLT_triggers["HLT_" + t] = np.any(
                     np.array([events.HLT[trigger] for trigger in self._trigger_dict[t] if trigger in events.HLT.fields]),
                     axis=0,
-                )
+                )          
             out[channel] = {**out[channel], **HLT_triggers}
 
-        """ Baseline selection """
-        goodmuon = (events.Muon.pt > 25) & (abs(events.Muon.eta) < 2.4) & events.Muon.mediumId
-        nmuons = ak.sum(goodmuon, axis=1)
-        goodelectron = (events.Electron.pt > 25) & (abs(events.Electron.eta) < 2.5) & (events.Electron.mvaFall17V2noIso_WP90)
-        nelectrons = ak.sum(goodelectron, axis=1)
-
-        # taus (will need to refine to avoid overlap with htt)
-        loose_taus_mu = (events.Tau.pt > 20) & (abs(events.Tau.eta) < 2.3) & (events.Tau.idAntiMu >= 1)  # loose antiMu ID
-        loose_taus_ele = (
-            (events.Tau.pt > 20)
-            & (abs(events.Tau.eta) < 2.3)
-            & (events.Tau.idAntiEleDeadECal >= 2)  # loose Anti-electron MVA discriminator V6 (2018) ?
+        """ basic definitions """
+        # DEFINE MUONS
+        loose_muons = (
+            (((events.Muon.pt > 30) & (events.Muon.pfRelIso04_all < 0.25)) | (events.Muon.pt > 55))
+            & (np.abs(events.Muon.eta) < 2.4)
+            & (events.Muon.looseId)
         )
-        n_loose_taus_mu = ak.sum(loose_taus_mu, axis=1)
-        n_loose_taus_ele = ak.sum(loose_taus_ele, axis=1)
+        n_loose_muons = ak.sum(loose_muons, axis=1)
 
-        # leading lepton
-        goodleptons = ak.concatenate([events.Muon[goodmuon], events.Electron[goodelectron]], axis=1)
-        candidatelep = ak.firsts(goodleptons[ak.argsort(goodleptons.pt)])
+        good_muons = (
+            (events.Muon.pt > 30)
+            & (np.abs(events.Muon.eta) < 2.4)
+            & (np.abs(events.Muon.dz) < 0.1)
+            & (np.abs(events.Muon.dxy) < 0.05)
+            & (events.Muon.sip3d <= 4.0)
+            & events.Muon.mediumId
+        )
+        n_good_muons = ak.sum(good_muons, axis=1)
 
-        # fatjet closest to MET
+        # DEFINE ELECTRONS
+        loose_electrons = (
+            (((events.Electron.pt > 38) & (events.Electron.pfRelIso03_all < 0.25)) | (events.Electron.pt > 120))
+            & (np.abs(events.Electron.eta) < 2.4)
+            & ((np.abs(events.Electron.eta) < 1.44) | (np.abs(events.Electron.eta) > 1.57))
+            & (events.Electron.cutBased >= events.Electron.LOOSE)
+        )
+        n_loose_electrons = ak.sum(loose_electrons, axis=1)
+
+        good_electrons = (
+            (events.Electron.pt > 38)
+            & (np.abs(events.Electron.eta) < 2.4)
+            & ((np.abs(events.Electron.eta) < 1.44) | (np.abs(events.Electron.eta) > 1.57))
+            & (np.abs(events.Electron.dz) < 0.1)
+            & (np.abs(events.Electron.dxy) < 0.05)
+            & (events.Electron.sip3d <= 4.0)
+            & (events.Electron.mvaFall17V2noIso_WP90)
+        )
+        n_good_electrons = ak.sum(good_electrons, axis=1)
+     
+        # get candidate lepton
+        goodleptons = ak.concatenate(
+            [events.Muon[good_muons], events.Electron[good_electrons]], axis=1
+        )  # concat muons and electrons
+        goodleptons = goodleptons[ak.argsort(goodleptons.pt, ascending=False)]  # sort by pt
+        candidatelep = ak.firsts(goodleptons)  # pick highest pt
+
+        candidatelep_p4 = build_p4(candidatelep)  # build p4 for candidate lepton
+
+        # DEFINE JETS
+        goodjets = events.Jet[
+            (events.Jet.pt > 30) & (abs(events.Jet.eta) < 5.0) & events.Jet.isTight & (events.Jet.puId > 0)
+        ]
+        # reject EE noisy jets for 2017
+        if self._year == "2017":
+            goodjets = goodjets[(goodjets.pt > 50) | (abs(goodjets.eta) < 2.65) | (abs(goodjets.eta) > 3.139)]
+
+        # fatjets
         fatjets = events.FatJet
-        candidatefj = fatjets[(fatjets.pt > 200) & (abs(fatjets.eta) < 2.4)]
-        met = events.MET
-        dphi_met_fj = abs(candidatefj.delta_phi(met))
-        candidatefj = ak.firsts(candidatefj[ak.argmin(dphi_met_fj, axis=1, keepdims=True)])
-        dr_lep_fj = candidatefj.delta_r(candidatelep)
 
-        # jets
-        jets = events.Jet
-        candidatejet = jets[(jets.pt > 30) & (abs(jets.eta) < 2.5) & jets.isTight]
+        good_fatjets = (fatjets.pt > 200) & (abs(fatjets.eta) < 2.5) & fatjets.isTight
+        n_fatjets = ak.sum(good_fatjets, axis=1)
 
-        # define isolation
-        mu_iso = ak.where(candidatelep.pt >= 55.0, candidatelep.miniPFRelIso_all, candidatelep.pfRelIso03_all)
-        ele_iso = ak.where(candidatelep.pt >= 120.0, candidatelep.pfRelIso03_all, candidatelep.pfRelIso03_all)
+        good_fatjets = fatjets[good_fatjets]  # select good fatjets
+        good_fatjets = good_fatjets[ak.argsort(good_fatjets.pt, ascending=False)]  # sort them by pt
 
+        # for leptonic channel: first clean jets and leptons by removing overlap, then pick candidate_fj closest to the lepton
+        lep_in_fj_overlap_bool = good_fatjets.delta_r(candidatelep_p4) > 0.1
+        good_fatjets = good_fatjets[lep_in_fj_overlap_bool]
+        fj_idx_lep = ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)
+        candidatefj = ak.firsts(good_fatjets[fj_idx_lep])
+        
+        """ Baseline weight """
+        self.weights.add("genweight", events.genWeight)
+        self.weights.add(
+            "L1Prefiring", events.L1PreFiringWeight.Nom, events.L1PreFiringWeight.Up, events.L1PreFiringWeight.Dn
+        )
+        add_pileup_weight(self.weights, self._year, "", nPU=ak.to_numpy(events.Pileup.nPU))
+        add_VJets_kFactors(self.weights, events.GenPart, dataset)
+
+        """ Baseline selection """
         # define selections for different channels
         for channel in self._channels:
-            selection = PackedSelection()
-            selection.add("fjkin", candidatefj.pt > 200)
+            selection = PackedSelection()               
             if channel == "mu":
-                selection.add("onemuon", (nmuons == 1) & (nelectrons == 0) & (n_loose_taus_mu == 0))
-                selection.add("muonkin", (candidatelep.pt > 27.0) & abs(candidatelep.eta < 2.4))
+                add_lepton_weight(self.weights, candidatelep, self._year, "muon")
+                selection.add("onemuon", ((n_good_muons == 1) & (n_good_electrons == 0) & (n_loose_electrons == 0) & ~ak.any(loose_muons & ~good_muons, 1)))
+                selection.add("muonkin", (candidatelep.pt > 30))
             elif channel == "ele":
-                selection.add("oneelectron", (nelectrons == 1) & (nmuons == 0) & (n_loose_taus_ele == 0))
-                selection.add("electronkin", (candidatelep.pt > 30.0) & abs(candidatelep.eta < 2.4))
+                add_lepton_weight(self.weights, candidatelep, self._year, "electron")
+                # selection.add("oneelectron", ((n_good_muons == 0) & (n_loose_muons == 0) & (n_good_electrons == 1) & ~ak.any(loose_electrons & ~good_electrons, 1)))
+                # selection.add("electronkin", (candidatelep.pt > 40))
+            selection.add("fatjetKin", candidatefj.pt > 0)     
 
             """ Define other variables to save """
             out[channel]["fj_pt"] = pad_val_nevents(candidatefj.pt)
@@ -155,12 +221,22 @@ class TriggerEfficienciesProcessor(ProcessorABC):
                 matchedH_pt = ak.zeros_like(candidatefj.pt)
             out[channel]["higgspt"] = pad_val_nevents(matchedH_pt)
 
+            # store the per channel weight
+            # if len(self.weights_per_ch[channel]) > 0:
+            #     out[channel][f"weight_{channel}"] = self.weights.partial_weight(self.weights_per_ch[channel])
+       
+            for key in self.weights._weights.keys():
+                # store the individual weights (ONLY for now until we debug)
+                out[channel][f"weight_{key}"] = self.weights.partial_weight([key])
+                if channel in self.weights_per_ch.keys():
+                    self.weights_per_ch[channel].append(key)
+            
             # use column accumulators
             out[channel] = {
                 key: column_accumulator(value[selection.all(*selection.names)]) for (key, value) in out[channel].items()
             }
 
-        return {self._year: {dataset: {"nevents": n_events, "skimmed_events": out}}}
+        return {self._year: {dataset: {"nevents": nevents, "skimmed_events": out}}}
 
     def postprocess(self, accumulator):
         for year, datasets in accumulator.items():
@@ -172,15 +248,6 @@ class TriggerEfficienciesProcessor(ProcessorABC):
 
         return accumulator
 
-        # now save pandas dataframes
-        for ch in self._channels:  # creating directories for each channel
-            if not os.path.exists(self._output_location + ch):
-                os.makedirs(self._output_location + ch)
-            if not os.path.exists(self._output_location + ch + "/parquet"):
-                os.makedirs(self._output_location + ch + "/parquet")
 
-        # return dictionary with cutflows
-        return {dataset: {"mc": isMC, self._year: {"sumgenweight": sumgenweight, "cutflows": self.cutflows}}}
 
-    def postprocess(self, accumulator):
-        return accumulator
+        
