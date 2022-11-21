@@ -37,7 +37,7 @@ def match_HWW(genparticles, candidatefj):
     higgs = getParticles(genparticles, 25)   # genparticles is the full set... this function selects Higgs particles
     is_hWW = ak.all(abs(higgs.children.pdgId) == 24, axis=2)    # W~24 so we get H->WW (limitation: only picking one W and assumes the other will be there)
 
-    higgs = higgs[is_hWW][:,:1]
+    higgs = higgs[is_hWW]
     higgs_wstar = higgs.children[ak.argmin(higgs.children.mass, axis=2, keepdims=True)]
     higgs_w = higgs.children[ak.argmax(higgs.children.mass, axis=2, keepdims=True)]
 
@@ -65,8 +65,8 @@ def match_HWW(genparticles, candidatefj):
     # this is gonna come to bite us
     fj = ak.singletons(candidatefj)
     matchedH = fj.nearest(higgs, axis=1, threshold=0.8)    # choose higgs closest to fj
-    matchedW = fj.nearest(higgs_w, axis=1, threshold=0.8)  # choose W closest to fj
-    matchedWstar = fj.nearest(higgs_wstar, axis=1, threshold=0.8)  # choose Wstar closest to fj
+    matchedW = fj.nearest(ak.firsts(higgs_w), axis=1, threshold=0.8)  # choose W closest to fj
+    matchedWstar = fj.nearest(ak.firsts(higgs_wstar), axis=1, threshold=0.8)  # choose Wstar closest to fj
 
     # 1 (H only), 4(W), 6(W star), 9(H, W and Wstar)
     hWW_matched = (
@@ -84,20 +84,25 @@ def match_HWW(genparticles, candidatefj):
     leptons = leptons[dr_fj_leptons < 0.8]
 
     # leptons coming from W or W*
-    leptons_mass = leptons.distinctParent.mass[:,:1]   # # TODO: why need firsts
-    higgs_w_mass = higgs_w.mass[(leptons.pt > 0)[:,:1]]
-    higgs_wstar_mass = higgs_wstar.mass[(leptons.pt > 0)[:,:1]]
+    leptons_mass = leptons.distinctParent.mass[:,:1]
+    hfirsts = ak.firsts(higgs_w)
 
+    #higgs_w_mass = higgs_w.mass[(leptons.pt > 0)]
+    higgs_w_mass = ak.firsts(higgs_w.mass)[ak.firsts(leptons.pt > 0)]
+    # higgs_wstar_mass = ak.firsts(higgs_wstar.mass[(leptons.pt > 0)])
+    higgs_wstar_mass = ak.firsts(higgs_wstar.mass)[ak.firsts(leptons.pt > 0)]
+    
     iswlepton = (leptons_mass == higgs_w_mass)
     iswstarlepton = (leptons_mass == higgs_wstar_mass)
+
     genVars = {
         "hWW_flavor": hWW_flavor,
         "hWW_matched": hWW_matched,
         "hWW_nprongs": hWW_nprongs,
         "matchedH": matchedH,
         "iswlepton": iswlepton,  # truth info, higher mass is normally onshell
-        "iswstarlepton": iswstarlepton}  # truth info, lower mass is normally offshell
-
+        "iswstarlepton": iswstarlepton  # truth info, lower mass is normally offshell
+    }
     return genVars
 
 def to_label(array: ak.Array) -> ak.Array:
