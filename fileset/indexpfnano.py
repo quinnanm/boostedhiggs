@@ -91,10 +91,12 @@ folders_to_index = [
     "/store/user/lpcpfnano/cmantill/v2_2/2018/DYJetsToLL",
 
     "/store/user/lpcpfnano/jdickins/v2_2/2016/Diboson/",
+    "/store/user/lpcpfnano/jdickins/v2_2/2016APV/Diboson/",
     "/store/user/lpcpfnano/jdickins/v2_2/2017/Diboson/",
     "/store/user/lpcpfnano/jdickins/v2_2/2018/Diboson/",
 
     "/store/user/lpcpfnano/jdickins/v2_2/2016/DibosonNLO/",
+    "/store/user/lpcpfnano/jdickins/v2_2/2016APV/DibosonNLO/",
     "/store/user/lpcpfnano/jdickins/v2_2/2017/DibosonNLO/",
     "/store/user/lpcpfnano/jdickins/v2_2/2018/DibosonNLO/",
 
