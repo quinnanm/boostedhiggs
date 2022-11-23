@@ -41,7 +41,14 @@ def plot_stacked_hists(year, ch, odir, logy=True, add_data=True, add_soverb=True
     """
 
     # load the hists
-    with open(f"{odir}/{ch}_hists.pkl", "rb") as f:
+    if "tagger" in odir:
+        extra = "_tagger"
+        add_soverb = False
+        add_data = False
+    else:
+        extra = ""
+        
+    with open(f"{odir}/{ch}_hists{extra}.pkl", "rb") as f:
         hists = pkl.load(f)
         f.close()
 
@@ -385,6 +392,8 @@ def main(args):
 if __name__ == "__main__":
     # e.g.
     # run locally as: python plot_stacked_hists.py --year 2017 --odir Nov15 --channels ele
+    # run locally as: python plot_stacked_hists.py --year 2017 --odir Nov23tagger --channels ele,mu
+
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--year", dest="year", required=True, choices=["2016", "2016APV", "2017", "2018", "Run2"], help="year"
