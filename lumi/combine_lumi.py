@@ -21,21 +21,24 @@ that holds a dictionary with "key=dataset_name" and "value=lumi_set" which has t
 def main():
     
     # load the pkl outfiles
-    dir_ = "/eos/uscms/store/user/fmokhtar/boostedhiggs/lumi_2017/"
+    year = "2016APV"
+    dir_ = f"/eos/uscms/store/user/fmokhtar/boostedhiggs/lumi_{year}/"
 
-    datasets = [
-        "SingleElectron_Run2017B", 
-        "SingleElectron_Run2017D", 
-        "SingleElectron_Run2017F", 
-        "SingleMuon_Run2017C", 
-        "SingleMuon_Run2017E",
-        "SingleElectron_Run2017C", 
-        "SingleElectron_Run2017E", 
-        "SingleMuon_Run2017B", 
-        "SingleMuon_Run2017D", 
-        "SingleMuon_Run2017F"
-    ]
+    # datasets = [
+    #     "SingleElectron_Run2017B", 
+    #     "SingleElectron_Run2017D", 
+    #     "SingleElectron_Run2017F", 
+    #     "SingleMuon_Run2017C", 
+    #     "SingleMuon_Run2017E",
+    #     "SingleElectron_Run2017C", 
+    #     "SingleElectron_Run2017E", 
+    #     "SingleMuon_Run2017B", 
+    #     "SingleMuon_Run2017D", 
+    #     "SingleMuon_Run2017F"
+    # ]
     
+    datasets = os.listdir(dir_)
+
     out_all = {}
     for dataset in datasets:
         print(dataset)
@@ -46,7 +49,7 @@ def main():
 
             # you can load the output!
             with open(pkl_file, 'rb') as f:
-                out = pickle.load(f)[dataset]["2017"]["lumilist"]
+                out = pickle.load(f)[dataset][year+"APV"]["lumilist"]
 
             if i==0:
                 out_all[dataset] = out

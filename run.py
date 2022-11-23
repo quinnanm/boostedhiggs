@@ -78,7 +78,7 @@ def main(args):
 
     elif args.processor == 'lumi':        
         from boostedhiggs.lumi_processor import LumiProcessor
-        p = LumiProcessor(year=args.year, yearmod=yearmod, 
+        p = LumiProcessor(year=args.year,
                           output_location='./outfiles' + job_name)
                          
     else:
@@ -145,7 +145,8 @@ if __name__ == "__main__":
     # e.g.
     # run locally on lpc as: python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --json samples_pfnano.json
     # run locally on lpc as: python run.py --year 2017 --processor lumi --pfnano --n 1 --starti 0 --json samples_pfnano_data.json
-
+    # run locally on lpc as: python run.py --year 2017 --processor trigger --pfnano --n 45 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele
+    
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',        dest='year',           default='2017',
                         help="year",                                type=str)
