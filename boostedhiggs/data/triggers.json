@@ -79,7 +79,8 @@
 	],
         "MuonEG": [
             "HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ",
-	    "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ"
+	    "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ",
+	    "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL"
 	]
     },
     "2018": {
@@ -104,7 +105,8 @@
         ],
 	"SingleMuon" : [
             "HLT_IsoMu24",
-	    "HLT_Mu50"
+	    "HLT_Mu50",
+	    "HLT_IsoMu27"
 	],
 	"DoubleMuon" : [
             "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8",
@@ -112,7 +114,7 @@
 	],
 	"EGamma" : [
 	    "HLT_Ele32_WPTight_Gsf",
-	    "HLT_Ele35_WPTight_Gsf".
+	    "HLT_Ele35_WPTight_Gsf",
 	    "LT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL",
 	],
 	"MuonEG" : [
