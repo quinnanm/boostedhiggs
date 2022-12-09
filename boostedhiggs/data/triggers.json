@@ -19,6 +19,29 @@
             "PFHT650_WideJetMJJ950DEtaJJ1p5",
             "PFHT650_WideJetMJJ900DEtaJJ1p5",
             "PFJet450"
+	],
+	"SingleMuon" : [
+            "HLT_IsoMu24",
+	    "HLT_IsoTkMu24",
+	],
+	"SingleElectron": [
+            "HLT_Ele27_WPTight_Gsf",
+            "HLT_Ele25_eta2p1_WPTight_Gsf"
+	],
+	"DoubleMuon" : [
+	    "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL",
+            "HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL",
+	    "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ",
+	    "HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ"
+	],
+	"DoubleEG" : [
+            "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ "
+	],
+	"MuonEG" : [
+            "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL",
+	    "HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL",
+	    "HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ",
+	    "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ",
 	]
     },
     "2017": {
@@ -40,7 +63,24 @@
             "AK8PFHT800_TrimMass50",
             "PFJet500",
             "AK8PFJet500"
-        ]
+        ],
+	"SingleMuon" : [
+            "HLT_IsoMu27"
+	],
+	"SingleElectron": [
+            "HLT_Ele35_WPTight_Gsf"
+	],
+	"DoubleMuon" : [
+	    "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ",
+	    "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8"
+	],
+	"DoubleEG" : [
+	    "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL",
+	],
+        "MuonEG": [
+            "HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ",
+	    "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ"
+	]
     },
     "2018": {
         "ele": [
@@ -61,6 +101,23 @@
             "AK8PFHT800_TrimMass50",
             "PFJet500",
             "AK8PFJet500"
-        ]
+        ],
+	"SingleMuon" : [
+            "HLT_IsoMu24",
+	    "HLT_Mu50"
+	],
+	"DoubleMuon" : [
+            "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8",
+	    "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8"
+	],
+	"EGamma" : [
+	    "HLT_Ele32_WPTight_Gsf",
+	    "HLT_Ele35_WPTight_Gsf".
+	    "LT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL",
+	],
+	"MuonEG" : [
+            "HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ",
+	    "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ"
+	]
     }
 }
