@@ -84,7 +84,7 @@ class vhProcessor(processor.ProcessorABC):
         self,
         year="2017", #note that this has been hardcoded!! need to be careful of the year or change to make it adapt/year
         yearmod="",
-        channels=["ele", "mu"],
+        #channels=["ele", "mu"],
         output_location="./outfiles/",
         inference=False,
         apply_trigger=True,
@@ -92,13 +92,14 @@ class vhProcessor(processor.ProcessorABC):
 
         self._year = year
         self._yearmod = yearmod
-        self._channels = channels
+        #self._channels = channels
         self._output_location = output_location
 
         # trigger paths
         with importlib.resources.path("boostedhiggs.data", "triggers.json") as path:
             with open(path, "r") as f:
                 self._HLTs = json.load(f)[self._year]
+                print('self.HLTs', self._HLTs)
 
         # apply trigger in selection?
         self.apply_trigger = apply_trigger
@@ -112,15 +113,18 @@ class vhProcessor(processor.ProcessorABC):
         self._btagWPs = btagWPs["deepJet"][year + yearmod]
         # self._btagSF = BTagCorrector("M", "deepJet", year, yearmod)
 
-        if year == "2018":
-            self.dataset_per_ch = {
-                "ele": "EGamma",
-                "mu": "SingleMuon",
+        if year == "2018":  #TO DO _ CHANGE PER dataset - try first using Cristina's dataset and no channels
+            #self.dataset_per_ch = {
+            self.dataset = {
+	        "DoubleEG",
+		"DoubleMu",
+		"MuonEG"
             }
-        else:
-            self.dataset_per_ch = {
-                "ele": "SingleElectron",
-                "mu": "SingleMuon",
+        else: #fix this to add in single muon and electron and also one is missing in 2018
+            self.dataset = {
+	       "DoubleEG",
+	       "DoubleMu",
+	       "MuonEG"
             }
 
         # do inference
@@ -148,15 +152,15 @@ class vhProcessor(processor.ProcessorABC):
 
     def add_selection(self, name: str, sel: np.ndarray, channel: list = None):
         """Adds selection to PackedSelection object and the cutflow dictionary"""
-        channels = channel if channel else self._channels
-        for ch in channels:
-            self.selections[ch].add(name, sel)
-            selection_ch = self.selections[ch].all(*self.selections[ch].names)
-            if self.isMC:
-                weight = self.weights.partial_weight(self.weights_per_ch[ch] + self.common_weights)
-                self.cutflows[ch][name] = float(weight[selection_ch].sum())
-            else:
-                self.cutflows[ch][name] = np.sum(selection_ch)
+        #channels = channel if channel else self._channels
+        #for ch in channels:
+        self.selections.add(name, sel)
+        selection = self.selections.all(*self.selections.names)
+        if self.isMC:
+            weight = self.weights.partial_weight(self.weights + self.common_weights)
+            self.cutflows[name] = float(weight[selection].sum())
+        else:
+            self.cutflows[name] = np.sum(selection)
 
     def process(self, events: ak.Array):
         """Returns skimmed events which pass preselection cuts and with the branches listed in self._skimvars"""
@@ -165,31 +169,30 @@ class vhProcessor(processor.ProcessorABC):
 
         self.isMC = hasattr(events, "genWeight")
         self.weights = Weights(nevents, storeIndividual=True)
-        self.weights_per_ch = {}
+        self.weights = {}
         self.selections = {}
         self.cutflows = {}
-        for ch in self._channels:
-            self.weights_per_ch[ch] = []
-            self.selections[ch] = PackedSelection()
-            self.cutflows[ch] = {}
+        #for ch in self._channels:
+        self.weights = []
+        self.selections = PackedSelection()
+        self.cutflows = {}
 
         sumgenweight = ak.sum(events.genWeight) if self.isMC else 0
 
-        # trigger
-        trigger = {}
-        trigger_noiso = {}
-        trigger_iso = {}
-        for ch in self._channels:
-            trigger[ch] = np.zeros(nevents, dtype="bool")
-            trigger_noiso[ch] = np.zeros(nevents, dtype="bool")
-            trigger_iso[ch] = np.zeros(nevents, dtype="bool")
-            for t in self._HLTs[ch]:
+#******************TRIGGER******************************************
+        # trigger            Def: self._HLTs = json.load(f)[self._year]
+        trigger = {}          #to do - make a dictionary looping over triggers, put actual sel logic below
+        #for ch in self._channels:
+        trigger = np.zeros(nevents, dtype="bool")
+        vhTriggerList = ['DoubleMuon', 'DoubleEG', 'MuonEG', 'ele', 'mu'] #for testing, not full list add also EGAmma for 2018
+        for trig in vhTriggerList:
+            print('trig', trig)
+            for t in self._HLTs[trig]:
+                print('t', t)
                 if t in events.HLT.fields:
-                    if "Iso" in t or "WPTight_Gsf" in t:
-                        trigger_iso[ch] = trigger_iso[ch] | events.HLT[t]
-                    else:
-                        trigger_noiso[ch] = trigger_noiso[ch] | events.HLT[t]
-                    trigger[ch] = trigger[ch] | events.HLT[t]
+                    trigger = trigger | events.HLT[t]
+                    print('trigger', trigger)
+#******************TRIGGER******************************************
 
         # metfilters
         metfilters = np.ones(nevents, dtype="bool")
@@ -207,8 +210,6 @@ class vhProcessor(processor.ProcessorABC):
         )
         n_loose_taus_mu = ak.sum(loose_taus_mu, axis=1)
         n_loose_taus_ele = ak.sum(loose_taus_ele, axis=1)
-
-
 
         #add flavor tag to muons and electrons
         good_muons = ak.with_field(events.Muon,0, 'flavor')
@@ -281,7 +282,6 @@ class vhProcessor(processor.ProcessorABC):
         ZLepMass = ak.to_numpy(ak.fill_none(ak.pad_none(ZLeptonMass, desired_length), 0))
 
         remainingLeptons = minThreeLeptons[ (ak.local_index(minThreeLeptons)!= ak.any(new1, axis=1))& (ak.local_index(minThreeLeptons) != ak.any(new2, axis=1))]                   
-
         candidatelep = ak.firsts(remainingLeptons)  # pick highest pt 
 
         candidatelep_p4 = build_p4(candidatelep)  # build p4 for candidate lepton
@@ -383,65 +383,54 @@ class vhProcessor(processor.ProcessorABC):
 
         # output tuple variables
         variables = {
-            "lep": {
-                "fj_pt": candidatefj.pt,
-                "fj_msoftdrop": candidatefj.msdcorr,
-                "fj_bjets_ophem": ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1),
-                "lep_pt": candidatelep.pt,
-                "lep_isolation": lep_reliso,
-                "lep_misolation": lep_miso,
-                "lep_fj_m": lep_fj_m,
-                "lep_fj_dr": lep_fj_dr,
-                "lep_met_mt": mt_lep_met,
-                "met_fj_dphi": met_fjlep_dphi,
-            },
-            "ele": {
-                #"ele_highPtId": ele_highPtId,
+                #"fj_pt": candidatefj.pt,
+                #"fj_msoftdrop": candidatefj.msdcorr,
+                #"fj_bjets_ophem": ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1),
+                #"lep_pt": candidatelep.pt,
+               # "lep_isolation": lep_reliso,
+               # "lep_misolation": lep_miso,
+               # "lep_fj_m": lep_fj_m,
+               # "lep_fj_dr": lep_fj_dr,
+               # "lep_met_mt": mt_lep_met,
+               # "met_fj_dphi": met_fjlep_dphi,
 		"Zmass": ZLepMass, #for now put this in the electron channel, will need to separate by channel
-            },
-            "mu": {
-                "mu_mvaId": mu_mvaId,
-                #"mu_highPtId": mu_highPtId,
-            },
-            "common": {
-                "met": met.pt,
-                "ht": ht,
-                "nfj": n_fatjets,
-                "nj": n_jets_outside_ak8,
-                "deta": deta,
-                "mjj": mjj,
-            },
+                #"met": met.pt,
+               # "ht": ht,
+                #"nfj": n_fatjets,
+                #"nj": n_jets_outside_ak8,
+                #"deta": deta,
+                #"mjj": mjj,
         }
 
         # gen matching for signal
-        if (("HToWW" or "HWW") in dataset) and self.isMC:
-            matchHWW = match_HWW(events.GenPart, candidatefj)
-            variables["lep"]["gen_Hpt"] = ak.firsts(matchHWW["matchedH"].pt)
-            variables["lep"]["gen_Hnprongs"] = matchHWW["hWW_nprongs"]
-            variables["lep"]["gen_iswlepton"] = matchHWW["iswlepton"]
-            variables["lep"]["gen_iswstarlepton"] = matchHWW["iswstarlepton"]
+    #    if (("HToWW" or "HWW") in dataset) and self.isMC:
+    #        matchHWW = match_HWW(events.GenPart, candidatefj)
+    #        variables["lep"]["gen_Hpt"] = ak.firsts(matchHWW["matchedH"].pt)
+    #        variables["lep"]["gen_Hnprongs"] = matchHWW["hWW_nprongs"]
+    #        variables["lep"]["gen_iswlepton"] = matchHWW["iswlepton"]
+    #        variables["lep"]["gen_iswstarlepton"] = matchHWW["iswstarlepton"]
 
         # gen matching for background
-        if ("WJets" in dataset) or ("ZJets" in dataset) and self.isMC:
-            matchV = match_V(events.GenPart, candidatefj)
-            if "WJetsToLNu" in dataset:
-                variables["lep"]["gen_isVlep"] = matchV["gen_isVlep"]
-            if ("WJetsToQQ" in dataset) or ("ZJetsToQQ" in dataset):
-                variables["lep"]["gen_isVqq"] = matchV["gen_isVqq"]
-        if ("TT" in dataset) and self.isMC:
-            matchT = match_Top(events.GenPart, candidatefj)
-            variables["lep"]["gen_isTop"] = matchT["gen_isTopbmerged"]
-            variables["lep"]["gen_isToplep"] = matchT["gen_isToplep"]
-            variables["lep"]["gen_isTopqq"] = matchT["gen_isTopqq"]
+    #    if ("WJets" in dataset) or ("ZJets" in dataset) and self.isMC:
+    #        matchV = match_V(events.GenPart, candidatefj)
+    #        if "WJetsToLNu" in dataset:
+    #            variables["lep"]["gen_isVlep"] = matchV["gen_isVlep"]
+    #        if ("WJetsToQQ" in dataset) or ("ZJetsToQQ" in dataset):
+    #            variables["lep"]["gen_isVqq"] = matchV["gen_isVqq"]
+    #    if ("TT" in dataset) and self.isMC:
+    #        matchT = match_Top(events.GenPart, candidatefj)
+    #        variables["lep"]["gen_isTop"] = matchT["gen_isTopbmerged"]
+    #        variables["lep"]["gen_isToplep"] = matchT["gen_isToplep"]
+    #        variables["lep"]["gen_isTopqq"] = matchT["gen_isTopqq"]
 
         # if trigger is not applied then save the trigger variables
-        if not self.apply_trigger:
-            variables["lep"]["cut_trigger_iso"] = trigger_iso[ch]
-            variables["lep"]["cut_trigger_noniso"] = trigger_noiso[ch]
+  #      if not self.apply_trigger:
+  #          variables["lep"]["cut_trigger_iso"] = trigger_iso[ch]
+  #          variables["lep"]["cut_trigger_noniso"] = trigger_noiso[ch]
 
         # let's save the hem veto as a cut for now
-        if self._year == "2018":
-            variables["common"]["hem_cleaning"] = hem_cleaning
+  #      if self._year == "2018":
+  #          variables["common"]["hem_cleaning"] = hem_cleaning
 
         """
         Weights
@@ -497,37 +486,26 @@ class vhProcessor(processor.ProcessorABC):
 
             add_lepton_weight(self.weights, candidatelep, self._year + self._yearmod, "muon")
             add_lepton_weight(self.weights, candidatelep, self._year + self._yearmod, "electron")
-
             # self._btagSF.addBtagWeight(bjets_away_lepfj, self.weights, "lep")
-
             add_VJets_kFactors(self.weights, events.GenPart, dataset)
 
             # store the final common weight
-            variables["common"]["weight"] = self.weights.partial_weight(self.common_weights)
-
-            for key in self.weights._weights.keys():
+            #variables["common"]["weight"] = self.weights.partial_weight(self.common_weights)
+            variables["weight"] = self.weights.partial_weight(self.common_weights)
+                                       #Def above of: self.common_weights = ["genweight", "L1Prefiring", "pileup"]
+            #for key in self.weights._weights.keys():
                 # ignore btagSFlight/bc for now
-                if "btagSFlight" in key or "btagSFbc" in key:
-                    continue
-
-                if "muon" in key:
-                    varkey = "mu"
-                elif "electron" in key:
-                    varkey = "ele"
-                elif "lep" in key:
-                    varkey = "lep"
-                else:
-                    varkey = "common"
+                #if "btagSFlight" in key or "btagSFbc" in key:
+                 #   continue
+                #if "muon" in key:
+                 #   varkey = "mu"
                 # store the individual weights (ONLY for now until we debug)
-                variables[varkey][f"weight_{key}"] = self.weights.partial_weight([key])
-                if varkey in self.weights_per_ch.keys():
-                    self.weights_per_ch[varkey].append(key)
+            #    variables[varkey][f"weight_{key}"] = self.weights.partial_weight([key])
+                #if varkey in self.weights_per_ch.keys():
+                 #   self.weights_per_ch[varkey].append(key)
 
-            # store the per channel weight
-            for ch in self._channels:
-                if len(self.weights_per_ch[ch]) > 0:
-                    variables[ch][f"weight_{ch}"] = self.weights.partial_weight(self.weights_per_ch[ch])
-
+            if len(self.weights) > 0:
+                variables[f"weight"] = self.weights.partial_weight(self.weights)
             # NOTE: to add variations:
             # for var in self.weights.variations:
             #     variables["common"][f"weight_{key}"] = self.weights.weight(key)
@@ -537,8 +515,7 @@ class vhProcessor(processor.ProcessorABC):
         """
         self.add_selection("all", np.ones(nevents, dtype="bool"))
         if self.apply_trigger:
-            for ch in self._channels:
-                self.add_selection("trigger", trigger[ch], [ch])
+            self.add_selection("trigger", trigger)
         self.add_selection("metfilters", metfilters)
         self.add_selection(name="ht", sel=(ht > 200))
         self.add_selection(
@@ -548,9 +525,8 @@ class vhProcessor(processor.ProcessorABC):
         self.add_selection(
             name="ThreeOrMoreLeptons", sel=(minThreeLeptonsMask == True),
         )
-        self.add_selection(name="leptonKin", sel=(candidatelep.pt > 30), channel=["mu"])
-        self.add_selection(name="leptonKin", sel=(candidatelep.pt > 40), channel=["ele"])
-
+        self.add_selection(name="leptonKin", sel=(candidatelep.pt > 30))
+        #self.add_selection(name="leptonKin", sel=(candidatelep.pt > 40), channel=["ele"]) #no distinction b/t e and mu
         self.add_selection(name="fatjetKin", sel=candidatefj.pt > 200)
         self.add_selection(name="leptonInJet", sel=(lep_fj_dr < 0.8))
 
@@ -560,62 +536,57 @@ class vhProcessor(processor.ProcessorABC):
         # initialize pandas dataframe
         output = {}
 
-        for ch in self._channels:
-            fill_output = True
+        #for ch in self._channels:
+        fill_output = True
             # for data, only fill output for the dataset needed
-            if not self.isMC and self.dataset_per_ch[ch] not in dataset:
-                fill_output = False
+        if not self.isMC and self.dataset not in dataset:
+            fill_output = False
 
-            selection_ch = self.selections[ch].all(*self.selections[ch].names)
+        selection = self.selections.all(*self.selections.names)
 
             # only fill output for that channel if the selections yield any events
-            if np.sum(selection_ch) <= 0:
-                fill_output = False
+        if np.sum(selection) <= 0:
+            fill_output = False
 
-            if fill_output:
-                keys = ["common", ch]
-                if ch == "ele" or ch == "mu":
-                    keys += ["lep"]
-
-                out = {}
-                for key in keys:
-                    for var, item in variables[key].items():
-                        # pad all the variables that are not a cut with -1
-                        pad_item = item if ("cut" in var or "weight" in var) else pad_val(item, -1)
+        if fill_output:
+            out = {}
+            #for key in keys:
+            for var, item in variables.items():
+                # pad all the variables that are not a cut with -1
+                pad_item = item if ("cut" in var or "weight" in var) else pad_val(item, -1)
                         # fill out dictionary
-                        out[var] = item
-
+                out[var] = item
                 # fill the output dictionary after selections
-                output[ch] = {key: value[selection_ch] for (key, value) in out.items()}
+            output = {key: value[selection] for (key, value) in out.items()}
 
-                # fill inference
-                if self.inference:
-                    print("pre-inference")
-                    pnet_vars = runInferenceTriton(
-                        self.tagger_resources_path, events[selection_ch], fj_idx_lep[selection_ch]
-                    )
-                    print("post-inference")
-                    print(pnet_vars)
+            # fill inference
+            if self.inference:
+                print("pre-inference")
+                pnet_vars = runInferenceTriton(
+                    self.tagger_resources_path, events[selection], fj_idx_lep[selection]
+                )
+                print("post-inference")
+                print(pnet_vars)
 
-                    output[ch] = {**output[ch], **{key: value for (key, value) in pnet_vars.items()}}
-            else:
-                output[ch] = {}
+                output = {**output, **{key: value for (key, value) in pnet_vars.items()}}
+        else:
+            output = {}
 
-            # convert arrays to pandas
-            if not isinstance(output[ch], pd.DataFrame):
-                output[ch] = self.ak_to_pandas(output[ch])
+        # convert arrays to pandas
+        if not isinstance(output, pd.DataFrame):
+            output = self.ak_to_pandas(output)
 
         # now save pandas dataframes
         fname = events.behavior["__events_factory__"]._partition_key.replace("/", "_")
         fname = "condor_" + fname
 
-        for ch in self._channels:  # creating directories for each channel
-            if not os.path.exists(self._output_location + ch):
-                os.makedirs(self._output_location + ch)
-            if not os.path.exists(self._output_location + ch + "/parquet"):
-                os.makedirs(self._output_location + ch + "/parquet")
+        #for ch in self._channels:  # creating directories for each channel
+        if not os.path.exists(self._output_location):
+            os.makedirs(self._output_location)
+        if not os.path.exists(self._output_location + "/parquet"):
+            os.makedirs(self._output_location + "/parquet")
 
-            self.save_dfs_parquet(fname, output[ch], ch)
+        self.save_dfs_parquet(fname, output)
 
         # return dictionary with cutflows
         return {dataset: {"mc": self.isMC, self._year: {"sumgenweight": sumgenweight, "cutflows": self.cutflows}}}
