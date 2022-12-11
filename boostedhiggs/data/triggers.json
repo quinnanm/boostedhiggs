@@ -110,7 +110,6 @@
 	],
 	"DoubleMuon" : [
             "Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8",
-	    "Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8"
 	],
 	"EGamma" : [
 	    "Ele32_WPTight_Gsf",
