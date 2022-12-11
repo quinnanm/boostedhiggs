@@ -82,10 +82,7 @@ def main(args):
             p = vhProcessor(year='2016', yearmod='APV', 
                              inference=args.inference, output_location='./outfiles' + job_name)
         else:
-            p = vhProcessor(year=args.year, inference=args.inference,
-                             output_location='./outfiles' + job_name)
-
-
+            p = vhProcessor(year=args.year, inference=args.inference, output_location='./outfiles' + job_name)
     else:
         from boostedhiggs.trigger_efficiencies_processor import TriggerEfficienciesProcessor
         p = TriggerEfficienciesProcessor()  # year=args.year)
@@ -143,7 +140,7 @@ def main(args):
         data.to_parquet('./outfiles/' + job_name + '_' + '.parquet')
 
             # remove old parquet files
-        os.system('rm -rf ./outfiles/' + job_name + ch)
+        os.system('rm -rf ./outfiles/' + job_name)
 
 
 if __name__ == "__main__":
