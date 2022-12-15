@@ -156,7 +156,7 @@ class vhProcessor(processor.ProcessorABC):
         #for ch in channels:
         self.selections.add(name, sel)
         selection = self.selections.all(*self.selections.names)
-        print('selection', selection)
+        #print('selection', selection)
         if self.isMC:
             #weight = self.weights.partial_weight(self.weights + self.common_weights)
             #weight = self.weights.partial_weight(self.weights_vh + self.common_weights)
@@ -167,14 +167,13 @@ class vhProcessor(processor.ProcessorABC):
 
     def process(self, events: ak.Array):
         """Returns skimmed events which pass preselection cuts and with the branches listed in self._skimvars"""
-        print('got an event')
         dataset = events.metadata["dataset"]
         nevents = len(events)
-        print('nevents', nevents)
+        #print('nevents', nevents)
 
         self.isMC = hasattr(events, "genWeight")
         self.weights = Weights(nevents, storeIndividual=True)
-        print('self.weights', self.weights)
+        #print('self.weights', self.weights)
         #self.weights_vh = []
         self.selections = {}
         self.cutflows = {}
@@ -192,17 +191,39 @@ class vhProcessor(processor.ProcessorABC):
         #vhTriggerList = ['DoubleMuon', 'DoubleEG', 'MuonEG', 'ele', 'mu'] #for testing, not full list add also EGAmma for 2018
         vhTriggerList = ['ele', 'mu', 'DoubleMuon'] #for testing, not full list add also EGAmma for 2018
         for trig in vhTriggerList:
-            print('trig', trig)
-            print('self._HLTs[trig]', self._HLTs[trig])
+         #   print('trig', trig)
+          #  print('self._HLTs[trig]', self._HLTs[trig])
             trigger[trig] = np.zeros(nevents,dtype="bool")
             for t in self._HLTs[trig]:
-                print('t', t)
+                #print('t', t)
                 if t in events.HLT.fields:
                     trigger[trig] = trigger[trig] | events.HLT[t]
-                    print('trigger[trig]', trigger[trig])
-                    print('try a few events', ak.to_list(trigger[trig])[0:5])
+                    #print('trigger[trig]', trigger[trig])
+                    #print('try a few events', ak.to_list(trigger[trig])[0:10])
                     #print('length of trigger', len(trigger))
-        print('trigger - is this a dictionary', trigger)
+#        print('trigger - is this a dictionary', trigger)
+
+
+	#try putting trigger logic here and pass just rue or false to add selection
+
+        triggerDecision = {}
+        triggerDecision = np.ones(nevents, dtype = "bool")
+        
+        triggerDecision = trigger['ele'] 
+        print('triggerDecision', ak.to_list(triggerDecision)[0:10])
+
+        triggerDecision = trigger['mu'] 
+        print('triggerDecisionMu', ak.to_list(triggerDecision)[0:10])
+
+
+        triggerDecision = trigger['ele'] & ~trigger['mu']
+        print('triggerDecisionMuFinal', ak.to_list(triggerDecision)[0:10])
+
+        print('this is annoying')
+
+        print('this is annoying')
+
+
 #******************TRIGGER******************************************
 
         # metfilters
@@ -290,9 +311,8 @@ class vhProcessor(processor.ProcessorABC):
         desired_length = np.max(ak.num(ZLeptonMass))
         ZLepMass = ak.to_numpy(ak.fill_none(ak.pad_none(ZLeptonMass, desired_length), 0))
 
-        print('ZLepMass', ZLepMass)
         ZLepMass = ak.ravel(ZLepMass)
-        print('ZLepMass', ZLepMass)
+        #print('ZLepMass', ZLepMass)
 
         remainingLeptons = minThreeLeptons[ (ak.local_index(minThreeLeptons)!= ak.any(new1, axis=1))& (ak.local_index(minThreeLeptons) != ak.any(new2, axis=1))]                   
         candidatelep = ak.firsts(remainingLeptons)  # pick highest pt 
@@ -545,17 +565,26 @@ class vhProcessor(processor.ProcessorABC):
         
 
         if self.apply_trigger: #try first cristina's
-            print('applying trigger')
-            if ak.any(trigger['mu']) and ~ak.any(trigger['ele']):
+           # print('applying trigger')
+           # print('trigger mu', ak.to_list(trigger['mu'])[0:10])
+           # print('trigger ele', ak.to_list(trigger['ele'])[0:10])
+
+#THIS IS WRONG.................
+            if ak.any(trigger['mu']) & ~ak.any(trigger['ele']):
                 self.add_selection("trigger", trigger['mu'])
-                print('try a few events for muon trigger', ak.to_list(trigger['mu'])[0:10])
-              #  print('added trigger: trigger for electron', trigger['mu'])
+        #        print('try a few events for muon trigger', ak.to_list(trigger['mu'])[0:10])
             else:
                 self.add_selection("trigger", trigger['ele'])
-              #  print('added trigger: trigger for electron', trigger['ele'])
-            #self.add_selection("trigger", trigger['mu'])
-                print('try a few events for electron trigger', ak.to_list(trigger['ele'])[0:10])
+        #        print('try a few events for electron trigger', ak.to_list(trigger['ele'])[0:10])
 
+
+        #print('ak.any trigger mu', ak.any(trigger['mu']))
+        #print('ak.any trigger mu', (trigger['mu'], sel=True))
+        #self.add_selection("trigger", sel=trigger['mu'] = True)
+
+
+
+        print("metfilters", metfilters)
 
 
 
