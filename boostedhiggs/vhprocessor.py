@@ -200,7 +200,7 @@ class vhProcessor(processor.ProcessorABC):
                 if t in events.HLT.fields:
                     trigger[trig] = trigger[trig] | events.HLT[t]
                     print('trigger[trig]', trigger[trig])
-                    print('try a few events', ak.to_list(trigger[trig])[0:3])
+                    print('try a few events', ak.to_list(trigger[trig])[0:5])
                     #print('length of trigger', len(trigger))
         print('trigger - is this a dictionary', trigger)
 #******************TRIGGER******************************************
@@ -338,12 +338,11 @@ class vhProcessor(processor.ProcessorABC):
         # MET
         met = events.MET
 
-        print('met', met)
         mt_lep_met = np.sqrt(
             2.0 * candidatelep_p4.pt * met.pt * (ak.ones_like(met.pt) - np.cos(candidatelep_p4.delta_phi(met)))
         )
 
-        print('mt_lep_met', mt_lep_met)
+        #print('mt_lep_met', mt_lep_met)
         # delta phi MET and higgs candidate
         met_fjlep_dphi = candidatefj.delta_phi(met)
 
@@ -514,8 +513,8 @@ class vhProcessor(processor.ProcessorABC):
             #variables["common"]["weight"] = self.weights.partial_weight(self.common_weights)
             variables["weight"] = self.weights.partial_weight(self.common_weights)
                                        #Def above of: self.common_weights = ["genweight", "L1Prefiring", "pileup"]
-            for key in self.weights._weights.keys():
-                print('self.weights._weights.keys()', self.weights._weights.keys())
+            #for key in self.weights._weights.keys():
+             #   print('self.weights._weights.keys()', self.weights._weights.keys())
 
                 # ignore btagSFlight/bc for now
                 #if "btagSFlight" in key or "btagSFbc" in key:
@@ -546,14 +545,18 @@ class vhProcessor(processor.ProcessorABC):
         
 
         if self.apply_trigger: #try first cristina's
-            print('muon trigger', trigger['mu'])
-            #if trigger['mu']:
-             #   self.add_selection("trigger", trigger['mu'])
+            print('applying trigger')
+            if ak.any(trigger['mu']) and ~ak.any(trigger['ele']):
+                self.add_selection("trigger", trigger['mu'])
+                print('try a few events for muon trigger', ak.to_list(trigger['mu'])[0:10])
               #  print('added trigger: trigger for electron', trigger['mu'])
-            #else:
-             #   self.add_selection("trigger", trigger['ele'])
+            else:
+                self.add_selection("trigger", trigger['ele'])
               #  print('added trigger: trigger for electron', trigger['ele'])
-            self.add_selection("trigger", trigger['mu'])
+            #self.add_selection("trigger", trigger['mu'])
+                print('try a few events for electron trigger', ak.to_list(trigger['ele'])[0:10])
+
+
 
 
         self.add_selection("metfilters", metfilters)
@@ -583,7 +586,7 @@ class vhProcessor(processor.ProcessorABC):
             fill_output = False
 
         selection = self.selections.all(*self.selections.names)
-        print('selection', selection)
+        #print('selection', selection)
 
             # only fill output for that channel if the selections yield any events
         if np.sum(selection) <= 0:
@@ -594,27 +597,27 @@ class vhProcessor(processor.ProcessorABC):
             out = {}
           #  for key in keys:
             #for var, item in variables[key].items():
-            print('variables.items()', variables.items)
+            #print('variables.items()', variables.items)
             for var, item in variables.items():
-                print('var, item', var, item)
+                #print('var, item', var, item)
                     # pad all the variables that are not a cut with -1
                 pad_item = item if ("cut" in var or "weight" in var) else pad_val(item, -1)
                         # fill out dictionary
-                print('pad_item', pad_item)
+                #print('pad_item', pad_item)
                 out[var] = item
-                print('out[var]', out[var])
+                #print('out[var]', out[var])
                     # fill the output dictionary after selections
             output = {key: value[selection] for (key, value) in out.items()}
-            print('output', output)
+            #print('output', output)
 
             # fill inference
             if self.inference:
-                print("pre-inference")
+             #   print("pre-inference")
                 pnet_vars = runInferenceTriton(
                     self.tagger_resources_path, events[selection], fj_idx_lep[selection]
                 )
-                print("post-inference")
-                print(pnet_vars)
+              #  print("post-inference")
+               # print(pnet_vars)
 
                 output = {**output, **{key: value for (key, value) in pnet_vars.items()}}
         #else:
