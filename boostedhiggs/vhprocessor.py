@@ -124,7 +124,9 @@ class vhProcessor(processor.ProcessorABC):
             self.dataset = {
 	        "SingleElectron",
 		"SingleMuon", #use cristina's - maybe code is failing b/c of lack of weights?
-                "DoubleMu"
+                "DoubleMuon",
+		"DoubleEG",
+		"MuonEG",
             }
 
         # do inference
@@ -189,7 +191,7 @@ class vhProcessor(processor.ProcessorABC):
         #for ch in self._channels:
         #trigger = np.zeros(nevents, dtype="bool") #cristina said to move this below???
         #vhTriggerList = ['DoubleMuon', 'DoubleEG', 'MuonEG', 'ele', 'mu'] #for testing, not full list add also EGAmma for 2018
-        vhTriggerList = ['ele', 'mu', 'DoubleMuon'] #for testing, not full list add also EGAmma for 2018
+        vhTriggerList = ['ele', 'mu', 'DoubleMuon', 'MuonEG', 'DoubleEG'] #for testing, not full list add also EGAmma for 2018
         for trig in vhTriggerList:
          #   print('trig', trig)
           #  print('self._HLTs[trig]', self._HLTs[trig])
@@ -209,19 +211,25 @@ class vhProcessor(processor.ProcessorABC):
         triggerDecision = {}
         triggerDecision = np.ones(nevents, dtype = "bool")
         
-        triggerDecision = trigger['ele'] 
-        print('triggerDecision', ak.to_list(triggerDecision)[0:10])
+        #triggerDecision = trigger['ele'] 
+       # print('triggerDecision', ak.to_list(triggerDecision)[0:15])
+       # triggerDecision = trigger['mu'] 
+       # print('triggerDecisionMu', ak.to_list(triggerDecision)[0:15])
+        #triggerDecision = trigger['ele'] & ~trigger['mu']
+        #print('triggerDecisionMuFinal', ak.to_list(triggerDecision)[0:10])
+     #   triggerDecision = trigger['DoubleMuon'] 
+      #  print('triggerDecisionDoubleMuon', ak.to_list(triggerDecision)[0:15])
+      #  triggerDecision = trigger['MuonEG'] 
+      #  print('triggerDecisionMuonEG', ak.to_list(triggerDecision)[0:15])
+      #  triggerDecision = trigger['DoubleEG'] 
+      #  print('triggerDecisionDoubleEG', ak.to_list(triggerDecision)[0:15])
 
-        triggerDecision = trigger['mu'] 
-        print('triggerDecisionMu', ak.to_list(triggerDecision)[0:10])
-
-
-        triggerDecision = trigger['ele'] & ~trigger['mu']
-        print('triggerDecisionMuFinal', ak.to_list(triggerDecision)[0:10])
+        #this may be ok since we just want at least one trigger to pass; this should eliminate double counting
+        triggerDecision = trigger['ele'] | trigger['mu'] | trigger['DoubleMuon'] | trigger['DoubleEG'] | trigger['MuonEG']
+        print('triggerDecisionAs of a bunch ', ak.to_list(triggerDecision)[0:15])
 
         print('this is annoying')
 
-        print('this is annoying')
 
 
 #******************TRIGGER******************************************
@@ -562,31 +570,9 @@ class vhProcessor(processor.ProcessorABC):
         print('before any selections')
         self.add_selection("all", np.ones(nevents, dtype="bool"))
 
-        
 
-        if self.apply_trigger: #try first cristina's
-           # print('applying trigger')
-           # print('trigger mu', ak.to_list(trigger['mu'])[0:10])
-           # print('trigger ele', ak.to_list(trigger['ele'])[0:10])
-
-#THIS IS WRONG.................
-            if ak.any(trigger['mu']) & ~ak.any(trigger['ele']):
-                self.add_selection("trigger", trigger['mu'])
-        #        print('try a few events for muon trigger', ak.to_list(trigger['mu'])[0:10])
-            else:
-                self.add_selection("trigger", trigger['ele'])
-        #        print('try a few events for electron trigger', ak.to_list(trigger['ele'])[0:10])
-
-
-        #print('ak.any trigger mu', ak.any(trigger['mu']))
-        #print('ak.any trigger mu', (trigger['mu'], sel=True))
-        #self.add_selection("trigger", sel=trigger['mu'] = True)
-
-
-
-        print("metfilters", metfilters)
-
-
+        if self.apply_trigger:
+           self.add_selection("trigger", triggerDecision)
 
         self.add_selection("metfilters", metfilters)
         self.add_selection(name="ht", sel=(ht > 200))
