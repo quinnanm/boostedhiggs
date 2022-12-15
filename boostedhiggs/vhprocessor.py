@@ -123,7 +123,8 @@ class vhProcessor(processor.ProcessorABC):
         else: #fix this to add in single muon and electron and also one is missing in 2018
             self.dataset = {
 	        "SingleElectron",
-		"SingeleMuon" #use cristina's - maybe code is failing b/c of lack of weights?
+		"SingleMuon", #use cristina's - maybe code is failing b/c of lack of weights?
+                "DoubleMu"
             }
 
         # do inference
@@ -166,8 +167,10 @@ class vhProcessor(processor.ProcessorABC):
 
     def process(self, events: ak.Array):
         """Returns skimmed events which pass preselection cuts and with the branches listed in self._skimvars"""
+        print('got an event')
         dataset = events.metadata["dataset"]
         nevents = len(events)
+        print('nevents', nevents)
 
         self.isMC = hasattr(events, "genWeight")
         self.weights = Weights(nevents, storeIndividual=True)
@@ -185,14 +188,21 @@ class vhProcessor(processor.ProcessorABC):
         # trigger            Def: self._HLTs = json.load(f)[self._year]
         trigger = {}          #to do - make a dictionary looping over triggers, put actual sel logic below
         #for ch in self._channels:
-        trigger = np.zeros(nevents, dtype="bool")
+        #trigger = np.zeros(nevents, dtype="bool") #cristina said to move this below???
         #vhTriggerList = ['DoubleMuon', 'DoubleEG', 'MuonEG', 'ele', 'mu'] #for testing, not full list add also EGAmma for 2018
-        vhTriggerList = ['ele', 'mu'] #for testing, not full list add also EGAmma for 2018
+        vhTriggerList = ['ele', 'mu', 'DoubleMuon'] #for testing, not full list add also EGAmma for 2018
         for trig in vhTriggerList:
+            print('trig', trig)
+            print('self._HLTs[trig]', self._HLTs[trig])
+            trigger[trig] = np.zeros(nevents,dtype="bool")
             for t in self._HLTs[trig]:
+                print('t', t)
                 if t in events.HLT.fields:
-                    trigger = trigger | events.HLT[t]
-                 #   print('trigger', trigger)
+                    trigger[trig] = trigger[trig] | events.HLT[t]
+                    print('trigger[trig]', trigger[trig])
+                    print('try a few events', ak.to_list(trigger[trig])[0:3])
+                    #print('length of trigger', len(trigger))
+        print('trigger - is this a dictionary', trigger)
 #******************TRIGGER******************************************
 
         # metfilters
@@ -506,6 +516,7 @@ class vhProcessor(processor.ProcessorABC):
                                        #Def above of: self.common_weights = ["genweight", "L1Prefiring", "pileup"]
             for key in self.weights._weights.keys():
                 print('self.weights._weights.keys()', self.weights._weights.keys())
+
                 # ignore btagSFlight/bc for now
                 #if "btagSFlight" in key or "btagSFbc" in key:
                  #   continue
@@ -529,9 +540,22 @@ class vhProcessor(processor.ProcessorABC):
         """
         Selection and cutflows.
         """
+        print('before any selections')
         self.add_selection("all", np.ones(nevents, dtype="bool"))
-        if self.apply_trigger:
-            self.add_selection("trigger", trigger)
+
+        
+
+        if self.apply_trigger: #try first cristina's
+            print('muon trigger', trigger['mu'])
+            #if trigger['mu']:
+             #   self.add_selection("trigger", trigger['mu'])
+              #  print('added trigger: trigger for electron', trigger['mu'])
+            #else:
+             #   self.add_selection("trigger", trigger['ele'])
+              #  print('added trigger: trigger for electron', trigger['ele'])
+            self.add_selection("trigger", trigger['mu'])
+
+
         self.add_selection("metfilters", metfilters)
         self.add_selection(name="ht", sel=(ht > 200))
         self.add_selection(
