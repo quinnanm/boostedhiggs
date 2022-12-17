@@ -271,6 +271,7 @@ class vhProcessor(processor.ProcessorABC):
             & good_muons.mediumId ]
         )
         #n_good_muons = ak.sum(good_muons, axis=1)
+        #print('n_good_muons', n_good_muons)
 
         loose_electrons = (
             good_electrons[(((good_electrons.pt > 38) & (good_electrons.pfRelIso03_all < 0.25)) | (good_electrons.pt > 120))
@@ -291,8 +292,25 @@ class vhProcessor(processor.ProcessorABC):
             & (good_electrons.mvaFall17V2noIso_WP90)  ]
         )
 
+
         goodleptons = ak.concatenate([good_muons,good_electrons ], axis=1)  
         goodleptons = goodleptons[ak.argsort(goodleptons.pt, ascending=False)]  # sort by pt
+
+        #print('goodleptons', goodleptons)
+        #print('goodleptons[0].pt', goodleptons[0].pt)
+        #print('goodleptons.pt', goodleptons.pt)
+#this is for calculating trigger efficiencies
+        minOneLeptonMask = ak.num(goodleptons, axis=1) >= 1
+        minOneLepton = ak.mask(goodleptons, minOneLeptonMask[:,None])
+        #print('minOneLepton', minOneLepton)
+        #print('minOneLeptonMask', minOneLeptonMask)
+
+        #pTfirstLepton = goodleptons[0].pt
+
+        pTfirstLepton = np.ones(nevents, dtype="bool")
+        pTfirstLepton = ak.firsts(goodleptons.pt)
+        print('gets highest pT leptons pT', pTfirstLepton)
+
 
 #************************************************************************************************************
 #add this section below - get the leptons that belong to the Z, then get the other leptons - use the highest pt lepton of the latter for the candidate lepton
@@ -430,6 +448,7 @@ class vhProcessor(processor.ProcessorABC):
 	#"lep": {
 		"Zmass": ZLepMass, #for now put this in the electron channel, will need to separate by channel
 #	},
+                "lepton_pT": pTfirstLepton,
                 #"fj_pt": candidatefj.pt,
                 #"fj_msoftdrop": candidatefj.msdcorr,
                 #"fj_bjets_ophem": ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1),
@@ -570,6 +589,9 @@ class vhProcessor(processor.ProcessorABC):
         print('before any selections')
         self.add_selection("all", np.ones(nevents, dtype="bool"))
 
+        self.add_selection(
+            name="OneOrMoreLeptons", sel=(minOneLeptonMask == True),
+        )
 
         if self.apply_trigger:
            self.add_selection("trigger", triggerDecision)
