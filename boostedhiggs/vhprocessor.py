@@ -116,14 +116,15 @@ class vhProcessor(processor.ProcessorABC):
         if year == "2018":  #TO DO _ CHANGE PER dataset - try first using Cristina's dataset and no channels
             #self.dataset_per_ch = {
             self.dataset = {
-	        "DoubleEG",
-		"DoubleMu",
+	        "SingleMuon",
+	        "DoubleMuon",
+		"EGamma", #2018 doesn't have single electron, so Cristina used EGamma for that channel
 		"MuonEG"
             }
-        else: #fix this to add in single muon and electron and also one is missing in 2018
+        else: 
             self.dataset = {
 	        "SingleElectron",
-		"SingleMuon", #use cristina's - maybe code is failing b/c of lack of weights?
+		"SingleMuon", 
                 "DoubleMuon",
 		"DoubleEG",
 		"MuonEG",
@@ -154,8 +155,6 @@ class vhProcessor(processor.ProcessorABC):
 
     def add_selection(self, name: str, sel: np.ndarray):
         """Adds selection to PackedSelection object and the cutflow dictionary"""
-        #channels = channel if channel else self._channels
-        #for ch in channels:
         self.selections.add(name, sel)
         selection = self.selections.all(*self.selections.names)
         #print('selection', selection)
@@ -178,23 +177,21 @@ class vhProcessor(processor.ProcessorABC):
         #print('self.weights', self.weights)
         #self.weights_vh = []
         self.selections = {}
-        self.cutflows = {}
-        #for ch in self._channels:
-        #self.weights = []  #not sure what to do here...... 
+        self.cutflows = {}   #should doublecheck if this is correct
         self.selections = PackedSelection()
 
         sumgenweight = ak.sum(events.genWeight) if self.isMC else 0
 
 #******************TRIGGER******************************************
         # trigger            Def: self._HLTs = json.load(f)[self._year]
-        trigger = {}          #to do - make a dictionary looping over triggers, put actual sel logic below
-        #for ch in self._channels:
-        #trigger = np.zeros(nevents, dtype="bool") #cristina said to move this below???
-        #vhTriggerList = ['DoubleMuon', 'DoubleEG', 'MuonEG', 'ele', 'mu'] #for testing, not full list add also EGAmma for 2018
-        vhTriggerList = ['ele', 'mu', 'DoubleMuon', 'MuonEG', 'DoubleEG'] #for testing, not full list add also EGAmma for 2018
+        trigger = {}         #making a dictionary of triggers
+        if self._year == "2018":  
+            vhTriggerList = ['ele', 'mu', 'DoubleMuon', 'MuonEG'] 
+        else: 
+            vhTriggerList = ['ele', 'mu', 'DoubleMuon', 'MuonEG', 'DoubleEG'] 
+
         for trig in vhTriggerList:
          #   print('trig', trig)
-          #  print('self._HLTs[trig]', self._HLTs[trig])
             trigger[trig] = np.zeros(nevents,dtype="bool")
             for t in self._HLTs[trig]:
                 #print('t', t)
@@ -207,7 +204,6 @@ class vhProcessor(processor.ProcessorABC):
 
 
 	#try putting trigger logic here and pass just rue or false to add selection
-
         triggerDecision = {}
         triggerDecision = np.ones(nevents, dtype = "bool")
         
@@ -227,8 +223,6 @@ class vhProcessor(processor.ProcessorABC):
         #this may be ok since we just want at least one trigger to pass; this should eliminate double counting
         triggerDecision = trigger['ele'] | trigger['mu'] | trigger['DoubleMuon'] | trigger['DoubleEG'] | trigger['MuonEG']
         print('triggerDecisionAs of a bunch ', ak.to_list(triggerDecision)[0:15])
-
-        print('this is annoying')
 
 
 
@@ -309,7 +303,7 @@ class vhProcessor(processor.ProcessorABC):
 
         pTfirstLepton = np.ones(nevents, dtype="bool")
         pTfirstLepton = ak.firsts(goodleptons.pt)
-        print('gets highest pT leptons pT', pTfirstLepton)
+        #print('gets highest pT leptons pT', pTfirstLepton)
 
 
 #************************************************************************************************************
@@ -388,7 +382,6 @@ class vhProcessor(processor.ProcessorABC):
             2.0 * candidatelep_p4.pt * met.pt * (ak.ones_like(met.pt) - np.cos(candidatelep_p4.delta_phi(met)))
         )
 
-        #print('mt_lep_met', mt_lep_met)
         # delta phi MET and higgs candidate
         met_fjlep_dphi = candidatefj.delta_phi(met)
 
@@ -445,9 +438,7 @@ class vhProcessor(processor.ProcessorABC):
 
         # output tuple variables
         variables = {
-	#"lep": {
 		"Zmass": ZLepMass, #for now put this in the electron channel, will need to separate by channel
-#	},
                 "lepton_pT": pTfirstLepton,
                 #"fj_pt": candidatefj.pt,
                 #"fj_msoftdrop": candidatefj.msdcorr,
@@ -459,10 +450,8 @@ class vhProcessor(processor.ProcessorABC):
                # "lep_fj_dr": lep_fj_dr,
                # "lep_met_mt": mt_lep_met,
                # "met_fj_dphi": met_fjlep_dphi,
-#	"common": {
                 "met": met.pt,
                 "ht": ht,
-#		},
                 #"nfj": n_fatjets,
                 #"nj": n_jets_outside_ak8,
                 #"deta": deta,
@@ -589,6 +578,7 @@ class vhProcessor(processor.ProcessorABC):
         print('before any selections')
         self.add_selection("all", np.ones(nevents, dtype="bool"))
 
+#temporarily adding this selection: OneOrMoreLeptons for trigg. eff. study
         self.add_selection(
             name="OneOrMoreLeptons", sel=(minOneLeptonMask == True),
         )
@@ -596,22 +586,26 @@ class vhProcessor(processor.ProcessorABC):
         if self.apply_trigger:
            self.add_selection("trigger", triggerDecision)
 
-        self.add_selection("metfilters", metfilters)
-        self.add_selection(name="ht", sel=(ht > 200))
-        self.add_selection(
-            name="antibjettag",
-            sel=(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"])
-        )
-        self.add_selection(
-            name="ThreeOrMoreLeptons", sel=(minThreeLeptonsMask == True),
-        )
+
+
+#temporarily comment these out for the trigger eff. study
+        #self.add_selection("metfilters", metfilters)
+        #self.add_selection(name="ht", sel=(ht > 200))
+        #self.add_selection(
+        #    name="antibjettag",
+        #    sel=(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"])
+        #)
+        #self.add_selection(
+        #    name="ThreeOrMoreLeptons", sel=(minThreeLeptonsMask == True),
+        #)
+
+
     #    self.add_selection(name="leptonKin", sel=(candidatelep.pt > 30))
         #self.add_selection(name="leptonKin", sel=(candidatelep.pt > 40), channel=["ele"]) #no distinction b/t e and mu
    #     self.add_selection(name="fatjetKin", sel=candidatefj.pt > 200)
    #     self.add_selection(name="leptonInJet", sel=(lep_fj_dr < 0.8))
 
         #self.add_selection(name="notaus", sel=(n_loose_taus_mu == 0), channel=["mu"])
-        #self.add_selection(name="notaus", sel=(n_loose_taus_ele == 0), channel=["ele"])
 
         # initialize pandas dataframe
         output = {}
@@ -662,15 +656,11 @@ class vhProcessor(processor.ProcessorABC):
           #  print('output, line 575', output)
 
         # convert arrays to pandas
-        print('trying pandas')
-        print('output - line 578', output)
         if not isinstance(output, pd.DataFrame):
-            print('trying to convert to pandas')
             output = self.ak_to_pandas(output) #ak.to_dataframe
-            print('output - line 583', output)
+            print('output', output)
 
         # now save pandas dataframes
-        print('line 586')
         fname = events.behavior["__events_factory__"]._partition_key.replace("/", "_")
         fname = "condor_" + fname
         print('fname', fname)
