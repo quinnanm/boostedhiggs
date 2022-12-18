@@ -39,7 +39,10 @@ def get_simplified_label(sample):   # get simplified "alias" names of the sample
 
 
 def get_sum_sumgenweight(idir, year, sample):
-    pkl_files = glob.glob(f'{idir}/{sample}/outfiles/*.pkl')  # get the pkl metadata of the pkl files that were processed
+#hack to work locally
+    pkl_files = glob.glob(f'{idir}/*.pkl')  # get the pkl metadata of the pkl files that were processed
+
+    #pkl_files = glob.glob(f'{idir}/{sample}/outfiles/*.pkl')  # get the pkl metadata of the pkl files that were processed
     sum_sumgenweight = 0
     for file in pkl_files:
         # load and sum the sumgenweight of each
@@ -81,16 +84,24 @@ signal_by_ch = {
 #   - GluGluHToWWTo4q-HpT190 (produced by Cristina w Pythia)
 # to come: GluGluHToWW_MINLO (for ele,mu,had)
 
+
+#this is actually no longer by channel since I don't have channels for VH, but leave the name for now, since 2018 is different than other years:w
 data_by_ch = {
     'ele': 'SingleElectron',
     'mu': 'SingleMuon',
     'had': 'JetHT',
+    'DoubleMuon': 'DoubleMuon',
+    'MuonEG': 'MuonEG',
+    'DoubleEG': 'DoubleEG',
 }
 data_by_ch_2018 = {
-    'ele': 'EGamma',
+    'ele': 'EGamma',  #i guess there was no single electron for this year, so cristina used eGamma instead of single electron?
     'mu': 'SingleMuon',
     'had': 'JetHT',
+    'DoubleMuon': 'DoubleMuon',
+    'MuonEG': 'MuonEG',
 }
+
 color_by_sample = {
     "QCD": 'tab:orange',
     "DYJets": 'tab:purple',
