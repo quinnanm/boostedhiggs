@@ -35,15 +35,21 @@ def get_xsecweight(idir,year,sample,is_data,luminosity):
         # Find xsection                                                                                                                                                                                                                                                 
         f = open("../fileset/xsec_pfnano.json")
         xsec = json.load(f)
+        #print('xec', xsec)
+        print('sample', sample)
+        sample = 'HZJ_HToWW_M-125'
         f.close()
         try:
             xsec = eval(str((xsec[sample])))
+            print('xsec', xsec)
         except:
             print(f"sample {sample} doesn't have xsecs defined in xsec_pfnano.json so will skip it")
-            return None
 
-        # print(idir,year.replace("APV", ""),sample)
-        # print(get_sum_sumgenweight(idir, year.replace("APV", ""), sample))
+            return None
+        print('idir', idir)
+        print(idir,year.replace("APV", ""),sample)
+        print('get_sum_sumgenweight',get_sum_sumgenweight(idir, year.replace("APV", ""), sample))
+        #print('get_sum_sumgenweight',get_sum_sumgenweight(2017,sample))
             
         # Get overall weighting of events.. each event has a genweight... sumgenweight sums over events in a chunk... sum_sumgenweight sums over chunks                                                                                                                 
         xsec_weight = (xsec * luminosity) / get_sum_sumgenweight(idir, year.replace("APV", ""), sample)
@@ -51,29 +57,8 @@ def get_xsecweight(idir,year,sample,is_data,luminosity):
         xsec_weight = 1
     return xsec_weight
 
-def get_xsecweight(idir, year, sample, is_data, luminosity):
-    if not is_data:
-        # Find xsection
-        f = open("../fileset/xsec_pfnano.json")
-        xsec = json.load(f)
-        f.close()
-        try:
-            xsec = eval(str((xsec[sample])))
-        except:
-            print(f"sample {sample} doesn't have xsecs defined in xsec_pfnano.json so will skip it")
-            return None
-
-        # print(idir,year.replace("APV", ""),sample)
-        # print(get_sum_sumgenweight(idir, year.replace("APV", ""), sample))
-
-        # Get overall weighting of events.. each event has a genweight... sumgenweight sums over events in a chunk... sum_sumgenweight sums over chunks
-        xsec_weight = (xsec * luminosity) / get_sum_sumgenweight(idir, year.replace("APV", ""), sample)
-    else:
-        xsec_weight = 1
-    return xsec_weight
-
-
-def append_correct_weights(idir, samples, year, channels, reprocess=False):
+def append_correct_weights(idir, samples, year, reprocess=False):
+#def append_correct_weights(idir, samples, year, channels, reprocess=False):
     """
     Updates the processed parquet daraftames by appending the correct scaling factor/weight per event as new column 'tot_weight'
     Args:
@@ -92,72 +77,75 @@ def append_correct_weights(idir, samples, year, channels, reprocess=False):
         data_label = data_by_ch
 
     # loop over the processed files and fill the histograms
-    for ch in channels:
-        for sample in samples:
-            print("------------------------------------------------------------")
+    #for ch in channels:
+    for sample in samples:
+        print("------------------------------------------------------------")
             # check if the sample was processed
-            pkl_dir = f"{idir}/{sample}/outfiles/*.pkl"
-            pkl_files = glob.glob(pkl_dir)  #
-            if not pkl_files:  # skip samples which were not processed
-                print("- No processed files found...", pkl_dir, "skipping sample...", sample)
+            #pkl_dir = f"{idir}/{sample}/outfiles/*.pkl" #i changed the line below to read from my local directory
+        pkl_dir = f"{idir}/*.pkl"
+        pkl_files = glob.glob(pkl_dir)  #
+        if not pkl_files:  # skip samples which were not processed
+            print("- No processed files found...", pkl_dir, "skipping sample...", sample)
+            continue
+
+        # define an isdata bool
+        is_data = False
+
+        for key in data_label.values():
+            if key in sample:
+                is_data = True
+
+        # retrieve xsections for MC and define xsec_weight=1 for data
+        xsec_weight = get_xsecweight(idir, year, sample, is_data, luminosity)
+        if xsec_weight is None:
+            continue
+
+        # get list of parquet files that have been processed
+        #parquet_files = glob.glob(f"{idir}/{sample}/outfiles/*_{ch}.parquet")
+#changed to line below to read from my local directory
+        parquet_files = glob.glob(f"{idir}/*_.parquet")
+
+        if len(parquet_files) != 0:
+            print(f"Processing sample", sample)
+
+        for i, parquet_file in enumerate(parquet_files):
+            try:
+                data = pq.read_table(parquet_file).to_pandas()
+            except:
+                print("Not able to read data: ", parquet_file, " should remove evts from scaling/lumi")
                 continue
 
-            # define an isdata bool
-            is_data = False
-
-            for key in data_label.values():
-                if key in sample:
-                    is_data = True
-
-            # retrieve xsections for MC and define xsec_weight=1 for data
-            xsec_weight = get_xsecweight(idir, year, sample, is_data, luminosity)
-            if xsec_weight is None:
+            if len(data) == 0:
                 continue
 
-            # get list of parquet files that have been processed
-            parquet_files = glob.glob(f"{idir}/{sample}/outfiles/*_{ch}.parquet")
+            if "tot_weight" in data.columns and not reprocess:
+                print(
+                    "Warning: File has already been reprocessed! Add --reprocess to arguments if you want to re-writing tot weight."
+                )
+                continue
 
-            if len(parquet_files) != 0:
-                print(f"Processing {ch} channel of sample", sample)
+            if not is_data:
+                event_weight = data["weight"] 
+                #event_weight = data["weight"] * data[f"weight_{ch}"]
+                print('event_weight', event_weight)
+            else:
+                event_weight = 1  # for data fill a weight column with ones
 
-            for i, parquet_file in enumerate(parquet_files):
-                try:
-                    data = pq.read_table(parquet_file).to_pandas()
-                except:
-                    print("Not able to read data: ", parquet_file, " should remove evts from scaling/lumi")
-                    continue
+            # append an additional column 'tot_weight' to the parquet dataframes
+            data["tot_weight"] = xsec_weight * event_weight
 
-                if len(data) == 0:
-                    continue
+            # update parquet file (this line should overwrite the stored dataframe)
+            pq.write_table(pa.Table.from_pandas(data), parquet_file)
 
-                if "tot_weight" in data.columns and not reprocess:
-                    print(
-                        "Warning: File has already been reprocessed! Add --reprocess to arguments if you want to re-writing tot weight."
-                    )
-                    continue
-
-                if not is_data:
-                    event_weight = data["weight"] * data[f"weight_{ch}"]
-                else:
-                    event_weight = 1  # for data fill a weight column with ones
-
-                # append an additional column 'tot_weight' to the parquet dataframes
-                data["tot_weight"] = xsec_weight * event_weight
-
-                # update parquet file (this line should overwrite the stored dataframe)
-                pq.write_table(pa.Table.from_pandas(data), parquet_file)
-
-    print("------------------------------------------------------------")
+print("------------------------------------------------------------")
 
 
 def main(args):
 
-    channels = args.channels.split(",")
-
     # build samples
     samples = os.listdir(args.idir)
-
-    append_correct_weights(args.idir, samples, args.year, channels, args.reprocess)
+    print('samples', samples)
+    append_correct_weights(args.idir, samples, args.year, args.reprocess)
 
 
 if __name__ == "__main__":
@@ -165,7 +153,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--year", dest="year", choices=["2016APV", "2016", "2017", "2018"], help="year", required=True)
-    parser.add_argument("--channels", dest="channels", default="ele,mu,had", help="channels for which to plot this variable")
+    #parser.add_argument("--channels", dest="channels", default="ele,mu,had", help="channels for which to plot this variable")
     parser.add_argument("--idir", dest="idir", default="../results/", help="input directory with results")
     parser.add_argument(
         "--reprocess", dest="reprocess", action="store_true", help="force re-processing of parquet file to include weight"
