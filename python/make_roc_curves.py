@@ -10,31 +10,30 @@ import json
 import os, glob, sys
 import argparse
 
+from sklearn.metrics import auc, roc_curve
 import hist as hist2
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import mplhep as hep
+
 plt.style.use(hep.style.CMS)
 plt.rcParams.update({'font.size': 20})
 
 
-def make_hists(ch, idir, odir, weights, presel, samples):
+def construct_score_arrays(ch, idir, odir, weights, presel, samples):
     """
-    Makes 1D histograms of the tagger scores to be plotted as stacked over the different samples.
+   Makes nd arrays containing the tagger scores for each of the three classes (Higgs, QCD, Top).
     
     Args:
         ch: string that represents the signal channel to look at... choices are ['ele', 'mu'].
         idir: directory that holds the processed samples (e.g. {idir}/{sample}/outfiles/*_{ch}.parquet).
         odir: output directory to hold the hist object.
-        vars_to_plot: the set of variables to plot a 1D-histogram of (by default: the samples with key==1 defined in plot_configs/vars.json).
-        presel: pre-selection string.
         weights: weights to be applied to MC.
+        presel: pre-selection string.
         samples: the set of samples to run over (by default: the samples defined in plot_configs/samples_pfnano.json).
     """
 
-    # define histograms
-    hists = {}
-    sample_axis = hist2.axis.StrCategory([], name="samples", growth=True)
+    # define the scores
     scores = ["hww_score (H)", "H/(1-H)", "H/(H+QCD)", "H/(H+Top)"]#, "qcd_score (QCD)", "top_score (Top)"]
 
     tagger_scores = {}
@@ -127,7 +126,7 @@ def make_hists(ch, idir, odir, weights, presel, samples):
                     else:
                         HIGGS += df_all_softmax[:, i]
 
-                # filling histograms
+                # filling the scores nd arrays
                 for score in scores:
                     if score=="hww_score (H)":
                         tagger_scores[score] += np.ndarray.tolist(HIGGS)
@@ -137,23 +136,54 @@ def make_hists(ch, idir, odir, weights, presel, samples):
                         tagger_scores[score] += np.ndarray.tolist(HIGGS/(HIGGS+QCD))
                     elif score=="H/(H+Top)":
                         tagger_scores[score] += np.ndarray.tolist(HIGGS/(HIGGS+TOP))
-                    # elif score=="qcd_score (QCD)":
-                    #     tagger_scores[score].append(QCD)
-                    # elif score=="top_score (Top)":
-                    #     tagger_scores[score].append(TOP)                        
-                
+
                 if "HToWW" in sample_to_use:
                     label = 1
                 else:
                     label = 0
                 label_array += [label]*len(np.ndarray.tolist(HIGGS))    # just the length of the events
     
-    # store the hists variable
+    # store the scores
     with open(f"{odir}/{ch}_tagger_scores.pkl", "wb") as f:
         pkl.dump(tagger_scores, f)
-    # store the hists variable
+    # store the labels to make ROC curves
     with open(f"{odir}/{ch}_tagger_labels.pkl", "wb") as f:
         pkl.dump(label_array, f)                      
+
+
+def make_roc_curves(odir, ch)
+    with open(f"{odir}/{ch}_tagger_labels.pkl", "rb") as f:
+        labels = pkl.load(f)
+        
+    with open(f"{odir}/{ch}_tagger_scores.pkl", "rb") as f:
+        scores = pkl.load(f)
+
+    def make_roc(labels, scores, ch):
+        fig, ax = plt.subplots()
+        for key in scores.keys():   # keys here are the score classes (H, H/1-H, ...)
+            # get nan scores indices
+            nan_indices = np.argwhere(np.isnan(scores[key]))
+
+            label = np.delete(np.array(labels), nan_indices)
+            score = np.delete(np.array(scores[key]), nan_indices)
+
+            fpr, tpr, _ = roc_curve(label, score)
+            roc_auc = auc(fpr, tpr)
+
+            ax.plot(
+                tpr,
+                fpr,
+                lw=2,
+                label=f"{key} - AUC = {round(auc(fpr, tpr)*100,2)}%",
+            )
+        plt.xlim([0.0, 1.0])
+        plt.ylabel("False Positive Rate")
+        plt.xlabel("True Positive Rate")
+        plt.yscale("log")
+        plt.legend(loc="lower right")        
+        plt.save_fig(f"{odir}/{ch}_roc.png")
+
+    make_roc(labels, scores)
 
 def main(args):
     # append '/year' to the output directory
@@ -209,13 +239,13 @@ def main(args):
     os.system(f"cp {args.vars} {odir}/")
      
     for ch in channels:
-        if len(glob.glob(f"{odir}/{ch}_hists.pkl")) > 0:
-            print("Histograms already exist - remaking them")
-        print(f"Making TAGGER histograms for {ch}...")
+        print(f"Making TAGGER nd score arrays for {ch}...")
         print("Weights: ", weights[ch])
         print("Pre-selection: ", presel[ch])
-        make_hists(ch, args.idir, odir, weights[ch], presel[ch], samples)
+        construct_score_arrays(ch, args.idir, odir, weights[ch], presel[ch], samples)
 
+        make_roc_curves(odir, ch)
+        
 if __name__ == "__main__":
     # e.g.
     # run locally as: python make_roc_curves.py --year 2017 --odir Dec15tagger --channels mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Nov16_inference
