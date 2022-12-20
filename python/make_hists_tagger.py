@@ -35,18 +35,19 @@ def make_hists(ch, idir, odir, weights, presel, samples):
     # define histograms
     hists = {}
     sample_axis = hist2.axis.StrCategory([], name="samples", growth=True)
-    plot_vars = ["qcd_score", "top_score", "hww_score"]
-    for var in plot_vars:
-        hists[var] = hist2.Hist(
-            sample_axis,
-            hist2.axis.Regular(35, 0, 1, name="var", label=var, overflow=True),
-        )
-   
+    scores = ["qcd_score (QCD)", "top_score (Top)", "hww_score (H)", "H/(1-H)", "H/(H+QCD)", "H/(H+Top)"]
+    
     hists["fj_pt"] = hist2.Hist(
-        sample_axis,
-        axis_dict["fj_pt"],
+    sample_axis,
+    axis_dict["fj_pt"],
     )
 
+    for score in scores:
+        hists[score] = hist2.Hist(
+            sample_axis,
+            hist2.axis.Regular(35, 0, 1, name="score", label=score, overflow=True),
+        )
+   
     labels = []
     # loop over the samples
     for yr in samples.keys():
@@ -122,33 +123,43 @@ def make_hists(ch, idir, odir, weights, presel, samples):
                     var=data["fj_pt"],
                     weight=event_weight,
                 )
-                
-                data = data[labels]   # keep only the labels
- 
+     
                 # apply softmax per row
-                df_all_softmax = scipy.special.softmax(data.values, axis=1)
+                df_all_softmax = scipy.special.softmax(data[labels].values, axis=1)
 
                 # combine the labels under QCD, TOP or HWW
-                scores = {}
-                for var in plot_vars:
-                    scores[var] = np.zeros(len(df_all_softmax))
+                QCD = 0
+                TOP = 0
+                HIGGS = 0
 
-                for i, label in enumerate(labels):
+                for i, label in enumerate(labels):  # labels are the tagger classes
                     if "QCD" in label:
-                        scores["qcd_score"] += df_all_softmax[:, i]
+                        QCD += df_all_softmax[:, i]
                     elif "Top" in label:
-                        scores["top_score"] += df_all_softmax[:, i]
+                        TOP += df_all_softmax[:, i]
                     else:
-                        scores["hww_score"] += df_all_softmax[:, i]
-                
-                # filling histograms
-                for var in plot_vars:
-                    hists[var].fill(
-                        samples=sample_to_use,
-                        var=scores[var],
-                        weight=event_weight,
-                    )
+                        HIGGS += df_all_softmax[:, i]
 
+                # filling histograms
+                for score in scores:
+                    if score=="qcd_score (QCD)":
+                        X = QCD
+                    elif score=="top_score (Top)":
+                        X = TOP
+                    elif score=="hww_score (H)":
+                        X = HIGGS
+                    elif score=="H/(1-H)":
+                        X = HIGGS/(1-HIGGS)
+                    elif score=="H/(H+QCD)":
+                        X = HIGGS/(HIGGS+QCD)
+                    elif score=="H/(H+Top)":
+                        X = HIGGS/(HIGGS+TOP)
+   
+                    hists[score].fill(
+                        samples=sample_to_use,
+                        score=X,
+                        weight=event_weight,
+                    )                        
     # store the hists variable
     with open(f"{odir}/{ch}_hists_tagger.pkl", "wb") as f:
         pkl.dump(hists, f)
@@ -216,7 +227,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as: python make_hists_tagger.py --year 2017 --odir Nov23tagger --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Nov16_inference
+    # run locally as: python make_hists_tagger.py --year 2017 --odir Dec15tagger --channels mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Nov16_inference
     
     parser = argparse.ArgumentParser()
     parser.add_argument(

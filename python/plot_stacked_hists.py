@@ -392,7 +392,7 @@ def main(args):
 if __name__ == "__main__":
     # e.g.
     # run locally as: python plot_stacked_hists.py --year 2017 --odir Nov15 --channels ele
-    # run locally as: python plot_stacked_hists.py --year 2017 --odir Nov23tagger --channels ele,mu
+    # run locally as: python plot_stacked_hists.py --year 2017 --odir Dec15tagger --channels mu
 
     parser = argparse.ArgumentParser()
     parser.add_argument(

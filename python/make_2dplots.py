@@ -184,28 +184,28 @@ def plot_2dplots(year, ch, odir):
         for sample in hists[score].axes[0]:
             print(sample)
             # one for log z-scale
+            # fig, ax = plt.subplots(figsize=(8, 5))
+            # hep.hist2dplot(hists[score][{'samples': sample}], ax=ax, cmap="plasma", norm=matplotlib.colors.LogNorm(vmin=1e-1, vmax=10000))
+            # ax.set_xlabel(f"miso")
+            # ax.set_ylabel(f"{score}")
+            # ax.set_title(f'{ch} channel for \n {sample}')
+            # hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
+            # hep.cms.text("Work in Progress", ax=ax)
+            # print(f'saving at {odir}/{ch}_{save_dict[score]}/{sample}_log_z.png')
+            # plt.savefig(f'{odir}/{ch}_{save_dict[score]}/{sample}_log_z.png')
+            # plt.close()
+
+            # one for non-log z-scale
             fig, ax = plt.subplots(figsize=(8, 5))
-            hep.hist2dplot(hists[score][{'samples': sample}], ax=ax, cmap="plasma", norm=matplotlib.colors.LogNorm(vmin=1e-1, vmax=10000))
+            hep.hist2dplot(hists[score][{'samples': sample}], ax=ax, cmap="plasma", cmin=0, cmax=1)
             ax.set_xlabel(f"miso")
             ax.set_ylabel(f"{score}")
             ax.set_title(f'{ch} channel for \n {sample}')
             hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
             hep.cms.text("Work in Progress", ax=ax)
-            print(f'saving at {odir}/{ch}_{save_dict[score]}/{sample}_log_z.png')
-            plt.savefig(f'{odir}/{ch}_{save_dict[score]}/{sample}_log_z.png')
+            print(f'saving at {odir}/{ch}_{save_dict[score]}/{sample}.png')
+            plt.savefig(f'{odir}/{ch}_{save_dict[score]}/{sample}.png')
             plt.close()
-
-        # # one for non-log z-scale
-        # fig, ax = plt.subplots(figsize=(8, 5))
-        # hep.hist2dplot(hists[score][{'samples': sample}], ax=ax, cmap="plasma")
-        # ax.set_xlabel(f"{vars[0]}")
-        # ax.set_ylabel(f"{vars[1]}")
-        # ax.set_title(f'{ch} channel for \n {sample}')
-        # hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
-        # hep.cms.text("Work in Progress", ax=ax)
-        # print(f'saving at {odir}/{ch}_{save_dict[score]}/{sample}.png')
-        # plt.savefig(f'{odir}/{ch}_{save_dict[score]}/{sample}.png')
-        # plt.close()
 
 
 def main(args):

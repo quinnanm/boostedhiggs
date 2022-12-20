@@ -151,7 +151,7 @@ def construct_score_arrays(ch, idir, odir, weights, presel, samples):
         pkl.dump(label_array, f)                      
 
 
-def make_roc_curves(odir, ch)
+def make_roc_curves(odir, ch):
     with open(f"{odir}/{ch}_tagger_labels.pkl", "rb") as f:
         labels = pkl.load(f)
         
@@ -180,10 +180,11 @@ def make_roc_curves(odir, ch)
         plt.ylabel("False Positive Rate")
         plt.xlabel("True Positive Rate")
         plt.yscale("log")
-        plt.legend(loc="lower right")        
-        plt.save_fig(f"{odir}/{ch}_roc.png")
-
-    make_roc(labels, scores)
+        plt.legend(title=f"{ch} channel", loc="lower right")     
+        plt.savefig(f"{odir}/{ch}_roc.png")
+        print(f"saved plot under {odir}/{ch}_roc.png")
+        
+    make_roc(labels, scores, ch)
 
 def main(args):
     # append '/year' to the output directory
@@ -244,11 +245,12 @@ def main(args):
         print("Pre-selection: ", presel[ch])
         construct_score_arrays(ch, args.idir, odir, weights[ch], presel[ch], samples)
 
+        print(f"Plotting ROC curves for {ch}...")
         make_roc_curves(odir, ch)
-        
+
 if __name__ == "__main__":
     # e.g.
-    # run locally as: python make_roc_curves.py --year 2017 --odir Dec15tagger --channels mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Nov16_inference
+    # run locally as: python make_roc_curves.py --year 2017 --odir Dec15tagger --channels ele --idir /eos/uscms/store/user/cmantill/boostedhiggs/Nov16_inference
     
     parser = argparse.ArgumentParser()
     parser.add_argument(
