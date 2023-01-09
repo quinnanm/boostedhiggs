@@ -84,10 +84,10 @@ class vhProcessor(processor.ProcessorABC):
         self,
         year="2017", #note that this has been hardcoded!! need to be careful of the year or change to make it adapt/year
         yearmod="",
-        #channels=["ele", "mu"],
         output_location="./outfiles/",
         inference=False,
         apply_trigger=True,
+        #apply_trigger=False,
     ):
 
         self._year = year
@@ -186,7 +186,8 @@ class vhProcessor(processor.ProcessorABC):
         # trigger            Def: self._HLTs = json.load(f)[self._year]
         trigger = {}         #making a dictionary of triggers
         if self._year == "2018":  
-            vhTriggerList = ['ele', 'mu', 'DoubleMuon', 'MuonEG'] 
+            #vhTriggerList = ['ele', 'mu', 'DoubleMuon', 'MuonEG'] 
+            vhTriggerList = ['ele', 'mu', 'MuonEG'] 
         else: 
             vhTriggerList = ['ele', 'mu', 'DoubleMuon', 'MuonEG', 'DoubleEG'] 
 
@@ -208,22 +209,33 @@ class vhProcessor(processor.ProcessorABC):
         triggerDecision = np.ones(nevents, dtype = "bool")
         
         #triggerDecision = trigger['ele'] 
-       # print('triggerDecision', ak.to_list(triggerDecision)[0:15])
-       # triggerDecision = trigger['mu'] 
-       # print('triggerDecisionMu', ak.to_list(triggerDecision)[0:15])
+        #print('triggerDecisionEle', ak.to_list(triggerDecision)[0:25])
+        #triggerDecision = trigger['mu'] 
+        #print('triggerDecisionMu', ak.to_list(triggerDecision)[0:25])
         #triggerDecision = trigger['ele'] & ~trigger['mu']
         #print('triggerDecisionMuFinal', ak.to_list(triggerDecision)[0:10])
-     #   triggerDecision = trigger['DoubleMuon'] 
-      #  print('triggerDecisionDoubleMuon', ak.to_list(triggerDecision)[0:15])
+        #triggerDecision = trigger['DoubleMuon'] 
+        #print('triggerDecisionDoubleMuon', ak.to_list(triggerDecision)[0:25])
       #  triggerDecision = trigger['MuonEG'] 
       #  print('triggerDecisionMuonEG', ak.to_list(triggerDecision)[0:15])
       #  triggerDecision = trigger['DoubleEG'] 
       #  print('triggerDecisionDoubleEG', ak.to_list(triggerDecision)[0:15])
 
         #this may be ok since we just want at least one trigger to pass; this should eliminate double counting
-        triggerDecision = trigger['ele'] | trigger['mu'] | trigger['DoubleMuon'] | trigger['DoubleEG'] | trigger['MuonEG']
-        print('triggerDecisionAs of a bunch ', ak.to_list(triggerDecision)[0:15])
+        if self._year == "2018":  
 
+            triggerDecision = trigger['ele'] | trigger['mu'] 
+            #triggerDecision = trigger['ele'] | trigger['mu'] | trigger['DoubleMuon'] | trigger['MuonEG']
+            #print('triggerDecision', ak.to_list(triggerDecision)[0:15])
+
+            #triggerDecision = trigger['ele'] | trigger['mu'] | trigger['DoubleMuon']
+            #triggerDecision = trigger['ele'] | trigger['mu'] | trigger['DoubleMuon'] | trigger['MuonEG']
+            #print('triggerDecisionWithDM', ak.to_list(triggerDecision)[0:25])
+
+
+        #else: 
+        #    triggerDecision = trigger['ele'] | trigger['mu'] | trigger['DoubleMuon'] | trigger['DoubleEG'] | trigger['MuonEG']
+        #print('triggerDecisions', ak.to_list(triggerDecision)[0:25])
 
 
 #******************TRIGGER******************************************
@@ -254,7 +266,6 @@ class vhProcessor(processor.ProcessorABC):
             & (np.abs(good_muons.eta) < 2.4)
             & (good_muons.looseId) ]
         )
-        #n_loose_muons = ak.sum(loose_muons, axis=1) #note since i changed to recors to add flavor, this summing doesn't work
 
         good_muons = (
             good_muons[(good_muons.pt > 30)
@@ -273,7 +284,6 @@ class vhProcessor(processor.ProcessorABC):
             & ((np.abs(good_electrons.eta) < 1.44) | (np.abs(good_electrons.eta) > 1.57))
             & (good_electrons.cutBased >= good_electrons.LOOSE)]
         )
-        #n_loose_electrons = ak.sum(loose_electrons, axis=1)
 
         good_electrons = (
             good_electrons[(good_electrons.pt > 38) 
@@ -292,10 +302,11 @@ class vhProcessor(processor.ProcessorABC):
 
         #print('goodleptons', goodleptons)
         #print('goodleptons[0].pt', goodleptons[0].pt)
-        #print('goodleptons.pt', goodleptons.pt)
 #this is for calculating trigger efficiencies
-        minOneLeptonMask = ak.num(goodleptons, axis=1) >= 1
-        minOneLepton = ak.mask(goodleptons, minOneLeptonMask[:,None])
+
+
+       # minOneLeptonMask = ak.num(goodleptons, axis=1) >= 1
+       # minOneLepton = ak.mask(goodleptons, minOneLeptonMask[:,None])
         #print('minOneLepton', minOneLepton)
         #print('minOneLeptonMask', minOneLeptonMask)
 
@@ -304,7 +315,6 @@ class vhProcessor(processor.ProcessorABC):
         pTfirstLepton = np.ones(nevents, dtype="bool")
         pTfirstLepton = ak.firsts(goodleptons.pt)
         #print('gets highest pT leptons pT', pTfirstLepton)
-
 
 #************************************************************************************************************
 #add this section below - get the leptons that belong to the Z, then get the other leptons - use the highest pt lepton of the latter for the candidate lepton
@@ -338,6 +348,7 @@ class vhProcessor(processor.ProcessorABC):
         candidatelep = ak.firsts(remainingLeptons)  # pick highest pt 
 
         candidatelep_p4 = build_p4(candidatelep)  # build p4 for candidate lepton
+
         lep_reliso = (
             candidatelep.pfRelIso04_all if hasattr(candidatelep, "pfRelIso04_all") else candidatelep.pfRelIso03_all
         )  # reliso for candidate lepton
@@ -377,7 +388,6 @@ class vhProcessor(processor.ProcessorABC):
 
         # MET
         met = events.MET
-
         mt_lep_met = np.sqrt(
             2.0 * candidatelep_p4.pt * met.pt * (ak.ones_like(met.pt) - np.cos(candidatelep_p4.delta_phi(met)))
         )
@@ -440,14 +450,14 @@ class vhProcessor(processor.ProcessorABC):
         variables = {
 		"Zmass": ZLepMass, #for now put this in the electron channel, will need to separate by channel
                 "lepton_pT": pTfirstLepton,
-                #"fj_pt": candidatefj.pt,
+                "fj_pt": candidatefj.pt,
                 #"fj_msoftdrop": candidatefj.msdcorr,
                 #"fj_bjets_ophem": ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1),
                 #"lep_pt": candidatelep.pt,
                # "lep_isolation": lep_reliso,
                # "lep_misolation": lep_miso,
                # "lep_fj_m": lep_fj_m,
-               # "lep_fj_dr": lep_fj_dr,
+                "lep_fj_dr": lep_fj_dr,
                # "lep_met_mt": mt_lep_met,
                # "met_fj_dphi": met_fjlep_dphi,
                 "met": met.pt,
@@ -478,11 +488,6 @@ class vhProcessor(processor.ProcessorABC):
     #        variables["lep"]["gen_isTop"] = matchT["gen_isTopbmerged"]
     #        variables["lep"]["gen_isToplep"] = matchT["gen_isToplep"]
     #        variables["lep"]["gen_isTopqq"] = matchT["gen_isTopqq"]
-
-        # if trigger is not applied then save the trigger variables
-  #      if not self.apply_trigger:
-  #          variables["lep"]["cut_trigger_iso"] = trigger_iso[ch]
-  #          variables["lep"]["cut_trigger_noniso"] = trigger_noiso[ch]
 
         # let's save the hem veto as a cut for now
   #      if self._year == "2018":
@@ -540,10 +545,11 @@ class vhProcessor(processor.ProcessorABC):
                 )
             add_pileup_weight(self.weights, self._year, self._yearmod, nPU=ak.to_numpy(events.Pileup.nPU))
 
-            add_lepton_weight(self.weights, candidatelep, self._year + self._yearmod, "muon")
-            add_lepton_weight(self.weights, candidatelep, self._year + self._yearmod, "electron")
+#i don't know how to apply these so commenting out for now
+            #add_lepton_weight(self.weights, candidatelep, self._year + self._yearmod, "muon")
+            #add_lepton_weight(self.weights, candidatelep, self._year + self._yearmod, "electron")
             # self._btagSF.addBtagWeight(bjets_away_lepfj, self.weights, "lep")
-            add_VJets_kFactors(self.weights, events.GenPart, dataset)
+            #add_VJets_kFactors(self.weights, events.GenPart, dataset)
 
             # store the final common weight
             #variables["common"]["weight"] = self.weights.partial_weight(self.common_weights)
@@ -579,31 +585,31 @@ class vhProcessor(processor.ProcessorABC):
         self.add_selection("all", np.ones(nevents, dtype="bool"))
 
 #temporarily adding this selection: OneOrMoreLeptons for trigg. eff. study
-        self.add_selection(
-            name="OneOrMoreLeptons", sel=(minOneLeptonMask == True),
-        )
+        #self.add_selection(
+         #   name="OneOrMoreLeptons", sel=(minOneLeptonMask == True),
+        #)
 
         if self.apply_trigger:
            self.add_selection("trigger", triggerDecision)
 
 
-
 #temporarily comment these out for the trigger eff. study
-        #self.add_selection("metfilters", metfilters)
-        #self.add_selection(name="ht", sel=(ht > 200))
-        #self.add_selection(
-        #    name="antibjettag",
-        #    sel=(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"])
-        #)
-        #self.add_selection(
-        #    name="ThreeOrMoreLeptons", sel=(minThreeLeptonsMask == True),
-        #)
+        self.add_selection("metfilters", metfilters)
+        self.add_selection(name="ht", sel=(ht > 200))
+        self.add_selection(
+            name="antibjettag",
+            sel=(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"])
+        )
 
-
-    #    self.add_selection(name="leptonKin", sel=(candidatelep.pt > 30))
+        #if self.apply_trigger:
+         #  self.add_selection("trigger", triggerDecision)
+        self.add_selection(
+            name="ThreeOrMoreLeptons", sel=(minThreeLeptonsMask == True),
+        )
+        self.add_selection(name="leptonKin", sel=(candidatelep.pt > 30))
         #self.add_selection(name="leptonKin", sel=(candidatelep.pt > 40), channel=["ele"]) #no distinction b/t e and mu
-   #     self.add_selection(name="fatjetKin", sel=candidatefj.pt > 200)
-   #     self.add_selection(name="leptonInJet", sel=(lep_fj_dr < 0.8))
+        self.add_selection(name="fatjetKin", sel=candidatefj.pt > 200)
+        self.add_selection(name="leptonInJet", sel=(lep_fj_dr < 0.8))
 
         #self.add_selection(name="notaus", sel=(n_loose_taus_mu == 0), channel=["mu"])
 
@@ -617,29 +623,29 @@ class vhProcessor(processor.ProcessorABC):
             fill_output = False
 
         selection = self.selections.all(*self.selections.names)
-        #print('selection', selection)
+        print('selection', selection)
 
-            # only fill output for that channel if the selections yield any events
+        # only fill output if the selections yield any events
         if np.sum(selection) <= 0:
             fill_output = False
 
         if fill_output:
-         #   keys = ["lep", "common"]
             out = {}
-          #  for key in keys:
-            #for var, item in variables[key].items():
-            #print('variables.items()', variables.items)
+            #print('variables.items()', variables.items())
+            #print('len of variables.items()', len(variables.items()))
+
             for var, item in variables.items():
-                #print('var, item', var, item)
+               # print('var, item', var, item)
                     # pad all the variables that are not a cut with -1
                 pad_item = item if ("cut" in var or "weight" in var) else pad_val(item, -1)
                         # fill out dictionary
-                #print('pad_item', pad_item)
+              #  print('pad_item', pad_item)
                 out[var] = item
-                #print('out[var]', out[var])
+             #   print('out[var]', out[var])
                     # fill the output dictionary after selections
+		    #the line below with output is the one giving me issues
             output = {key: value[selection] for (key, value) in out.items()}
-            #print('output', output)
+            #print('output - line 640', output)
 
             # fill inference
             if self.inference:
@@ -649,7 +655,6 @@ class vhProcessor(processor.ProcessorABC):
                 )
               #  print("post-inference")
                # print(pnet_vars)
-
                 output = {**output, **{key: value for (key, value) in pnet_vars.items()}}
         #else:
          #   output = {}
@@ -658,12 +663,11 @@ class vhProcessor(processor.ProcessorABC):
         # convert arrays to pandas
         if not isinstance(output, pd.DataFrame):
             output = self.ak_to_pandas(output) #ak.to_dataframe
-            print('output', output)
+            print('DF', output)
 
         # now save pandas dataframes
         fname = events.behavior["__events_factory__"]._partition_key.replace("/", "_")
         fname = "condor_" + fname
-        print('fname', fname)
 
         #for ch in self._channels:  # creating directories for each channel
         if not os.path.exists(self._output_location):
@@ -671,7 +675,6 @@ class vhProcessor(processor.ProcessorABC):
         if not os.path.exists(self._output_location + "/parquet"):
             os.makedirs(self._output_location + "/parquet")
 
-#need a new version without channel
         self.save_dfs_parquet(fname, output)
 
         # return dictionary with cutflows
