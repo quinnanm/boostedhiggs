@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 from utils import axis_dict, add_samples, color_by_sample, signal_by_ch, data_by_ch, data_by_ch_2018
-from utils import get_simplified_label, get_sum_sumgenweight
+from utils import get_sample_to_use, get_simplified_label, get_sum_sumgenweight
 import pickle as pkl
 import pyarrow.parquet as pq
 import pyarrow as pa
@@ -32,7 +32,7 @@ import warnings
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
-def make_2dplots(year, ch, idir, odir, samples, vars, x_bins, x_start, x_end, y_bins, y_start, y_end):
+def make_2dplots(year, ch, idir, odir, samples, vars, x_bins, x_start, x_end, y_bins, y_start, y_end, make_iso_cuts):
     """
     Makes 2D plots of two variables
 
@@ -44,80 +44,111 @@ def make_2dplots(year, ch, idir, odir, samples, vars, x_bins, x_start, x_end, y_
         samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
         vars: a list of two variable names to plot against each other... see the full list of choices in plot_configs/vars.json
     """
-    max_iso = {'ele': 120, 'mu': 55}
-    if vars[0] == 'lep_misolation':
-        start = max_iso[ch]
-        end = 350
-    elif vars[0] == 'lep_isolation':
-        start = 30
-        end = max_iso[ch]
-    else:
-        start = x_start
-        end = x_end
 
     # instantiates the histogram object
     hists = hist2.Hist(
-        hist2.axis.Regular(x_bins, 0, 4, name=vars[0], label=vars[0], overflow=True),
-        hist2.axis.Regular(y_bins, start, end, name=vars[1], label=vars[1], overflow=True),
+        hist2.axis.Regular(x_bins, x_start, x_end, name=vars[0], label=vars[0], overflow=True),
+        hist2.axis.Regular(y_bins, y_start, y_end, name=vars[1], label=vars[1], overflow=True),
         hist2.axis.StrCategory([], name='samples', growth=True),
     )
 
+    # Define cuts to make later
+    pt_iso = {"ele": 120, "mu": 55}
+
+    # Get luminosity of year
+    f = open("../fileset/luminosity.json")
+    luminosity = json.load(f)[year]
+    f.close()
+    print(f"Processing samples from year {year} with luminosity {luminosity} for channel {ch}")
+
+    if year == "2018":
+        data_label = data_by_ch_2018
+    else:
+        data_label = data_by_ch
+    
+    c = 0
     # loop over the samples
     for sample in samples[year][ch]:
-        print("------------------------------------------------------------")
+        print(sample)
         # check if the sample was processed
-        pkl_dir = f'{idir}/{sample}/outfiles/*.pkl'
-        pkl_files = glob.glob(pkl_dir)  #
+        pkl_dir = f"{idir}_{year}/{sample}/outfiles/*.pkl"
+        pkl_files = glob.glob(pkl_dir)
         if not pkl_files:  # skip samples which were not processed
-            print('- No processed files found...', pkl_dir, 'skipping sample...', sample)
+            print("- No processed files found...", pkl_dir, "skipping sample...", sample)
             continue
 
-        # get list of parquet files that have been processed
-        parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')
+        # get list of parquet files that have been post processed
+        parquet_files = glob.glob(f"{idir}_{year}/{sample}/outfiles/*_{ch}.parquet")
 
-        if len(parquet_files) != 0:
-            print(f'Processing {ch} channel of sample', sample)
+        # define an is_data boolean
+        is_data = False
+        for key in data_label.values():
+            if key in sample:
+                is_data = True
+
+        # get xsec weight
+        from postprocess_parquets import get_xsecweight
+        xsec_weight = get_xsecweight(f"{idir}_{year}", year, sample, is_data, luminosity)
+
+        # get combined sample
+        sample_to_use = get_sample_to_use(sample, year)
 
         for i, parquet_file in enumerate(parquet_files):
             try:
                 data = pq.read_table(parquet_file).to_pandas()
             except:
-                print('Not able to read data: ', parquet_file, ' should remove evts from scaling/lumi')
-                continue
-            if len(data) == 0:
                 continue
 
-            single_sample = None
-            for single_key, key in add_samples.items():
-                if key in sample:
-                    single_sample = single_key
+            try:
+                event_weight = data['tot_weight']
+            except:
+                continue
 
-            if vars[0] == 'lep_isolation':
-                selection = data['lep_pt'] < max_iso[ch]
-                x = data[vars[0]][selection]
-                y = data[vars[1]][selection]
-            elif vars[0] == 'lep_misolation':
-                selection = data['lep_pt'] > max_iso[ch]
-                x = data[vars[0]][selection]
-                y = data[vars[1]][selection]
-            else:
-                x = data[vars[0]]
-                y = data[vars[1]]
+            if ch == "mu":
+                data['mu_score'] = data['fj_isHVV_munuqq'] / \
+                    (data['fj_isHVV_munuqq'] + data['fj_ttbar_bmerged'] +
+                        data['fj_ttbar_bsplit'] + data['fj_wjets_label'])
+            elif ch == "ele":
+                data['ele_score'] = data['fj_isHVV_elenuqq'] / \
+                    (data['fj_isHVV_elenuqq'] + data['fj_ttbar_bmerged'] +
+                        data['fj_ttbar_bsplit'] + data['fj_wjets_label'])
 
-            # combining all pt bins of a specefic process under one name
-            if single_sample is not None:
-                hists.fill(
-                    x,
-                    y,
-                    single_sample,
+            # make kinematic cuts
+            pt_cut = (data["fj_pt"] > 400) & (data["fj_pt"] < 600)
+            msd_cut = (data["fj_msoftdrop"] > 30) & (data["fj_msoftdrop"] < 150)
+
+            if make_iso_cuts:
+                # make isolation cuts
+                iso_cut = (
+                    ((data["lep_isolation"] < 0.15) & (data["lep_pt"] < pt_iso[ch])) |
+                    (data["lep_pt"] > pt_iso[ch])
                 )
-            # otherwise give unique name
+
+                # make mini-isolation cuts
+                if ch == "mu":
+                    miso_cut = (
+                        ((data["lep_misolation"] < 0.1) & (data["lep_pt"] >= pt_iso[ch])) |
+                        (data["lep_pt"] < pt_iso[ch])
+                    )
+                elif ch == "ele":
+                    miso_cut = data["lep_pt"] > 10
+                    
+                select_var = iso_cut & miso_cut
+                
             else:
-                hists.fill(
-                    x,
-                    y,
-                    sample,
-                )
+                select_var = (event_weight!=3.14)   # pick all events
+
+            if vars[1] == 'tagger_score':
+                vars[1] = f'{ch}_score'
+
+            x = data[vars[0]][select_var]
+            y = data[vars[1]][select_var]
+
+            hists.fill(
+                x,
+                y,
+                sample_to_use,
+            )
 
     print("------------------------------------------------------------")
 
@@ -147,6 +178,7 @@ def plot_2dplots(year, ch, odir, vars):
 
     # make plots per channel
     for sample in hists.axes[2]:
+        print(sample)
         # one for log z-scale
         fig, ax = plt.subplots(figsize=(8, 5))
         hep.hist2dplot(hists[{'samples': sample}], ax=ax, cmap="plasma", norm=matplotlib.colors.LogNorm(vmin=1e-1, vmax=10000))
@@ -155,8 +187,8 @@ def plot_2dplots(year, ch, odir, vars):
         ax.set_title(f'{ch} channel for \n {sample}')
         hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
         hep.cms.text("Work in Progress", ax=ax)
-        print(f'saving at {odir}/{ch}_{vars[0]}_{vars[1]}/{sample}_log_z.pdf')
-        plt.savefig(f'{odir}/{ch}_{vars[0]}_{vars[1]}/{sample}_log_z.pdf')
+        print(f'saving at {odir}/{ch}_{vars[0]}_{vars[1]}/{sample}_log_z.png')
+        plt.savefig(f'{odir}/{ch}_{vars[0]}_{vars[1]}/{sample}_log_z.png')
         plt.close()
 
         # # one for non-log z-scale
@@ -178,11 +210,6 @@ def main(args):
     odir = args.odir + '_' + args.year
     if not os.path.exists(odir):
         os.makedirs(odir)
-
-    # make subdirectory specefic to this script
-    if not os.path.exists(odir + '/2d_plots/'):
-        os.makedirs(odir + '/2d_plots/')
-    odir = odir + '/2d_plots/'
 
     channels = args.channels.split(',')
 
@@ -206,7 +233,7 @@ def main(args):
 
         if args.make_hists:
             print(f'Making 2dplot of {vars} for {ch} channel')
-            make_2dplots(args.year, ch, args.idir, odir, samples, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end)
+            make_2dplots(args.year, ch, args.idir, odir, samples, vars, args.x_bins, args.x_start, args.x_end, args.y_bins, args.y_start, args.y_end, args.make_iso_cuts)
 
         if args.plot_hists:
             print('Plotting...')
@@ -215,11 +242,13 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # lep_iso vs lep_pt:   python make_2dplots.py --year 2017 --odir plots --channels ele,mu --vars lep_isolation,lep_pt --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0   --y_end 1 --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --make_hists
-    # lep_pt vs lep_fj_dr: python make_2dplots.py --year 2017 --odir hists --channels ele --vars lep_pt,lep_fj_dr     --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0.1 --y_end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # fj_pt vs lep_fj_dr:  python make_2dplots.py --year 2017 --odir hists --channels ele,mu --vars fj_pt,lep_fj_dr      --make_hists --plot_hists --x_bins 100 --x_start 200 --x_end 500 --y_bins 100 --y_start 0.1 --y_end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # lep_pt vs mt:        python make_2dplots.py --year 2017 --odir hists --channels ele --vars lep_pt,lep_met_mt    --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0   --y_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # lep_pt vs fj_pt:     python make_2dplots.py --year 2017 --odir hists --channels ele --vars lep_pt,fj_pt         --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0   --y_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_iso vs lep_pt:   python make_2dplots.py --year 2017 --odir 2d_plots --channels ele,mu --vars lep_isolation,lep_pt --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0   --y_end 1 --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --make_hists
+    # lep_pt vs lep_fj_dr: python make_2dplots.py --year 2017 --odir 2d_plots --channels ele --vars lep_pt,lep_fj_dr     --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0.1 --y_end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # fj_pt vs lep_fj_dr:  python make_2dplots.py --year 2017 --odir 2d_plots --channels ele,mu --vars fj_pt,lep_fj_dr      --make_hists --plot_hists --x_bins 100 --x_start 200 --x_end 500 --y_bins 100 --y_start 0.1 --y_end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_pt vs mt:        python make_2dplots.py --year 2017 --odir 2d_plots --channels ele --vars lep_pt,lep_met_mt    --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0   --y_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+    # lep_pt vs fj_pt:     python make_2dplots.py --year 2017 --odir 2d_plots --channels ele --vars lep_pt,fj_pt         --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0   --y_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
+
+    # lep_miso vs tagger_score:     python make_2dplots.py --year 2017 --odir 2d_plots --channels ele --vars lep_misolation,tagger_score --make_hists --plot_hists --x_bins 10 --x_start 0 --x_end 2 --y_bins 10 --y_start 0   --y_end 1 --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',            dest='year',        default='2017',                                 help="year")
@@ -236,6 +265,7 @@ if __name__ == "__main__":
     parser.add_argument('--y_end',           dest='y_end',       default=1,                                      help="end range of the second variable passed",             type=float)
     parser.add_argument("--make_hists",      dest='make_hists',  action='store_true',                            help="Make hists")
     parser.add_argument("--plot_hists",      dest='plot_hists',  action='store_true',                            help="Plot the hists")
+    parser.add_argument("--make_iso_cuts",      dest='make_iso_cuts',  action='store_true',     help="Make iso cuts")
 
     args = parser.parse_args()
 

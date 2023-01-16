@@ -28,6 +28,9 @@ def main(args):
     logdir = locdir + "/logs"
     os.system(f"mkdir -p {logdir}")
 
+    # copy the json samples file to the locdir
+    os.system(f"cp {args.samples} {locdir}")
+
     # and condor directory
     print("CONDOR work dir: " + outdir)
     os.system(f"mkdir -p /eos/uscms/{outdir}")
@@ -119,13 +122,16 @@ def main(args):
 if __name__ == "__main__":
     """
     python condor/submit.py --year 2017 --tag Aug11 --samples samples_pfnano_mc.json --pfnano --submit --inference
+    python condor/submit.py --year 2017 --tag lumi --processor lumi --samples samples_pfnano_data.json --pfnano --submit 
+
     """
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--script",    dest="script",    default="run.py",              help="script to run", type=str)
     parser.add_argument("--year",      dest="year",      default="2017",                help="year", type=str)
     parser.add_argument("--tag",       dest="tag",       default="Test",                help="process tag", type=str)
     parser.add_argument("--processor", dest="processor", default="hww",
-                        help="which processor", type=str, choices=["hww", "trigger"])
+                        help="which processor", type=str, choices=["hww", "trigger", "lumi"])
     parser.add_argument('--samples',   dest='samples',   default="samples_pfnano.json", help='path to datafiles', type=str)
     parser.add_argument('--slist',     dest='slist',     default=None,
                         help="give sample list separated by commas")

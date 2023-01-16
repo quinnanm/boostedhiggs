@@ -1,0 +1,41 @@
+ele:
+  vars:
+    gen_Hpt: 1
+    gen_Hnprongs: 1
+    gen_iswlepton: 1
+    gen_iswstarlepton: 1
+    gen_isVlep: 1
+    gen_isVqq: 1
+    gen_isTop: 1
+    gen_isToplep: 1
+    gen_isTopqq: 1
+  pre-sel:
+  weights:
+    weight_genweight: 1
+    weight_L1Prefiring: 1
+    weight_pileup: 1
+    weight_trigger_electron: 1
+    weight_reco_electron: 1
+    weight_id_electron: 1
+    weight_vjets_nominal: 1
+mu:
+  vars:
+    gen_Hpt: 1
+    gen_Hnprongs: 1
+    gen_iswlepton: 1
+    gen_iswstarlepton: 1
+    gen_isVlep: 1
+    gen_isVqq: 1
+    gen_isTop: 1
+    gen_isToplep: 1
+    gen_isTopqq: 1
+  pre-sel:
+  weights:
+    weight_genweight: 1
+    weight_L1Prefiring: 1
+    weight_pileup: 1
+    weight_trigger_iso_muon: 1
+    weight_trigger_noniso_muon: 1
+    weight_isolation_muon: 1
+    weight_id_muon: 1
+    weight_vjets_nominal: 1

@@ -86,7 +86,8 @@ class wrapped_triton:
             input.set_data_from_numpy(input_dict[key])
             inputs.append(input)
 
-        out_name = "softmax__0" if self._torchscript else "softmax"
+        #out_name = "softmax__0" if self._torchscript else "softmax"
+        out_name = "output__0"
 
         output = triton_protocol.InferRequestedOutput(out_name)
 
@@ -157,14 +158,22 @@ def runInferenceTriton(
 
     print(f"Inference took {time_taken:.1f}s")
 
-    pnet_vars = {
-        f"fj_ttbar_bmerged": tagger_outputs[:, 0],
-        f"fj_ttbar_bsplit": tagger_outputs[:, 1],
-        f"fj_wjets_label": tagger_outputs[:, 2],
-        f"fj_isHVV_elenuqq": tagger_outputs[:, 3],
-        f"fj_isHVV_munuqq": tagger_outputs[:, 4],
-        f"fj_isHVV_taunuqq": tagger_outputs[:, 5],
-    }
+    # For model: 05_10_ak8_ttbarwjets
+    # pnet_vars = {
+    #     f"fj_ttbar_bmerged": tagger_outputs[:, 0],
+    #     f"fj_ttbar_bsplit": tagger_outputs[:, 1],
+    #     f"fj_wjets_label": tagger_outputs[:, 2],
+    #     f"fj_isHVV_elenuqq": tagger_outputs[:, 3],
+    #     f"fj_isHVV_munuqq": tagger_outputs[:, 4],
+    #     f"fj_isHVV_taunuqq": tagger_outputs[:, 5],
+    # }
+
+    # For model: particlenet_hww_inclv2_pre2
+    names_to_discard = ["label_H_bb","label_H_cc","label_H_ss","label_H_qq"]
+    pnet_vars = {}
+    for i,output_name in enumerate(tagger_vars["output_names"]):
+        if output_name in names_to_discard: continue
+        pnet_vars[f"fj_{output_name}"] = tagger_outputs[:, i]
 
     print(f"Total time taken: {time.time() - total_start:.1f}s")
     return pnet_vars

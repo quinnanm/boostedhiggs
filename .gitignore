@@ -47,3 +47,8 @@ roc_curves/
 extra/
 binder_tagger_resources/
 melissa_dataconfig_semilep_ttbarwjets.yaml
+
+
+*.pdf
+*.png
+*.csv
