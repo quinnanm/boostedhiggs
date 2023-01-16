@@ -59,7 +59,7 @@ We use the `submit.py` script to submit jobs.
 
 For example:
 ```
-python condor/submit.py --year 2017 --tag Feb21 --samples samples_pfnano_mc.json --pfnano
+python condor/submit.py --year 2017 --tag ${TAG} --samples samples_pfnano_mc.json --pfnano
 ```
 where:
 - year: this determines which fileset to read
@@ -69,10 +69,12 @@ where:
 --no-pfnano: do not use pfnano
 - number of files per job: if given all of the samples will use these number of files per job
 - script that runs processor: is `run.py` by default
+--no-inference: do not use inference
+--inference: (true by default)
 
 e.g.
 ```
-python3 condor/submit.py --year 2017 --tag Jun20 --samples samples_pfnano_mc.json --pfnano --slist ggHToWWTo4Q-MH125,GluGluHToWWTo4q,GluGluHToWWTo4q-HpT190,TTToSemiLeptonic --submit
+python3 condor/submit.py --year 2017 --tag ${TAG} --samples samples_pfnano_mc.json --pfnano --slist GluGluHToWW_Pt-200ToInf_M-125,TTToSemiLeptonic --submit --no-inference
 ```
 
 The `run.py` script has different options to e.g. select a different processor, run over files that go from one starting index (starti) to the end (endi).
@@ -96,7 +98,7 @@ If you see no jobs listed it means they have all finished.
 
 #### Testing jobs locally per single sample:
 ```
-python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --sample GluGluHToWWToLNuQQ --local
+python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local
 ```
 
 #### Testing jobs with inference (and triton server running):
@@ -106,7 +108,7 @@ python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --sample Glu
 
 #### Testing jobs locally over multiple samples specified in the json:
 ```
-python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --json samples_pfnano.json
+python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --json samples_pfnano_mc.json
 ```
 
 ## Triton server setup
@@ -174,20 +176,83 @@ To start triton server with kubernetes in PRP:
     ```
     python make_jittable.py --data-config /hwwtaggervol/melissa-weaver/data/mq_ntuples/melissa_dataconfig_semilep_ttbarwjets.yaml -n networks/particle_net_pf_sv_4_layers_pyg_ef.py -m 05_10_ak8_ttbarwjets
     ```
+    or
+    ```
+    python make_jittable.py --data-config models/particlenet_hww_inclv2_pre2/data/ak8_MD_vminclv2_pre2.yaml -n networks/particle_net_pf_sv_hybrid.py -m models/particlenet_hww_inclv2_pre2/data/net
+    ```
   - Copy this jittable file, the config file with labels and the json file to the PR.
 - Create a pod in the triton server and use `sudo` to pull changes from this repository.
+  ```
+  kubectl create -f tritonpod.yml
+  ```
+  and
+  ```
+  cd /triton/sonic-models/
+  sudo git pull origin master
+  ```
 
 ## Analysis
 
-Run postprocess_parquets.py to add a "tot_weight" column.
-e.g.
+The output will be stored in ${ODIR}, e.g.: `/eos/uscms/store/user/cmantill/boostedhiggs/Nov4`.
+
+### Luminosities
+
 ```
-python postprocess_parquets.py --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --year 2017
+2016:
+nominal: 16830.0
+SingleElectron: 16809.97
+SingleMuon: 16810.81
+
+2016APV:
+nominal: 19500.0
+SingleElectron: 19492.72
+SingleMuon: 19436.16
+
+2017: 
+nominal 41480.0
+SingleElectron: 41476.02
+SingleMuon: 41475.26
+
+2018:
+nominal: 59830.0
+EGamma: 59816.23
+SingleMuon: 59781.96
+
+Run2:
+nominal: 137640.0
+ele: 137594.94
+mu: 137504.19
 ```
 
-Then, convert to root files using:
+### Normalization
+
+To convert to root files using:
 ```
-python convert_to_root.py --dir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --ch ele,mu --odir rootfiles
+python convert_to_root.py --dir ${ODIR} --ch ele,mu --odir rootfiles
+```
+
+### Histograms
+
+The configs to make histograms are under `plot_configs`.
+
+Make histograms with correct normalization:
+```
+python make_hists.py --year 2017 --odir ${TAG} --channels ele,mu --idir ${ODIR} --vars plot_configs/vars.yaml
+```
+and make stacked histograms with:
+```
+python plot_stacked_hists.py --year 2017 --odir ${TAG}
+# e.g. for variable=cutflow with no data
+python plot_stacked_hists.py --year 2017 --odir ${TAG} --var cutflow --nodata
+```
+
+You can also customize the `vars.yaml` file. For example:
+```
+python make_hists.py --year 2017 --odir ${CUSTOM_TAG} --channels ele,mu --idir ${ODIR} --vars plot_configs/genvars.yaml
+```
+and use `plot_1dhists.py` to create 1D hists for specific variables. Use `samples` to customize samples to compare.
+```
+python plot_1dhists.py --year 2017 --odir ${CUSTOM_TAG} --var gen_Hpt --samples GluGluHToWW_Pt-200ToInf_M-125,VH,VBFHToWWToLNuQQ_M-125_withDipoleRecoil --tag signal --logy
 ```
 
 ## Setting up coffea environments
@@ -217,7 +282,7 @@ export PATH="$HOME/miniconda3/bin:$PATH"
 #### Set up a conda environment and install the required packages
 ```
 # create a new conda environment
-conda create -n coffea-env python=3.7
+conda create -n coffea-env python=3.8
 
 # activate the environment
 conda activate coffea-env
