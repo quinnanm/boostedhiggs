@@ -80,10 +80,9 @@ def main(args):
     elif args.processor == 'vh':
         from boostedhiggs.vhprocessor import vhProcessor
         p = vhProcessor(year=year, yearmod=yearmod, 
-                         channels=channels, 
-                         inference=args.inference,
-                         output_location='./outfiles' + job_name)
-
+                        inference=args.inference,
+                        output_location='./outfiles' + job_name)
+        
     elif args.processor == 'lumi':        
         from boostedhiggs.lumi_processor import LumiProcessor
         p = LumiProcessor(year=year, yearmod=yearmod, 
@@ -140,20 +139,22 @@ def main(args):
     filehandler.close()
 
     # merge parquet
-    #if args.processor == 'hww':
-    if args.processor == 'hww' or 'vh':
+    if args.processor == 'hww' or  args.processor=='vh':
         for ch in channels:
             data = pd.read_parquet('./outfiles/' + job_name + ch + '/parquet')
-            data.to_parquet('./outfiles/' + job_name + '_' + ch + '.parquet')
-
+            if ch=="":
+                data.to_parquet('./outfiles/' + job_name + '.parquet')
+            else:
+                data.to_parquet('./outfiles/' + job_name + '_' + ch + '.parquet')
             # remove old parquet files
             os.system('rm -rf ./outfiles/' + job_name + ch)
 
 
 if __name__ == "__main__":
     # e.g.
-    # run locally on lpc as: python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --json samples_pfnano.json
-    # run locally on lpc as: python run.py --year 2017 --processor lumi --pfnano --n 1 --starti 0 --json samples_pfnano_data.json
+    # run locally on lpc (hww mc) as: python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --json samples_pfnano_mc.json
+    # run locally on lpc (hww mc) as: python run.py --year 2017 --processor lumi --pfnano --n 1 --starti 0 --json samples_pfnano_data.json
+    # run locally on lpc (vh) as: python run.py --year 2018 --sample HZJ_HToWW_M-125 --processor vh --pfnano --n 1 --starti 0 --json samples_pfnano_mc.json  --channels "" --executor iterative
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year',        dest='year',           default='2017',
@@ -166,11 +167,11 @@ if __name__ == "__main__":
                         help='path to datafiles',                   type=str)
     parser.add_argument('--sample',      dest='sample',         default=None,
                         help='specify sample',                      type=str)
-    parser.add_argument("--processor",   dest="processor",      default="hww",
-                        help="HWW processor",                       type=str)
+    parser.add_argument("--processor",   dest="processor",      required=True,
+                        help="processor",                       type=str)
     parser.add_argument("--chunksize",   dest='chunksize',      default=10000,
                         help="chunk size in processor",             type=int)
-    parser.add_argument("--channels",    dest='channels',       default="ele,mu",
+    parser.add_argument("--channels",    dest='channels',       required=True,
                         help='channels separated by commas')
     parser.add_argument(
         "--executor",
@@ -185,7 +186,7 @@ if __name__ == "__main__":
     parser.add_argument("--pfnano",      dest='pfnano', action='store_true')
     parser.add_argument("--no-pfnano",   dest='pfnano', action='store_false')
     parser.set_defaults(pfnano=True)
-    parser.set_defaults(inference=True)
+    parser.set_defaults(inference=False)
     args = parser.parse_args()
 
     main(args)
