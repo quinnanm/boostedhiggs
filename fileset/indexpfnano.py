@@ -38,6 +38,18 @@ folders_to_index = [
     "/store/user/lpcpfnano/drankin/v2_2/2017/SingleElectron2017",
     "/store/user/lpcpfnano/drankin/v2_2/2018/EGamma2018",
 
+    "/store/user/lpcpfnano/jiyoo/v2_3/2016/DoubleEG2016",
+    "/store/user/lpcpfnano/jiyoo/v2_3/2016/DoubleMu2016",
+    "/store/user/lpcpfnano/jiyoo/v2_3/2016/MuonEG2016",
+
+    "/store/user/lpcpfnano/jiyoo/v2_3/2017/DoubleMu2017",
+    "/store/user/lpcpfnano/jiyoo/v2_3/2017/DoubleEG2017",
+    "/store/user/lpcpfnano/jiyoo/v2_3/2017/MuonEG2017",
+
+    "/store/user/lpcpfnano/jiyoo/v2_3/2018/DoubleMu2018",
+    "/store/user/lpcpfnano/jiyoo/v2_3/2018/MuonEG2018",
+    "/store/user/lpcpfnano/jiyoo/v2_3/2018/DoubleEG2018",
+
     "/store/user/lpcpfnano/jekrupa/v2_2/2016APV/TTbar",
     "/store/user/lpcpfnano/jekrupa/v2_2/2016/TTbar",
     "/store/user/lpcpfnano/jekrupa/v2_2/2017/TTbar",
@@ -143,6 +155,11 @@ folders_to_index = [
     "/store/user/lpcpfnano/cmantill/v2_2/2018/HTT",
 ]
 
+# samples to exclude (needs / at the end)
+samples_to_exclude = [
+    ["2018", "v2_2", "HZJ_HToWW_M-125_TuneCP5_13TeV-powheg-jhugen727-pythia8/"],
+    
+]
 index_APV = {}
 
 # Data path:
@@ -153,20 +170,25 @@ index_APV = {}
 # .......................f1........................|.......................f2..............................|..........f3.........|.....f4......|.f5.|....
 # /store/user/lpcpfnano/jekrupa/v2_2/2017/WJetsToQQ/WJetsToQQ_HT-800toInf_TuneCP5_13TeV-madgraphMLM-pythia8/WJetsToQQ_HT-800toInf/211108_171840/0000/*root
 
-#for pyear in ["2016", "2016APV", "2017", "2018"]:
-for pyear in ["2016APV"]:
+for pyear in ["2016", "2016APV", "2017", "2018"]:
+    # if year != "2016APV": continue
     print(pyear)
+
     index = {}
     for f1 in folders_to_index:
         f1 = f1.rstrip("/")
-        # print(f1)
+
+        version = "v2_2"
+        if "v2_3" in f1:
+            version = "v2_3"
+
         year = f1.split("/")[-2]
         sample_short = f1.split("/")[-1]
         if year != pyear:
             continue
 
         sample_short = f1.split("/")[-1]
-        print(f' {sample_short}') 
+        print(f' {sample_short}')
 
         if not year in index:
             index[year] = {}
@@ -175,7 +197,15 @@ for pyear in ["2016APV"]:
 
         f1_subfolders = get_subfolders(f"{f1}")
         for f2 in f1_subfolders:
-            # print(f"\t/{f2}")
+            print(f"\t/{f2}")
+
+            exclude = False
+            for exclude_year,exclude_version,exclude_sample in samples_to_exclude:
+                if(f2 == exclude_sample and pyear == exclude_year and version == exclude_version):
+                    print(f'   Excluding {sample_short}, {f2}, {version}, {pyear}')
+                    exclude = True
+            if exclude: break
+
             subsample_long = f2.replace("/", "")  # This should be the actual dataset name
             f2_subfolders = get_subfolders(f"{f1}/{f2}")
             if len(f2_subfolders) == 0:
