@@ -3,6 +3,7 @@ import numpy as np
 from coffea.analysis_tools import PackedSelection
 
 d_PDGID = 1
+c_PDGID = 4
 b_PDGID = 5
 g_PDGID = 21
 TOP_PDGID = 6
@@ -304,6 +305,28 @@ def add_selection_no_cutflow(
     selection.add(name, ak.fill_none(sel, False))
 
 
+def get_pid_mask(
+    genparts: GenParticleArray,
+    pdgids: Union[int, list],
+    ax: int = 2,
+    byall: bool = True,
+) -> ak.Array:
+    """
+    Get selection mask for gen particles matching any of the pdgIds in ``pdgids``.
+    If ``byall``, checks all particles along axis ``ax`` match.
+    """
+    gen_pdgids = abs(genparts.pdgId)
+
+    if type(pdgids) == list:
+        mask = gen_pdgids == pdgids[0]
+        for pdgid in pdgids[1:]:
+            mask = mask | (gen_pdgids == pdgid)
+    else:
+        mask = gen_pdgids == pdgids
+
+    return ak.all(mask, axis=ax) if byall else mask
+
+
 def tagger_gen_H_matching(genparticles, candidatefj):
 
     """
@@ -326,9 +349,8 @@ def tagger_gen_H_matching(genparticles, candidatefj):
         "label_H_WqqWtauhv_1c",
     """
 
-    higgs = getParticles(
-        genparticles, 25
-    )  # genparticles is the full set... this function selects Higgs particles
+    # select Higgs particles that decay to W from the full set
+    higgs = getParticles(genparticles, 25)
     is_hWW = ak.all(
         abs(higgs.children.pdgId) == 24, axis=2
     )  # W~24 so we get H->WW (limitation: only picking one W and assumes the other will be there)
@@ -337,37 +359,34 @@ def tagger_gen_H_matching(genparticles, candidatefj):
 
     # choose higgs closest to fj
     matched_higgs = candidatefj.nearest(higgs, axis=1, threshold=0.8)
-
-    # higgs kinematics
-    genResVars = {
-        f"fj_genRes_{key}": ak.fill_none(matched_higgs[var], FILL_NONE_VALUE)
-        for (var, key) in P4.items()
-    }
-    # Higgs parent kinematics
-    bulkg = matched_higgs.distinctParent
-
     matched_higgs_children = matched_higgs.children
-
-    # select only VV children
-    children_mask = get_pid_mask(
-        matched_higgs_children, [W_PDGID, Z_PDGID], byall=False
-    )
-    matched_higgs_children = matched_higgs_children[children_mask]
-
     children_mass = matched_higgs_children.mass
 
-    # select lower mass child as V* and higher as V
-    v_star = ak.firsts(
+    # select lower mass child as W* and higher as W
+    W_star = ak.firsts(
         matched_higgs_children[ak.argmin(children_mass, axis=2, keepdims=True)]
     )
-    v = ak.firsts(
+    W = ak.firsts(
         matched_higgs_children[ak.argmax(children_mass, axis=2, keepdims=True)]
     )
 
-    # get VV daughters
+    # get WW daughters
     daughters = ak.flatten(
         ak.flatten(matched_higgs_children.distinctChildren, axis=2), axis=2
     )
+
+    ### get number of c-quarks
+    prompt_c = getParticles(
+        daughters, c_PDGID, c_PDGID, ["fromHardProcess", "isLastCopy"]
+    )    
+    prompt_c = getParticles(
+        genparticles, c_PDGID, c_PDGID, ["fromHardProcess", "isLastCopy"]
+    )
+    prompt_c = prompt_c[abs(prompt_c.distinctParent.pdgId) == 24]  # parent W
+    n_cquarks = ak.sum(prompt_c.pt > 0, axis=1)
+
+    # make sure the daughters come from hard process
+    GEN_FLAGS = ["fromHardProcess", "isLastCopy"]
     daughters = daughters[daughters.hasFlags(GEN_FLAGS)]
     daughters_pdgId = abs(daughters.pdgId)
 
@@ -382,6 +401,8 @@ def tagger_gen_H_matching(genparticles, candidatefj):
         + (ak.sum(daughters_pdgId == TAU_PDGID, axis=1) == 1) * 7
         # 4 quarks * 11
         + (ak.sum(daughters_pdgId <= b_PDGID, axis=1) == 4) * 11
+        # 3 quarks * 13
+        + (ak.sum(daughters_pdgId <= b_PDGID, axis=1) == 3) * 13
     )
 
     # get tau decays from daughters
@@ -409,36 +430,30 @@ def tagger_gen_H_matching(genparticles, candidatefj):
     taudecay = ak.sum(taudecay, axis=-1)
 
     genLabelVars = {
-        "label_H_WqqWqq_0c": to_label(decay == 11),  # force c=0
-        "label_H_WqqWqq_1c": to_label(decay == 11),  # force c=1
-        "label_H_WqqWqq_2c": to_label(decay == 11),  # force c=2
-        "label_H_WqqWq_0c": to_label(
-            decay == 11
-        ),  # force c=0 and one 3 quarks
-        "label_H_WqqWq_1c": to_label(
-            decay == 11
-        ),  # force c=1 and one 3 quarks
-        "label_H_WqqWq_2c": to_label(
-            decay == 11
-        ),  # force c=2 and one 3 quarks
-        "label_H_WqqWev_0c": to_label(decay == 4),  # force c=0
-        "label_H_WqqWev_1c": to_label(decay == 4),  # force c=1
-        "label_H_WqqWmv_0c": to_label(decay == 6),  # force c=0
-        "label_H_WqqWmv_1c": to_label(decay == 6),  # force c=1
+        "label_H_WqqWqq_0c": to_label((decay == 11) & (n_cquarks == 0)),
+        "label_H_WqqWqq_1c": to_label((decay == 11) & (n_cquarks == 1)),
+        "label_H_WqqWqq_2c": to_label((decay == 11) & (n_cquarks == 2)),
+        "label_H_WqqWq_0c": to_label((decay == 13) & (n_cquarks == 0)),
+        "label_H_WqqWq_1c": to_label((decay == 13) & (n_cquarks == 1)),
+        "label_H_WqqWq_2c": to_label((decay == 13) & (n_cquarks == 2)),
+        "label_H_WqqWev_0c": to_label((decay == 4) & (n_cquarks == 0)),
+        "label_H_WqqWev_1c": to_label((decay == 4) & (n_cquarks == 1)),
+        "label_H_WqqWmv_0c": to_label((decay == 6) & (n_cquarks == 0)),
+        "label_H_WqqWmv_1c": to_label((decay == 6) & (n_cquarks == 1)),
         "label_H_WqqWtauev_0c": to_label(
-            (decay == 8) & (taudecay == 3)
-        ),  # force c=0
+            (decay == 8) & (taudecay == 3) & (n_cquarks == 0)
+        ),
         "label_H_WqqWtauev_1c": to_label(
-            (decay == 8) & (taudecay == 3)
-        ),  # force c=1
+            (decay == 8) & (taudecay == 3) & (n_cquarks == 1)
+        ),
         "label_H_WqqWtaumv_0c": to_label(
-            (decay == 8) & (taudecay == 5)
-        ),  # force c=0
+            (decay == 8) & (taudecay == 5) & (n_cquarks == 0)
+        ),
         "label_H_WqqWtaumv_1c": to_label(
-            (decay == 8) & (taudecay == 5)
-        ),  # force c=1
-        "label_H_WqqWtauhv_0c": to_label(decay == 11),  # force c=0
-        "label_H_WqqWtauhv_1c": to_label(decay == 11),  # force c=1
+            (decay == 8) & (taudecay == 5) & (n_cquarks == 1)
+        ),
+        # "label_H_WqqWtauhv_0c": to_label(decay == 11),  # force c=0
+        # "label_H_WqqWtauhv_1c": to_label(decay == 11),  # force c=1
     }
 
     return genLabelVars
