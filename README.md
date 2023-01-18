@@ -187,8 +187,10 @@ To start triton server with kubernetes in PRP:
   ```
   and
   ```
+  kubectl exec -it tritonpodi -- /bin/bash
   cd /triton/sonic-models/
   sudo git pull origin master
+  kubectl delete pod tritonpodi
   ```
 
 ## Analysis
