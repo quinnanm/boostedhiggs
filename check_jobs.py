@@ -9,7 +9,6 @@ import os
 from math import ceil
 from condor.file_utils import loadJson
 
-
 def main(args):
 
     username = os.environ["USER"]
@@ -52,8 +51,8 @@ def main(args):
 
 if __name__ == "__main__":
     """
-    python xplore_failed_jobs.py --pfnano --year 2017 --username cmantill --tag Nov4 --samples samples_pfnano_mc.json
-    python xplore_failed_jobs.py --pfnano --year 2018 --username fmokhtar --tag lumiv3 --samples samples_pfnano_data.json
+    python check_jobs.py --pfnano --year 2017 --username cmantill --tag Nov4 --samples samples_pfnano_mc.json
+    python check_jobs.py --pfnano --year 2018 --username fmokhtar --tag lumiv3 --samples samples_pfnano_data.json
     """
 
     parser = argparse.ArgumentParser()
@@ -69,9 +68,9 @@ if __name__ == "__main__":
         "--tag", dest="tag", default="Test", help="process tag", type=str
     )
     parser.add_argument(
-        "--samples",
+        "--sampleis",
         dest="samples",
-        default="samples_pfnano.json",
+        default="samples_pfnano_mc.json",
         help="path to datafiles",
         type=str,
     )
@@ -84,7 +83,6 @@ if __name__ == "__main__":
     parser.add_argument("--pfnano", dest="pfnano", action="store_true")
     parser.add_argument("--no-pfnano", dest="pfnano", action="store_false")
     parser.set_defaults(pfnano=True)
-    parser.set_defaults(inference=True)
     args = parser.parse_args()
 
     main(args)
