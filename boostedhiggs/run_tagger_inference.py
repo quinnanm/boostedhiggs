@@ -56,7 +56,9 @@ class wrapped_triton:
             )
             triton_protocol = triton_http
         else:
-            raise ValueError(f"{self._protocol} does not encode a valid protocol (grpc or http)")
+            raise ValueError(
+                f"{self._protocol} does not encode a valid protocol (grpc or http)"
+            )
 
         # manually split into batches for gpu inference
         input_size = input_dict[list(input_dict.keys())[0]].shape[0]
@@ -64,12 +66,17 @@ class wrapped_triton:
 
         outs = [
             self._do_inference(
-                {key: input_dict[key][batch: batch + self._batch_size] for key in input_dict},
+                {
+                    key: input_dict[key][batch : batch + self._batch_size]
+                    for key in input_dict
+                },
                 triton_protocol,
                 client,
             )
             for batch in tqdm(
-                range(0, input_dict[list(input_dict.keys())[0]].shape[0], self._batch_size)
+                range(
+                    0, input_dict[list(input_dict.keys())[0]].shape[0], self._batch_size
+                )
             )
         ]
 
@@ -86,7 +93,7 @@ class wrapped_triton:
             input.set_data_from_numpy(input_dict[key])
             inputs.append(input)
 
-        #out_name = "softmax__0" if self._torchscript else "softmax"
+        # out_name = "softmax__0" if self._torchscript else "softmax"
         out_name = "output__0"
 
         output = triton_protocol.InferRequestedOutput(out_name)
@@ -125,7 +132,9 @@ def runInferenceTriton(
     tagger_inputs = []
 
     feature_dict = {
-        **get_pfcands_features(tagger_vars, events, fj_idx_lep, fatjet_label, pfcands_label),
+        **get_pfcands_features(
+            tagger_vars, events, fj_idx_lep, fatjet_label, pfcands_label
+        ),
         **get_svs_features(tagger_vars, events, fj_idx_lep, fatjet_label, svs_label),
     }
 
@@ -151,7 +160,9 @@ def runInferenceTriton(
     try:
         tagger_outputs = triton_model(tagger_inputs)
     except:
-        print("---can't run inference due to error with the event or the server is not running--")
+        print(
+            "---can't run inference due to error with the event or the server is not running--"
+        )
         return {}
 
     time_taken = time.time() - start
@@ -169,10 +180,11 @@ def runInferenceTriton(
     # }
 
     # For model: particlenet_hww_inclv2_pre2
-    names_to_discard = ["label_H_bb","label_H_cc","label_H_ss","label_H_qq"]
+    names_to_discard = ["label_H_bb", "label_H_cc", "label_H_ss", "label_H_qq"]
     pnet_vars = {}
-    for i,output_name in enumerate(tagger_vars["output_names"]):
-        if output_name in names_to_discard: continue
+    for i, output_name in enumerate(tagger_vars["output_names"]):
+        if output_name in names_to_discard:
+            continue
         pnet_vars[f"fj_{output_name}"] = tagger_outputs[:, i]
 
     print(f"Total time taken: {time.time() - total_start:.1f}s")

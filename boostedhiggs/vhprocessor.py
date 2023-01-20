@@ -188,10 +188,10 @@ class vhProcessor(processor.ProcessorABC):
             for t in self._HLTs[trig]:
                 if t in events.HLT.fields:
                     trigger[trig] = trigger[trig] | events.HLT[t]
-                    
+
         # build a trigger logic per dataset
         trigger_logic = {}
-        for dset,dtriggers in self.dataset.items():
+        for dset, dtriggers in self.dataset.items():
             trigger_logic[dset] = np.ones(nevents, dtype="bool")
             for trig in self._trigger_list:
                 if trig in dtriggers:
@@ -229,24 +229,23 @@ class vhProcessor(processor.ProcessorABC):
         good_electrons = (
             (electrons.pt > 38)
             & (np.abs(electrons.eta) < 2.4)
-            & (
-                (np.abs(electrons.eta) < 1.44)
-                | (np.abs(electrons.eta) > 1.57)
-            )
+            & ((np.abs(electrons.eta) < 1.44) | (np.abs(electrons.eta) > 1.57))
             & (np.abs(electrons.dz) < 0.1)
             & (np.abs(electrons.dxy) < 0.05)
             & (electrons.sip3d <= 4.0)
             & (electrons.mvaFall17V2noIso_WP90)
         )
 
-        good_leptons = ak.concatenate([muons[good_muons], electrons[good_electrons]], axis=1)
+        good_leptons = ak.concatenate(
+            [muons[good_muons], electrons[good_electrons]], axis=1
+        )
         good_leptons = good_leptons[
             ak.argsort(good_leptons.pt, ascending=False)
         ]  # sort by pt
 
         # match leptons to the Z
         ngood_leptons = ak.num(good_leptons, axis=1)
-        min_three_leptons = ak.mask(good_leptons, (ngood_leptons>=3)[:, None])
+        min_three_leptons = ak.mask(good_leptons, (ngood_leptons >= 3)[:, None])
 
         lepton_pairs = ak.argcombinations(
             min_three_leptons, 2, fields=["first", "second"]
@@ -281,18 +280,24 @@ class vhProcessor(processor.ProcessorABC):
 
         # invariant Z mass
         ZLeptonMass = (
-            min_three_leptons[closest_pairs.first] + min_three_leptons[closest_pairs.second]
+            min_three_leptons[closest_pairs.first]
+            + min_three_leptons[closest_pairs.second]
         ).mass
         desired_length = np.max(ak.num(ZLeptonMass))
-        ZLeptonMass = ak.ravel(ak.to_numpy(
-            ak.fill_none(ak.pad_none(ZLeptonMass, desired_length), 0)
-        ))
+        ZLeptonMass = ak.ravel(
+            ak.to_numpy(ak.fill_none(ak.pad_none(ZLeptonMass, desired_length), 0))
+        )
 
         remainingLeptons = min_three_leptons[
             (ak.local_index(min_three_leptons) != ak.any(closest_pairs.first, axis=1))
-            & (ak.local_index(min_three_leptons) != ak.any(closest_pairs.second, axis=1))
+            & (
+                ak.local_index(min_three_leptons)
+                != ak.any(closest_pairs.second, axis=1)
+            )
         ]
-        candidatelep = ak.firsts(remainingLeptons)  # pick remaining lepton with highest pt
+        candidatelep = ak.firsts(
+            remainingLeptons
+        )  # pick remaining lepton with highest pt
         candidatelep_p4 = build_p4(candidatelep)  # build p4 for candidate lepton
 
         lep_reliso = (
@@ -481,7 +486,8 @@ class vhProcessor(processor.ProcessorABC):
         self.add_selection("all", np.ones(nevents, dtype="bool"))
         if self.trigger_eff_study:
             self.add_selection(
-                name="OneOrMoreLeptons", sel=(ngood_leptons >=1),
+                name="OneOrMoreLeptons",
+                sel=(ngood_leptons >= 1),
             )
         else:
             if self.apply_trigger:
@@ -494,7 +500,7 @@ class vhProcessor(processor.ProcessorABC):
             # )
             self.add_selection(
                 name="threeOrMoreLeptons",
-                sel=(ngood_leptons >=3),
+                sel=(ngood_leptons >= 3),
             )
             self.add_selection(name="leptonKin", sel=(candidatelep.pt > 30))
             self.add_selection(name="fatjetKin", sel=candidatefj.pt > 200)

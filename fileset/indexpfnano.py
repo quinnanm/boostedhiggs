@@ -25,130 +25,104 @@ folders_to_index = [
     "/store/user/lpcpfnano/dryu/v2_2_1/2016/SingleMu2016",
     "/store/user/lpcpfnano/dryu/v2_2_1/2017/SingleMu2017",
     "/store/user/lpcpfnano/dryu/v2_2/2018/SingleMu2018",
-
     "/store/user/lpcpfnano/jekrupa/v2_2/2016/JetHT2016",
     "/store/user/lpcpfnano/jekrupa/v2_2/2017/JetHT2017",
     "/store/user/lpcpfnano/jekrupa/v2_2/2018/JetHT2018",
-
     "/store/user/lpcpfnano/cmantill/v2_2/2016/MET2016",
     "/store/user/lpcpfnano/cmantill/v2_2/2017/MET2017",
     "/store/user/lpcpfnano/cmantill/v2_2/2018/MET2018",
-
     "/store/user/lpcpfnano/drankin/v2_2/2016/SingleElectron2016",
     "/store/user/lpcpfnano/drankin/v2_2/2017/SingleElectron2017",
     "/store/user/lpcpfnano/drankin/v2_2/2018/EGamma2018",
-
     "/store/user/lpcpfnano/jiyoo/v2_3/2016/DoubleEG2016",
     "/store/user/lpcpfnano/jiyoo/v2_3/2016/DoubleMu2016",
     "/store/user/lpcpfnano/jiyoo/v2_3/2016/MuonEG2016",
-
     "/store/user/lpcpfnano/jiyoo/v2_3/2017/DoubleMu2017",
     "/store/user/lpcpfnano/jiyoo/v2_3/2017/DoubleEG2017",
     "/store/user/lpcpfnano/jiyoo/v2_3/2017/MuonEG2017",
-
     "/store/user/lpcpfnano/jiyoo/v2_3/2018/DoubleMu2018",
     "/store/user/lpcpfnano/jiyoo/v2_3/2018/MuonEG2018",
     "/store/user/lpcpfnano/jiyoo/v2_3/2018/DoubleEG2018",
-
     "/store/user/lpcpfnano/jekrupa/v2_2/2016APV/TTbar",
     "/store/user/lpcpfnano/jekrupa/v2_2/2016/TTbar",
     "/store/user/lpcpfnano/jekrupa/v2_2/2017/TTbar",
     "/store/user/lpcpfnano/emoreno/v2_2/2018/TTbar",
-
     "/store/user/lpcpfnano/drankin/v2_2/2016/TTbar",
     "/store/user/lpcpfnano/drankin/v2_2/2016APV/TTbar",
     "/store/user/lpcpfnano/drankin/v2_2/2017/TTbar",
     "/store/user/lpcpfnano/drankin/v2_2/2018/TTbar",
-
     "/store/user/lpcpfnano/yihan/v2_2/2016/TTbar",
     "/store/user/lpcpfnano/yihan/v2_2/2016APV/TTbar",
     "/store/user/lpcpfnano/yihan/v2_2/2017/TTbar",
     "/store/user/lpcpfnano/yihan/v2_2/2018/TTbar",
-    
     "/store/user/lpcpfnano/yihan/v2_2/2016/QCD",
     "/store/user/lpcpfnano/yihan/v2_2/2016APV/QCD",
     "/store/user/lpcpfnano/jekrupa/v2_2/2017/QCD",
     "/store/user/lpcpfnano/jekrupa/v2_2/2018/QCD",
-
     "/store/user/lpcpfnano/cmantill/v2_3/2016/WJetsToQQ/",
     "/store/user/lpcpfnano/cmantill/v2_3/2016APV/WJetsToQQ/",
     "/store/user/lpcpfnano/cmantill/v2_3/2017/WJetsToQQ/",
     "/store/user/lpcpfnano/rkansal/v2_3/2017/WJetsToQQ/",
     "/store/user/lpcpfnano/cmantill/v2_3/2018/WJetsToQQ/",
-
     "/store/user/lpcpfnano/cmantill/v2_3/2016/ZJetsToQQ/",
     "/store/user/lpcpfnano/cmantill/v2_3/2016APV/ZJetsToQQ/",
     "/store/user/lpcpfnano/cmantill/v2_3/2017/ZJetsToQQ/",
     "/store/user/lpcpfnano/rkansal/v2_3/2017/ZJetsToQQ/",
     "/store/user/lpcpfnano/cmantill/v2_3/2018/ZJetsToQQ/",
-
     "/store/user/lpcpfnano/pharris/v2_2/2016/SingleTop",
     "/store/user/lpcpfnano/pharris/v2_2/2016APV/SingleTop",
     "/store/user/lpcpfnano/pharris/v2_2/2017/SingleTop",
     "/store/user/lpcpfnano/pharris/v2_2/2018/SingleTop",
-
     "/store/user/lpcpfnano/drankin/v2_2/2016/SingleTop/",
     "/store/user/lpcpfnano/drankin/v2_2/2016APV/SingleTop/",
     "/store/user/lpcpfnano/drankin/v2_2/2017/SingleTop/",
     "/store/user/lpcpfnano/drankin/v2_2/2018/SingleTop/",
-
     "/store/user/lpcpfnano/drankin/v2_2/2016/WJetsToLNu",
     "/store/user/lpcpfnano/drankin/v2_2/2016APV/WJetsToLNu",
     "/store/user/lpcpfnano/drankin/v2_2/2017/WJetsToLNu",
     "/store/user/lpcpfnano/drankin/v2_2/2018/WJetsToLNu",
-
     "/store/user/lpcpfnano/cmantill/v2_2/2016/DYJetsToLL",
     "/store/user/lpcpfnano/cmantill/v2_2/2016APV/DYJetsToLL",
     "/store/user/lpcpfnano/cmantill/v2_3/2016APV/DYJetsToLL",
     "/store/user/lpcpfnano/cmantill/v2_2/2017/DYJetsToLL",
     "/store/user/lpcpfnano/cmantill/v2_2/2018/DYJetsToLL",
-
     "/store/user/lpcpfnano/jdickins/v2_2/2016/Diboson/",
     "/store/user/lpcpfnano/jdickins/v2_2/2016APV/Diboson/",
     "/store/user/lpcpfnano/jdickins/v2_2/2017/Diboson/",
     "/store/user/lpcpfnano/jdickins/v2_2/2018/Diboson/",
-
     "/store/user/lpcpfnano/jdickins/v2_2/2016/DibosonNLO/",
     "/store/user/lpcpfnano/jdickins/v2_2/2016APV/DibosonNLO/",
     "/store/user/lpcpfnano/jdickins/v2_2/2017/DibosonNLO/",
     "/store/user/lpcpfnano/jdickins/v2_2/2018/DibosonNLO/",
-
     "/store/user/lpcpfnano/jdickins/v2_2/2016/ttHToBB/"
     "/store/user/lpcpfnano/jdickins/v2_2/2016APV/ttHToBB/",
     "/store/user/lpcpfnano/jdickins/v2_2/2017/ttHToBB/",
     "/store/user/lpcpfnano/jdickins/v2_2/2018/ttHToBB/",
-
     "/store/user/lpcpfnano/jdickins/v2_2/2016/VBFHToBB/",
     "/store/user/lpcpfnano/jdickins/v2_2/2016APV/VBFHToBB/",
     "/store/user/lpcpfnano/jdickins/v2_2/2017/VBFHToBB/",
     "/store/user/lpcpfnano/jdickins/v2_2/2018/VBFHToBB/",
-
     "/store/user/lpcpfnano/jdickins/v2_2/2016/GluGluHToBB/",
     "/store/user/lpcpfnano/jdickins/v2_2/2016APV/GluGluHToBB/",
     "/store/user/lpcpfnano/jdickins/v2_2/2017/GluGluHToBB/",
     "/store/user/lpcpfnano/jdickins/v2_2/2018/GluGluHToBB/",
-
     "/store/user/lpcpfnano/jdickins/v2_2/2016/WHToBB/",
     "/store/user/lpcpfnano/jdickins/v2_2/2016APV/WHToBB/",
     "/store/user/lpcpfnano/jdickins/v2_2/2017/WHToBB/",
     "/store/user/lpcpfnano/jdickins/v2_2/2018/WHToBB/",
-
     "/store/user/lpcpfnano/jdickins/v2_2/2016/ZHToBB/",
     "/store/user/lpcpfnano/jdickins/v2_2/2016APV/ZHToBB/",
     "/store/user/lpcpfnano/jdickins/v2_2/2017/ZHToBB/",
     "/store/user/lpcpfnano/jdickins/v2_2/2018/ZHToBB/",
-
     "/store/user/lpcpfnano/cmantill/v2_2/2016/HWW",
     "/store/user/lpcpfnano/cmantill/v2_2/2016APV/HWW",
     "/store/user/lpcpfnano/cmantill/v2_2/2017/HWW",
     "/store/user/lpcpfnano/cmantill/v2_2/2017/HWWPrivate",
     "/store/user/lpcpfnano/cmantill/v2_2/2018/HWW",
-
     "/store/user/lpcpfnano/cmantill/v2_3/2016/HWW",
     "/store/user/lpcpfnano/cmantill/v2_3/2016APV/HWW",
     "/store/user/lpcpfnano/cmantill/v2_3/2017/HWW",
     "/store/user/lpcpfnano/cmantill/v2_3/2018/HWW",
-
     "/store/user/lpcpfnano/cmantill/v2_2/2016/HTT",
     "/store/user/lpcpfnano/cmantill/v2_2/2016APV/HTT",
     "/store/user/lpcpfnano/cmantill/v2_2/2017/HTT",
@@ -158,7 +132,6 @@ folders_to_index = [
 # samples to exclude (needs / at the end)
 samples_to_exclude = [
     ["2018", "v2_2", "HZJ_HToWW_M-125_TuneCP5_13TeV-powheg-jhugen727-pythia8/"],
-    
 ]
 index_APV = {}
 
@@ -188,7 +161,7 @@ for pyear in ["2016", "2016APV", "2017", "2018"]:
             continue
 
         sample_short = f1.split("/")[-1]
-        print(f' {sample_short}')
+        print(f" {sample_short}")
 
         if not year in index:
             index[year] = {}
@@ -200,13 +173,20 @@ for pyear in ["2016", "2016APV", "2017", "2018"]:
             print(f"\t/{f2}")
 
             exclude = False
-            for exclude_year,exclude_version,exclude_sample in samples_to_exclude:
-                if(f2 == exclude_sample and pyear == exclude_year and version == exclude_version):
-                    print(f'   Excluding {sample_short}, {f2}, {version}, {pyear}')
+            for exclude_year, exclude_version, exclude_sample in samples_to_exclude:
+                if (
+                    f2 == exclude_sample
+                    and pyear == exclude_year
+                    and version == exclude_version
+                ):
+                    print(f"   Excluding {sample_short}, {f2}, {version}, {pyear}")
                     exclude = True
-            if exclude: break
+            if exclude:
+                break
 
-            subsample_long = f2.replace("/", "")  # This should be the actual dataset name
+            subsample_long = f2.replace(
+                "/", ""
+            )  # This should be the actual dataset name
             f2_subfolders = get_subfolders(f"{f1}/{f2}")
             if len(f2_subfolders) == 0:
                 root_files = [
@@ -221,11 +201,11 @@ for pyear in ["2016", "2016APV", "2017", "2018"]:
             for f3 in f2_subfolders:
                 # print(f"\t\t/{f3}")
                 subsample_short = f3.replace("/", "")
-                if "ext1" in subsample_short: 
-                    print('   Ext1')
+                if "ext1" in subsample_short:
+                    print("   Ext1")
 
-                subsample_short = subsample_short.replace("_ext1","")
-                print(f'  {subsample_short}')
+                subsample_short = subsample_short.replace("_ext1", "")
+                print(f"  {subsample_short}")
 
                 if not subsample_short in index[year][sample_short]:
                     index[year][sample_short][subsample_short] = []
@@ -243,26 +223,31 @@ for pyear in ["2016", "2016APV", "2017", "2018"]:
                             for x in f5_children
                             if x[-5:] == ".root"
                         ]
-                        if year=="2016" and "HIPM" in subsample_short:
+                        if year == "2016" and "HIPM" in subsample_short:
                             if not sample_short in index_APV:
                                 index_APV[sample_short] = {}
                             if not subsample_short in index_APV[sample_short]:
                                 index_APV[sample_short][subsample_short] = []
-                                index_APV[sample_short][subsample_short].extend(root_files)
+                                index_APV[sample_short][subsample_short].extend(
+                                    root_files
+                                )
                         else:
                             if not subsample_short in index[year][sample_short]:
                                 index[year][sample_short][subsample_short] = []
-                            index[year][sample_short][subsample_short].extend(root_files)
+                            index[year][sample_short][subsample_short].extend(
+                                root_files
+                            )
 
-
-    if pyear=="2016APV":
+    if pyear == "2016APV":
         for sample_short in index_APV.keys():
             for subsample_short in index_APV[sample_short].keys():
                 if not sample_short in index[pyear]:
                     index[pyear][sample_short] = {}
-                if  not subsample_short in index[pyear][sample_short]:
+                if not subsample_short in index[pyear][sample_short]:
                     index[pyear][sample_short][subsample_short] = []
-                index[pyear][sample_short][subsample_short] = index_APV[sample_short][subsample_short]
+                index[pyear][sample_short][subsample_short] = index_APV[sample_short][
+                    subsample_short
+                ]
 
     with open(f"pfnanoindex_{pyear}.json", "w") as f:
         json.dump(index, f, sort_keys=True, indent=2)

@@ -25,9 +25,18 @@ pd.options.mode.chained_assignment = None  # default='warn'
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--ch',       dest='ch',        default='ele,mu,had',  help='channels for which to plot this variable')
-parser.add_argument('--dir',      dest='dir',       default='May7_2017',   help="tag for data directory")
-parser.add_argument('--odir',     dest='odir',      default='rootfiles',   help="tag for output directory")
+parser.add_argument(
+    "--ch",
+    dest="ch",
+    default="ele,mu,had",
+    help="channels for which to plot this variable",
+)
+parser.add_argument(
+    "--dir", dest="dir", default="May7_2017", help="tag for data directory"
+)
+parser.add_argument(
+    "--odir", dest="odir", default="rootfiles", help="tag for output directory"
+)
 
 args = parser.parse_args()
 
@@ -41,10 +50,10 @@ def compute_counts(channels, samples, idir, outdir, data_label):
         if not os.path.exists(outdir + ch):
             os.makedirs(outdir + ch)
 
-        print(f'For {ch} channel')
+        print(f"For {ch} channel")
 
         for sample in samples:
-            print(f'For {sample} sample')
+            print(f"For {sample} sample")
 
             # check if sample is data to skip
             is_data = False
@@ -66,11 +75,11 @@ def compute_counts(channels, samples, idir, outdir, data_label):
             else:
                 dir_name = sample
 
-            if not os.path.exists(outdir + ch + '/' + dir_name):
-                os.makedirs(outdir + ch + '/' + dir_name)
+            if not os.path.exists(outdir + ch + "/" + dir_name):
+                os.makedirs(outdir + ch + "/" + dir_name)
 
             # get list of parquet files that have been processed
-            parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')
+            parquet_files = glob.glob(f"{idir}/{sample}/outfiles/*_{ch}.parquet")
 
             if len(parquet_files) == 0:
                 continue
@@ -79,44 +88,59 @@ def compute_counts(channels, samples, idir, outdir, data_label):
                 try:
                     data = pq.read_table(parquet_file).to_pandas()
                 except:
-                    print('Not able to read data: ', parquet_file, ' should remove evts from scaling/lumi')
+                    print(
+                        "Not able to read data: ",
+                        parquet_file,
+                        " should remove evts from scaling/lumi",
+                    )
                     continue
                 if len(data) == 0:
                     continue
 
                 # load parquet into dataframe
-                print('loading dataframe...')
+                print("loading dataframe...")
                 table = pq.read_table(parquet_file)
                 data = table.to_pandas()
-                print('# input events:', len(data))
+                print("# input events:", len(data))
 
                 if len(data) == 0:
-                    print('no skimmed events. skipping')
+                    print("no skimmed events. skipping")
                     continue
 
                 for key in data.keys():
-                    if key == 'fj_bjets_ophem':
+                    if key == "fj_bjets_ophem":
                         data.drop(columns=[key], inplace=True)
 
                 # drop AK columns
                 for key in data.keys():
-                    if data[key].dtype == 'object':
-                        print(f'dropping column {key}')
+                    if data[key].dtype == "object":
+                        print(f"dropping column {key}")
                         data.drop(columns=[key], inplace=True)
 
                 # explicitly drop fj_bjets_ophem
                 for key in data.keys():
-                    if key == 'fj_bjets_ophem':
-                        print(f'dropping column {key}')
+                    if key == "fj_bjets_ophem":
+                        print(f"dropping column {key}")
                         data.drop(columns=[key], inplace=True)
 
-                _, tail = os.path.split(parquet_file)    # get the file name from full path
+                _, tail = os.path.split(
+                    parquet_file
+                )  # get the file name from full path
 
-                outname = outdir + ch + '/' + dir_name + '/' + f'{sample}_' + tail[:-8] + '.root'  # the [:-8] slice removes the .parquet extension (to replace it with a .root extension)
+                outname = (
+                    outdir
+                    + ch
+                    + "/"
+                    + dir_name
+                    + "/"
+                    + f"{sample}_"
+                    + tail[:-8]
+                    + ".root"
+                )  # the [:-8] slice removes the .parquet extension (to replace it with a .root extension)
                 with uproot.recreate(outname) as file:
-                    file['Events'] = pd.DataFrame(data)
+                    file["Events"] = pd.DataFrame(data)
 
-                print('Wrote rootfile ', outname)
+                print("Wrote rootfile ", outname)
 
 
 if __name__ == "__main__":
@@ -125,20 +149,20 @@ if __name__ == "__main__":
     python convert_to_root.py --dir /eos/uscms/store/user/cmantill/boostedhiggs/May7_2017 --ch ele,mu,had --odir rootfiles
     """
 
-    channels = args.ch.split(',')
+    channels = args.ch.split(",")
 
-    year = args.dir[-4:]    # get the year from the --dir argument being passed
+    year = args.dir[-4:]  # get the year from the --dir argument being passed
     idir = args.dir
 
-    if year == '2018':
+    if year == "2018":
         data_label = data_by_ch_2018
     else:
         data_label = data_by_ch
 
-    samples = os.listdir(f'{idir}')
+    samples = os.listdir(f"{idir}")
 
     # make directory to hold counts
-    outdir = args.odir + '/'
+    outdir = args.odir + "/"
     if not os.path.exists(outdir):
         os.makedirs(outdir)
 

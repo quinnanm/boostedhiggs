@@ -31,7 +31,7 @@ def get_pfcands_features(
 
     msk = preselected_events[pfcands_label].jetIdx == ak.firsts(fj_idx_lep)
     jet_ak_pfcands = preselected_events[pfcands_label][msk]
-    jet_pfcands = (preselected_events.PFCands[jet_ak_pfcands.pFCandsIdx])
+    jet_pfcands = preselected_events.PFCands[jet_ak_pfcands.pFCandsIdx]
 
     # negative eta jets have -1 sign, positive eta jets have +1
     eta_sign = ak.values_astype(jet_pfcands.eta > 0, int) * 2 - 1
@@ -64,16 +64,30 @@ def get_pfcands_features(
     # btag vars
     for var in tagger_vars["pf_features"]["var_names"]:
         if "btag" in var:
-            feature_dict[var] = jet_ak_pfcands[var[len("pfcand_"):]]
+            feature_dict[var] = jet_ak_pfcands[var[len("pfcand_") :]]
 
     # pfcand mask
-    feature_dict["pfcand_mask"] = (~(ma.masked_invalid( ak.pad_none(feature_dict["pfcand_abseta"], tagger_vars["pf_points"]["var_length"], axis=1, clip=True).to_numpy() ).mask) ).astype(np.float32)
+    feature_dict["pfcand_mask"] = (
+        ~(
+            ma.masked_invalid(
+                ak.pad_none(
+                    feature_dict["pfcand_abseta"],
+                    tagger_vars["pf_points"]["var_length"],
+                    axis=1,
+                    clip=True,
+                ).to_numpy()
+            ).mask
+        )
+    ).astype(np.float32)
 
     # convert to numpy arrays and normalize features
     for var in tagger_vars["pf_features"]["var_names"]:
         a = (
             ak.pad_none(
-                feature_dict[var], tagger_vars["pf_points"]["var_length"], axis=1, clip=True
+                feature_dict[var],
+                tagger_vars["pf_points"]["var_length"],
+                axis=1,
+                clip=True,
             )
             .to_numpy()
             .filled(fill_value=0)
@@ -114,8 +128,7 @@ def get_svs_features(
     msk = preselected_events[svs_label].jetIdx == ak.firsts(fj_idx_lep)
     jet_svs = preselected_events.SV[
         preselected_events[svs_label].sVIdx[
-            (preselected_events[svs_label].sVIdx != -1)
-            * (msk)
+            (preselected_events[svs_label].sVIdx != -1) * (msk)
         ]
     ]
 
@@ -136,13 +149,27 @@ def get_svs_features(
     svpAngle = jet_svs.pAngle
     feature_dict["sv_costhetasvpv"] = -np.cos(svpAngle)
 
-    feature_dict["sv_mask"] = (~(ma.masked_invalid( ak.pad_none(feature_dict["sv_etarel"], tagger_vars["sv_points"]["var_length"], axis=1, clip=True).to_numpy() ).mask) ).astype(np.float32)
+    feature_dict["sv_mask"] = (
+        ~(
+            ma.masked_invalid(
+                ak.pad_none(
+                    feature_dict["sv_etarel"],
+                    tagger_vars["sv_points"]["var_length"],
+                    axis=1,
+                    clip=True,
+                ).to_numpy()
+            ).mask
+        )
+    ).astype(np.float32)
 
     # convert to numpy arrays and normalize features
     for var in tagger_vars["sv_features"]["var_names"]:
         a = (
             ak.pad_none(
-                feature_dict[var], tagger_vars["sv_points"]["var_length"], axis=1, clip=True
+                feature_dict[var],
+                tagger_vars["sv_points"]["var_length"],
+                axis=1,
+                clip=True,
             )
             .to_numpy()
             .filled(fill_value=0)

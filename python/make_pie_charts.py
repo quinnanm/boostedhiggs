@@ -29,28 +29,44 @@ import mplhep as hep
 from hist.intervals import clopper_pearson_interval
 
 import warnings
+
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--ch',       dest='ch',        default='ele,mu,had',  help='channels for which to plot this variable')
-parser.add_argument('--dir',      dest='dir',       default='May7_2017',   help="tag for data directory")
-parser.add_argument('--odir',     dest='odir',      default='counts',      help="tag for output directory")
-parser.add_argument("--compute_counts",   dest='compute_counts', action='store_true', help="Plot the hists")
+parser.add_argument(
+    "--ch",
+    dest="ch",
+    default="ele,mu,had",
+    help="channels for which to plot this variable",
+)
+parser.add_argument(
+    "--dir", dest="dir", default="May7_2017", help="tag for data directory"
+)
+parser.add_argument(
+    "--odir", dest="odir", default="counts", help="tag for output directory"
+)
+parser.add_argument(
+    "--compute_counts",
+    dest="compute_counts",
+    action="store_true",
+    help="Plot the hists",
+)
 
 args = parser.parse_args()
 
 # define color dict for plotting different samples
-color_dict = {'signal': 'red',
-              'QCD': 'blue',
-              'DYJets': 'green',
-              'TTbar': 'purple',
-              'SingleTop': 'yellow',
-              'WJetsLNu': 'brown',
-              'WQQ': 'orange',
-              'ZQQ': 'magenta',
-              'others': 'black'
-              }
+color_dict = {
+    "signal": "red",
+    "QCD": "blue",
+    "DYJets": "green",
+    "TTbar": "purple",
+    "SingleTop": "yellow",
+    "WJetsLNu": "brown",
+    "WQQ": "orange",
+    "ZQQ": "magenta",
+    "others": "black",
+}
 
 
 def compute_counts(channels, samples, odir, data_label):
@@ -62,7 +78,7 @@ def compute_counts(channels, samples, odir, data_label):
     num_dict = {}
     for ch in channels:
         num_dict[ch] = {}
-        print(f'For {ch} channel')
+        print(f"For {ch} channel")
 
         for sample in samples:
 
@@ -81,13 +97,15 @@ def compute_counts(channels, samples, odir, data_label):
                     combine = True
                     break
 
-            if combine and single_key not in num_dict[ch].keys():   # if the counts for the combined samples has not been intialized yet
+            if (
+                combine and single_key not in num_dict[ch].keys()
+            ):  # if the counts for the combined samples has not been intialized yet
                 num_dict[ch][single_key] = 0
             elif not combine:
                 num_dict[ch][sample] = 0
 
             # get list of parquet files that have been processed
-            parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')
+            parquet_files = glob.glob(f"{idir}/{sample}/outfiles/*_{ch}.parquet")
 
             if len(parquet_files) == 0:
                 continue
@@ -96,27 +114,35 @@ def compute_counts(channels, samples, odir, data_label):
                 try:
                     data = pq.read_table(parquet_file).to_pandas()
                 except:
-                    print('Not able to read data: ', parquet_file, ' should remove evts from scaling/lumi')
+                    print(
+                        "Not able to read data: ",
+                        parquet_file,
+                        " should remove evts from scaling/lumi",
+                    )
                     continue
                 if len(data) == 0:
                     continue
 
                 # drop AK columns
                 for key in data.keys():
-                    if data[key].dtype == 'object':
+                    if data[key].dtype == "object":
                         data.drop(columns=[key], inplace=True)
 
                 if combine:
-                    num_dict[ch][single_key] = num_dict[ch][single_key] + data['tot_weight'].sum()
+                    num_dict[ch][single_key] = (
+                        num_dict[ch][single_key] + data["tot_weight"].sum()
+                    )
                 else:
-                    num_dict[ch][sample] = num_dict[ch][sample] + data['tot_weight'].sum()
+                    num_dict[ch][sample] = (
+                        num_dict[ch][sample] + data["tot_weight"].sum()
+                    )
 
         for key, value in num_dict[ch].items():
-            print(f'number of events for {key} is {value}')
+            print(f"number of events for {key} is {value}")
 
-        print(f'-----------------------------------------')
+        print(f"-----------------------------------------")
 
-    with open(f'./{odir}/num_dict.pkl', 'wb') as f:  # saves counts
+    with open(f"./{odir}/num_dict.pkl", "wb") as f:  # saves counts
         pkl.dump(num_dict, f)
 
 
@@ -125,9 +151,9 @@ def make_pie(channels, odir):
     Makes pie chart for a given channel
     """
 
-    print(f'Making pie charts...')
+    print(f"Making pie charts...")
 
-    with open(f'{odir}/num_dict.pkl', 'rb') as f:
+    with open(f"{odir}/num_dict.pkl", "rb") as f:
         num_dict = pkl.load(f)
         f.close()
 
@@ -138,16 +164,16 @@ def make_pie(channels, odir):
             num_total = num_total + num
 
         plot = {}
-        plot['others'] = 0
+        plot["others"] = 0
         others = []
 
         for sample, num in num_dict[ch].items():
-            if ('GluGluH' in sample):
-                plot['signal'] = 100 * num / num_total
-            elif (100 * num / num_total > 1):
+            if "GluGluH" in sample:
+                plot["signal"] = 100 * num / num_total
+            elif 100 * num / num_total > 1:
                 plot[sample] = 100 * num / num_total
             else:
-                plot['others'] = plot['others'] + 100 * num / num_total
+                plot["others"] = plot["others"] + 100 * num / num_total
                 others.append(sample)
 
         col = []
@@ -157,16 +183,19 @@ def make_pie(channels, odir):
         fig, ax = plt.subplots(figsize=(9, 7))
 
         patches, texts = ax.pie(plot.values(), colors=col, startangle=90, radius=1.2)
-        labels = ['{0} - {1:1.2f} %'.format(i, j) for i, j in zip(plot.keys(), plot.values())]
+        labels = [
+            "{0} - {1:1.2f} %".format(i, j) for i, j in zip(plot.keys(), plot.values())
+        ]
 
-        ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
-        ax.set_title(f'{ch} channel', size=40)
-        plt.legend(patches, labels, loc='upper left', bbox_to_anchor=(-0.1, 1.),
-                   fontsize=12)
+        ax.axis("equal")  # Equal aspect ratio ensures that pie is drawn as a circle.
+        ax.set_title(f"{ch} channel", size=40)
+        plt.legend(
+            patches, labels, loc="upper left", bbox_to_anchor=(-0.1, 1.0), fontsize=12
+        )
         plt.tight_layout()
-        plt.savefig(f'{odir}/pie_chart_{ch}.pdf')
+        plt.savefig(f"{odir}/pie_chart_{ch}.pdf")
         plt.close()
-        print(f'others for {ch} ch include {others}')
+        print(f"others for {ch} ch include {others}")
 
 
 if __name__ == "__main__":
@@ -175,17 +204,17 @@ if __name__ == "__main__":
     python make_pie_charts.py --dir May7_2017 --odir pie_charts --ch ele,mu,had --compute_counts
     """
 
-    channels = args.ch.split(',')
+    channels = args.ch.split(",")
 
     year = args.dir[-4:]
-    idir = '/eos/uscms/store/user/cmantill/boostedhiggs/' + args.dir
+    idir = "/eos/uscms/store/user/cmantill/boostedhiggs/" + args.dir
 
-    if year == '2018':
+    if year == "2018":
         data_label = data_by_ch_2018
     else:
         data_label = data_by_ch
 
-    samples = os.listdir(f'{idir}')
+    samples = os.listdir(f"{idir}")
 
     # make directory to hold counts
     if not os.path.exists(args.odir):
