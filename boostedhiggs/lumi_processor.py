@@ -43,12 +43,10 @@ class LumiProcessor(processor.ProcessorABC):
     def __init__(
         self,
         year="2017",
-        yearmod="",
         output_location="./outfiles/",
     ):
 
         self._year = year
-        self._yearmod = yearmod
 
     @property
     def accumulator(self):
@@ -65,7 +63,7 @@ class LumiProcessor(processor.ProcessorABC):
 
         # TODO: if possible, get lumi value per file and accumulate
         # return dictionary with cutflows
-        return {dataset: {self._year + self._yearmod: {"lumilist": lumilist}}}
+        return {dataset: {self._year: {"lumilist": lumilist}}}
 
     def postprocess(self, accumulator):
         return accumulator
