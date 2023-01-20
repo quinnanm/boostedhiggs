@@ -30,7 +30,7 @@ class wrapped_triton:
         self,
         model_url: str,
         batch_size: int,
-        torchscript: bool = True,
+        out_name: str = "softmax__0"
     ) -> None:
         fullprotocol, location = model_url.split("://")
         _, protocol = fullprotocol.split("+")
@@ -42,7 +42,7 @@ class wrapped_triton:
         self._version = version
 
         self._batch_size = batch_size
-        self._torchscript = torchscript
+        self._out_name = out_name
 
     def __call__(self, input_dict: Dict[str, np.ndarray]) -> np.ndarray:
         if self._protocol == "grpc":
@@ -93,10 +93,7 @@ class wrapped_triton:
             input.set_data_from_numpy(input_dict[key])
             inputs.append(input)
 
-        # out_name = "softmax__0" if self._torchscript else "softmax"
-        out_name = "output__0"
-
-        output = triton_protocol.InferRequestedOutput(out_name)
+        output = triton_protocol.InferRequestedOutput(self._out_name)
 
         request = client.infer(
             self._model,
@@ -105,22 +102,30 @@ class wrapped_triton:
             outputs=[output],
         )
 
-        return request.as_numpy(out_name)
+        return request.as_numpy(self._out_name)
 
 
 def runInferenceTriton(
-    tagger_resources_path: str, events: NanoEventsArray, fj_idx_lep
+    tagger_resources_path: str, events: NanoEventsArray, fj_idx_lep, model_name: str = "ak8_MD_vminclv2ParT_manual_fixwrap"
 ) -> dict:
     total_start = time.time()
+    # print(f"Running tagger inference with model {model_name}")
 
-    with open(f"{tagger_resources_path}/triton_config.json") as f:
+    with open(f"{tagger_resources_path}/triton_config_{model_name}.json") as f:
         triton_config = json.load(f)
 
     with open(f"{tagger_resources_path}/{triton_config['model_name']}.json") as f:
         tagger_vars = json.load(f)
 
+    pversion,out_name = {
+        "05_10_ak8_ttbarwjets": ["PN_UCSD","softmax__0"],
+        "particlenet_hww_inclv2_pre2": ["PN_v2","output__0"],
+        "particlenet_hww_inclv2_pre2_noreg": ["PN_v2_noreg","output__0"],
+        "ak8_MD_vminclv2ParT_manual_fixwrap": ["ParT","softmax"],
+    }[model_name]
+
     triton_model = wrapped_triton(
-        triton_config["model_url"], triton_config["batch_size"], torchscript=True
+        triton_config["model_url"], triton_config["batch_size"], out_name=out_name
     )
 
     fatjet_label = "FatJet"
@@ -142,16 +147,28 @@ def runInferenceTriton(
         for key in tagger_vars[input_name]["var_names"]:
             np.expand_dims(feature_dict[key], 1)
 
-    tagger_inputs = {
-        f"{input_name}__{i}": np.concatenate(
-            [
-                np.expand_dims(feature_dict[key], 1)
-                for key in tagger_vars[input_name]["var_names"]
-            ],
+    if out_name=="softmax":
+        tagger_inputs = {
+            f"{input_name}": np.concatenate(
+                [
+                    np.expand_dims(feature_dict[key], 1)
+                    for key in tagger_vars[input_name]["var_names"]
+                ],
+                axis=1,
+            )
+            for i, input_name in enumerate(tagger_vars["input_names"])
+        }
+    else:
+        tagger_inputs = {
+            f"{input_name}__{i}": np.concatenate(
+                [
+                    np.expand_dims(feature_dict[key], 1)
+                    for key in tagger_vars[input_name]["var_names"]
+                ],
             axis=1,
-        )
-        for i, input_name in enumerate(tagger_vars["input_names"])
-    }
+            )
+            for i, input_name in enumerate(tagger_vars["input_names"])
+        }
 
     # run inference for both fat jets
     tagger_outputs = []
@@ -165,27 +182,45 @@ def runInferenceTriton(
         )
         return {}
 
+    if model_name=="particlenet_hww_inclv2_pre2" or model_name=="particlenet_hww_inclv2_pre2_noreg":
+        import scipy
+        mass = tagger_outputs[:, -1]
+        tagger_outputs = scipy.special.softmax(tagger_outputs[:,:-1], axis=1)
+        np.append(tagger_outputs, mass)
+
     time_taken = time.time() - start
 
     print(f"Inference took {time_taken:.1f}s")
 
-    # For model: 05_10_ak8_ttbarwjets
-    # pnet_vars = {
-    #     f"fj_ttbar_bmerged": tagger_outputs[:, 0],
-    #     f"fj_ttbar_bsplit": tagger_outputs[:, 1],
-    #     f"fj_wjets_label": tagger_outputs[:, 2],
-    #     f"fj_isHVV_elenuqq": tagger_outputs[:, 3],
-    #     f"fj_isHVV_munuqq": tagger_outputs[:, 4],
-    #     f"fj_isHVV_taunuqq": tagger_outputs[:, 5],
-    # }
+    if model_name=="05_10_ak8_ttbarwjets":
+        pnet_vars = {
+            f"fj_{pversion}_ttbar": tagger_outputs[:, 0:1],
+            f"fj_{pversion}_wjets": tagger_outputs[:, 2],
+            f"fj_{pversion}_HVV_elenuqq": tagger_outputs[:, 3],
+            f"fj_{pversion}_HVV_munuqq": tagger_outputs[:, 4],
+            f"fj_{pversion}_HVV_taunuqq": tagger_outputs[:, 5],
+        }
+    else:
+        pnet_vars = {}
+        for i, output_name in enumerate(tagger_vars["output_names"]):
+            pnet_vars[f"fj_{output_name}"] = tagger_outputs[:, i]
 
-    # For model: particlenet_hww_inclv2_pre2
-    names_to_discard = ["label_H_bb", "label_H_cc", "label_H_ss", "label_H_qq"]
-    pnet_vars = {}
-    for i, output_name in enumerate(tagger_vars["output_names"]):
-        if output_name in names_to_discard:
-            continue
-        pnet_vars[f"fj_{output_name}"] = tagger_outputs[:, i]
+        derived_vars = {
+            f"fj_{pversion}_probQCD": np.sum(
+                tagger_outputs[:, 23:28], axis=1
+            ),
+            f"fj_{pversion}_probTopb": np.sum(
+                tagger_outputs[:, 29:37], axis=1
+            ),
+            f"fj_{pversion}_probHWWelenuqq": np.sum(
+                tagger_outputs[:, 7:8], axis=1
+            ),
+            f"fj_{pversion}_probHWWmunuqq": np.sum(
+                tagger_outputs[:, 9:10], axis=1
+            ),
+        }
+        
+        pnet_vars = {**pnet_vars, **derived_vars}
 
     print(f"Total time taken: {time.time() - total_start:.1f}s")
     return pnet_vars

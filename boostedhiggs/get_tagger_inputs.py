@@ -61,6 +61,11 @@ def get_pfcands_features(
     feature_dict["pfcand_dzsig"] = jet_pfcands.dz / jet_pfcands.dzErr
     feature_dict["pfcand_dxysig"] = jet_pfcands.d0 / jet_pfcands.d0Err
 
+    feature_dict["pfcand_px"] = jet_pfcands.px
+    feature_dict["pfcand_py"] = jet_pfcands.py
+    feature_dict["pfcand_pz"] = jet_pfcands.pz
+    feature_dict["pfcand_energy"] = jet_pfcands.E
+
     # btag vars
     for var in tagger_vars["pf_features"]["var_names"]:
         if "btag" in var:
@@ -72,7 +77,7 @@ def get_pfcands_features(
             ma.masked_invalid(
                 ak.pad_none(
                     feature_dict["pfcand_abseta"],
-                    tagger_vars["pf_points"]["var_length"],
+                    tagger_vars["pf_features"]["var_length"],
                     axis=1,
                     clip=True,
                 ).to_numpy()
@@ -80,21 +85,34 @@ def get_pfcands_features(
         )
     ).astype(np.float32)
 
+    # if no padding is needed, mask will = 1.0
+    if isinstance(feature_dict["pfcand_mask"], np.float32):
+        feature_dict["pfcand_mask"] = np.ones(
+            (len(feature_dict["pfcand_abseta"]), tagger_vars["pf_features"]["var_length"])
+        ).astype(np.float32)
+
     # convert to numpy arrays and normalize features
-    for var in tagger_vars["pf_features"]["var_names"]:
+    for var in set(
+        tagger_vars["pf_features"]["var_names"] + tagger_vars["pf_vectors"]["var_names"]
+    ):
         a = (
             ak.pad_none(
                 feature_dict[var],
-                tagger_vars["pf_points"]["var_length"],
+                tagger_vars["pf_features"]["var_length"],
                 axis=1,
                 clip=True,
             )
             .to_numpy()
             .filled(fill_value=0)
         ).astype(np.float32)
+        a = np.nan_to_num(a)
 
         if normalize:
-            info = tagger_vars["pf_features"]["var_infos"][var]
+            if var in tagger_vars["pf_features"]["var_names"]:
+                info = tagger_vars["pf_features"]["var_infos"][var]
+            else:
+                info = tagger_vars["pf_vectors"]["var_infos"][var]
+
             a = (a - info["median"]) * info["norm_factor"]
             a = np.clip(a, info.get("lower_bound", -5), info.get("upper_bound", 5))
 
@@ -149,25 +167,36 @@ def get_svs_features(
     svpAngle = jet_svs.pAngle
     feature_dict["sv_costhetasvpv"] = -np.cos(svpAngle)
 
+    feature_dict["sv_px"] = jet_svs.px
+    feature_dict["sv_py"] = jet_svs.py
+    feature_dict["sv_pz"] = jet_svs.pz
+    feature_dict["sv_energy"] = jet_svs.E
+
     feature_dict["sv_mask"] = (
         ~(
             ma.masked_invalid(
                 ak.pad_none(
                     feature_dict["sv_etarel"],
-                    tagger_vars["sv_points"]["var_length"],
+                    tagger_vars["sv_features"]["var_length"],
                     axis=1,
                     clip=True,
                 ).to_numpy()
             ).mask
         )
     ).astype(np.float32)
+    if isinstance(feature_dict["sv_mask"], np.float32):
+        feature_dict["sv_mask"] = np.ones(
+            (len(feature_dict["sv_abseta"]), tagger_vars["sv_features"]["var_length"])
+        ).astype(np.float32)
 
     # convert to numpy arrays and normalize features
-    for var in tagger_vars["sv_features"]["var_names"]:
+    for var in set(
+            tagger_vars["sv_features"]["var_names"] + tagger_vars["sv_vectors"]["var_names"]
+    ):
         a = (
             ak.pad_none(
                 feature_dict[var],
-                tagger_vars["sv_points"]["var_length"],
+                tagger_vars["sv_features"]["var_length"],
                 axis=1,
                 clip=True,
             )
@@ -176,7 +205,10 @@ def get_svs_features(
         ).astype(np.float32)
 
         if normalize:
-            info = tagger_vars["sv_features"]["var_infos"][var]
+            if var in tagger_vars["sv_features"]["var_names"]:
+                info = tagger_vars["sv_features"]["var_infos"][var]
+            else:
+                info = tagger_vars["sv_vectors"]["var_infos"][var]
             a = (a - info["median"]) * info["norm_factor"]
             a = np.clip(a, info.get("lower_bound", -5), info.get("upper_bound", 5))
 
