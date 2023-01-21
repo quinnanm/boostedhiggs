@@ -32,6 +32,7 @@ FILL_NONE_VALUE = -99999
 
 JET_DR = 0.8
 
+
 def get_pid_mask(
     genparts: GenParticleArray,
     pdgids: Union[int, list],
@@ -58,9 +59,7 @@ def to_label(array: ak.Array) -> ak.Array:
     return ak.values_astype(array, np.int32)
 
 
-def match_H(
-    genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID
-):
+def match_H(genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID):
     """Gen matching for Higgs samples"""
     higgs = genparts[
         get_pid_mask(genparts, HIGGS_PDGID, byall=False) * genparts.hasFlags(GEN_FLAGS)
@@ -301,7 +300,8 @@ def match_H(
 
 def match_V(genparts: GenParticleArray, fatjet: FatJetArray):
     vs = genparts[
-        get_pid_mask(genparts, [W_PDGID, Z_PDGID], byall=False) * genparts.hasFlags(GEN_FLAGS)
+        get_pid_mask(genparts, [W_PDGID, Z_PDGID], byall=False)
+        * genparts.hasFlags(GEN_FLAGS)
     ]
     matched_vs = vs[ak.argmin(fatjet.delta_r(vs), axis=1, keepdims=True)]
     matched_vs_mask = ak.any(fatjet.delta_r(matched_vs) < 0.8, axis=1)
@@ -319,7 +319,7 @@ def match_V(genparts: GenParticleArray, fatjet: FatJetArray):
         # 1 tau * 7
         + (ak.sum(daughters_pdgId == TAU_PDGID, axis=1) == 1) * 7
     )
-    
+
     daughters_nov = daughters[
         (
             (daughters_pdgId != vELE_PDGID)
@@ -338,7 +338,9 @@ def match_V(genparts: GenParticleArray, fatjet: FatJetArray):
     ]
     lepinprongs = 0
     if len(lepdaughters) > 0:
-        lepinprongs = ak.sum(fatjet.delta_r(lepdaughters) < JET_DR, axis=1)  # should be 0 or 1
+        lepinprongs = ak.sum(
+            fatjet.delta_r(lepdaughters) < JET_DR, axis=1
+        )  # should be 0 or 1
 
     # number of c quarks
     cquarks = daughters_nov[abs(daughters_nov.pdgId) == c_PDGID]
@@ -360,7 +362,9 @@ def match_V(genparts: GenParticleArray, fatjet: FatJetArray):
 
 
 def match_Top(genparts: GenParticleArray, fatjet: FatJetArray):
-    tops = genparts[get_pid_mask(genparts, TOP_PDGID, byall=False) * genparts.hasFlags(GEN_FLAGS)]
+    tops = genparts[
+        get_pid_mask(genparts, TOP_PDGID, byall=False) * genparts.hasFlags(GEN_FLAGS)
+    ]
     matched_tops = tops[ak.argmin(fatjet.delta_r(tops), axis=1, keepdims=True)]
     matched_tops_mask = ak.any(fatjet.delta_r(matched_tops) < 0.8, axis=1)
     daughters = ak.flatten(matched_tops.distinctChildren, axis=2)
@@ -414,7 +418,9 @@ def match_Top(genparts: GenParticleArray, fatjet: FatJetArray):
 
     lepinprongs = 0
     if len(lepdaughters) > 0:
-        lepinprongs = ak.sum(fatjet.delta_r(lepdaughters) < JET_DR, axis=1)  # should be 0 or 1
+        lepinprongs = ak.sum(
+            fatjet.delta_r(lepdaughters) < JET_DR, axis=1
+        )  # should be 0 or 1
 
     # get tau decays from V daughters
     taudaughters = wboson_daughters[(wboson_daughters_pdgId == TAU_PDGID)].children
@@ -423,7 +429,13 @@ def match_Top(genparts: GenParticleArray, fatjet: FatJetArray):
 
     taudecay = (
         # pions/kaons (hadronic tau) * 1
-        (ak.sum((taudaughters_pdgId == ELE_PDGID) | (taudaughters_pdgId == MU_PDGID), axis=2) == 0)
+        (
+            ak.sum(
+                (taudaughters_pdgId == ELE_PDGID) | (taudaughters_pdgId == MU_PDGID),
+                axis=2,
+            )
+            == 0
+        )
         * 1
         # 1 electron * 3
         + (ak.sum(taudaughters_pdgId == ELE_PDGID, axis=2) == 1) * 3
@@ -433,7 +445,7 @@ def match_Top(genparts: GenParticleArray, fatjet: FatJetArray):
     # flatten taudecay - so painful
     taudecay = ak.sum(taudecay, axis=-1)
 
-    genVars = {        
+    genVars = {
         "fj_Top_isMatched": matched_mask,
         "fj_nprongs": nprongs,
         "fj_lepinprongs": lepinprongs,
@@ -468,6 +480,7 @@ def pad_val(
     else:
         ret = ak.fill_none(arr, value, axis=None)
     return ret.to_numpy() if to_numpy else ret
+
 
 def add_selection(
     name: str,
