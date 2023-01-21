@@ -88,7 +88,10 @@ def get_pfcands_features(
     # if no padding is needed, mask will = 1.0
     if isinstance(feature_dict["pfcand_mask"], np.float32):
         feature_dict["pfcand_mask"] = np.ones(
-            (len(feature_dict["pfcand_abseta"]), tagger_vars["pf_features"]["var_length"])
+            (
+                len(feature_dict["pfcand_abseta"]),
+                tagger_vars["pf_features"]["var_length"],
+            )
         ).astype(np.float32)
 
     # convert to numpy arrays and normalize features
@@ -191,7 +194,7 @@ def get_svs_features(
 
     # convert to numpy arrays and normalize features
     for var in set(
-            tagger_vars["sv_features"]["var_names"] + tagger_vars["sv_vectors"]["var_names"]
+        tagger_vars["sv_features"]["var_names"] + tagger_vars["sv_vectors"]["var_names"]
     ):
         a = (
             ak.pad_none(

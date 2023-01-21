@@ -27,10 +27,7 @@ from .get_tagger_inputs import get_pfcands_features, get_svs_features
 # adapted from https://github.com/lgray/hgg-coffea/blob/triton-bdts/src/hgg_coffea/tools/chained_quantile.py
 class wrapped_triton:
     def __init__(
-        self,
-        model_url: str,
-        batch_size: int,
-        out_name: str = "softmax__0"
+        self, model_url: str, batch_size: int, out_name: str = "softmax__0"
     ) -> None:
         fullprotocol, location = model_url.split("://")
         _, protocol = fullprotocol.split("+")
@@ -106,7 +103,10 @@ class wrapped_triton:
 
 
 def runInferenceTriton(
-    tagger_resources_path: str, events: NanoEventsArray, fj_idx_lep, model_name: str = "ak8_MD_vminclv2ParT_manual_fixwrap"
+    tagger_resources_path: str,
+    events: NanoEventsArray,
+    fj_idx_lep,
+    model_name: str = "ak8_MD_vminclv2ParT_manual_fixwrap",
 ) -> dict:
     total_start = time.time()
     # print(f"Running tagger inference with model {model_name}")
@@ -117,11 +117,11 @@ def runInferenceTriton(
     with open(f"{tagger_resources_path}/{triton_config['model_name']}.json") as f:
         tagger_vars = json.load(f)
 
-    pversion,out_name = {
-        "05_10_ak8_ttbarwjets": ["PN_UCSD","softmax__0"],
-        "particlenet_hww_inclv2_pre2": ["PN_v2","output__0"],
-        "particlenet_hww_inclv2_pre2_noreg": ["PN_v2_noreg","output__0"],
-        "ak8_MD_vminclv2ParT_manual_fixwrap": ["ParT","softmax"],
+    pversion, out_name = {
+        "05_10_ak8_ttbarwjets": ["PN_UCSD", "softmax__0"],
+        "particlenet_hww_inclv2_pre2": ["PN_v2", "output__0"],
+        "particlenet_hww_inclv2_pre2_noreg": ["PN_v2_noreg", "output__0"],
+        "ak8_MD_vminclv2ParT_manual_fixwrap": ["ParT", "softmax"],
     }[model_name]
 
     triton_model = wrapped_triton(
@@ -147,7 +147,7 @@ def runInferenceTriton(
         for key in tagger_vars[input_name]["var_names"]:
             np.expand_dims(feature_dict[key], 1)
 
-    if out_name=="softmax":
+    if out_name == "softmax":
         tagger_inputs = {
             f"{input_name}": np.concatenate(
                 [
@@ -165,7 +165,7 @@ def runInferenceTriton(
                     np.expand_dims(feature_dict[key], 1)
                     for key in tagger_vars[input_name]["var_names"]
                 ],
-            axis=1,
+                axis=1,
             )
             for i, input_name in enumerate(tagger_vars["input_names"])
         }
@@ -182,17 +182,21 @@ def runInferenceTriton(
         )
         return {}
 
-    if model_name=="particlenet_hww_inclv2_pre2" or model_name=="particlenet_hww_inclv2_pre2_noreg":
+    if (
+        model_name == "particlenet_hww_inclv2_pre2"
+        or model_name == "particlenet_hww_inclv2_pre2_noreg"
+    ):
         import scipy
+
         mass = tagger_outputs[:, -1]
-        tagger_outputs = scipy.special.softmax(tagger_outputs[:,:-1], axis=1)
+        tagger_outputs = scipy.special.softmax(tagger_outputs[:, :-1], axis=1)
         np.append(tagger_outputs, mass)
 
     time_taken = time.time() - start
 
     print(f"Inference took {time_taken:.1f}s")
 
-    if model_name=="05_10_ak8_ttbarwjets":
+    if model_name == "05_10_ak8_ttbarwjets":
         pnet_vars = {
             f"fj_{pversion}_ttbar": tagger_outputs[:, 0:1],
             f"fj_{pversion}_wjets": tagger_outputs[:, 2],
@@ -206,20 +210,12 @@ def runInferenceTriton(
             pnet_vars[f"fj_{output_name}"] = tagger_outputs[:, i]
 
         derived_vars = {
-            f"fj_{pversion}_probQCD": np.sum(
-                tagger_outputs[:, 23:28], axis=1
-            ),
-            f"fj_{pversion}_probTopb": np.sum(
-                tagger_outputs[:, 29:37], axis=1
-            ),
-            f"fj_{pversion}_probHWWelenuqq": np.sum(
-                tagger_outputs[:, 7:8], axis=1
-            ),
-            f"fj_{pversion}_probHWWmunuqq": np.sum(
-                tagger_outputs[:, 9:10], axis=1
-            ),
+            f"fj_{pversion}_probQCD": np.sum(tagger_outputs[:, 23:28], axis=1),
+            f"fj_{pversion}_probTopb": np.sum(tagger_outputs[:, 29:37], axis=1),
+            f"fj_{pversion}_probHWWelenuqq": np.sum(tagger_outputs[:, 7:8], axis=1),
+            f"fj_{pversion}_probHWWmunuqq": np.sum(tagger_outputs[:, 9:10], axis=1),
         }
-        
+
         pnet_vars = {**pnet_vars, **derived_vars}
 
     print(f"Total time taken: {time.time() - total_start:.1f}s")

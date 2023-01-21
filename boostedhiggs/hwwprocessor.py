@@ -381,7 +381,6 @@ class HwwProcessor(processor.ProcessorABC):
         # isvbf = ((deta > 3.5) & (mjj > 1000))
         # isvbf = ak.fill_none(isvbf,False)
 
-
         variables = {
             "lep": {
                 "fj_pt": candidatefj.pt,
@@ -438,21 +437,17 @@ class HwwProcessor(processor.ProcessorABC):
 
         # gen-level matching
         if self.isMC:
-            if (
-                ("HToWW" in dataset) or ("HWW" in dataset) or ("ttHToNonbb" in dataset)
-            ):
-                genVars,signal_mask = match_H(events.GenPart, candidatefj)
+            if ("HToWW" in dataset) or ("HWW" in dataset) or ("ttHToNonbb" in dataset):
+                genVars, signal_mask = match_H(events.GenPart, candidatefj)
                 variables["common"] = {**variables["common"], **genVars}
                 self.add_selection(name="signal", sel=signal_mask)
-            elif (
-                ("HToTauTau" in dataset)
-            ):
-                genVars,signal_mask = match_H(events.GenPart, candidatefj, dau_pdgid = 15)
+            elif "HToTauTau" in dataset:
+                genVars, signal_mask = match_H(
+                    events.GenPart, candidatefj, dau_pdgid=15
+                )
                 variables["common"] = {**variables["common"], **genVars}
                 self.add_selection(name="signal", sel=signal_mask)
-            elif (
-                ("WJets" in dataset) or ("ZJets" in dataset) or ("DYJets" in dataset)
-            ):
+            elif ("WJets" in dataset) or ("ZJets" in dataset) or ("DYJets" in dataset):
                 genVars = match_V(events.GenPart, candidatefj)
             elif ("TT" in dataset) and self.isMC:
                 genVars = match_Top(events.GenPart, candidatefj)
