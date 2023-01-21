@@ -18,8 +18,7 @@ from coffea.nanoevents.methods import candidate, vector
 from coffea.analysis_tools import Weights, PackedSelection
 
 from boostedhiggs.utils import (
-    match_HWW,
-    getParticles,
+    match_H,
     match_V,
     match_Top,
     get_neutrino_z,
@@ -382,27 +381,7 @@ class HwwProcessor(processor.ProcessorABC):
         # isvbf = ((deta > 3.5) & (mjj > 1000))
         # isvbf = ak.fill_none(isvbf,False)
 
-        """
-        HEM issue: Hadronic calorimeter Endcaps Minus (HEM) issue.
-        The endcaps of the hadron calorimeter failed to cover the phase space at -3 < eta < -1.3 and -1.57 < phi < -0.87 during the 2018 data C and D.
-        The transverse momentum of the jets in this region is typically under-measured, this results in over-measured MET. It could also result on new electrons.
-        We must veto the jets and met in this region.
-        Should we veto on AK8 jets or electrons too?
-        Let's add this as a cut to check first.
-        """
-        if self._year == "2018":
-            hem_cleaning = events.run >= 319077 & ak.any(
-                (
-                    (events.Jet.pt > 30.0)
-                    & (events.Jet.eta > -3.2)
-                    & (events.Jet.eta < -1.3)
-                    & (events.Jet.phi > -1.57)
-                    & (events.Jet.phi < -0.87)
-                ),
-                -1,
-            ) | ((met.phi > -1.62) & (met.pt < 470.0) & (met.phi < -0.62))
 
-        # output tuple variables
         variables = {
             "lep": {
                 "fj_pt": candidatefj.pt,
@@ -435,43 +414,50 @@ class HwwProcessor(processor.ProcessorABC):
             },
         }
 
-        # variables["lep"]["fatjetKin"] = candidatefj.pt > 200
-        # variables["lep"]["ht"] = (ht > 200)
-        # variables["lep"]["antibjettag"] = (ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"])
-        # variables["lep"]["leptonInJet"] = (lep_fj_dr < 0.8)
-        # variables["mu"]["leptonKin"] = (candidatelep.pt > 30)
-        # variables["mu"]["oneLepton"] = (n_good_muons == 1) & (n_good_electrons == 0) & (n_loose_electrons == 0) & ~ak.any(loose_muons & ~good_muons, 1)
-        # variables["mu"]["notaus"] = (n_loose_taus_mu == 0)
-        # variables["ele"]["leptonKin"] = (candidatelep.pt > 40)
-        # variables["ele"]["oneLepton"] = (n_good_muons == 0) & (n_loose_muons == 0) & (n_good_electrons == 1) & ~ak.any(loose_electrons & ~good_electrons, 1)
-        # variables["ele"]["notaus"] = (n_loose_taus_ele == 0)
-
-        # gen matching for signal
-        if (
-            ("HToWW" in dataset) or ("HWW" in dataset) or ("ttH" in dataset)
-        ) and self.isMC:
-            matchHWW = match_HWW(events.GenPart, candidatefj)
-            variables["lep"]["gen_Hpt"] = ak.firsts(matchHWW["matchedH"].pt)
-            variables["lep"]["gen_Hnprongs"] = matchHWW["hWW_nprongs"]
-            variables["lep"]["gen_iswlepton"] = ak.firsts(matchHWW["iswlepton"])
-            variables["lep"]["gen_iswstarlepton"] = ak.firsts(matchHWW["iswstarlepton"])
-
-        # gen matching for background
-        if ("WJets" in dataset) or ("ZJets" in dataset) and self.isMC:
-            matchV = match_V(events.GenPart, candidatefj)
-            if "WJetsToLNu" in dataset:
-                variables["lep"]["gen_isVlep"] = matchV["gen_isVlep"]
-            if ("WJetsToQQ" in dataset) or ("ZJetsToQQ" in dataset):
-                variables["lep"]["gen_isVqq"] = matchV["gen_isVqq"]
-        if ("TT" in dataset) and self.isMC:
-            matchT = match_Top(events.GenPart, candidatefj)
-            variables["lep"]["gen_isTop"] = matchT["gen_isTopbmerged"]
-            variables["lep"]["gen_isToplep"] = matchT["gen_isToplep"]
-            variables["lep"]["gen_isTopqq"] = matchT["gen_isTopqq"]
-
-        # let's save the hem veto as a cut for now
+        """
+        HEM issue: Hadronic calorimeter Endcaps Minus (HEM) issue.
+        The endcaps of the hadron calorimeter failed to cover the phase space at -3 < eta < -1.3 and -1.57 < phi < -0.87 during the 2018 data C and D.
+        The transverse momentum of the jets in this region is typically under-measured, this results in over-measured MET. It could also result on new electrons.
+        We must veto the jets and met in this region.
+        Should we veto on AK8 jets or electrons too?
+        Let's add this as a cut to check first.
+        """
         if self._year == "2018":
+            hem_cleaning = events.run >= 319077 & ak.any(
+                (
+                    (events.Jet.pt > 30.0)
+                    & (events.Jet.eta > -3.2)
+                    & (events.Jet.eta < -1.3)
+                    & (events.Jet.phi > -1.57)
+                    & (events.Jet.phi < -0.87)
+                ),
+                -1,
+            ) | ((met.phi > -1.62) & (met.pt < 470.0) & (met.phi < -0.62))
+
             variables["common"]["hem_cleaning"] = hem_cleaning
+
+        # gen-level matching
+        if self.isMC:
+            if (
+                ("HToWW" in dataset) or ("HWW" in dataset) or ("ttHToNonbb" in dataset)
+            ):
+                genVars,signal_mask = match_H(events.GenPart, candidatefj)
+                variables["common"] = {**variables["common"], **genVars}
+                self.add_selection(name="signal", sel=signal_mask)
+            elif (
+                ("HToTauTau" in dataset)
+            ):
+                genVars,signal_mask = match_H(events.GenPart, candidatefj, dau_pdgid = 15)
+                variables["common"] = {**variables["common"], **genVars}
+                self.add_selection(name="signal", sel=signal_mask)
+            elif (
+                ("WJets" in dataset) or ("ZJets" in dataset) or ("DYJets" in dataset)
+            ):
+                genVars = match_V(events.GenPart, candidatefj)
+            elif ("TT" in dataset) and self.isMC:
+                genVars = match_Top(events.GenPart, candidatefj)
+            else:
+                pass
 
         """
         Weights
@@ -656,13 +642,11 @@ class HwwProcessor(processor.ProcessorABC):
 
                 # fill inference
                 if self.inference:
-                    print("pre-inference")
                     pnet_vars = runInferenceTriton(
                         self.tagger_resources_path,
                         events[selection_ch],
                         fj_idx_lep[selection_ch],
                     )
-                    print("post-inference")
 
                     output[ch] = {
                         **output[ch],
