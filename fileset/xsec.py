@@ -18,7 +18,7 @@ BR_THadronic = 0.667
 BR_TLeptonic = 1 - BR_THadronic
 
 BR_HBB = 0.5809
-BR_Htt = 0.06272
+BR_Htt = 0.0621
 
 xs = {}
 
@@ -52,12 +52,16 @@ vbf_xsec = 3.782 * BR_HWW * BR_WW_lnuqq
 xs["VBFHToWWToLNuQQ-MH125"] = 3.782 * BR_HWW * BR_WW_lnuqq
 xs["VBFHToWWToLNuQQ_M-125_withDipoleRecoil"] = vbf_xsec
 
+xs["VBFHToWWToAny_M-125_TuneCP5_withDipoleRecoil"] = 3.782 * BR_HWW
+
 xs["ttHToNonbb_M125"] = 5.013e-01 * (1 - BR_HBB)
 
 # Cross xcheck the following numbers
 xs["HWminusJ_HToWW_M-125"] = 0.5445 * BR_HWW
 xs["HWplusJ_HToWW_M-125"] = 0.8720 * BR_HWW
 xs["HZJ_HToWW_M-125"] = 0.9595 * BR_HWW
+# cross check -  this in xsdb is 0.006185
+xs["GluGluZH_HToWW_ZTo2L_M-125"] = 0.1223 * 3 * 0.033658 * BR_HWW
 
 # QCD
 xs["QCD_HT500to700"] = 3.033e04
@@ -180,7 +184,13 @@ xs["ggZH_HToBB_ZToLL"] = 6.185e-03 * BR_HBB
 
 xs["ttHToBB"] = 5.013e-01 * BR_HBB
 
+# Higgs to Tau Tau
 xs["GluGluHToTauTau"] = 48.58 * BR_Htt
+xs["VBFHToTauTau"] = 3.770 * BR_Htt
+xs["WminusHToTauTau"] = 0.5272 * BR_Htt
+xs["WplusHToTauTau"] = 0.8331 * BR_Htt
+xs["ZHToTauTau"] = 0.7544 * BR_Htt
+xs["ttHToTauTau"] = 0.5033 * BR_Htt
 
 print(xs)
 

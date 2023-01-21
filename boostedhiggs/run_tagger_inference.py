@@ -120,7 +120,7 @@ def runInferenceTriton(
     pversion, out_name = {
         "05_10_ak8_ttbarwjets": ["PN_UCSD", "softmax__0"],
         "particlenet_hww_inclv2_pre2": ["PN_v2", "output__0"],
-        "particlenet_hww_inclv2_pre2_noreg": ["PN_v2_noreg", "output__0"],
+        "particlenet_hww_inclv2_pre2_noreg": ["PN_v2_noreg", "softmax__0"],
         "ak8_MD_vminclv2ParT_manual_fixwrap": ["ParT", "softmax"],
     }[model_name]
 
@@ -183,8 +183,7 @@ def runInferenceTriton(
         return {}
 
     if (
-        model_name == "particlenet_hww_inclv2_pre2"
-        or model_name == "particlenet_hww_inclv2_pre2_noreg"
+        out_name == "output__0"
     ):
         import scipy
 
@@ -207,7 +206,7 @@ def runInferenceTriton(
     else:
         pnet_vars = {}
         for i, output_name in enumerate(tagger_vars["output_names"]):
-            pnet_vars[f"fj_{output_name}"] = tagger_outputs[:, i]
+            pnet_vars[f"fj_{pversion}_{output_name}"] = tagger_outputs[:, i]
 
         derived_vars = {
             f"fj_{pversion}_probQCD": np.sum(tagger_outputs[:, 23:28], axis=1),

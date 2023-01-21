@@ -22,6 +22,7 @@ from boostedhiggs.utils import (
     match_V,
     match_Top,
     get_neutrino_z,
+    pad_val,
 )
 from boostedhiggs.corrections import (
     corrected_msoftdrop,
@@ -41,35 +42,6 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", message="Missing cross-reference index ")
 warnings.filterwarnings("ignore", message="divide by zero encountered in log")
 np.seterr(invalid="ignore")
-
-
-def dsum(*dicts):
-    ret = defaultdict(int)
-    for d in dicts:
-        for k, v in d.items():
-            ret[k] += v
-    return dict(ret)
-
-
-def pad_val(
-    arr: ak.Array,
-    value: float,
-    target: int = None,
-    axis: int = 0,
-    to_numpy: bool = False,
-    clip: bool = True,
-):
-    """
-    pads awkward array up to ``target`` index along axis ``axis`` with value ``value``,
-    optionally converts to numpy array
-    """
-    if target:
-        ret = ak.fill_none(
-            ak.pad_none(arr, target, axis=axis, clip=clip), value, axis=None
-        )
-    else:
-        ret = ak.fill_none(arr, value, axis=None)
-    return ret.to_numpy() if to_numpy else ret
 
 
 def build_p4(cand):
@@ -116,10 +88,10 @@ class HwwProcessor(processor.ProcessorABC):
                 self._metfilters = json.load(f)[self._year]
 
         # b-tagging corrector
-        self._btagWPs = btagWPs["deepJet"][year + yearmod]
+        self._btagWPs = btagWPs["deepJet"][self._year + self._yearmod]
         # self._btagSF = BTagCorrector("M", "deepJet", year, yearmod)
 
-        if year == "2018":
+        if self._year == "2018":
             self.dataset_per_ch = {
                 "ele": "EGamma",
                 "mu": "SingleMuon",
@@ -137,7 +109,10 @@ class HwwProcessor(processor.ProcessorABC):
             str(pathlib.Path(__file__).parent.resolve()) + "/tagger_resources/"
         )
 
-        self.common_weights = ["genweight", "L1Prefiring", "pileup"]
+        if self._year in ("2016", "2017"):
+            self.common_weights = ["genweight", "L1Prefiring", "pileup"]
+        else:
+            self.common_weights = ["genweight", "pileup"]
 
     @property
     def accumulator(self):
@@ -227,63 +202,67 @@ class HwwProcessor(processor.ProcessorABC):
         n_loose_taus_mu = ak.sum(loose_taus_mu, axis=1)
         n_loose_taus_ele = ak.sum(loose_taus_ele, axis=1)
 
+        muons = ak.with_field(events.Muon, 0, "flavor")
+        electrons = ak.with_field(events.Electron, 1, "flavor")
+
         # muons
         loose_muons = (
             (
-                ((events.Muon.pt > 30) & (events.Muon.pfRelIso04_all < 0.25))
-                | (events.Muon.pt > 55)
+                ((muons.pt > 30) & (muons.pfRelIso04_all < 0.25))
+                | (muons.pt > 55)
             )
-            & (np.abs(events.Muon.eta) < 2.4)
-            & (events.Muon.looseId)
+            & (np.abs(muons.eta) < 2.4)
+            & (muons.looseId)
         )
         n_loose_muons = ak.sum(loose_muons, axis=1)
 
         good_muons = (
-            (events.Muon.pt > 30)
-            & (np.abs(events.Muon.eta) < 2.4)
-            & (np.abs(events.Muon.dz) < 0.1)
-            & (np.abs(events.Muon.dxy) < 0.05)
-            & (events.Muon.sip3d <= 4.0)
-            & events.Muon.mediumId
+            (muons.pt > 30)
+            & (np.abs(muons.eta) < 2.4)
+            & (np.abs(muons.dz) < 0.1)
+            & (np.abs(muons.dxy) < 0.05)
+            & (muons.sip3d <= 4.0)
+            & muons.mediumId
         )
         n_good_muons = ak.sum(good_muons, axis=1)
 
         # electrons
         loose_electrons = (
             (
-                ((events.Electron.pt > 38) & (events.Electron.pfRelIso03_all < 0.25))
-                | (events.Electron.pt > 120)
+                ((electrons.pt > 38) & (electrons.pfRelIso03_all < 0.25))
+                | (electrons.pt > 120)
             )
-            & (np.abs(events.Electron.eta) < 2.4)
+            & (np.abs(electrons.eta) < 2.4)
             & (
-                (np.abs(events.Electron.eta) < 1.44)
-                | (np.abs(events.Electron.eta) > 1.57)
+                (np.abs(electrons.eta) < 1.44)
+                | (np.abs(electrons.eta) > 1.57)
             )
-            & (events.Electron.cutBased >= events.Electron.LOOSE)
+            & (electrons.cutBased >= electrons.LOOSE)
         )
         n_loose_electrons = ak.sum(loose_electrons, axis=1)
 
         good_electrons = (
-            (events.Electron.pt > 38)
-            & (np.abs(events.Electron.eta) < 2.4)
+            (electrons.pt > 38)
+            & (np.abs(electrons.eta) < 2.4)
             & (
-                (np.abs(events.Electron.eta) < 1.44)
-                | (np.abs(events.Electron.eta) > 1.57)
+                (np.abs(electrons.eta) < 1.44)
+                | (np.abs(electrons.eta) > 1.57)
             )
-            & (np.abs(events.Electron.dz) < 0.1)
-            & (np.abs(events.Electron.dxy) < 0.05)
-            & (events.Electron.sip3d <= 4.0)
-            & (events.Electron.mvaFall17V2noIso_WP90)
+            & (np.abs(electrons.dz) < 0.1)
+            & (np.abs(electrons.dxy) < 0.05)
+            & (electrons.sip3d <= 4.0)
+            & (electrons.mvaFall17V2noIso_WP90)
         )
         n_good_electrons = ak.sum(good_electrons, axis=1)
 
         # get candidate lepton
         goodleptons = ak.concatenate(
-            [events.Muon[good_muons], events.Electron[good_electrons]], axis=1
+            [muons[good_muons], electrons[good_electrons]], axis=1
         )  # concat muons and electrons
         goodleptons = goodleptons[
             ak.argsort(goodleptons.pt, ascending=False)
         ]  # sort by pt
+
         candidatelep = ak.firsts(goodleptons)  # pick highest pt
 
         candidatelep_p4 = build_p4(candidatelep)  # build p4 for candidate lepton
@@ -296,8 +275,8 @@ class HwwProcessor(processor.ProcessorABC):
         mu_mvaId = (
             candidatelep.mvaId if hasattr(candidatelep, "mvaId") else np.zeros(nevents)
         )  # MVA-ID for candidate lepton
-        mu_highPtId = ak.firsts(events.Muon[good_muons]).highPtId
-        ele_highPtId = ak.firsts(events.Electron[good_electrons]).cutBased_HEEP
+        mu_highPtId = ak.firsts(muons[good_muons]).highPtId
+        ele_highPtId = ak.firsts(electrons[good_electrons]).cutBased_HEEP
 
         # jets
         goodjets = events.Jet[
@@ -439,54 +418,55 @@ class HwwProcessor(processor.ProcessorABC):
         if self.isMC:
             if ("HToWW" in dataset) or ("HWW" in dataset) or ("ttHToNonbb" in dataset):
                 genVars, signal_mask = match_H(events.GenPart, candidatefj)
-                variables["common"] = {**variables["common"], **genVars}
                 self.add_selection(name="signal", sel=signal_mask)
             elif "HToTauTau" in dataset:
                 genVars, signal_mask = match_H(
                     events.GenPart, candidatefj, dau_pdgid=15
                 )
-                variables["common"] = {**variables["common"], **genVars}
                 self.add_selection(name="signal", sel=signal_mask)
             elif ("WJets" in dataset) or ("ZJets" in dataset) or ("DYJets" in dataset):
                 genVars = match_V(events.GenPart, candidatefj)
-            elif ("TT" in dataset) and self.isMC:
+            elif ("TT" in dataset):
                 genVars = match_Top(events.GenPart, candidatefj)
             else:
-                pass
+                genVars = {}
+            variables["common"] = {**variables["common"], **genVars}
+
 
         """
         Weights
         ------
-        - Gen weight (DONE)
-        - Pileup weight (DONE)
-        - L1 prefiring weight for 2016/2017 (DONE)
+        - Gen weight
+        - Pileup weight
+        - L1 prefiring weight for 2016/2017
         - B-tagging efficiency weights (ToDo)
-        - Electron trigger scale factors (DONE)
-        - Muon trigger scale factors (DONE)
-        - Electron ID scale factors and Reco scale factors (DONE)
-        - Muon ID scale factors (DONE)
-        - Muon Isolation scale factors (DONE)
+        - Electron trigger scale factors
+        - Muon trigger scale factors
+        - Electron ID scale factors and Reco scale factors
+        - Muon ID scale factors
+        - Muon Isolation scale factors
         - Electron Isolation scale factors (ToDo)
+        - Mini-isolation scale factor (ToDo)
         - Jet Mass Scale (JMS) scale factor (ToDo)
         - Jet Mass Resolution (JMR) scale factor (ToDo)
-        - NLO EWK scale factors for DY(ll)/W(lnu)/W(qq)/Z(qq) (DONE)
-        - ~NNLO QCD scale factors for DY(ll)/W(lnu)/W(qq)/Z(qq) (DONE)
-        - LHE scale weights for signal
-        - LHE pdf weights for signal
-        - PSweights for signal
-        - ParticleNet tagger efficiency
+        - NLO EWK scale factors for DY(ll)/W(lnu)/W(qq)/Z(qq)
+        - ~NNLO QCD scale factors for DY(ll)/W(lnu)/W(qq)/Z(qq)
+        - LHE scale weights for signal (ToDo) 
+        - LHE pdf weights for signal (ToDo) 
+        - PSweights for signal (ToDo) 
+        - ParticleNet tagger efficienc (ToDo) y
 
         Up and Down Variations (systematics included as a new variable)
         ----
-        - Pileup weight Up/Down (DONE)
-        - L1 prefiring weight Up/Down (DONE)
+        - Pileup weight Up/Down 
+        - L1 prefiring weight Up/Down
         - B-tagging efficiency Up/Down (ToDo)
         - Electron Trigger Up/Down (ToDo)
-        - Muon Trigger Up/Down (DONE)
-        - Electron ID Up/Down (DONE)
+        - Muon Trigger Up/Down
+        - Electron ID Up/Down
         - Electron Isolation Up/Down
-        - Muon ID Up/Down (DONE)
-        - Muon Isolation Up/Down (DONE)
+        - Muon ID Up/Down
+        - Muon Isolation Up/Down
         - JMS Up/Down
         - JMR Up/Down
         - LHE scale variations for signal
@@ -501,6 +481,7 @@ class HwwProcessor(processor.ProcessorABC):
         """
         if self.isMC:
             self.weights.add("genweight", events.genWeight)
+
             if self._year in ("2016", "2017"):
                 self.weights.add(
                     "L1Prefiring",
@@ -508,6 +489,7 @@ class HwwProcessor(processor.ProcessorABC):
                     events.L1PreFiringWeight.Up,
                     events.L1PreFiringWeight.Dn,
                 )
+
             add_pileup_weight(
                 self.weights,
                 self._year,
@@ -637,22 +619,29 @@ class HwwProcessor(processor.ProcessorABC):
 
                 # fill inference
                 if self.inference:
-                    pnet_vars = runInferenceTriton(
-                        self.tagger_resources_path,
-                        events[selection_ch],
-                        fj_idx_lep[selection_ch],
-                    )
-
-                    output[ch] = {
-                        **output[ch],
-                        **{key: value for (key, value) in pnet_vars.items()},
-                    }
+                    for model_name in ["particlenet_hww_inclv2_pre2_noreg",
+                                       "ak8_MD_vminclv2ParT_manual_fixwrap"]:
+                        pnet_vars = runInferenceTriton(
+                            self.tagger_resources_path,
+                            events[selection_ch],
+                            fj_idx_lep[selection_ch],
+                            model_name=model_name
+                        )
+                        
+                        output[ch] = {
+                            **output[ch],
+                            **{key: value for (key, value) in pnet_vars.items()},
+                        }
+                        
             else:
                 output[ch] = {}
 
             # convert arrays to pandas
             if not isinstance(output[ch], pd.DataFrame):
                 output[ch] = self.ak_to_pandas(output[ch])
+
+            if "rec_higgs_m" in output[ch].keys():
+                output[ch]["rec_higgs_m"] = np.nan_to_num(output[ch]["rec_higgs_m"], nan=-1)
 
         # now save pandas dataframes
         fname = events.behavior["__events_factory__"]._partition_key.replace("/", "_")

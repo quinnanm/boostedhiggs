@@ -17,7 +17,7 @@ from coffea import processor
 from coffea.nanoevents.methods import candidate, vector
 from coffea.analysis_tools import Weights, PackedSelection
 
-from boostedhiggs.utils import match_HWW, getParticles, match_V, match_Top
+from boostedhiggs.utils import match_H, match_V, match_Top
 from boostedhiggs.corrections import (
     corrected_msoftdrop,
     add_VJets_kFactors,
@@ -36,6 +36,64 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", message="Missing cross-reference index ")
 warnings.filterwarnings("ignore", message="divide by zero encountered in log")
 np.seterr(invalid="ignore")
+
+
+def zleptons(good_leptons):
+     ngood_leptons = ak.num(good_leptons, axis=1)
+
+     min_three_leptons = ak.mask(good_leptons, (ngood_leptons >= 3)[:, None])
+     
+     lepton_pairs = ak.argcombinations(
+         min_three_leptons, 2, fields=["first", "second"]
+     )
+     lepton_pairs = ak.fill_none(lepton_pairs, [], axis=0)
+     
+     OSSF_pairs = lepton_pairs[
+         (
+             min_three_leptons[lepton_pairs["first"]].charge
+             != min_three_leptons[lepton_pairs["second"]].charge
+        )
+         & (
+             min_three_leptons[lepton_pairs["first"]].flavor
+             == min_three_leptons[lepton_pairs["second"]].flavor
+         )
+     ]
+     
+     closest_pairs = OSSF_pairs[
+        ak.local_index(OSSF_pairs)
+         == ak.argmin(
+             np.abs(
+                 (
+                     min_three_leptons[OSSF_pairs["first"]]
+                    + min_three_leptons[OSSF_pairs["second"]]
+                 ).mass
+                 - 91.2
+             ),
+             axis=1,
+         )
+     ]
+     closest_pairs = ak.fill_none(closest_pairs, [], axis=0)
+
+     # invariant Z mass                                                                                                                                                                                            
+     ZLeptonMass = (
+        min_three_leptons[closest_pairs.first]
+         + min_three_leptons[closest_pairs.second]
+     ).mass
+     desired_length = np.max(ak.num(ZLeptonMass))
+     
+     ZLeptonMass = ak.ravel(
+        ak.to_numpy(ak.fill_none(ak.pad_none(ZLeptonMass, desired_length), 0))
+     )
+
+     remainingLeptons = min_three_leptons[
+            (ak.local_index(min_three_leptons) != ak.any(closest_pairs.first, axis=1))
+            & (
+                ak.local_index(min_three_leptons)
+                != ak.any(closest_pairs.second, axis=1)
+            )
+     ]
+     
+     return ZLeptonMass,remainingLeptons
 
 
 def pad_val(
@@ -243,58 +301,11 @@ class vhProcessor(processor.ProcessorABC):
             ak.argsort(good_leptons.pt, ascending=False)
         ]  # sort by pt
 
-        # match leptons to the Z
         ngood_leptons = ak.num(good_leptons, axis=1)
-        min_three_leptons = ak.mask(good_leptons, (ngood_leptons >= 3)[:, None])
-
-        lepton_pairs = ak.argcombinations(
-            min_three_leptons, 2, fields=["first", "second"]
-        )
-        lepton_pairs = ak.fill_none(lepton_pairs, [], axis=0)
-
-        OSSF_pairs = lepton_pairs[
-            (
-                min_three_leptons[lepton_pairs["first"]].charge
-                != min_three_leptons[lepton_pairs["second"]].charge
-            )
-            & (
-                min_three_leptons[lepton_pairs["first"]].flavor
-                == min_three_leptons[lepton_pairs["second"]].flavor
-            )
-        ]
-
-        closest_pairs = OSSF_pairs[
-            ak.local_index(OSSF_pairs)
-            == ak.argmin(
-                np.abs(
-                    (
-                        min_three_leptons[OSSF_pairs["first"]]
-                        + min_three_leptons[OSSF_pairs["second"]]
-                    ).mass
-                    - 91.2
-                ),
-                axis=1,
-            )
-        ]
-        closest_pairs = ak.fill_none(closest_pairs, [], axis=0)
 
         # invariant Z mass
-        ZLeptonMass = (
-            min_three_leptons[closest_pairs.first]
-            + min_three_leptons[closest_pairs.second]
-        ).mass
-        desired_length = np.max(ak.num(ZLeptonMass))
-        ZLeptonMass = ak.ravel(
-            ak.to_numpy(ak.fill_none(ak.pad_none(ZLeptonMass, desired_length), 0))
-        )
+        ZLeptonMass,remainingLeptons = zleptons(good_leptons)
 
-        remainingLeptons = min_three_leptons[
-            (ak.local_index(min_three_leptons) != ak.any(closest_pairs.first, axis=1))
-            & (
-                ak.local_index(min_three_leptons)
-                != ak.any(closest_pairs.second, axis=1)
-            )
-        ]
         candidatelep = ak.firsts(
             remainingLeptons
         )  # pick remaining lepton with highest pt
@@ -405,14 +416,23 @@ class vhProcessor(processor.ProcessorABC):
             "ht": ht,
         }
 
-        # gen matching for signal
-        if (("HToWW" or "HWW") in dataset) and self.isMC:
-            matchHWW = match_HWW(events.GenPart, candidatefj)
-            # print(ak.firsts(matchHWW["matchedH"].pt))
-            variables["gen_Hpt"] = ak.firsts(matchHWW["matchedH"].pt)
-            variables["gen_Hnprongs"] = matchHWW["hWW_nprongs"]
-            variables["gen_iswlepton"] = matchHWW["iswlepton"]
-            variables["gen_iswstarlepton"] = matchHWW["iswstarlepton"]
+        # gen matching
+        if self.isMC:
+             if ("HToWW" in dataset) or ("HWW" in dataset) or ("ttHToNonbb" in dataset):
+                  genVars, signal_mask = match_H(events.GenPart, candidatefj)
+                  self.add_selection(name="signal", sel=signal_mask)
+             elif "HToTauTau" in dataset:
+                  genVars, signal_mask = match_H(
+                       events.GenPart, candidatefj, dau_pdgid=15
+                  )
+                  self.add_selection(name="signal", sel=signal_mask)
+             elif ("WJets" in dataset) or ("ZJets" in dataset) or ("DYJets" in dataset):
+                  genVars = match_V(events.GenPart, candidatefj)
+             elif ("TT" in dataset):
+                  genVars = match_Top(events.GenPart, candidatefj)
+             else:
+                  genVars = {}
+             variables = {**variables, **genVars}
 
         # let's save the hem veto as a cut for now
         if self._year == "2018":
