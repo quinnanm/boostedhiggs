@@ -98,7 +98,7 @@ If you see no jobs listed it means they have all finished.
 
 #### Testing jobs locally per single sample:
 ```
-python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local
+python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channel=ele
 ```
 
 #### Testing jobs with inference (and triton server running):
