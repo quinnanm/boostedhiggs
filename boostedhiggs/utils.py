@@ -5,6 +5,8 @@ import numpy as np
 from coffea.analysis_tools import PackedSelection
 from coffea.nanoevents.methods.nanoaod import FatJetArray, GenParticleArray
 
+from typing import List, Dict, Tuple, Union
+
 d_PDGID = 1
 c_PDGID = 4
 b_PDGID = 5
@@ -59,44 +61,31 @@ def to_label(array: ak.Array) -> ak.Array:
     return ak.values_astype(array, np.int32)
 
 
-def match_H(
-    genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID
-):
+def match_H(genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID):
     """Gen matching for Higgs samples"""
     higgs = genparts[
-        get_pid_mask(genparts, HIGGS_PDGID, byall=False)
-        * genparts.hasFlags(GEN_FLAGS)
+        get_pid_mask(genparts, HIGGS_PDGID, byall=False) * genparts.hasFlags(GEN_FLAGS)
     ]
 
     # only select events that match an specific decay
-    signal_mask = ak.firsts(
-        ak.all(abs(higgs.children.pdgId) == dau_pdgid, axis=2)
-    )
+    signal_mask = ak.firsts(ak.all(abs(higgs.children.pdgId) == dau_pdgid, axis=2))
 
-    matched_higgs = higgs[
-        ak.argmin(fatjet.delta_r(higgs), axis=1, keepdims=True)
-    ][:, 0]
+    matched_higgs = higgs[ak.argmin(fatjet.delta_r(higgs), axis=1, keepdims=True)][:, 0]
     matched_higgs_children = matched_higgs.children
 
     genVars = {"fj_genH_pt": ak.fill_none(matched_higgs.pt, FILL_NONE_VALUE)}
 
     if dau_pdgid == W_PDGID:
-        children_mask = get_pid_mask(
-            matched_higgs_children, [W_PDGID], byall=False
-        )
+        children_mask = get_pid_mask(matched_higgs_children, [W_PDGID], byall=False)
         matched_higgs_children = matched_higgs_children[children_mask]
 
         # order by mass, select lower mass child as V* and higher as V
         children_mass = matched_higgs_children.mass
         v_star = ak.firsts(
-            matched_higgs_children[
-                ak.argmin(children_mass, axis=1, keepdims=True)
-            ]
+            matched_higgs_children[ak.argmin(children_mass, axis=1, keepdims=True)]
         )
         v = ak.firsts(
-            matched_higgs_children[
-                ak.argmax(children_mass, axis=1, keepdims=True)
-            ]
+            matched_higgs_children[ak.argmax(children_mass, axis=1, keepdims=True)]
         )
 
         is_hww_matched = ak.any(children_mask, axis=1)
@@ -201,9 +190,7 @@ def match_H(
         genVars = {**genVars, **genVVars, **genHVVVars}
 
     elif dau_pdgid == TAU_PDGID:
-        children_mask = get_pid_mask(
-            matched_higgs_children, [TAU_PDGID], byall=False
-        )
+        children_mask = get_pid_mask(matched_higgs_children, [TAU_PDGID], byall=False)
         daughters = matched_higgs_children[children_mask]
 
         is_htt_matched = ak.any(children_mask, axis=1)
@@ -268,27 +255,11 @@ def match_H(
                 )
             )
             * 1
+            + (ak.sum(ak.sum(children_pdgId == ELE_PDGID, axis=-1), axis=1) == 1) * 3
+            + (ak.sum(ak.sum(children_pdgId == MU_PDGID, axis=-1), axis=1) == 1) * 5
             + (
-                ak.sum(ak.sum(children_pdgId == ELE_PDGID, axis=-1), axis=1)
-                == 1
-            )
-            * 3
-            + (
-                ak.sum(ak.sum(children_pdgId == MU_PDGID, axis=-1), axis=1)
-                == 1
-            )
-            * 5
-            + (
-                (
-                    ak.sum(ak.sum(children_pdgId == MU_PDGID, axis=-1), axis=1)
-                    == 2
-                )
-                | (
-                    ak.sum(
-                        ak.sum(children_pdgId == ELE_PDGID, axis=-1), axis=1
-                    )
-                    == 2
-                )
+                (ak.sum(ak.sum(children_pdgId == MU_PDGID, axis=-1), axis=1) == 2)
+                | (ak.sum(ak.sum(children_pdgId == ELE_PDGID, axis=-1), axis=1) == 2)
             )
             * 7
         )
@@ -338,9 +309,7 @@ def match_V(genparts: GenParticleArray, fatjet: FatJetArray):
     matched_vs_mask = ak.any(fatjet.delta_r(matched_vs) < 0.8, axis=1)
 
     daughters = ak.flatten(matched_vs.distinctChildren, axis=2)
-    daughters = daughters[
-        daughters.hasFlags(["fromHardProcess", "isLastCopy"])
-    ]
+    daughters = daughters[daughters.hasFlags(["fromHardProcess", "isLastCopy"])]
     daughters_pdgId = abs(daughters.pdgId)
     decay = (
         # 2 quarks * 1
@@ -396,15 +365,12 @@ def match_V(genparts: GenParticleArray, fatjet: FatJetArray):
 
 def match_Top(genparts: GenParticleArray, fatjet: FatJetArray):
     tops = genparts[
-        get_pid_mask(genparts, TOP_PDGID, byall=False)
-        * genparts.hasFlags(GEN_FLAGS)
+        get_pid_mask(genparts, TOP_PDGID, byall=False) * genparts.hasFlags(GEN_FLAGS)
     ]
     matched_tops = tops[ak.argmin(fatjet.delta_r(tops), axis=1, keepdims=True)]
     matched_tops_mask = ak.any(fatjet.delta_r(matched_tops) < 0.8, axis=1)
     daughters = ak.flatten(matched_tops.distinctChildren, axis=2)
-    daughters = daughters[
-        daughters.hasFlags(["fromHardProcess", "isLastCopy"])
-    ]
+    daughters = daughters[daughters.hasFlags(["fromHardProcess", "isLastCopy"])]
     daughters_pdgId = abs(daughters.pdgId)
 
     wboson_daughters = ak.flatten(
@@ -459,9 +425,7 @@ def match_Top(genparts: GenParticleArray, fatjet: FatJetArray):
         )  # should be 0 or 1
 
     # get tau decays from V daughters
-    taudaughters = wboson_daughters[
-        (wboson_daughters_pdgId == TAU_PDGID)
-    ].children
+    taudaughters = wboson_daughters[(wboson_daughters_pdgId == TAU_PDGID)].children
     taudaughters = taudaughters[taudaughters.hasFlags(["isLastCopy"])]
     taudaughters_pdgId = abs(taudaughters.pdgId)
 
@@ -469,8 +433,7 @@ def match_Top(genparts: GenParticleArray, fatjet: FatJetArray):
         # pions/kaons (hadronic tau) * 1
         (
             ak.sum(
-                (taudaughters_pdgId == ELE_PDGID)
-                | (taudaughters_pdgId == MU_PDGID),
+                (taudaughters_pdgId == ELE_PDGID) | (taudaughters_pdgId == MU_PDGID),
                 axis=2,
             )
             == 0
@@ -554,21 +517,14 @@ def get_neutrino_z(vis, inv, h_mass=125):
     Then, solve for the z component of the neutrino momentum
     by requiring that the invariant mass of the group of objects is the Higgs mass = 125
     """
-    a = (
-        h_mass * h_mass
-        - vis.mass * vis.mass
-        + 2 * vis.x * inv.x
-        + 2 * vis.y * inv.y
-    )
+    a = h_mass * h_mass - vis.mass * vis.mass + 2 * vis.x * inv.x + 2 * vis.y * inv.y
     A = 4 * (vis.t * vis.t - vis.z * vis.z)
     B = -4 * a * vis.z
     C = 4 * vis.t * vis.t * (inv.x * inv.x + inv.y * inv.y) - a * a
     delta = B * B - 4 * A * C
     neg = -B / (2 * A)
     neg = ak.nan_to_num(neg)
-    pos = np.maximum(
-        (-B + np.sqrt(delta)) / (2 * A), (-B - np.sqrt(delta)) / (2 * A)
-    )
+    pos = np.maximum((-B + np.sqrt(delta)) / (2 * A), (-B - np.sqrt(delta)) / (2 * A))
     pos = ak.nan_to_num(pos)
 
     invZ = (delta < 0) * neg + (delta > 0) * pos

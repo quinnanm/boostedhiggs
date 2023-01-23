@@ -17,6 +17,10 @@ ele:
     ht: 1
     met: 1
     met_fj_dphi: 1
+    nfj: 1
+    nj: 1
+    deta: 1
+    mjj: 1
   pre-sel:
     - (( (lep_pt < 120) & (lep_isolation < 0.15) ) | (lep_pt >= 120))
     # - (( (lep_pt < 120) & (lep_isolation < 0.1) ) | (lep_pt >= 120))
@@ -30,7 +34,7 @@ ele:
     weight_trigger_electron: 1
     weight_reco_electron: 1
     weight_id_electron: 1
-    weight_vjets_nominal: 0
+    weight_vjets_nominal: 1
 mu:
   vars:
     cutflow: 1
@@ -49,6 +53,10 @@ mu:
     ht: 1
     met: 1
     met_fj_dphi: 1
+    nfj: 1
+    nj: 1
+    deta: 1
+    mjj: 1
   pre-sel:
     - (( (lep_pt < 50) & (lep_isolation < 0.15) ) | (lep_pt >= 50))
     - (( (lep_pt >= 50) & (lep_misolation < 0.1) ) | (lep_pt < 50))
@@ -63,4 +71,4 @@ mu:
     weight_trigger_noniso_muon: 1
     weight_isolation_muon: 1
     weight_id_muon: 1
-    weight_vjets_nominal: 0
+    weight_vjets_nominal: 1

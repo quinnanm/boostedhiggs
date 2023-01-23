@@ -1,5 +1,18 @@
-from utils import axis_dict, color_by_sample, signal_by_ch, data_by_ch, data_by_ch_2018, label_by_ch
-from utils import simplified_labels, get_cutflow, get_xsecweight, get_sample_to_use, get_cutflow_axis
+from utils import (
+    axis_dict,
+    color_by_sample,
+    signal_by_ch,
+    data_by_ch,
+    data_by_ch_2018,
+    label_by_ch,
+)
+from utils import (
+    simplified_labels,
+    get_cutflow,
+    get_xsecweight,
+    get_sample_to_use,
+    get_cutflow_axis,
+)
 from s_over_b import compute_soverb
 
 import pickle as pkl
@@ -13,11 +26,14 @@ import hist as hist2
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import mplhep as hep
+
 plt.style.use(hep.style.CMS)
-plt.rcParams.update({'font.size': 20})
+plt.rcParams.update({"font.size": 20})
 
 
-def make_hists(year, ch, idir, odir, low_pt_cuts, high_pt_cuts, weights, presel, samples):
+def make_hists(
+    year, ch, idir, odir, low_pt_cuts, high_pt_cuts, weights, presel, samples
+):
     """
     Makes 1D histograms to be plotted as stacked over the different samples
     Args:
@@ -29,12 +45,14 @@ def make_hists(year, ch, idir, odir, low_pt_cuts, high_pt_cuts, weights, presel,
         weights: weights to be applied to MC
         samples: the set of samples to run over (by default: the samples defined in plot_configs/samples_pfnano.json)
     """
-    
+
     # get luminosity of year
     f = open("../fileset/luminosity.json")
     luminosity = json.load(f)[year]
     f.close()
-    print(f"Processing samples from year {year} with luminosity {luminosity} for channel {ch}")
+    print(
+        f"Processing samples from year {year} with luminosity {luminosity} for channel {ch}"
+    )
 
     # loop over the samples
     data_label = data_by_ch
@@ -42,8 +60,8 @@ def make_hists(year, ch, idir, odir, low_pt_cuts, high_pt_cuts, weights, presel,
 
     hists = {}
     for low_pt_cut in low_pt_cuts:
-        for high_pt_cut in high_pt_cuts:       
-            hists[(low_pt_cut,high_pt_cut)] = hist2.Hist(
+        for high_pt_cut in high_pt_cuts:
+            hists[(low_pt_cut, high_pt_cut)] = hist2.Hist(
                 hist2.axis.StrCategory([], name="samples", growth=True),
                 axis_dict["lep_fj_m"],
             )
@@ -54,7 +72,9 @@ def make_hists(year, ch, idir, odir, low_pt_cuts, high_pt_cuts, weights, presel,
         pkl_dir = f"{idir}_{year}/{sample}/outfiles/*.pkl"
         pkl_files = glob.glob(pkl_dir)
         if not pkl_files:  # skip samples which were not processed
-            print("- No processed files found...", pkl_dir, "skipping sample...", sample)
+            print(
+                "- No processed files found...", pkl_dir, "skipping sample...", sample
+            )
             continue
 
         # get list of parquet files that have been post processed
@@ -67,23 +87,29 @@ def make_hists(year, ch, idir, odir, low_pt_cuts, high_pt_cuts, weights, presel,
                 is_data = True
 
         # get combined sample
-        sample_to_use = get_sample_to_use(sample,year)
+        sample_to_use = get_sample_to_use(sample, year)
 
         # get xsec_weight
-        xsec_weight = get_xsecweight(pkl_files,year,sample,is_data,luminosity)
+        xsec_weight = get_xsecweight(pkl_files, year, sample, is_data, luminosity)
 
         for parquet_file in parquet_files:
             try:
                 data = pq.read_table(parquet_file).to_pandas()
             except:
                 if is_data:
-                    print("Not able to read data: ", parquet_file, " should remove events from scaling/lumi")
+                    print(
+                        "Not able to read data: ",
+                        parquet_file,
+                        " should remove events from scaling/lumi",
+                    )
                 else:
                     print("Not able to read data from ", parquet_file)
                 continue
 
             if len(data) == 0:
-                print(f"WARNING: Parquet file empty {year} {ch} {sample} {parquet_file}")
+                print(
+                    f"WARNING: Parquet file empty {year} {ch} {sample} {parquet_file}"
+                )
                 continue
 
             # modify dataframe with pre-selection query
@@ -102,13 +128,13 @@ def make_hists(year, ch, idir, odir, low_pt_cuts, high_pt_cuts, weights, presel,
                 weight_ones = np.ones_like(data["lep_pt"])
                 event_weight = weight_ones
 
-            low_pt = data["lep_pt"]<pt_iso[ch]
-            high_pt = data["lep_pt"]>pt_iso[ch]
+            low_pt = data["lep_pt"] < pt_iso[ch]
+            high_pt = data["lep_pt"] > pt_iso[ch]
 
             for low_pt_cut in low_pt_cuts:
                 for high_pt_cut in high_pt_cuts:
-                    con1 = (low_pt & (data["lep_misolation"]<low_pt_cut))
-                    con2 = (high_pt & (data["lep_misolation"]<high_pt_cut))
+                    con1 = low_pt & (data["lep_misolation"] < low_pt_cut)
+                    con2 = high_pt & (data["lep_misolation"] < high_pt_cut)
                     condition = con1 | con2
 
                     hists[(low_pt_cut, high_pt_cut)].fill(
@@ -116,7 +142,7 @@ def make_hists(year, ch, idir, odir, low_pt_cuts, high_pt_cuts, weights, presel,
                         var=data["lep_fj_m"][condition],
                         weight=event_weight[condition],
                     )
- 
+
     # store the hists variable
     with open(f"{odir}/{ch}_hists.pkl", "wb") as f:
         pkl.dump(hists, f)
@@ -172,19 +198,29 @@ def main(args):
         for sel in variables[ch]["pre-sel"]:
             presel_str += f"{sel} & "
         presel[ch] = presel_str[:-3]
-    
+
     # cuts = [0.0001, 0.005, 0.010, 0.050, 0.1, 0.15, 0.2, 0.25, 0.3, 100]
     low_pt_cuts = [0.00001, 0.00005, 0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1]
     high_pt_cuts = [0.00001, 0.00005, 0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1]
-    
+
     for ch in channels:
         if args.make_hists:
             if len(glob.glob(f"{odir}/{ch}_hists.pkl")) > 0:
                 print("Histograms already exist - remaking them")
             print(f"Making histograms for {ch}...")
-            print("Weights: ",weights[ch])
-            print("Pre-selection: ",presel[ch])
-            make_hists(args.year, ch, args.idir, odir, low_pt_cuts, high_pt_cuts, weights[ch], presel[ch], samples)
+            print("Weights: ", weights[ch])
+            print("Pre-selection: ", presel[ch])
+            make_hists(
+                args.year,
+                ch,
+                args.idir,
+                odir,
+                low_pt_cuts,
+                high_pt_cuts,
+                weights[ch],
+                presel[ch],
+                samples,
+            )
             print("-------------------------------------------")
 
         # load the hists
@@ -195,9 +231,21 @@ def main(args):
         soverb_all = []
         for low_pt_cut in low_pt_cuts:
             for high_pt_cut in high_pt_cuts:
-                print(f"Cut is lep_miso<{low_pt_cut} for low pT or lep_miso<{high_pt_cut} for high pT")
-                soverb_all.append(compute_soverb(args.year, hists[(low_pt_cut,high_pt_cut)], ch, range_min=0, range_max=150, remove_ttH=False))  
+                print(
+                    f"Cut is lep_miso<{low_pt_cut} for low pT or lep_miso<{high_pt_cut} for high pT"
+                )
+                soverb_all.append(
+                    compute_soverb(
+                        args.year,
+                        hists[(low_pt_cut, high_pt_cut)],
+                        ch,
+                        range_min=0,
+                        range_max=150,
+                        remove_ttH=False,
+                    )
+                )
                 print("--------------------")
+
 
 if __name__ == "__main__":
     # e.g.
@@ -205,10 +253,17 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--year", dest="year", required=True, choices=["2016", "2016APV", "2017", "2018", "Run2"], help="year"
+        "--year",
+        dest="year",
+        required=True,
+        choices=["2016", "2016APV", "2017", "2018", "Run2"],
+        help="year",
     )
     parser.add_argument(
-        "--vars", dest="vars", default="plot_configs/vars.json", help="path to json with variables to be plotted"
+        "--vars",
+        dest="vars",
+        default="plot_configs/vars.json",
+        help="path to json with variables to be plotted",
     )
     parser.add_argument(
         "--samples",
@@ -216,16 +271,35 @@ if __name__ == "__main__":
         default="plot_configs/samples_pfnano.json",
         help="path to json with samples to be plotted",
     )
-    parser.add_argument("--channels", dest="channels", default="ele,mu", help="channels for which to plot this variable")
     parser.add_argument(
-        "--odir", dest="odir", default="hists", help="tag for output directory... will append '_{year}' to it"
+        "--channels",
+        dest="channels",
+        default="ele,mu",
+        help="channels for which to plot this variable",
     )
-    parser.add_argument("--idir", dest="idir", default="../results/", help="input directory with results - without _{year}")
-    parser.add_argument("--make_hists", dest="make_hists", action="store_true", help="Make hists")
-    parser.add_argument("--plot_hists", dest="plot_hists", action="store_true", help="Plot the hists")
+    parser.add_argument(
+        "--odir",
+        dest="odir",
+        default="hists",
+        help="tag for output directory... will append '_{year}' to it",
+    )
+    parser.add_argument(
+        "--idir",
+        dest="idir",
+        default="../results/",
+        help="input directory with results - without _{year}",
+    )
+    parser.add_argument(
+        "--make_hists", dest="make_hists", action="store_true", help="Make hists"
+    )
+    parser.add_argument(
+        "--plot_hists", dest="plot_hists", action="store_true", help="Plot the hists"
+    )
     parser.add_argument("--logy", dest="logy", action="store_true", help="Log y axis")
     parser.add_argument("--nodata", dest="nodata", action="store_false", help="No data")
-    parser.add_argument("--add_score", dest="add_score",  action="store_true", help="Add inference score")
+    parser.add_argument(
+        "--add_score", dest="add_score", action="store_true", help="Add inference score"
+    )
 
     args = parser.parse_args()
 

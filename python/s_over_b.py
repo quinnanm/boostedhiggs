@@ -1,5 +1,18 @@
-from utils import axis_dict, color_by_sample, signal_by_ch, data_by_ch, data_by_ch_2018, label_by_ch
-from utils import simplified_labels, get_cutflow, get_xsecweight, get_sample_to_use, get_cutflow_axis
+from utils import (
+    axis_dict,
+    color_by_sample,
+    signal_by_ch,
+    data_by_ch,
+    data_by_ch_2018,
+    label_by_ch,
+)
+from utils import (
+    simplified_labels,
+    get_cutflow,
+    get_xsecweight,
+    get_sample_to_use,
+    get_cutflow_axis,
+)
 
 import pickle as pkl
 import pyarrow.parquet as pq
@@ -12,8 +25,9 @@ import hist as hist2
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import mplhep as hep
+
 plt.style.use(hep.style.CMS)
-plt.rcParams.update({'font.size': 20})
+plt.rcParams.update({"font.size": 20})
 
 
 def compute_soverb(year, hists, ch, range_min=0, range_max=150, remove_ttH=True):
@@ -38,11 +52,15 @@ def compute_soverb(year, hists, ch, range_min=0, range_max=150, remove_ttH=True)
         h = hists["lep_fj_m"]
     except:
         h = hists
-    
+
     # get samples existing in histogram
     samples = [h.axes[0].value(i) for i in range(len(h.axes[0].edges))]
     signal_labels = [label for label in samples if label in signal_by_ch[ch]]
-    bkg_labels = [label for label in samples if (label and label != data_label and label not in signal_labels)]
+    bkg_labels = [
+        label
+        for label in samples
+        if (label and label != data_label and label not in signal_labels)
+    ]
 
     if remove_ttH:
         signal_labels.remove("ttHToNonbb_M125")
@@ -62,9 +80,9 @@ def compute_soverb(year, hists, ch, range_min=0, range_max=150, remove_ttH=True)
                 tot_signal = signal[i].copy()
             else:
                 tot_signal = tot_signal + signal[i]
-    
+
     totsignal_val = tot_signal.values()
-    
+
     # background
     bkg = [h[{"samples": label}] for label in bkg_labels]
     # sum all of the background
@@ -75,22 +93,27 @@ def compute_soverb(year, hists, ch, range_min=0, range_max=150, remove_ttH=True)
                 tot = tot + b
 
         tot_val = tot.values()
-        tot_val_zero_mask = (tot_val == 0)
+        tot_val_zero_mask = tot_val == 0
         tot_val[tot_val_zero_mask] = 1
 
     # replace values where bkg is 0
-    totsignal_val[tot_val==0] = 0
-    
+    totsignal_val[tot_val == 0] = 0
+
     # integrate soverb in a given range for lep_fj_m
-    bin_array = tot_signal.axes[0].edges[:-1] # remove last element since bins have one extra element
-    condition = (bin_array>=range_min) & (bin_array<=range_max)
+    bin_array = tot_signal.axes[0].edges[
+        :-1
+    ]  # remove last element since bins have one extra element
+    condition = (bin_array >= range_min) & (bin_array <= range_max)
 
     s = totsignal_val[condition].sum()
     b = np.sqrt(tot_val[condition].sum())
-    
-    soverb_integrated = round((s/b).item(),2)
-    print(f"S/sqrt(B) in range [{range_min}, {range_max}] of (Jet-Lep).mass is: {soverb_integrated}")
+
+    soverb_integrated = round((s / b).item(), 2)
+    print(
+        f"S/sqrt(B) in range [{range_min}, {range_max}] of (Jet-Lep).mass is: {soverb_integrated}"
+    )
     return soverb_integrated
+
 
 def main(args):
     # append '_year' to the output directory
@@ -120,7 +143,7 @@ def main(args):
         # load the hists
         with open(f"{odir}/{ch}_hists.pkl", "rb") as f:
             hists = pkl.load(f)
-            f.close()        
+            f.close()
         print(f"Computing integrated soverb for {ch}...")
         compute_soverb(args.year, hists, ch)
 
@@ -131,7 +154,11 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--year", dest="year", required=True, choices=["2016", "2016APV", "2017", "2018", "Run2"], help="year"
+        "--year",
+        dest="year",
+        required=True,
+        choices=["2016", "2016APV", "2017", "2018", "Run2"],
+        help="year",
     )
     parser.add_argument(
         "--samples",
@@ -139,9 +166,17 @@ if __name__ == "__main__":
         default="plot_configs/samples_pfnano.json",
         help="path to json with samples to be plotted",
     )
-    parser.add_argument("--channels", dest="channels", default="ele,mu", help="channels for which to plot this variable")
     parser.add_argument(
-        "--odir", dest="odir", default="hists", help="tag for output directory... will append '_{year}' to it"
+        "--channels",
+        dest="channels",
+        default="ele,mu",
+        help="channels for which to plot this variable",
+    )
+    parser.add_argument(
+        "--odir",
+        dest="odir",
+        default="hists",
+        help="tag for output directory... will append '_{year}' to it",
     )
 
     args = parser.parse_args()

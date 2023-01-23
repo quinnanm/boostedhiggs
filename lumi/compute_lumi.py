@@ -12,19 +12,22 @@ import os, glob, sys
 import pickle
 
 from coffea.lumi_tools import LumiData, LumiMask, LumiList
+
 """
 This script computes the total luminosity using a single lumi_set.pkl file 
 and a lumi.csv produced using the GoldenJson.
 """
+
 
 def main():
     # you can load the output!
     year = "2016"
     year_mod = "APV"
     dir_ = f"/eos/uscms/store/user/fmokhtar/boostedhiggs/lumi_{year+year_mod}/"
-    
+
     import pickle
-    with open(f"{dir_}/lumi_set.pkl", 'rb') as f:
+
+    with open(f"{dir_}/lumi_set.pkl", "rb") as f:
         lumi_set = pickle.load(f)
 
     # # combine the sets from the different datasets
@@ -47,9 +50,9 @@ def main():
     # print(f"---> Total Lumi = {lumidata.get_lumi(lumi_list)}")
 
     print("------------------------------------")
-    
+
     lumis = {}
-    
+
     # combine the sets from the different datasets
     for i, dataset in enumerate(lumi_set.keys()):
         if "Muon" in dataset:
@@ -76,6 +79,7 @@ def main():
         lumidata = LumiData(f"lumi{year}.csv")
         print(f"---> Lumi for {ch} channel = {lumidata.get_lumi(lumi_list[ch])}")
         print("------------------------------------")
+
 
 if __name__ == "__main__":
     # e.g.

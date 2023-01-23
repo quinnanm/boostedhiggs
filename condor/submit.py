@@ -96,6 +96,7 @@ def main(args):
             line = line.replace("METADATAFILE", metadata_file)
             line = line.replace("NUMJOBS", files_per_job)
             line = line.replace("SAMPLE", sample)
+            line = line.replace("CHANNELS", args.channels)
             line = line.replace("EOSOUTPKL", eosoutput_pkl)
             if args.pfnano:
                 line = line.replace("PFNANO", "--pfnano")
@@ -140,6 +141,12 @@ if __name__ == "__main__":
     parser.add_argument("--submit",    dest='submit',    action='store_true',           help="submit jobs when created")
     parser.add_argument("--files-per-job",               default=None,
                         help="# files per condor job", type=int)
+    parser.add_argument(
+        "--channels",
+        dest="channels",
+        required=True,
+        help="channels separated by commas",
+    )
     parser.add_argument("--pfnano",    dest='pfnano', action='store_true')
     parser.add_argument("--no-pfnano", dest='pfnano', action='store_false')
     parser.add_argument("--inference",   dest='inference', action='store_true')

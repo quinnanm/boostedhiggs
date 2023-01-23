@@ -29,13 +29,23 @@ import mplhep as hep
 from hist.intervals import clopper_pearson_interval
 
 import warnings
+
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--ch',       dest='ch',        default='ele,mu,had',  help='channels for which to plot this variable')
-parser.add_argument('--dir',      dest='dir',       default='May7_2017',   help="tag for data directory")
-parser.add_argument('--odir',     dest='odir',      default='counts',       help="tag for output directory")
+parser.add_argument(
+    "--ch",
+    dest="ch",
+    default="ele,mu,had",
+    help="channels for which to plot this variable",
+)
+parser.add_argument(
+    "--dir", dest="dir", default="May7_2017", help="tag for data directory"
+)
+parser.add_argument(
+    "--odir", dest="odir", default="counts", help="tag for output directory"
+)
 
 args = parser.parse_args()
 
@@ -49,7 +59,7 @@ def compute_counts(channels, samples, odir, data_label):
     num_dict = {}
     for ch in channels:
         num_dict[ch] = {}
-        print(f'For {ch} channel')
+        print(f"For {ch} channel")
 
         for sample in samples:
             # check if sample is data to skip
@@ -67,13 +77,15 @@ def compute_counts(channels, samples, odir, data_label):
                     combine = True
                     break
 
-            if combine and single_key not in num_dict[ch].keys():   # if the counts for the combined samples has not been intialized yet
+            if (
+                combine and single_key not in num_dict[ch].keys()
+            ):  # if the counts for the combined samples has not been intialized yet
                 num_dict[ch][single_key] = 0
             elif not combine:
                 num_dict[ch][sample] = 0
 
             # get list of parquet files that have been processed
-            parquet_files = glob.glob(f'{idir}/{sample}/outfiles/*_{ch}.parquet')
+            parquet_files = glob.glob(f"{idir}/{sample}/outfiles/*_{ch}.parquet")
 
             if len(parquet_files) == 0:
                 continue
@@ -82,28 +94,36 @@ def compute_counts(channels, samples, odir, data_label):
                 try:
                     data = pq.read_table(parquet_file).to_pandas()
                 except:
-                    print('Not able to read data: ', parquet_file, ' should remove evts from scaling/lumi')
+                    print(
+                        "Not able to read data: ",
+                        parquet_file,
+                        " should remove evts from scaling/lumi",
+                    )
                     continue
                 if len(data) == 0:
                     continue
 
                 # drop AK columns
                 for key in data.keys():
-                    if data[key].dtype == 'object':
+                    if data[key].dtype == "object":
                         data.drop(columns=[key], inplace=True)
 
                 if combine:
-                    num_dict[ch][single_key] = num_dict[ch][single_key] + data['tot_weight'].sum()
+                    num_dict[ch][single_key] = (
+                        num_dict[ch][single_key] + data["tot_weight"].sum()
+                    )
                 else:
-                    num_dict[ch][sample] = num_dict[ch][sample] + data['tot_weight'].sum()
+                    num_dict[ch][sample] = (
+                        num_dict[ch][sample] + data["tot_weight"].sum()
+                    )
 
         for key, value in num_dict[ch].items():
             if value != 0:
-                print(f'number of events for {key} is {value}')
+                print(f"number of events for {key} is {value}")
 
-        print(f'-----------------------------------------')
+        print(f"-----------------------------------------")
 
-    with open(f'./{odir}/num_dict.pkl', 'wb') as f:  # saves counts
+    with open(f"./{odir}/num_dict.pkl", "wb") as f:  # saves counts
         pkl.dump(num_dict, f)
 
 
@@ -113,17 +133,17 @@ if __name__ == "__main__":
     python counting_from_pq.py --dir May7_2017 --ch ele --odir counts
     """
 
-    channels = args.ch.split(',')
+    channels = args.ch.split(",")
 
     year = args.dir[-4:]
-    idir = '/eos/uscms/store/user/cmantill/boostedhiggs/' + args.dir
+    idir = "/eos/uscms/store/user/cmantill/boostedhiggs/" + args.dir
 
-    if year == '2018':
+    if year == "2018":
         data_label = data_by_ch_2018
     else:
         data_label = data_by_ch
 
-    samples = os.listdir(f'{idir}')
+    samples = os.listdir(f"{idir}")
 
     # make directory to hold counts
     if not os.path.exists(args.odir):

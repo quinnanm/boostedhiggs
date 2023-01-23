@@ -17,7 +17,13 @@ from coffea import processor
 from coffea.analysis_tools import PackedSelection, Weights
 from coffea.nanoevents.methods import candidate, vector
 
-from boostedhiggs.btag import BTagCorrector, btagWPs
+from boostedhiggs.utils import (
+    match_H,
+    match_V,
+    match_Top,
+    get_neutrino_z,
+    pad_val,
+)
 from boostedhiggs.corrections import (
     add_jetTriggerSF,
     add_lepton_weight,
@@ -125,12 +131,7 @@ class HwwProcessor(processor.ProcessorABC):
             table = pa.Table.from_pandas(dfs_dict)
             if len(table) != 0:  # skip dataframes with empty entries
                 pq.write_table(
-                    table,
-                    self._output_location
-                    + ch
-                    + "/parquet/"
-                    + fname
-                    + ".parquet",
+                    table, self._output_location + ch + "/parquet/" + fname + ".parquet"
                 )
 
     def ak_to_pandas(self, output_collection: ak.Array) -> pd.DataFrame:
@@ -214,10 +215,7 @@ class HwwProcessor(processor.ProcessorABC):
 
         # muons
         loose_muons = (
-            (
-                ((muons.pt > 30) & (muons.pfRelIso04_all < 0.25))
-                | (muons.pt > 55)
-            )
+            (((muons.pt > 30) & (muons.pfRelIso04_all < 0.25)) | (muons.pt > 55))
             & (np.abs(muons.eta) < 2.4)
             & (muons.looseId)
         )
@@ -276,9 +274,7 @@ class HwwProcessor(processor.ProcessorABC):
         )  # reliso for candidate lepton
         lep_miso = candidatelep.miniPFRelIso_all  # miniso for candidate lepton
         mu_mvaId = (
-            candidatelep.mvaId
-            if hasattr(candidatelep, "mvaId")
-            else np.zeros(nevents)
+            candidatelep.mvaId if hasattr(candidatelep, "mvaId") else np.zeros(nevents)
         )  # MVA-ID for candidate lepton
         mu_highPtId = ak.firsts(muons[good_muons]).highPtId
         ele_highPtId = ak.firsts(electrons[good_electrons]).cutBased_HEEP
@@ -427,11 +423,7 @@ class HwwProcessor(processor.ProcessorABC):
 
         # gen-level matching
         if self.isMC:
-            if (
-                ("HToWW" in dataset)
-                or ("HWW" in dataset)
-                or ("ttHToNonbb" in dataset)
-            ):
+            if ("HToWW" in dataset) or ("HWW" in dataset) or ("ttHToNonbb" in dataset):
                 genVars, signal_mask = match_H(events.GenPart, candidatefj)
                 self.add_selection(name="signal", sel=signal_mask)
             elif "HToTauTau" in dataset:
@@ -439,11 +431,7 @@ class HwwProcessor(processor.ProcessorABC):
                     events.GenPart, candidatefj, dau_pdgid=15
                 )
                 self.add_selection(name="signal", sel=signal_mask)
-            elif (
-                ("WJets" in dataset)
-                or ("ZJets" in dataset)
-                or ("DYJets" in dataset)
-            ):
+            elif ("WJets" in dataset) or ("ZJets" in dataset) or ("DYJets" in dataset):
                 genVars = match_V(events.GenPart, candidatefj)
             elif "TT" in dataset:
                 genVars = match_Top(events.GenPart, candidatefj)
@@ -518,10 +506,7 @@ class HwwProcessor(processor.ProcessorABC):
                 self.weights, candidatelep, self._year + self._yearmod, "muon"
             )
             add_lepton_weight(
-                self.weights,
-                candidatelep,
-                self._year + self._yearmod,
-                "electron",
+                self.weights, candidatelep, self._year + self._yearmod, "electron"
             )
 
             # self._btagSF.addBtagWeight(bjets_away_lepfj, self.weights, "lep")
@@ -557,9 +542,9 @@ class HwwProcessor(processor.ProcessorABC):
             # store the per channel weight
             for ch in self._channels:
                 if len(self.weights_per_ch[ch]) > 0:
-                    variables[ch][
-                        f"weight_{ch}"
-                    ] = self.weights.partial_weight(self.weights_per_ch[ch])
+                    variables[ch][f"weight_{ch}"] = self.weights.partial_weight(
+                        self.weights_per_ch[ch]
+                    )
 
             # NOTE: to add variations:
             # for var in self.weights.variations:
@@ -575,9 +560,7 @@ class HwwProcessor(processor.ProcessorABC):
                     name="trigger", sel=trigger[ch], channel=[ch]
                 )
         self.add_selection(name="metfilters", sel=metfilters)
-        self.add_selection(
-            name="leptonKin", sel=(candidatelep.pt > 30), channel=["mu"]
-        )
+        self.add_selection(name="leptonKin", sel=(candidatelep.pt > 30), channel=["mu"])
         self.add_selection(
             name="leptonKin", sel=(candidatelep.pt > 40), channel=["ele"]
         )
@@ -599,12 +582,8 @@ class HwwProcessor(processor.ProcessorABC):
             & ~ak.any(loose_electrons & ~good_electrons, 1),
             channel=["ele"],
         )
-        self.add_selection(
-            name="notaus", sel=(n_loose_taus_mu == 0), channel=["mu"]
-        )
-        self.add_selection(
-            name="notaus", sel=(n_loose_taus_ele == 0), channel=["ele"]
-        )
+        self.add_selection(name="notaus", sel=(n_loose_taus_mu == 0), channel=["mu"])
+        self.add_selection(name="notaus", sel=(n_loose_taus_ele == 0), channel=["ele"])
         self.add_selection(name="leptonInJet", sel=(lep_fj_dr < 0.8))
         # self.add_selection(
         #     name="antibjettag",
@@ -664,10 +643,7 @@ class HwwProcessor(processor.ProcessorABC):
 
                         output[ch] = {
                             **output[ch],
-                            **{
-                                key: value
-                                for (key, value) in pnet_vars.items()
-                            },
+                            **{key: value for (key, value) in pnet_vars.items()},
                         }
 
             else:

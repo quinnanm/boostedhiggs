@@ -1,44 +1,44 @@
 {
-	"2016": {
-		"SingleMuon_Run2016F": 1,
-		"SingleMuon_Run2016G": 1,
-		"SingleMuon_Run2016H": 1,
-		"SingleElectron_Run2016F": 1,
-		"SingleElectron_Run2016G": 1,
-		"SingleElectron_Run2016H": 1
-	},
-	"2016APV": {
-		"SingleMuon_Run2016B_ver2_HIPM": 1,
-		"SingleMuon_Run2016C_HIPM": 1,
-		"SingleMuon_Run2016D_HIPM": 1,
-		"SingleMuon_Run2016E_HIPM": 1,
-		"SingleMuon_Run2016F_HIPM": 1,
-		"SingleElectron_Run2016B_ver2_HIPM": 1,
-		"SingleElectron_Run2016C_HIPM": 1,
-		"SingleElectron_Run2016D_HIPM": 1,
-		"SingleElectron_Run2016E_HIPM": 1,
-		"SingleElectron_Run2016F_HIPM": 1
-	},
-	"2017": {
-		"SingleMuon_Run2017B": 1,
-		"SingleMuon_Run2017C": 1,
-		"SingleMuon_Run2017D": 1,
-		"SingleMuon_Run2017E": 1,
-		"SingleMuon_Run2017F": 1,
-		"SingleElectron_Run2017B": 1,
-		"SingleElectron_Run2017C": 1,
-		"SingleElectron_Run2017D": 1,
-		"SingleElectron_Run2017E": 1,
-		"SingleElectron_Run2017F": 1
-	},
-	"2018": {
-		"SingleMuon_Run2018A": 1,
-		"SingleMuon_Run2018B": 1,
-		"SingleMuon_Run2018C": 1,
-		"SingleMuon_Run2018D": 1,
-		"EGamma_Run2018A": 1,
-		"EGamma_Run2018B": 1,
-		"EGamma_Run2018C": 1,
-		"EGamma_Run2018D": 1
-	}
+    "2016": {
+	"SingleMuon_Run2016F": 20,
+	"SingleMuon_Run2016G": 20,
+	"SingleMuon_Run2016H": 20,
+	"SingleElectron_Run2016F": 20,
+	"SingleElectron_Run2016G": 20,
+	"SingleElectron_Run2016H": 20
+    },
+    "2016APV": {
+	"SingleMuon_Run2016B_ver2_HIPM": 20,
+	"SingleMuon_Run2016C_HIPM": 20,
+	"SingleMuon_Run2016D_HIPM": 20,
+	"SingleMuon_Run2016E_HIPM": 20,
+	"SingleMuon_Run2016F_HIPM": 20,
+	"SingleElectron_Run2016B_ver2_HIPM": 20,
+	"SingleElectron_Run2016C_HIPM": 20,
+	"SingleElectron_Run2016D_HIPM": 20,
+	"SingleElectron_Run2016E_HIPM": 20,
+	"SingleElectron_Run2016F_HIPM": 20,
+    },
+    "2017": {
+	"SingleMuon_Run2017B": 20,
+	"SingleMuon_Run2017C": 20,
+	"SingleMuon_Run2017D": 20,
+	"SingleMuon_Run2017E": 20,
+	"SingleMuon_Run2017F": 20,
+	"SingleElectron_Run2017B": 20,
+	"SingleElectron_Run2017C": 20,
+	"SingleElectron_Run2017D": 20,
+	"SingleElectron_Run2017E": 20,
+	"SingleElectron_Run2017F": 20,
+    },
+    "2018": {
+	"SingleMuon_Run2018A": 20,
+	"SingleMuon_Run2018B": 20,
+	"SingleMuon_Run2018C": 20,
+	"SingleMuon_Run2018D": 20,
+	"EGamma_Run2018A": 20,
+	"EGamma_Run2018B": 20,
+	"EGamma_Run2018C": 20,
+	"EGamma_Run2018D": 20,
+    }
 }
