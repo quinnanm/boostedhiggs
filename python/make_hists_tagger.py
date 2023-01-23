@@ -57,8 +57,8 @@ def make_hists(ch, idir, odir, weights, presel, samples):
         )
 
     hists["fj_pt"] = hist2.Hist(
-    sample_axis,
-    axis_dict["fj_pt"],
+        sample_axis,
+        axis_dict["fj_pt"],
     )
 
     for score in scores:
@@ -66,7 +66,7 @@ def make_hists(ch, idir, odir, weights, presel, samples):
             sample_axis,
             hist2.axis.Regular(35, 0, 1, name="score", label=score, overflow=True),
         )
-   
+
     labels = []
     # loop over the samples
     for yr in samples.keys():
@@ -180,24 +180,24 @@ def make_hists(ch, idir, odir, weights, presel, samples):
 
                 # filling histograms
                 for score in scores:
-                    if score=="qcd_score (QCD)":
+                    if score == "qcd_score (QCD)":
                         X = QCD
-                    elif score=="top_score (Top)":
+                    elif score == "top_score (Top)":
                         X = TOP
-                    elif score=="hww_score (H)":
+                    elif score == "hww_score (H)":
                         X = HIGGS
-                    elif score=="H/(1-H)":
-                        X = HIGGS/(1-HIGGS)
-                    elif score=="H/(H+QCD)":
-                        X = HIGGS/(HIGGS+QCD)
-                    elif score=="H/(H+Top)":
-                        X = HIGGS/(HIGGS+TOP)
-   
+                    elif score == "H/(1-H)":
+                        X = HIGGS / (1 - HIGGS)
+                    elif score == "H/(H+QCD)":
+                        X = HIGGS / (HIGGS + QCD)
+                    elif score == "H/(H+Top)":
+                        X = HIGGS / (HIGGS + TOP)
+
                     hists[score].fill(
                         samples=sample_to_use,
                         score=X,
                         weight=event_weight,
-                    )                        
+                    )
     # store the hists variable
     with open(f"{odir}/{ch}_hists_tagger.pkl", "wb") as f:
         pkl.dump(hists, f)

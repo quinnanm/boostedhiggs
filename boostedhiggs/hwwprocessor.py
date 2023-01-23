@@ -79,9 +79,7 @@ class HwwProcessor(processor.ProcessorABC):
         self._output_location = output_location
 
         # trigger paths
-        with importlib.resources.path(
-            "boostedhiggs.data", "triggers.json"
-        ) as path:
+        with importlib.resources.path("boostedhiggs.data", "triggers.json") as path:
             with open(path, "r") as f:
                 self._HLTs = json.load(f)[self._year]
 
@@ -89,9 +87,7 @@ class HwwProcessor(processor.ProcessorABC):
         self.apply_trigger = apply_trigger
 
         # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFiltersRun2
-        with importlib.resources.path(
-            "boostedhiggs.data", "metfilters.json"
-        ) as path:
+        with importlib.resources.path("boostedhiggs.data", "metfilters.json") as path:
             with open(path, "r") as f:
                 self._metfilters = json.load(f)[self._year]
 
@@ -264,9 +260,7 @@ class HwwProcessor(processor.ProcessorABC):
 
         candidatelep = ak.firsts(goodleptons)  # pick highest pt
 
-        candidatelep_p4 = build_p4(
-            candidatelep
-        )  # build p4 for candidate lepton
+        candidatelep_p4 = build_p4(candidatelep)  # build p4 for candidate lepton
         lep_reliso = (
             candidatelep.pfRelIso04_all
             if hasattr(candidatelep, "pfRelIso04_all")
@@ -300,9 +294,7 @@ class HwwProcessor(processor.ProcessorABC):
         fatjets["msdcorr"] = corrected_msoftdrop(fatjets)
         fatjets["qcdrho"] = 2 * np.log(fatjets.msdcorr / fatjets.pt)
 
-        good_fatjets = (
-            (fatjets.pt > 200) & (abs(fatjets.eta) < 2.5) & fatjets.isTight
-        )
+        good_fatjets = (fatjets.pt > 200) & (abs(fatjets.eta) < 2.5) & fatjets.isTight
         n_fatjets = ak.sum(good_fatjets, axis=1)
         good_fatjets = fatjets[good_fatjets]  # select good fatjets
         good_fatjets = good_fatjets[
@@ -353,9 +345,7 @@ class HwwProcessor(processor.ProcessorABC):
 
         # VBF variables
         ak4_outside_ak8 = goodjets[goodjets.delta_r(candidatefj) > 0.8]
-        n_jets_outside_ak8 = ak.sum(
-            goodjets.delta_r(candidatefj) > 0.8, axis=1
-        )
+        n_jets_outside_ak8 = ak.sum(goodjets.delta_r(candidatefj) > 0.8, axis=1)
         jet1 = ak4_outside_ak8[:, 0:1]
         jet2 = ak4_outside_ak8[:, 1:2]
         deta = abs(ak.firsts(jet1).eta - ak.firsts(jet2).eta)
@@ -369,9 +359,7 @@ class HwwProcessor(processor.ProcessorABC):
             "lep": {
                 "fj_pt": candidatefj.pt,
                 "fj_msoftdrop": candidatefj.msdcorr,
-                "fj_bjets_ophem": ak.max(
-                    bjets_away_lepfj.btagDeepFlavB, axis=1
-                ),
+                "fj_bjets_ophem": ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1),
                 "fj_bjets": ak.max(bjets.btagDeepFlavB, axis=1),
                 "lep_pt": candidatelep.pt,
                 "lep_isolation": lep_reliso,
@@ -533,9 +521,7 @@ class HwwProcessor(processor.ProcessorABC):
                     varkey = "common"
 
                 # store the individual weights (ONLY for now until we debug)
-                variables[varkey][
-                    f"weight_{key}"
-                ] = self.weights.partial_weight([key])
+                variables[varkey][f"weight_{key}"] = self.weights.partial_weight([key])
                 if varkey in self.weights_per_ch.keys():
                     self.weights_per_ch[varkey].append(key)
 
@@ -556,9 +542,7 @@ class HwwProcessor(processor.ProcessorABC):
         # self.add_selection("all", np.ones(nevents, dtype="bool"))
         if self.apply_trigger:
             for ch in self._channels:
-                self.add_selection(
-                    name="trigger", sel=trigger[ch], channel=[ch]
-                )
+                self.add_selection(name="trigger", sel=trigger[ch], channel=[ch])
         self.add_selection(name="metfilters", sel=metfilters)
         self.add_selection(name="leptonKin", sel=(candidatelep.pt > 30), channel=["mu"])
         self.add_selection(
@@ -624,9 +608,7 @@ class HwwProcessor(processor.ProcessorABC):
                         out[var] = item
 
                 # fill the output dictionary after selections
-                output[ch] = {
-                    key: value[selection_ch] for (key, value) in out.items()
-                }
+                output[ch] = {key: value[selection_ch] for (key, value) in out.items()}
 
                 # fill inference
                 if self.inference:
@@ -659,9 +641,7 @@ class HwwProcessor(processor.ProcessorABC):
                 )
 
         # now save pandas dataframes
-        fname = events.behavior["__events_factory__"]._partition_key.replace(
-            "/", "_"
-        )
+        fname = events.behavior["__events_factory__"]._partition_key.replace("/", "_")
         fname = "condor_" + fname
 
         for ch in self._channels:  # creating directories for each channel
