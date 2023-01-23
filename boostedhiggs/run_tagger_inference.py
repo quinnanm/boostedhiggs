@@ -59,7 +59,7 @@ class wrapped_triton:
 
         # manually split into batches for gpu inference
         input_size = input_dict[list(input_dict.keys())[0]].shape[0]
-        print(f"size of input (number of events) = {input_size}")
+        # print(f"size of input (number of events) = {input_size}")
 
         outs = [
             self._do_inference(
@@ -174,6 +174,7 @@ def runInferenceTriton(
     tagger_outputs = []
 
     start = time.time()
+
     try:
         tagger_outputs = triton_model(tagger_inputs)
     except:
@@ -193,7 +194,7 @@ def runInferenceTriton(
 
     time_taken = time.time() - start
 
-    print(f"Inference took {time_taken:.1f}s")
+    # print(f"Inference took {time_taken:.1f}s")
 
     if model_name == "05_10_ak8_ttbarwjets":
         pnet_vars = {
@@ -217,5 +218,5 @@ def runInferenceTriton(
 
         pnet_vars = {**pnet_vars, **derived_vars}
 
-    print(f"Total time taken: {time.time() - total_start:.1f}s")
+    # print(f"Total time taken: {time.time() - total_start:.1f}s")
     return pnet_vars
