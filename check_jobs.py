@@ -37,7 +37,9 @@ def main(args):
         # print(f"Sample {sample} produced {njobs_produced} files")
 
         if njobs_produced != njobs:  # debug which pkl file wasn't produced
-            print(f"-----> SAMPLE {sample} HAS RAN INTO ERROR, #jobs produced: {njobs_produced}, # jobs {njobs}" )
+            print(
+                f"-----> SAMPLE {sample} HAS RAN INTO ERROR, #jobs produced: {njobs_produced}, # jobs {njobs}"
+            )
             for i, x in enumerate(
                 range(0, njobs * nfiles_per_job[sample], nfiles_per_job[sample])
             ):

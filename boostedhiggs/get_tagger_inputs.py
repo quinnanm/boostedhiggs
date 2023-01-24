@@ -96,7 +96,10 @@ def get_pfcands_features(
 
     # convert to numpy arrays and normalize features
     if "pf_vectors" in tagger_vars.keys():
-        variables = set(tagger_vars["pf_features"]["var_names"] + tagger_vars["pf_vectors"]["var_names"])
+        variables = set(
+            tagger_vars["pf_features"]["var_names"]
+            + tagger_vars["pf_vectors"]["var_names"]
+        )
     else:
         variables = tagger_vars["pf_features"]["var_names"]
 
@@ -197,7 +200,10 @@ def get_svs_features(
 
     # convert to numpy arrays and normalize features
     if "sv_vectors" in tagger_vars.keys():
-        variables = set(tagger_vars["sv_features"]["var_names"] + tagger_vars["sv_vectors"]["var_names"])
+        variables = set(
+            tagger_vars["sv_features"]["var_names"]
+            + tagger_vars["sv_vectors"]["var_names"]
+        )
     else:
         variables = tagger_vars["sv_features"]["var_names"]
 

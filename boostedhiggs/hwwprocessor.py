@@ -207,10 +207,7 @@ class HwwProcessor(processor.ProcessorABC):
 
         # muons
         loose_muons = (
-            (
-                ((muons.pt > 30) & (muons.pfRelIso04_all < 0.25))
-                | (muons.pt > 55)
-            )
+            (((muons.pt > 30) & (muons.pfRelIso04_all < 0.25)) | (muons.pt > 55))
             & (np.abs(muons.eta) < 2.4)
             & (muons.looseId)
         )
@@ -233,10 +230,7 @@ class HwwProcessor(processor.ProcessorABC):
                 | (electrons.pt > 120)
             )
             & (np.abs(electrons.eta) < 2.4)
-            & (
-                (np.abs(electrons.eta) < 1.44)
-                | (np.abs(electrons.eta) > 1.57)
-            )
+            & ((np.abs(electrons.eta) < 1.44) | (np.abs(electrons.eta) > 1.57))
             & (electrons.cutBased >= electrons.LOOSE)
         )
         n_loose_electrons = ak.sum(loose_electrons, axis=1)
@@ -244,10 +238,7 @@ class HwwProcessor(processor.ProcessorABC):
         good_electrons = (
             (electrons.pt > 38)
             & (np.abs(electrons.eta) < 2.4)
-            & (
-                (np.abs(electrons.eta) < 1.44)
-                | (np.abs(electrons.eta) > 1.57)
-            )
+            & ((np.abs(electrons.eta) < 1.44) | (np.abs(electrons.eta) > 1.57))
             & (np.abs(electrons.dz) < 0.1)
             & (np.abs(electrons.dxy) < 0.05)
             & (electrons.sip3d <= 4.0)
@@ -426,12 +417,11 @@ class HwwProcessor(processor.ProcessorABC):
                 self.add_selection(name="signal", sel=signal_mask)
             elif ("WJets" in dataset) or ("ZJets" in dataset) or ("DYJets" in dataset):
                 genVars = match_V(events.GenPart, candidatefj)
-            elif ("TT" in dataset):
+            elif "TT" in dataset:
                 genVars = match_Top(events.GenPart, candidatefj)
             else:
                 genVars = {}
             variables["common"] = {**variables["common"], **genVars}
-
 
         """
         Weights
@@ -619,20 +609,22 @@ class HwwProcessor(processor.ProcessorABC):
 
                 # fill inference
                 if self.inference:
-                    for model_name in ["particlenet_hww_inclv2_pre2_noreg",
-                                       "ak8_MD_vminclv2ParT_manual_fixwrap"]:
+                    for model_name in [
+                        "particlenet_hww_inclv2_pre2_noreg",
+                        "ak8_MD_vminclv2ParT_manual_fixwrap",
+                    ]:
                         pnet_vars = runInferenceTriton(
                             self.tagger_resources_path,
                             events[selection_ch],
                             fj_idx_lep[selection_ch],
-                            model_name=model_name
+                            model_name=model_name,
                         )
-                        
+
                         output[ch] = {
                             **output[ch],
                             **{key: value for (key, value) in pnet_vars.items()},
                         }
-                        
+
             else:
                 output[ch] = {}
 
@@ -641,7 +633,9 @@ class HwwProcessor(processor.ProcessorABC):
                 output[ch] = self.ak_to_pandas(output[ch])
 
             if "rec_higgs_m" in output[ch].keys():
-                output[ch]["rec_higgs_m"] = np.nan_to_num(output[ch]["rec_higgs_m"], nan=-1)
+                output[ch]["rec_higgs_m"] = np.nan_to_num(
+                    output[ch]["rec_higgs_m"], nan=-1
+                )
 
         # now save pandas dataframes
         fname = events.behavior["__events_factory__"]._partition_key.replace("/", "_")
