@@ -11,29 +11,18 @@ from utils import (
 from utils import get_sample_to_use, get_simplified_label, get_sum_sumgenweight
 import pickle as pkl
 import pyarrow.parquet as pq
-import pyarrow as pa
-import awkward as ak
 import numpy as np
 import pandas as pd
+import scipy
 import json
-import os
-import sys
-import glob
-import shutil
-import pathlib
-from typing import List, Optional
-
+import os, sys, glob
 import argparse
-from coffea import processor
-from coffea.nanoevents.methods import candidate, vector
-from coffea.analysis_tools import Weights, PackedSelection
 
 import hist as hist2
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import mplhep as hep
-from hist.intervals import clopper_pearson_interval
 
 import warnings
 
@@ -59,13 +48,14 @@ def make_2dplots(
     Makes 2D plots of two variables
 
     Args:
-        year: string that represents the year the processed samples are from
-        ch: string that represents the signal channel to look at... choices are ['ele', 'mu', 'had']
+        ch: string that represents the signal channel to look at... choices are ['ele', 'mu']
         idir: directory that holds the processed samples (e.g. {idir}/{sample}/outfiles/*_{ch}.parquet)
         odir: output directory to hold the hist object
         samples: the set of samples to run over (by default: the samples with key==1 defined in plot_configs/samples_pfnano.json)
-        vars: a list of two variable names to plot against each other... see the full list of choices in plot_configs/vars.json
     """
+
+    # scores = ["hww_score (H)", "H/(1-H)", "H/(H+QCD)", "H(H+Top)"]#, "qcd_score (QCD)", "top_score (Top)"]
+    scores = ["hww_score (H)"]
 
     # instantiates the histogram object
     hists = hist2.Hist(
@@ -107,14 +97,21 @@ def make_2dplots(
             )
             continue
 
-        # get list of parquet files that have been post processed
-        parquet_files = glob.glob(f"{idir}_{year}/{sample}/outfiles/*_{ch}.parquet")
+        # data label and lumi
+        data_label = data_by_ch[ch]
+        if yr == "2018":
+            data_label = data_by_ch_2018[ch]
+        f = open("../fileset/luminosity.json")
+        luminosity = json.load(f)[ch][yr]
+        f.close()
+        print(f"Processing samples from year {yr} with luminosity {luminosity} for channel {ch}")
 
-        # define an is_data boolean
-        is_data = False
-        for key in data_label.values():
-            if key in sample:
-                is_data = True
+        for sample in samples[yr][ch]:
+            if "ttHToNonbb_M125" in sample: # skip ttH cz labels are not stored
+                continue 
+            if data_label in sample:    # skip data samples
+                continue
+            is_data = False
 
         # get xsec weight
         from postprocess_parquets import get_xsecweight
@@ -123,13 +120,11 @@ def make_2dplots(
             f"{idir}_{year}", year, sample, is_data, luminosity
         )
 
-        # get combined sample
-        sample_to_use = get_sample_to_use(sample, year)
-
-        for i, parquet_file in enumerate(parquet_files):
-            try:
-                data = pq.read_table(parquet_file).to_pandas()
-            except:
+            # check if the sample was processed
+            pkl_dir = f"{idir}_{yr}/{sample}/outfiles/*.pkl"
+            pkl_files = glob.glob(pkl_dir)
+            if not pkl_files:  # skip samples which were not processed
+                print("- No processed files found...", pkl_dir, "skipping sample...", sample)
                 continue
 
             try:
@@ -152,9 +147,8 @@ def make_2dplots(
                     + data["fj_wjets_label"]
                 )
 
-            # make kinematic cuts
-            pt_cut = (data["fj_pt"] > 400) & (data["fj_pt"] < 600)
-            msd_cut = (data["fj_msoftdrop"] > 30) & (data["fj_msoftdrop"] < 150)
+            # get cutflow
+            xsec_weight = get_xsecweight(pkl_files,yr,sample,is_data,luminosity)
 
             if make_iso_cuts:
                 # make isolation cuts
@@ -178,16 +172,26 @@ def make_2dplots(
             if vars[1] == "tagger_score":
                 vars[1] = f"{ch}_score"
 
-            x = data[vars[0]][select_var]
-            y = data[vars[1]][select_var]
+                # modify dataframe with pre-selection query
+                if presel is not None:
+                    data = data.query(presel)
 
-            hists.fill(
-                x,
-                y,
-                sample_to_use,
-            )
+                event_weight = xsec_weight
+                weight_ones = np.ones_like(data["weight_genweight"])
+                for w in weights:
+                    try:
+                        event_weight *= data[w]
+                    except:
+                        if w!="weight_vjets_nominal":
+                            print(f"No {w} variable in parquet for sample {sample}")
+      
+                # apply softmax per row
+                df_all_softmax = scipy.special.softmax(data[labels].values, axis=1)
 
-    print("------------------------------------------------------------")
+                # combine the labels under QCD, TOP or HWW
+                QCD = 0
+                TOP = 0
+                HIGGS = 0
 
     with open(
         f"{odir}/{ch}_{vars[0]}_{vars[1]}.pkl", "wb"
@@ -195,7 +199,7 @@ def make_2dplots(
         pkl.dump(hists, f)
 
 
-def plot_2dplots(year, ch, odir, vars):
+def plot_2dplots(year, ch, odir):
     """
     Plots 2D plots of two variables that were made by "make_2dplots" function
 
@@ -203,7 +207,6 @@ def plot_2dplots(year, ch, odir, vars):
         year: string that represents the year the processed samples are from
         ch: string that represents the signal channel to look at... choices are ['ele', 'mu', 'had']
         odir: output directory to hold the plots
-        vars: a list of two variable names to plot against each other... see the full list of choices in plot_configs/vars.json
     """
 
     # load the hists
@@ -235,17 +238,32 @@ def plot_2dplots(year, ch, odir, vars):
         plt.savefig(f"{odir}/{ch}_{vars[0]}_{vars[1]}/{sample}_log_z.png")
         plt.close()
 
-        # # one for non-log z-scale
-        # fig, ax = plt.subplots(figsize=(8, 5))
-        # hep.hist2dplot(hists[{'samples': sample}], ax=ax, cmap="plasma")
-        # ax.set_xlabel(f"{vars[0]}")
-        # ax.set_ylabel(f"{vars[1]}")
-        # ax.set_title(f'{ch} channel for \n {sample}')
-        # hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
-        # hep.cms.text("Work in Progress", ax=ax)
-        # print(f'saving at {odir}/{ch}_{vars[0]}_{vars[1]}/{sample}.pdf')
-        # plt.savefig(f'{odir}/{ch}_{vars[0]}_{vars[1]}/{sample}.pdf')
-        # plt.close()
+        # make plots per channel
+        for sample in hists[score].axes[0]:
+            print(sample)
+            # one for log z-scale
+            # fig, ax = plt.subplots(figsize=(8, 5))
+            # hep.hist2dplot(hists[score][{'samples': sample}], ax=ax, cmap="plasma", norm=matplotlib.colors.LogNorm(vmin=1e-1, vmax=10000))
+            # ax.set_xlabel(f"miso")
+            # ax.set_ylabel(f"{score}")
+            # ax.set_title(f'{ch} channel for \n {sample}')
+            # hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
+            # hep.cms.text("Work in Progress", ax=ax)
+            # print(f'saving at {odir}/{ch}_{save_dict[score]}/{sample}_log_z.png')
+            # plt.savefig(f'{odir}/{ch}_{save_dict[score]}/{sample}_log_z.png')
+            # plt.close()
+
+            # one for non-log z-scale
+            fig, ax = plt.subplots(figsize=(8, 5))
+            hep.hist2dplot(hists[score][{'samples': sample}], ax=ax, cmap="plasma", cmin=0, cmax=1)
+            ax.set_xlabel(f"miso")
+            ax.set_ylabel(f"{score}")
+            ax.set_title(f'{ch} channel for \n {sample}')
+            hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
+            hep.cms.text("Work in Progress", ax=ax)
+            print(f'saving at {odir}/{ch}_{save_dict[score]}/{sample}.png')
+            plt.savefig(f'{odir}/{ch}_{save_dict[score]}/{sample}.png')
+            plt.close()
 
 
 def main(args):
@@ -253,7 +271,7 @@ def main(args):
     # append '_year' to the output directory
     odir = args.odir + "_" + args.year
     if not os.path.exists(odir):
-        os.makedirs(odir)
+        os.system(f'mkdir -p {odir}')
 
     channels = args.channels.split(",")
 
@@ -264,7 +282,40 @@ def main(args):
 
     # build samples
     samples = {}
-    samples[args.year] = {}
+    for year in years:
+        samples[year] = {}
+        for ch in channels:
+            samples[year][ch] = []
+            for key, value in json_samples[year][ch].items():
+                if value == 1:
+                    samples[year][ch].append(key)
+
+    # load yaml config file
+    with open(args.vars) as f:
+        variables = yaml.safe_load(f)
+
+    print(variables)
+
+    # list of weights to apply to MC
+    weights = {}
+    # pre-selection string
+    presel = {}
+    for ch in channels:
+
+        weights[ch] = []
+        for key, value in variables[ch]["weights"].items():
+            if value == 1:
+                weights[ch].append(key)
+
+        presel_str = None
+        if type(variables[ch]["pre-sel"]) is list:
+            presel_str = variables[ch]["pre-sel"][0]
+            for i,sel in enumerate(variables[ch]["pre-sel"]):
+                if i==0: continue
+                presel_str += f'& {sel}'
+        presel[ch] = presel_str
+
+    os.system(f"cp {args.vars} {odir}/")
 
     for ch in channels:
         samples[args.year][ch] = []
@@ -300,13 +351,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g. run locally as
-    # lep_iso vs lep_pt:   python make_2dplots.py --year 2017 --odir 2d_plots --channels ele,mu --vars lep_isolation,lep_pt --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0   --y_end 1 --idir /eos/uscms/store/user/cmantill/boostedhiggs/Jun20_2017/ --make_hists
-    # lep_pt vs lep_fj_dr: python make_2dplots.py --year 2017 --odir 2d_plots --channels ele --vars lep_pt,lep_fj_dr     --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0.1 --y_end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # fj_pt vs lep_fj_dr:  python make_2dplots.py --year 2017 --odir 2d_plots --channels ele,mu --vars fj_pt,lep_fj_dr      --make_hists --plot_hists --x_bins 100 --x_start 200 --x_end 500 --y_bins 100 --y_start 0.1 --y_end 2 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # lep_pt vs mt:        python make_2dplots.py --year 2017 --odir 2d_plots --channels ele --vars lep_pt,lep_met_mt    --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0   --y_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-    # lep_pt vs fj_pt:     python make_2dplots.py --year 2017 --odir 2d_plots --channels ele --vars lep_pt,fj_pt         --make_hists --plot_hists --x_bins 100 --x_start 0 --x_end 500 --y_bins 100 --y_start 0   --y_end 500 --idir /eos/uscms/store/user/fmokhtar/boostedhiggs/
-
-    # lep_miso vs tagger_score:     python make_2dplots.py --year 2017 --odir 2d_plots --channels ele --vars lep_misolation,tagger_score --make_hists --plot_hists --x_bins 10 --x_start 0 --x_end 2 --y_bins 10 --y_start 0   --y_end 1 --idir /eos/uscms/store/user/cmantill/boostedhiggs/Sep2
+    # python make_2dplots.py --year 2017 --odir Dec15_2d_plots --channels ele --make_hists --plot_hists --y_start 0 --y_end 1 --idir /eos/uscms/store/user/cmantill/boostedhiggs/Nov16_inference
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--year", dest="year", default="2017", help="year")

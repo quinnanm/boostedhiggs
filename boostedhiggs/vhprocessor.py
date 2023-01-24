@@ -39,61 +39,55 @@ np.seterr(invalid="ignore")
 
 
 def zleptons(good_leptons):
-     ngood_leptons = ak.num(good_leptons, axis=1)
+    ngood_leptons = ak.num(good_leptons, axis=1)
 
-     min_three_leptons = ak.mask(good_leptons, (ngood_leptons >= 3)[:, None])
-     
-     lepton_pairs = ak.argcombinations(
-         min_three_leptons, 2, fields=["first", "second"]
-     )
-     lepton_pairs = ak.fill_none(lepton_pairs, [], axis=0)
-     
-     OSSF_pairs = lepton_pairs[
-         (
-             min_three_leptons[lepton_pairs["first"]].charge
-             != min_three_leptons[lepton_pairs["second"]].charge
+    min_three_leptons = ak.mask(good_leptons, (ngood_leptons >= 3)[:, None])
+
+    lepton_pairs = ak.argcombinations(min_three_leptons, 2, fields=["first", "second"])
+    lepton_pairs = ak.fill_none(lepton_pairs, [], axis=0)
+
+    OSSF_pairs = lepton_pairs[
+        (
+            min_three_leptons[lepton_pairs["first"]].charge
+            != min_three_leptons[lepton_pairs["second"]].charge
         )
-         & (
-             min_three_leptons[lepton_pairs["first"]].flavor
-             == min_three_leptons[lepton_pairs["second"]].flavor
-         )
-     ]
-     
-     closest_pairs = OSSF_pairs[
+        & (
+            min_three_leptons[lepton_pairs["first"]].flavor
+            == min_three_leptons[lepton_pairs["second"]].flavor
+        )
+    ]
+
+    closest_pairs = OSSF_pairs[
         ak.local_index(OSSF_pairs)
-         == ak.argmin(
-             np.abs(
-                 (
-                     min_three_leptons[OSSF_pairs["first"]]
+        == ak.argmin(
+            np.abs(
+                (
+                    min_three_leptons[OSSF_pairs["first"]]
                     + min_three_leptons[OSSF_pairs["second"]]
-                 ).mass
-                 - 91.2
-             ),
-             axis=1,
-         )
-     ]
-     closest_pairs = ak.fill_none(closest_pairs, [], axis=0)
+                ).mass
+                - 91.2
+            ),
+            axis=1,
+        )
+    ]
+    closest_pairs = ak.fill_none(closest_pairs, [], axis=0)
 
-     # invariant Z mass                                                                                                                                                                                            
-     ZLeptonMass = (
-        min_three_leptons[closest_pairs.first]
-         + min_three_leptons[closest_pairs.second]
-     ).mass
-     desired_length = np.max(ak.num(ZLeptonMass))
-     
-     ZLeptonMass = ak.ravel(
+    # invariant Z mass
+    ZLeptonMass = (
+        min_three_leptons[closest_pairs.first] + min_three_leptons[closest_pairs.second]
+    ).mass
+    desired_length = np.max(ak.num(ZLeptonMass))
+
+    ZLeptonMass = ak.ravel(
         ak.to_numpy(ak.fill_none(ak.pad_none(ZLeptonMass, desired_length), 0))
-     )
+    )
 
-     remainingLeptons = min_three_leptons[
-            (ak.local_index(min_three_leptons) != ak.any(closest_pairs.first, axis=1))
-            & (
-                ak.local_index(min_three_leptons)
-                != ak.any(closest_pairs.second, axis=1)
-            )
-     ]
-     
-     return ZLeptonMass,remainingLeptons
+    remainingLeptons = min_three_leptons[
+        (ak.local_index(min_three_leptons) != ak.any(closest_pairs.first, axis=1))
+        & (ak.local_index(min_three_leptons) != ak.any(closest_pairs.second, axis=1))
+    ]
+
+    return ZLeptonMass, remainingLeptons
 
 
 def pad_val(
@@ -304,7 +298,7 @@ class vhProcessor(processor.ProcessorABC):
         ngood_leptons = ak.num(good_leptons, axis=1)
 
         # invariant Z mass
-        ZLeptonMass,remainingLeptons = zleptons(good_leptons)
+        ZLeptonMass, remainingLeptons = zleptons(good_leptons)
 
         candidatelep = ak.firsts(
             remainingLeptons
@@ -418,21 +412,21 @@ class vhProcessor(processor.ProcessorABC):
 
         # gen matching
         if self.isMC:
-             if ("HToWW" in dataset) or ("HWW" in dataset) or ("ttHToNonbb" in dataset):
-                  genVars, signal_mask = match_H(events.GenPart, candidatefj)
-                  self.add_selection(name="signal", sel=signal_mask)
-             elif "HToTauTau" in dataset:
-                  genVars, signal_mask = match_H(
-                       events.GenPart, candidatefj, dau_pdgid=15
-                  )
-                  self.add_selection(name="signal", sel=signal_mask)
-             elif ("WJets" in dataset) or ("ZJets" in dataset) or ("DYJets" in dataset):
-                  genVars = match_V(events.GenPart, candidatefj)
-             elif ("TT" in dataset):
-                  genVars = match_Top(events.GenPart, candidatefj)
-             else:
-                  genVars = {}
-             variables = {**variables, **genVars}
+            if ("HToWW" in dataset) or ("HWW" in dataset) or ("ttHToNonbb" in dataset):
+                genVars, signal_mask = match_H(events.GenPart, candidatefj)
+                self.add_selection(name="signal", sel=signal_mask)
+            elif "HToTauTau" in dataset:
+                genVars, signal_mask = match_H(
+                    events.GenPart, candidatefj, dau_pdgid=15
+                )
+                self.add_selection(name="signal", sel=signal_mask)
+            elif ("WJets" in dataset) or ("ZJets" in dataset) or ("DYJets" in dataset):
+                genVars = match_V(events.GenPart, candidatefj)
+            elif "TT" in dataset:
+                genVars = match_Top(events.GenPart, candidatefj)
+            else:
+                genVars = {}
+            variables = {**variables, **genVars}
 
         # let's save the hem veto as a cut for now
         if self._year == "2018":

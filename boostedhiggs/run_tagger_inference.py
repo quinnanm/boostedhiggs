@@ -183,9 +183,7 @@ def runInferenceTriton(
         )
         return {}
 
-    if (
-        out_name == "output__0"
-    ):
+    if out_name == "output__0":
         import scipy
 
         mass = tagger_outputs[:, -1]
