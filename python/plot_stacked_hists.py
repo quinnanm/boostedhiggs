@@ -30,24 +30,8 @@ import mplhep as hep
 plt.style.use(hep.style.CMS)
 plt.rcParams.update({"font.size": 20})
 
-cut_keys = [
-    "trigger",
-    "leptonKin",
-    "fatjetKin",
-    "ht",
-    "oneLepton",
-    "notaus",
-    "leptonInJet",
-    "pre-sel",
-]
-
-global axis_dict
-axis_dict["cutflow"] = get_cutflow_axis(cut_keys)
-print("Cutflow with key names: ", cut_keys)
-
-
 def plot_stacked_hists(
-    vars_to_plot, year, ch, odir, logy=True, add_data=True, add_soverb=True
+    vars_to_plot, year, ch, odir, logy=True, add_data=True, add_soverb=True, only_sig=False
 ):
     """
     Plots the stacked 1D histograms that were made by "make_hists" individually for each year
@@ -57,6 +41,9 @@ def plot_stacked_hists(
         odir: output directory to hold the plots
     """
 
+    if only_sig:
+        add_data = False
+    
     # load the hists
     with open(f"{odir}/../{ch}_hists.pkl", "rb") as f:
         hists = pkl.load(f)
@@ -247,7 +234,7 @@ def plot_stacked_hists(
                 # rax.set_ylim(0.7, 1.3)
 
         # plot the background
-        if len(bkg) > 0:
+        if len(bkg) > 0 and not only_sig:
             if var == "cutflow":
                 """
                 # sort bkg for cutflow
@@ -501,5 +488,19 @@ if __name__ == "__main__":
     parser.add_argument("--nodata", dest="nodata", action="store_false", help="No data")
 
     args = parser.parse_args()
+
+    cut_keys = [
+        "trigger",
+        "leptonKin",
+        "fatjetKin",
+        "ht",
+        "oneLepton",
+        "notaus",
+        "leptonInJet",
+        "pre-sel",
+    ]
+    global axis_dict
+    axis_dict["cutflow"] = get_cutflow_axis(cut_keys)
+    print("Cutflow with key names: ", cut_keys)
 
     main(args)

@@ -23,10 +23,6 @@ ele:
     mjj: 1
   pre-sel:
     - (( (lep_pt < 120) & (lep_isolation < 0.15) ) | (lep_pt >= 120))
-    # - (( (lep_pt < 120) & (lep_isolation < 0.1) ) | (lep_pt >= 120))
-    # - (( (lep_pt >= 120) & (lep_misolation < 0.4) ) | (lep_pt < 120))
-    # - (( (lep_pt >= 120) & (lep_misolation < 0.1) ) | (lep_pt < 120)) # dylan's selection
-    # - (fj_bjets < 0.340)
   weights:
     weight_genweight: 1
     weight_L1Prefiring: 1
@@ -59,10 +55,6 @@ mu:
     mjj: 1
   pre-sel:
     - (( (lep_pt < 50) & (lep_isolation < 0.15) ) | (lep_pt >= 50))
-    - (( (lep_pt >= 50) & (lep_misolation < 0.1) ) | (lep_pt < 50))
-    # - (( (lep_pt < 50) & (lep_isolation < 0.25) ) | (lep_pt >= 50))
-    # - (( (lep_pt >= 50) & (lep_misolation < 0.2) ) | (lep_pt < 50)) # dylan's selection
-    # - (fj_bjets < 0.340)
   weights:
     weight_genweight: 1
     weight_L1Prefiring: 1

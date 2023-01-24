@@ -7,6 +7,7 @@ from utils import (
     signal_by_ch,
     simplified_labels,
     color_by_sample,
+    get_cutflow_axis,
 )
 import pickle as pkl
 import os
@@ -26,7 +27,6 @@ warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 plt.style.use(hep.style.CMS)
 plt.rcParams.update({"font.size": 20})
-
 
 def plot_1dhists(year, channels, odir, var, samples, tag, logy):
     """
@@ -77,7 +77,11 @@ def plot_1dhists(year, channels, odir, var, samples, tag, logy):
         hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
         hep.cms.text("Work in Progress", ax=ax)
         ax.legend(title=f"{ch_title} Channel")
+        if var == "cutflow":
+            ax.set_xticks(range(len(cut_keys)), cut_keys, rotation=60, fontsize=8)
+            ax.set_xlabel("")
         if logy:
+            ax.set_ylim(10,50000)
             ax.set_yscale("log")
             plt.savefig(f"{odir}/1dhist_{var}_{tag}_{ch}_log.pdf")
         else:
@@ -136,6 +140,17 @@ if __name__ == "__main__":
         "--var", dest="var", default=None, required=True, help="variable to plot"
     )
     parser.add_argument("--logy", dest="logy", action="store_true", help="Log y axis")
+    parser.add_argument(
+        "--cut-keys",
+        dest="cut_keys",
+        default="trigger,leptonKin,fatjetKin,ht,oneLepton,notaus,leptonInJet,pre-sel",
+        help="cut keys for cutflow (split by commas)"
+    )
+    
     args = parser.parse_args()
+
+    cut_keys = args.cut_keys.split(",")
+    global axis_dict
+    axis_dict["cutflow"] = get_cutflow_axis(cut_keys)
 
     main(args)
