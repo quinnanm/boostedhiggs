@@ -28,6 +28,7 @@ warnings.filterwarnings("ignore", message="Found duplicate branch ")
 plt.style.use(hep.style.CMS)
 plt.rcParams.update({"font.size": 20})
 
+
 def plot_1dhists(year, channels, odir, var, samples, tag, logy):
     """
     Plots 1D histograms that were made by "make_1dhists" function
@@ -81,7 +82,7 @@ def plot_1dhists(year, channels, odir, var, samples, tag, logy):
             ax.set_xticks(range(len(cut_keys)), cut_keys, rotation=60, fontsize=8)
             ax.set_xlabel("")
         if logy:
-            ax.set_ylim(10,50000)
+            ax.set_ylim(10, 50000)
             ax.set_yscale("log")
             plt.savefig(f"{odir}/1dhist_{var}_{tag}_{ch}_log.pdf")
         else:
@@ -144,9 +145,9 @@ if __name__ == "__main__":
         "--cut-keys",
         dest="cut_keys",
         default="trigger,leptonKin,fatjetKin,ht,oneLepton,notaus,leptonInJet,pre-sel",
-        help="cut keys for cutflow (split by commas)"
+        help="cut keys for cutflow (split by commas)",
     )
-    
+
     args = parser.parse_args()
 
     cut_keys = args.cut_keys.split(",")
