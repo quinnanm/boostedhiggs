@@ -1,21 +1,21 @@
-import importlib.resources
-import json
-import os
-import pathlib
-import pickle as pkl
-import shutil
-import warnings
 from collections import defaultdict
-from typing import List, Optional
-
+import pickle as pkl
+import pyarrow as pa
 import awkward as ak
 import numpy as np
 import pandas as pd
-import pyarrow as pa
+import json
+import os
+import shutil
+import pathlib
+from typing import List, Optional
 import pyarrow.parquet as pq
+
+import importlib.resources
+
 from coffea import processor
-from coffea.analysis_tools import PackedSelection, Weights
 from coffea.nanoevents.methods import candidate, vector
+from coffea.analysis_tools import Weights, PackedSelection
 
 from boostedhiggs.utils import (
     match_H,
@@ -25,21 +25,17 @@ from boostedhiggs.utils import (
     pad_val,
 )
 from boostedhiggs.corrections import (
+    corrected_msoftdrop,
+    add_VJets_kFactors,
     add_jetTriggerSF,
     add_lepton_weight,
     add_pileup_weight,
-    add_VJets_kFactors,
-    corrected_msoftdrop,
 )
-from boostedhiggs.utils import (
-    get_neutrino_z,
-    match_H,
-    match_Top,
-    match_V,
-    pad_val,
-)
+from boostedhiggs.btag import btagWPs, BTagCorrector
 
 from .run_tagger_inference import runInferenceTriton
+
+import warnings
 
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -449,6 +445,7 @@ class HwwProcessor(processor.ProcessorABC):
         - LHE pdf weights for signal (ToDo) 
         - PSweights for signal (ToDo) 
         - ParticleNet tagger efficienc (ToDo) y
+
         Up and Down Variations (systematics included as a new variable)
         ----
         - Pileup weight Up/Down 

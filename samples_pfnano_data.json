@@ -17,7 +17,7 @@
 	"SingleElectron_Run2016C_HIPM": 20,
 	"SingleElectron_Run2016D_HIPM": 20,
 	"SingleElectron_Run2016E_HIPM": 20,
-	"SingleElectron_Run2016F_HIPM": 20,
+	"SingleElectron_Run2016F_HIPM": 20
     },
     "2017": {
 	"SingleMuon_Run2017B": 20,
@@ -29,7 +29,7 @@
 	"SingleElectron_Run2017C": 20,
 	"SingleElectron_Run2017D": 20,
 	"SingleElectron_Run2017E": 20,
-	"SingleElectron_Run2017F": 20,
+	"SingleElectron_Run2017F": 20
     },
     "2018": {
 	"SingleMuon_Run2018A": 20,
@@ -39,6 +39,6 @@
 	"EGamma_Run2018A": 20,
 	"EGamma_Run2018B": 20,
 	"EGamma_Run2018C": 20,
-	"EGamma_Run2018D": 20,
+        "EGamma_Run2018D": 20
     }
 }

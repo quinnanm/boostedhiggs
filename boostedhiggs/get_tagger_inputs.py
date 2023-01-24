@@ -95,9 +95,15 @@ def get_pfcands_features(
         ).astype(np.float32)
 
     # convert to numpy arrays and normalize features
-    for var in set(
-        tagger_vars["pf_features"]["var_names"] + tagger_vars["pf_vectors"]["var_names"]
-    ):
+    if "pf_vectors" in tagger_vars.keys():
+        variables = set(
+            tagger_vars["pf_features"]["var_names"]
+            + tagger_vars["pf_vectors"]["var_names"]
+        )
+    else:
+        variables = tagger_vars["pf_features"]["var_names"]
+
+    for var in variables:
         a = (
             ak.pad_none(
                 feature_dict[var],
@@ -193,9 +199,15 @@ def get_svs_features(
         ).astype(np.float32)
 
     # convert to numpy arrays and normalize features
-    for var in set(
-        tagger_vars["sv_features"]["var_names"] + tagger_vars["sv_vectors"]["var_names"]
-    ):
+    if "sv_vectors" in tagger_vars.keys():
+        variables = set(
+            tagger_vars["sv_features"]["var_names"]
+            + tagger_vars["sv_vectors"]["var_names"]
+        )
+    else:
+        variables = tagger_vars["sv_features"]["var_names"]
+
+    for var in variables:
         a = (
             ak.pad_none(
                 feature_dict[var],
