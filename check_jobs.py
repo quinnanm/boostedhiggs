@@ -37,7 +37,7 @@ def main(args):
         # print(f"Sample {sample} produced {njobs_produced} files")
 
         if njobs_produced != njobs:  # debug which pkl file wasn't produced
-            print(f"-----> SAMPLE {sample} HAS RAN INTO ERROR")
+            print(f"-----> SAMPLE {sample} HAS RAN INTO ERROR, #jobs produced: {njobs_produced}, # jobs {njobs}" )
             for i, x in enumerate(
                 range(0, njobs * nfiles_per_job[sample], nfiles_per_job[sample])
             ):
@@ -69,7 +69,7 @@ if __name__ == "__main__":
         "--tag", dest="tag", default="Test", help="process tag", type=str
     )
     parser.add_argument(
-        "--sampleis",
+        "--samples",
         dest="samples",
         default="samples_pfnano_mc.json",
         help="path to datafiles",
