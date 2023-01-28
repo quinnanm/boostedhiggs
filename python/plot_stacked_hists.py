@@ -30,8 +30,16 @@ import mplhep as hep
 plt.style.use(hep.style.CMS)
 plt.rcParams.update({"font.size": 20})
 
+
 def plot_stacked_hists(
-    vars_to_plot, year, ch, odir, logy=True, add_data=True, add_soverb=True, only_sig=False
+    vars_to_plot,
+    year,
+    ch,
+    odir,
+    logy=True,
+    add_data=True,
+    add_soverb=True,
+    only_sig=False,
 ):
     """
     Plots the stacked 1D histograms that were made by "make_hists" individually for each year
@@ -43,7 +51,7 @@ def plot_stacked_hists(
 
     if only_sig:
         add_data = False
-    
+
     # load the hists
     with open(f"{odir}/../{ch}_hists.pkl", "rb") as f:
         hists = pkl.load(f)
