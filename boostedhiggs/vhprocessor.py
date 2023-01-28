@@ -130,6 +130,7 @@ class vhProcessor(processor.ProcessorABC):
         self,
         year,
         yearmod="",
+        channel="lep",
         output_location="./outfiles/",
         inference=False,
         apply_trigger=True,
@@ -137,7 +138,7 @@ class vhProcessor(processor.ProcessorABC):
 
         self._year = year
         self._yearmod = yearmod
-        self._output_location = output_location
+        self._output_location = output_location + channel
 
         # dictionary of trigger paths
         with importlib.resources.path("boostedhiggs.data", "triggers.json") as path:

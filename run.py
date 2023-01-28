@@ -95,6 +95,7 @@ def main(args):
         p = vhProcessor(
             year=year,
             yearmod=yearmod,
+            channel=channels[0],
             inference=args.inference,
             output_location="./outfiles" + job_name,
         )
