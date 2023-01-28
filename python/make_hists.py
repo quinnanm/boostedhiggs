@@ -30,23 +30,7 @@ import mplhep as hep
 plt.style.use(hep.style.CMS)
 plt.rcParams.update({"font.size": 20})
 
-cut_keys = [
-    "trigger",
-    "leptonKin",
-    "fatjetKin",
-    "ht",
-    "oneLepton",
-    "notaus",
-    "leptonInJet",
-    "pre-sel",
-]
-
-global axis_dict
-axis_dict["cutflow"] = get_cutflow_axis(cut_keys)
-print("Cutflow with key names: ", cut_keys)
-
-
-def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples):
+def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys):
     """
     Makes 1D histograms of the "vars_to_plot" to be plotted as stacked over the different samples.
 
@@ -55,9 +39,10 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples):
         idir: directory that holds the processed samples (e.g. {idir}/{sample}/outfiles/*_{ch}.parquet).
         odir: output directory to hold the hist object.
         vars_to_plot: the set of variables to plot a 1D-histogram of (by default: the samples with key==1 defined in plot_configs/vars.json).
-        presel: pre-selection string.
+        presel: pre-selection dictionary.
         weights: weights to be applied to MC.
         samples: the set of samples to run over (by default: the samples defined in plot_configs/samples_pfnano.json).
+        cut_keys: cut keys
     """
 
     # define histograms
@@ -125,9 +110,11 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples):
             for key, val in cutflow.items():
                 cut_values[sample_to_use][key] += val
 
-            cut_values[sample_to_use]["pre-sel"] = 0
+            if presel is not None:
+                for key in presel.keys():
+                    cut_values[sample_to_use][key] = 0
 
-            sample_yield = 0
+            sample_yields = {}
             for i, parquet_file in enumerate(parquet_files):
                 try:
                     data = pq.read_table(parquet_file).to_pandas()
@@ -152,13 +139,25 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples):
                     )
                     continue
 
-                # modify dataframe with pre-selection query
+                # modify dataframe with string queries
                 if presel is not None:
-                    data = data.query(presel)
+                    for sel_key,sel_str in presel.items():
+                        data = data.query(sel_str)
+                        if not is_data:
+                            event_weight = xsec_weight
+                            for w in weights:
+                                try:
+                                    event_weight *= data[w]
+                                except:
+                                    pass
+                            cut_values[sample_to_use][sel_key] += np.sum(event_weight)
+                        else:
+                            weight_ones = np.ones_like(data["fj_pt"])
+                            cut_values[sample_to_use][sel_key] += np.sum(weight_ones*xsec_weight)
 
+                # get event weight
                 if not is_data:
                     event_weight = xsec_weight
-                    weight_ones = np.ones_like(data["weight_genweight"])
                     for w in weights:
                         try:
                             event_weight *= data[w]
@@ -170,32 +169,14 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples):
                                 print_warning = False
                             if print_warning:
                                 print(f"No {w} variable in parquet for sample {sample}")
-                            # break
                 else:
-                    weight_ones = np.ones_like(data["lep_pt"])
-                    event_weight = weight_ones
-
-                # account yield for extra selection
-                # (with only the xsec weight)
-                # sample_yield += np.sum(weight_ones*xsec_weight)
-                sample_yield += np.sum(event_weight)
+                    event_weight = np.ones_like(data["fj_pt"])
 
                 for var in plot_vars:
                     if var == "cutflow":
                         continue
-                    if var == "score" and not args.add_score:
-                        continue
 
-                    # for specific variables introduce cut
-                    if "lowpt" in var:
-                        select_var = data["lep_pt"] < pt_iso[ch]
-                    elif "highpt" in var:
-                        select_var = data["lep_pt"] > pt_iso[ch]
-                    else:
-                        select_var = data["lep_pt"] > 0
-
-                    var_plot = var.replace("_lowpt", "").replace("_highpt", "")
-                    if var_plot not in data.keys():
+                    if var not in data.keys():
                         if "gen" in var:
                             continue
                         print(f"Var {var} not in parquet keys")
@@ -208,18 +189,15 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples):
                         weight=event_weight[select_var],
                     )
 
-            cut_values[sample_to_use]["pre-sel"] += sample_yield
-
             # fill cutflow histogram once we have all the values
             for key, numevents in cut_values[sample_to_use].items():
-                cut_index = cut_keys.index(key)
+                cut_index = list(cut_values[sample_to_use].keys()).index(key)
                 hists["cutflow"].fill(
                     samples=sample_to_use, var=cut_index, weight=numevents
                 )
 
-            # samples = [hists["cutflow"].axes[0].value(i) for i in range(len(hists["cutflow"].axes[0].edges))]
-            # print(sample,samples)
-
+        # print(cut_values)
+        
         # save cutflow values
         with open(f"{odir}/cut_values_{ch}.pkl", "wb") as f:
             pkl.dump(cut_values, f)
@@ -271,7 +249,7 @@ def main(args):
     vars_to_plot = {}
     # list of weights to apply to MC
     weights = {}
-    # pre-selection string
+    # pre-selection dictionary
     presel = {}
     for ch in variables.keys():
         vars_to_plot[ch] = []
@@ -284,32 +262,37 @@ def main(args):
             if value == 1:
                 weights[ch].append(key)
 
-        presel_str = None
-        if type(variables[ch]["pre-sel"]) is list:
-            presel_str = variables[ch]["pre-sel"][0]
-            for i, sel in enumerate(variables[ch]["pre-sel"]):
-                if i == 0:
-                    continue
-                presel_str += f"& {sel}"
-        presel[ch] = presel_str
+        if "selection" in variables[ch]:
+            presel[ch] = variables[ch]["selection"]
+        else:
+            presel[ch] = None
 
+    cut_keys = args.cut_keys.split(",")
+    global axis_dict
+            
     os.system(f"cp {args.vars} {odir}/")
 
     for ch in channels:
         if len(glob.glob(f"{odir}/{ch}_hists.pkl")) > 0:
             print("Histograms already exist - remaking them")
+
+        # get cut keys for cutflow
+        extra_cut_keys = []
+        if presel[ch] is not None:
+            extra_cut_keys = list(presel[ch].keys())
+        axis_dict["cutflow"] = get_cutflow_axis(cut_keys + extra_cut_keys)
+            
         print(f"Making histograms for {ch}...")
         print("Weights: ", weights[ch])
-        print("Pre-selection: ", presel[ch])
+        print("Pre-selection: ", presel[ch].keys())
         make_hists(
-            ch, args.idir, odir, vars_to_plot[ch], weights[ch], presel[ch], samples
+            ch, args.idir, odir, vars_to_plot[ch], weights[ch], presel[ch], samples, cut_keys
         )
 
 
 if __name__ == "__main__":
     # e.g.
-    # run locally as: python make_hists.py --year 2017 --odir Nov4 --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Nov4
-    # run locally as: python make_hists.py --year 2016 --odir Nov21 --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Nov16
+    # run locally as: python make_hists.py --year 2017 --odir Jan23 --channels ele,mu --idir ../Jan20 --vars plot_configs/cutflow.yaml
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -322,8 +305,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--vars",
         dest="vars",
-        default="plot_configs/vars.yaml",
-        help="path to json with variables to be plotted",
+        required=True,
+        help="path to yaml with variables to be plotted",
     )
     parser.add_argument(
         "--samples",
@@ -350,9 +333,12 @@ if __name__ == "__main__":
         help="input directory with results - without _{year}",
     )
     parser.add_argument(
-        "--add_score", dest="add_score", action="store_true", help="Add inference score"
+        "--cut-keys",
+        dest="cut_keys",
+        default="trigger,leptonKin,fatjetKin,ht,oneLepton,notaus,leptonInJet",
+        help="cut keys for cutflow (split by commas)"
     )
-
+    
     args = parser.parse_args()
 
     main(args)

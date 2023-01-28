@@ -2,8 +2,8 @@ ele:
   vars:
     fj_pt: 1
     cutflow: 1
-  pre-sel:
-    - (( (lep_pt < 120) & (lep_isolation < 0.15) ) | (lep_pt >= 120))
+  selection:
+    mini-iso: (( (lep_pt < 120) & (lep_isolation < 0.15) ) | (lep_pt >= 120))
   weights:
     weight_genweight: 1
     weight_L1Prefiring: 1
@@ -16,8 +16,8 @@ mu:
   vars:
     fj_pt: 1
     cutflow: 1
-  pre-sel:
-    - (( (lep_pt < 50) & (lep_isolation < 0.15) ) | (lep_pt >= 50))
+  selection:
+    mini-iso: (( (lep_pt < 50) & (lep_isolation < 0.15) ) | (lep_pt >= 50))
   weights:
     weight_genweight: 1
     weight_L1Prefiring: 1

@@ -166,10 +166,7 @@ def main(args):
     if args.processor == "hww" or args.processor == "vh":
         for ch in channels:
             data = pd.read_parquet("./outfiles/" + job_name + ch + "/parquet")
-            if ch == "":
-                data.to_parquet("./outfiles/" + job_name + ".parquet")
-            else:
-                data.to_parquet("./outfiles/" + job_name + "_" + ch + ".parquet")
+            data.to_parquet("./outfiles/" + job_name + "_" + ch + ".parquet")
             # remove old parquet files
             os.system("rm -rf ./outfiles/" + job_name + ch)
 
@@ -179,7 +176,7 @@ if __name__ == "__main__":
 
     # run locally on lpc (hww mc) as: python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --json samples_pfnano_mc.json
     # run locally on lpc (hww mc) as: python run.py --year 2017 --processor lumi --pfnano --n 1 --starti 0 --json samples_pfnano_data.json
-    # run locally on lpc (vh) as: python run.py --year 2018 --sample HZJ_HToWW_M-125 --processor vh --pfnano --n 1 --starti 0 --json samples_pfnano_mc.json  --channels "" --executor iterative
+    # run locally on lpc (vh) as: python run.py --year 2018 --sample HZJ_HToWW_M-125 --processor vh --pfnano --n 1 --starti 0 --json samples_pfnano_mc.json  --channels lep --executor iterative
     # run locally on lpc (hww trigger) as: python run.py --year 2017 --processor trigger --pfnano --n 45 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele
 
     parser = argparse.ArgumentParser()

@@ -9,7 +9,6 @@ ele:
     gen_isTop: 1
     gen_isToplep: 1
     gen_isTopqq: 1
-  pre-sel:
   weights:
     weight_genweight: 1
     weight_L1Prefiring: 1
@@ -29,7 +28,6 @@ mu:
     gen_isTop: 1
     gen_isToplep: 1
     gen_isTopqq: 1
-  pre-sel:
   weights:
     weight_genweight: 1
     weight_L1Prefiring: 1

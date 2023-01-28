@@ -395,7 +395,7 @@ def plot_stacked_hists(
 
         if logy:
             ax.set_yscale("log")
-            ax.set_ylim(0.1)
+            ax.set_ylim(10)
 
         hep.cms.lumitext(
             "%.1f " % luminosity + r"fb$^{-1}$ (13 TeV)", ax=ax, fontsize=20
