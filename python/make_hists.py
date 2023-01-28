@@ -30,6 +30,7 @@ import mplhep as hep
 plt.style.use(hep.style.CMS)
 plt.rcParams.update({"font.size": 20})
 
+
 def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys):
     """
     Makes 1D histograms of the "vars_to_plot" to be plotted as stacked over the different samples.
@@ -141,7 +142,7 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys)
 
                 # modify dataframe with string queries
                 if presel is not None:
-                    for sel_key,sel_str in presel.items():
+                    for sel_key, sel_str in presel.items():
                         data = data.query(sel_str)
                         if not is_data:
                             event_weight = xsec_weight
@@ -153,7 +154,9 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys)
                             cut_values[sample_to_use][sel_key] += np.sum(event_weight)
                         else:
                             weight_ones = np.ones_like(data["fj_pt"])
-                            cut_values[sample_to_use][sel_key] += np.sum(weight_ones*xsec_weight)
+                            cut_values[sample_to_use][sel_key] += np.sum(
+                                weight_ones * xsec_weight
+                            )
 
                 # get event weight
                 if not is_data:
@@ -197,7 +200,7 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys)
                 )
 
         # print(cut_values)
-        
+
         # save cutflow values
         with open(f"{odir}/cut_values_{ch}.pkl", "wb") as f:
             pkl.dump(cut_values, f)
@@ -269,7 +272,7 @@ def main(args):
 
     cut_keys = args.cut_keys.split(",")
     global axis_dict
-            
+
     os.system(f"cp {args.vars} {odir}/")
 
     for ch in channels:
@@ -281,12 +284,19 @@ def main(args):
         if presel[ch] is not None:
             extra_cut_keys = list(presel[ch].keys())
         axis_dict["cutflow"] = get_cutflow_axis(cut_keys + extra_cut_keys)
-            
+
         print(f"Making histograms for {ch}...")
         print("Weights: ", weights[ch])
         print("Pre-selection: ", presel[ch].keys())
         make_hists(
-            ch, args.idir, odir, vars_to_plot[ch], weights[ch], presel[ch], samples, cut_keys
+            ch,
+            args.idir,
+            odir,
+            vars_to_plot[ch],
+            weights[ch],
+            presel[ch],
+            samples,
+            cut_keys,
         )
 
 
@@ -336,9 +346,9 @@ if __name__ == "__main__":
         "--cut-keys",
         dest="cut_keys",
         default="trigger,leptonKin,fatjetKin,ht,oneLepton,notaus,leptonInJet",
-        help="cut keys for cutflow (split by commas)"
+        help="cut keys for cutflow (split by commas)",
     )
-    
+
     args = parser.parse_args()
 
     main(args)
