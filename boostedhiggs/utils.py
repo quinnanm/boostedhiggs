@@ -314,12 +314,12 @@ def match_V(genparts: GenParticleArray, fatjet: FatJetArray):
     decay = (
         # 2 quarks * 1
         (ak.sum(daughters_pdgId < b_PDGID, axis=1) == 2) * 1
-        # 1 electron * 3
-        + (ak.sum(daughters_pdgId == ELE_PDGID, axis=1) == 1) * 3
-        # 1 muon * 5
-        + (ak.sum(daughters_pdgId == MU_PDGID, axis=1) == 1) * 5
-        # 1 tau * 7
-        + (ak.sum(daughters_pdgId == TAU_PDGID, axis=1) == 1) * 7
+        # >=1 electron * 3
+        + (ak.sum(daughters_pdgId == ELE_PDGID, axis=1) >= 1) * 3
+        # >=1 muon * 5
+        + (ak.sum(daughters_pdgId == MU_PDGID, axis=1) >= 1) * 5
+        # >=1 tau * 7
+        + (ak.sum(daughters_pdgId == TAU_PDGID, axis=1) >= 1) * 7
     )
 
     daughters_nov = daughters[
