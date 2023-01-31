@@ -33,8 +33,13 @@ def get_pfcands_features(
     jet_ak_pfcands = preselected_events[pfcands_label][msk]
     jet_pfcands = preselected_events.PFCands[jet_ak_pfcands.pFCandsIdx]
 
+    # sort them by pt
+    pfcand_sort = ak.argsort(jet_pfcands.pt, ascending=False)
+    jet_pfcands = jet_pfcands[pfcand_sort]
+
     # negative eta jets have -1 sign, positive eta jets have +1
-    eta_sign = ak.values_astype(jet_pfcands.eta > 0, int) * 2 - 1
+    eta_sign = ak.ones_like(jet_pfcands.eta)
+    eta_sign = eta_sign * (ak.values_astype(jet.eta > 0, int) * 2 - 1)
     feature_dict["pfcand_etarel"] = eta_sign * (jet_pfcands.eta - jet.eta)
     feature_dict["pfcand_phirel"] = jet.delta_phi(jet_pfcands)
     feature_dict["pfcand_abseta"] = np.abs(jet_pfcands.eta)
@@ -69,7 +74,7 @@ def get_pfcands_features(
     # btag vars
     for var in tagger_vars["pf_features"]["var_names"]:
         if "btag" in var:
-            feature_dict[var] = jet_ak_pfcands[var[len("pfcand_") :]]
+            feature_dict[var] = jet_ak_pfcands[var[len("pfcand_") :]][pfcand_sort]
 
     # pfcand mask
     feature_dict["pfcand_mask"] = (
@@ -94,6 +99,14 @@ def get_pfcands_features(
             )
         ).astype(np.float32)
 
+    repl_values_dict = {
+        "pfcand_normchi2": [-1, 999],
+        "pfcand_dz": [-1, 0],
+        "pfcand_dzsig": [1, 0],
+        "pfcand_dxy": [-1, 0],
+        "pfcand_dxysig": [1, 0],
+    }
+
     # convert to numpy arrays and normalize features
     if "pf_vectors" in tagger_vars.keys():
         variables = set(
@@ -116,6 +129,11 @@ def get_pfcands_features(
         ).astype(np.float32)
         a = np.nan_to_num(a)
 
+        # replace values to match PKU's
+        if var in repl_values_dict:
+            vals = repl_values_dict[var]
+            a[a == vals[0]] = vals[1]
+
         if normalize:
             if var in tagger_vars["pf_features"]["var_names"]:
                 info = tagger_vars["pf_features"]["var_infos"][var]
@@ -127,12 +145,6 @@ def get_pfcands_features(
 
         feature_dict[var] = a
 
-    if normalize:
-        var = "pfcand_normchi2"
-        info = tagger_vars["pf_features"]["var_infos"][var]
-        # finding what -1 transforms to
-        chi2_min = -1 - info["median"] * info["norm_factor"]
-        feature_dict[var][feature_dict[var] == chi2_min] = info["upper_bound"]
     return feature_dict
 
 
@@ -158,6 +170,9 @@ def get_svs_features(
             (preselected_events[svs_label].sVIdx != -1) * (msk)
         ]
     ]
+
+    # sort by dxy significance
+    jet_svs = jet_svs[ak.argsort(jet_svs.dxySig, ascending=False)]
 
     # negative eta jets have -1 sign, positive eta jets have +1
     eta_sign = ak.values_astype(jet_svs.eta > 0, int) * 2 - 1
@@ -218,6 +233,7 @@ def get_svs_features(
             .to_numpy()
             .filled(fill_value=0)
         ).astype(np.float32)
+        a = np.nan_to_num(a)
 
         if normalize:
             if var in tagger_vars["sv_features"]["var_names"]:
