@@ -188,8 +188,8 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys)
                     # filling histograms
                     hists[var].fill(
                         samples=sample_to_use,
-                        var=data[var_plot][select_var],
-                        weight=event_weight[select_var],
+                        var=data[var],
+                        weight=event_weight
                     )
 
             # fill cutflow histogram once we have all the values
