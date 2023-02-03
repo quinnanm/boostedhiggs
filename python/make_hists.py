@@ -3,36 +3,20 @@ import glob
 import json
 import os
 import pickle as pkl
-import sys
 
 import hist as hist2
-import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import mplhep as hep
 import numpy as np
 import pyarrow.parquet as pq
 import yaml
-from utils import (
-    axis_dict,
-    color_by_sample,
-    data_by_ch,
-    data_by_ch_2018,
-    get_cutflow,
-    get_cutflow_axis,
-    get_sample_to_use,
-    get_xsecweight,
-    label_by_ch,
-    signal_by_ch,
-    simplified_labels,
-)
+from utils import axis_dict, data_by_ch, data_by_ch_2018, get_cutflow, get_cutflow_axis, get_sample_to_use, get_xsecweight
 
 plt.style.use(hep.style.CMS)
 plt.rcParams.update({"font.size": 20})
 
 
-def make_hists(
-    ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys
-):
+def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys):
     """
     Makes 1D histograms of the "vars_to_plot" to be plotted as stacked over the different samples.
 
@@ -40,7 +24,7 @@ def make_hists(
         ch: string that represents the signal channel to look at... choices are ['ele', 'mu'].
         idir: directory that holds the processed samples (e.g. {idir}/{sample}/outfiles/*_{ch}.parquet).
         odir: output directory to hold the hist object.
-        vars_to_plot: the set of variables to plot a 1D-histogram of (by default: the samples with key==1 defined in plot_configs/vars.json).
+        vars_to_plot: the set of variables to plot 1D-histograms of.
         presel: pre-selection dictionary.
         weights: weights to be applied to MC.
         samples: the set of samples to run over (by default: the samples defined in plot_configs/samples_pfnano.json).
@@ -62,7 +46,7 @@ def make_hists(
     cut_values = {}
 
     # pt cuts for variables
-    pt_iso = {"ele": 120, "mu": 55}
+    # pt_iso = {"ele": 120, "mu": 55}
 
     # loop over the samples
     for yr in samples.keys():
@@ -73,9 +57,7 @@ def make_hists(
         f = open("../fileset/luminosity.json")
         luminosity = json.load(f)[ch][yr]
         f.close()
-        print(
-            f"Processing samples from year {yr} with luminosity {luminosity} for channel {ch}"
-        )
+        print(f"Processing samples from year {yr} with luminosity {luminosity} for channel {ch}")
 
         for sample in samples[yr][ch]:
             print(f"Sample {sample}")
@@ -93,9 +75,7 @@ def make_hists(
                 continue
 
             # get list of parquet files that have been post processed
-            parquet_files = glob.glob(
-                f"{idir}_{yr}/{sample}/outfiles/*_{ch}.parquet"
-            )
+            parquet_files = glob.glob(f"{idir}_{yr}/{sample}/outfiles/*_{ch}.parquet")
 
             # define an is_data boolean
             is_data = False
@@ -103,17 +83,13 @@ def make_hists(
                 is_data = True
 
             # get combined sample
-            sample_to_use = get_sample_to_use(sample, yr)
+            sample_to_use = get_sample_to_use(sample, yr, is_data)
 
             # get cutflow
-            xsec_weight = get_xsecweight(
-                pkl_files, yr, sample, is_data, luminosity
-            )
+            xsec_weight = get_xsecweight(pkl_files, yr, sample, is_data, luminosity)
             if sample_to_use not in cut_values.keys():
                 cut_values[sample_to_use] = dict.fromkeys(cut_keys, 0)
-            cutflow = get_cutflow(
-                cut_keys, pkl_files, yr, sample, xsec_weight, ch
-            )
+            cutflow = get_cutflow(cut_keys, pkl_files, yr, sample, xsec_weight, ch)
             for key, val in cutflow.items():
                 cut_values[sample_to_use][key] += val
 
@@ -121,11 +97,10 @@ def make_hists(
                 for key in presel.keys():
                     cut_values[sample_to_use][key] = 0
 
-            sample_yields = {}
             for i, parquet_file in enumerate(parquet_files):
                 try:
                     data = pq.read_table(parquet_file).to_pandas()
-                except:
+                except ValueError:
                     if is_data:
                         print(
                             "Not able to read data: ",
@@ -141,9 +116,7 @@ def make_hists(
                 #    print(sample, data.columns)
 
                 if len(data) == 0:
-                    print(
-                        f"WARNING: Parquet file empty {yr} {ch} {sample} {parquet_file}"
-                    )
+                    print(f"WARNING: Parquet file empty {yr} {ch} {sample} {parquet_file}")
                     continue
 
                 # modify dataframe with string queries
@@ -155,16 +128,12 @@ def make_hists(
                             for w in weights:
                                 try:
                                     event_weight *= data[w]
-                                except:
+                                except ValueError:
                                     pass
-                            cut_values[sample_to_use][sel_key] += np.sum(
-                                event_weight
-                            )
+                            cut_values[sample_to_use][sel_key] += np.sum(event_weight)
                         else:
                             weight_ones = np.ones_like(data["fj_pt"])
-                            cut_values[sample_to_use][sel_key] += np.sum(
-                                weight_ones * xsec_weight
-                            )
+                            cut_values[sample_to_use][sel_key] += np.sum(weight_ones * xsec_weight)
 
                 # get event weight
                 if not is_data:
@@ -172,16 +141,12 @@ def make_hists(
                     for w in weights:
                         try:
                             event_weight *= data[w]
-                        except:
+                        except ValueError:
                             print_warning = True
-                            if w == "weight_vjets_nominal" or (
-                                w == "weight_L1Prefiring" and yr == "2018"
-                            ):
+                            if w == "weight_vjets_nominal" or (w == "weight_L1Prefiring" and yr == "2018"):
                                 print_warning = False
                             if print_warning:
-                                print(
-                                    f"No {w} variable in parquet for sample {sample}"
-                                )
+                                print(f"No {w} variable in parquet for sample {sample}")
                 else:
                     event_weight = np.ones_like(data["fj_pt"])
 
@@ -205,9 +170,7 @@ def make_hists(
             # fill cutflow histogram once we have all the values
             for key, numevents in cut_values[sample_to_use].items():
                 cut_index = list(cut_values[sample_to_use].keys()).index(key)
-                hists["cutflow"].fill(
-                    samples=sample_to_use, var=cut_index, weight=numevents
-                )
+                hists["cutflow"].fill(samples=sample_to_use, var=cut_index, weight=numevents)
 
         # print(cut_values)
 
@@ -215,10 +178,7 @@ def make_hists(
         with open(f"{odir}/cut_values_{ch}.pkl", "wb") as f:
             pkl.dump(cut_values, f)
 
-    samples = [
-        hists["cutflow"].axes[0].value(i)
-        for i in range(len(hists["cutflow"].axes[0].edges))
-    ]
+    samples = [hists["cutflow"].axes[0].value(i) for i in range(len(hists["cutflow"].axes[0].edges))]
     print(samples)
 
     # store the hists variable
@@ -235,11 +195,7 @@ def main(args):
     channels = args.channels.split(",")
 
     # get year
-    years = (
-        ["2016", "2016APV", "2017", "2018"]
-        if args.year == "Run2"
-        else [args.year]
-    )
+    years = ["2016", "2016APV", "2017", "2018"] if args.year == "Run2" else [args.year]
 
     # get samples to make histograms
     f = open(args.samples)
@@ -315,8 +271,9 @@ def main(args):
 
 
 if __name__ == "__main__":
-    # e.g.
-    # run locally as: python make_hists.py --year 2017 --odir Jan23 --channels ele,mu --idir ../Jan20 --vars plot_configs/cutflow.yaml
+
+    # e.g. run locally as:
+    # # noqa: python make_hists.py --year 2017 --odir Jan23 --channels ele,mu --idir ../Jan20 --vars plot_configs/cutflow.yaml
 
     parser = argparse.ArgumentParser()
     parser.add_argument(

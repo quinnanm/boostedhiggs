@@ -1,22 +1,17 @@
-import os
-import subprocess
 import json
-
+import subprocess
 
 eosbase = "root://cmseos.fnal.gov/"
+user = "cmantill"
 eosdirs = {
-    "pfnano": f"/store/user/lpcpfnano/cmantill/v2_2/2017/",
+    "pfnano": f"/store/user/lpcpfnano/{user}/v2_2/2017/",
 }
 
 sampledict = {"HWW": {}, "HWWPrivate": {}}
 
 
 def eos_rec_search(startdir, suffix, dirs):
-    dirlook = (
-        subprocess.check_output(f"eos {eosbase} ls {startdir}", shell=True)
-        .decode("utf-8")
-        .split("\n")[:-1]
-    )
+    dirlook = subprocess.check_output(f"eos {eosbase} ls {startdir}", shell=True).decode("utf-8").split("\n")[:-1]
     donedirs = [[] for d in dirlook]
     for di, d in enumerate(dirlook):
         if d.endswith(suffix):
@@ -25,9 +20,7 @@ def eos_rec_search(startdir, suffix, dirs):
             continue
         else:
             # print(f"Searching {d}")
-            donedirs[di] = donedirs[di] + eos_rec_search(
-                startdir + "/" + d, suffix, dirs + donedirs[di]
-            )
+            donedirs[di] = donedirs[di] + eos_rec_search(startdir + "/" + d, suffix, dirs + donedirs[di])
     donedir = [d for da in donedirs for d in da]
     return dirs + donedir
 
@@ -36,9 +29,7 @@ for tag, eospfnano in eosdirs.items():
     try:
         for sample in sampledict.keys():
             datasets = (
-                subprocess.check_output(
-                    f"eos {eosbase} ls {eospfnano}/{sample}/", shell=True
-                )
+                subprocess.check_output(f"eos {eosbase} ls {eospfnano}/{sample}/", shell=True)
                 .decode("utf-8")
                 .split("\n")[:-1]
             )
@@ -51,7 +42,7 @@ for tag, eospfnano in eosdirs.items():
                     print(f"repeated {sample}/{dataset} in {user}")
                     sampledict[sample][dataset] = sampledict[sample][dataset] + dirlog
                     # print(user,sample,dataset,len(dirlog))
-    except:
+    except ValueError:
         pass
 with open(f"{tag}_2017.json", "w") as outfile:
     json.dump(sampledict, outfile, indent=4, sort_keys=True)

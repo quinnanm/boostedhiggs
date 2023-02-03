@@ -43,6 +43,5 @@ scp -r cmslpc-sl7.fnal.gov:/eos/uscms/store/user/lpcdihiggsboost/cmantill/PFNano
 
 More files (to run e.g. on coffea-casa) can be found in the fileset json:
 ```
-data/fileset/2017_UL_ak15.json 
+data/fileset/2017_UL_ak15.json
 ```
-

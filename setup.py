@@ -1,11 +1,8 @@
 #!/usr/bin/env python
-import sys
 import os.path
-from setuptools import (
-    setup,
-    find_packages,
-)
+import sys
 
+from setuptools import find_packages, setup
 
 about = {}
 with open(os.path.join("boostedhiggs", "version.py")) as f:
