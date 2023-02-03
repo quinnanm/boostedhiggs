@@ -19,7 +19,7 @@ repos:
   - id: mixed-line-ending
     args: ['--fix=no']
 
-This is giving different results on github CI vs. locally and I can't understand why
+#This is giving different results on github CI vs. locally and I can't understand why
 - repo: https://github.com/PyCQA/isort
  rev: 5.11.2
  hooks:
