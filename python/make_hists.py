@@ -1,37 +1,38 @@
+import argparse
+import glob
+import json
+import os
+import pickle as pkl
+import sys
+
+import hist as hist2
+import matplotlib.colors as mcolors
+import matplotlib.pyplot as plt
+import mplhep as hep
+import numpy as np
+import pyarrow.parquet as pq
+import yaml
 from utils import (
     axis_dict,
     color_by_sample,
-    signal_by_ch,
     data_by_ch,
     data_by_ch_2018,
-    label_by_ch,
-)
-from utils import (
-    simplified_labels,
     get_cutflow,
-    get_xsecweight,
-    get_sample_to_use,
     get_cutflow_axis,
+    get_sample_to_use,
+    get_xsecweight,
+    label_by_ch,
+    signal_by_ch,
+    simplified_labels,
 )
-
-import yaml
-import pickle as pkl
-import pyarrow.parquet as pq
-import numpy as np
-import json
-import os, glob, sys
-import argparse
-
-import hist as hist2
-import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
-import mplhep as hep
 
 plt.style.use(hep.style.CMS)
 plt.rcParams.update({"font.size": 20})
 
 
-def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys):
+def make_hists(
+    ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys
+):
     """
     Makes 1D histograms of the "vars_to_plot" to be plotted as stacked over the different samples.
 
@@ -92,7 +93,9 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys)
                 continue
 
             # get list of parquet files that have been post processed
-            parquet_files = glob.glob(f"{idir}_{yr}/{sample}/outfiles/*_{ch}.parquet")
+            parquet_files = glob.glob(
+                f"{idir}_{yr}/{sample}/outfiles/*_{ch}.parquet"
+            )
 
             # define an is_data boolean
             is_data = False
@@ -103,10 +106,14 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys)
             sample_to_use = get_sample_to_use(sample, yr)
 
             # get cutflow
-            xsec_weight = get_xsecweight(pkl_files, yr, sample, is_data, luminosity)
+            xsec_weight = get_xsecweight(
+                pkl_files, yr, sample, is_data, luminosity
+            )
             if sample_to_use not in cut_values.keys():
                 cut_values[sample_to_use] = dict.fromkeys(cut_keys, 0)
-            cutflow = get_cutflow(cut_keys, pkl_files, yr, sample, xsec_weight, ch)
+            cutflow = get_cutflow(
+                cut_keys, pkl_files, yr, sample, xsec_weight, ch
+            )
             for key, val in cutflow.items():
                 cut_values[sample_to_use][key] += val
 
@@ -150,7 +157,9 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys)
                                     event_weight *= data[w]
                                 except:
                                     pass
-                            cut_values[sample_to_use][sel_key] += np.sum(event_weight)
+                            cut_values[sample_to_use][sel_key] += np.sum(
+                                event_weight
+                            )
                         else:
                             weight_ones = np.ones_like(data["fj_pt"])
                             cut_values[sample_to_use][sel_key] += np.sum(
@@ -170,7 +179,9 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys)
                             ):
                                 print_warning = False
                             if print_warning:
-                                print(f"No {w} variable in parquet for sample {sample}")
+                                print(
+                                    f"No {w} variable in parquet for sample {sample}"
+                                )
                 else:
                     event_weight = np.ones_like(data["fj_pt"])
 
@@ -186,7 +197,9 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys)
 
                     # filling histograms
                     hists[var].fill(
-                        samples=sample_to_use, var=data[var], weight=event_weight
+                        samples=sample_to_use,
+                        var=data[var],
+                        weight=event_weight,
                     )
 
             # fill cutflow histogram once we have all the values
@@ -222,7 +235,11 @@ def main(args):
     channels = args.channels.split(",")
 
     # get year
-    years = ["2016", "2016APV", "2017", "2018"] if args.year == "Run2" else [args.year]
+    years = (
+        ["2016", "2016APV", "2017", "2018"]
+        if args.year == "Run2"
+        else [args.year]
+    )
 
     # get samples to make histograms
     f = open(args.samples)
