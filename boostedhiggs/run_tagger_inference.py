@@ -203,18 +203,34 @@ def runInferenceTriton(
             f"fj_{pversion}_HVV_taunuqq": tagger_outputs[:, 5],
         }
     else:
+        output_names = [x.replace("label_","prob").replace("_","") for x in tagger_vars["output_names"]]
+
         pnet_vars = {}
-        for i, output_name in enumerate(tagger_vars["output_names"]):
+        for i, output_name in enumerate(output_names):
             pnet_vars[f"fj_{pversion}_{output_name}"] = tagger_outputs[:, i]
 
         derived_vars = {
             f"fj_{pversion}_probQCD": np.sum(tagger_outputs[:, 23:28], axis=1),
-            f"fj_{pversion}_probTopb": np.sum(tagger_outputs[:, 29:37], axis=1),
-            f"fj_{pversion}_probHWWelenuqq": np.sum(tagger_outputs[:, 7:8], axis=1),
-            f"fj_{pversion}_probHWWmunuqq": np.sum(tagger_outputs[:, 9:10], axis=1),
+            f"fj_{pversion}_probTopb": np.sum(tagger_outputs[:, 28:], axis=1),
+            f"fj_{pversion}_probHWWelenuqq": np.sum(
+                tagger_outputs[:, 6:8], axis=1
+            ),
+            f"fj_{pversion}_probHWWmunuqq": np.sum(
+                tagger_outputs[:, 8:10], axis=1
+            ),
         }
 
         pnet_vars = {**pnet_vars, **derived_vars}
+
+        # also add pku vars of that jet
+        if pversion=="ParT":
+            jet = ak.firsts(events[fatjet_label][fj_idx_lep])
+            pku_vars = {
+                f"fj_PKU_{pversion}_{output_name}": jet[f"inclParTMDV1_{output_name}"] for output_name in output_names
+            }
+            pku_vars[f"fj_PKU_{pversion}_mass"] = jet[f"inclParTMDV1_mass"]
+            
+            pnet_vars = {**pnet_vars, **pku_vars}
 
     # print(f"Total time taken: {time.time() - total_start:.1f}s")
     return pnet_vars
