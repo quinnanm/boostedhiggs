@@ -65,7 +65,6 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys)
 
     # loop over the samples
     for yr in samples.keys():
-
         # data label and lumi
         data_label = data_by_ch[ch]
         if yr == "2018":
@@ -187,9 +186,7 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys)
 
                     # filling histograms
                     hists[var].fill(
-                        samples=sample_to_use,
-                        var=data[var_plot][select_var],
-                        weight=event_weight[select_var],
+                        samples=sample_to_use, var=data[var], weight=event_weight
                     )
 
             # fill cutflow histogram once we have all the values

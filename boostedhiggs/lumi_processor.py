@@ -45,7 +45,6 @@ class LumiProcessor(processor.ProcessorABC):
         year="2017",
         output_location="./outfiles/",
     ):
-
         self._year = year
 
     @property

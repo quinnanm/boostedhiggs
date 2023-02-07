@@ -135,7 +135,6 @@ class vhProcessor(processor.ProcessorABC):
         inference=False,
         apply_trigger=True,
     ):
-
         self._year = year
         self._yearmod = yearmod
         self._output_location = output_location + channel

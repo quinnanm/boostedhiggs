@@ -20,7 +20,6 @@ that holds a dictionary with "key=dataset_name" and "value=lumi_set" which has t
 
 
 def main():
-
     # load the pkl outfiles
     year = "2016APV"
     dir_ = f"/eos/uscms/store/user/fmokhtar/boostedhiggs/lumi_{year}/"
@@ -47,7 +46,6 @@ def main():
         pkl_files = glob.glob(dir_ + dataset + "/outfiles/*")
 
         for i, pkl_file in enumerate(pkl_files):
-
             # you can load the output!
             with open(pkl_file, "rb") as f:
                 out = pickle.load(f)[dataset][year + "APV"]["lumilist"]

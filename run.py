@@ -17,7 +17,6 @@ import os
 
 
 def main(args):
-
     # make directory for output
     if not os.path.exists("./outfiles"):
         os.makedirs("./outfiles")

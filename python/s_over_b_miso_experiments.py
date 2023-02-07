@@ -188,7 +188,6 @@ def main(args):
     # pre-selection string
     presel = {}
     for ch in variables.keys():
-
         weights[ch] = []
         for key, value in variables[ch]["weights"].items():
             if value == 1:

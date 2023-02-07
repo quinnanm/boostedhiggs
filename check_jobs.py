@@ -11,7 +11,6 @@ from condor.file_utils import loadJson
 
 
 def main(args):
-
     username = os.environ["USER"]
     homedir = f"/store/user/{args.username}/boostedhiggs/"
     outdir = "/eos/uscms/" + homedir + args.tag + "_" + args.year + "/"

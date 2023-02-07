@@ -69,7 +69,6 @@ class HwwProcessor(processor.ProcessorABC):
         apply_trigger=True,
         apply_selection=True
     ):
-
         self._year = year
         self._yearmod = yearmod
         self._channels = channels
