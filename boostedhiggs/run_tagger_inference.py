@@ -4,6 +4,8 @@ Author(s): Raghav Kansal, Cristina Mantilla Suarez, Melissa Quinnan, Farouk Mokh
 """
 
 import json
+
+# import time
 from typing import Dict
 
 import awkward as ak
@@ -57,13 +59,7 @@ class wrapped_triton:
                 triton_protocol,
                 client,
             )
-            for batch in tqdm(
-                range(
-                    0,
-                    input_dict[list(input_dict.keys())[0]].shape[0],
-                    self._batch_size,
-                )
-            )
+            for batch in tqdm(range(0, input_dict[list(input_dict.keys())[0]].shape[0], self._batch_size))
         ]
 
         return np.concatenate(outs) if input_size > 0 else outs
@@ -95,6 +91,7 @@ def runInferenceTriton(
     fj_idx_lep,
     model_name: str = "ak8_MD_vminclv2ParT_manual_fixwrap",
 ) -> dict:
+    # total_start = time.time()
     # print(f"Running tagger inference with model {model_name}")
 
     with open(f"{tagger_resources_path}/triton_config_{model_name}.json") as f:
@@ -110,11 +107,7 @@ def runInferenceTriton(
         "ak8_MD_vminclv2ParT_manual_fixwrap": ["ParT", "softmax"],
     }[model_name]
 
-    triton_model = wrapped_triton(
-        triton_config["model_url"],
-        triton_config["batch_size"],
-        out_name=out_name,
-    )
+    triton_model = wrapped_triton(triton_config["model_url"], triton_config["batch_size"], out_name=out_name)
 
     fatjet_label = "FatJet"
     pfcands_label = "FatJetPFCands"
@@ -153,9 +146,11 @@ def runInferenceTriton(
     # run inference for both fat jets
     tagger_outputs = []
 
+    # start = time.time()
+
     try:
         tagger_outputs = triton_model(tagger_inputs)
-    except ValueError:
+    except Exception:
         print("---can't run inference due to error with the event or the server is not running--")
         return {}
 
@@ -165,6 +160,8 @@ def runInferenceTriton(
         mass = tagger_outputs[:, -1]
         tagger_outputs = scipy.special.softmax(tagger_outputs[:, :-1], axis=1)
         np.append(tagger_outputs, mass)
+
+    # time_taken = time.time() - start
 
     # print(f"Inference took {time_taken:.1f}s")
 

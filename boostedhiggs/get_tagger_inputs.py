@@ -3,6 +3,7 @@ Methods for deriving input variables for the tagger.
 Author(s): Raghav Kansal, Cristina Mantilla Suarez, Melissa Quinnan, Farouk Mokhtar
 """
 
+# import json
 from typing import Dict
 
 import awkward as ak
@@ -75,8 +76,8 @@ def get_pfcands_features(
     feature_dict["pfcand_px"] = jet_pfcands.px
     feature_dict["pfcand_py"] = jet_pfcands.py
     feature_dict["pfcand_pz"] = jet_pfcands.pz
-    # feature_dict["pfcand_energy"] = jet_pfcands.E
-    feature_dict["pfcand_energy"] = jet_pfcands.energy
+    feature_dict["pfcand_energy"] = jet_pfcands.E
+    # feature_dict["pfcand_energy"] = jet_pfcands.energy
 
     # btag vars
     for var in tagger_vars["pf_features"]["var_names"]:
