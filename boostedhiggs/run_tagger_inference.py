@@ -6,6 +6,7 @@ Author(s): Raghav Kansal, Cristina Mantilla Suarez, Melissa Quinnan, Farouk Mokh
 import json
 from typing import Dict
 
+import awkward as ak
 import numpy as np
 import tritonclient.grpc as triton_grpc
 import tritonclient.http as triton_http
@@ -56,7 +57,13 @@ class wrapped_triton:
                 triton_protocol,
                 client,
             )
-            for batch in tqdm(range(0, input_dict[list(input_dict.keys())[0]].shape[0], self._batch_size))
+            for batch in tqdm(
+                range(
+                    0,
+                    input_dict[list(input_dict.keys())[0]].shape[0],
+                    self._batch_size,
+                )
+            )
         ]
 
         return np.concatenate(outs) if input_size > 0 else outs
@@ -88,7 +95,6 @@ def runInferenceTriton(
     fj_idx_lep,
     model_name: str = "ak8_MD_vminclv2ParT_manual_fixwrap",
 ) -> dict:
-
     # print(f"Running tagger inference with model {model_name}")
 
     with open(f"{tagger_resources_path}/triton_config_{model_name}.json") as f:
@@ -104,7 +110,11 @@ def runInferenceTriton(
         "ak8_MD_vminclv2ParT_manual_fixwrap": ["ParT", "softmax"],
     }[model_name]
 
-    triton_model = wrapped_triton(triton_config["model_url"], triton_config["batch_size"], out_name=out_name)
+    triton_model = wrapped_triton(
+        triton_config["model_url"],
+        triton_config["batch_size"],
+        out_name=out_name,
+    )
 
     fatjet_label = "FatJet"
     pfcands_label = "FatJetPFCands"
@@ -167,17 +177,30 @@ def runInferenceTriton(
             f"fj_{pversion}_HVV_taunuqq": tagger_outputs[:, 5],
         }
     else:
+        output_names = [x.replace("label_", "prob").replace("_", "") for x in tagger_vars["output_names"]]
+
         pnet_vars = {}
-        for i, output_name in enumerate(tagger_vars["output_names"]):
+        for i, output_name in enumerate(output_names):
             pnet_vars[f"fj_{pversion}_{output_name}"] = tagger_outputs[:, i]
 
         derived_vars = {
             f"fj_{pversion}_probQCD": np.sum(tagger_outputs[:, 23:28], axis=1),
-            f"fj_{pversion}_probTopb": np.sum(tagger_outputs[:, 29:37], axis=1),
-            f"fj_{pversion}_probHWWelenuqq": np.sum(tagger_outputs[:, 7:8], axis=1),
-            f"fj_{pversion}_probHWWmunuqq": np.sum(tagger_outputs[:, 9:10], axis=1),
+            f"fj_{pversion}_probTopb": np.sum(tagger_outputs[:, 28:], axis=1),
+            f"fj_{pversion}_probHWWelenuqq": np.sum(tagger_outputs[:, 6:8], axis=1),
+            f"fj_{pversion}_probHWWmunuqq": np.sum(tagger_outputs[:, 8:10], axis=1),
         }
 
         pnet_vars = {**pnet_vars, **derived_vars}
 
+        # also add pku vars of that jet
+        if pversion == "ParT":
+            jet = ak.firsts(events[fatjet_label][fj_idx_lep])
+            pku_vars = {
+                f"fj_PKU_{pversion}_{output_name}": jet[f"inclParTMDV1_{output_name}"] for output_name in output_names
+            }
+            pku_vars[f"fj_PKU_{pversion}_mass"] = jet["inclParTMDV1_mass"]
+
+            pnet_vars = {**pnet_vars, **pku_vars}
+
+    # print(f"Total time taken: {time.time() - total_start:.1f}s")
     return pnet_vars
