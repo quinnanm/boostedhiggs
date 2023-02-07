@@ -98,10 +98,7 @@ def main(args):
             line = line.replace("SAMPLE", sample)
             line = line.replace("CHANNELS", args.channels)
             line = line.replace("EOSOUTPKL", eosoutput_pkl)
-            if args.pfnano:
-                line = line.replace("PFNANO", "--pfnano")
-            else:
-                line = line.replace("PFNANO", "--no-pfnano")
+            line = line.replace("PFNANO", "--pfnano {args.pfnano}")
             if args.inference:
                 line = line.replace("INFERENCE", "--inference")
             else:
@@ -142,13 +139,19 @@ if __name__ == "__main__":
     parser.add_argument("--files-per-job",               default=None,
                         help="# files per condor job", type=int)
     parser.add_argument(
+        "--pfnano",
+        dest="pfnano",
+        type=str,
+        default="v2_2",
+        help="pfnano version",
+    )
+    parser.add_argument(
         "--channels",
         dest="channels",
         required=True,
         help="channels separated by commas",
     )
-    parser.add_argument("--pfnano",    dest='pfnano', action='store_true')
-    parser.add_argument("--no-pfnano", dest='pfnano', action='store_false')
+
     parser.add_argument("--inference",   dest='inference', action='store_true')
     parser.add_argument("--no-inference", dest='inference', action='store_false')
     parser.set_defaults(pfnano=True)
