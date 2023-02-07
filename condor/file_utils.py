@@ -1,7 +1,7 @@
 import json
 
 
-def loadJson(samplesjson="samples_pfnano.json", year='2017', pfnano=True, sampleslist=None):
+def loadJson(samplesjson="samples_pfnano.json", year='2017', pfnano="v2_2", sampleslist=None):
     samples = []
     values = {}
     with open(samplesjson, 'r') as f:
@@ -16,7 +16,7 @@ def loadJson(samplesjson="samples_pfnano.json", year='2017', pfnano=True, sample
             if key not in values:
                 values[key] = value
 
-    fname = f"fileset/pfnanoindex_{year}.json"
+    fname = f"fileset/pfnanoindex_{pfnano}_{year}.json"
 
     fileset = {}
     with open(fname, 'r') as f:
@@ -27,23 +27,24 @@ def loadJson(samplesjson="samples_pfnano.json", year='2017', pfnano=True, sample
                     fileset[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist]
 
     # take signal samples from 2017
-    if '2016' in year or '2018' in year:
-        for sample in samples:
-            if "GluGluHToWW" in sample:
-                with open(f"fileset/pfnanoindex_2017.json", 'r') as f:
-                    files = json.load(f)
-                    for key, flist in files['2017']['HWWPrivate'].items():
-                        if key in sample:
-                            fileset[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist]
-                    if '2016' in year:
-                        for key, flist in files['2017']['HWW'].items():
-                            if key in sample:
-                                fileset[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist]
+    # not sure this is needed anymore?
+    # if '2016' in year or '2018' in year:
+    #     for sample in samples:
+    #         if "GluGluHToWW" in sample:
+    #             with open(f"fileset/pfnanoindex_{pfnano}_2017.json", 'r') as f:
+    #                 files = json.load(f)
+    #                 for key, flist in files['2017']['HWWPrivate'].items():
+    #                     if key in sample:
+    #                         fileset[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist]
+    #                 if '2016' in year:
+    #                     for key, flist in files['2017']['HWW'].items():
+    #                         if key in sample:
+    #                             fileset[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist]
 
     return fileset, values
 
 
-def printPFNano(year='2017', samplesjson=None):
+def printPFNano(year='2017', pfnano="v2_2", samplesjson=None):
     samples = None
     if samplesjson:
         samples = []
@@ -56,7 +57,7 @@ def printPFNano(year='2017', samplesjson=None):
     if not samples:
         desired_keys = ["QCD", "WJets", "ZJets", "TTbar", "ST", "Single", "DYJets", "EGamma", "JetHT", "HToWW", "ZZ", "WW", "WZ"]
 
-    fname = f"fileset/pfnanoindex_{year}.json"
+    fname = f"fileset/pfnanoindex_{pfnano}_{year}.json"
 
     with open(fname, 'r') as f:
         files = json.load(f)
@@ -84,8 +85,9 @@ if __name__ == "__main__":
 
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--year',        dest='year',           default='2017',                     help="year",                             type=str)
+    parser.add_argument('--year',        dest='year',           default='2017', help="year",                             type=str)
+    parser.add_argument('--pfnano',      dest='pfnano',         default='v2_2', help="pfnano version")
     parser.add_argument('--samples',     dest='samples',        default=None, help='path to datafiles', type=str)
     args = parser.parse_args()
 
-    printPFNano(args.year, args.samples)
+    printPFNano(args.year, args.pfnano, args.samples)
