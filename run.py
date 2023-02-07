@@ -18,44 +18,50 @@ def main(args):
 
     channels = args.channels.split(",")
 
-    # if --local is specefied in args, process only the args.sample provided
-    if args.local:
-        files = {}
-        with open(f"fileset/pfnanoindex_{args.pfnano}_{args.year}.json", "r") as f:
-            files_all = json.load(f)
-            for subdir in files_all[args.year]:
-                for key, flist in files_all[args.year][subdir].items():
-                    if key in args.sample:
-                        files[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist]
+    if args.mac:
+        fileset = {}
+        fileset["GluGluHToWW_Pt-200ToInf_M-125"] = ["rootfiles/HWW/nano_mc2017_1-1.root"]
+        job_name = "/0_1/"
+
     else:
-        # get samples
-        if "metadata" in args.json:
-            with open(args.json, "r") as f:
-                files = json.load(f)
+        # if --local is specified in args, process only the args.sample provided
+        if args.local:
+            files = {}
+            with open(f"fileset/pfnanoindex_{args.pfnano}_{args.year}.json", "r") as f:
+                files_all = json.load(f)
+                for subdir in files_all[args.year]:
+                    for key, flist in files_all[args.year][subdir].items():
+                        if key in args.sample:
+                            files[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist]
         else:
-            # hopefully this step is avoided in condor jobs that have metadata.json
-            from condor.file_utils import loadJson
+            # get samples
+            if "metadata" in args.json:
+                with open(args.json, "r") as f:
+                    files = json.load(f)
+            else:
+                # hopefully this step is avoided in condor jobs that have metadata.json
+                from condor.file_utils import loadJson
 
-            files, _ = loadJson(args.json, args.year, args.pfnano)
+                files, _ = loadJson(args.json, args.year, args.pfnano)
 
-    if not files:
-        print("Did not find files.. Exiting.")
-        exit(1)
+        if not files:
+            print("Did not find files.. Exiting.")
+            exit(1)
 
-    # build fileset with files to run per job
-    fileset = {}
-    starti = args.starti
-    job_name = "/" + str(starti * args.n)
-    if args.n != -1:
-        job_name += "-" + str(args.starti * args.n + args.n)
-    for sample, flist in files.items():
-        if args.sample:
-            if sample not in args.sample.split(","):
-                continue
+        # build fileset with files to run per job
+        fileset = {}
+        starti = args.starti
+        job_name = "/" + str(starti * args.n)
         if args.n != -1:
-            fileset[sample] = flist[args.starti * args.n : args.starti * args.n + args.n]
-        else:
-            fileset[sample] = flist
+            job_name += "-" + str(args.starti * args.n + args.n)
+        for sample, flist in files.items():
+            if args.sample:
+                if sample not in args.sample.split(","):
+                    continue
+            if args.n != -1:
+                fileset[sample] = flist[args.starti * args.n : args.starti * args.n + args.n]
+            else:
+                fileset[sample] = flist
 
     print(
         len(list(fileset.keys())),
@@ -131,6 +137,11 @@ def main(args):
         else:
             executor = processor.IterativeExecutor(status=True)
 
+    # nanoevents.PFNanoAODSchema.mixins["SV"] = "PFCand"
+    nanoevents.PFNanoAODSchema.mixins["FatJetAK15"] = "FatJet"
+    nanoevents.PFNanoAODSchema.mixins["FatJetAK15SubJet"] = "FatJet"
+    nanoevents.PFNanoAODSchema.mixins["SubJet"] = "FatJet"
+    nanoevents.PFNanoAODSchema.mixins["PFCands"] = "PFCand"
     nanoevents.PFNanoAODSchema.mixins["SV"] = "PFCand"
     run = processor.Runner(
         executor=executor,
@@ -162,8 +173,10 @@ def main(args):
 if __name__ == "__main__":
 
     # e.g.
+    # noqa: python run.py --year 2017 --processor hww --pfnano v2_2 --n 1 --starti 0 --json samples_pfnano_quick.json --channels mu --inference
+    # noqa: python run.py --year 2017 --processor hww --pfnano v2_2 --n 1 --starti 0 --json samples_pfnano_quick.json --channels mu --inference --mac
 
-    # noqa: run locally on lpc (hww mc) as: python run.py --year 2017 --processor hww --pfnano v2_2 --n 1 --starti 0 --json samples_pfnano_mc.json
+    # noqa: run locally on lpc (hww mc) as: python run.py --year 2017 --processor hww --pfnano v2_4 --n 1 --starti 0 --json samples_pfnano_mc.json
     # noqa: run locally on lpc (hww mc) as: python run.py --year 2017 --processor lumi --pfnano v2_2 --n 1 --starti 0 --json samples_pfnano_data.json
     # noqa: run locally on lpc (vh) as: python run.py --year 2018 --sample HZJ_HToWW_M-125 --processor vh --pfnano v2_2 --n 1 --starti 0 --json samples_pfnano_mc.json --channels lep --executor iterative
     # noqa: run locally on lpc (hww trigger) as: python run.py --year 2017 --processor trigger --pfnano v2_2 --n 45 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele
@@ -189,6 +202,8 @@ if __name__ == "__main__":
     parser.add_argument("--no-inference", dest="inference", action="store_false")
     parser.add_argument("--pfnano", dest="pfnano", type=str, default="v2_2", help="pfnano version")
     parser.set_defaults(inference=False)
+
+    parser.add_argument("--mac", dest="mac", action="store_true")
     args = parser.parse_args()
 
     main(args)
