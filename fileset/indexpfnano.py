@@ -21,114 +21,121 @@ def get_subfolders(parent):
     return subfolders
 
 
-folders_to_index = [
-    "/store/user/lpcpfnano/dryu/v2_2_1/2016/SingleMu2016",
-    "/store/user/lpcpfnano/dryu/v2_2_1/2017/SingleMu2017",
-    "/store/user/lpcpfnano/dryu/v2_2/2018/SingleMu2018",
-    ##
-    "/store/user/lpcpfnano/jekrupa/v2_2/2016/JetHT2016",
-    "/store/user/lpcpfnano/jekrupa/v2_2/2017/JetHT2017",
-    "/store/user/lpcpfnano/jekrupa/v2_2/2018/JetHT2018",
-    ##
-    "/store/user/lpcpfnano/cmantill/v2_2/2016/MET2016",
-    "/store/user/lpcpfnano/cmantill/v2_2/2017/MET2017",
-    "/store/user/lpcpfnano/cmantill/v2_2/2018/MET2018",
-    ##
-    "/store/user/lpcpfnano/drankin/v2_2/2016/SingleElectron2016",
-    "/store/user/lpcpfnano/drankin/v2_2/2017/SingleElectron2017",
-    "/store/user/lpcpfnano/drankin/v2_2/2018/EGamma2018",
-    ##
-    "/store/user/lpcpfnano/jiyoo/v2_3/2016/DoubleEG2016",
-    "/store/user/lpcpfnano/jiyoo/v2_3/2017/DoubleEG2017",
-    "/store/user/lpcpfnano/jiyoo/v2_3/2018/DoubleEG2018",
-    ##
-    "/store/user/lpcpfnano/jiyoo/v2_3/2016/DoubleMu2016",
-    "/store/user/lpcpfnano/jiyoo/v2_3/2017/DoubleMu2017",
-    "/store/user/lpcpfnano/jiyoo/v2_3/2018/DoubleMu2018",
-    ##
-    "/store/user/lpcpfnano/jiyoo/v2_3/2016/MuonEG2016",
-    "/store/user/lpcpfnano/jiyoo/v2_3/2017/MuonEG2017",
-    "/store/user/lpcpfnano/jiyoo/v2_3/2018/MuonEG2018",
-    ##
-    "/store/user/lpcpfnano/jekrupa/v2_2/2016APV/TTbar",
-    "/store/user/lpcpfnano/jekrupa/v2_2/2016/TTbar",
-    "/store/user/lpcpfnano/jekrupa/v2_2/2017/TTbar",
-    "/store/user/lpcpfnano/emoreno/v2_2/2018/TTbar",
-    "/store/user/lpcpfnano/drankin/v2_2/2016/TTbar",
-    "/store/user/lpcpfnano/drankin/v2_2/2016APV/TTbar",
-    "/store/user/lpcpfnano/drankin/v2_2/2017/TTbar",
-    "/store/user/lpcpfnano/drankin/v2_2/2018/TTbar",
-    "/store/user/lpcpfnano/yihan/v2_2/2016/TTbar",
-    "/store/user/lpcpfnano/yihan/v2_2/2016APV/TTbar",
-    "/store/user/lpcpfnano/yihan/v2_2/2017/TTbar",
-    "/store/user/lpcpfnano/yihan/v2_2/2018/TTbar",
-    ##
-    "/store/user/lpcpfnano/yihan/v2_2/2016/QCD",
-    "/store/user/lpcpfnano/yihan/v2_2/2016APV/QCD",
-    "/store/user/lpcpfnano/jekrupa/v2_2/2017/QCD",
-    "/store/user/lpcpfnano/jekrupa/v2_2/2018/QCD",
-    ##
-    "/store/user/lpcpfnano/cmantill/v2_3/2016/WJetsToQQ/",
-    "/store/user/lpcpfnano/cmantill/v2_3/2016APV/WJetsToQQ/",
-    "/store/user/lpcpfnano/cmantill/v2_3/2017/WJetsToQQ/",
-    "/store/user/lpcpfnano/rkansal/v2_3/2017/WJetsToQQ/",
-    "/store/user/lpcpfnano/cmantill/v2_3/2018/WJetsToQQ/",
-    ##
-    "/store/user/lpcpfnano/cmantill/v2_3/2016/ZJetsToQQ/",
-    "/store/user/lpcpfnano/cmantill/v2_3/2016APV/ZJetsToQQ/",
-    "/store/user/lpcpfnano/cmantill/v2_3/2017/ZJetsToQQ/",
-    "/store/user/lpcpfnano/rkansal/v2_3/2017/ZJetsToQQ/",
-    "/store/user/lpcpfnano/cmantill/v2_3/2018/ZJetsToQQ/",
-    ##
-    "/store/user/lpcpfnano/pharris/v2_2/2016/SingleTop",
-    "/store/user/lpcpfnano/pharris/v2_2/2016APV/SingleTop",
-    "/store/user/lpcpfnano/pharris/v2_2/2017/SingleTop",
-    "/store/user/lpcpfnano/pharris/v2_2/2018/SingleTop",
-    "/store/user/lpcpfnano/drankin/v2_2/2016/SingleTop/",
-    "/store/user/lpcpfnano/drankin/v2_2/2016APV/SingleTop/",
-    "/store/user/lpcpfnano/drankin/v2_2/2017/SingleTop/",
-    "/store/user/lpcpfnano/drankin/v2_2/2018/SingleTop/",
-    ##
-    "/store/user/lpcpfnano/drankin/v2_2/2016/WJetsToLNu",
-    "/store/user/lpcpfnano/drankin/v2_2/2016APV/WJetsToLNu",
-    "/store/user/lpcpfnano/drankin/v2_2/2017/WJetsToLNu",
-    "/store/user/lpcpfnano/drankin/v2_2/2018/WJetsToLNu",
-    ##
-    "/store/user/lpcpfnano/cmantill/v2_2/2016/DYJetsToLL",
-    "/store/user/lpcpfnano/cmantill/v2_2/2016APV/DYJetsToLL",
-    "/store/user/lpcpfnano/cmantill/v2_3/2016APV/DYJetsToLL",
-    "/store/user/lpcpfnano/cmantill/v2_2/2017/DYJetsToLL",
-    "/store/user/lpcpfnano/cmantill/v2_2/2018/DYJetsToLL",
-    ##
-    "/store/user/lpcpfnano/jdickins/v2_2/2016/Diboson/",
-    "/store/user/lpcpfnano/jdickins/v2_2/2016APV/Diboson/",
-    "/store/user/lpcpfnano/jdickins/v2_2/2017/Diboson/",
-    "/store/user/lpcpfnano/jdickins/v2_2/2018/Diboson/",
-    ##
-    "/store/user/lpcpfnano/jdickins/v2_2/2016/DibosonNLO/",
-    "/store/user/lpcpfnano/jdickins/v2_2/2016APV/DibosonNLO/",
-    "/store/user/lpcpfnano/jdickins/v2_2/2017/DibosonNLO/",
-    "/store/user/lpcpfnano/jdickins/v2_2/2018/DibosonNLO/",
-    ##
-    "/store/user/lpcpfnano/cmantill/v2_2/2016/HWW",
-    "/store/user/lpcpfnano/cmantill/v2_2/2016APV/HWW",
-    "/store/user/lpcpfnano/cmantill/v2_2/2017/HWW",
-    "/store/user/lpcpfnano/cmantill/v2_2/2017/HWWPrivate",
-    "/store/user/lpcpfnano/cmantill/v2_2/2018/HWW",
-    "/store/user/lpcpfnano/cmantill/v2_3/2016/HWW",
-    "/store/user/lpcpfnano/cmantill/v2_3/2016APV/HWW",
-    "/store/user/lpcpfnano/cmantill/v2_3/2017/HWW",
-    "/store/user/lpcpfnano/cmantill/v2_3/2018/HWW",
-    ##
-    "/store/user/lpcpfnano/drankin/v2_2/2016/HTT/",
-    "/store/user/lpcpfnano/drankin/v2_2/2016APV/HTT/",
-    "/store/user/lpcpfnano/drankin/v2_2/2017/HTT/",
-    "/store/user/lpcpfnano/drankin/v2_2/2018/HTT/",
-    "/store/user/lpcpfnano/cmantill/v2_2/2016/HTT",
-    "/store/user/lpcpfnano/cmantill/v2_2/2016APV/HTT",
-    "/store/user/lpcpfnano/cmantill/v2_2/2017/HTT",
-    "/store/user/lpcpfnano/cmantill/v2_2/2018/HTT",
-]
+folders_to_index = {
+    "v2_2": [
+        "/store/user/lpcpfnano/dryu/v2_2_1/2016/SingleMu2016",
+        "/store/user/lpcpfnano/dryu/v2_2_1/2017/SingleMu2017",
+        "/store/user/lpcpfnano/dryu/v2_2/2018/SingleMu2018",
+        ##
+        "/store/user/lpcpfnano/jekrupa/v2_2/2016/JetHT2016",
+        "/store/user/lpcpfnano/jekrupa/v2_2/2017/JetHT2017",
+        "/store/user/lpcpfnano/jekrupa/v2_2/2018/JetHT2018",
+        ##
+        "/store/user/lpcpfnano/cmantill/v2_2/2016/MET2016",
+        "/store/user/lpcpfnano/cmantill/v2_2/2017/MET2017",
+        "/store/user/lpcpfnano/cmantill/v2_2/2018/MET2018",
+        ##
+        "/store/user/lpcpfnano/drankin/v2_2/2016/SingleElectron2016",
+        "/store/user/lpcpfnano/drankin/v2_2/2017/SingleElectron2017",
+        "/store/user/lpcpfnano/drankin/v2_2/2018/EGamma2018",
+        ##
+        "/store/user/lpcpfnano/jiyoo/v2_3/2016/DoubleEG2016",
+        "/store/user/lpcpfnano/jiyoo/v2_3/2017/DoubleEG2017",
+        "/store/user/lpcpfnano/jiyoo/v2_3/2018/DoubleEG2018",
+        ##
+        "/store/user/lpcpfnano/jiyoo/v2_3/2016/DoubleMu2016",
+        "/store/user/lpcpfnano/jiyoo/v2_3/2017/DoubleMu2017",
+        "/store/user/lpcpfnano/jiyoo/v2_3/2018/DoubleMu2018",
+        ##
+        "/store/user/lpcpfnano/jiyoo/v2_3/2016/MuonEG2016",
+        "/store/user/lpcpfnano/jiyoo/v2_3/2017/MuonEG2017",
+        "/store/user/lpcpfnano/jiyoo/v2_3/2018/MuonEG2018",
+        ##
+        "/store/user/lpcpfnano/jekrupa/v2_2/2016APV/TTbar",
+        "/store/user/lpcpfnano/jekrupa/v2_2/2016/TTbar",
+        "/store/user/lpcpfnano/jekrupa/v2_2/2017/TTbar",
+        "/store/user/lpcpfnano/emoreno/v2_2/2018/TTbar",
+        "/store/user/lpcpfnano/drankin/v2_2/2016/TTbar",
+        "/store/user/lpcpfnano/drankin/v2_2/2016APV/TTbar",
+        "/store/user/lpcpfnano/drankin/v2_2/2017/TTbar",
+        "/store/user/lpcpfnano/drankin/v2_2/2018/TTbar",
+        "/store/user/lpcpfnano/yihan/v2_2/2016/TTbar",
+        "/store/user/lpcpfnano/yihan/v2_2/2016APV/TTbar",
+        "/store/user/lpcpfnano/yihan/v2_2/2017/TTbar",
+        "/store/user/lpcpfnano/yihan/v2_2/2018/TTbar",
+        ##
+        "/store/user/lpcpfnano/yihan/v2_2/2016/QCD",
+        "/store/user/lpcpfnano/yihan/v2_2/2016APV/QCD",
+        "/store/user/lpcpfnano/jekrupa/v2_2/2017/QCD",
+        "/store/user/lpcpfnano/jekrupa/v2_2/2018/QCD",
+        ##
+        "/store/user/lpcpfnano/cmantill/v2_3/2016/WJetsToQQ/",
+        "/store/user/lpcpfnano/cmantill/v2_3/2016APV/WJetsToQQ/",
+        "/store/user/lpcpfnano/cmantill/v2_3/2017/WJetsToQQ/",
+        "/store/user/lpcpfnano/rkansal/v2_3/2017/WJetsToQQ/",
+        "/store/user/lpcpfnano/cmantill/v2_3/2018/WJetsToQQ/",
+        ##
+        "/store/user/lpcpfnano/cmantill/v2_3/2016/ZJetsToQQ/",
+        "/store/user/lpcpfnano/cmantill/v2_3/2016APV/ZJetsToQQ/",
+        "/store/user/lpcpfnano/cmantill/v2_3/2017/ZJetsToQQ/",
+        "/store/user/lpcpfnano/rkansal/v2_3/2017/ZJetsToQQ/",
+        "/store/user/lpcpfnano/cmantill/v2_3/2018/ZJetsToQQ/",
+        ##
+        "/store/user/lpcpfnano/pharris/v2_2/2016/SingleTop",
+        "/store/user/lpcpfnano/pharris/v2_2/2016APV/SingleTop",
+        "/store/user/lpcpfnano/pharris/v2_2/2017/SingleTop",
+        "/store/user/lpcpfnano/pharris/v2_2/2018/SingleTop",
+        "/store/user/lpcpfnano/drankin/v2_2/2016/SingleTop/",
+        "/store/user/lpcpfnano/drankin/v2_2/2016APV/SingleTop/",
+        "/store/user/lpcpfnano/drankin/v2_2/2017/SingleTop/",
+        "/store/user/lpcpfnano/drankin/v2_2/2018/SingleTop/",
+        ##
+        "/store/user/lpcpfnano/drankin/v2_2/2016/WJetsToLNu",
+        "/store/user/lpcpfnano/drankin/v2_2/2016APV/WJetsToLNu",
+        "/store/user/lpcpfnano/drankin/v2_2/2017/WJetsToLNu",
+        "/store/user/lpcpfnano/drankin/v2_2/2018/WJetsToLNu",
+        ##
+        "/store/user/lpcpfnano/cmantill/v2_2/2016/DYJetsToLL",
+        "/store/user/lpcpfnano/cmantill/v2_2/2016APV/DYJetsToLL",
+        "/store/user/lpcpfnano/cmantill/v2_3/2016APV/DYJetsToLL",
+        "/store/user/lpcpfnano/cmantill/v2_2/2017/DYJetsToLL",
+        "/store/user/lpcpfnano/cmantill/v2_2/2018/DYJetsToLL",
+        ##
+        "/store/user/lpcpfnano/jdickins/v2_2/2016/Diboson/",
+        "/store/user/lpcpfnano/jdickins/v2_2/2016APV/Diboson/",
+        "/store/user/lpcpfnano/jdickins/v2_2/2017/Diboson/",
+        "/store/user/lpcpfnano/jdickins/v2_2/2018/Diboson/",
+        ##
+        "/store/user/lpcpfnano/jdickins/v2_2/2016/DibosonNLO/",
+        "/store/user/lpcpfnano/jdickins/v2_2/2016APV/DibosonNLO/",
+        "/store/user/lpcpfnano/jdickins/v2_2/2017/DibosonNLO/",
+        "/store/user/lpcpfnano/jdickins/v2_2/2018/DibosonNLO/",
+        ##
+        "/store/user/lpcpfnano/cmantill/v2_2/2016/HWW",
+        "/store/user/lpcpfnano/cmantill/v2_2/2016APV/HWW",
+        "/store/user/lpcpfnano/cmantill/v2_2/2017/HWW",
+        "/store/user/lpcpfnano/cmantill/v2_2/2017/HWWPrivate",
+        "/store/user/lpcpfnano/cmantill/v2_2/2018/HWW",
+        "/store/user/lpcpfnano/cmantill/v2_3/2016/HWW",
+        "/store/user/lpcpfnano/cmantill/v2_3/2016APV/HWW",
+        "/store/user/lpcpfnano/cmantill/v2_3/2017/HWW",
+        "/store/user/lpcpfnano/cmantill/v2_3/2018/HWW",
+        ##
+        "/store/user/lpcpfnano/drankin/v2_2/2016/HTT/",
+        "/store/user/lpcpfnano/drankin/v2_2/2016APV/HTT/",
+        "/store/user/lpcpfnano/drankin/v2_2/2017/HTT/",
+        "/store/user/lpcpfnano/drankin/v2_2/2018/HTT/",
+        "/store/user/lpcpfnano/cmantill/v2_2/2016/HTT",
+        "/store/user/lpcpfnano/cmantill/v2_2/2016APV/HTT",
+        "/store/user/lpcpfnano/cmantill/v2_2/2017/HTT",
+        "/store/user/lpcpfnano/cmantill/v2_2/2018/HTT",
+    ],
+    "v2_4": [
+        "/store/user/lpcpfnano/cmantill/v2_4/2017/HWW",
+        "/store/user/lpcpfnano/cmantill/v2_4/2017/QCD",
+        "/store/user/lpcpfnano/cmantill/v2_4/2017/TTbar",
+    ],
+}
 
 # samples to exclude (needs / at the end)
 samples_to_exclude = [
@@ -143,6 +150,9 @@ index_APV = {}
 # MC path:
 # .......................f1........................|.......................f2..............................|..........f3.........|.....f4......|.f5.|....
 # /store/user/lpcpfnano/jekrupa/v2_2/2017/WJetsToQQ/WJetsToQQ_HT-800toInf_TuneCP5_13TeV-madgraphMLM-pythia8/WJetsToQQ_HT-800toInf/211108_171840/0000/*root
+
+pfnano_version = "v2_2"
+folders_to_index = folders_to_index[pfnano_version]
 
 for pyear in ["2016", "2016APV", "2017", "2018"]:
     # if year != "2016APV": continue
@@ -232,5 +242,5 @@ for pyear in ["2016", "2016APV", "2017", "2018"]:
                     index[pyear][sample_short][subsample_short] = []
                 index[pyear][sample_short][subsample_short] = index_APV[sample_short][subsample_short]
 
-    with open(f"pfnanoindex_{pyear}.json", "w") as f:
+    with open(f"pfnanoindex_{pfnano_version}_{pyear}.json", "w") as f:
         json.dump(index, f, sort_keys=True, indent=2)
