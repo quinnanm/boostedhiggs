@@ -67,7 +67,7 @@ class HwwProcessor(processor.ProcessorABC):
         output_location="./outfiles/",
         inference=False,
         apply_trigger=True,
-        apply_selection=True
+        apply_selection=True,
     ):
         self._year = year
         self._yearmod = yearmod
@@ -137,7 +137,11 @@ class HwwProcessor(processor.ProcessorABC):
 
     def add_selection(self, name: str, sel: np.ndarray, channel: list = None):
         """Adds selection to PackedSelection object and the cutflow dictionary"""
-        channels = channel if (channel is not None and channel in self._channels) else self._channels
+        channels = (
+            channel
+            if (channel is not None and channel in self._channels)
+            else self._channels
+        )
         for ch in channels:
             self.selections[ch].add(name, sel)
             selection_ch = self.selections[ch].all(*self.selections[ch].names)
@@ -544,7 +548,9 @@ class HwwProcessor(processor.ProcessorABC):
                 for ch in self._channels:
                     self.add_selection(name="trigger", sel=trigger[ch], channel=[ch])
             self.add_selection(name="metfilters", sel=metfilters)
-            self.add_selection(name="leptonKin", sel=(candidatelep.pt > 30), channel=["mu"])
+            self.add_selection(
+                name="leptonKin", sel=(candidatelep.pt > 30), channel=["mu"]
+            )
             self.add_selection(
                 name="leptonKin", sel=(candidatelep.pt > 40), channel=["ele"]
             )
@@ -566,8 +572,12 @@ class HwwProcessor(processor.ProcessorABC):
                 & ~ak.any(loose_electrons & ~good_electrons, 1),
                 channel=["ele"],
             )
-            self.add_selection(name="notaus", sel=(n_loose_taus_mu == 0), channel=["mu"])
-            self.add_selection(name="notaus", sel=(n_loose_taus_ele == 0), channel=["ele"])
+            self.add_selection(
+                name="notaus", sel=(n_loose_taus_mu == 0), channel=["mu"]
+            )
+            self.add_selection(
+                name="notaus", sel=(n_loose_taus_ele == 0), channel=["ele"]
+            )
             self.add_selection(name="leptonInJet", sel=(lep_fj_dr < 0.8))
             # self.add_selection(
             #     name="antibjettag",
@@ -613,8 +623,8 @@ class HwwProcessor(processor.ProcessorABC):
                 # fill inference
                 if self.inference:
                     for model_name in [
-                            #"particlenet_hww_inclv2_pre2_noreg",
-                            "ak8_MD_vminclv2ParT_manual_fixwrap",
+                        # "particlenet_hww_inclv2_pre2_noreg",
+                        "ak8_MD_vminclv2ParT_manual_fixwrap",
                     ]:
                         pnet_vars = runInferenceTriton(
                             self.tagger_resources_path,
