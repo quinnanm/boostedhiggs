@@ -67,6 +67,7 @@ class HwwProcessor(processor.ProcessorABC):
         output_location="./outfiles/",
         inference=False,
         apply_trigger=True,
+        apply_selection=True
     ):
 
         self._year = year
@@ -78,6 +79,9 @@ class HwwProcessor(processor.ProcessorABC):
         with importlib.resources.path("boostedhiggs.data", "triggers.json") as path:
             with open(path, "r") as f:
                 self._HLTs = json.load(f)[self._year]
+
+        # apply selection?
+        self.apply_selection = apply_selection
 
         # apply trigger in selection?
         self.apply_trigger = apply_trigger
@@ -536,41 +540,41 @@ class HwwProcessor(processor.ProcessorABC):
         """
         Selection and cutflows.
         """
-        # self.add_selection("all", np.ones(nevents, dtype="bool"))
-        if self.apply_trigger:
-            for ch in self._channels:
-                self.add_selection(name="trigger", sel=trigger[ch], channel=[ch])
-        self.add_selection(name="metfilters", sel=metfilters)
-        self.add_selection(name="leptonKin", sel=(candidatelep.pt > 30), channel=["mu"])
-        self.add_selection(
-            name="leptonKin", sel=(candidatelep.pt > 40), channel=["ele"]
-        )
-        self.add_selection(name="fatjetKin", sel=candidatefj.pt > 200)
-        self.add_selection(name="ht", sel=(ht > 200))
-        self.add_selection(
-            name="oneLepton",
-            sel=(n_good_muons == 1)
-            & (n_good_electrons == 0)
-            & (n_loose_electrons == 0)
-            & ~ak.any(loose_muons & ~good_muons, 1),
-            channel=["mu"],
-        )
-        self.add_selection(
-            name="oneLepton",
-            sel=(n_good_muons == 0)
-            & (n_loose_muons == 0)
-            & (n_good_electrons == 1)
-            & ~ak.any(loose_electrons & ~good_electrons, 1),
-            channel=["ele"],
-        )
-        self.add_selection(name="notaus", sel=(n_loose_taus_mu == 0), channel=["mu"])
-        self.add_selection(name="notaus", sel=(n_loose_taus_ele == 0), channel=["ele"])
-        self.add_selection(name="leptonInJet", sel=(lep_fj_dr < 0.8))
-        # self.add_selection(
-        #     name="antibjettag",
-        #     # sel=(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"])
-        #     sel=(ak.max(bjets.btagDeepFlavB, axis=1) < self._btagWPs["M"])
-        # )
+        if self.apply_selection:
+            if self.apply_trigger:
+                for ch in self._channels:
+                    self.add_selection(name="trigger", sel=trigger[ch], channel=[ch])
+            self.add_selection(name="metfilters", sel=metfilters)
+            self.add_selection(name="leptonKin", sel=(candidatelep.pt > 30), channel=["mu"])
+            self.add_selection(
+                name="leptonKin", sel=(candidatelep.pt > 40), channel=["ele"]
+            )
+            self.add_selection(name="fatjetKin", sel=candidatefj.pt > 200)
+            self.add_selection(name="ht", sel=(ht > 200))
+            self.add_selection(
+                name="oneLepton",
+                sel=(n_good_muons == 1)
+                & (n_good_electrons == 0)
+                & (n_loose_electrons == 0)
+                & ~ak.any(loose_muons & ~good_muons, 1),
+                channel=["mu"],
+            )
+            self.add_selection(
+                name="oneLepton",
+                sel=(n_good_muons == 0)
+                & (n_loose_muons == 0)
+                & (n_good_electrons == 1)
+                & ~ak.any(loose_electrons & ~good_electrons, 1),
+                channel=["ele"],
+            )
+            self.add_selection(name="notaus", sel=(n_loose_taus_mu == 0), channel=["mu"])
+            self.add_selection(name="notaus", sel=(n_loose_taus_ele == 0), channel=["ele"])
+            self.add_selection(name="leptonInJet", sel=(lep_fj_dr < 0.8))
+            # self.add_selection(
+            #     name="antibjettag",
+            #     # sel=(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"])
+            #     sel=(ak.max(bjets.btagDeepFlavB, axis=1) < self._btagWPs["M"])
+            # )
 
         # initialize pandas dataframe
         output = {}
@@ -610,8 +614,8 @@ class HwwProcessor(processor.ProcessorABC):
                 # fill inference
                 if self.inference:
                     for model_name in [
-                        "particlenet_hww_inclv2_pre2_noreg",
-                        "ak8_MD_vminclv2ParT_manual_fixwrap",
+                            #"particlenet_hww_inclv2_pre2_noreg",
+                            "ak8_MD_vminclv2ParT_manual_fixwrap",
                     ]:
                         pnet_vars = runInferenceTriton(
                             self.tagger_resources_path,
