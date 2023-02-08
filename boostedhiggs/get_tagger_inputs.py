@@ -195,7 +195,8 @@ def get_svs_features(
     feature_dict["sv_px"] = jet_svs.px
     feature_dict["sv_py"] = jet_svs.py
     feature_dict["sv_pz"] = jet_svs.pz
-    feature_dict["sv_energy"] = jet_svs.E
+    # feature_dict["sv_energy"] = jet_svs.E
+    feature_dict["sv_energy"] = jet_svs.energy
 
     feature_dict["sv_mask"] = (
         ~(
