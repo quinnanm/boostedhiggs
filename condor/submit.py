@@ -42,7 +42,7 @@ def main(args):
     metadata_file = f"metadata_{args.samples}"
     with open(f"{locdir}/{metadata_file}", "w") as f:
         json.dump(files, f, sort_keys=True, indent=2)
-
+    print(files.keys())
     # submit a cluster of jobs per sample
     for sample in files.keys():
         os.system(f"mkdir -p /eos/uscms/{outdir}/{sample}")
