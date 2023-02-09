@@ -104,6 +104,10 @@ def main(args):
                 line = line.replace("INFERENCE", "--inference")
             else:
                 line = line.replace("INFERENCE", "--no-inference")
+            if args.without_selection:
+                line = line.replace("SELECTION", "--without_selection")
+            else:
+                line = line.replace("SELECTION", "")
             sh_file.write(line)
         sh_file.close()
         sh_templ_file.close()
@@ -141,6 +145,7 @@ if __name__ == "__main__":
     parser.add_argument("--pfnano", dest="pfnano", type=str, default="v2_2", help="pfnano version")
     parser.add_argument("--inference", dest="inference", action="store_true")
     parser.add_argument("--no-inference", dest="inference", action="store_false")
+    parser.add_argument("--without_selection", dest="without_selection", action="store_true")
 
     parser.set_defaults(inference=True)
     args = parser.parse_args()
