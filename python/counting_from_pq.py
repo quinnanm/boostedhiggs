@@ -1,34 +1,13 @@
 #!/usr/bin/python
 
-from utils import add_samples, data_by_ch, data_by_ch_2018
-
-import pickle as pkl
-import pyarrow.parquet as pq
-import pyarrow as pa
-import awkward as ak
-import numpy as np
-import pandas as pd
-import json
-import os
-import sys
-import glob
-import shutil
-import pathlib
-from typing import List, Optional
-
 import argparse
-from coffea import processor
-from coffea.nanoevents.methods import candidate, vector
-from coffea.analysis_tools import Weights, PackedSelection
-
-import hist as hist2
-import matplotlib
-import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
-import mplhep as hep
-from hist.intervals import clopper_pearson_interval
-
+import glob
+import os
+import pickle as pkl
 import warnings
+
+import pyarrow.parquet as pq
+from utils import add_samples, data_by_ch, data_by_ch_2018
 
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
@@ -40,12 +19,8 @@ parser.add_argument(
     default="ele,mu,had",
     help="channels for which to plot this variable",
 )
-parser.add_argument(
-    "--dir", dest="dir", default="May7_2017", help="tag for data directory"
-)
-parser.add_argument(
-    "--odir", dest="odir", default="counts", help="tag for output directory"
-)
+parser.add_argument("--dir", dest="dir", default="May7_2017", help="tag for data directory")
+parser.add_argument("--odir", dest="odir", default="counts", help="tag for output directory")
 
 args = parser.parse_args()
 
@@ -93,7 +68,7 @@ def compute_counts(channels, samples, odir, data_label):
             for i, parquet_file in enumerate(parquet_files):
                 try:
                     data = pq.read_table(parquet_file).to_pandas()
-                except:
+                except ValueError:
                     print(
                         "Not able to read data: ",
                         parquet_file,
@@ -109,19 +84,15 @@ def compute_counts(channels, samples, odir, data_label):
                         data.drop(columns=[key], inplace=True)
 
                 if combine:
-                    num_dict[ch][single_key] = (
-                        num_dict[ch][single_key] + data["tot_weight"].sum()
-                    )
+                    num_dict[ch][single_key] = num_dict[ch][single_key] + data["tot_weight"].sum()
                 else:
-                    num_dict[ch][sample] = (
-                        num_dict[ch][sample] + data["tot_weight"].sum()
-                    )
+                    num_dict[ch][sample] = num_dict[ch][sample] + data["tot_weight"].sum()
 
         for key, value in num_dict[ch].items():
             if value != 0:
                 print(f"number of events for {key} is {value}")
 
-        print(f"-----------------------------------------")
+        print("-----------------------------------------")
 
     with open(f"./{odir}/num_dict.pkl", "wb") as f:  # saves counts
         pkl.dump(num_dict, f)

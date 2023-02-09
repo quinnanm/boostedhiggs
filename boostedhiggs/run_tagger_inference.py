@@ -3,25 +3,21 @@ Methods for running the tagger inference.
 Author(s): Raghav Kansal, Cristina Mantilla Suarez, Melissa Quinnan, Farouk Mokhtar
 """
 
-from typing import Dict
-
-import numpy as np
-from scipy.special import softmax
-import awkward as ak
-from coffea.nanoevents.methods.base import NanoEventsArray
-
 import json
 
-# import onnxruntime as ort
+# import time
+from typing import Dict
 
-import time
-
+import awkward as ak
+import numpy as np
 import tritonclient.grpc as triton_grpc
 import tritonclient.http as triton_http
-
+from coffea.nanoevents.methods.base import NanoEventsArray
 from tqdm import tqdm
 
 from .get_tagger_inputs import get_pfcands_features, get_svs_features
+
+# import onnxruntime as ort
 
 
 # adapted from https://github.com/lgray/hgg-coffea/blob/triton-bdts/src/hgg_coffea/tools/chained_quantile.py
@@ -108,7 +104,7 @@ def runInferenceTriton(
     fj_idx_lep,
     model_name: str = "ak8_MD_vminclv2ParT_manual_fixwrap",
 ) -> dict:
-    total_start = time.time()
+    # total_start = time.time()
     # print(f"Running tagger inference with model {model_name}")
 
     with open(f"{tagger_resources_path}/triton_config_{model_name}.json") as f:
@@ -131,7 +127,7 @@ def runInferenceTriton(
     fatjet_label = "FatJet"
     pfcands_label = "FatJetPFCands"
     svs_label = "FatJetSVs"
-    jet_label = "ak8"
+    # jet_label = "ak8"
 
     # prepare inputs for both fat jets
     tagger_inputs = []
@@ -173,11 +169,11 @@ def runInferenceTriton(
     # run inference for both fat jets
     tagger_outputs = []
 
-    start = time.time()
+    # start = time.time()
 
     try:
         tagger_outputs = triton_model(tagger_inputs)
-    except:
+    except Exception:
         print(
             "---can't run inference due to error with the event or the server is not running--"
         )
@@ -190,7 +186,7 @@ def runInferenceTriton(
         tagger_outputs = scipy.special.softmax(tagger_outputs[:, :-1], axis=1)
         np.append(tagger_outputs, mass)
 
-    time_taken = time.time() - start
+    # time_taken = time.time() - start
 
     # print(f"Inference took {time_taken:.1f}s")
 

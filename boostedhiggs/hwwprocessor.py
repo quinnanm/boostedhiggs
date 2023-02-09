@@ -1,41 +1,28 @@
-from collections import defaultdict
-import pickle as pkl
-import pyarrow as pa
+import importlib.resources
+import json
+import os
+import pathlib
+import warnings
+
 import awkward as ak
 import numpy as np
 import pandas as pd
-import json
-import os
-import shutil
-import pathlib
-from typing import List, Optional
+import pyarrow as pa
 import pyarrow.parquet as pq
-
-import importlib.resources
-
 from coffea import processor
-from coffea.nanoevents.methods import candidate, vector
-from coffea.analysis_tools import Weights, PackedSelection
+from coffea.analysis_tools import PackedSelection, Weights
+from coffea.nanoevents.methods import candidate
 
-from boostedhiggs.utils import (
-    match_H,
-    match_V,
-    match_Top,
-    get_neutrino_z,
-    pad_val,
-)
+from boostedhiggs.btag import btagWPs
 from boostedhiggs.corrections import (
-    corrected_msoftdrop,
-    add_VJets_kFactors,
-    add_jetTriggerSF,
     add_lepton_weight,
     add_pileup_weight,
+    add_VJets_kFactors,
+    corrected_msoftdrop,
 )
-from boostedhiggs.btag import btagWPs, BTagCorrector
+from boostedhiggs.utils import get_neutrino_z, match_H, match_Top, match_V
 
 from .run_tagger_inference import runInferenceTriton
-
-import warnings
 
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -143,6 +130,8 @@ class HwwProcessor(processor.ProcessorABC):
             else self._channels
         )
         for ch in channels:
+            if ch not in self._channels:
+                continue
             self.selections[ch].add(name, sel)
             selection_ch = self.selections[ch].all(*self.selections[ch].names)
             if self.isMC:
@@ -304,7 +293,7 @@ class HwwProcessor(processor.ProcessorABC):
             ak.argsort(good_fatjets.pt, ascending=False)
         ]  # sort them by pt
 
-        # for leptonic channel: first clean jets and leptons by removing overlap, then pick candidate_fj closest to the lepton
+        # for lep channel: first clean jets and leptons by removing overlap, then pick candidate_fj closest to the lepton
         lep_in_fj_overlap_bool = good_fatjets.delta_r(candidatelep_p4) > 0.1
         good_fatjets = good_fatjets[lep_in_fj_overlap_bool]
         fj_idx_lep = ak.argmin(
@@ -324,7 +313,7 @@ class HwwProcessor(processor.ProcessorABC):
         met_fjlep_dphi = candidatefj.delta_phi(met)
 
         # for leptonic channel: pick candidate_fj closest to the MET
-        # candidatefj = ak.firsts(good_fatjets[ak.argmin(good_fatjets.delta_phi(met), axis=1, keepdims=True)])      # get candidatefj for leptonic channel
+        # candidatefj = ak.firsts(good_fatjets[ak.argmin(good_fatjets.delta_phi(met), axis=1, keepdims=True)])
 
         # fatjet - lepton mass
         lep_fj_mass = (
@@ -338,7 +327,7 @@ class HwwProcessor(processor.ProcessorABC):
         ).mass  # mass of fatjet with lepton + neutrino
 
         # b-jets
-        # in event, pick highest b score in opposite direction from signal (we will make cut here to avoid tt background events producing bjets)
+        # pick highest b score in opposite direction from signal and make cut to avoid tt background events producing bjets)
         dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj))
         bjets_away_lepfj = goodjets[dphi_jet_lepfj > np.pi / 2]
         bjets = goodjets  # not necessarily opposite hemisphere
@@ -392,8 +381,10 @@ class HwwProcessor(processor.ProcessorABC):
 
         """
         HEM issue: Hadronic calorimeter Endcaps Minus (HEM) issue.
-        The endcaps of the hadron calorimeter failed to cover the phase space at -3 < eta < -1.3 and -1.57 < phi < -0.87 during the 2018 data C and D.
-        The transverse momentum of the jets in this region is typically under-measured, this results in over-measured MET. It could also result on new electrons.
+        The endcaps of the hadron calorimeter failed to cover the phase space at -3 < eta < -1.3 and -1.57 < phi < -0.87
+        during the 2018 data C and D.
+        The transverse momentum of the jets in this region is typically under-measured, this results in over-measured MET.
+        It could also result on new electrons.
         We must veto the jets and met in this region.
         Should we veto on AK8 jets or electrons too?
         Let's add this as a cut to check first.
@@ -448,14 +439,14 @@ class HwwProcessor(processor.ProcessorABC):
         - Jet Mass Resolution (JMR) scale factor (ToDo)
         - NLO EWK scale factors for DY(ll)/W(lnu)/W(qq)/Z(qq)
         - ~NNLO QCD scale factors for DY(ll)/W(lnu)/W(qq)/Z(qq)
-        - LHE scale weights for signal (ToDo) 
-        - LHE pdf weights for signal (ToDo) 
-        - PSweights for signal (ToDo) 
+        - LHE scale weights for signal (ToDo)
+        - LHE pdf weights for signal (ToDo)
+        - PSweights for signal (ToDo)
         - ParticleNet tagger efficienc (ToDo) y
 
         Up and Down Variations (systematics included as a new variable)
         ----
-        - Pileup weight Up/Down 
+        - Pileup weight Up/Down
         - L1 prefiring weight Up/Down
         - B-tagging efficiency Up/Down (ToDo)
         - Electron Trigger Up/Down (ToDo)
@@ -543,6 +534,7 @@ class HwwProcessor(processor.ProcessorABC):
         """
         Selection and cutflows.
         """
+
         if self.apply_selection:
             if self.apply_trigger:
                 for ch in self._channels:
@@ -609,11 +601,7 @@ class HwwProcessor(processor.ProcessorABC):
                 for key in keys:
                     for var, item in variables[key].items():
                         # pad all the variables that are not a cut with -1
-                        pad_item = (
-                            item
-                            if ("cut" in var or "weight" in var)
-                            else pad_val(item, -1)
-                        )
+                        # pad_item = item if ("cut" in var or "weight" in var) else pad_val(item, -1)
                         # fill out dictionary
                         out[var] = item
 

@@ -1,25 +1,12 @@
 # script for converting pandas dataframe to rootfile
-from utils import add_samples, data_by_ch, data_by_ch_2018
-
-import pickle as pkl
-import pyarrow.parquet as pq
-import pyarrow as pa
-import awkward as ak
-import numpy as np
-import pandas as pd
-import json
-import os
-import sys
-import glob
-import shutil
-import pathlib
-from typing import List, Optional
-
 import argparse
-import uproot
-import numpy as np
+import glob
+import os
+
 import pandas as pd
 import pyarrow.parquet as pq
+import uproot
+from utils import add_samples, data_by_ch, data_by_ch_2018
 
 pd.options.mode.chained_assignment = None  # default='warn'
 
@@ -31,12 +18,8 @@ parser.add_argument(
     default="ele,mu,had",
     help="channels for which to plot this variable",
 )
-parser.add_argument(
-    "--dir", dest="dir", default="May7_2017", help="tag for data directory"
-)
-parser.add_argument(
-    "--odir", dest="odir", default="rootfiles", help="tag for output directory"
-)
+parser.add_argument("--dir", dest="dir", default="May7_2017", help="tag for data directory")
+parser.add_argument("--odir", dest="odir", default="rootfiles", help="tag for output directory")
 
 args = parser.parse_args()
 
@@ -87,7 +70,7 @@ def compute_counts(channels, samples, idir, outdir, data_label):
             for i, parquet_file in enumerate(parquet_files):
                 try:
                     data = pq.read_table(parquet_file).to_pandas()
-                except:
+                except ValueError:
                     print(
                         "Not able to read data: ",
                         parquet_file,
@@ -123,19 +106,10 @@ def compute_counts(channels, samples, idir, outdir, data_label):
                         print(f"dropping column {key}")
                         data.drop(columns=[key], inplace=True)
 
-                _, tail = os.path.split(
-                    parquet_file
-                )  # get the file name from full path
+                _, tail = os.path.split(parquet_file)  # get the file name from full path
 
                 outname = (
-                    outdir
-                    + ch
-                    + "/"
-                    + dir_name
-                    + "/"
-                    + f"{sample}_"
-                    + tail[:-8]
-                    + ".root"
+                    outdir + ch + "/" + dir_name + "/" + f"{sample}_" + tail[:-8] + ".root"
                 )  # the [:-8] slice removes the .parquet extension (to replace it with a .root extension)
                 with uproot.recreate(outname) as file:
                     file["Events"] = pd.DataFrame(data)

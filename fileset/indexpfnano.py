@@ -1,5 +1,5 @@
-import subprocess
 import json
+import subprocess
 
 
 def get_children(parent):
@@ -174,9 +174,9 @@ for pyear in ["2016", "2016APV", "2017", "2018"]:
         sample_short = f1.split("/")[-1]
         print(f" {sample_short}")
 
-        if not year in index:
+        if year not in index:
             index[year] = {}
-        if not sample_short in index[year]:
+        if sample_short not in index[year]:
             index[year][sample_short] = {}
 
         f1_subfolders = get_subfolders(f"{f1}")
@@ -185,27 +185,17 @@ for pyear in ["2016", "2016APV", "2017", "2018"]:
 
             exclude = False
             for exclude_year, exclude_version, exclude_sample in samples_to_exclude:
-                if (
-                    f2 == exclude_sample
-                    and pyear == exclude_year
-                    and version == exclude_version
-                ):
+                if f2 == exclude_sample and pyear == exclude_year and version == exclude_version:
                     print(f"   Excluding {sample_short}, {f2}, {version}, {pyear}")
                     exclude = True
             if exclude:
                 break
 
-            subsample_long = f2.replace(
-                "/", ""
-            )  # This should be the actual dataset name
+            subsample_long = f2.replace("/", "")  # This should be the actual dataset name
             f2_subfolders = get_subfolders(f"{f1}/{f2}")
             if len(f2_subfolders) == 0:
-                root_files = [
-                    f"{f1}/{f2}/{x}".replace("//", "/")
-                    for x in get_children((f"{f1}/{f2}"))
-                    if x[-5:] == ".root"
-                ]
-                if not subsample_long in index[year][sample_short]:
+                root_files = [f"{f1}/{f2}/{x}".replace("//", "/") for x in get_children((f"{f1}/{f2}")) if x[-5:] == ".root"]
+                if subsample_long not in index[year][sample_short]:
                     index[year][sample_short][subsample_long] = []
                 index[year][sample_short][subsample_long].extend(root_files)
 
@@ -218,7 +208,7 @@ for pyear in ["2016", "2016APV", "2017", "2018"]:
                 subsample_short = subsample_short.replace("_ext1", "")
                 print(f"  {subsample_short}")
 
-                if not subsample_short in index[year][sample_short]:
+                if subsample_short not in index[year][sample_short]:
                     index[year][sample_short][subsample_short] = []
                 f3_subfolders = get_subfolders(f"{f1}/{f2}/{f3}")
                 if len(f3_subfolders) >= 2:
@@ -230,35 +220,27 @@ for pyear in ["2016", "2016APV", "2017", "2018"]:
                     for f5 in f4_subfolders:  # 0000, 0001, ...
                         f5_children = get_children((f"{f1}/{f2}/{f3}/{f4}/{f5}"))
                         root_files = [
-                            f"{f1}/{f2}/{f3}/{f4}/{f5}/{x}".replace("//", "/")
-                            for x in f5_children
-                            if x[-5:] == ".root"
+                            f"{f1}/{f2}/{f3}/{f4}/{f5}/{x}".replace("//", "/") for x in f5_children if x[-5:] == ".root"
                         ]
                         if year == "2016" and "HIPM" in subsample_short:
-                            if not sample_short in index_APV:
+                            if sample_short not in index_APV:
                                 index_APV[sample_short] = {}
-                            if not subsample_short in index_APV[sample_short]:
+                            if subsample_short not in index_APV[sample_short]:
                                 index_APV[sample_short][subsample_short] = []
-                                index_APV[sample_short][subsample_short].extend(
-                                    root_files
-                                )
+                                index_APV[sample_short][subsample_short].extend(root_files)
                         else:
-                            if not subsample_short in index[year][sample_short]:
+                            if subsample_short not in index[year][sample_short]:
                                 index[year][sample_short][subsample_short] = []
-                            index[year][sample_short][subsample_short].extend(
-                                root_files
-                            )
+                            index[year][sample_short][subsample_short].extend(root_files)
 
     if pyear == "2016APV":
         for sample_short in index_APV.keys():
             for subsample_short in index_APV[sample_short].keys():
-                if not sample_short in index[pyear]:
+                if sample_short not in index[pyear]:
                     index[pyear][sample_short] = {}
-                if not subsample_short in index[pyear][sample_short]:
+                if subsample_short not in index[pyear][sample_short]:
                     index[pyear][sample_short][subsample_short] = []
-                index[pyear][sample_short][subsample_short] = index_APV[sample_short][
-                    subsample_short
-                ]
+                index[pyear][sample_short][subsample_short] = index_APV[sample_short][subsample_short]
 
     with open(f"pfnanoindex_{pfnano_version}_{pyear}.json", "w") as f:
         json.dump(index, f, sort_keys=True, indent=2)

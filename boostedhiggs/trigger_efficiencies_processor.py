@@ -1,39 +1,26 @@
-from coffea.analysis_tools import Weights, PackedSelection
-from coffea.nanoevents.methods import candidate, vector
-from coffea.processor import ProcessorABC, column_accumulator
-import os, sys
-import pandas as pd
-import numpy as np
 import warnings
-import awkward as ak
-import matplotlib.pyplot as plt
-import mplhep as hep
-from hist.intervals import clopper_pearson_interval
 
-from boostedhiggs.utils import match_HWW, getParticles, match_V, match_Top
-from boostedhiggs.corrections import (
-    corrected_msoftdrop,
-    add_VJets_kFactors,
-    add_jetTriggerSF,
-    add_lepton_weight,
-    add_pileup_weight,
-)
+import awkward as ak
+import numpy as np
+from coffea.analysis_tools import PackedSelection, Weights
+from coffea.nanoevents.methods import candidate
+from coffea.processor import ProcessorABC, column_accumulator
+
+from boostedhiggs.corrections import add_lepton_weight, add_pileup_weight, add_VJets_kFactors
+
+# from boostedhiggs.utils import getParticles
 
 # we suppress ROOT warnings where our input ROOT tree has duplicate branches - these are handled correctly.
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
-def getParticles(
-    genparticles, lowid=22, highid=25, flags=["fromHardProcess", "isLastCopy"]
-):
+def getParticles(genparticles, lowid=22, highid=25, flags=["fromHardProcess", "isLastCopy"]):
     """
     returns the particle objects that satisfy a low id,
     high id condition and have certain flags
     """
     absid = abs(genparticles.pdgId)
-    return genparticles[
-        ((absid >= lowid) & (absid <= highid)) & genparticles.hasFlags(flags)
-    ]
+    return genparticles[((absid >= lowid) & (absid <= highid)) & genparticles.hasFlags(flags)]
 
 
 def simple_match_HWW(genparticles, candidatefj):
@@ -41,17 +28,13 @@ def simple_match_HWW(genparticles, candidatefj):
     return the number of matched objects (hWW*),daughters,
     and gen flavor (enuqq, munuqq, taunuqq)
     """
-    higgs = getParticles(
-        genparticles, 25
-    )  # genparticles is the full set... this function selects Higgs particles
+    higgs = getParticles(genparticles, 25)  # genparticles is the full set... this function selects Higgs particles
     # W~24 so we get H->WW (limitation: only picking one W and assumes the other will be there)
     is_hWW = ak.all(abs(higgs.children.pdgId) == 24, axis=2)
 
     higgs = higgs[is_hWW]
 
-    matchedH = candidatefj.nearest(
-        higgs, axis=1, threshold=0.8
-    )  # choose higgs closest to fj
+    matchedH = candidatefj.nearest(higgs, axis=1, threshold=0.8)  # choose higgs closest to fj
 
     return matchedH
 
@@ -102,7 +85,8 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         axis: int = 0,
         to_numpy: bool = True,
     ):
-        """pads awkward array up to `target` index along axis `axis` with value `value`, optionally converts to numpy array"""
+        """pads awkward array up to `target` index along axis `axis` with value `value`,
+        optionally converts to numpy array"""
         ret = ak.fill_none(ak.pad_none(arr, target, axis=axis, clip=True), value)
         return ret.to_numpy() if to_numpy else ret
 
@@ -128,13 +112,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             HLT_triggers = {}
             for t in self._triggers[channel]:
                 HLT_triggers["HLT_" + t] = np.any(
-                    np.array(
-                        [
-                            events.HLT[trigger]
-                            for trigger in self._trigger_dict[t]
-                            if trigger in events.HLT.fields
-                        ]
-                    ),
+                    np.array([events.HLT[trigger] for trigger in self._trigger_dict[t] if trigger in events.HLT.fields]),
                     axis=0,
                 )
             out[channel] = {**out[channel], **HLT_triggers}
@@ -142,14 +120,11 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         """ basic definitions """
         # DEFINE MUONS
         loose_muons = (
-            (
-                ((events.Muon.pt > 30) & (events.Muon.pfRelIso04_all < 0.25))
-                | (events.Muon.pt > 55)
-            )
+            (((events.Muon.pt > 30) & (events.Muon.pfRelIso04_all < 0.25)) | (events.Muon.pt > 55))
             & (np.abs(events.Muon.eta) < 2.4)
             & (events.Muon.looseId)
         )
-        n_loose_muons = ak.sum(loose_muons, axis=1)
+        # n_loose_muons = ak.sum(loose_muons, axis=1)
 
         good_muons = (
             (events.Muon.pt > 30)
@@ -163,15 +138,9 @@ class TriggerEfficienciesProcessor(ProcessorABC):
 
         # DEFINE ELECTRONS
         loose_electrons = (
-            (
-                ((events.Electron.pt > 38) & (events.Electron.pfRelIso03_all < 0.25))
-                | (events.Electron.pt > 120)
-            )
+            (((events.Electron.pt > 38) & (events.Electron.pfRelIso03_all < 0.25)) | (events.Electron.pt > 120))
             & (np.abs(events.Electron.eta) < 2.4)
-            & (
-                (np.abs(events.Electron.eta) < 1.44)
-                | (np.abs(events.Electron.eta) > 1.57)
-            )
+            & ((np.abs(events.Electron.eta) < 1.44) | (np.abs(events.Electron.eta) > 1.57))
             & (events.Electron.cutBased >= events.Electron.LOOSE)
         )
         n_loose_electrons = ak.sum(loose_electrons, axis=1)
@@ -179,10 +148,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         good_electrons = (
             (events.Electron.pt > 38)
             & (np.abs(events.Electron.eta) < 2.4)
-            & (
-                (np.abs(events.Electron.eta) < 1.44)
-                | (np.abs(events.Electron.eta) > 1.57)
-            )
+            & ((np.abs(events.Electron.eta) < 1.44) | (np.abs(events.Electron.eta) > 1.57))
             & (np.abs(events.Electron.dz) < 0.1)
             & (np.abs(events.Electron.dxy) < 0.05)
             & (events.Electron.sip3d <= 4.0)
@@ -194,45 +160,32 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         goodleptons = ak.concatenate(
             [events.Muon[good_muons], events.Electron[good_electrons]], axis=1
         )  # concat muons and electrons
-        goodleptons = goodleptons[
-            ak.argsort(goodleptons.pt, ascending=False)
-        ]  # sort by pt
+        goodleptons = goodleptons[ak.argsort(goodleptons.pt, ascending=False)]  # sort by pt
         candidatelep = ak.firsts(goodleptons)  # pick highest pt
 
         candidatelep_p4 = build_p4(candidatelep)  # build p4 for candidate lepton
 
         # DEFINE JETS
         goodjets = events.Jet[
-            (events.Jet.pt > 30)
-            & (abs(events.Jet.eta) < 5.0)
-            & events.Jet.isTight
-            & (events.Jet.puId > 0)
+            (events.Jet.pt > 30) & (abs(events.Jet.eta) < 5.0) & events.Jet.isTight & (events.Jet.puId > 0)
         ]
         # reject EE noisy jets for 2017
         if self._year == "2017":
-            goodjets = goodjets[
-                (goodjets.pt > 50)
-                | (abs(goodjets.eta) < 2.65)
-                | (abs(goodjets.eta) > 3.139)
-            ]
+            goodjets = goodjets[(goodjets.pt > 50) | (abs(goodjets.eta) < 2.65) | (abs(goodjets.eta) > 3.139)]
 
         # fatjets
         fatjets = events.FatJet
 
         good_fatjets = (fatjets.pt > 200) & (abs(fatjets.eta) < 2.5) & fatjets.isTight
-        n_fatjets = ak.sum(good_fatjets, axis=1)
+        # n_fatjets = ak.sum(good_fatjets, axis=1)
 
         good_fatjets = fatjets[good_fatjets]  # select good fatjets
-        good_fatjets = good_fatjets[
-            ak.argsort(good_fatjets.pt, ascending=False)
-        ]  # sort them by pt
+        good_fatjets = good_fatjets[ak.argsort(good_fatjets.pt, ascending=False)]  # sort them by pt
 
-        # for leptonic channel: first clean jets and leptons by removing overlap, then pick candidate_fj closest to the lepton
+        # for lep channel: first clean jets and leptons by removing overlap, then pick candidate_fj closest to the lepton
         lep_in_fj_overlap_bool = good_fatjets.delta_r(candidatelep_p4) > 0.1
         good_fatjets = good_fatjets[lep_in_fj_overlap_bool]
-        fj_idx_lep = ak.argmin(
-            good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True
-        )
+        fj_idx_lep = ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)
         candidatefj = ak.firsts(good_fatjets[fj_idx_lep])
 
         """ Baseline weight """
@@ -243,9 +196,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             events.L1PreFiringWeight.Up,
             events.L1PreFiringWeight.Dn,
         )
-        add_pileup_weight(
-            self.weights, self._year, "", nPU=ak.to_numpy(events.Pileup.nPU)
-        )
+        add_pileup_weight(self.weights, self._year, "", nPU=ak.to_numpy(events.Pileup.nPU))
         add_VJets_kFactors(self.weights, events.GenPart, dataset)
 
         """ Baseline selection """
@@ -266,7 +217,15 @@ class TriggerEfficienciesProcessor(ProcessorABC):
                 selection.add("muonkin", (candidatelep.pt > 30))
             elif channel == "ele":
                 add_lepton_weight(self.weights, candidatelep, self._year, "electron")
-                # selection.add("oneelectron", ((n_good_muons == 0) & (n_loose_muons == 0) & (n_good_electrons == 1) & ~ak.any(loose_electrons & ~good_electrons, 1)))
+                # selection.add(
+                #     "oneelectron",
+                #     (
+                #         (n_good_muons == 0)
+                #         & (n_loose_muons == 0)
+                #         & (n_good_electrons == 1)
+                #         & ~ak.any(loose_electrons & ~good_electrons, 1)
+                #     ),
+                # )
                 # selection.add("electronkin", (candidatelep.pt > 40))
             selection.add("fatjetKin", candidatefj.pt > 0)
 
@@ -294,8 +253,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
 
             # use column accumulators
             out[channel] = {
-                key: column_accumulator(value[selection.all(*selection.names)])
-                for (key, value) in out[channel].items()
+                key: column_accumulator(value[selection.all(*selection.names)]) for (key, value) in out[channel].items()
             }
 
         return {self._year: {dataset: {"nevents": nevents, "skimmed_events": out}}}
@@ -305,8 +263,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             for dataset, output in datasets.items():
                 for channel in output["skimmed_events"].keys():
                     output["skimmed_events"][channel] = {
-                        key: value.value
-                        for (key, value) in output["skimmed_events"][channel].items()
+                        key: value.value for (key, value) in output["skimmed_events"][channel].items()
                     }
 
         return accumulator
