@@ -1,12 +1,9 @@
-import correctionlib
-import awkward as ak
-from coffea import processor, hist, util
-import numpy as np
-import pickle as pkl
 import importlib.resources
 
-from coffea.lookup_tools.correctionlib_wrapper import correctionlib_wrapper
-from coffea.lookup_tools.dense_lookup import dense_lookup
+import awkward as ak
+import correctionlib
+import numpy as np
+from coffea import hist, processor, util
 
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
 btagWPs = {
@@ -56,12 +53,7 @@ class BTagEfficiency(processor.ProcessorABC):
         return self._accumulator
 
     def process(self, events):
-        jets = events.Jet[
-            (events.Jet.pt > 30.0)
-            & (abs(events.Jet.eta) < 2.5)
-            & events.Jet.isTight
-            & (events.Jet.puId > 0)
-        ]
+        jets = events.Jet[(events.Jet.pt > 30.0) & (abs(events.Jet.eta) < 2.5) & events.Jet.isTight & (events.Jet.puId > 0)]
 
         out = self.accumulator.identity()
         tags = [
@@ -94,7 +86,7 @@ class BTagCorrector:
         self._btagwp = btagWPs[tagger][year + mod][wp]
         self._branch = taggerBranch[tagger]
 
-        # more docs at https://cms-nanoaod-integration.web.cern.ch/commonJSONSFs/BTV_btagging_Run2_UL/BTV_btagging_201*_UL.html
+        # noqa: more docs at https://cms-nanoaod-integration.web.cern.ch/commonJSONSFs/BTV_btagging_Run2_UL/BTV_btagging_201*_UL.html
         if year == "2016":
             self._cset = correctionlib.CorrectionSet.from_file(
                 "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/BTV/2016postVFP_UL/btagging.json.gz"
@@ -109,9 +101,7 @@ class BTagCorrector:
             )
 
         # efficiency lookup
-        with importlib.resources.path(
-            "boostedhiggs.data", f"btageff_{tagger}_{wp}_{year}.coffea"
-        ) as filename:
+        with importlib.resources.path("boostedhiggs.data", f"btageff_{tagger}_{wp}_{year}.coffea") as filename:
             self.efflookup = util.load(str(filename))
 
     def lighttagSF(self, j, syst="central"):
@@ -150,9 +140,7 @@ class BTagCorrector:
         lightJets = jets[(jets.hadronFlavour == 0) & (abs(jets.eta) < 2.5)]
         bcJets = jets[(jets.hadronFlavour > 0) & (abs(jets.eta) < 2.5)]
 
-        lightEff = self.efflookup(
-            lightJets.hadronFlavour, lightJets.pt, abs(lightJets.eta)
-        )
+        lightEff = self.efflookup(lightJets.hadronFlavour, lightJets.pt, abs(lightJets.eta))
         bcEff = self.efflookup(bcJets.hadronFlavour, bcJets.pt, abs(bcJets.eta))
 
         lightPass = lightJets[self._branch] > self._btagwp
@@ -166,9 +154,7 @@ class BTagCorrector:
 
             return ak.fill_none(tagged_sf * untagged_sf, 1.0)
 
-        lightweight = combine(
-            lightEff, self.lighttagSF(lightJets, "central"), lightPass
-        )
+        lightweight = combine(lightEff, self.lighttagSF(lightJets, "central"), lightPass)
         bcweight = combine(bcEff, self.btagSF(bcJets, "central"), bcPass)
 
         # nominal weight = btagSF (btagSFbc*btagSFlight)
@@ -187,7 +173,7 @@ class BTagCorrector:
             weightDown=combine(lightEff, self.lighttagSF(lightJets, "down"), lightPass),
         )
         weights.add(
-            "btagSFbc_%s" % (label, self._year),
+            "btagSFbc_%s" % (label + self._year),
             np.ones(len(nominal)),
             weightUp=combine(bcEff, self.btagSF(bcJets, "up"), bcPass),
             weightDown=combine(bcEff, self.btagSF(bcJets, "down"), bcPass),
@@ -195,12 +181,8 @@ class BTagCorrector:
         weights.add(
             "btagSFlight_correlated_%s" % label,
             np.ones(len(nominal)),
-            weightUp=combine(
-                lightEff, self.lighttagSF(lightJets, "up_correlated"), lightPass
-            ),
-            weightDown=combine(
-                lightEff, self.lighttagSF(lightJets, "down_correlated"), lightPass
-            ),
+            weightUp=combine(lightEff, self.lighttagSF(lightJets, "up_correlated"), lightPass),
+            weightDown=combine(lightEff, self.lighttagSF(lightJets, "down_correlated"), lightPass),
         )
         weights.add(
             "btagSFbc_correlated_%s" % label,

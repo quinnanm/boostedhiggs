@@ -4,10 +4,11 @@
 Splits the total fileset and creates condor job submission files for the specified run script.
 Author(s): Cristina Mantilla, Raghav Kansal, Farouk Mokhtar
 """
-import json
 import argparse
+import json
 import os
 from math import ceil
+
 from file_utils import loadJson
 
 
@@ -15,8 +16,8 @@ def main(args):
 
     try:
         proxy = os.environ["X509_USER_PROXY"]
-    except:
-        print('No valid proxy. Exiting.')
+    except ValueError:
+        print("No valid proxy. Exiting.")
         exit(1)
 
     locdir = "condor/" + args.tag + "_" + args.year
@@ -36,7 +37,7 @@ def main(args):
     os.system(f"mkdir -p /eos/uscms/{outdir}")
 
     # build metadata.json with samples
-    slist = args.slist.split(',') if args.slist is not None else None
+    slist = args.slist.split(",") if args.slist is not None else None
     files, nfiles_per_job = loadJson(args.samples, args.year, args.pfnano, slist)
     metadata_file = f"metadata_{args.samples}"
     with open(f"{locdir}/{metadata_file}", "w") as f:
@@ -52,7 +53,7 @@ def main(args):
             os.remove(localcondor)
             os.remove(localsh)
             os.remove(f"{locdir}/*.log")
-        except:
+        except ValueError:
             pass
 
         tot_files = len(files[sample])
@@ -67,9 +68,9 @@ def main(args):
         if args.test:
             njobs = 1
         jobids = [str(jobid) for jobid in range(njobs)]
-        jobids_file = os.path.join(locdir, f'submit_{sample}.txt')
-        with open(jobids_file, 'w') as f:
-            f.write('\n'.join(jobids))
+        jobids_file = os.path.join(locdir, f"submit_{sample}.txt")
+        with open(jobids_file, "w") as f:
+            f.write("\n".join(jobids))
 
         # make condor file
         condor_templ_file = open("condor/submit.templ.jdl")
@@ -113,48 +114,34 @@ def main(args):
 
         # submit
         if args.submit:
-            print('Submit ', localcondor)
-            os.system('condor_submit %s' % localcondor)
+            print("Submit ", localcondor)
+            os.system("condor_submit %s" % localcondor)
 
 
 if __name__ == "__main__":
     """
     python condor/submit.py --year 2017 --tag Aug11 --samples samples_pfnano_mc.json --pfnano --submit --inference
-    python condor/submit.py --year 2017 --tag lumi --processor lumi --samples samples_pfnano_data.json --pfnano --submit 
+    python condor/submit.py --year 2017 --tag lumi --processor lumi --samples samples_pfnano_data.json --pfnano --submit
 
     """
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--script",    dest="script",    default="run.py",              help="script to run", type=str)
-    parser.add_argument("--year",      dest="year",      default="2017",                help="year", type=str)
-    parser.add_argument("--tag",       dest="tag",       default="Test",                help="process tag", type=str)
-    parser.add_argument("--processor", dest="processor", default="hww",
-                        help="which processor", type=str, choices=["hww", "trigger", "lumi"])
-    parser.add_argument('--samples',   dest='samples',   default="samples_pfnano.json", help='path to datafiles', type=str)
-    parser.add_argument('--slist',     dest='slist',     default=None,
-                        help="give sample list separated by commas")
-    parser.add_argument("--test",      dest="test",      action='store_true',
-                        help="only 2 jobs per sample will be created")
-    parser.add_argument("--submit",    dest='submit',    action='store_true',           help="submit jobs when created")
-    parser.add_argument("--files-per-job",               default=None,
-                        help="# files per condor job", type=int)
+    parser.add_argument("--script", dest="script", default="run.py", help="script to run", type=str)
+    parser.add_argument("--year", dest="year", default="2017", help="year", type=str)
+    parser.add_argument("--tag", dest="tag", default="Test", help="process tag", type=str)
     parser.add_argument(
-        "--pfnano",
-        dest="pfnano",
-        type=str,
-        default="v2_2",
-        help="pfnano version",
+        "--processor", dest="processor", default="hww", help="which processor", type=str, choices=["hww", "trigger", "lumi"]
     )
-    parser.add_argument(
-        "--channels",
-        dest="channels",
-        required=True,
-        help="channels separated by commas",
-    )
+    parser.add_argument("--samples", dest="samples", default="samples_pfnano.json", help="path to datafiles", type=str)
+    parser.add_argument("--slist", dest="slist", default=None, help="give sample list separated by commas")
+    parser.add_argument("--test", dest="test", action="store_true", help="only 2 jobs per sample will be created")
+    parser.add_argument("--submit", dest="submit", action="store_true", help="submit jobs when created")
+    parser.add_argument("--files-per-job", default=None, help="# files per condor job", type=int)
+    parser.add_argument("--channels", dest="channels", required=True, help="channels separated by commas")
+    parser.add_argument("--pfnano", dest="pfnano", type=str, default="v2_2", help="pfnano version")
+    parser.add_argument("--inference", dest="inference", action="store_true")
+    parser.add_argument("--no-inference", dest="inference", action="store_false")
 
-    parser.add_argument("--inference",   dest='inference', action='store_true')
-    parser.add_argument("--no-inference", dest='inference', action='store_false')
-    parser.set_defaults(pfnano=True)
     parser.set_defaults(inference=True)
     args = parser.parse_args()
 

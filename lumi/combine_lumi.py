@@ -1,20 +1,12 @@
 #!/usr/bin/python
 
-import json
-import uproot
-import time
-
-import argparse
-import warnings
-import pyarrow as pa
-import pyarrow.parquet as pq
-import pickle as pkl
-import pandas as pd
-import os, glob, sys
+import glob
+import os
 import pickle
+import pickle as pkl
 
 """
-This script combines the pkl files produced by the lumi processor to a single pkl file 
+This script combines the pkl files produced by the lumi processor to a single pkl file
 that holds a dictionary with "key=dataset_name" and "value=lumi_set" which has the form (run, lumi).
 """
 

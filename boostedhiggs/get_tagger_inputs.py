@@ -3,13 +3,13 @@ Methods for deriving input variables for the tagger.
 Author(s): Raghav Kansal, Cristina Mantilla Suarez, Melissa Quinnan, Farouk Mokhtar
 """
 
+# import json
 from typing import Dict
-from coffea.nanoevents.methods.base import NanoEventsArray
+
 import awkward as ak
 import numpy as np
 import numpy.ma as ma
-
-import json
+from coffea.nanoevents.methods.base import NanoEventsArray
 
 
 def get_pfcands_features(
@@ -76,7 +76,7 @@ def get_pfcands_features(
     feature_dict["pfcand_px"] = jet_pfcands.px
     feature_dict["pfcand_py"] = jet_pfcands.py
     feature_dict["pfcand_pz"] = jet_pfcands.pz
-    feature_dict["pfcand_energy"] = jet_pfcands.E
+    feature_dict["pfcand_energy"] = jet_pfcands.energy
 
     # btag vars
     for var in tagger_vars["pf_features"]["var_names"]:
@@ -116,10 +116,7 @@ def get_pfcands_features(
 
     # convert to numpy arrays and normalize features
     if "pf_vectors" in tagger_vars.keys():
-        variables = set(
-            tagger_vars["pf_features"]["var_names"]
-            + tagger_vars["pf_vectors"]["var_names"]
-        )
+        variables = set(tagger_vars["pf_features"]["var_names"] + tagger_vars["pf_vectors"]["var_names"])
     else:
         variables = tagger_vars["pf_features"]["var_names"]
 
@@ -202,7 +199,8 @@ def get_svs_features(
     feature_dict["sv_px"] = jet_svs.px
     feature_dict["sv_py"] = jet_svs.py
     feature_dict["sv_pz"] = jet_svs.pz
-    feature_dict["sv_energy"] = jet_svs.E
+    # feature_dict["sv_energy"] = jet_svs.E
+    feature_dict["sv_energy"] = jet_svs.energy
 
     feature_dict["sv_mask"] = (
         ~(
@@ -217,16 +215,13 @@ def get_svs_features(
         )
     ).astype(np.float32)
     if isinstance(feature_dict["sv_mask"], np.float32):
-        feature_dict["sv_mask"] = np.ones(
-            (len(feature_dict["sv_abseta"]), tagger_vars["sv_features"]["var_length"])
-        ).astype(np.float32)
+        feature_dict["sv_mask"] = np.ones((len(feature_dict["sv_abseta"]), tagger_vars["sv_features"]["var_length"])).astype(
+            np.float32
+        )
 
     # convert to numpy arrays and normalize features
     if "sv_vectors" in tagger_vars.keys():
-        variables = set(
-            tagger_vars["sv_features"]["var_names"]
-            + tagger_vars["sv_vectors"]["var_names"]
-        )
+        variables = set(tagger_vars["sv_features"]["var_names"] + tagger_vars["sv_vectors"]["var_names"])
     else:
         variables = tagger_vars["sv_features"]["var_names"]
 

@@ -1,6 +1,5 @@
 import correctionlib.schemav2 as clib
 from correctionlib import convert
-from correctionlib import CorrectionSet
 
 corrections = {
     "trigger": {
