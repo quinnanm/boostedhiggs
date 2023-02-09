@@ -79,6 +79,7 @@ def main(args):
             channels=channels,
             inference=args.inference,
             output_location="./outfiles" + job_name,
+            apply_selection=False if args.without_selection else True,
         )
 
     elif args.processor == "vh":
@@ -195,6 +196,8 @@ if __name__ == "__main__":
     parser.add_argument("--local", dest="local", action="store_true")
     parser.add_argument("--inference", dest="inference", action="store_true")
     parser.add_argument("--no-inference", dest="inference", action="store_false")
+    parser.add_argument("--without_selection", dest="without_selection", action="store_true")
+
     parser.set_defaults(inference=False)
     args = parser.parse_args()
 
