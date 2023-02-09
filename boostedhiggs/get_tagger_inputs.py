@@ -16,7 +16,7 @@ def get_pfcands_features(
     tagger_vars: dict,
     preselected_events: NanoEventsArray,
     fj_idx_lep,
-    fatjet_label: str = "FatJetAK15",
+    fatjet_label: str = "FatJet",
     pfcands_label: str = "FatJetPFCands",
     normalize: bool = True,
 ) -> Dict[str, np.ndarray]:
@@ -159,8 +159,8 @@ def get_svs_features(
     tagger_vars: dict,
     preselected_events: NanoEventsArray,
     fj_idx_lep,
-    fatjet_label: str = "FatJetAK15",
-    svs_label: str = "JetSVsAK15",
+    fatjet_label: str = "FatJet",
+    svs_label: str = "FatJetSVs",
     normalize: bool = True,
 ) -> Dict[str, np.ndarray]:
     """
@@ -172,6 +172,7 @@ def get_svs_features(
 
     jet = ak.firsts(preselected_events[fatjet_label][fj_idx_lep])
     msk = preselected_events[svs_label].jetIdx == ak.firsts(fj_idx_lep)
+
     jet_svs = preselected_events.SV[
         preselected_events[svs_label].sVIdx[
             (preselected_events[svs_label].sVIdx != -1) * (msk)
