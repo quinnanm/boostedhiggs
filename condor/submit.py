@@ -45,6 +45,7 @@ def main(args):
     print(files.keys())
     # submit a cluster of jobs per sample
     for sample in files.keys():
+        print(f"Making directory /eos/uscms/{outdir}/{sample}")
         os.system(f"mkdir -p /eos/uscms/{outdir}/{sample}")
 
         localcondor = f"{locdir}/{sample}.jdl"
