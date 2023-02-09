@@ -14,12 +14,7 @@ from coffea.analysis_tools import PackedSelection, Weights
 from coffea.nanoevents.methods import candidate
 
 from boostedhiggs.btag import btagWPs
-from boostedhiggs.corrections import (
-    add_lepton_weight,
-    add_pileup_weight,
-    add_VJets_kFactors,
-    corrected_msoftdrop,
-)
+from boostedhiggs.corrections import add_lepton_weight, add_pileup_weight, add_VJets_kFactors, corrected_msoftdrop
 from boostedhiggs.utils import get_neutrino_z, match_H, match_Top, match_V
 
 from .run_tagger_inference import runInferenceTriton
@@ -68,6 +63,10 @@ class HwwProcessor(processor.ProcessorABC):
 
         # apply selection?
         self.apply_selection = apply_selection
+        if apply_selection:
+            print("Will apply selections")
+        else:
+            print("Will NOT apply selections")
 
         # apply trigger in selection?
         self.apply_trigger = apply_trigger
