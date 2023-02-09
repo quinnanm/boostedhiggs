@@ -151,7 +151,7 @@ index_APV = {}
 # .......................f1........................|.......................f2..............................|..........f3.........|.....f4......|.f5.|....
 # /store/user/lpcpfnano/jekrupa/v2_2/2017/WJetsToQQ/WJetsToQQ_HT-800toInf_TuneCP5_13TeV-madgraphMLM-pythia8/WJetsToQQ_HT-800toInf/211108_171840/0000/*root
 
-pfnano_version = "v2_2"
+pfnano_version = "v2_4"
 folders_to_index = folders_to_index[pfnano_version]
 
 for pyear in ["2016", "2016APV", "2017", "2018"]:

@@ -195,7 +195,7 @@ def runInferenceTriton(
             pku_vars = {
                 f"fj_PKU_{pversion}_{output_name}": jet[f"inclParTMDV1_{output_name}"] for output_name in output_names
             }
-            # pku_vars[f"fj_PKU_{pversion}_mass"] = jet[f"inclParTMDV1_mass"]
+            pku_vars[f"fj_PKU_{pversion}_mass"] = jet["inclParTMDV1_mass"]
 
             pnet_vars = {**pnet_vars, **pku_vars}
 
