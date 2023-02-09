@@ -1,6 +1,7 @@
 {
         "2017": {
                 "GluGluHToWW_Pt-200ToInf_M-125": 5,
+                "QCD_HT1000to1500": 2,
                 "WJetsToLNu_HT-200To400": 2,
                 "TTToSemiLeptonic": 0,
                 "DYJetsToLL_Pt-250To400": 0,
