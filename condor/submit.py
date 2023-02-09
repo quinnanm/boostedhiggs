@@ -54,7 +54,7 @@ def main(args):
             os.remove(localcondor)
             os.remove(localsh)
             os.remove(f"{locdir}/*.log")
-        except ValueError:
+        except Exception:
             pass
 
         tot_files = len(files[sample])
