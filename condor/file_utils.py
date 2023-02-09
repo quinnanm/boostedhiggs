@@ -29,7 +29,7 @@ def loadJson(samplesjson="samples_pfnano.json", year="2017", pfnano="v2_2", samp
     return fileset, values
 
 
-def printPFNano(year='2017', pfnano="v2_2", samplesjson=None):
+def printPFNano(year="2017", pfnano="v2_2", samplesjson=None):
     samples = None
     if samplesjson:
         samples = []

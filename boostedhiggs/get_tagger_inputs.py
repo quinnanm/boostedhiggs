@@ -116,10 +116,7 @@ def get_pfcands_features(
 
     # convert to numpy arrays and normalize features
     if "pf_vectors" in tagger_vars.keys():
-        variables = set(
-            tagger_vars["pf_features"]["var_names"]
-            + tagger_vars["pf_vectors"]["var_names"]
-        )
+        variables = set(tagger_vars["pf_features"]["var_names"] + tagger_vars["pf_vectors"]["var_names"])
     else:
         variables = tagger_vars["pf_features"]["var_names"]
 
@@ -173,11 +170,7 @@ def get_svs_features(
     jet = ak.firsts(preselected_events[fatjet_label][fj_idx_lep])
     msk = preselected_events[svs_label].jetIdx == ak.firsts(fj_idx_lep)
 
-    jet_svs = preselected_events.SV[
-        preselected_events[svs_label].sVIdx[
-            (preselected_events[svs_label].sVIdx != -1) * (msk)
-        ]
-    ]
+    jet_svs = preselected_events.SV[preselected_events[svs_label].sVIdx[(preselected_events[svs_label].sVIdx != -1) * (msk)]]
 
     # sort by dxy significance
     jet_svs = jet_svs[ak.argsort(jet_svs.dxySig, ascending=False)]
@@ -218,16 +211,13 @@ def get_svs_features(
         )
     ).astype(np.float32)
     if isinstance(feature_dict["sv_mask"], np.float32):
-        feature_dict["sv_mask"] = np.ones(
-            (len(feature_dict["sv_abseta"]), tagger_vars["sv_features"]["var_length"])
-        ).astype(np.float32)
+        feature_dict["sv_mask"] = np.ones((len(feature_dict["sv_abseta"]), tagger_vars["sv_features"]["var_length"])).astype(
+            np.float32
+        )
 
     # convert to numpy arrays and normalize features
     if "sv_vectors" in tagger_vars.keys():
-        variables = set(
-            tagger_vars["sv_features"]["var_names"]
-            + tagger_vars["sv_vectors"]["var_names"]
-        )
+        variables = set(tagger_vars["sv_features"]["var_names"] + tagger_vars["sv_vectors"]["var_names"])
     else:
         variables = tagger_vars["sv_features"]["var_names"]
 

@@ -162,18 +162,10 @@ def main(args):
 if __name__ == "__main__":
 
     # e.g.
-
-<<<<<<< HEAD
-    # run locally on lpc (hww mc) as: python run.py --year 2017 --processor hww --pfnano v2_2 --n 1 --starti 0 --json samples_pfnano_mc.json
-    # run locally on lpc (hww mc) as: python run.py --year 2017 --processor lumi --pfnano v2_2 --n 1 --starti 0 --json samples_pfnano_data.json
-    # run locally on lpc (vh) as: python run.py --year 2018 --sample HZJ_HToWW_M-125 --processor vh --pfnano v2_2 --n 1 --starti 0 --json samples_pfnano_mc.json  --channels lep --executor iterative
-    # run locally on lpc (hww trigger) as: python run.py --year 2017 --processor trigger --pfnano v2_2 --n 45 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele
-=======
     # noqa: run locally on lpc (hww mc) as: python run.py --year 2017 --processor hww --pfnano v2_2 --n 1 --starti 0 --json samples_pfnano_mc.json
     # noqa: run locally on lpc (hww mc) as: python run.py --year 2017 --processor lumi --pfnano v2_2 --n 1 --starti 0 --json samples_pfnano_data.json
     # noqa: run locally on lpc (vh) as: python run.py --year 2018 --sample HZJ_HToWW_M-125 --processor vh --pfnano v2_2 --n 1 --starti 0 --json samples_pfnano_mc.json --channels lep --executor iterative
     # noqa: run locally on lpc (hww trigger) as: python run.py --year 2017 --processor trigger --pfnano v2_2 --n 45 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele
->>>>>>> 38bd7803b7ce7f503a58f45701ed46ae1e7b5960
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--year", dest="year", default="2017", help="year", type=str)
@@ -201,10 +193,6 @@ if __name__ == "__main__":
     parser.add_argument("--local", dest="local", action="store_true")
     parser.add_argument("--inference", dest="inference", action="store_true")
     parser.add_argument("--no-inference", dest="inference", action="store_false")
-<<<<<<< HEAD
-=======
-    parser.add_argument("--pfnano", dest="pfnano", type=str, default="v2_2", help="pfnano version")
->>>>>>> 38bd7803b7ce7f503a58f45701ed46ae1e7b5960
     parser.set_defaults(inference=False)
     args = parser.parse_args()
 
