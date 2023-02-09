@@ -512,6 +512,26 @@ class HwwProcessor(processor.ProcessorABC):
             #     # sel=(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"])
             #     sel=(ak.max(bjets.btagDeepFlavB, axis=1) < self._btagWPs["M"])
             # )
+        else:  # save the selections as variables
+            if self.apply_trigger:
+                for ch in self._channels:
+                    self.add_selection(name="trigger", sel=trigger[ch], channel=[ch])
+            variables["common"]["metfilters"] = metfilters
+            variables["common"]["leptonInJet"] = lep_fj_dr < 0.8
+            variables["mu"]["oneLepton"] = (
+                (n_good_muons == 1)
+                & (n_good_electrons == 0)
+                & (n_loose_electrons == 0)
+                & ~ak.any(loose_muons & ~good_muons, 1)
+            )
+            variables["mu"]["notaus"] = n_loose_taus_mu == 0
+            variables["ele"]["oneLepton"] = (
+                (n_good_muons == 0)
+                & (n_loose_muons == 0)
+                & (n_good_electrons == 1)
+                & ~ak.any(loose_electrons & ~good_electrons, 1)
+            )
+            variables["ele"]["notaus"] = n_loose_taus_ele == 0
 
         # initialize pandas dataframe
         output = {}
