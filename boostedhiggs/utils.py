@@ -267,7 +267,9 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID):
 
     # added Feb13 2023
     nmuons = {"nmuons": (ak.sum(daughters_pdgId == MU_PDGID, axis=1))}
-    genVars = {**genVars, **nmuons}
+    daughters_pdgId = {"daughters_pdgId": daughters_pdgId}
+
+    genVars = {**genVars, **nmuons, **daughters_pdgId}
 
     return genVars, signal_mask
 
