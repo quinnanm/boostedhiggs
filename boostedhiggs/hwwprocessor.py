@@ -566,7 +566,7 @@ class HwwProcessor(processor.ProcessorABC):
 
                 # fill the output dictionary after selections
                 output[ch] = {key: value[selection_ch] for (key, value) in out.items()}
-
+                print(output[ch].keys())
                 print("AFTER", len(output[ch][genVars["daughters"]]))
                 print("AFTER", output[ch][genVars["daughters"]][~ak.is_none(output[ch][genVars["daughters"]])])
 
