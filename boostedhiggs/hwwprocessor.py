@@ -361,8 +361,8 @@ class HwwProcessor(processor.ProcessorABC):
         if self.isMC:
             if ("HToWW" in dataset) or ("HWW" in dataset) or ("ttHToNonbb" in dataset):
                 genVars, signal_mask = match_H(events.GenPart, candidatefj)
-                boo = genVars["nmuons"][ak.is_none(genVars["nmuons"])] == 0
-                print("BEFORE", genVars["daughters"][~ak.is_none(genVars["daughters"])][boo])
+                # boo = genVars["nmuons"][ak.is_none(genVars["nmuons"])] == 0
+                # print("BEFORE", genVars["daughters"][~ak.is_none(genVars["daughters"])][boo])
 
                 self.add_selection(name="signal", sel=signal_mask)
             elif "HToTauTau" in dataset:
@@ -567,11 +567,11 @@ class HwwProcessor(processor.ProcessorABC):
                 # fill the output dictionary after selections
                 output[ch] = {key: value[selection_ch] for (key, value) in out.items()}
 
-                s = output[ch]["daughters"]
-                boo = output[ch]["nmuons"][ak.is_none(output[ch]["nmuons"])] == 0
+                # s = output[ch]["daughters"]
+                # boo = output[ch]["nmuons"][ak.is_none(output[ch]["nmuons"])] == 0
 
-                print(s)
-                print("AFTER", s[~ak.is_none(s)][boo])
+                # print(s)
+                # print("AFTER", s[~ak.is_none(s)][boo])
 
                 # fill inference
                 if self.inference:
