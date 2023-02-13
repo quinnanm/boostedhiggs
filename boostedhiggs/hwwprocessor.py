@@ -361,6 +361,7 @@ class HwwProcessor(processor.ProcessorABC):
         if self.isMC:
             if ("HToWW" in dataset) or ("HWW" in dataset) or ("ttHToNonbb" in dataset):
                 genVars, signal_mask = match_H(events.GenPart, candidatefj)
+                print("BEFORE", genVars["daughters"])
                 self.add_selection(name="signal", sel=signal_mask)
             elif "HToTauTau" in dataset:
                 genVars, signal_mask = match_H(events.GenPart, candidatefj, dau_pdgid=15)
@@ -532,6 +533,8 @@ class HwwProcessor(processor.ProcessorABC):
                 & ~ak.any(loose_electrons & ~good_electrons, 1)
             )
             variables["ele"]["notaus"] = n_loose_taus_ele == 0
+
+        print("AFTER", genVars["daughters"])
 
         # initialize pandas dataframe
         output = {}
