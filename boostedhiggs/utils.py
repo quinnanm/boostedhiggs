@@ -266,10 +266,25 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID):
         genVars = {**genVars, **genHTTVars}
 
     # added Feb13 2023
-    nmuons = {"nmuons": (ak.sum(daughters_pdgId == MU_PDGID, axis=1))}
-    daughters_pdgId = {"daughters_pdgId": daughters_pdgId}
+    # nmuons = {"nmuons": (ak.sum(daughters_pdgId == MU_PDGID, axis=1))}
 
-    genVars = {**genVars, **nmuons, **daughters_pdgId}
+    test_ = {
+        "d_PDGID": 1,
+        "u_PDGID": 2,
+        "s_PDGID": 3,
+        "c_PDGID": 4,
+        "ELE_PDGID": 11,
+        "vELE_PDGID": 12,
+        "MU_PDGID": 13,
+        "vMU_PDGID": 13,
+        "TAU_PDGID": 13,
+        "vTAU_PDGID": 13,
+    }
+    npgid = {}
+    for key, val in test_.items():
+        npgid[key] = ak.sum(daughters_pdgId == val, axis=1)
+
+    genVars = {**genVars, **npgid}
 
     return genVars, signal_mask
 
