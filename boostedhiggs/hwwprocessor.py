@@ -362,7 +362,6 @@ class HwwProcessor(processor.ProcessorABC):
             if ("HToWW" in dataset) or ("HWW" in dataset) or ("ttHToNonbb" in dataset):
                 genVars, signal_mask = match_H(events.GenPart, candidatefj)
                 print("BEFORE", len(genVars["daughters"]))
-                print("BEFORE", genVars["daughters"])
                 print("BEFORE", genVars["daughters"][~ak.is_none(genVars["daughters"])])
 
                 self.add_selection(name="signal", sel=signal_mask)
@@ -537,10 +536,6 @@ class HwwProcessor(processor.ProcessorABC):
             )
             variables["ele"]["notaus"] = n_loose_taus_ele == 0
 
-        print("AFTER", len(genVars["daughters"]))
-        print("AFTER", genVars["daughters"])
-        print("AFTER", genVars["daughters"][~ak.is_none(genVars["daughters"])])
-
         # initialize pandas dataframe
         output = {}
 
@@ -571,6 +566,9 @@ class HwwProcessor(processor.ProcessorABC):
 
                 # fill the output dictionary after selections
                 output[ch] = {key: value[selection_ch] for (key, value) in out.items()}
+
+                print("AFTER", len(output[ch][genVars["daughters"]]))
+                print("AFTER", output[ch][genVars["daughters"]][~ak.is_none(output[ch][genVars["daughters"]])])
 
                 # fill inference
                 if self.inference:
