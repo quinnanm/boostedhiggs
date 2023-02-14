@@ -149,7 +149,7 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, selection=None, dau
 
         print("higgs pt ", matched_higgs.pt[selection][decay[selection] != 6])
         print("w mass ", v.mass[selection][decay[selection] != 6])
-        print("children ", matched_higgs_children.pdgId[selection][decay[selection] != 6])
+        print("children ", matched_higgs_children.children.pdgId[selection][decay[selection] != 6])
         print("distinct children ", matched_higgs_children.distinctChildren.pdgId[selection][decay[selection] != 6])
         print("decay ", decay[selection][decay[selection] != 6])
         print("dau id ", daughters_pdgId[selection][decay[selection] != 6])
