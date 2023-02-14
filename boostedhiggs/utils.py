@@ -147,13 +147,12 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, selection=None, dau
             + (ak.sum(daughters_pdgId <= b_PDGID, axis=1) == 4) * 11
         )
 
-        print("higgs mass", matched_higgs.mass[selection][decay[selection] != 6])
-        print("higgs pt ", matched_higgs.pt[selection][decay[selection] != 6])
-        print("w mass ", v.mass[selection][decay[selection] != 6])
-        print("distinct children ", matched_higgs_children.distinctChildren.pdgId[selection][decay[selection] != 6])
-        print("decay ", decay[selection][decay[selection] != 6])
-        print("dau id ", daughters_pdgId[selection][decay[selection] != 6])
-        print(" ")
+        # print("higgs pt ", matched_higgs.pt[selection][decay[selection] != 6])
+        # print("w mass ", v.mass[selection][decay[selection] != 6])
+        # print("distinct children ", matched_higgs_children.distinctChildren.pdgId[selection][decay[selection] != 6])
+        # print("decay ", decay[selection][decay[selection] != 6])
+        # print("dau id ", daughters_pdgId[selection][decay[selection] != 6])
+        # print(" ")
 
         # number of c quarks in V decay inside jet
         cquarks = daughters_nov[abs(daughters_nov.pdgId) == c_PDGID]
@@ -274,7 +273,7 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, selection=None, dau
         genVars = {**genVars, **genHTTVars}
 
     # added Feb13 2023
-    nmuons = {"nmuons": (ak.sum(daughters_pdgId == MU_PDGID, axis=1))}
+    nmuons = {"n_gen_muons": (ak.sum(daughters_pdgId == MU_PDGID, axis=1))}
     decay = {"decay": decay}
 
     # a = daughters_pdgId[nmuons["nmuons"] == 0]
