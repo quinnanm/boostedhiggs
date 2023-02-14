@@ -146,6 +146,8 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, selection=None, dau
             # 4 quarks * 11
             + (ak.sum(daughters_pdgId <= b_PDGID, axis=1) == 4) * 11
         )
+
+        print("higgs mass", matched_higgs.mass[selection][decay[selection] != 6])
         print("higgs pt ", matched_higgs.pt[selection][decay[selection] != 6])
         print("w mass ", v.mass[selection][decay[selection] != 6])
         print("distinct children ", matched_higgs_children.distinctChildren.pdgId[selection][decay[selection] != 6])
