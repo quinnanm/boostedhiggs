@@ -59,7 +59,7 @@ def to_label(array: ak.Array) -> ak.Array:
     return ak.values_astype(array, np.int32)
 
 
-def match_H(genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID):
+def match_H(genparts: GenParticleArray, fatjet: FatJetArray, selection=None, dau_pdgid=W_PDGID):
     """Gen matching for Higgs samples"""
     higgs = genparts[get_pid_mask(genparts, HIGGS_PDGID, byall=False) * genparts.hasFlags(GEN_FLAGS)]
 
@@ -146,6 +146,12 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID):
             # 4 quarks * 11
             + (ak.sum(daughters_pdgId <= b_PDGID, axis=1) == 4) * 11
         )
+        print("higgs pt ", matched_higgs.pt[selection][decay[selection] != 6])
+        print("w mass ", v.mass[selection][decay[selection] != 6])
+        print("distinct children ", matched_higgs_children.distinctChildren.pdgId[selection][decay[selection] != 6])
+        print("decay ", decay[selection][decay[selection] != 6])
+        print("dau id ", daughters_pdgId[selection][decay[selection] != 6])
+        print(" ")
 
         # number of c quarks in V decay inside jet
         cquarks = daughters_nov[abs(daughters_nov.pdgId) == c_PDGID]

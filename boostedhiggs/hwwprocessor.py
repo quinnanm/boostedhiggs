@@ -63,10 +63,6 @@ class HwwProcessor(processor.ProcessorABC):
 
         # apply selection?
         self.apply_selection = apply_selection
-        if apply_selection:
-            print("Will apply selections")
-        else:
-            print("Will NOT apply selections")
 
         # apply trigger in selection?
         self.apply_trigger = apply_trigger
@@ -357,13 +353,42 @@ class HwwProcessor(processor.ProcessorABC):
 
             variables["common"]["hem_cleaning"] = hem_cleaning
 
+        if self.apply_selection:
+            if self.apply_trigger:
+                for ch in self._channels:
+                    self.add_selection(name="trigger", sel=trigger[ch], channel=[ch])
+            self.add_selection(name="metfilters", sel=metfilters)
+            self.add_selection(name="leptonKin", sel=(candidatelep.pt > 30), channel=["mu"])
+            self.add_selection(name="leptonKin", sel=(candidatelep.pt > 40), channel=["ele"])
+            self.add_selection(name="fatjetKin", sel=candidatefj.pt > 200)
+            self.add_selection(name="ht", sel=(ht > 200))
+            self.add_selection(
+                name="oneLepton",
+                sel=(n_good_muons == 1)
+                & (n_good_electrons == 0)
+                & (n_loose_electrons == 0)
+                & ~ak.any(loose_muons & ~good_muons, 1),
+                channel=["mu"],
+            )
+            self.add_selection(
+                name="oneLepton",
+                sel=(n_good_muons == 0)
+                & (n_loose_muons == 0)
+                & (n_good_electrons == 1)
+                & ~ak.any(loose_electrons & ~good_electrons, 1),
+                channel=["ele"],
+            )
+            self.add_selection(name="notaus", sel=(n_loose_taus_mu == 0), channel=["mu"])
+            self.add_selection(name="notaus", sel=(n_loose_taus_ele == 0), channel=["ele"])
+            self.add_selection(name="leptonInJet", sel=(lep_fj_dr < 0.8))
+
         # gen-level matching
         if self.isMC:
             if ("HToWW" in dataset) or ("HWW" in dataset) or ("ttHToNonbb" in dataset):
-                genVars, signal_mask = match_H(events.GenPart, candidatefj)
-                # boo = genVars["nmuons"][ak.is_none(genVars["nmuons"])] == 0
-                # print("BEFORE", genVars["daughters"][~ak.is_none(genVars["daughters"])][boo])
-
+                print("selection ", self.selections["mu"].all(*self.selections["mu"].names))
+                genVars, signal_mask = match_H(
+                    events.GenPart, candidatefj, selection=self.selections["mu"].all(*self.selections["mu"].names)
+                )
                 self.add_selection(name="signal", sel=signal_mask)
             elif "HToTauTau" in dataset:
                 genVars, signal_mask = match_H(events.GenPart, candidatefj, dau_pdgid=15)
@@ -478,64 +503,6 @@ class HwwProcessor(processor.ProcessorABC):
             # for var in self.weights.variations:
             #     variables["common"][f"weight_{key}"] = self.weights.weight(key)
 
-        """
-        Selection and cutflows.
-        """
-
-        if self.apply_selection:
-            if self.apply_trigger:
-                for ch in self._channels:
-                    self.add_selection(name="trigger", sel=trigger[ch], channel=[ch])
-            self.add_selection(name="metfilters", sel=metfilters)
-            self.add_selection(name="leptonKin", sel=(candidatelep.pt > 30), channel=["mu"])
-            self.add_selection(name="leptonKin", sel=(candidatelep.pt > 40), channel=["ele"])
-            self.add_selection(name="fatjetKin", sel=candidatefj.pt > 200)
-            self.add_selection(name="ht", sel=(ht > 200))
-            self.add_selection(
-                name="oneLepton",
-                sel=(n_good_muons == 1)
-                & (n_good_electrons == 0)
-                & (n_loose_electrons == 0)
-                & ~ak.any(loose_muons & ~good_muons, 1),
-                channel=["mu"],
-            )
-            self.add_selection(
-                name="oneLepton",
-                sel=(n_good_muons == 0)
-                & (n_loose_muons == 0)
-                & (n_good_electrons == 1)
-                & ~ak.any(loose_electrons & ~good_electrons, 1),
-                channel=["ele"],
-            )
-            self.add_selection(name="notaus", sel=(n_loose_taus_mu == 0), channel=["mu"])
-            self.add_selection(name="notaus", sel=(n_loose_taus_ele == 0), channel=["ele"])
-            self.add_selection(name="leptonInJet", sel=(lep_fj_dr < 0.8))
-            # self.add_selection(
-            #     name="antibjettag",
-            #     # sel=(ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1) < self._btagWPs["M"])
-            #     sel=(ak.max(bjets.btagDeepFlavB, axis=1) < self._btagWPs["M"])
-            # )
-        else:  # save the selections as variables
-            if self.apply_trigger:
-                for ch in self._channels:
-                    self.add_selection(name="trigger", sel=trigger[ch], channel=[ch])
-            variables["common"]["metfilters"] = metfilters
-            variables["common"]["leptonInJet"] = lep_fj_dr < 0.8
-            variables["mu"]["oneLepton"] = (
-                (n_good_muons == 1)
-                & (n_good_electrons == 0)
-                & (n_loose_electrons == 0)
-                & ~ak.any(loose_muons & ~good_muons, 1)
-            )
-            variables["mu"]["notaus"] = n_loose_taus_mu == 0
-            variables["ele"]["oneLepton"] = (
-                (n_good_muons == 0)
-                & (n_loose_muons == 0)
-                & (n_good_electrons == 1)
-                & ~ak.any(loose_electrons & ~good_electrons, 1)
-            )
-            variables["ele"]["notaus"] = n_loose_taus_ele == 0
-
         # initialize pandas dataframe
         output = {}
 
@@ -566,12 +533,6 @@ class HwwProcessor(processor.ProcessorABC):
 
                 # fill the output dictionary after selections
                 output[ch] = {key: value[selection_ch] for (key, value) in out.items()}
-
-                # s = output[ch]["daughters"]
-                # boo = output[ch]["nmuons"][ak.is_none(output[ch]["nmuons"])] == 0
-
-                # print(s)
-                # print("AFTER", s[~ak.is_none(s)][boo])
 
                 # fill inference
                 if self.inference:
