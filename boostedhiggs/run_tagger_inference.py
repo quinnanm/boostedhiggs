@@ -180,12 +180,21 @@ def runInferenceTriton(
         for i, output_name in enumerate(output_names):
             pnet_vars[f"fj_{pversion}_{output_name}"] = tagger_outputs[:, i]
 
-        derived_vars = {
-            f"fj_{pversion}_probQCD": np.sum(tagger_outputs[:, 23:28], axis=1),
-            f"fj_{pversion}_probTopb": np.sum(tagger_outputs[:, 28:], axis=1),
-            f"fj_{pversion}_probHWWelenuqq": np.sum(tagger_outputs[:, 6:8], axis=1),
-            f"fj_{pversion}_probHWWmunuqq": np.sum(tagger_outputs[:, 8:10], axis=1),
-        }
+        if "noreg" in model_name:
+            derived_vars = {
+                f"fj_{pversion}_probQCD": np.sum(tagger_outputs[:, 23:28], axis=1),
+                f"fj_{pversion}_probTopb": np.sum(tagger_outputs[:, 28:], axis=1),
+                f"fj_{pversion}_probHWWelenuqq": np.sum(tagger_outputs[:, 6:8], axis=1),
+                f"fj_{pversion}_probHWWmunuqq": np.sum(tagger_outputs[:, 8:10], axis=1),
+            }
+        else:
+            derived_vars = {
+                f"fj_{pversion}_probQCD": np.sum(tagger_outputs[:, 23:28], axis=1),
+                f"fj_{pversion}_probTopb": np.sum(tagger_outputs[:, 28:-1], axis=1),  # last index is mass regression
+                f"fj_{pversion}_probHWWelenuqq": np.sum(tagger_outputs[:, 6:8], axis=1),
+                f"fj_{pversion}_probHWWmunuqq": np.sum(tagger_outputs[:, 8:10], axis=1),
+                f"fj_{pversion}_mass": tagger_outputs[:, -1],
+            }
 
         pnet_vars = {**pnet_vars, **derived_vars}
 
