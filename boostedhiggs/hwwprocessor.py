@@ -538,7 +538,8 @@ class HwwProcessor(processor.ProcessorABC):
                 if self.inference:
                     for model_name in [
                         # "particlenet_hww_inclv2_pre2_noreg",
-                        "ak8_MD_vminclv2ParT_manual_fixwrap",
+                        # "ak8_MD_vminclv2ParT_manual_fixwrap",
+                        "particlenet_hww_inclv2_pre2",
                     ]:
                         pnet_vars = runInferenceTriton(
                             self.tagger_resources_path,
