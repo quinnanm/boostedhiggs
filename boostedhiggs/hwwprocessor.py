@@ -548,7 +548,7 @@ class HwwProcessor(processor.ProcessorABC):
                             fj_idx_lep[selection_ch],
                             model_name=model_name,
                         )
-
+                        print(pnet_vars)
                         output[ch] = {
                             **output[ch],
                             **{key: value for (key, value) in pnet_vars.items()},
