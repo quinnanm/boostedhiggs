@@ -114,7 +114,7 @@ def runInferenceTriton(
     svs_label = "FatJetSVs"
     # jet_label = "ak8"
 
-    # prepare inputs for both fat jets
+    # prepare inputs for the fatjet
     tagger_inputs = []
 
     feature_dict = {
@@ -143,27 +143,14 @@ def runInferenceTriton(
             for i, input_name in enumerate(tagger_vars["input_names"])
         }
 
-    # run inference for both fat jets
+    # run inference on the fat jet
     tagger_outputs = []
-
-    # start = time.time()
 
     try:
         tagger_outputs = triton_model(tagger_inputs)
     except Exception:
         print("---can't run inference due to error with the event or the server is not running--")
         return {}
-
-    if out_name == "output__0":
-        import scipy
-
-        mass = tagger_outputs[:, -1]
-        tagger_outputs = scipy.special.softmax(tagger_outputs[:, :-1], axis=1)
-        np.append(tagger_outputs, mass)
-
-    # time_taken = time.time() - start
-
-    # print(f"Inference took {time_taken:.1f}s")
 
     if model_name == "05_10_ak8_ttbarwjets":
         pnet_vars = {
@@ -180,25 +167,32 @@ def runInferenceTriton(
         for i, output_name in enumerate(output_names):
             pnet_vars[f"fj_{pversion}_{output_name}"] = tagger_outputs[:, i]
 
-        if "noreg" in model_name:
+        if model_name == "particlenet_hww_inclv2_pre2":
+            import scipy
+
+            # last index is mass regression
+            mass = tagger_outputs[:, -1]
+            # missing softmax for that model (unfortunately)
+            tagger_outputs = scipy.special.softmax(tagger_outputs[:, :-1], axis=1)
+
+            derived_vars = {
+                f"fj_{pversion}_probQCD": np.sum(tagger_outputs[:, 23:28], axis=1),
+                f"fj_{pversion}_probTopb": np.sum(tagger_outputs[:, 28:], axis=1),
+                f"fj_{pversion}_probHWWelenuqq": np.sum(tagger_outputs[:, 6:8], axis=1),
+                f"fj_{pversion}_probHWWmunuqq": np.sum(tagger_outputs[:, 8:10], axis=1),
+                f"fj_{pversion}_mass": mass,
+            }
+        else:
             derived_vars = {
                 f"fj_{pversion}_probQCD": np.sum(tagger_outputs[:, 23:28], axis=1),
                 f"fj_{pversion}_probTopb": np.sum(tagger_outputs[:, 28:], axis=1),
                 f"fj_{pversion}_probHWWelenuqq": np.sum(tagger_outputs[:, 6:8], axis=1),
                 f"fj_{pversion}_probHWWmunuqq": np.sum(tagger_outputs[:, 8:10], axis=1),
             }
-        else:
-            derived_vars = {
-                f"fj_{pversion}_probQCD": np.sum(tagger_outputs[:, 23:28], axis=1),
-                f"fj_{pversion}_probTopb": np.sum(tagger_outputs[:, 28:-1], axis=1),  # last index is mass regression
-                f"fj_{pversion}_probHWWelenuqq": np.sum(tagger_outputs[:, 6:8], axis=1),
-                f"fj_{pversion}_probHWWmunuqq": np.sum(tagger_outputs[:, 8:10], axis=1),
-                f"fj_{pversion}_mass": tagger_outputs[:, -1],
-            }
 
         pnet_vars = {**pnet_vars, **derived_vars}
 
-        # also add pku vars of that jet
+        # if model is ParT, add pku vars of that jet
         if pversion == "ParT":
             jet = ak.firsts(events[fatjet_label][fj_idx_lep])
             pku_vars = {
@@ -208,5 +202,4 @@ def runInferenceTriton(
 
             pnet_vars = {**pnet_vars, **pku_vars}
 
-    # print(f"Total time taken: {time.time() - total_start:.1f}s")
     return pnet_vars
