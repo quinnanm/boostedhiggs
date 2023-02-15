@@ -105,6 +105,7 @@ def runInferenceTriton(
         "particlenet_hww_inclv2_pre2": ["PN_v2", "output__0"],
         "particlenet_hww_inclv2_pre2_noreg": ["PN_v2_noreg", "softmax__0"],
         "ak8_MD_vminclv2ParT_manual_fixwrap": ["ParT", "softmax"],
+        "ak8_MD_vminclv2ParT_manual_fixwrap_all_nodes": ["ParT_all_nodes", "softmax"],
     }[model_name]
 
     triton_model = wrapped_triton(triton_config["model_url"], triton_config["batch_size"], out_name=out_name)
@@ -152,7 +153,7 @@ def runInferenceTriton(
         print("---can't run inference due to error with the event or the server is not running--")
         return {}
 
-    if model_name == "05_10_ak8_ttbarwjets":
+    if pversion == "PN_UCSD":
         pnet_vars = {
             f"fj_{pversion}_ttbar": tagger_outputs[:, 0:1],
             f"fj_{pversion}_wjets": tagger_outputs[:, 2],
@@ -167,7 +168,7 @@ def runInferenceTriton(
         for i, output_name in enumerate(output_names):
             pnet_vars[f"fj_{pversion}_{output_name}"] = tagger_outputs[:, i]
 
-        if model_name == "particlenet_hww_inclv2_pre2":
+        if pversion == "PN_v2":
             import scipy
 
             # last index is mass regression
@@ -182,12 +183,24 @@ def runInferenceTriton(
                 f"fj_{pversion}_probHWWmunuqq": np.sum(tagger_outputs[:, 8:10], axis=1),
                 f"fj_{pversion}_mass": mass,
             }
-        else:
+        elif pversion == "PN_v2_noreg":
             derived_vars = {
                 f"fj_{pversion}_probQCD": np.sum(tagger_outputs[:, 23:28], axis=1),
                 f"fj_{pversion}_probTopb": np.sum(tagger_outputs[:, 28:], axis=1),
                 f"fj_{pversion}_probHWWelenuqq": np.sum(tagger_outputs[:, 6:8], axis=1),
                 f"fj_{pversion}_probHWWmunuqq": np.sum(tagger_outputs[:, 8:10], axis=1),
+            }
+        elif pversion == "ParT_all_nodes":
+            # the 38th neuron is the mass and neurons after 38 are hidden neurons
+            mass = tagger_outputs[:, 37]
+            tagger_outputs = tagger_outputs[:, :37]
+
+            derived_vars = {
+                f"fj_{pversion}_probQCD": np.sum(tagger_outputs[:, 23:28], axis=1),
+                f"fj_{pversion}_probTopb": np.sum(tagger_outputs[:, 28:], axis=1),
+                f"fj_{pversion}_probHWWelenuqq": np.sum(tagger_outputs[:, 6:8], axis=1),
+                f"fj_{pversion}_probHWWmunuqq": np.sum(tagger_outputs[:, 8:10], axis=1),
+                f"fj_{pversion}_mass": mass,
             }
 
         pnet_vars = {**pnet_vars, **derived_vars}
