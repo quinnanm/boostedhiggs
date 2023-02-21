@@ -18,6 +18,7 @@ vMU_PDGID = 14
 TAU_PDGID = 15
 vTAU_PDGID = 16
 
+GAMMA_PDGID = 22
 Z_PDGID = 23
 W_PDGID = 24
 HIGGS_PDGID = 25
@@ -92,6 +93,7 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, selection=None, dau
         daughters = ak.flatten(matched_higgs_children.distinctChildren, axis=2)
         daughters = daughters[daughters.hasFlags(GEN_FLAGS)]
         daughters_pdgId = abs(daughters.pdgId)
+        daughters_children_pdgId = abs(daughters.children.pdgId)
 
         # exclude neutrinos from nprongs count
         daughters_nov = daughters[
@@ -146,6 +148,22 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, selection=None, dau
             # 4 quarks * 11
             + (ak.sum(daughters_pdgId <= b_PDGID, axis=1) == 4) * 11
         )
+        print("old", to_label(decay == 6))
+        ssss = ak.sum(daughters_children_pdgId == MU_PDGID, axis=1) == 1
+        decay = (
+            # 2 quarks * 1
+            (ak.sum(daughters_pdgId <= b_PDGID, axis=1) == 2) * 1
+            # 1 electron * 3
+            + (ak.sum(daughters_pdgId == ELE_PDGID, axis=1) == 1) * 3
+            # 1 muon * 5
+            + (ak.sum(daughters_pdgId == MU_PDGID, axis=1) == 1) * 5
+            + (ak.sum(ssss == MU_PDGID, axis=1) == 1) * 5
+            # 1 tau * 7
+            + (ak.sum(daughters_pdgId == TAU_PDGID, axis=1) == 1) * 7
+            # 4 quarks * 11
+            + (ak.sum(daughters_pdgId <= b_PDGID, axis=1) == 4) * 11
+        )
+        print("new", to_label(decay == 6))
 
         # print("higgs pt ", matched_higgs.pt[selection][decay[selection] != 6])
         # print("w mass ", v.mass[selection][decay[selection] != 6])
@@ -299,7 +317,6 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, selection=None, dau
     # npgid = {}
     # for key, val in test_.items():
     #     npgid[key] = ak.sum(daughters_pdgId == val, axis=1)
-
     genVars = {**genVars, **nmuons, **decay}
 
     return genVars, signal_mask
