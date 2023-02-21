@@ -148,7 +148,7 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, selection=None, dau
             # 4 quarks * 11
             + (ak.sum(daughters_pdgId <= b_PDGID, axis=1) == 4) * 11
         )
-        print("old", to_label(decay == 6))
+        print("old", ak.sum(to_label(decay == 6)))
         ssss = ak.sum(daughters_children_pdgId == MU_PDGID, axis=1) == 1
         decay = (
             # 2 quarks * 1
@@ -163,7 +163,7 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, selection=None, dau
             # 4 quarks * 11
             + (ak.sum(daughters_pdgId <= b_PDGID, axis=1) == 4) * 11
         )
-        print("new", to_label(decay == 6))
+        print("new", ak.sum(to_label(decay == 6)))
 
         # print("higgs pt ", matched_higgs.pt[selection][decay[selection] != 6])
         # print("w mass ", v.mass[selection][decay[selection] != 6])

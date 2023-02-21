@@ -170,6 +170,8 @@ if __name__ == "__main__":
     # noqa: run locally on lpc (vh) as: python run.py --year 2018 --sample HZJ_HToWW_M-125 --processor vh --pfnano v2_2 --n 1 --starti 0 --json samples_pfnano_mc.json --channels lep --executor iterative
     # noqa: run locally on lpc (hww trigger) as: python run.py --year 2017 --processor trigger --pfnano v2_2 --n 45 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele
 
+    # noqa: python run.py --year 2017 --processor hww --pfnano v2_4 --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels mu
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--year", dest="year", default="2017", help="year", type=str)
     parser.add_argument("--starti", dest="starti", default=0, help="start index of files", type=int)
