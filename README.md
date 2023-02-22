@@ -59,6 +59,10 @@ We use the `submit.py` script to submit jobs.
 
 For example:
 ```
+python condor/submit.py --year 2017 --tag Feb22 --samples samples_pfnano_mc.json --pfnano=v2_2 --channels mu,ele --submit
+```
+
+```
 python condor/submit.py --year 2017 --tag ${TAG} --samples samples_pfnano_mc.json --pfnano
 ```
 where:
