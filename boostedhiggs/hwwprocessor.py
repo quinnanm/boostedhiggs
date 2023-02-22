@@ -385,10 +385,7 @@ class HwwProcessor(processor.ProcessorABC):
         # gen-level matching
         if self.isMC:
             if ("HToWW" in dataset) or ("HWW" in dataset) or ("ttHToNonbb" in dataset):
-                print("selection ", self.selections["mu"].all(*self.selections["mu"].names))
-                genVars, signal_mask = match_H(
-                    events.GenPart, candidatefj, selection=self.selections["mu"].all(*self.selections["mu"].names)
-                )
+                genVars, signal_mask = match_H(events.GenPart, candidatefj)
                 self.add_selection(name="signal", sel=signal_mask)
             elif "HToTauTau" in dataset:
                 genVars, signal_mask = match_H(events.GenPart, candidatefj, dau_pdgid=15)

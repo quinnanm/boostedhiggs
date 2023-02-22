@@ -165,9 +165,6 @@ def runInferenceTriton(
         output_names = [x.replace("label_", "prob").replace("_", "") for x in tagger_vars["output_names"]]
 
         pnet_vars = {}
-        for i, output_name in enumerate(output_names):
-            pnet_vars[f"fj_{pversion}_{output_name}"] = tagger_outputs[:, i]
-
         if pversion == "PN_v2":
             import scipy
 
@@ -175,6 +172,8 @@ def runInferenceTriton(
             mass = tagger_outputs[:, -1]
             # missing softmax for that model (unfortunately)
             tagger_outputs = scipy.special.softmax(tagger_outputs[:, :-1], axis=1)
+            for i, output_name in enumerate(output_names):
+                pnet_vars[f"fj_{pversion}_{output_name}"] = tagger_outputs[:, i]
 
             derived_vars = {
                 f"fj_{pversion}_probQCD": np.sum(tagger_outputs[:, 23:28], axis=1),
@@ -183,25 +182,29 @@ def runInferenceTriton(
                 f"fj_{pversion}_probHWWmunuqq": np.sum(tagger_outputs[:, 8:10], axis=1),
                 f"fj_{pversion}_mass": mass,
             }
-        elif pversion == "PN_v2_noreg":
-            derived_vars = {
-                f"fj_{pversion}_probQCD": np.sum(tagger_outputs[:, 23:28], axis=1),
-                f"fj_{pversion}_probTopb": np.sum(tagger_outputs[:, 28:], axis=1),
-                f"fj_{pversion}_probHWWelenuqq": np.sum(tagger_outputs[:, 6:8], axis=1),
-                f"fj_{pversion}_probHWWmunuqq": np.sum(tagger_outputs[:, 8:10], axis=1),
-            }
-        elif pversion == "ParT_all_nodes":
-            # the 38th neuron is the mass and neurons after 38 are hidden neurons
-            mass = tagger_outputs[:, 37]
-            tagger_outputs = tagger_outputs[:, :37]
+        else:
+            for i, output_name in enumerate(output_names):
+                pnet_vars[f"fj_{pversion}_{output_name}"] = tagger_outputs[:, i]
 
-            derived_vars = {
-                f"fj_{pversion}_probQCD": np.sum(tagger_outputs[:, 23:28], axis=1),
-                f"fj_{pversion}_probTopb": np.sum(tagger_outputs[:, 28:], axis=1),
-                f"fj_{pversion}_probHWWelenuqq": np.sum(tagger_outputs[:, 6:8], axis=1),
-                f"fj_{pversion}_probHWWmunuqq": np.sum(tagger_outputs[:, 8:10], axis=1),
-                f"fj_{pversion}_mass": mass,
-            }
+            if pversion == "PN_v2_noreg":
+                derived_vars = {
+                    f"fj_{pversion}_probQCD": np.sum(tagger_outputs[:, 23:28], axis=1),
+                    f"fj_{pversion}_probTopb": np.sum(tagger_outputs[:, 28:], axis=1),
+                    f"fj_{pversion}_probHWWelenuqq": np.sum(tagger_outputs[:, 6:8], axis=1),
+                    f"fj_{pversion}_probHWWmunuqq": np.sum(tagger_outputs[:, 8:10], axis=1),
+                }
+            if pversion == "ParT_all_nodes":
+                # the 38th neuron is the mass and neurons after 38 are hidden neurons
+                mass = tagger_outputs[:, 37]
+                tagger_outputs = tagger_outputs[:, :37]
+
+                derived_vars = {
+                    f"fj_{pversion}_probQCD": np.sum(tagger_outputs[:, 23:28], axis=1),
+                    f"fj_{pversion}_probTopb": np.sum(tagger_outputs[:, 28:], axis=1),
+                    f"fj_{pversion}_probHWWelenuqq": np.sum(tagger_outputs[:, 6:8], axis=1),
+                    f"fj_{pversion}_probHWWmunuqq": np.sum(tagger_outputs[:, 8:10], axis=1),
+                    f"fj_{pversion}_mass": mass,
+                }
 
         pnet_vars = {**pnet_vars, **derived_vars}
 
