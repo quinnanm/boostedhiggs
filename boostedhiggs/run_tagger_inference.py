@@ -102,10 +102,10 @@ def runInferenceTriton(
 
     pversion, out_name = {
         "05_10_ak8_ttbarwjets": ["PN_UCSD", "softmax__0"],
-        "particlenet_hww_inclv2_pre2": ["PN_v2", "output__0"],
+        "particlenet_hww_inclv2_pre2": ["ParticleNet", "output__0"],
         "particlenet_hww_inclv2_pre2_noreg": ["PN_v2_noreg", "softmax__0"],
-        "ak8_MD_vminclv2ParT_manual_fixwrap": ["ParT", "softmax"],
-        "ak8_MD_vminclv2ParT_manual_fixwrap_all_nodes": ["ParT_all_nodes", "softmax"],
+        "ak8_MD_vminclv2ParT_manual_fixwrap": ["ParT_noreg", "softmax"],
+        "ak8_MD_vminclv2ParT_manual_fixwrap_all_nodes": ["ParT", "softmax"],
     }[model_name]
 
     triton_model = wrapped_triton(triton_config["model_url"], triton_config["batch_size"], out_name=out_name)
@@ -165,13 +165,13 @@ def runInferenceTriton(
         output_names = [x.replace("label_", "prob").replace("_", "") for x in tagger_vars["output_names"]]
 
         pnet_vars = {}
-        if pversion == "PN_v2":
+        if pversion == "ParticleNet":
             import scipy
 
             # last index is mass regression
             mass = tagger_outputs[:, -1]
             # missing softmax for that model (unfortunately)
-            tagger_outputs = scipy.special.softmax(tagger_outputs[:, :-1], axis=1)
+            tagger_outputs[:, :-1] = scipy.special.softmax(tagger_outputs[:, :-1], axis=1)
             for i, output_name in enumerate(output_names):
                 pnet_vars[f"fj_{pversion}_{output_name}"] = tagger_outputs[:, i]
 
@@ -193,7 +193,7 @@ def runInferenceTriton(
                     f"fj_{pversion}_probHWWelenuqq": np.sum(tagger_outputs[:, 6:8], axis=1),
                     f"fj_{pversion}_probHWWmunuqq": np.sum(tagger_outputs[:, 8:10], axis=1),
                 }
-            if pversion == "ParT_all_nodes":
+            if pversion == "ParT":
                 # the 38th neuron is the mass and neurons after 38 are hidden neurons
                 mass = tagger_outputs[:, 37]
                 tagger_outputs = tagger_outputs[:, :37]
@@ -208,8 +208,8 @@ def runInferenceTriton(
 
         pnet_vars = {**pnet_vars, **derived_vars}
 
-        # if model is ParT, add pku vars of that jet
-        if pversion == "ParT":
+        # if model is ParT, add pku vars of that jet. MUST BE pf_nano v2_4
+        if pversion == "ParT_noreg":
             jet = ak.firsts(events[fatjet_label][fj_idx_lep])
             pku_vars = {
                 f"fj_PKU_{pversion}_{output_name}": jet[f"inclParTMDV1_{output_name}"] for output_name in output_names
