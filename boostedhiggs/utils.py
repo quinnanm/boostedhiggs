@@ -93,7 +93,6 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID):
         daughters = ak.flatten(matched_higgs_children.distinctChildren, axis=2)
         daughters = daughters[daughters.hasFlags(GEN_FLAGS)]
         daughters_pdgId = abs(daughters.pdgId)
-        daughters_children_pdgId = abs(ak.flatten(daughters.children.pdgId, axis=2))
 
         # exclude neutrinos from nprongs count
         daughters_nov = daughters[
@@ -148,21 +147,6 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID):
             # 4 quarks * 11
             + (ak.sum(daughters_pdgId <= b_PDGID, axis=1) == 4) * 11
         )
-        print("old", ak.sum(to_label(decay == 6)))
-        decay = (
-            # 2 quarks * 1
-            (ak.sum(daughters_pdgId <= b_PDGID, axis=1) == 2) * 1
-            # 1 electron * 3
-            + (ak.sum(daughters_pdgId == ELE_PDGID, axis=1) == 1) * 3
-            # 1 muon * 5
-            + (ak.sum(daughters_pdgId == MU_PDGID, axis=1) == 1) * 5
-            + (ak.sum(daughters_children_pdgId == MU_PDGID, axis=1) == 1) * 5
-            # 1 tau * 7
-            + (ak.sum(daughters_pdgId == TAU_PDGID, axis=1) == 1) * 7
-            # 4 quarks * 11
-            + (ak.sum(daughters_pdgId <= b_PDGID, axis=1) == 4) * 11
-        )
-        print("new", ak.sum(to_label(decay == 6)))
 
         # number of c quarks in V decay inside jet
         cquarks = daughters_nov[abs(daughters_nov.pdgId) == c_PDGID]
@@ -286,28 +270,6 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID):
     nmuons = {"n_gen_muons": (ak.sum(daughters_pdgId == MU_PDGID, axis=1))}
     decay = {"decay": decay}
 
-    # a = daughters_pdgId[nmuons["nmuons"] == 0]
-    # a = a[~ak.is_none(a)]
-    # for i, aa in enumerate(a):
-    #     print(aa)
-    #     if i == 100:
-    #         break
-
-    # test_ = {
-    #     "d_PDGID": 1,
-    #     "u_PDGID": 2,
-    #     "s_PDGID": 3,
-    #     "c_PDGID": 4,
-    #     "ELE_PDGID": 11,
-    #     "vELE_PDGID": 12,
-    #     "MU_PDGID": 13,
-    #     "vMU_PDGID": 13,
-    #     "TAU_PDGID": 13,
-    #     "vTAU_PDGID": 13,
-    # }
-    # npgid = {}
-    # for key, val in test_.items():
-    #     npgid[key] = ak.sum(daughters_pdgId == val, axis=1)
     genVars = {**genVars, **nmuons, **decay}
 
     return genVars, signal_mask
