@@ -119,14 +119,10 @@ class HwwProcessor(processor.ProcessorABC):
         """Adds selection to PackedSelection object and the cutflow dictionary"""
         channels = channel if (channel is not None and channel in self._channels) else self._channels
         for ch in channels:
-            print("1", ch)
             if ch not in self._channels:
                 continue
-            print("2", ch)
             self.selections[ch].add(name, sel)
-            print("3", ch)
             selection_ch = self.selections[ch].all(*self.selections[ch].names)
-            print("4", ch)
             if self.isMC:
                 weight = self.weights.partial_weight(self.weights_per_ch[ch] + self.common_weights)
                 self.cutflows[ch][name] = float(weight[selection_ch].sum())
