@@ -115,9 +115,15 @@ class HwwProcessor(processor.ProcessorABC):
             output[field] = ak.to_numpy(output_collection[field])
         return output
 
-    def add_selection(self, name: str, sel: np.ndarray, channel: list = None):
+    def add_selection(self, name: str, sel: np.ndarray, channel: str = "both"):
         """Adds selection to PackedSelection object and the cutflow dictionary"""
-        channels = channel if (channel is not None and channel in self._channels) else self._channels
+        channels = []
+        if channel == "both":
+            channels = self._channels
+        else:
+            if channel in self._channels:
+                channels = [channel]
+
         for ch in channels:
             if ch not in self._channels:
                 continue
@@ -358,10 +364,10 @@ class HwwProcessor(processor.ProcessorABC):
         if self.apply_selection:
             if self.apply_trigger:
                 for ch in self._channels:
-                    self.add_selection(name="trigger", sel=trigger[ch], channel=[ch])
+                    self.add_selection(name="trigger", sel=trigger[ch], channel=ch)
             self.add_selection(name="metfilters", sel=metfilters)
-            self.add_selection(name="leptonKin", sel=(candidatelep.pt > 30), channel=["mu"])
-            self.add_selection(name="leptonKin", sel=(candidatelep.pt > 40), channel=["ele"])
+            self.add_selection(name="leptonKin", sel=(candidatelep.pt > 30), channel="mu")
+            self.add_selection(name="leptonKin", sel=(candidatelep.pt > 40), channel="ele")
             self.add_selection(name="fatjetKin", sel=candidatefj.pt > 200)
             self.add_selection(name="ht", sel=(ht > 200))
             self.add_selection(
@@ -370,7 +376,7 @@ class HwwProcessor(processor.ProcessorABC):
                 & (n_good_electrons == 0)
                 & (n_loose_electrons == 0)
                 & ~ak.any(loose_muons & ~good_muons, 1),
-                channel=["mu"],
+                channel="mu",
             )
             self.add_selection(
                 name="oneLepton",
@@ -378,10 +384,10 @@ class HwwProcessor(processor.ProcessorABC):
                 & (n_loose_muons == 0)
                 & (n_good_electrons == 1)
                 & ~ak.any(loose_electrons & ~good_electrons, 1),
-                channel=["ele"],
+                channel="ele",
             )
-            self.add_selection(name="notaus", sel=(n_loose_taus_mu == 0), channel=["mu"])
-            self.add_selection(name="notaus", sel=(n_loose_taus_ele == 0), channel=["ele"])
+            self.add_selection(name="notaus", sel=(n_loose_taus_mu == 0), channel="mu")
+            self.add_selection(name="notaus", sel=(n_loose_taus_ele == 0), channel="ele")
             self.add_selection(name="leptonInJet", sel=(lep_fj_dr < 0.8))
 
         # gen-level matching
