@@ -17,6 +17,7 @@ def main(args):
         os.makedirs("./outfiles")
 
     channels = args.channels.split(",")
+    print(channels)
 
     # if --local is specified in args, process only the args.sample provided
     if args.local:
