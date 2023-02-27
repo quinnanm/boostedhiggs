@@ -1,31 +1,22 @@
+import argparse
+import json
+import os
+import pickle as pkl
+
+import matplotlib.pyplot as plt
+import mplhep as hep
+import numpy as np
+import yaml
 from utils import (
     axis_dict,
     color_by_sample,
-    signal_by_ch,
     data_by_ch,
     data_by_ch_2018,
-    label_by_ch,
-)
-from utils import (
-    simplified_labels,
-    get_cutflow,
-    get_xsecweight,
-    get_sample_to_use,
     get_cutflow_axis,
+    label_by_ch,
+    signal_by_ch,
+    simplified_labels,
 )
-
-import yaml
-import pickle as pkl
-import pyarrow.parquet as pq
-import numpy as np
-import json
-import os, glob, sys
-import argparse
-
-import hist as hist2
-import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
-import mplhep as hep
 
 plt.style.use(hep.style.CMS)
 plt.rcParams.update({"font.size": 20})
@@ -95,28 +86,20 @@ def plot_stacked_hists(
         # get histograms
         h = hists[var]
 
-        if (
-            h.shape[0] == 0
-        ):  # skip empty histograms (such as lepton_pt for hadronic channel)
+        if h.shape[0] == 0:  # skip empty histograms (such as lepton_pt for hadronic channel)
             print("Empty histogram ", var)
             continue
 
         # get samples existing in histogram
         samples = [h.axes[0].value(i) for i in range(len(h.axes[0].edges))]
         signal_labels = [label for label in samples if label in signal_by_ch[ch]]
-        bkg_labels = [
-            label
-            for label in samples
-            if (label and label != data_label and label not in signal_labels)
-        ]
+        bkg_labels = [label for label in samples if (label and label != data_label and label not in signal_labels)]
 
         # get total yield of backgrounds per label
         # (sort by yield in fixed fj_pt histogram after pre-sel)
         order_dic = {}
         for bkg_label in bkg_labels:
-            order_dic[simplified_labels[bkg_label]] = hists["fj_pt"][
-                {"samples": bkg_label}
-            ].sum()
+            order_dic[simplified_labels[bkg_label]] = hists["fj_pt"][{"samples": bkg_label}].sum()
 
         # data
         data = None
@@ -304,15 +287,13 @@ def plot_stacked_hists(
                     color=color_by_sample[signal_labels[i]],
                 )
 
-                if tot_signal == None:
+                if tot_signal is None:
                     tot_signal = signal[i].copy()
                 else:
                     tot_signal = tot_signal + signal[i]
 
             # plot the total signal (w/o scaling)
-            hep.histplot(
-                tot_signal, ax=ax, label=f"ggF+VBF+VH+ttH", linewidth=3, color="tab:red"
-            )
+            hep.histplot(tot_signal, ax=ax, label="ggF+VBF+VH+ttH", linewidth=3, color="tab:red")
             # add MC stat errors
             ax.stairs(
                 values=tot_signal.values() + np.sqrt(tot_signal.values()),
@@ -337,20 +318,14 @@ def plot_stacked_hists(
 
                 # integrate soverb in a given range for lep_fj_m (which, intentionally, is the first variable we pass)
                 if var == "lep_fj_m":
-                    bin_array = tot_signal.axes[0].edges[
-                        :-1
-                    ]  # remove last element since bins have one extra element
+                    bin_array = tot_signal.axes[0].edges[:-1]  # remove last element since bins have one extra element
                     range_max = 150
                     range_min = 0
 
                     condition = (bin_array >= range_min) & (bin_array <= range_max)
 
-                    s = totsignal_val[
-                        condition
-                    ].sum()  # sum/integrate signal counts in the range
-                    b = np.sqrt(
-                        tot_val[condition].sum()
-                    )  # sum/integrate bkg counts in the range and take sqrt
+                    s = totsignal_val[condition].sum()  # sum/integrate signal counts in the range
+                    b = np.sqrt(tot_val[condition].sum())  # sum/integrate bkg counts in the range and take sqrt
 
                     soverb_integrated = round((s / b).item(), 2)
                     sax.legend(title=f"S/sqrt(B) (in 0-150)={soverb_integrated}")
@@ -405,9 +380,7 @@ def plot_stacked_hists(
             ax.set_yscale("log")
             ax.set_ylim(10)
 
-        hep.cms.lumitext(
-            "%.1f " % luminosity + r"fb$^{-1}$ (13 TeV)", ax=ax, fontsize=20
-        )
+        hep.cms.lumitext("%.1f " % luminosity + r"fb$^{-1}$ (13 TeV)", ax=ax, fontsize=20)
         hep.cms.text("Work in Progress", ax=ax, fontsize=15)
 
         if logy:
@@ -445,14 +418,15 @@ def main(args):
                 if value == 1:
                     vars_to_plot[ch].append(key)
 
+    global axis_dict
+
+    axis_dict["cutflow"] = get_cutflow_axis(cut_keys)
+    print("Cutflow with key names: ", cut_keys)
+
     for ch in channels:
         print(f"Plotting for {ch}...")
-        plot_stacked_hists(
-            vars_to_plot[ch], args.year, ch, odir, logy=True, add_data=args.nodata
-        )
-        plot_stacked_hists(
-            vars_to_plot[ch], args.year, ch, odir, logy=False, add_data=args.nodata
-        )
+        plot_stacked_hists(vars_to_plot[ch], args.year, ch, odir, logy=True, add_data=args.nodata)
+        plot_stacked_hists(vars_to_plot[ch], args.year, ch, odir, logy=False, add_data=args.nodata)
 
 
 if __name__ == "__main__":
@@ -507,8 +481,5 @@ if __name__ == "__main__":
         "leptonInJet",
         "pre-sel",
     ]
-    global axis_dict
-    axis_dict["cutflow"] = get_cutflow_axis(cut_keys)
-    print("Cutflow with key names: ", cut_keys)
 
     main(args)

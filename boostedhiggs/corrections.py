@@ -1,10 +1,9 @@
-import os
-import numpy as np
-import awkward as ak
-import gzip
-import pickle
 import importlib.resources
+import warnings
+
+import awkward as ak
 import correctionlib
+import numpy as np
 
 with importlib.resources.path("boostedhiggs.data", "msdcorr.json") as filename:
     msdcorr = correctionlib.CorrectionSet.from_file(str(filename))
@@ -17,7 +16,7 @@ def corrected_msoftdrop(fatjets):
             (fatjets.subjets * (1 - fatjets.subjets.rawFactor)).sum().mass2,
         )
     )
-    msoftdrop = fatjets.msoftdrop
+    # msoftdrop = fatjets.msoftdrop
     msdfjcorr = msdraw / (1 - fatjets.rawFactor)
 
     corr = msdcorr["msdfjcorr"].evaluate(
@@ -31,9 +30,7 @@ def corrected_msoftdrop(fatjets):
     return corrected_mass
 
 
-with importlib.resources.path(
-    "boostedhiggs.data", "ULvjets_corrections.json"
-) as filename:
+with importlib.resources.path("boostedhiggs.data", "ULvjets_corrections.json") as filename:
     vjets_kfactors = correctionlib.CorrectionSet.from_file(str(filename))
 
 
@@ -42,10 +39,7 @@ def get_vpt(genpart, check_offshell=False):
     when M is beyond the configured Breit-Wigner cutoff (usually 15*width)
     """
     boson = ak.firsts(
-        genpart[
-            ((genpart.pdgId == 23) | (abs(genpart.pdgId) == 24))
-            & genpart.hasFlags(["fromHardProcess", "isLastCopy"])
-        ]
+        genpart[((genpart.pdgId == 23) | (abs(genpart.pdgId) == 24)) & genpart.hasFlags(["fromHardProcess", "isLastCopy"])]
     )
     if check_offshell:
         offshell = genpart[
@@ -83,9 +77,7 @@ def add_VJets_kFactors(weights, genpart, dataset):
 
     def add_systs(systlist, qcdcorr, ewkcorr, vpt):
         ewknom = ewkcorr.evaluate("nominal", vpt)
-        weights.add(
-            "vjets_nominal", qcdcorr * ewknom if qcdcorr is not None else ewknom
-        )
+        weights.add("vjets_nominal", qcdcorr * ewknom if qcdcorr is not None else ewknom)
         ones = np.ones_like(vpt)
         for syst in systlist:
             weights.add(
@@ -112,9 +104,7 @@ def add_VJets_kFactors(weights, genpart, dataset):
         add_systs(wsysts, qcdcorr, ewkcorr, vpt)
 
 
-with importlib.resources.path(
-    "boostedhiggs.data", "fatjet_triggerSF_Hbb.json"
-) as filename:
+with importlib.resources.path("boostedhiggs.data", "fatjet_triggerSF_Hbb.json") as filename:
     jet_triggerSF = correctionlib.CorrectionSet.from_file(str(filename))
 
 
@@ -124,15 +114,9 @@ def add_jetTriggerSF(weights, leadingjet, year, selection):
 
     jet_pt = np.array(ak.fill_none(leadingjet.pt, 0.0))
     jet_msd = np.array(ak.fill_none(leadingjet.msoftdrop, 0.0))  # note: uncorrected
-    nom = mask(
-        jet_triggerSF[f"fatjet_triggerSF{year}"].evaluate("nominal", jet_pt, jet_msd)
-    )
-    up = mask(
-        jet_triggerSF[f"fatjet_triggerSF{year}"].evaluate("stat_up", jet_pt, jet_msd)
-    )
-    down = mask(
-        jet_triggerSF[f"fatjet_triggerSF{year}"].evaluate("stat_dn", jet_pt, jet_msd)
-    )
+    nom = mask(jet_triggerSF[f"fatjet_triggerSF{year}"].evaluate("nominal", jet_pt, jet_msd))
+    up = mask(jet_triggerSF[f"fatjet_triggerSF{year}"].evaluate("stat_up", jet_pt, jet_msd))
+    down = mask(jet_triggerSF[f"fatjet_triggerSF{year}"].evaluate("stat_dn", jet_pt, jet_msd))
     weights.add("trigger_had", nom, up, down)
 
 
@@ -141,7 +125,7 @@ def add_pdf_weight(weights, pdf_weights):
     nom = np.ones(nweights)
     up = np.ones(nweights)
     down = np.ones(nweights)
-    docstring = pdf_weights.__doc__
+    # docstring = pdf_weights.__doc__
 
     # NNPDF31_nnlo_hessian_pdfas
     # https://lhapdfsets.web.cern.ch/current/NNPDF31_nnlo_hessian_pdfas/NNPDF31_nnlo_hessian_pdfas.info
@@ -171,7 +155,7 @@ def add_pdf_weight(weights, pdf_weights):
 
 # 7-point scale variations
 def add_scalevar_7pt(weights, var_weights):
-    docstring = var_weights.__doc__
+    # docstring = var_weights.__doc__
     nweights = len(weights.weight())
 
     nom = np.ones(nweights)
@@ -207,7 +191,7 @@ def add_scalevar_7pt(weights, var_weights):
 
 # 3-point scale variations
 def add_scalevar_3pt(weights, var_weights):
-    docstring = var_weights.__doc__
+    # docstring = var_weights.__doc__
 
     nweights = len(weights.weight())
 
@@ -254,9 +238,7 @@ def build_lumimask(filename):
 
 lumi_masks = {
     "2016": build_lumimask("Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt"),
-    "2017": build_lumimask(
-        "Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt"
-    ),
+    "2017": build_lumimask("Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt"),
     "2018": build_lumimask("Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt"),
 }
 
@@ -283,11 +265,11 @@ def get_UL_year(year):
 def get_pog_json(obj, year):
     try:
         pog_json = pog_jsons[obj]
-    except:
+    except ValueError:
         print(f"No json for {obj}")
     year = get_UL_year(year)
     return f"{pog_correction_path}POG/{pog_json[0]}/{year}/{pog_json[1]}"
-    # os.system(f"cp {pog_correction_path}POG/{pog_json[0]}/{year}/{pog_json[1]} boostedhiggs/data/POG_{pog_json[0]}_{year}_{pog_json[1]}")
+    # noqa: os.system(f"cp {pog_correction_path}POG/{pog_json[0]}/{year}/{pog_json[1]} boostedhiggs/data/POG_{pog_json[0]}_{year}_{pog_json[1]}")
     # fname = ""
     # with importlib.resources.path("boostedhiggs.data", f"POG_{pog_json[0]}_{year}_{pog_json[1]}") as filename:
     #     fname = str(filename)
@@ -431,52 +413,32 @@ def add_lepton_weight(weights, lepton, year, lepton_type="muon"):
 
         values = {}
         if lepton_type == "muon":
-            values["nominal"] = cset[json_map_name].evaluate(
-                ul_year, lepton_eta, lepton_pt, "sf"
-            )
+            values["nominal"] = cset[json_map_name].evaluate(ul_year, lepton_eta, lepton_pt, "sf")
         else:
-            values["nominal"] = cset["UL-Electron-ID-SF"].evaluate(
-                ul_year, "sf", json_map_name, lepton_eta, lepton_pt
-            )
+            values["nominal"] = cset["UL-Electron-ID-SF"].evaluate(ul_year, "sf", json_map_name, lepton_eta, lepton_pt)
 
         if lepton_type == "muon":
-            values["up"] = cset[json_map_name].evaluate(
-                ul_year, lepton_eta, lepton_pt, "systup"
-            )
-            values["down"] = cset[json_map_name].evaluate(
-                ul_year, lepton_eta, lepton_pt, "systdown"
-            )
+            values["up"] = cset[json_map_name].evaluate(ul_year, lepton_eta, lepton_pt, "systup")
+            values["down"] = cset[json_map_name].evaluate(ul_year, lepton_eta, lepton_pt, "systdown")
         else:
-            values["up"] = cset["UL-Electron-ID-SF"].evaluate(
-                ul_year, "sfup", json_map_name, lepton_eta, lepton_pt
-            )
-            values["down"] = cset["UL-Electron-ID-SF"].evaluate(
-                ul_year, "sfdown", json_map_name, lepton_eta, lepton_pt
-            )
+            values["up"] = cset["UL-Electron-ID-SF"].evaluate(ul_year, "sfup", json_map_name, lepton_eta, lepton_pt)
+            values["down"] = cset["UL-Electron-ID-SF"].evaluate(ul_year, "sfdown", json_map_name, lepton_eta, lepton_pt)
 
         for key, val in values.items():
             # restrict values to 1 for some SFs if we are above/below the ISO threshold
-            values[key] = set_isothreshold(
-                corr, val, np.array(ak.fill_none(lepton.pt, 0.0)), lepton_type
-            )
+            values[key] = set_isothreshold(corr, val, np.array(ak.fill_none(lepton.pt, 0.0)), lepton_type)
 
         # add weights (for now only the nominal weight)
-        weights.add(
-            f"{corr}_{lepton_type}", values["nominal"], values["up"], values["down"]
-        )
+        weights.add(f"{corr}_{lepton_type}", values["nominal"], values["up"], values["down"])
 
     # quick hack to add electron trigger SFs
     if lepton_type == "electron":
         corr = "trigger"
-        with importlib.resources.path(
-            "boostedhiggs.data", f"electron_trigger_{ul_year}_UL.json"
-        ) as filename:
+        with importlib.resources.path("boostedhiggs.data", f"electron_trigger_{ul_year}_UL.json") as filename:
             cset = correctionlib.CorrectionSet.from_file(str(filename))
             lepton_pt, lepton_eta = get_clip(lep_pt, lep_eta, lepton_type, corr)
             # stil need to add uncertanties..
-            values["nominal"] = cset["UL-Electron-Trigger-SF"].evaluate(
-                lepton_eta, lepton_pt
-            )
+            values["nominal"] = cset["UL-Electron-Trigger-SF"].evaluate(lepton_eta, lepton_pt)
             # print(values["nominal"][lep_pt>30])
             weights.add(f"{corr}_{lepton_type}", values["nominal"])
 

@@ -3,16 +3,15 @@
 """
 Explores unproduced files due to condor job errors.
 """
-import json
 import argparse
 import os
 from math import ceil
+
 from condor.file_utils import loadJson
 
 
 def main(args):
-
-    username = os.environ["USER"]
+    # username = os.environ["USER"]
     homedir = f"/store/user/{args.username}/boostedhiggs/"
     outdir = "/eos/uscms/" + homedir + args.tag + "_" + args.year + "/"
 
@@ -27,7 +26,7 @@ def main(args):
         tot_files = len(files[sample])
 
         njobs = ceil(tot_files / nfiles_per_job[sample])
-        files_per_job = str(nfiles_per_job[sample])
+        # files_per_job = str(nfiles_per_job[sample])
 
         # print(f"Sample {sample} should produce {njobs} files")
 
@@ -37,17 +36,11 @@ def main(args):
         # print(f"Sample {sample} produced {njobs_produced} files")
 
         if njobs_produced != njobs:  # debug which pkl file wasn't produced
-            print(
-                f"-----> SAMPLE {sample} HAS RAN INTO ERROR, #jobs produced: {njobs_produced}, # jobs {njobs}"
-            )
-            for i, x in enumerate(
-                range(0, njobs * nfiles_per_job[sample], nfiles_per_job[sample])
-            ):
+            print(f"-----> SAMPLE {sample} HAS RAN INTO ERROR, #jobs produced: {njobs_produced}, # jobs {njobs}")
+            for i, x in enumerate(range(0, njobs * nfiles_per_job[sample], nfiles_per_job[sample])):
                 fname = f"{x}-{x+nfiles_per_job[sample]}"
                 if not os.path.exists(f"{outdir}/{sample}/outfiles/{fname}.pkl"):
-                    print(
-                        f"file {fname}.pkl wasn't produced which means job_idx {i} failed.."
-                    )
+                    print(f"file {fname}.pkl wasn't produced which means job_idx {i} failed..")
 
         # print("-----------------------------------------------------------------------------------------")
 
@@ -67,9 +60,7 @@ if __name__ == "__main__":
         help="user who submitted the jobs",
         type=str,
     )
-    parser.add_argument(
-        "--tag", dest="tag", default="Test", help="process tag", type=str
-    )
+    parser.add_argument("--tag", dest="tag", default="Test", help="process tag", type=str)
     parser.add_argument(
         "--samples",
         dest="samples",

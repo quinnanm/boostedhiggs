@@ -1,26 +1,17 @@
 #!/usr/bin/python
 
-import json
-import uproot
-import time
-
-import argparse
-import warnings
-import pyarrow as pa
-import pyarrow.parquet as pq
-import pickle as pkl
-import pandas as pd
-import os, glob, sys
+import glob
+import os
 import pickle
+import pickle as pkl
 
 """
-This script combines the pkl files produced by the lumi processor to a single pkl file 
+This script combines the pkl files produced by the lumi processor to a single pkl file
 that holds a dictionary with "key=dataset_name" and "value=lumi_set" which has the form (run, lumi).
 """
 
 
 def main():
-
     # load the pkl outfiles
     year = "2016APV"
     dir_ = f"/eos/uscms/store/user/fmokhtar/boostedhiggs/lumi_{year}/"
@@ -47,7 +38,6 @@ def main():
         pkl_files = glob.glob(dir_ + dataset + "/outfiles/*")
 
         for i, pkl_file in enumerate(pkl_files):
-
             # you can load the output!
             with open(pkl_file, "rb") as f:
                 out = pickle.load(f)[dataset][year + "APV"]["lumilist"]

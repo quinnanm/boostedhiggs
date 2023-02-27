@@ -16,6 +16,7 @@ ele:
     weight_trigger_electron: 1
     weight_reco_electron: 1
     weight_id_electron: 1
+    weight_vjets_nominal: 0
 mu:
   weights:
     weight_genweight: 1
@@ -25,3 +26,4 @@ mu:
     weight_trigger_noniso_muon: 1
     weight_isolation_muon: 1
     weight_id_muon: 1
+    weight_vjets_nominal: 0

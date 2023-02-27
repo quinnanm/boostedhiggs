@@ -1,20 +1,10 @@
 #!/usr/bin/python
 
-import json
-import time
-
-import argparse
-import warnings
-import pickle as pkl
 import numpy as np
-import pandas as pd
-import os, glob, sys
-import pickle
-
-from coffea.lumi_tools import LumiData, LumiMask, LumiList
+from coffea.lumi_tools import LumiData, LumiList
 
 """
-This script computes the total luminosity using a single lumi_set.pkl file 
+This script computes the total luminosity using a single lumi_set.pkl file
 and a lumi.csv produced using the GoldenJson.
 """
 
@@ -44,8 +34,8 @@ def main():
     # # make LumiList object
     # lumi_list = LumiList(runs=lumis[:, 0], lumis=lumis[:, 1])
 
-    # # this csv was made using brilcalc and the GoldenJson2017
-    # # refer to https://github.com/CoffeaTeam/coffea/blob/52e102fce21a3e19f8c079adc649dfdd27c92075/coffea/lumi_tools/lumi_tools.py#L20
+    # # this csv was made using brilcalc and the GoldenJson2017... refer to
+    # https://github.com/CoffeaTeam/coffea/blob/52e102fce21a3e19f8c079adc649dfdd27c92075/coffea/lumi_tools/lumi_tools.py#L20
     # lumidata = LumiData(f"lumi{year}.csv")
     # print(f"---> Total Lumi = {lumidata.get_lumi(lumi_list)}")
 
@@ -74,8 +64,8 @@ def main():
         # make LumiList object
         lumi_list[ch] = LumiList(runs=lumis[ch][:, 0], lumis=lumis[ch][:, 1])
 
-        # this csv was made using brilcalc and the GoldenJson2017
-        # refer to https://github.com/CoffeaTeam/coffea/blob/52e102fce21a3e19f8c079adc649dfdd27c92075/coffea/lumi_tools/lumi_tools.py#L20
+        # this csv was made using brilcalc and the GoldenJson2017... refer to
+        # https://github.com/CoffeaTeam/coffea/blob/52e102fce21a3e19f8c079adc649dfdd27c92075/coffea/lumi_tools/lumi_tools.py#L20
         lumidata = LumiData(f"lumi{year}.csv")
         print(f"---> Lumi for {ch} channel = {lumidata.get_lumi(lumi_list[ch])}")
         print("------------------------------------")

@@ -1,32 +1,16 @@
-from utils import (
-    axis_dict,
-    color_by_sample,
-    signal_by_ch,
-    data_by_ch,
-    data_by_ch_2018,
-    label_by_ch,
-)
-from utils import (
-    simplified_labels,
-    get_cutflow,
-    get_xsecweight,
-    get_sample_to_use,
-    get_cutflow_axis,
-)
-
-import yaml
-import pickle as pkl
-import pyarrow.parquet as pq
-import numpy as np
-import scipy
-import json
-import os, glob, sys
 import argparse
+import glob
+import json
+import os
+import pickle as pkl
 
 import hist as hist2
 import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
 import mplhep as hep
+import pyarrow.parquet as pq
+import scipy
+import yaml
+from utils import axis_dict, data_by_ch, data_by_ch_2018, get_sample_to_use, get_xsecweight
 
 plt.style.use(hep.style.CMS)
 plt.rcParams.update({"font.size": 20})
@@ -40,11 +24,13 @@ def make_hists(ch, idir, odir, weights, presel, samples):
         ch: string that represents the signal channel to look at... choices are ['ele', 'mu'].
         idir: directory that holds the processed samples (e.g. {idir}/{sample}/outfiles/*_{ch}.parquet).
         odir: output directory to hold the hist object.
-        vars_to_plot: the set of variables to plot a 1D-histogram of (by default: the samples with key==1 defined in plot_configs/vars.json).
+        vars_to_plot: the set of variables to plot 1D-histograms of.
         presel: pre-selection string.
         weights: weights to be applied to MC.
         samples: the set of samples to run over (by default: the samples defined in plot_configs/samples_pfnano.json).
     """
+    # scores = ["hww_score (H)", "H/(1-H)", "H/(H+QCD)", "H(H+Top)"]#, "qcd_score (QCD)", "top_score (Top)"]
+    scores = ["hww_score (H)"]
 
     # define histograms
     hists = {}
@@ -70,7 +56,6 @@ def make_hists(ch, idir, odir, weights, presel, samples):
     labels = []
     # loop over the samples
     for yr in samples.keys():
-
         # data label and lumi
         data_label = data_by_ch[ch]
         if yr == "2018":
@@ -78,9 +63,7 @@ def make_hists(ch, idir, odir, weights, presel, samples):
         f = open("../fileset/luminosity.json")
         luminosity = json.load(f)[ch][yr]
         f.close()
-        print(
-            f"Processing samples from year {yr} with luminosity {luminosity} for channel {ch}"
-        )
+        print(f"Processing samples from year {yr} with luminosity {luminosity} for channel {ch}")
 
         for sample in samples[yr][ch]:
             if "ttHToNonbb_M125" in sample:  # skip ttH cz labels are not stored
@@ -107,7 +90,7 @@ def make_hists(ch, idir, odir, weights, presel, samples):
             parquet_files = glob.glob(f"{idir}_{yr}/{sample}/outfiles/*_{ch}.parquet")
 
             # get combined sample
-            sample_to_use = get_sample_to_use(sample, yr)
+            sample_to_use = get_sample_to_use(sample, yr, is_data)
 
             # get cutflow
             xsec_weight = get_xsecweight(pkl_files, yr, sample, is_data, luminosity)
@@ -115,7 +98,7 @@ def make_hists(ch, idir, odir, weights, presel, samples):
             for parquet_file in parquet_files:
                 try:
                     data = pq.read_table(parquet_file).to_pandas()
-                except:
+                except ValueError:
                     print("Not able to read data from ", parquet_file)
                     continue
 
@@ -127,9 +110,7 @@ def make_hists(ch, idir, odir, weights, presel, samples):
                             print(key)
 
                 if len(data) == 0:
-                    print(
-                        f"WARNING: Parquet file empty {yr} {ch} {sample} {parquet_file}"
-                    )
+                    print(f"WARNING: Parquet file empty {yr} {ch} {sample} {parquet_file}")
                     continue
 
                 # modify dataframe with pre-selection query
@@ -137,11 +118,10 @@ def make_hists(ch, idir, odir, weights, presel, samples):
                     data = data.query(presel)
 
                 event_weight = xsec_weight
-                weight_ones = np.ones_like(data["weight_genweight"])
                 for w in weights:
                     try:
                         event_weight *= data[w]
-                    except:
+                    except ValueError:
                         if w != "weight_vjets_nominal":
                             print(f"No {w} variable in parquet for sample {sample}")
 
@@ -240,7 +220,6 @@ def main(args):
     # pre-selection string
     presel = {}
     for ch in channels:
-
         weights[ch] = []
         for key, value in variables[ch]["weights"].items():
             if value == 1:
@@ -267,8 +246,9 @@ def main(args):
 
 
 if __name__ == "__main__":
-    # e.g.
-    # run locally as: python make_hists_tagger.py --year 2017 --odir Nov23tagger --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Nov16_inference
+
+    # e.g. run locally as:
+    # noqa: python make_hists_tagger.py --year 2017 --odir Nov23tagger --channels ele,mu --idir /eos/uscms/store/user/cmantill/boostedhiggs/Nov16_inference
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -308,9 +288,7 @@ if __name__ == "__main__":
         default="../results/",
         help="input directory with results - without _{year}",
     )
-    parser.add_argument(
-        "--add_score", dest="add_score", action="store_true", help="Add inference score"
-    )
+    parser.add_argument("--add_score", dest="add_score", action="store_true", help="Add inference score")
 
     args = parser.parse_args()
 

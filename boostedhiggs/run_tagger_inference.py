@@ -3,32 +3,26 @@ Methods for running the tagger inference.
 Author(s): Raghav Kansal, Cristina Mantilla Suarez, Melissa Quinnan, Farouk Mokhtar
 """
 
-from typing import Dict
-
-import numpy as np
-from scipy.special import softmax
-import awkward as ak
-from coffea.nanoevents.methods.base import NanoEventsArray
-
 import json
 
-# import onnxruntime as ort
+# import time
+from typing import Dict
 
-import time
-
+import awkward as ak
+import numpy as np
 import tritonclient.grpc as triton_grpc
 import tritonclient.http as triton_http
-
+from coffea.nanoevents.methods.base import NanoEventsArray
 from tqdm import tqdm
 
 from .get_tagger_inputs import get_pfcands_features, get_svs_features
 
+# import onnxruntime as ort
+
 
 # adapted from https://github.com/lgray/hgg-coffea/blob/triton-bdts/src/hgg_coffea/tools/chained_quantile.py
 class wrapped_triton:
-    def __init__(
-        self, model_url: str, batch_size: int, out_name: str = "softmax__0"
-    ) -> None:
+    def __init__(self, model_url: str, batch_size: int, out_name: str = "softmax__0") -> None:
         fullprotocol, location = model_url.split("://")
         _, protocol = fullprotocol.split("+")
         address, model, version = location.split("/")
@@ -53,9 +47,7 @@ class wrapped_triton:
             )
             triton_protocol = triton_http
         else:
-            raise ValueError(
-                f"{self._protocol} does not encode a valid protocol (grpc or http)"
-            )
+            raise ValueError(f"{self._protocol} does not encode a valid protocol (grpc or http)")
 
         # manually split into batches for gpu inference
         input_size = input_dict[list(input_dict.keys())[0]].shape[0]
@@ -63,25 +55,16 @@ class wrapped_triton:
 
         outs = [
             self._do_inference(
-                {
-                    key: input_dict[key][batch : batch + self._batch_size]
-                    for key in input_dict
-                },
+                {key: input_dict[key][batch : batch + self._batch_size] for key in input_dict},
                 triton_protocol,
                 client,
             )
-            for batch in tqdm(
-                range(
-                    0, input_dict[list(input_dict.keys())[0]].shape[0], self._batch_size
-                )
-            )
+            for batch in tqdm(range(0, input_dict[list(input_dict.keys())[0]].shape[0], self._batch_size))
         ]
 
         return np.concatenate(outs) if input_size > 0 else outs
 
-    def _do_inference(
-        self, input_dict: Dict[str, np.ndarray], triton_protocol, client
-    ) -> np.ndarray:
+    def _do_inference(self, input_dict: Dict[str, np.ndarray], triton_protocol, client) -> np.ndarray:
         # Infer
         inputs = []
 
@@ -108,7 +91,7 @@ def runInferenceTriton(
     fj_idx_lep,
     model_name: str = "ak8_MD_vminclv2ParT_manual_fixwrap",
 ) -> dict:
-    total_start = time.time()
+    # total_start = time.time()
     # print(f"Running tagger inference with model {model_name}")
 
     with open(f"{tagger_resources_path}/triton_config_{model_name}.json") as f:
@@ -119,27 +102,24 @@ def runInferenceTriton(
 
     pversion, out_name = {
         "05_10_ak8_ttbarwjets": ["PN_UCSD", "softmax__0"],
-        "particlenet_hww_inclv2_pre2": ["PN_v2", "output__0"],
+        "particlenet_hww_inclv2_pre2": ["ParticleNet", "output__0"],
         "particlenet_hww_inclv2_pre2_noreg": ["PN_v2_noreg", "softmax__0"],
-        "ak8_MD_vminclv2ParT_manual_fixwrap": ["ParT", "softmax"],
+        "ak8_MD_vminclv2ParT_manual_fixwrap": ["ParT_noreg", "softmax"],
+        "ak8_MD_vminclv2ParT_manual_fixwrap_all_nodes": ["ParT", "softmax"],
     }[model_name]
 
-    triton_model = wrapped_triton(
-        triton_config["model_url"], triton_config["batch_size"], out_name=out_name
-    )
+    triton_model = wrapped_triton(triton_config["model_url"], triton_config["batch_size"], out_name=out_name)
 
     fatjet_label = "FatJet"
     pfcands_label = "FatJetPFCands"
     svs_label = "FatJetSVs"
-    jet_label = "ak8"
+    # jet_label = "ak8"
 
-    # prepare inputs for both fat jets
+    # prepare inputs for the fatjet
     tagger_inputs = []
 
     feature_dict = {
-        **get_pfcands_features(
-            tagger_vars, events, fj_idx_lep, fatjet_label, pfcands_label
-        ),
+        **get_pfcands_features(tagger_vars, events, fj_idx_lep, fatjet_label, pfcands_label),
         **get_svs_features(tagger_vars, events, fj_idx_lep, fatjet_label, svs_label),
     }
 
@@ -150,10 +130,7 @@ def runInferenceTriton(
     if out_name == "softmax":
         tagger_inputs = {
             f"{input_name}": np.concatenate(
-                [
-                    np.expand_dims(feature_dict[key], 1)
-                    for key in tagger_vars[input_name]["var_names"]
-                ],
+                [np.expand_dims(feature_dict[key], 1) for key in tagger_vars[input_name]["var_names"]],
                 axis=1,
             )
             for i, input_name in enumerate(tagger_vars["input_names"])
@@ -161,40 +138,22 @@ def runInferenceTriton(
     else:
         tagger_inputs = {
             f"{input_name}__{i}": np.concatenate(
-                [
-                    np.expand_dims(feature_dict[key], 1)
-                    for key in tagger_vars[input_name]["var_names"]
-                ],
+                [np.expand_dims(feature_dict[key], 1) for key in tagger_vars[input_name]["var_names"]],
                 axis=1,
             )
             for i, input_name in enumerate(tagger_vars["input_names"])
         }
 
-    # run inference for both fat jets
+    # run inference on the fat jet
     tagger_outputs = []
-
-    start = time.time()
 
     try:
         tagger_outputs = triton_model(tagger_inputs)
-    except:
-        print(
-            "---can't run inference due to error with the event or the server is not running--"
-        )
+    except Exception:
+        print("---can't run inference due to error with the event or the server is not running--")
         return {}
 
-    if out_name == "output__0":
-        import scipy
-
-        mass = tagger_outputs[:, -1]
-        tagger_outputs = scipy.special.softmax(tagger_outputs[:, :-1], axis=1)
-        np.append(tagger_outputs, mass)
-
-    time_taken = time.time() - start
-
-    # print(f"Inference took {time_taken:.1f}s")
-
-    if model_name == "05_10_ak8_ttbarwjets":
+    if pversion == "PN_UCSD":
         pnet_vars = {
             f"fj_{pversion}_ttbar": tagger_outputs[:, 0:1],
             f"fj_{pversion}_wjets": tagger_outputs[:, 2],
@@ -203,18 +162,26 @@ def runInferenceTriton(
             f"fj_{pversion}_HVV_taunuqq": tagger_outputs[:, 5],
         }
     else:
+        output_names = [x.replace("label_", "prob").replace("_", "") for x in tagger_vars["output_names"]]
+
         pnet_vars = {}
-        for i, output_name in enumerate(tagger_vars["output_names"]):
+        if pversion == "ParticleNet":  # missing softmax for that model (unfortunately)
+            import scipy
+
+            # last index is mass regression
+            tagger_outputs[:, :-1] = scipy.special.softmax(tagger_outputs[:, :-1], axis=1)
+
+        for i, output_name in enumerate(output_names):
             pnet_vars[f"fj_{pversion}_{output_name}"] = tagger_outputs[:, i]
 
-        derived_vars = {
-            f"fj_{pversion}_probQCD": np.sum(tagger_outputs[:, 23:28], axis=1),
-            f"fj_{pversion}_probTopb": np.sum(tagger_outputs[:, 29:37], axis=1),
-            f"fj_{pversion}_probHWWelenuqq": np.sum(tagger_outputs[:, 7:8], axis=1),
-            f"fj_{pversion}_probHWWmunuqq": np.sum(tagger_outputs[:, 9:10], axis=1),
-        }
+        # if model is ParT, add pku vars of that jet. MUST BE pf_nano v2_4
+        if pversion == "ParT_noreg":
+            jet = ak.firsts(events[fatjet_label][fj_idx_lep])
+            pku_vars = {
+                f"fj_PKU_{pversion}_{output_name}": jet[f"inclParTMDV1_{output_name}"] for output_name in output_names
+            }
+            pku_vars[f"fj_PKU_{pversion}_mass"] = jet["inclParTMDV1_mass"]
 
-        pnet_vars = {**pnet_vars, **derived_vars}
+            pnet_vars = {**pnet_vars, **pku_vars}
 
-    # print(f"Total time taken: {time.time() - total_start:.1f}s")
     return pnet_vars

@@ -22,7 +22,7 @@ BR_Htt = 0.0621
 
 xs = {}
 
-##VH - this needs to be checked for qqZH, also need to add ggZH
+# VH - this needs to be checked for qqZH, also need to add ggZH
 # pp->ZH 8.839E-01
 xs["HZJ_HToWW_M-125"] = 0.8839 * BR_HWW
 

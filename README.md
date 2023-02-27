@@ -59,6 +59,10 @@ We use the `submit.py` script to submit jobs.
 
 For example:
 ```
+python condor/submit.py --year 2017 --tag Feb22 --samples samples_pfnano_mc.json --pfnano=v2_2 --channels mu,ele --submit
+```
+
+```
 python condor/submit.py --year 2017 --tag ${TAG} --samples samples_pfnano_mc.json --pfnano
 ```
 where:
@@ -133,9 +137,9 @@ To start triton server with kubernetes in PRP:
 - Check that things are running:
   - Get pods (check that they are running - at least 2..):
     ```
-    kubectl get pods  
+    kubectl get pods
     ```
-    e.g. 
+    e.g.
     ```
     % kubectl get pods
     NAME                      READY   STATUS    RESTARTS   AGE
@@ -210,7 +214,7 @@ nominal: 19500.0
 SingleElectron: 19492.72
 SingleMuon: 19436.16
 
-2017: 
+2017:
 nominal 41480.0
 SingleElectron: 41476.02
 SingleMuon: 41475.26
@@ -295,6 +299,15 @@ pip install tritonclient['all']
 
 # install xrootd
 conda install -c conda-forge xrootd
+
+# install pre-commit
+pip install pre-commit
+
+# setup pre-commit hooks
+pre-commit install
+
+# before pushing changes to git make sure to run
+pre-commit run -a
 ```
 
 ### With singularity shell
@@ -318,4 +331,3 @@ singularity exec -B ${PWD}:/srv -B /uscmst1b_scratch -B /eos/uscms/store/user/cm
   /cvmfs/unpacked.cern.ch/registry.hub.docker.com/${COFFEA_IMAGE} \
   /bin/bash --rcfile /srv/.bashrc
 ```
-

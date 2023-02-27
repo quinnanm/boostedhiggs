@@ -1,35 +1,23 @@
-from collections import defaultdict
-import pickle as pkl
-import pyarrow as pa
+import importlib.resources
+import json
+import os
+import pathlib
+import warnings
+
 import awkward as ak
 import numpy as np
 import pandas as pd
-import json
-import os
-import shutil
-import pathlib
-from typing import List, Optional
+import pyarrow as pa
 import pyarrow.parquet as pq
-
-import importlib.resources
-
 from coffea import processor
-from coffea.nanoevents.methods import candidate, vector
-from coffea.analysis_tools import Weights, PackedSelection
+from coffea.analysis_tools import PackedSelection, Weights
+from coffea.nanoevents.methods import candidate
 
-from boostedhiggs.utils import match_H, match_V, match_Top
-from boostedhiggs.corrections import (
-    corrected_msoftdrop,
-    add_VJets_kFactors,
-    add_jetTriggerSF,
-    add_lepton_weight,
-    add_pileup_weight,
-)
-from boostedhiggs.btag import btagWPs, BTagCorrector
+from boostedhiggs.btag import btagWPs
+from boostedhiggs.corrections import add_pileup_weight
+from boostedhiggs.utils import match_H, match_Top, match_V
 
 from .run_tagger_inference import runInferenceTriton
-
-import warnings
 
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -47,40 +35,24 @@ def zleptons(good_leptons):
     lepton_pairs = ak.fill_none(lepton_pairs, [], axis=0)
 
     OSSF_pairs = lepton_pairs[
-        (
-            min_three_leptons[lepton_pairs["first"]].charge
-            != min_three_leptons[lepton_pairs["second"]].charge
-        )
-        & (
-            min_three_leptons[lepton_pairs["first"]].flavor
-            == min_three_leptons[lepton_pairs["second"]].flavor
-        )
+        (min_three_leptons[lepton_pairs["first"]].charge != min_three_leptons[lepton_pairs["second"]].charge)
+        & (min_three_leptons[lepton_pairs["first"]].flavor == min_three_leptons[lepton_pairs["second"]].flavor)
     ]
 
     closest_pairs = OSSF_pairs[
         ak.local_index(OSSF_pairs)
         == ak.argmin(
-            np.abs(
-                (
-                    min_three_leptons[OSSF_pairs["first"]]
-                    + min_three_leptons[OSSF_pairs["second"]]
-                ).mass
-                - 91.2
-            ),
+            np.abs((min_three_leptons[OSSF_pairs["first"]] + min_three_leptons[OSSF_pairs["second"]]).mass - 91.2),
             axis=1,
         )
     ]
     closest_pairs = ak.fill_none(closest_pairs, [], axis=0)
 
     # invariant Z mass
-    ZLeptonMass = (
-        min_three_leptons[closest_pairs.first] + min_three_leptons[closest_pairs.second]
-    ).mass
+    ZLeptonMass = (min_three_leptons[closest_pairs.first] + min_three_leptons[closest_pairs.second]).mass
     desired_length = np.max(ak.num(ZLeptonMass))
 
-    ZLeptonMass = ak.ravel(
-        ak.to_numpy(ak.fill_none(ak.pad_none(ZLeptonMass, desired_length), 0))
-    )
+    ZLeptonMass = ak.ravel(ak.to_numpy(ak.fill_none(ak.pad_none(ZLeptonMass, desired_length), 0)))
 
     remainingLeptons = min_three_leptons[
         (ak.local_index(min_three_leptons) != ak.any(closest_pairs.first, axis=1))
@@ -103,9 +75,7 @@ def pad_val(
     optionally converts to numpy array
     """
     if target:
-        ret = ak.fill_none(
-            ak.pad_none(arr, target, axis=axis, clip=clip), value, axis=None
-        )
+        ret = ak.fill_none(ak.pad_none(arr, target, axis=axis, clip=clip), value, axis=None)
     else:
         ret = ak.fill_none(arr, value, axis=None)
     return ret.to_numpy() if to_numpy else ret
@@ -135,7 +105,6 @@ class vhProcessor(processor.ProcessorABC):
         inference=False,
         apply_trigger=True,
     ):
-
         self._year = year
         self._yearmod = yearmod
         self._output_location = output_location + channel
@@ -184,9 +153,7 @@ class vhProcessor(processor.ProcessorABC):
         self.inference = inference
 
         # for tagger model and preprocessing dict
-        self.tagger_resources_path = (
-            str(pathlib.Path(__file__).parent.resolve()) + "/tagger_resources/"
-        )
+        self.tagger_resources_path = str(pathlib.Path(__file__).parent.resolve()) + "/tagger_resources/"
 
         # do trigger efficiency study
         self.trigger_eff_study = False
@@ -201,9 +168,7 @@ class vhProcessor(processor.ProcessorABC):
         if self._output_location is not None:
             table = pa.Table.from_pandas(dfs_dict)
             if len(table) != 0:  # skip dataframes with empty entries
-                pq.write_table(
-                    table, self._output_location + "/parquet/" + fname + ".parquet"
-                )
+                pq.write_table(table, self._output_location + "/parquet/" + fname + ".parquet")
 
     def ak_to_pandas(self, output_collection: ak.Array) -> pd.DataFrame:
         output = pd.DataFrame()
@@ -289,102 +254,80 @@ class vhProcessor(processor.ProcessorABC):
             & (electrons.mvaFall17V2noIso_WP90)
         )
 
-        good_leptons = ak.concatenate(
-            [muons[good_muons], electrons[good_electrons]], axis=1
-        )
-        good_leptons = good_leptons[
-            ak.argsort(good_leptons.pt, ascending=False)
-        ]  # sort by pt
+        good_leptons = ak.concatenate([muons[good_muons], electrons[good_electrons]], axis=1)
+        good_leptons = good_leptons[ak.argsort(good_leptons.pt, ascending=False)]  # sort by pt
 
         ngood_leptons = ak.num(good_leptons, axis=1)
 
         # invariant Z mass
         ZLeptonMass, remainingLeptons = zleptons(good_leptons)
 
-        candidatelep = ak.firsts(
-            remainingLeptons
-        )  # pick remaining lepton with highest pt
+        candidatelep = ak.firsts(remainingLeptons)  # pick remaining lepton with highest pt
         candidatelep_p4 = build_p4(candidatelep)  # build p4 for candidate lepton
 
-        lep_reliso = (
-            candidatelep.pfRelIso04_all
-            if hasattr(candidatelep, "pfRelIso04_all")
-            else candidatelep.pfRelIso03_all
-        )  # reliso for candidate lepton
-        lep_miso = candidatelep.miniPFRelIso_all  # miniso for candidate lepton
-        mu_mvaId = (
-            candidatelep.mvaId if hasattr(candidatelep, "mvaId") else np.zeros(nevents)
-        )  # MVA-ID for candidate lepton
+        # lep_reliso = (
+        #     candidatelep.pfRelIso04_all if hasattr(candidatelep, "pfRelIso04_all") else candidatelep.pfRelIso03_all
+        # )  # reliso for candidate lepton
+        # lep_miso = candidatelep.miniPFRelIso_all  # miniso for candidate lepton
+        # mu_mvaId = candidatelep.mvaId if hasattr(candidatelep, "mvaId") else np.zeros(nevents)  # MVA-ID for candidate lep
 
         # jets
         goodjets = events.Jet[
-            (events.Jet.pt > 30)
-            & (abs(events.Jet.eta) < 5.0)
-            & events.Jet.isTight
-            & (events.Jet.puId > 0)
+            (events.Jet.pt > 30) & (abs(events.Jet.eta) < 5.0) & events.Jet.isTight & (events.Jet.puId > 0)
         ]
         # reject EE noisy jets for 2017
         if self._year == "2017":
-            goodjets = goodjets[
-                (goodjets.pt > 50)
-                | (abs(goodjets.eta) < 2.65)
-                | (abs(goodjets.eta) > 3.139)
-            ]
+            goodjets = goodjets[(goodjets.pt > 50) | (abs(goodjets.eta) < 2.65) | (abs(goodjets.eta) > 3.139)]
         ht = ak.sum(goodjets.pt, axis=1)
 
         # fatjets
         fatjets = events.FatJet
         good_fatjets = (fatjets.pt > 200) & (abs(fatjets.eta) < 2.5) & fatjets.isTight
-        n_fatjets = ak.sum(good_fatjets, axis=1)
+        # n_fatjets = ak.sum(good_fatjets, axis=1)
 
         good_fatjets = fatjets[good_fatjets]  # select good fatjets
-        good_fatjets = good_fatjets[
-            ak.argsort(good_fatjets.pt, ascending=False)
-        ]  # sort them by pt
+        good_fatjets = good_fatjets[ak.argsort(good_fatjets.pt, ascending=False)]  # sort them by pt
 
-        # for leptonic channel: first clean jets and leptons by removing overlap, then pick candidate_fj closest to the lepton
+        # for leptonic channel: first clean jets and leptons by removing overlap, then pick candidate_fj closest to the lep
         lep_in_fj_overlap_bool = good_fatjets.delta_r(candidatelep_p4) > 0.1
         good_fatjets = good_fatjets[lep_in_fj_overlap_bool]
-        fj_idx_lep = ak.argmin(
-            good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True
-        )
+        fj_idx_lep = ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)
         candidatefj = ak.firsts(good_fatjets[fj_idx_lep])
 
         # MET
         met = events.MET
-        mt_lep_met = np.sqrt(
-            2.0
-            * candidatelep_p4.pt
-            * met.pt
-            * (ak.ones_like(met.pt) - np.cos(candidatelep_p4.delta_phi(met)))
-        )
+        # mt_lep_met = np.sqrt(
+        #     2.0 * candidatelep_p4.pt * met.pt * (ak.ones_like(met.pt) - np.cos(candidatelep_p4.delta_phi(met)))
+        # )
 
         # delta phi MET and higgs candidate
-        met_fjlep_dphi = candidatefj.delta_phi(met)
+        # met_fjlep_dphi = candidatefj.delta_phi(met)
 
         # lepton and fatjet mass
-        lep_fj_m = (candidatefj - candidatelep_p4).mass  # mass of fatjet without lepton
+        # lep_fj_m = (candidatefj - candidatelep_p4).mass  # mass of fatjet without lepton
 
         # b-jets
-        # in event, pick highest b score in opposite direction from signal (we will make cut here to avoid tt background events producing bjets)
-        dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj))
-        bjets_away_lepfj = goodjets[dphi_jet_lepfj > np.pi / 2]
+        # pick highest b score in opposite direction from signal and make cut to avoid tt background events producing bjets)
+        # dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj))
+        # bjets_away_lepfj = goodjets[dphi_jet_lepfj > np.pi / 2]
 
         # deltaR
         lep_fj_dr = candidatefj.delta_r(candidatelep_p4)
 
         # VBF variables
-        ak4_outside_ak8 = goodjets[goodjets.delta_r(candidatefj) > 0.8]
-        n_jets_outside_ak8 = ak.sum(goodjets.delta_r(candidatefj) > 0.8, axis=1)
-        jet1 = ak4_outside_ak8[:, 0:1]
-        jet2 = ak4_outside_ak8[:, 1:2]
-        deta = abs(ak.firsts(jet1).eta - ak.firsts(jet2).eta)
-        mjj = (ak.firsts(jet1) + ak.firsts(jet2)).mass
+        # ak4_outside_ak8 = goodjets[goodjets.delta_r(candidatefj) > 0.8]
+        # n_jets_outside_ak8 = ak.sum(goodjets.delta_r(candidatefj) > 0.8, axis=1)
+        # jet1 = ak4_outside_ak8[:, 0:1]
+        # jet2 = ak4_outside_ak8[:, 1:2]
+        # deta = abs(ak.firsts(jet1).eta - ak.firsts(jet2).eta)
+        # mjj = (ak.firsts(jet1) + ak.firsts(jet2)).mass
 
         """
         HEM issue: Hadronic calorimeter Endcaps Minus (HEM) issue.
-        The endcaps of the hadron calorimeter failed to cover the phase space at -3 < eta < -1.3 and -1.57 < phi < -0.87 during the 2018 data C and D.
-        The transverse momentum of the jets in this region is typically under-measured, this results in over-measured MET. It could also result on new electrons.
+        The endcaps of the hadron calorimeter failed to cover the phase space at -3 < eta < -1.3 and -1.57 < phi < -0.87
+        during the 2018 data C and D.
+        The transverse momentum of the jets in this region is typically under-measured, this results in over-measured MET.
+        It could also result on new electrons.
         We must veto the jets and met in this region.
         Should we veto on AK8 jets or electrons too?
         Let's add this as a cut to check first.
@@ -417,9 +360,7 @@ class vhProcessor(processor.ProcessorABC):
                 genVars, signal_mask = match_H(events.GenPart, candidatefj)
                 self.add_selection(name="signal", sel=signal_mask)
             elif "HToTauTau" in dataset:
-                genVars, signal_mask = match_H(
-                    events.GenPart, candidatefj, dau_pdgid=15
-                )
+                genVars, signal_mask = match_H(events.GenPart, candidatefj, dau_pdgid=15)
                 self.add_selection(name="signal", sel=signal_mask)
             elif ("WJets" in dataset) or ("ZJets" in dataset) or ("DYJets" in dataset):
                 genVars = match_V(events.GenPart, candidatefj)
@@ -439,9 +380,9 @@ class vhProcessor(processor.ProcessorABC):
         - Gen weight (DONE)
         - Pileup weight (DONE)
         - L1 prefiring weight for 2016/2017 (DONE)
-        - B-tagging efficiency weights 
-        - Electron trigger scale factors 
-        - Muon trigger scale factors 
+        - B-tagging efficiency weights
+        - Electron trigger scale factors
+        - Muon trigger scale factors
         - Electron ID scale factors and Reco scale factors
         - Muon ID scale factors
         - Muon Isolation scale factors
@@ -539,9 +480,7 @@ class vhProcessor(processor.ProcessorABC):
             out = {}
             for var, item in variables.items():
                 # pad all the variables that are not a cut with -1
-                pad_item = (
-                    item if ("cut" in var or "weight" in var) else pad_val(item, -1)
-                )
+                # pad_item = item if ("cut" in var or "weight" in var) else pad_val(item, -1)
                 # fill out dictionary
                 out[var] = item
 
@@ -552,9 +491,7 @@ class vhProcessor(processor.ProcessorABC):
             # fill inference
             if self.inference:
                 # print("pre-inference")
-                pnet_vars = runInferenceTriton(
-                    self.tagger_resources_path, events[selection], fj_idx_lep[selection]
-                )
+                pnet_vars = runInferenceTriton(self.tagger_resources_path, events[selection], fj_idx_lep[selection])
                 #  print("post-inference")
                 # print(pnet_vars)
                 output = {

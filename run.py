@@ -1,33 +1,27 @@
 #!/usr/bin/python
 
+import argparse
 import json
-import uproot
-from coffea.nanoevents import NanoEventsFactory, NanoAODSchema, BaseSchema
-from coffea import nanoevents
-from coffea import processor
+import os
+import pickle as pkl
 import time
 
-import argparse
-import warnings
-import pyarrow as pa
-import pyarrow.parquet as pq
-import pickle as pkl
 import pandas as pd
-import os
+import uproot
+from coffea import nanoevents, processor
 
 
 def main(args):
-
     # make directory for output
     if not os.path.exists("./outfiles"):
         os.makedirs("./outfiles")
 
     channels = args.channels.split(",")
 
-    # if --local is specefied in args, process only the args.sample provided
+    # if --local is specified in args, process only the args.sample provided
     if args.local:
         files = {}
-        with open(f"fileset/pfnanoindex_{args.year}.json", "r") as f:
+        with open(f"fileset/pfnanoindex_{args.pfnano}_{args.year}.json", "r") as f:
             files_all = json.load(f)
             for subdir in files_all[args.year]:
                 for key, flist in files_all[args.year][subdir].items():
@@ -59,9 +53,7 @@ def main(args):
             if sample not in args.sample.split(","):
                 continue
         if args.n != -1:
-            fileset[sample] = flist[
-                args.starti * args.n : args.starti * args.n + args.n
-            ]
+            fileset[sample] = flist[args.starti * args.n : args.starti * args.n + args.n]
         else:
             fileset[sample] = flist
 
@@ -87,6 +79,7 @@ def main(args):
             channels=channels,
             inference=args.inference,
             output_location="./outfiles" + job_name,
+            apply_selection=False if args.without_selection else True,
         )
 
     elif args.processor == "vh":
@@ -103,19 +96,16 @@ def main(args):
     elif args.processor == "lumi":
         from boostedhiggs.lumi_processor import LumiProcessor
 
-        p = LumiProcessor(
-            year=args.year, yearmod=yearmod, output_location="./outfiles" + job_name
-        )
+        p = LumiProcessor(year=args.year, yearmod=yearmod, output_location="./outfiles" + job_name)
 
     else:
-        from boostedhiggs.trigger_efficiencies_processor import (
-            TriggerEfficienciesProcessor,
-        )
+        from boostedhiggs.trigger_efficiencies_processor import TriggerEfficienciesProcessor
 
         p = TriggerEfficienciesProcessor(year=args.year)
 
     tic = time.time()
     if args.executor == "dask":
+        from coffea.nanoevents import NanoeventsSchemaPlugin
         from distributed import Client
         from lpcjobqueue import LPCCondorCluster
 
@@ -135,9 +125,7 @@ def main(args):
         executor = processor.DaskExecutor(status=True, client=client, treereduction=2)
 
     else:
-        uproot.open.defaults[
-            "xrootd_handler"
-        ] = uproot.source.xrootd.MultithreadedXRootDSource
+        uproot.open.defaults["xrootd_handler"] = uproot.source.xrootd.MultithreadedXRootDSource
 
         if args.executor == "futures":
             executor = processor.FuturesExecutor(status=True)
@@ -173,47 +161,26 @@ def main(args):
 
 
 if __name__ == "__main__":
-    # e.g.
 
-    # run locally on lpc (hww mc) as: python run.py --year 2017 --processor hww --pfnano --n 1 --starti 0 --json samples_pfnano_mc.json
-    # run locally on lpc (hww mc) as: python run.py --year 2017 --processor lumi --pfnano --n 1 --starti 0 --json samples_pfnano_data.json
-    # run locally on lpc (vh) as: python run.py --year 2018 --sample HZJ_HToWW_M-125 --processor vh --pfnano --n 1 --starti 0 --json samples_pfnano_mc.json  --channels lep --executor iterative
-    # run locally on lpc (hww trigger) as: python run.py --year 2017 --processor trigger --pfnano --n 45 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele
+    # e.g.
+    # noqa: python run.py --year 2017 --processor hww --pfnano v2_4 --n 1 --starti 0 --json samples_pfnano_quick.json --channel=mu --inference
+
+    # noqa: run locally on lpc (hww mc) as: python run.py --year 2017 --processor hww --pfnano v2_2 --n 1 --starti 0 --json samples_pfnano_mc.json
+    # noqa: run locally on lpc (hww mc) as: python run.py --year 2017 --processor lumi --pfnano v2_2 --n 1 --starti 0 --json samples_pfnano_data.json
+    # noqa: run locally on lpc (vh) as: python run.py --year 2018 --sample HZJ_HToWW_M-125 --processor vh --pfnano v2_2 --n 1 --starti 0 --json samples_pfnano_mc.json --channels lep --executor iterative
+    # noqa: run locally on lpc (hww trigger) as: python run.py --year 2017 --processor trigger --pfnano v2_2 --n 45 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele
+
+    # noqa: python run.py --year 2017 --processor hww --pfnano v2_4 --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels mu
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--year", dest="year", default="2017", help="year", type=str)
-    parser.add_argument(
-        "--starti", dest="starti", default=0, help="start index of files", type=int
-    )
-    parser.add_argument(
-        "--n", dest="n", default=-1, help="number of files to process", type=int
-    )
-    parser.add_argument(
-        "--json",
-        dest="json",
-        default="metadata.json",
-        help="path to datafiles",
-        type=str,
-    )
-    parser.add_argument(
-        "--sample", dest="sample", default=None, help="specify sample", type=str
-    )
-    parser.add_argument(
-        "--processor", dest="processor", required=True, help="processor", type=str
-    )
-    parser.add_argument(
-        "--chunksize",
-        dest="chunksize",
-        default=10000,
-        help="chunk size in processor",
-        type=int,
-    )
-    parser.add_argument(
-        "--channels",
-        dest="channels",
-        required=True,
-        help="channels separated by commas",
-    )
+    parser.add_argument("--starti", dest="starti", default=0, help="start index of files", type=int)
+    parser.add_argument("--n", dest="n", default=-1, help="number of files to process", type=int)
+    parser.add_argument("--json", dest="json", default="metadata.json", help="path to datafiles", type=str)
+    parser.add_argument("--sample", dest="sample", default=None, help="specify sample", type=str)
+    parser.add_argument("--processor", dest="processor", required=True, help="processor", type=str)
+    parser.add_argument("--chunksize", dest="chunksize", default=10000, help="chunk size in processor", type=int)
+    parser.add_argument("--channels", dest="channels", required=True, help="channels separated by commas")
     parser.add_argument(
         "--executor",
         type=str,
@@ -221,12 +188,18 @@ if __name__ == "__main__":
         choices=["futures", "iterative", "dask"],
         help="type of processor executor",
     )
+    parser.add_argument(
+        "--pfnano",
+        dest="pfnano",
+        type=str,
+        default="v2_2",
+        help="pfnano version",
+    )
     parser.add_argument("--local", dest="local", action="store_true")
     parser.add_argument("--inference", dest="inference", action="store_true")
     parser.add_argument("--no-inference", dest="inference", action="store_false")
-    parser.add_argument("--pfnano", dest="pfnano", action="store_true")
-    parser.add_argument("--no-pfnano", dest="pfnano", action="store_false")
-    parser.set_defaults(pfnano=True)
+    parser.add_argument("--without_selection", dest="without_selection", action="store_true")
+
     parser.set_defaults(inference=False)
     args = parser.parse_args()
 
