@@ -70,7 +70,6 @@ def make_hists(ch, idir, odir, weights, presel, samples):
     labels = []
     # loop over the samples
     for yr in samples.keys():
-
         # data label and lumi
         data_label = data_by_ch[ch]
         if yr == "2018":
@@ -240,7 +239,6 @@ def main(args):
     # pre-selection string
     presel = {}
     for ch in channels:
-
         weights[ch] = []
         for key, value in variables[ch]["weights"].items():
             if value == 1:
