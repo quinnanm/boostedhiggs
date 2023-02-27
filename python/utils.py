@@ -40,7 +40,8 @@ add_samples = {
     "TTbar": "TT",
     "WJetsLNu": "WJetsToLNu",
     "Diboson": ["WW", "WZ", "ZZ"],
-    "VH": "HToWW_M-125",
+    #"VH": "HToWW_M-125",
+    "VH": "HZJ_HToWW_M-125",
     "GluGluHToWW_Pt-200ToInf_M-125": "GluGluHToWW",
     "VBFHToWWToLNuQQ_M-125_withDipoleRecoil": "VBFHToWW",
 }
@@ -50,6 +51,7 @@ def get_sample_to_use(sample, year):
     """
     Get name of sample that adds small subsamples
     """
+    print('sample', sample)
     single_sample = None
     for single_key, key in add_samples.items():
         if type(key) is list:
@@ -67,6 +69,7 @@ def get_sample_to_use(sample, year):
         sample_to_use = single_sample
     else:
         sample_to_use = sample
+    print('sample_to_use in utils line 72', sample_to_use)
     return sample_to_use
 
 
@@ -116,14 +119,20 @@ def get_xsecweight(pkl_files, year, sample, is_data, luminosity):
 
 
 def get_cutflow(cut_keys, pkl_files, yr, sample, xsec_weight, ch):
+    print('cut_keys', cut_keys)
+    print('yr', yr)
     evyield = dict.fromkeys(cut_keys, 0)
+    print('evyield', evyield)
     for ik, pkl_file in enumerate(pkl_files):
         with open(pkl_file, "rb") as f:
             metadata = pkl.load(f)
-            cutflows = metadata[sample][yr]["cutflows"][ch]
+            print('metadata', metadata)
+            #cutflows = metadata[sample][yr]["cutflows"][ch]
+            cutflows = metadata[sample][yr]["cutflows"]
             for key in cut_keys:
                 if key in cutflows.keys():
                     evyield[key] += cutflows[key] * xsec_weight
+    print('evyield', evyield)
     return evyield
 
 
@@ -158,6 +167,9 @@ signal_by_ch = {
         "VH",
         "VBFHToWWToLNuQQ_M-125_withDipoleRecoil",
     ],
+    "lep" : [
+         "HZJ_HToWW_M-125",
+    ],
 }
 
 
@@ -179,15 +191,22 @@ data_by_ch = {
     "DoubleMuon": "DoubleMuon",
     "MuonEG": "MuonEG",
     "DoubleEG": "DoubleEG",
+    "lep" : ["SingleElectron","SingleMuon","DoubleMuon","MuonEG","DoubleEG"]
 }
+#data_by_ch_2018 = {
+ #   "ele": "EGamma",  # i guess there was no single electron for this year, so cristina used eGamma instead of single electron?
+  #  "mu": "SingleMuon",
+   # "had": "JetHT",
+    #"DoubleMuon": "DoubleMuon",
+   # "MuonEG": "MuonEG",
+#}
+
 data_by_ch_2018 = {
     "ele": "EGamma",  # i guess there was no single electron for this year, so cristina used eGamma instead of single electron?
     "mu": "SingleMuon",
     "had": "JetHT",
-    "DoubleMuon": "DoubleMuon",
-    "MuonEG": "MuonEG",
+    "lep" : ["SingleElectron","SingleMuon","DoubleMuon","MuonEG","DoubleEG"]
 }
-
 color_by_sample = {
     "QCD": "tab:orange",
     "DYJets": "tab:purple",
@@ -200,6 +219,7 @@ color_by_sample = {
     "GluGluHToWW_Pt-200ToInf_M-125": "coral",
     "VH": "tab:brown",
     "VBFHToWWToLNuQQ_M-125_withDipoleRecoil": "tab:gray",
+    "HZJ_HToWW_M-125" : "tab:brown",
 }
 # available tab colors
 # 'tab:cyan'
@@ -211,10 +231,14 @@ color_by_sample = {
 label_by_ch = {
     "ele": "Electron",
     "mu": "Muon",
+    "lep": "Lepton",
 }
 
 
 axis_dict = {
+    "Zmass": hist2.axis.Regular(
+        40, 30, 450, name="var", label=r"Zmass [GeV]", overflow=True
+    ),
     "lep_pt": hist2.axis.Regular(
         40, 30, 450, name="var", label=r"Lepton $p_T$ [GeV]", overflow=True
     ),

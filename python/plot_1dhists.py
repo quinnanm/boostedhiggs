@@ -56,11 +56,13 @@ def plot_1dhists(year, channels, odir, var, samples, tag, logy):
         print(f"Variable {var} not present in hists pkl file")
         exit
 
-    # print(h.axes[0].edges)
+    print(h.axes[0].edges)
     all_samples = [h.axes[0].value(i) for i in range(len(h.axes[0].edges))]
-    # print(all_samples)
+    print('line 61')
+    print('all_samples', all_samples)
 
     # get samples: hists[channels[0]][var].axes[1]
+    print('hists[ch][var][{"var": sum}]', hists[ch][var][{"var": sum}])
 
     ch_titles = {"ele": "Electron", "mu": "Muon"}
     for ch in channels:

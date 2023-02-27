@@ -68,8 +68,10 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys)
 
         # data label and lumi
         data_label = data_by_ch[ch]
+        print('data_label', data_label)
         if yr == "2018":
             data_label = data_by_ch_2018[ch]
+            print('data_label 2018', data_label)
         f = open("../fileset/luminosity.json")
         luminosity = json.load(f)[ch][yr]
         f.close()
@@ -82,6 +84,7 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys)
 
             # check if the sample was processed
             pkl_dir = f"{idir}_{yr}/{sample}/outfiles/*.pkl"
+            #pkl_dir = f"{idir}/{sample}/outfiles/*.pkl"
             pkl_files = glob.glob(pkl_dir)
             if not pkl_files:  # skip samples which were not processed
                 print(
@@ -93,15 +96,22 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys)
                 continue
 
             # get list of parquet files that have been post processed
+            #parquet_files = glob.glob(f"{idir}/{sample}/outfiles/*_{ch}.parquet")
+
             parquet_files = glob.glob(f"{idir}_{yr}/{sample}/outfiles/*_{ch}.parquet")
 
-            # define an is_data boolean
+            # define an is_data boolean   #comment this out temporarily
             is_data = False
-            if data_label in sample:
-                is_data = True
+            print('data_label', data_label)
+            for i in data_label:
+                if i in sample:
+                    is_data = True
+            #if data_label in sample:
+             #   is_data = True
 
             # get combined sample
             sample_to_use = get_sample_to_use(sample, yr)
+            print("sample_to_use", sample_to_use)
 
             # get cutflow
             xsec_weight = get_xsecweight(pkl_files, yr, sample, is_data, luminosity)
@@ -287,7 +297,7 @@ def main(args):
 
         print(f"Making histograms for {ch}...")
         print("Weights: ", weights[ch])
-        print("Pre-selection: ", presel[ch].keys())
+        #print("Pre-selection: ", presel[ch].keys())
         make_hists(
             ch,
             args.idir,
@@ -345,7 +355,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--cut-keys",
         dest="cut_keys",
-        default="trigger,leptonKin,fatjetKin,ht,oneLepton,notaus,leptonInJet",
+        #default="trigger,leptonKin,fatjetKin,ht,oneLepton,notaus,leptonInJet",
+        default="trigger",
         help="cut keys for cutflow (split by commas)",
     )
 
