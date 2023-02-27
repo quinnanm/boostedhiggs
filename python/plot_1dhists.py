@@ -62,19 +62,32 @@ def plot_1dhists(year, channels, odir, var, samples, tag, logy):
 
     # get samples: hists[channels[0]][var].axes[1]
 
-    ch_titles = {"ele": "Electron", "mu": "Muon"}
+    ch_titles = {"ele": "Electron", "mu": "Muon", "all": "Semi-leptonic"}
     for ch in channels:
         ch_title = ch_titles[ch]
         fig, ax = plt.subplots(figsize=(8, 8))
         for sample in samples:
-            # print(hists[ch][var][{'samples': sample}])
+            try:
+                h = hists[ch][var][{"samples": sample}]
+            except:
+                raise Exception("Unable to access histogram - samples available ",hists[ch][var][{"var": sum}])
+            try:
+                label = simplified_labels[sample]
+            except:
+                raise Exception("Unable to access simplified_label")
+            try:
+                color = color_by_sample[sample]
+            except:
+                raise Exception("Unable to access color_by_sample")
+            
             hep.histplot(
-                hists[ch][var][{"samples": sample}],
+                h,
                 ax=ax,
-                label=simplified_labels[sample],
+                label=label,
                 linewidth=3,
-                color=color_by_sample[sample],
+                color=color,
             )
+            
         hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
         hep.cms.text("Work in Progress", ax=ax)
         ax.legend(title=f"{ch_title} Channel")

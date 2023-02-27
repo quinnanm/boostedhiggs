@@ -8,7 +8,7 @@ from utils import (
     data_by_ch,
     data_by_ch_2018,
 )
-from utils import get_sample_to_use, get_simplified_label, get_sum_sumgenweight
+from utils import get_sample_to_use, get_sum_sumgenweight
 import pickle as pkl
 import pyarrow.parquet as pq
 import numpy as np
