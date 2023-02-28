@@ -11,9 +11,8 @@ import numpy as np
 import pyarrow.parquet as pq
 import yaml
 from utils import (
+    data_ref,
     axis_dict,
-    data_by_ch,
-    data_by_ch_2018,
     get_cutflow,
     get_cutflow_axis,
     get_sample_to_use,
@@ -23,7 +22,8 @@ from utils import (
 plt.style.use(hep.style.CMS)
 plt.rcParams.update({"font.size": 20})
 
-
+import logging
+                           
 def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys, hists):
     """
     Makes 1D histograms of the "vars_to_plot" to be plotted as stacked over the different samples.
@@ -45,50 +45,34 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys,
 
     # loop over the years
     for yr in samples.keys():
-        # data label and lumi
-        data_label = data_by_ch[ch]
-        print("data_label", data_label)
-        if yr == "2018":
-            data_label = data_by_ch_2018[ch]
-            print("data_label 2018", data_label)
+
+        # get luminosity per year
         f = open("../fileset/luminosity.json")
         luminosity = json.load(f)[ch][yr]
         f.close()
-        print(
-            f"Processing samples from year {yr} with luminosity {luminosity} for channel {ch}"
-        )
+        logger.info(f"Processing samples from year {yr} with luminosity {luminosity} for channel {ch}")
 
+        # loop over samples
         for sample in samples[yr][ch]:
-            # print(f"Sample {sample}")
+            logger.debug(f"Sample {sample}")
 
             # check if the sample was processed
             pkl_dir = f"{idir}_{yr}/{sample}/outfiles/*.pkl"
-            # pkl_dir = f"{idir}/{sample}/outfiles/*.pkl"
             pkl_files = glob.glob(pkl_dir)
             if not pkl_files:  # skip samples which were not processed
-                print(
-                    "- No processed files found...",
-                    pkl_dir,
-                    "skipping sample...",
-                    sample,
-                )
+                logger.warning(f"- No processed files found... {pkl_dir} skipping sample... {sample}")
                 continue
 
             # get list of parquet files that have been post processed
-            # parquet_files = glob.glob(f"{idir}/{sample}/outfiles/*_{ch}.parquet")
-
             parquet_files = glob.glob(f"{idir}_{yr}/{sample}/outfiles/*_{ch}.parquet")
 
-            # define an is_data boolean   #comment this out temporarily
+            # define an is_data boolean
             is_data = False
-            print("data_label", data_label)
-            for i in data_label:
-                if i in sample:
+            for data_label in data_ref:
+                if data_label in sample:
                     is_data = True
-            # if data_label in sample:
-            #   is_data = True
-
-            # get combined sample
+                    
+            # get name of sample to use (allows to merge samples)
             sample_to_use = get_sample_to_use(sample, yr, is_data)
 
             # xsec weight
@@ -112,39 +96,43 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys,
                     data = pq.read_table(parquet_file).to_pandas()
                 except ValueError:
                     if is_data:
-                        print(
-                            "Not able to read data: ",
-                            parquet_file,
-                            " should remove events from scaling/lumi",
+                        logger.warning(
+                            f"Not able to read data: {parquet_file} should remove events from scaling/lumi"
                         )
                     else:
-                        print("Not able to read data from ", parquet_file)
+                        logger.warning(f"Not able to read data from {parquet_file}")
                     continue
 
                 # print parquet content
-                # if i==0:
+                #if i==0:
                 #    print(sample, data.columns)
 
                 if len(data) == 0:
-                    print(
-                        f"WARNING: Parquet file empty {yr} {ch} {sample} {parquet_file}"
-                    )
+                    logger.warning(f"Parquet file empty {yr} {ch} {sample} {parquet_file}")
                     continue
 
                 # modify dataframe with string queries
                 if presel is not None:
                     for sel_key, sel_str in presel.items():
                         df = data.query(sel_str)
-                        weight_ones = np.ones_like(df["fj_pt"])
+                        if not is_data:
+                            try:
+                                genweight = df["weight_genweight"]
+                            except:
+                                logger.warning("weight weight_genweight not found in parquet")
+                                continue
+                            values[sample_to_use][sel_key] += np.sum(genweight * xsec_weight)
+                        else:
+                            weight_ones = np.ones_like(df["fj_pt"])
+                            values[sample_to_use][sel_key] += np.sum(weight_ones * xsec_weight)
                         #print(sel_key,sel_str,np.sum(weight_ones),np.sum(weight_ones * xsec_weight))
-                        values[sample_to_use][sel_key] += np.sum(weight_ones * xsec_weight)
 
                 # get event weight
                 if not is_data:
                     event_weight = xsec_weight
                     for w in weights:
                         try:
-                            event_weight *= data[w]
+                            weight = data[w]
                         except ValueError:
                             print_warning = True
                             if w == "weight_vjets_nominal" or (
@@ -152,7 +140,8 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys,
                             ):
                                 print_warning = False
                             if print_warning:
-                                print(f"No {w} variable in parquet for sample {sample}")
+                                logger.warning(f"No {w} variable in parquet for sample {sample}")
+                        event_weight *= weight
                 else:
                     event_weight = np.ones_like(data["fj_pt"])
 
@@ -163,7 +152,7 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys,
                     if var not in data.keys():
                         if "gen" in var:
                             continue
-                        print(f"Var {var} not in parquet keys")
+                        logger.warning(f"Var {var} not in parquet keys")
                         continue
 
                     # filling histograms
@@ -230,7 +219,7 @@ def main(args):
     for key, value in variables["vars"].items():
         if value == 1:
             vars_to_plot.append(key)
-    print(f"Variables to include {vars_to_plot}")
+    logger.info(f"Variables to include {vars_to_plot}")
 
     # define channels
     if args.channels == "all":
@@ -251,11 +240,13 @@ def main(args):
     for ch in channels:
         if ch not in variables.keys():
             raise Exception(f"Channel {ch} not included in yaml file")
+        logger.info(f"Making histograms for {ch}...")
 
         weights = []
         for key, value in variables[ch]["weights"].items():
             if value == 1:
                 weights.append(key)
+        logger.info("Weights ",weights)
 
         presel = {}
         if "selection" in variables.keys():
@@ -263,13 +254,10 @@ def main(args):
             for presel_key, presel_str in variables["selection"][ch].items():
                 cum_presel_str += "& " + presel_str
                 presel[presel_key] = cum_presel_str
+            logger.info("Pre-selection: %s"%presel.keys())
 
         if len(glob.glob(f"{odir}/{ch}_hists.pkl")) > 0:
-            print("Histograms already exist - remaking them")
-
-        print(f"Making histograms for {ch}...")
-        print("Weights: ", weights)
-        print("Pre-selection: ", presel.keys())
+            logger.warning("Histograms already exist - remaking them")
 
         if hists is None:
             hists_per_ch = {}
@@ -279,7 +267,7 @@ def main(args):
                     axis_dict[var],
                 )
         else:
-            print(f"Filling the same histogram to combine all channels")
+            logging.info(f"Filling the same histogram to combine all channels")
             hists_per_ch = hists
 
         hists_per_ch, values_per_ch = make_hists(
@@ -293,9 +281,11 @@ def main(args):
             cut_keys,
             hists_per_ch,
         )
-        # print(values_per_ch)
-
+        print(values_per_ch)
+        print(args.channels)
+        
         if args.channels != "all":
+            logging.info(f"Saving histograms to {odir}/{ch}_hists.pkl")
             with open(f"{odir}/{ch}_hists.pkl", "wb") as f:
                 pkl.dump(hists_per_ch, f)
         else:
@@ -309,7 +299,6 @@ def main(args):
                     else:
                         values[sample][cutkey] = val
 
-        print(f"Finished histograms for {ch} \n")
 
     if args.channels == "all":
         print(values)
@@ -370,5 +359,8 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
+
+    logging.basicConfig(level=20)
+    logger = logging.getLogger("make-hists")
 
     main(args)

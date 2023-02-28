@@ -10,11 +10,10 @@ import yaml
 from utils import (
     axis_dict,
     color_by_sample,
-    data_by_ch,
-    data_by_ch_2018,
+    data_ref,
+    signal_ref,
     get_cutflow_axis,
     label_by_ch,
-    signal_by_ch,
     simplified_labels,
 )
 
@@ -66,7 +65,6 @@ def plot_stacked_hists(
     luminosity = luminosity / 1000.0
     f.close()
 
-    data_labels = ["SingleElectron","SingleMuon"]
     data_label = "Data"
 
     for var in vars_to_plot:
@@ -87,8 +85,8 @@ def plot_stacked_hists(
 
         # get samples existing in histogram
         samples = [h.axes[0].value(i) for i in range(len(h.axes[0].edges))]
-        signal_labels = [label for label in samples if label in signal_by_ch["mu"]]
-        bkg_labels = [label for label in samples if (label and label not in data_labels and label not in signal_labels)]
+        signal_labels = [label for label in samples if label in signal_ref]
+        bkg_labels = [label for label in samples if (label and label not in data_ref and label not in signal_labels)]
 
         # get total yield of backgrounds per label
         # (sort by yield in fixed fj_pt histogram after pre-sel)

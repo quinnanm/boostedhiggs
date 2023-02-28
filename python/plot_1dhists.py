@@ -4,7 +4,8 @@ from utils import (
     axis_dict,
     add_samples,
     color_by_sample,
-    signal_by_ch,
+    signal_ref,
+    data_ref,
     simplified_labels,
     color_by_sample,
     get_cutflow_axis,
@@ -101,9 +102,9 @@ def plot_1dhists(year, channels, odir, var, samples, tag, logy):
         if logy:
             ax.set_ylim(10, 50000)
             ax.set_yscale("log")
-            plt.savefig(f"{odir}/1dhist_{var}_{tag}_{ch}_log.pdf")
+            plt.savefig(f"{odir}/1dhist_{var}_{tag}{ch}_log.pdf")
         else:
-            plt.savefig(f"{odir}/1dhist_{var}_{tag}_{ch}.pdf")
+            plt.savefig(f"{odir}/1dhist_{var}_{tag}{ch}.pdf")
         plt.close()
 
 
@@ -140,13 +141,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--samples", dest="samples", required=True, help="string w samples"
     )
-    parser.add_argument("--tag", dest="tag", required=True, help="tag the plot")
+    parser.add_argument("--tag", dest="tag", default="", help="tag the plot")
     parser.add_argument("--year", dest="year", default="2017", help="year")
     parser.add_argument(
         "--channels",
         dest="channels",
-        default="ele,mu",
-        help="channels for which to plot this variable",
+        required=True,
+        help="channels for which to plot this variable (separated by comma)",
     )
     parser.add_argument(
         "--odir",
@@ -161,13 +162,15 @@ if __name__ == "__main__":
     parser.add_argument(
         "--cut-keys",
         dest="cut_keys",
-        default="trigger,leptonKin,fatjetKin,ht,oneLepton,notaus,leptonInJet,pre-sel",
+        default="",
         help="cut keys for cutflow (split by commas)",
     )
 
     args = parser.parse_args()
 
     cut_keys = args.cut_keys.split(",")
+    if len(cut_keys)==0 and args.var=="cutflow":
+        print("no cut keys given for cutflow")
     global axis_dict
     axis_dict["cutflow"] = get_cutflow_axis(cut_keys)
 
