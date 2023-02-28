@@ -56,13 +56,15 @@ def plot_1dhists(year, channels, odir, var, samples, tag, logy):
         print(f"Variable {var} not present in hists pkl file")
         exit
 
-    # print(h.axes[0].edges)
     all_samples = [h.axes[0].value(i) for i in range(len(h.axes[0].edges))]
-    # print(all_samples)
 
-    # get samples: hists[channels[0]][var].axes[1]
-
-    ch_titles = {"ele": "Electron", "mu": "Muon", "all": "Semi-leptonic"}
+    ch_titles = {
+        "ele": "Electron",
+        "mu": "Muon",
+        "all": "Semi-leptonic",
+        "lep": "Semi-leptonic",
+    }
+    
     for ch in channels:
         ch_title = ch_titles[ch]
         fig, ax = plt.subplots(figsize=(8, 8))
