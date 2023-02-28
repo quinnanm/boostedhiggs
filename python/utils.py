@@ -20,9 +20,11 @@ add_samples = {
     "TTbar": "TT",
     "WJetsLNu": "WJetsToLNu",
     "Diboson": ["WW", "WZ", "ZZ"],
-    "VH": "HToWW_M-125",
-    "GluGluHToWW_Pt-200ToInf_M-125": "GluGluHToWW",
-    "VBFHToWWToLNuQQ_M-125_withDipoleRecoil": "VBFHToWW",
+    "ttH": ["ttHToNonbb_M125"],
+    "WH": ["HWminusJ_HToWW_M-125","HWplusJ_HToWW_M-125"],
+    "ZH": ["HZJ_HToWW_M-125"],
+    "ggH": "GluGluHToWW_Pt-200ToInf_M-125",
+    "VBF": "VBFHToWWToLNuQQ_M-125_withDipoleRecoil",
 }
 
 
@@ -49,17 +51,25 @@ def get_sample_to_use(sample, year, is_data):
         sample_to_use = sample
     return sample_to_use
 
-
-def get_simplified_label(
-    sample,
-):  # get simplified "alias" names of the samples for plotting purposes
-    f = open("plot_configs/simplified_labels.json")
-    name = json.load(f)
-    f.close()
-    if sample in name.keys():
-        return str(name[sample])
-    else:
-        return sample
+simplified_labels = {
+    "SingleElectron": "Data",
+    "EGamma": "Data",
+    "SingleMuon": "Data",
+    "JetHT": "Data",
+    "Data": "Data",
+    "QCD": "Multijet",
+    "DYJets": r"Z($\ell\ell$) + jets",
+    "WJetsLNu": r"W($\ell\nu$) + jets",
+    "Diboson": r"VV",
+    "WH": r"WH$\rightarrow$WW",
+    "ZH": r"ZH$\rightarrow$WW",
+    "ggH": r"ggH$\rightarrow$WW",
+    "VBF": r"VBF$\rightarrow$WW",
+    "ttH": r"ttH$\rightarrow$WW",
+    "TTbar": r"$t\bar{t}$+jets",
+    "SingleTop": r"single-t",
+    "WZQQ": r"W/Z(qq) + jets",
+}
 
 
 def get_sum_sumgenweight(pkl_files, year, sample):
@@ -104,36 +114,20 @@ def get_cutflow(cut_keys, pkl_files, yr, sample, xsec_weight, ch):
     return evyield
 
 
-simplified_labels = {
-    "GluGluHToWWToLNuQQ": r"ggH(WW) $(qq\ell\nu)$",
-    "ttHToNonbb_M125": "ttH(WW)",
-    "GluGluHToWW_Pt-200ToInf_M-125": "ggH(WW)-Pt200",
-    "VH": "VH(WW)",
-    "VBFHToWWToLNuQQ-MH125": r"VBFH(WW) $(qq\ell\nu)$",
-    "QCD": "Multijet",
-    "Diboson": "VV",
-    "DYJets": r"Z$(\ell\ell)$+jets",
-    "WJetsLNu": r"W$(\ell\nu)$+jets",
-    "TTbar": r"$t\bar{t}$+jets",
-    "WZQQ": r"W/Z$(qq)$",
-    "SingleTop": r"Single Top",
-    "VBFHToWWToLNuQQ_M-125_withDipoleRecoil": r"VBFH(WW) $(qq\ell\nu)$",
-}
-
 # define the axes for the different variables to be plotted
 # define samples
 signal_by_ch = {
     "ele": [
-        "ttHToNonbb_M125",
-        "GluGluHToWW_Pt-200ToInf_M-125",
-        "VH",
-        "VBFHToWWToLNuQQ_M-125_withDipoleRecoil",
+        "ttH",
+        "WH","ZH",
+        "ggH",
+        "VBF",
     ],
     "mu": [
-        "ttHToNonbb_M125",
-        "GluGluHToWW_Pt-200ToInf_M-125",
-        "VH",
-        "VBFHToWWToLNuQQ_M-125_withDipoleRecoil",
+        "ttH",
+        "WH","ZH",
+        "ggH",
+        "VBF",
     ],
 }
 
@@ -172,17 +166,12 @@ color_by_sample = {
     "WZQQ": "salmon",
     "SingleTop": "tab:cyan",
     "Diboson": "orchid",
-    "ttHToNonbb_M125": "tab:olive",
-    "GluGluHToWW_Pt-200ToInf_M-125": "coral",
-    "VH": "tab:brown",
-    "VBFHToWWToLNuQQ_M-125_withDipoleRecoil": "tab:gray",
+    "ttH": "tab:olive",
+    "ggH": "coral",
+    "WH": "tab:brown",
+    "ZH": "darkred",
+    "VBF": "tab:gray",
 }
-# available tab colors
-# 'tab:cyan'
-# 'tab:olive'
-# 'tab:gray'
-# 'tab:brown':
-
 
 label_by_ch = {
     "ele": "Electron",
