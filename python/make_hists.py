@@ -10,7 +10,15 @@ import mplhep as hep
 import numpy as np
 import pyarrow.parquet as pq
 import yaml
-from utils import axis_dict, data_by_ch, data_by_ch_2018, get_cutflow, get_cutflow_axis, get_sample_to_use, get_xsecweight
+from utils import (
+    axis_dict,
+    data_by_ch,
+    data_by_ch_2018,
+    get_cutflow,
+    get_cutflow_axis,
+    get_sample_to_use,
+    get_xsecweight,
+)
 
 plt.style.use(hep.style.CMS)
 plt.rcParams.update({"font.size": 20})
@@ -34,7 +42,7 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys,
 
     # dictionary to store cutflow
     values = {}
-    
+
     # loop over the years
     for yr in samples.keys():
         # data label and lumi
@@ -44,7 +52,9 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys,
         f = open("../fileset/luminosity.json")
         luminosity = json.load(f)[ch][yr]
         f.close()
-        print(f"Processing samples from year {yr} with luminosity {luminosity} for channel {ch}")
+        print(
+            f"Processing samples from year {yr} with luminosity {luminosity} for channel {ch}"
+        )
 
         for sample in samples[yr][ch]:
             # print(f"Sample {sample}")
@@ -78,9 +88,10 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys,
             # get cutflow
             if sample_to_use not in values.keys():
                 values[sample_to_use] = dict.fromkeys(cut_keys, 0)
-                
+
             cutflow = get_cutflow(cut_keys, pkl_files, yr, sample, xsec_weight, ch)
-            print("cutflow ",cutflow)
+            # print("cutflow ", cutflow)
+            
             for key, val in cutflow.items():
                 values[sample_to_use][key] += val
 
@@ -107,27 +118,18 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys,
                 #    print(sample, data.columns)
 
                 if len(data) == 0:
-                    print(f"WARNING: Parquet file empty {yr} {ch} {sample} {parquet_file}")
+                    print(
+                        f"WARNING: Parquet file empty {yr} {ch} {sample} {parquet_file}"
+                    )
                     continue
 
                 # modify dataframe with string queries
                 if presel is not None:
                     for sel_key, sel_str in presel.items():
-                        data = data.query(sel_str)
-                        if not is_data:
-                            event_weight = xsec_weight
-                            for w in weights:
-                                try:
-                                    event_weight *= data[w]
-                                except ValueError:
-                                    pass
-                            values[sample_to_use][sel_key] += np.sum(event_weight)
-                            print(f"sum {sel_key} ",np.sum(event_weight))
-                        else:
-                            weight_ones = np.ones_like(data["fj_pt"])
-                            values[sample_to_use][sel_key] += np.sum(
-                                weight_ones * xsec_weight
-                            )
+                        df = data.query(sel_str)
+                        weight_ones = np.ones_like(df["fj_pt"])
+                        #print(sel_key,sel_str,np.sum(weight_ones),np.sum(weight_ones * xsec_weight))
+                        values[sample_to_use][sel_key] += np.sum(weight_ones * xsec_weight)
 
                 # get event weight
                 if not is_data:
@@ -137,7 +139,9 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys,
                             event_weight *= data[w]
                         except ValueError:
                             print_warning = True
-                            if w == "weight_vjets_nominal" or (w == "weight_L1Prefiring" and yr == "2018"):
+                            if w == "weight_vjets_nominal" or (
+                                w == "weight_L1Prefiring" and yr == "2018"
+                            ):
                                 print_warning = False
                             if print_warning:
                                 print(f"No {w} variable in parquet for sample {sample}")
@@ -164,13 +168,14 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys,
             # fill cutflow histogram once we have all the values
             for key, numevents in values[sample_to_use].items():
                 cut_index = list(values[sample_to_use].keys()).index(key)
-                print("fill histogram ",cut_index,numevents)
+                # print("fill histogram ", cut_index, numevents)
                 hists["cutflow"].fill(
                     samples=sample_to_use, var=cut_index, weight=numevents
                 )
 
     return hists, values
-    
+
+
 def main(args):
     # append '/year' to the output directory
     odir = args.odir + "/" + args.year
@@ -211,17 +216,17 @@ def main(args):
     axis_dict["cutflow"] = get_cutflow_axis(cut_keys + extra_cut_keys)
 
     axis_sample = hist2.axis.StrCategory([], name="samples", growth=True)
-    
+
     # extract variables to plot
     vars_to_plot = []
     for key, value in variables["vars"].items():
         if value == 1:
             vars_to_plot.append(key)
-    print(vars_to_plot)
-            
+    print(f"Variables to include {vars_to_plot}")
+
     # define channels
     if args.channels == "all":
-        channels = ["ele","mu"]
+        channels = ["ele", "mu"]
         hists = {}
         values = {}
         for var in vars_to_plot:
@@ -233,21 +238,23 @@ def main(args):
         channels = args.channels.split(",")
         hists = None
         values = None
-    
+
     # extract variables and weights from yaml file
     for ch in channels:
         if ch not in variables.keys():
             raise Exception(f"Channel {ch} not included in yaml file")
-        
+
         weights = []
         for key, value in variables[ch]["weights"].items():
             if value == 1:
                 weights.append(key)
-                
+
         presel = {}
         if "selection" in variables.keys():
-            for presel_key,presel_str in variables["selection"][ch].items():
-                presel[presel_key] = presel_str
+            cum_presel_str = "(1==1)"
+            for presel_key, presel_str in variables["selection"][ch].items():
+                cum_presel_str += "& " + presel_str
+                presel[presel_key] = cum_presel_str
 
         if len(glob.glob(f"{odir}/{ch}_hists.pkl")) > 0:
             print("Histograms already exist - remaking them")
@@ -266,7 +273,7 @@ def main(args):
         else:
             print(f"Filling the same histogram to combine all channels")
             hists_per_ch = hists
-            
+
         hists_per_ch, values_per_ch = make_hists(
             ch,
             args.idir,
@@ -278,9 +285,9 @@ def main(args):
             cut_keys,
             hists_per_ch,
         )
-        print(values_per_ch)
+        # print(values_per_ch)
 
-        if args.channels!="all":
+        if args.channels != "all":
             with open(f"{odir}/{ch}_hists.pkl", "wb") as f:
                 pkl.dump(hists_per_ch, f)
         else:
@@ -288,20 +295,21 @@ def main(args):
             for sample in values_per_ch:
                 if sample not in values.keys():
                     values[sample] = {}
-                for cutkey,val in values_per_ch[sample].items():
+                for cutkey, val in values_per_ch[sample].items():
                     if cutkey in values[sample].keys():
                         values[sample][cutkey] += val
                     else:
                         values[sample][cutkey] = val
-            
+
         print(f"Finished histograms for {ch} \n")
 
     if args.channels == "all":
         print(values)
         print(hists["cutflow"])
         with open(f"{odir}/{args.channels}_hists.pkl", "wb") as f:
-             pkl.dump(hists, f)
-            
+            pkl.dump(hists, f)
+
+
 if __name__ == "__main__":
 
     # e.g. run locally as:

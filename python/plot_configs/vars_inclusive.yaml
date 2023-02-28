@@ -1,13 +1,14 @@
 vars:
  fj_pt: 1
  cutflow: 1
-selection:
- ele:
-  iso: (( (lep_pt < 120) & (lep_isolation < 0.15) ) | (lep_pt >= 120))
-  mini-iso: lep_pt > 20
- mu:
-  iso: (( (lep_pt < 50) & (lep_isolation < 0.15) ) | (lep_pt >= 50))
-  mini-iso: lep_pt > 20
+#selection:
+ # these are sequential cuts
+ #ele:
+ # iso: (( (lep_pt < 120) & (lep_isolation < 0.15) ) | (lep_pt >= 120))
+ # mini-iso: (lep_pt > 30)
+ #mu:
+ # iso: (( (lep_pt < 50) & (lep_isolation < 0.15) ) | (lep_pt >= 50))
+ # mini-iso: ( (lep_pt < 55) |  ( (lep_misolation < 0.2) & (lep_pt >= 55) ) )
 ele:
   weights:
     weight_genweight: 1

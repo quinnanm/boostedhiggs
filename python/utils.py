@@ -102,15 +102,16 @@ def get_xsecweight(pkl_files, year, sample, is_data, luminosity):
     return xsec_weight
 
 
-def get_cutflow(cut_keys, pkl_files, yr, sample, xsec_weight, ch):
+def get_cutflow(cut_keys, pkl_files, yr, sample, weight, ch):
     evyield = dict.fromkeys(cut_keys, 0)
     for ik, pkl_file in enumerate(pkl_files):
         with open(pkl_file, "rb") as f:
             metadata = pkl.load(f)
             cutflows = metadata[sample][yr]["cutflows"][ch]
+            print(cutflows)
             for key in cut_keys:
                 if key in cutflows.keys():
-                    evyield[key] += cutflows[key] * xsec_weight
+                    evyield[key] += cutflows[key] * weight
     return evyield
 
 
@@ -176,6 +177,7 @@ color_by_sample = {
 label_by_ch = {
     "ele": "Electron",
     "mu": "Muon",
+    "all": "Semi-leptonic",
 }
 
 

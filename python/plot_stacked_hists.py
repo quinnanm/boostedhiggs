@@ -60,19 +60,14 @@ def plot_stacked_hists(
         if not os.path.exists(f"{odir}/{ch}_hists"):
             os.makedirs(f"{odir}/{ch}_hists")
 
-    # data label
-    data_label = data_by_ch[ch]
-    if year == "2018":
-        data_label = data_by_ch_2018[ch]
-
     # luminosity
     f = open("../fileset/luminosity.json")
-    luminosity = json.load(f)[ch][year]
+    luminosity = json.load(f)["mu"][year]
     luminosity = luminosity / 1000.0
     f.close()
 
-    if year == "Run2":
-        data_label = "Data"
+    data_labels = ["SingleElectron","SingleMuon"]
+    data_label = "Data"
 
     for var in vars_to_plot:
         if var not in hists.keys():
@@ -92,8 +87,8 @@ def plot_stacked_hists(
 
         # get samples existing in histogram
         samples = [h.axes[0].value(i) for i in range(len(h.axes[0].edges))]
-        signal_labels = [label for label in samples if label in signal_by_ch[ch]]
-        bkg_labels = [label for label in samples if (label and label != data_label and label not in signal_labels)]
+        signal_labels = [label for label in samples if label in signal_by_ch["mu"]]
+        bkg_labels = [label for label in samples if (label and label not in data_labels and label not in signal_labels)]
 
         # get total yield of backgrounds per label
         # (sort by yield in fixed fj_pt histogram after pre-sel)
@@ -432,7 +427,6 @@ def main(args):
 if __name__ == "__main__":
     # e.g.
     # run locally as: python plot_stacked_hists.py --year 2017 --odir Nov15 --channels ele
-    # run locally as: python plot_stacked_hists.py --year 2017 --odir Dec15tagger --channels mu
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -445,13 +439,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--vars",
         dest="vars",
-        default="plot_configs/vars.yaml",
+        default="plot_configs/vars_inclusive.yaml",
         help="path to json with variables to be plotted",
     )
     parser.add_argument(
         "--samples",
         dest="samples",
-        default="plot_configs/samples_pfnano.json",
+        default="plot_configs/samples_all.json",
         help="path to json with samples to be plotted",
     )
     parser.add_argument(
@@ -479,7 +473,7 @@ if __name__ == "__main__":
         "oneLepton",
         "notaus",
         "leptonInJet",
-        "pre-sel",
+        #"pre-sel",
     ]
 
     main(args)

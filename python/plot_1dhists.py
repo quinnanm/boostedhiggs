@@ -90,9 +90,11 @@ def plot_1dhists(year, channels, odir, var, samples, tag, logy):
             
         hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
         hep.cms.text("Work in Progress", ax=ax)
+        ax.grid(linestyle='-', linewidth=0.2)
         ax.legend(title=f"{ch_title} Channel")
         if var == "cutflow":
-            ax.set_xticks(range(len(cut_keys)), cut_keys, rotation=60, fontsize=8)
+            ax.set_xticks(range(len(cut_keys)), cut_keys, rotation=40, fontsize=13)
+            ax.set_ylabel("Events (~normalized to XS - nogenweight)")
             ax.set_xlabel("")
         if logy:
             ax.set_ylim(10, 50000)
