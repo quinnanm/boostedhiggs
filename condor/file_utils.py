@@ -1,7 +1,7 @@
 import json
 
 
-def loadJson(samplesjson="samples_pfnano.json", year="2017", pfnano="v2_2", sampleslist=None):
+def loadJson(samplesjson="samples_mc.json", year="2017", pfnano="v2_2", sampleslist=None):
     samples = []
     values = {}
     with open(samplesjson, "r") as f:
@@ -17,7 +17,6 @@ def loadJson(samplesjson="samples_pfnano.json", year="2017", pfnano="v2_2", samp
                 values[key] = value
 
     fname = f"fileset/pfnanoindex_{pfnano}_{year}.json"
-
     fileset = {}
     with open(fname, "r") as f:
         files = json.load(f)
@@ -77,7 +76,7 @@ def printPFNano(year="2017", pfnano="v2_2", samplesjson=None):
 if __name__ == "__main__":
 
     """
-    python condor/file_utils.py --samples python/configs/samples_pfnano.json --year 2017
+    python condor/file_utils.py --samples python/configs/samples_mc.json --year 2017
     # or
     python condor/file_utils.py --year 2017
     """
