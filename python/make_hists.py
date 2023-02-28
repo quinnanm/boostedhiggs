@@ -23,7 +23,8 @@ plt.style.use(hep.style.CMS)
 plt.rcParams.update({"font.size": 20})
 
 import logging
-                           
+
+
 def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys, hists):
     """
     Makes 1D histograms of the "vars_to_plot" to be plotted as stacked over the different samples.
@@ -71,7 +72,7 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys,
             for data_label in data_ref:
                 if data_label in sample:
                     is_data = True
-                    
+
             # get name of sample to use (allows to merge samples)
             sample_to_use = get_sample_to_use(sample, yr, is_data)
 
@@ -96,15 +97,13 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys,
                     data = pq.read_table(parquet_file).to_pandas()
                 except ValueError:
                     if is_data:
-                        logger.warning(
-                            f"Not able to read data: {parquet_file} should remove events from scaling/lumi"
-                        )
+                        logger.warning(f"Not able to read data: {parquet_file} should remove events from scaling/lumi")
                     else:
                         logger.warning(f"Not able to read data from {parquet_file}")
                     continue
 
                 # print parquet content
-                #if i==0:
+                # if i==0:
                 #    print(sample, data.columns)
 
                 if len(data) == 0:
@@ -118,14 +117,14 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys,
                         if not is_data:
                             try:
                                 genweight = df["weight_genweight"]
-                            except:
+                            except ValueError:
                                 logger.warning("weight weight_genweight not found in parquet")
                                 continue
                             values[sample_to_use][sel_key] += np.sum(genweight * xsec_weight)
                         else:
                             weight_ones = np.ones_like(df["fj_pt"])
                             values[sample_to_use][sel_key] += np.sum(weight_ones * xsec_weight)
-                        #print(sel_key,sel_str,np.sum(weight_ones),np.sum(weight_ones * xsec_weight))
+                        # print(sel_key,sel_str,np.sum(weight_ones),np.sum(weight_ones * xsec_weight))
 
                 # get event weight
                 if not is_data:
@@ -135,9 +134,7 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys,
                             weight = data[w]
                         except ValueError:
                             print_warning = True
-                            if w == "weight_vjets_nominal" or (
-                                w == "weight_L1Prefiring" and yr == "2018"
-                            ):
+                            if w == "weight_vjets_nominal" or (w == "weight_L1Prefiring" and yr == "2018"):
                                 print_warning = False
                             if print_warning:
                                 logger.warning(f"No {w} variable in parquet for sample {sample}")
@@ -166,9 +163,7 @@ def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys,
             for key, numevents in values[sample_to_use].items():
                 cut_index = list(values[sample_to_use].keys()).index(key)
                 # print("fill histogram ", cut_index, numevents)
-                hists["cutflow"].fill(
-                    samples=sample_to_use, var=cut_index, weight=numevents
-                )
+                hists["cutflow"].fill(samples=sample_to_use, var=cut_index, weight=numevents)
 
     return hists, values
 
@@ -206,11 +201,11 @@ def main(args):
     os.system(f"cp {args.vars} {odir}/")
 
     # extract extra cut keys from yaml file
-    global axis_dict
+    axes = axis_dict
     extra_cut_keys = []
     if "selection" in variables.keys():
         extra_cut_keys = list(variables["selection"].keys())
-    axis_dict["cutflow"] = get_cutflow_axis(cut_keys + extra_cut_keys)
+    axes["cutflow"] = get_cutflow_axis(cut_keys + extra_cut_keys)
 
     axis_sample = hist2.axis.StrCategory([], name="samples", growth=True)
 
@@ -229,7 +224,7 @@ def main(args):
         for var in vars_to_plot:
             hists[var] = hist2.Hist(
                 axis_sample,
-                axis_dict[var],
+                axes[var],
             )
     else:
         channels = args.channels.split(",")
@@ -246,7 +241,7 @@ def main(args):
         for key, value in variables[ch]["weights"].items():
             if value == 1:
                 weights.append(key)
-        logger.info("Weights ",weights)
+        logger.info("Weights ", weights)
 
         presel = {}
         if "selection" in variables.keys():
@@ -254,7 +249,7 @@ def main(args):
             for presel_key, presel_str in variables["selection"][ch].items():
                 cum_presel_str += "& " + presel_str
                 presel[presel_key] = cum_presel_str
-            logger.info("Pre-selection: %s"%presel.keys())
+            logger.info("Pre-selection: %s" % presel.keys())
 
         if len(glob.glob(f"{odir}/{ch}_hists.pkl")) > 0:
             logger.warning("Histograms already exist - remaking them")
@@ -264,10 +259,10 @@ def main(args):
             for var in vars_to_plot:
                 hists_per_ch[var] = hist2.Hist(
                     axis_sample,
-                    axis_dict[var],
+                    axes[var],
                 )
         else:
-            logging.info(f"Filling the same histogram to combine all channels")
+            logging.info("Filling the same histogram to combine all channels")
             hists_per_ch = hists
 
         hists_per_ch, values_per_ch = make_hists(
@@ -283,7 +278,7 @@ def main(args):
         )
         print(values_per_ch)
         print(args.channels)
-        
+
         if args.channels != "all":
             logging.info(f"Saving histograms to {odir}/{ch}_hists.pkl")
             with open(f"{odir}/{ch}_hists.pkl", "wb") as f:
@@ -298,7 +293,6 @@ def main(args):
                         values[sample][cutkey] += val
                     else:
                         values[sample][cutkey] = val
-
 
     if args.channels == "all":
         print(values)

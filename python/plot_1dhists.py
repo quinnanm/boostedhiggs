@@ -2,25 +2,16 @@
 
 from utils import (
     axis_dict,
-    add_samples,
     color_by_sample,
-    signal_ref,
-    data_ref,
     simplified_labels,
-    color_by_sample,
     get_cutflow_axis,
 )
 import pickle as pkl
 import os
-import sys
 import argparse
 
-import hist as hist2
-import matplotlib
 import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
 import mplhep as hep
-from hist.intervals import clopper_pearson_interval
 
 import warnings
 
@@ -53,11 +44,12 @@ def plot_1dhists(year, channels, odir, var, samples, tag, logy):
     # make plots per channel
     try:
         h = hists[channels[0]][var]
-    except:
+    except ValueError:
         print(f"Variable {var} not present in hists pkl file")
         exit
 
     all_samples = [h.axes[0].value(i) for i in range(len(h.axes[0].edges))]
+    print("Samples present ", all_samples)
 
     ch_titles = {
         "ele": "Electron",
@@ -65,24 +57,24 @@ def plot_1dhists(year, channels, odir, var, samples, tag, logy):
         "all": "Semi-leptonic",
         "lep": "Semi-leptonic",
     }
-    
+
     for ch in channels:
         ch_title = ch_titles[ch]
         fig, ax = plt.subplots(figsize=(8, 8))
         for sample in samples:
             try:
                 h = hists[ch][var][{"samples": sample}]
-            except:
-                raise Exception("Unable to access histogram - samples available ",hists[ch][var][{"var": sum}])
+            except ValueError:
+                raise Exception("Unable to access histogram - samples available ", hists[ch][var][{"var": sum}])
             try:
                 label = simplified_labels[sample]
-            except:
+            except ValueError:
                 raise Exception("Unable to access simplified_label")
             try:
                 color = color_by_sample[sample]
-            except:
+            except ValueError:
                 raise Exception("Unable to access color_by_sample")
-            
+
             hep.histplot(
                 h,
                 ax=ax,
@@ -90,10 +82,10 @@ def plot_1dhists(year, channels, odir, var, samples, tag, logy):
                 linewidth=3,
                 color=color,
             )
-            
+
         hep.cms.lumitext(f"{year} (13 TeV)", ax=ax)
         hep.cms.text("Work in Progress", ax=ax)
-        ax.grid(linestyle='-', linewidth=0.2)
+        ax.grid(linestyle="-", linewidth=0.2)
         ax.legend(title=f"{ch_title} Channel")
         if var == "cutflow":
             ax.set_xticks(range(len(cut_keys)), cut_keys, rotation=40, fontsize=13)
@@ -122,7 +114,7 @@ def main(args):
 
     channels = args.channels.split(",")
 
-    print(f"Plotting...")
+    print("Plotting...")
     plot_1dhists(
         args.year,
         channels,
@@ -138,9 +130,7 @@ if __name__ == "__main__":
     # e.g. run locally as
     # python plot_1dhists.py --year 2017 --odir hists --channels ele --var lep_pt
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--samples", dest="samples", required=True, help="string w samples"
-    )
+    parser.add_argument("--samples", dest="samples", required=True, help="string w samples")
     parser.add_argument("--tag", dest="tag", default="", help="tag the plot")
     parser.add_argument("--year", dest="year", default="2017", help="year")
     parser.add_argument(
@@ -155,9 +145,7 @@ if __name__ == "__main__":
         default="hists",
         help="tag for output directory... will append '/{year}' to it",
     )
-    parser.add_argument(
-        "--var", dest="var", default=None, required=True, help="variable to plot"
-    )
+    parser.add_argument("--var", dest="var", default=None, required=True, help="variable to plot")
     parser.add_argument("--logy", dest="logy", action="store_true", help="Log y axis")
     parser.add_argument(
         "--cut-keys",
@@ -169,7 +157,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     cut_keys = args.cut_keys.split(",")
-    if len(cut_keys)==0 and args.var=="cutflow":
+    if len(cut_keys) == 0 and args.var == "cutflow":
         print("no cut keys given for cutflow")
     global axis_dict
     axis_dict["cutflow"] = get_cutflow_axis(cut_keys)

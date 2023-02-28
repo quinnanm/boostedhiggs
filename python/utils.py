@@ -100,7 +100,7 @@ def get_sample_to_use(sample, year, is_data):
     else:
         sample_to_use = sample
 
-    #print(f"sample is {sample} - going to use {sample_to_use} in histogram")
+    # print(f"sample is {sample} - going to use {sample_to_use} in histogram")
     return sample_to_use
 
 
@@ -123,16 +123,12 @@ def get_xsecweight(pkl_files, year, sample, is_data, luminosity):
         try:
             xsec = eval(str((xsec[sample])))
         except ValueError:
-            print(
-                f"sample {sample} doesn't have xsecs defined in xsec_pfnano.json so will skip it"
-            )
+            print(f"sample {sample} doesn't have xsecs defined in xsec_pfnano.json so will skip it")
             return None
 
         # get overall weighting of events.. each event has a genweight...
         # sumgenweight sums over events in a chunk... sum_sumgenweight sums over chunks
-        xsec_weight = (xsec * luminosity) / get_sum_sumgenweight(
-            pkl_files, year, sample
-        )
+        xsec_weight = (xsec * luminosity) / get_sum_sumgenweight(pkl_files, year, sample)
     else:
         xsec_weight = 1
     return xsec_weight
@@ -169,40 +165,16 @@ def get_cutflow_axis(cut_keys):
 
 
 axis_dict = {
-    "Zmass": hist2.axis.Regular(
-        40, 30, 450, name="var", label=r"Zmass [GeV]", overflow=True
-    ),
-    "lep_pt": hist2.axis.Regular(
-        40, 30, 450, name="var", label=r"Lepton $p_T$ [GeV]", overflow=True
-    ),
-    "lep_fj_m": hist2.axis.Regular(
-        35, 0, 280, name="var", label=r"Jet - Lepton mass [GeV]", overflow=True
-    ),
-    "lep_met_mt": hist2.axis.Regular(
-        35, 0, 400, name="var", label=r"$m_T(lep, p_T^{miss})$ [GeV]", overflow=True
-    ),
-    "fj_bjets_ophem": hist2.axis.Regular(
-        35, 0, 1, name="var", label=r"max btagFlavB (opphem)", overflow=True
-    ),
-    "fj_bjets": hist2.axis.Regular(
-        35, 0, 1, name="var", label=r"max btagFlavB", overflow=True
-    ),
-    "lep_fj_dr": hist2.axis.Regular(
-        35, 0.0, 0.8, name="var", label=r"$\Delta R(l, Jet)$", overflow=True
-    ),
-    "mu_mvaId": hist2.axis.Variable(
-        [0, 1, 2, 3, 4, 5], name="var", label="Muon MVAID", overflow=True
-    ),
-    "ele_highPtId": hist2.axis.Regular(
-        5, 0, 5, name="var", label="Electron high pT ID", overflow=True
-    ),
-    "mu_highPtId": hist2.axis.Regular(
-        5, 0, 5, name="var", label="Muon high pT ID", overflow=True
-    ),
-    "fj_pt": hist2.axis.Regular(
-        30, 200, 1000, name="var", label=r"Jet $p_T$ [GeV]", overflow=True
-    ),
-    "fj_msoftdrop": hist2.axis.Regular(
-        45, 20, 400, name="var", label=r"Jet $m_{sd}$ [GeV]", overflow=True
-    ),
+    "Zmass": hist2.axis.Regular(40, 30, 450, name="var", label=r"Zmass [GeV]", overflow=True),
+    "lep_pt": hist2.axis.Regular(40, 30, 450, name="var", label=r"Lepton $p_T$ [GeV]", overflow=True),
+    "lep_fj_m": hist2.axis.Regular(35, 0, 280, name="var", label=r"Jet - Lepton mass [GeV]", overflow=True),
+    "lep_met_mt": hist2.axis.Regular(35, 0, 400, name="var", label=r"$m_T(lep, p_T^{miss})$ [GeV]", overflow=True),
+    "fj_bjets_ophem": hist2.axis.Regular(35, 0, 1, name="var", label=r"max btagFlavB (opphem)", overflow=True),
+    "fj_bjets": hist2.axis.Regular(35, 0, 1, name="var", label=r"max btagFlavB", overflow=True),
+    "lep_fj_dr": hist2.axis.Regular(35, 0.0, 0.8, name="var", label=r"$\Delta R(l, Jet)$", overflow=True),
+    "mu_mvaId": hist2.axis.Variable([0, 1, 2, 3, 4, 5], name="var", label="Muon MVAID", overflow=True),
+    "ele_highPtId": hist2.axis.Regular(5, 0, 5, name="var", label="Electron high pT ID", overflow=True),
+    "mu_highPtId": hist2.axis.Regular(5, 0, 5, name="var", label="Muon high pT ID", overflow=True),
+    "fj_pt": hist2.axis.Regular(30, 200, 1000, name="var", label=r"Jet $p_T$ [GeV]", overflow=True),
+    "fj_msoftdrop": hist2.axis.Regular(45, 20, 400, name="var", label=r"Jet $m_{sd}$ [GeV]", overflow=True),
 }
