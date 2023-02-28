@@ -125,8 +125,8 @@ def main(args):
 
 if __name__ == "__main__":
     """
-    python condor/submit.py --year 2017 --tag Aug11 --samples samples_pfnano_mc.json --pfnano --submit --inference
-    python condor/submit.py --year 2017 --tag lumi --processor lumi --samples samples_pfnano_data.json --pfnano --submit
+    python condor/submit.py --year 2017 --tag Aug11 --samples samples_mc.json --submit --inference
+    python condor/submit.py --year 2017 --tag lumi --processor lumi --samples samples_data.json --pfnano --submit
 
     """
 
@@ -137,7 +137,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--processor", dest="processor", default="hww", help="which processor", type=str, choices=["hww", "trigger", "lumi"]
     )
-    parser.add_argument("--samples", dest="samples", default="samples_pfnano.json", help="path to datafiles", type=str)
+    parser.add_argument("--samples", dest="samples", default="samples_mc.json", help="path to datafiles", type=str)
     parser.add_argument("--slist", dest="slist", default=None, help="give sample list separated by commas")
     parser.add_argument("--test", dest="test", action="store_true", help="only 2 jobs per sample will be created")
     parser.add_argument("--submit", dest="submit", action="store_true", help="submit jobs when created")

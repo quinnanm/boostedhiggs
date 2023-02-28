@@ -163,11 +163,11 @@ def main(args):
 if __name__ == "__main__":
 
     # e.g.
-    # noqa: python run.py --year 2017 --processor hww --pfnano v2_4 --n 1 --starti 0 --json samples_pfnano_quick.json --channel=mu --inference
+    # noqa: python run.py --year 2017 --processor hww --pfnano v2_4 --n 1 --starti 0 --json samples_quick.json --channel=mu --inference
 
-    # noqa: run locally on lpc (hww mc) as: python run.py --year 2017 --processor hww --pfnano v2_2 --n 1 --starti 0 --json samples_pfnano_mc.json
-    # noqa: run locally on lpc (hww mc) as: python run.py --year 2017 --processor lumi --pfnano v2_2 --n 1 --starti 0 --json samples_pfnano_data.json
-    # noqa: run locally on lpc (vh) as: python run.py --year 2018 --sample HZJ_HToWW_M-125 --processor vh --pfnano v2_2 --n 1 --starti 0 --json samples_pfnano_mc.json --channels lep --executor iterative
+    # noqa: run locally on lpc (hww mc) as: python run.py --year 2017 --processor hww --pfnano v2_2 --n 1 --starti 0 --json samples_mc.json
+    # noqa: run locally on lpc (hww mc) as: python run.py --year 2017 --processor lumi --pfnano v2_2 --n 1 --starti 0 --json samples_data.json
+    # noqa: run locally on lpc (vh) as: python run.py --year 2018 --sample HZJ_HToWW_M-125 --processor vh --pfnano v2_2 --n 1 --starti 0 --json samples_mc.json --channels lep --executor iterative
     # noqa: run locally on lpc (hww trigger) as: python run.py --year 2017 --processor trigger --pfnano v2_2 --n 45 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele
 
     # noqa: python run.py --year 2017 --processor hww --pfnano v2_4 --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels mu

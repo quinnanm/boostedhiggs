@@ -47,8 +47,8 @@ def main(args):
 
 if __name__ == "__main__":
     """
-    python check_jobs.py --pfnano --year 2017 --username cmantill --tag Nov4 --samples samples_pfnano_mc.json
-    python check_jobs.py --pfnano --year 2018 --username fmokhtar --tag lumiv3 --samples samples_pfnano_data.json
+    python check_jobs.py --year 2017 --username cmantill --tag Nov4 --samples samples_mc.json
+    python check_jobs.py --year 2018 --username fmokhtar --tag lumiv3 --samples samples_data.json
     """
 
     parser = argparse.ArgumentParser()
@@ -64,7 +64,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--samples",
         dest="samples",
-        default="samples_pfnano_mc.json",
+        default="samples_mc.json",
         help="path to datafiles",
         type=str,
     )
@@ -74,9 +74,13 @@ if __name__ == "__main__":
         default=None,
         help="give sample list separated by commas",
     )
-    parser.add_argument("--pfnano", dest="pfnano", action="store_true")
-    parser.add_argument("--no-pfnano", dest="pfnano", action="store_false")
-    parser.set_defaults(pfnano=True)
+    parser.add_argument(
+        "--pfnano",
+        dest="pfnano",
+        type=str,
+        default="v2_2",
+        help="pfnano version",
+    )
     args = parser.parse_args()
 
     main(args)
