@@ -73,6 +73,7 @@ def main(args):
     if args.processor == "hww":
         from boostedhiggs.hwwprocessor import HwwProcessor
 
+        print("hww")
         p = HwwProcessor(
             year=year,
             yearmod=yearmod,
