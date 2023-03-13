@@ -102,6 +102,7 @@ class HwwProcessor(processor.ProcessorABC):
 
     @property
     def accumulator(self):
+        print("donezzz")
         return self._accumulator
 
     def save_dfs_parquet(self, fname, dfs_dict, ch):
@@ -138,6 +139,7 @@ class HwwProcessor(processor.ProcessorABC):
 
     def process(self, events: ak.Array):
         """Returns skimmed events which pass preselection cuts and with the branches listed in self._skimvars"""
+        print("done0 first")
         dataset = events.metadata["dataset"]
         nevents = len(events)
         print("done0")
