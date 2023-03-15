@@ -105,7 +105,6 @@ def main(args):
         from boostedhiggs.trigger_efficiencies_processor import TriggerEfficienciesProcessor
 
         p = TriggerEfficienciesProcessor(year=args.year)
-    print("0")
 
     tic = time.time()
     if args.executor == "dask":
@@ -135,16 +134,15 @@ def main(args):
             executor = processor.FuturesExecutor(status=True)
         else:
             executor = processor.IterativeExecutor(status=True)
-    print("1")
+
     nanoevents.PFNanoAODSchema.mixins["SV"] = "PFCand"
-    print("2")
+
     run = processor.Runner(
         executor=executor,
         savemetrics=True,
         schema=nanoevents.PFNanoAODSchema,
         chunksize=args.chunksize,
     )
-    print("3")
 
     out, metrics = run(fileset, "Events", processor_instance=p)
 
