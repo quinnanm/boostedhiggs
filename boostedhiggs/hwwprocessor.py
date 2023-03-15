@@ -98,11 +98,9 @@ class HwwProcessor(processor.ProcessorABC):
             self.common_weights = ["genweight", "L1Prefiring", "pileup"]
         else:
             self.common_weights = ["genweight", "pileup"]
-        print("done")
 
     @property
     def accumulator(self):
-        print("donezzz")
         return self._accumulator
 
     def save_dfs_parquet(self, fname, dfs_dict, ch):
@@ -139,10 +137,9 @@ class HwwProcessor(processor.ProcessorABC):
 
     def process(self, events: ak.Array):
         """Returns skimmed events which pass preselection cuts and with the branches listed in self._skimvars"""
-        print("done0 first")
+
         dataset = events.metadata["dataset"]
         nevents = len(events)
-        print("done0")
         self.isMC = hasattr(events, "genWeight")
         self.weights = Weights(nevents, storeIndividual=True)
         self.weights_per_ch = {}
@@ -152,10 +149,8 @@ class HwwProcessor(processor.ProcessorABC):
             self.weights_per_ch[ch] = []
             self.selections[ch] = PackedSelection()
             self.cutflows[ch] = {}
-        print("done1")
 
         sumgenweight = ak.sum(events.genWeight) if self.isMC else 0
-        print("done2")
 
         # trigger
         trigger = {}
@@ -172,7 +167,6 @@ class HwwProcessor(processor.ProcessorABC):
                     else:
                         trigger_noiso[ch] = trigger_noiso[ch] | events.HLT[t]
                     trigger[ch] = trigger[ch] | events.HLT[t]
-        print("done3")
 
         # metfilters
         metfilters = np.ones(nevents, dtype="bool")
@@ -180,7 +174,6 @@ class HwwProcessor(processor.ProcessorABC):
         for mf in self._metfilters[metfilterkey]:
             if mf in events.Flag.fields:
                 metfilters = metfilters & events.Flag[mf]
-        print("done4")
 
         # taus (will need to refine to avoid overlap with htt)
         loose_taus_mu = (events.Tau.pt > 20) & (abs(events.Tau.eta) < 2.3) & (events.Tau.idAntiMu >= 1)  # loose antiMu ID
@@ -191,7 +184,6 @@ class HwwProcessor(processor.ProcessorABC):
         )
         n_loose_taus_mu = ak.sum(loose_taus_mu, axis=1)
         n_loose_taus_ele = ak.sum(loose_taus_ele, axis=1)
-        print("done5")
 
         muons = ak.with_field(events.Muon, 0, "flavor")
         electrons = ak.with_field(events.Electron, 1, "flavor")
@@ -222,7 +214,6 @@ class HwwProcessor(processor.ProcessorABC):
             & (electrons.cutBased >= electrons.LOOSE)
         )
         n_loose_electrons = ak.sum(loose_electrons, axis=1)
-        print("done6")
 
         good_electrons = (
             (electrons.pt > 38)

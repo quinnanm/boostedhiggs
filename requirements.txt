@@ -1,0 +1,11 @@
+awkward==1.10.3
+black
+coffea>=0.7.20
+hist
+jetnet>=0.2.1.post2
+matplotlib
+mplhep
+pre-commit
+tritonclient[grpc]
+tritonclient[http]
+# fastjet
