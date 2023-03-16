@@ -286,7 +286,7 @@ class HwwProcessor(processor.ProcessorABC):
         rec_higgs = candidatefj + candidateNeutrino  # fatjet with lepton + neutrino
 
         # TODO: add candidateNeutrino to W_lnu later
-        W_lnu = candidatelep
+        W_lnu = candidatelep_p4
         W_qq = candidatefj - candidatelep_p4
 
         # b-jets
