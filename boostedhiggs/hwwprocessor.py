@@ -262,8 +262,8 @@ class HwwProcessor(processor.ProcessorABC):
 
         # for lep channel: first clean jets and leptons by removing overlap, then pick candidate_fj closest to the lepton
         # TODO: revert lep & jet overlap
-        # lep_in_fj_overlap_bool = good_fatjets.delta_r(candidatelep_p4) > 0.1
-        # good_fatjets = good_fatjets[lep_in_fj_overlap_bool]
+        lep_in_fj_overlap_bool = good_fatjets.delta_r(candidatelep_p4) > 0.1
+        good_fatjets = good_fatjets[lep_in_fj_overlap_bool]
         fj_idx_lep = ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)
         candidatefj = ak.firsts(good_fatjets[fj_idx_lep])
 
@@ -286,10 +286,10 @@ class HwwProcessor(processor.ProcessorABC):
         rec_higgs_mass = (candidatefj + candidateNeutrino).mass  # mass of fatjet with lepton + neutrino
 
         # b-jets
-        # pick highest b score in opposite direction from signal and make cut to avoid tt background events producing bjets)
         dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj))
-        bjets_away_lepfj = goodjets[dphi_jet_lepfj > np.pi / 2]
-        bjets = goodjets  # not necessarily opposite hemisphere
+        bjets = ak.max(goodjets.btagDeepFlavB, axis=1)  # not necessarily opposite hemisphere
+        # pick highest b score in opposite direction from signal and make cut to avoid tt background events producing bjets)
+        bjets_away_lepfj = ak.max(goodjets[dphi_jet_lepfj > np.pi / 2].btagDeepFlavB, axis=1)
 
         # deltaR
         lep_fj_dr = candidatefj.delta_r(candidatelep_p4)
@@ -310,8 +310,8 @@ class HwwProcessor(processor.ProcessorABC):
             "lep": {
                 "fj_pt": candidatefj.pt,
                 "fj_msoftdrop": candidatefj.msdcorr,
-                "fj_bjets_ophem": ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1),
-                "fj_bjets": ak.max(bjets.btagDeepFlavB, axis=1),
+                "fj_bjets_ophem": bjets_away_lepfj,
+                "fj_bjets": bjets,
                 "lep_pt": candidatelep.pt,
                 "lep_isolation": lep_reliso,
                 "lep_misolation": lep_miso,
