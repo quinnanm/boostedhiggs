@@ -287,7 +287,7 @@ class HwwProcessor(processor.ProcessorABC):
 
         # TODO: add candidateNeutrino to W_lnu later
         W_lnu = candidatelep
-        W_qq = candidatefj - candidatelep
+        W_qq = candidatefj - candidatelep_p4
 
         # b-jets
         dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj))
@@ -322,7 +322,7 @@ class HwwProcessor(processor.ProcessorABC):
                 "lep_misolation": lep_miso,
                 "fj_minus_lep_mass": fj_minus_lep.mass,
                 "fj_minus_lep_pt": fj_minus_lep.pt,
-                "dphi_lep_and_fj_minus_lep": candidatelep.delta_phi(fj_minus_lep),
+                "dphi_lep_and_fj_minus_lep": candidatelep_p4.delta_phi(fj_minus_lep),
                 "lep_fj_dr": lep_fj_dr,
                 "lep_met_mt": mt_lep_met,
                 "met_fj_dphi": met_fjlep_dphi,
