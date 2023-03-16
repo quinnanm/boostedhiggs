@@ -300,6 +300,9 @@ pip install tritonclient['all']
 # install xrootd
 conda install -c conda-forge xrootd
 
+# install jupyter notebook
+pip install notebook
+
 # install pre-commit
 pip install pre-commit
 

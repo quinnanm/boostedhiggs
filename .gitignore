@@ -48,8 +48,9 @@ extra/
 binder_tagger_resources/
 melissa_dataconfig_semilep_ttbarwjets.yaml
 
-
 *.pdf
 *.png
 *.csv
 *.gz
+
+NN/
