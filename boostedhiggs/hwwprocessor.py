@@ -261,8 +261,9 @@ class HwwProcessor(processor.ProcessorABC):
         good_fatjets = good_fatjets[ak.argsort(good_fatjets.pt, ascending=False)]  # sort them by pt
 
         # for lep channel: first clean jets and leptons by removing overlap, then pick candidate_fj closest to the lepton
-        lep_in_fj_overlap_bool = good_fatjets.delta_r(candidatelep_p4) > 0.1
-        good_fatjets = good_fatjets[lep_in_fj_overlap_bool]
+        # TODO: revert lep & jet overlap
+        # lep_in_fj_overlap_bool = good_fatjets.delta_r(candidatelep_p4) > 0.1
+        # good_fatjets = good_fatjets[lep_in_fj_overlap_bool]
         fj_idx_lep = ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)
         candidatefj = ak.firsts(good_fatjets[fj_idx_lep])
 
