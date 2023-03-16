@@ -261,8 +261,9 @@ class HwwProcessor(processor.ProcessorABC):
         good_fatjets = good_fatjets[ak.argsort(good_fatjets.pt, ascending=False)]  # sort them by pt
 
         # for lep channel: first clean jets and leptons by removing overlap, then pick candidate_fj closest to the lepton
-        lep_in_fj_overlap_bool = good_fatjets.delta_r(candidatelep_p4) > 0.1
-        good_fatjets = good_fatjets[lep_in_fj_overlap_bool]
+        # TODO: revert overlap cut
+        # lep_in_fj_overlap_bool = good_fatjets.delta_r(candidatelep_p4) > 0.1
+        # good_fatjets = good_fatjets[lep_in_fj_overlap_bool]
         fj_idx_lep = ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)
         candidatefj = ak.firsts(good_fatjets[fj_idx_lep])
 
@@ -278,11 +279,15 @@ class HwwProcessor(processor.ProcessorABC):
         # candidatefj = ak.firsts(good_fatjets[ak.argmin(good_fatjets.delta_phi(met), axis=1, keepdims=True)])
 
         # fatjet - lepton mass
-        lep_fj_mass = (candidatefj - candidatelep_p4).mass  # mass of fatjet without lepton
+        fj_minus_lep = candidatefj - candidatelep_p4
 
         # fatjet + neutrino
         candidateNeutrino = get_neutrino_z(candidatefj, met)
         rec_higgs = candidatefj + candidateNeutrino  # fatjet with lepton + neutrino
+
+        # TODO: add candidateNeutrino to W_lnu later
+        W_lnu = candidatelep
+        W_qq = candidatefj - candidatelep
 
         # b-jets
         dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj))
@@ -305,19 +310,19 @@ class HwwProcessor(processor.ProcessorABC):
         # isvbf = ((deta > 3.5) & (mjj > 1000))
         # isvbf = ak.fill_none(isvbf,False)
 
-        W_lnu = candidatelep + candidateNeutrino
-        W_qq = candidatefj - candidatelep - candidateNeutrino
-
         variables = {
             "lep": {
                 "fj_pt": candidatefj.pt,
                 "fj_msoftdrop": candidatefj.msdcorr,
+                "fj_lsf3": candidatefj.lsf3,
                 "fj_bjets_ophem": bjets_away_lepfj,
                 "fj_bjets": bjets,
                 "lep_pt": candidatelep.pt,
                 "lep_isolation": lep_reliso,
                 "lep_misolation": lep_miso,
-                "lep_fj_m": lep_fj_mass,
+                "fj_minus_lep_mass": fj_minus_lep.mass,
+                "fj_minus_lep_pt": fj_minus_lep.pt,
+                "dphi_lep_and_fj_minus_lep": candidatelep.delta_phi(fj_minus_lep),
                 "lep_fj_dr": lep_fj_dr,
                 "lep_met_mt": mt_lep_met,
                 "met_fj_dphi": met_fjlep_dphi,
