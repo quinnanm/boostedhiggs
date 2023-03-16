@@ -261,7 +261,6 @@ class HwwProcessor(processor.ProcessorABC):
         good_fatjets = good_fatjets[ak.argsort(good_fatjets.pt, ascending=False)]  # sort them by pt
 
         # for lep channel: first clean jets and leptons by removing overlap, then pick candidate_fj closest to the lepton
-        # TODO: revert lep & jet overlap
         lep_in_fj_overlap_bool = good_fatjets.delta_r(candidatelep_p4) > 0.1
         good_fatjets = good_fatjets[lep_in_fj_overlap_bool]
         fj_idx_lep = ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)
@@ -283,7 +282,7 @@ class HwwProcessor(processor.ProcessorABC):
 
         # fatjet + neutrino
         candidateNeutrino = get_neutrino_z(candidatefj, met)
-        rec_higgs_mass = (candidatefj + candidateNeutrino).mass  # mass of fatjet with lepton + neutrino
+        rec_higgs = candidatefj + candidateNeutrino  # fatjet with lepton + neutrino
 
         # b-jets
         dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj))
@@ -306,6 +305,9 @@ class HwwProcessor(processor.ProcessorABC):
         # isvbf = ((deta > 3.5) & (mjj > 1000))
         # isvbf = ak.fill_none(isvbf,False)
 
+        W_lnu = candidatelep + candidateNeutrino
+        W_qq = candidatefj - candidatelep - candidateNeutrino
+
         variables = {
             "lep": {
                 "fj_pt": candidatefj.pt,
@@ -319,7 +321,10 @@ class HwwProcessor(processor.ProcessorABC):
                 "lep_fj_dr": lep_fj_dr,
                 "lep_met_mt": mt_lep_met,
                 "met_fj_dphi": met_fjlep_dphi,
-                "rec_higgs_m": rec_higgs_mass,
+                "rec_higgs_m": rec_higgs.mass,
+                "rec_W_lnu_pt": W_lnu.pt,
+                "rec_W_qq_pt": W_qq.pt,
+                "rec_dphi_WW": W_lnu.delta_phi(W_qq),
             },
             "ele": {
                 "ele_highPtId": ele_highPtId,
