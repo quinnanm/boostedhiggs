@@ -140,8 +140,9 @@ class HwwProcessor(processor.ProcessorABC):
 
         for ch in channels:
             if ch not in self._channels:
-                logger.warning("Attempted to add selection to unexpected channel: {ch}")
+                logger.warning(f"Attempted to add selection to unexpected channel: {ch} not in %s" % (self._channels))
                 continue
+
             # add selection
             self.selections[ch].add(name, sel)
 

@@ -26,19 +26,23 @@ def main(args):
             for subdir in files_all[args.year]:
                 for key, flist in files_all[args.year][subdir].items():
                     if key in args.sample:
-                        # files[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist]
                         files[key] = ["root://cmseos.fnal.gov/" + f for f in flist]
 
     else:
         # get samples
-        if "metadata" in args.json:
-            with open(args.json, "r") as f:
+        if "metadata" in args.config:
+            with open(args.config, "r") as f:
                 files = json.load(f)
         else:
-            # hopefully this step is avoided in condor jobs that have metadata.json
-            from condor.file_utils import loadJson
+            if not args.config or not args.configkey:
+                raise Exception("No config or configkey provided for condor jobs")
 
-            files, _ = loadJson(args.json, args.year, args.pfnano)
+            # hopefully this step is avoided in condor jobs that have metadata.json
+            from condor.file_utils import loadFiles
+
+            files, _ = loadFiles(args.config, args.configkey, args.year, args.pfnano, args.sample.split(","))
+
+            # print(files)
 
     if not files:
         print("Did not find files.. Exiting.")
@@ -166,20 +170,16 @@ def main(args):
 if __name__ == "__main__":
 
     # e.g.
-    # noqa: python run.py --year 2017 --processor hww --pfnano v2_4 --n 1 --starti 0 --json samples_quick.json --channel=mu --inference
-
-    # noqa: run locally on lpc (hww mc) as: python run.py --year 2017 --processor hww --pfnano v2_2 --n 1 --starti 0 --json samples_mc.json
-    # noqa: run locally on lpc (hww mc) as: python run.py --year 2017 --processor lumi --pfnano v2_2 --n 1 --starti 0 --json samples_data.json
-    # noqa: run locally on lpc (vh) as: python run.py --year 2018 --sample HZJ_HToWW_M-125 --processor vh --pfnano v2_2 --n 1 --starti 0 --json samples_mc.json --channels lep --executor iterative
-    # noqa: run locally on lpc (hww trigger) as: python run.py --year 2017 --processor trigger --pfnano v2_2 --n 45 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele
-
-    # noqa: python run.py --year 2017 --processor hww --pfnano v2_4 --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels mu
+    # noqa: run locally on lpc (hww mc) as: python run.py --year 2017 --processor hww --pfnano v2_2 --n 1 --starti 0 --config samples_inclusive.yaml --key mc
+    # noqa: run locally on lpc (vh) as: python run.py --year 2018 --sample HZJ_HToWW_M-125 --processor vh --pfnano v2_2 --n 1 --starti 0 --config samples_vh.yaml --key mc --channels lep --executor iterative
+    # noqa: run locally on lpc (hww trigger) as: python run.py --year 2017 --processor trigger --pfnano v2_2 --n 45 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele --config samples_inclusive.yaml --key mc
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--year", dest="year", default="2017", help="year", type=str)
     parser.add_argument("--starti", dest="starti", default=0, help="start index of files", type=int)
     parser.add_argument("--n", dest="n", default=-1, help="number of files to process", type=int)
-    parser.add_argument("--json", dest="json", default="metadata.json", help="path to datafiles", type=str)
+    parser.add_argument("--config", dest="config", default=None, help="path to datafiles", type=str)
+    parser.add_argument("--key", dest="configkey", default=None, help="config key: [data, mc, ... ]", type=str)
     parser.add_argument("--sample", dest="sample", default=None, help="specify sample", type=str)
     parser.add_argument("--processor", dest="processor", required=True, help="processor", type=str)
     parser.add_argument("--chunksize", dest="chunksize", default=10000, help="chunk size in processor", type=int)

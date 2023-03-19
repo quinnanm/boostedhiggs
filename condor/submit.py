@@ -5,11 +5,11 @@ Splits the total fileset and creates condor job submission files for the specifi
 Author(s): Cristina Mantilla, Raghav Kansal, Farouk Mokhtar
 """
 import argparse
-import json
 import os
 from math import ceil
 
-from file_utils import loadJson
+import json
+from file_utils import loadFiles
 
 
 def main(args):
@@ -29,8 +29,8 @@ def main(args):
     logdir = locdir + "/logs"
     os.system(f"mkdir -p {logdir}")
 
-    # copy the json samples file to the locdir
-    os.system(f"cp {args.samples} {locdir}")
+    # copy the splitting file to the locdir
+    os.system(f"cp pfnano_splitting.yaml {locdir}")
 
     # and condor directory
     print("CONDOR work dir: " + outdir)
@@ -38,11 +38,12 @@ def main(args):
 
     # build metadata.json with samples
     slist = args.slist.split(",") if args.slist is not None else None
-    files, nfiles_per_job = loadJson(args.samples, args.year, args.pfnano, slist)
-    metadata_file = f"metadata_{args.samples}"
+    files, nfiles_per_job = loadFiles(args.config, args.configkey, args.year, args.pfnano, slist)
+    metadata_file = f"metadata_{args.configkey}.json"
     with open(f"{locdir}/{metadata_file}", "w") as f:
         json.dump(files, f, sort_keys=True, indent=2)
     print(files.keys())
+
     # submit a cluster of jobs per sample
     for sample in files.keys():
         print(f"Making directory /eos/uscms/{outdir}/{sample}")
@@ -100,7 +101,7 @@ def main(args):
             line = line.replace("SAMPLE", sample)
             line = line.replace("CHANNELS", args.channels)
             line = line.replace("EOSOUTPKL", eosoutput_pkl)
-            line = line.replace("PFNANO", "--pfnano {args.pfnano}")
+            line = line.replace("PFNANO", f"--pfnano {args.pfnano}")
             if args.inference:
                 line = line.replace("INFERENCE", "--inference")
             else:
@@ -125,9 +126,7 @@ def main(args):
 
 if __name__ == "__main__":
     """
-    python condor/submit.py --year 2017 --tag Aug11 --samples samples_mc.json --submit --inference
-    python condor/submit.py --year 2017 --tag lumi --processor lumi --samples samples_data.json --pfnano --submit
-
+    python condor/submit.py --year 2017 --tag test --config samples_inclusive.yaml --key mc --no-inference --channels mu
     """
 
     parser = argparse.ArgumentParser()
@@ -137,7 +136,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--processor", dest="processor", default="hww", help="which processor", type=str, choices=["hww", "trigger", "lumi"]
     )
-    parser.add_argument("--samples", dest="samples", default="samples_mc.json", help="path to datafiles", type=str)
+    parser.add_argument("--config", dest="config", required=True, help="path to config yaml", type=str)
+    parser.add_argument("--key", dest="configkey", required=True, help="config key: [data, mc, ... ]", type=str)
     parser.add_argument("--slist", dest="slist", default=None, help="give sample list separated by commas")
     parser.add_argument("--test", dest="test", action="store_true", help="only 2 jobs per sample will be created")
     parser.add_argument("--submit", dest="submit", action="store_true", help="submit jobs when created")

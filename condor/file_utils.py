@@ -1,20 +1,38 @@
 import json
+import yaml
 
 
-def loadJson(samplesjson="samples_mc.json", year="2017", pfnano="v2_2", sampleslist=None):
+def loadFiles(samples_yaml="samples_inclusive.yaml", config="mc", year="2017", pfnano="v2_2", sampleslist=None):
     samples = []
     values = {}
-    with open(samplesjson, "r") as f:
-        json_samples = json.load(f)[year]
-        for key, value in json_samples.items():
-            if value != 0:
-                if sampleslist is not None and isinstance(sampleslist, list):
-                    if key in sampleslist:
-                        samples.append(key)
+
+    splittingname = "pfnano_splitting.yaml"
+    with open(splittingname, "r") as f:
+        try:
+            splitting = yaml.safe_load(f)[pfnano]
+        except KeyError:
+            raise Exception(f"Unable to load splitting with pfnano {pfnano}")
+
+    with open(samples_yaml, "r") as f:
+        all_samples = yaml.safe_load(f)[config]
+        if isinstance(all_samples, dict):
+            all_samples = all_samples[year]
+        if not isinstance(all_samples, list):
+            raise Exception(f"Samples in config {config} and year {year} are not part of a list")
+
+        for sample in all_samples:
+            if sampleslist is not None and isinstance(sampleslist, list):
+                if sample in sampleslist:
+                    samples.append(sample)
                 else:
-                    samples.append(key)
-            if key not in values:
-                values[key] = value
+                    continue
+            else:
+                samples.append(sample)
+
+            try:
+                values[sample] = splitting[sample]
+            except KeyError:
+                raise Exception(f"Splitting for sample {sample} not found")
 
     fname = f"fileset/pfnanoindex_{pfnano}_{year}.json"
     fileset = {}
@@ -23,7 +41,7 @@ def loadJson(samplesjson="samples_mc.json", year="2017", pfnano="v2_2", samplesl
         for subdir in files[year]:
             for key, flist in files[year][subdir].items():
                 if key in samples:
-                    fileset[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist]
+                    fileset[key] = ["root://cmseos.fnal.gov/" + f for f in flist]
 
     return fileset, values
 
