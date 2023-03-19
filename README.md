@@ -8,7 +8,7 @@
     + [Submitting jobs](#submitting-jobs)
       - [Testing jobs locally per single sample](#testing-jobs-locally-per-single-sample-)
       - [Testing jobs with inference (and triton server running)](#testing-jobs-with-inference--and-triton-server-running--)
-      - [Testing jobs locally over multiple samples specified in the json](#testing-jobs-locally-over-multiple-samples-specified-in-the-json-)
+      - [Testing jobs locally over multiple samples specified in the config](#testing-jobs-locally-over-multiple-samples-specified-in-the-config-)
   * [Triton server setup](#triton-server-setup)
     + [Running the server](#running-the-server)
     + [First time setup with a new model](#first-time-setup-with-a-new-model)
@@ -68,14 +68,13 @@ We use the `submit.py` script to submit jobs.
 
 For example:
 ```
-python condor/submit.py --year 2017 --tag ${TAG} --samples samples_mc.json --pfnano=v2_2 --channels mu,ele --submit
+python condor/submit.py --year 2017 --tag ${TAG} --config samples_inclusive.yaml --key mc --pfnano v2_2 --channels mu,ele --submit
 ```
 where:
 - year: this determines which fileset to read
 - tag: is a tag to the jobs (usually a date or something more descriptive)
-- samples: a json file that contains the names of the samples to run and the number of files per job for that sample
---pfnano: use pfnano
---no-pfnano: do not use pfnano
+- config: a yaml file that contains the names of the samples to run and the number of files per job for that sample
+- pfnano: pfnano version
 - number of files per job: if given all of the samples will use these number of files per job
 - script that runs processor: is `run.py` by default
 --no-inference: do not use inference
@@ -83,7 +82,7 @@ where:
 
 e.g.
 ```
-python3 condor/submit.py --year 2017 --tag ${TAG} --samples samples_mc.json --slist GluGluHToWW_Pt-200ToInf_M-125,TTToSemiLeptonic --submit --no-inference
+python3 condor/submit.py --year 2017 --tag ${TAG} --config samples_inclusive.json --key mc --slist GluGluHToWW_Pt-200ToInf_M-125,TTToSemiLeptonic --submit --no-inference
 ```
 
 The `run.py` script has different options to e.g. select a different processor, run over files that go from one starting index (starti) to the end (endi).
@@ -115,9 +114,9 @@ python run.py --year 2017 --processor hww --n 1 --starti 0 --sample GluGluHToWW_
 python run.py --year 2017 --processor hww --n 1 --starti 0 --sample GluGluHToWWToLNuQQ --local --inference
 ```
 
-#### Testing jobs locally over multiple samples specified in the json:
+#### Testing jobs locally over multiple samples:
 ```
-python run.py --year 2017 --processor hww --n 1 --starti 0 --json samples_mc.json
+python run.py --year 2017 --processor hww --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125,GluGluHToWWToLNuQQ
 ```
 
 ## Triton server setup
