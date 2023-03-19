@@ -5,9 +5,10 @@ Explores unproduced files due to condor job errors.
 """
 import argparse
 import os
+import json
 from math import ceil
 
-from condor.file_utils import loadJson
+from condor.file_utils import loadFiles
 
 
 def main(args):
@@ -16,11 +17,22 @@ def main(args):
     homedir = f"/store/user/{args.username}/boostedhiggs/"
     outdir = "/eos/uscms/" + homedir + args.tag + "_" + args.year + "/"
 
-    # build metadata.json with samples
+    # check only specific samples
     slist = args.slist.split(",") if args.slist is not None else None
 
-    # TODO: this args.samples should be the one copied over in the condor/ directory at the moment the job was submitted
-    files, nfiles_per_job = loadJson(args.samples, args.year, args.pfnano, slist)
+    # TODO: add path from different username
+
+    metadata = f"condor/{args.tag}_{args.year}/metadata_{args.configkey}.json"
+    try:
+        with open(metadata, "r") as f:
+            files = json.load(f)
+    except KeyError:
+        raise Exception(f"Could not open file {metadata}")
+
+    config = f"condor/{args.tag}_{args.year}/{args.config}"
+    splitname = f"condor/{args.tag}_{args.year}/pfnano_splitting.yaml"
+
+    _, nfiles_per_job = loadFiles(config, args.configkey, args.year, args.pfnano, slist, splitname)
 
     # submit a cluster of jobs per sample
     for sample in files.keys():
@@ -48,7 +60,8 @@ def main(args):
 
 if __name__ == "__main__":
     """
-    e.g. python check_jobs.py --pfnano v2_2 --year 2017 --username fmokhtar --tag March16 --samples samples_pfnano_mc.json
+    e.g.
+    python check_jobs.py --year 2017 --username cmantill --tag Mar19 --config samples_inclusive.yaml --key mc_s_over_b
     """
 
     parser = argparse.ArgumentParser()
@@ -61,13 +74,8 @@ if __name__ == "__main__":
         type=str,
     )
     parser.add_argument("--tag", dest="tag", default="Test", help="process tag", type=str)
-    parser.add_argument(
-        "--samples",
-        dest="samples",
-        default="samples_mc.json",
-        help="path to datafiles",
-        type=str,
-    )
+    parser.add_argument("--config", dest="config", default=None, help="path to datafiles", type=str)
+    parser.add_argument("--key", dest="configkey", default=None, help="config key: [data, mc, ... ]", type=str)
     parser.add_argument(
         "--slist",
         dest="slist",

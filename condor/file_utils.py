@@ -2,12 +2,18 @@ import json
 import yaml
 
 
-def loadFiles(samples_yaml="samples_inclusive.yaml", config="mc", year="2017", pfnano="v2_2", sampleslist=None):
+def loadFiles(
+    samples_yaml="samples_inclusive.yaml",
+    config="mc",
+    year="2017",
+    pfnano="v2_2",
+    sampleslist=None,
+    splitname="pfnano_splitting.yaml",
+):
     samples = []
     values = {}
 
-    splittingname = "pfnano_splitting.yaml"
-    with open(splittingname, "r") as f:
+    with open(splitname, "r") as f:
         try:
             splitting = yaml.safe_load(f)[pfnano]
         except KeyError:

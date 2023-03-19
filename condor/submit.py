@@ -31,6 +31,7 @@ def main(args):
 
     # copy the splitting file to the locdir
     os.system(f"cp pfnano_splitting.yaml {locdir}")
+    os.system(f"cp {args.config} {locdir}")
 
     # and condor directory
     print("CONDOR work dir: " + outdir)
