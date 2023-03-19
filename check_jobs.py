@@ -48,8 +48,7 @@ def main(args):
 
 if __name__ == "__main__":
     """
-    python check_jobs.py --year 2017 --username cmantill --tag Nov4 --samples samples_mc.json
-    python check_jobs.py --year 2018 --username fmokhtar --tag lumiv3 --samples samples_data.json
+    e.g. python check_jobs.py --pfnano v2_2 --year 2017 --username fmokhtar --tag March16 --samples samples_pfnano_mc.json
     """
 
     parser = argparse.ArgumentParser()

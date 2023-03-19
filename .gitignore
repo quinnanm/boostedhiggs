@@ -17,6 +17,10 @@ binder/DY*
 *.parquet
 *.pkl
 *.pdf
+
+histo
+*/num_dict.pkl
+
 *.png
 *.csv
 *.gz

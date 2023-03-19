@@ -155,9 +155,9 @@ class HwwProcessor(processor.ProcessorABC):
 
     def process(self, events: ak.Array):
         """Returns skimmed events which pass preselection cuts and with the branches listed in self._skimvars"""
+
         dataset = events.metadata["dataset"]
         nevents = len(events)
-
         self.isMC = hasattr(events, "genWeight")
         self.weights = Weights(nevents, storeIndividual=True)
         self.selections = {}
@@ -278,9 +278,10 @@ class HwwProcessor(processor.ProcessorABC):
         good_fatjets = fatjets[good_fatjets]  # select good fatjets
         good_fatjets = good_fatjets[ak.argsort(good_fatjets.pt, ascending=False)]  # sort them by pt
 
-        # first clean jets and leptons by removing overlap, then pick candidate_fj closest to the lepton
-        lep_in_fj_overlap_bool = good_fatjets.delta_r(candidatelep_p4) > 0.1
-        good_fatjets = good_fatjets[lep_in_fj_overlap_bool]
+        # for lep channel: first clean jets and leptons by removing overlap, then pick candidate_fj closest to the lepton
+        # TODO: revert overlap cut
+        # lep_in_fj_overlap_bool = good_fatjets.delta_r(candidatelep_p4) > 0.1
+        # good_fatjets = good_fatjets[lep_in_fj_overlap_bool]
         fj_idx_lep = ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)
         candidatefj = ak.firsts(good_fatjets[fj_idx_lep])
 
@@ -296,7 +297,7 @@ class HwwProcessor(processor.ProcessorABC):
         # candidatefj = ak.firsts(good_fatjets[ak.argmin(good_fatjets.delta_phi(met), axis=1, keepdims=True)])
 
         # fatjet - lepton mass
-        lep_fj_mass = (candidatefj - candidatelep_p4).mass  # mass of fatjet without lepton
+        fj_minus_lep = candidatefj - candidatelep_p4
 
         # fatjet + neutrino
         # candidateNeutrino = get_neutrino_z(candidatefj, met)
@@ -306,13 +307,19 @@ class HwwProcessor(processor.ProcessorABC):
         subjet1 = candidatefj.subjets[:, 0]
         subjet2 = candidatefj.subjets[:, 1]
 
-        # b-jets
-        # pick highest b score in opposite direction from signal and make cut to avoid tt background events producing bjets)
-        dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj))
-        bjets_away_lepfj = goodjets[dphi_jet_lepfj > np.pi / 2]
-        bjets = goodjets  # not necessarily opposite hemisphere
+        # TODO: add candidateNeutrino to W_lnu later
+        W_lnu = candidatelep_p4
+        W_qq = candidatefj - candidatelep_p4
 
-        # deltaR
+        # b-jets
+        dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj))
+        dr_jet_lepfj = goodjets.delta_r(candidatefj)
+        # max b-jet score for jet away from AK8 jet
+        bjets = ak.max(goodjets[dr_jet_lepfj > 0.8].btagDeepFlavB, axis=1)
+        # max b-jet score for jet in opposite hemisphere from AK8 jet
+        bjets_away_lepfj = ak.max(goodjets[dphi_jet_lepfj > np.pi / 2].btagDeepFlavB, axis=1)
+
+        # delta R between AK8 jet and lepton
         lep_fj_dr = candidatefj.delta_r(candidatelep_p4)
 
         # VBF variables
@@ -330,22 +337,26 @@ class HwwProcessor(processor.ProcessorABC):
         variables = {
             "fj_pt": candidatefj.pt,
             "fj_msoftdrop": candidatefj.msdcorr,
-            "fj_bjets_ophem": ak.max(bjets_away_lepfj.btagDeepFlavB, axis=1),
-            "fj_bjets": ak.max(bjets.btagDeepFlavB, axis=1),
-            "lep_pt": candidatelep.pt,
-            "lep_isolation": lep_reliso,
-            "lep_misolation": lep_miso,
-            "lep_fj_m": lep_fj_mass,
-            "lep_fj_dr": lep_fj_dr,
-            "lep_met_mt": mt_lep_met,
-            "met_fj_dphi": met_fjlep_dphi,
-            # exploratory variables
             "fj_lsf3": candidatefj.lsf3,
             "fj_sj1_pt": subjet1.pt,
             "fj_sj2_pt": subjet2.pt,
             "fj_tau3": candidatefj.tau3,
             "fj_tau2": candidatefj.tau2,
+            "fj_bjets_ophem": bjets_away_lepfj,
+            "fj_bjets": bjets,
+            "lep_pt": candidatelep.pt,
+            "lep_isolation": lep_reliso,
+            "lep_misolation": lep_miso,
+            "fj_minus_lep_mass": fj_minus_lep.mass,
+            "fj_minus_lep_pt": fj_minus_lep.pt,
+            "dphi_lep_and_fj_minus_lep": candidatelep_p4.delta_phi(fj_minus_lep),
+            "lep_fj_dr": lep_fj_dr,
+            "lep_met_mt": mt_lep_met,
+            "met_fj_dphi": met_fjlep_dphi,
             # "rec_higgs_m": rec_higgs_mass,
+            "rec_W_lnu_pt": W_lnu.pt,
+            "rec_W_qq_pt": W_qq.pt,
+            "rec_dphi_WW": W_lnu.delta_phi(W_qq),
             "lep_mvaId": lep_mvaId,
             "mu_highPtId": mu_highPtId,
             "ele_highPtId": ele_highPtId,

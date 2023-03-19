@@ -26,7 +26,9 @@ def main(args):
             for subdir in files_all[args.year]:
                 for key, flist in files_all[args.year][subdir].items():
                     if key in args.sample:
-                        files[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist]
+                        # files[key] = ["root://cmsxrootd.fnal.gov/" + f for f in flist]
+                        files[key] = ["root://cmseos.fnal.gov/" + f for f in flist]
+
     else:
         # get samples
         if "metadata" in args.json:
@@ -133,6 +135,7 @@ def main(args):
             executor = processor.IterativeExecutor(status=True)
 
     nanoevents.PFNanoAODSchema.mixins["SV"] = "PFCand"
+
     run = processor.Runner(
         executor=executor,
         savemetrics=True,
