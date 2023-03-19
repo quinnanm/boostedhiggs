@@ -102,7 +102,7 @@ v2_2:
     ttHToTauTau: 10
     TTTo2L2Nu: 15
     TTToHadronic: 15
-    TTToSemiLeptonic: 15
+    TTToSemiLeptonic: 10
     QCD_Pt_120to170: 15
     QCD_Pt_170to300: 15
     QCD_Pt_300to470: 15
@@ -114,8 +114,8 @@ v2_2:
     QCD_Pt_1800to2400: 15
     QCD_Pt_2400to3200: 15
     QCD_Pt_3200toInf: 15
-    DYJetsToLL_Pt-50To100: 15
-    DYJetsToLL_Pt-100To250: 15
+    DYJetsToLL_Pt-50To100: 10
+    DYJetsToLL_Pt-100To250: 10
     DYJetsToLL_Pt-250To400: 15
     DYJetsToLL_Pt-400To650: 15
     DYJetsToLL_Pt-650ToInf: 15
@@ -125,8 +125,8 @@ v2_2:
     ST_tW_top_5f_inclusiveDecays: 15
     ST_s-channel_4f_hadronicDecays: 15
     ST_s-channel_4f_leptonDecays: 15
-    WJetsToLNu_HT-70To100: 12
-    WJetsToLNu_HT-100To200: 12
+    WJetsToLNu_HT-70To100: 10
+    WJetsToLNu_HT-100To200: 10
     WJetsToLNu_HT-200To400: 12
     WJetsToLNu_HT-400To600: 12
     WJetsToLNu_HT-600To800: 12
