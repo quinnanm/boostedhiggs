@@ -138,8 +138,20 @@ folders_to_index = {
 }
 
 # samples to exclude (needs / at the end)
+# since HWW inlude both v2_3 and v2_2 - need to make sure we do not duplicate
 samples_to_exclude = [
+    ["2017", "v2_2", "HWminusJ_HToWW_M-125_TuneCP5_13TeV-powheg-jhugen727-pythia8/"],
+    ["2017", "v2_2", "HWplusJ_HToWW_M-125_TuneCP5_13TeV-powheg-jhugen727-pythia8/"],
+    ["2017", "v2_2", "HZJ_HToWW_M-125_TuneCP5_13TeV-powheg-jhugen727-pythia8/"],
+    ["2018", "v2_2", "HWplusJ_HToWW_M-125_TuneCP5_13TeV-powheg-jhugen727-pythia8/"],
     ["2018", "v2_2", "HZJ_HToWW_M-125_TuneCP5_13TeV-powheg-jhugen727-pythia8/"],
+    ["2018", "v2_3", "ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8/"],
+    ["2016", "v2_2", "HZJ_HToWW_M-125_TuneCP5_13TeV-powheg-jhugen727-pythia8/"],
+    ["2016", "v2_3", "HWplusJ_HToWW_M-125_TuneCP5_13TeV-powheg-jhugen727-pythia8/"],
+    ["2016", "v2_3", "HWminusJ_HToWW_M-125_TuneCP5_13TeV-powheg-jhugen727-pythia8/"],
+    ["2016APV", "v2_2", "HZJ_HToWW_M-125_TuneCP5_13TeV-powheg-jhugen727-pythia8/"],
+    ["2016APV", "v2_2", "HWplusJ_HToWW_M-125_TuneCP5_13TeV-powheg-jhugen727-pythia8/"],
+    ["2016APV", "v2_2", "HWminusJ_HToWW_M-125_TuneCP5_13TeV-powheg-jhugen727-pythia8/"],
 ]
 index_APV = {}
 
@@ -151,7 +163,7 @@ index_APV = {}
 # .......................f1........................|.......................f2..............................|..........f3.........|.....f4......|.f5.|....
 # /store/user/lpcpfnano/jekrupa/v2_2/2017/WJetsToQQ/WJetsToQQ_HT-800toInf_TuneCP5_13TeV-madgraphMLM-pythia8/WJetsToQQ_HT-800toInf/211108_171840/0000/*root
 
-pfnano_version = "v2_4"
+pfnano_version = "v2_2"
 folders_to_index = folders_to_index[pfnano_version]
 
 for pyear in ["2016", "2016APV", "2017", "2018"]:

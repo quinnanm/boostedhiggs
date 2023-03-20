@@ -5,6 +5,8 @@ __pycache__
 *.egg-info
 *~
 *coffea
+*.DS_Store
+
 binder/data/
 metadata.json
 
@@ -12,45 +14,22 @@ binder/plots/*
 binder/DY*
 
 *.root
-
-run_local.py
-
-outfiles/
-lpc/
-hists/
-1dhists/
-2dplots/
-plots2/
-plots3/
-results/
-
-prp/
-datafiles/
-
-binder/DY/
-binder/GluGluHToWWToLNuQQ/
-
-binder/outfiles*
-binder/EGamma*
-
 *.parquet
 *.pkl
 *.pdf
 
 histo
-
-
 */num_dict.pkl
-condor/
 
-roc_curves/
-extra/
-binder_tagger_resources/
-melissa_dataconfig_semilep_ttbarwjets.yaml
-
-*.pdf
 *.png
 *.csv
 *.gz
 
-NN/
+condor/*/*
+
+.env/
+.local/
+.bashrc
+shell
+
+docker_stderror

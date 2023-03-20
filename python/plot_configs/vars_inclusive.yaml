@@ -1,0 +1,30 @@
+vars:
+ fj_pt: 1
+ cutflow: 1
+#selection:
+ # these are sequential cuts
+ #ele:
+ # iso: (( (lep_pt < 120) & (lep_isolation < 0.15) ) | (lep_pt >= 120))
+ # mini-iso: (lep_pt > 30)
+ #mu:
+ # iso: (( (lep_pt < 50) & (lep_isolation < 0.15) ) | (lep_pt >= 50))
+ # mini-iso: ( (lep_pt < 55) |  ( (lep_misolation < 0.2) & (lep_pt >= 55) ) )
+ele:
+ weights:
+  weight_genweight: 1
+  weight_L1Prefiring: 1
+  weight_pileup: 1
+  weight_trigger_electron: 1
+  weight_reco_electron: 1
+  weight_id_electron: 1
+  weight_vjets_nominal: 0
+mu:
+ weights:
+  weight_genweight: 1
+  weight_L1Prefiring: 1
+  weight_pileup: 1
+  weight_trigger_iso_muon: 1
+  weight_trigger_noniso_muon: 1
+  weight_isolation_muon: 1
+  weight_id_muon: 1
+  weight_vjets_nominal: 0
