@@ -14,12 +14,7 @@ from coffea.analysis_tools import PackedSelection, Weights
 from coffea.nanoevents.methods import candidate
 
 from boostedhiggs.btag import btagWPs
-from boostedhiggs.corrections import (
-    add_lepton_weight,
-    add_pileup_weight,
-    add_VJets_kFactors,
-    corrected_msoftdrop,
-)
+from boostedhiggs.corrections import add_lepton_weight, add_pileup_weight, add_VJets_kFactors, corrected_msoftdrop
 
 # from boostedhiggs.utils import get_neutrino_z
 from boostedhiggs.utils import match_H, match_Top, match_V
@@ -301,6 +296,16 @@ class HwwProcessor(processor.ProcessorABC):
         fj_minus_lep = candidatefj - candidatelep_p4
 
         # fatjet + neutrino
+        candidateNeutrino = ak.zip(
+            {
+                "pt": met.pt,
+                "eta": candidatelep_p4.eta,
+                "phi": met.phi,
+                "mass": 0,
+            },
+            with_name="PtEtaPhiMCandidate",
+            behavior=candidate.behavior,
+        )
         # candidateNeutrino = get_neutrino_z(candidatefj, met)
         # rec_higgs_mass = (candidatefj + candidateNeutrino).mass  # mass of fatjet with lepton + neutrino
 
@@ -308,9 +313,10 @@ class HwwProcessor(processor.ProcessorABC):
         subjet1 = candidatefj.subjets[:, 0]
         subjet2 = candidatefj.subjets[:, 1]
 
-        # TODO: add candidateNeutrino to W_lnu later
-        W_lnu = candidatelep_p4
-        W_qq = candidatefj - candidatelep_p4
+        rec_W_lnu = candidatelep_p4 + candidateNeutrino
+        rec_W_qq = candidatefj - candidatelep_p4
+
+        rec_higgs = rec_W_qq + rec_W_lnu
 
         # b-jets
         dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj))
@@ -348,16 +354,19 @@ class HwwProcessor(processor.ProcessorABC):
             "lep_pt": candidatelep.pt,
             "lep_isolation": lep_reliso,
             "lep_misolation": lep_miso,
-            "fj_minus_lep_mass": fj_minus_lep.mass,
+            "fj_minus_lep_m": fj_minus_lep.mass,
             "fj_minus_lep_pt": fj_minus_lep.pt,
             "dphi_lep_and_fj_minus_lep": candidatelep_p4.delta_phi(fj_minus_lep),
             "lep_fj_dr": lep_fj_dr,
             "lep_met_mt": mt_lep_met,
             "met_fj_dphi": met_fjlep_dphi,
-            # "rec_higgs_m": rec_higgs_mass,
-            "rec_W_lnu_pt": W_lnu.pt,
-            "rec_W_qq_pt": W_qq.pt,
-            "rec_dphi_WW": W_lnu.delta_phi(W_qq),
+            "rec_higgs_m": rec_higgs.mass,
+            "rec_higgs_pt": rec_higgs.pt,
+            "rec_W_lnu_m": rec_W_lnu.mass,
+            "rec_W_lnu_pt": rec_W_lnu.pt,
+            "rec_W_qq_m": rec_W_qq.mass,
+            "rec_W_qq_pt": rec_W_qq.pt,
+            "rec_dphi_WW": rec_W_lnu.delta_phi(rec_W_qq),
             "lep_mvaId": lep_mvaId,
             "mu_highPtId": mu_highPtId,
             "ele_highPtId": ele_highPtId,
