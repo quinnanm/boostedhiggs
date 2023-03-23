@@ -302,6 +302,7 @@ class HwwProcessor(processor.ProcessorABC):
                 "eta": candidatelep_p4.eta,
                 "phi": met.phi,
                 "mass": 0,
+                "charge": 0,
             },
             with_name="PtEtaPhiMCandidate",
             behavior=candidate.behavior,
