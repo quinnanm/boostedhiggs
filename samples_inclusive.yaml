@@ -95,6 +95,8 @@ other_signals:
   - HWplusJ_HToWW_M-125
   - HZJ_HToWW_M-125
   - ttHToNonbb_M125
+tth:
+- ttHToNonbb_M125
 data:
  2016:
     - SingleMuon_Run2016F
