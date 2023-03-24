@@ -89,8 +89,11 @@ mc_quick:
   - WJetsToLNu_HT-400To600
   - DYJetsToLL_Pt-250To400
   - TTToSemiLeptonic
-farouk:
+other_signals:
   - VBFHToWWToLNuQQ_M-125_withDipoleRecoil
+  - HWminusJ_HToWW_M-125
+  - HWplusJ_HToWW_M-125
+  - HZJ_HToWW_M-125
   - ttHToNonbb_M125
 data:
  2016:
