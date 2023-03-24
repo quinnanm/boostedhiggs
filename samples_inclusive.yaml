@@ -89,6 +89,9 @@ mc_quick:
   - WJetsToLNu_HT-400To600
   - DYJetsToLL_Pt-250To400
   - TTToSemiLeptonic
+farouk:
+  - VBFHToWWToLNuQQ_M-125_withDipoleRecoil
+  - ttHToNonbb_M125
 data:
  2016:
     - SingleMuon_Run2016F
