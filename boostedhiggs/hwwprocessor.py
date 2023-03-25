@@ -324,6 +324,10 @@ class HwwProcessor(processor.ProcessorABC):
         dr_jet_lepfj = goodjets.delta_r(candidatefj)
         # max b-jet score for jet away from AK8 jet
         bjets = ak.max(goodjets[dr_jet_lepfj > 0.8].btagDeepFlavB, axis=1)
+
+        # # TODO: save number of bjets at different working points
+        # n_bjets = ak.sum(goodjets[dr_jet_lepfj > 0.8].btagDeepFlavB>0.3, axis=1)
+
         # max b-jet score for jet in opposite hemisphere from AK8 jet
         bjets_away_lepfj = ak.max(goodjets[dphi_jet_lepfj > np.pi / 2].btagDeepFlavB, axis=1)
 
