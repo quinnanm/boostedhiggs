@@ -112,13 +112,13 @@ folders_to_index = {
         "/store/user/lpcpfnano/jdickins/v2_2/2018/DibosonNLO/",
         ##
         "/store/user/lpcpfnano/cmantill/v2_2/2016/HWW",
+        "/store/user/lpcpfnano/cmantill/v2_3/2016/HWW",
         "/store/user/lpcpfnano/cmantill/v2_2/2016APV/HWW",
+        "/store/user/lpcpfnano/cmantill/v2_3/2016APV/HWW",
         "/store/user/lpcpfnano/cmantill/v2_2/2017/HWW",
         "/store/user/lpcpfnano/cmantill/v2_2/2017/HWWPrivate",
-        "/store/user/lpcpfnano/cmantill/v2_2/2018/HWW",
-        "/store/user/lpcpfnano/cmantill/v2_3/2016/HWW",
-        "/store/user/lpcpfnano/cmantill/v2_3/2016APV/HWW",
         "/store/user/lpcpfnano/cmantill/v2_3/2017/HWW",
+        "/store/user/lpcpfnano/cmantill/v2_2/2018/HWW",
         "/store/user/lpcpfnano/cmantill/v2_3/2018/HWW",
         ##
         "/store/user/lpcpfnano/drankin/v2_2/2016/HTT/",
@@ -167,7 +167,7 @@ pfnano_version = "v2_2"
 folders_to_index = folders_to_index[pfnano_version]
 
 for pyear in ["2016", "2016APV", "2017", "2018"]:
-    # if year != "2016APV": continue
+    # if pyear != "2017": continue
     print(pyear)
 
     index = {}
@@ -201,7 +201,7 @@ for pyear in ["2016", "2016APV", "2017", "2018"]:
                     print(f"   Excluding {sample_short}, {f2}, {version}, {pyear}")
                     exclude = True
             if exclude:
-                break
+                continue
 
             subsample_long = f2.replace("/", "")  # This should be the actual dataset name
             f2_subfolders = get_subfolders(f"{f1}/{f2}")
@@ -218,10 +218,11 @@ for pyear in ["2016", "2016APV", "2017", "2018"]:
                     print("   Ext1")
 
                 subsample_short = subsample_short.replace("_ext1", "")
-                print(f"  {subsample_short}")
+                # print(f"  {subsample_short}")
 
                 if subsample_short not in index[year][sample_short]:
                     index[year][sample_short][subsample_short] = []
+
                 f3_subfolders = get_subfolders(f"{f1}/{f2}/{f3}")
                 if len(f3_subfolders) >= 2:
                     print(f"WARNING : Found multiple timestamps for {f1}/{f2}/{f3}")
@@ -244,6 +245,7 @@ for pyear in ["2016", "2016APV", "2017", "2018"]:
                             if subsample_short not in index[year][sample_short]:
                                 index[year][sample_short][subsample_short] = []
                             index[year][sample_short][subsample_short].extend(root_files)
+                        # print(index[year][sample_short].keys())
 
     if pyear == "2016APV":
         for sample_short in index_APV.keys():
