@@ -460,6 +460,23 @@ class HwwProcessor(processor.ProcessorABC):
             self.add_selection(name="notaus", sel=(n_loose_taus_mu == 0), channel="mu")
             self.add_selection(name="notaus", sel=(n_loose_taus_ele == 0), channel="ele")
             self.add_selection(name="leptonInJet", sel=(lep_fj_dr < 0.8))
+
+            # lepton isolation
+            self.add_selection(
+                name="lep_isolation",
+                sel=(((candidatelep.pt < 120) & (lep_reliso < 0.15)) | (candidatelep.pt >= 120)),
+                channel="ele",
+            )
+            self.add_selection(
+                name="lep_isolation",
+                sel=(((candidatelep.pt < 55) & (lep_reliso < 0.15)) | (candidatelep.pt >= 55)),
+                channel="mu",
+            )
+            self.add_selection(
+                name="lep_misolation",
+                sel=((candidatelep.pt < 55) | ((lep_miso < 0.2) & (candidatelep.pt >= 55))),
+                channel="mu",
+            )
         else:
             if self.apply_trigger:
                 for ch in self._channels:
@@ -484,6 +501,11 @@ class HwwProcessor(processor.ProcessorABC):
             variables["sel_notaus_ele"] = n_loose_taus_ele == 0
             variables["sel_notaus_mu"] = n_loose_taus_mu == 0
             variables["sel_leptonInJet"] = lep_fj_dr < 0.8
+
+            # lepton isolation
+            variables["sel_lep_isolation_ele"] = ((candidatelep.pt < 120) & (lep_reliso < 0.15)) | (candidatelep.pt >= 120)
+            variables["sel_lep_isolation_mu"] = ((candidatelep.pt < 55) & (lep_reliso < 0.15)) | (candidatelep.pt >= 55)
+            variables["sel_lep_misolation_mu"] = (candidatelep.pt < 55) | ((lep_miso < 0.2) & (candidatelep.pt >= 55))
 
         # gen-level matching
         signal_mask = None
