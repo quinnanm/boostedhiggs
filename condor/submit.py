@@ -135,7 +135,7 @@ if __name__ == "__main__":
     parser.add_argument("--year", dest="year", default="2017", help="year", type=str)
     parser.add_argument("--tag", dest="tag", default="Test", help="process tag", type=str)
     parser.add_argument(
-        "--processor", dest="processor", default="hww", help="which processor", type=str, choices=["hww", "trigger", "lumi"]
+        "--processor", dest="processor", default="hww", help="which processor", type=str, choices=["hww", "trigger", "lumi","vh"]
     )
     parser.add_argument("--config", dest="config", required=True, help="path to config yaml", type=str)
     parser.add_argument("--key", dest="configkey", required=True, help="config key: [data, mc, ... ]", type=str)
