@@ -56,7 +56,7 @@ axis_dict = {
     "ele_highPtId": hist2.axis.Regular(5, 0, 5, name="var", label="Electron high pT ID", overflow=True),
     "mu_highPtId": hist2.axis.Regular(5, 0, 5, name="var", label="Muon high pT ID", overflow=True),
     "fj_pt": hist2.axis.Regular(30, 200, 1000, name="var", label=r"Jet $p_T$ [GeV]", overflow=True),
-    "fj_msoftdrop": hist2.axis.Regular(45, 20, 400, name="var", label=r"Jet $m_{sd}$ [GeV]", overflow=True),
+    "fj_msoftdrop": hist2.axis.Regular(35, 20, 250, name="var", label=r"Jet $m_{sd}$ [GeV]", overflow=True),
     "rec_higgs_m": hist2.axis.Regular(35, 0, 480, name="var", label=r"Higgs reconstructed mass [GeV]", overflow=True),
     "rec_higgs_pt": hist2.axis.Regular(30, 0, 1000, name="var", label=r"Higgs reconstructed $p_T$ [GeV]", overflow=True),
     "fj_pt_over_lep_pt": hist2.axis.Regular(35, 1, 10, name="var", label=r"$p_T$(Jet) / $p_T$(Lepton)", overflow=True),
@@ -65,6 +65,9 @@ axis_dict = {
         35, 0, 3, name="var", label=r"$\left| \Delta \phi(W_{l\nu}, W_{qq}) \right|$", overflow=True
     ),
     "fj_ParT_mass": hist2.axis.Regular(35, 0, 250, name="var", label=r"ParT regressed mass [GeV]", overflow=True),
+    "fj_ParticleNet_mass": hist2.axis.Regular(
+        35, 0, 250, name="var", label=r"fj_ParticleNet regressed mass [GeV]", overflow=True
+    ),
 }
 
 
