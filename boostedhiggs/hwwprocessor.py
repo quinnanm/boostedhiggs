@@ -314,6 +314,7 @@ class HwwProcessor(processor.ProcessorABC):
         subjet1 = candidatefj.subjets[:, 0]
         subjet2 = candidatefj.subjets[:, 1]
 
+        # TODO: remove candidateNeutrino and plot dphi for VH
         rec_W_lnu = candidatelep_p4 + candidateNeutrino
         rec_W_qq = candidatefj - candidatelep_p4
 
@@ -399,6 +400,7 @@ class HwwProcessor(processor.ProcessorABC):
             "n_bjets_ophem_L": n_bjets_ophem_L,
             "n_bjets_ophem_M": n_bjets_ophem_M,
             "n_bjets_ophem_T": n_bjets_ophem_T,
+            "mreg": candidatefj.particleNet_mass,
         }
 
         """
