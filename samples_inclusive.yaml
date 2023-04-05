@@ -54,6 +54,11 @@ mc:
   - WZ
 mc_s_over_b:
   - GluGluHToWW_Pt-200ToInf_M-125
+  - VBFHToWWToLNuQQ_M-125_withDipoleRecoil
+  - HWminusJ_HToWW_M-125
+  - HWplusJ_HToWW_M-125
+  - HZJ_HToWW_M-125
+  - ttHToNonbb_M125
   - WJetsToLNu_HT-70To100
   - WJetsToLNu_HT-100To200
   - WJetsToLNu_HT-200To400
@@ -95,8 +100,6 @@ other_signals:
   - HWplusJ_HToWW_M-125
   - HZJ_HToWW_M-125
   - ttHToNonbb_M125
-tth:
-- ttHToNonbb_M125
 data:
  2016:
     - SingleMuon_Run2016F

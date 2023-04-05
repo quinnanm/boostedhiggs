@@ -317,6 +317,7 @@ class HwwProcessor(processor.ProcessorABC):
         subjet1 = candidatefj.subjets[:, 0]
         subjet2 = candidatefj.subjets[:, 1]
 
+        # TODO: remove candidateNeutrino and plot dphi for VH
         rec_W_lnu = candidatelep_p4 + candidateNeutrino
         rec_W_qq = candidatefj - candidatelep_p4
 
@@ -327,8 +328,24 @@ class HwwProcessor(processor.ProcessorABC):
         dr_jet_lepfj = goodjets.delta_r(candidatefj)
         # max b-jet score for jet away from AK8 jet
         bjets = ak.max(goodjets[dr_jet_lepfj > 0.8].btagDeepFlavB, axis=1)
+
+        # # TODO: save number of bjets at different working points
+        # n_bjets = ak.sum(goodjets[dr_jet_lepfj > 0.8].btagDeepFlavB>0.3, axis=1)
+        n_bjets_L = ak.sum(goodjets[dr_jet_lepfj > 0.8].btagDeepFlavB > btagWPs["deepJet"][self._year]["L"], axis=1)
+        n_bjets_M = ak.sum(goodjets[dr_jet_lepfj > 0.8].btagDeepFlavB > btagWPs["deepJet"][self._year]["M"], axis=1)
+        n_bjets_T = ak.sum(goodjets[dr_jet_lepfj > 0.8].btagDeepFlavB > btagWPs["deepJet"][self._year]["T"], axis=1)
+
         # max b-jet score for jet in opposite hemisphere from AK8 jet
         bjets_away_lepfj = ak.max(goodjets[dphi_jet_lepfj > np.pi / 2].btagDeepFlavB, axis=1)
+        n_bjets_ophem_L = ak.sum(
+            goodjets[dphi_jet_lepfj > np.pi / 2].btagDeepFlavB > btagWPs["deepJet"][self._year]["L"], axis=1
+        )
+        n_bjets_ophem_M = ak.sum(
+            goodjets[dphi_jet_lepfj > np.pi / 2].btagDeepFlavB > btagWPs["deepJet"][self._year]["M"], axis=1
+        )
+        n_bjets_ophem_T = ak.sum(
+            goodjets[dphi_jet_lepfj > np.pi / 2].btagDeepFlavB > btagWPs["deepJet"][self._year]["T"], axis=1
+        )
 
         # delta R between AK8 jet and lepton
         lep_fj_dr = candidatefj.delta_r(candidatelep_p4)
@@ -380,6 +397,13 @@ class HwwProcessor(processor.ProcessorABC):
             "nj": n_jets_outside_ak8,
             "deta": deta,
             "mjj": mjj,
+            "n_bjets_L": n_bjets_L,
+            "n_bjets_M": n_bjets_M,
+            "n_bjets_T": n_bjets_T,
+            "n_bjets_ophem_L": n_bjets_ophem_L,
+            "n_bjets_ophem_M": n_bjets_ophem_M,
+            "n_bjets_ophem_T": n_bjets_ophem_T,
+            "mreg": candidatefj.particleNet_mass,
         }
 
         """
@@ -441,6 +465,23 @@ class HwwProcessor(processor.ProcessorABC):
             self.add_selection(name="notaus", sel=(n_loose_taus_mu == 0), channel="mu")
             self.add_selection(name="notaus", sel=(n_loose_taus_ele == 0), channel="ele")
             self.add_selection(name="leptonInJet", sel=(lep_fj_dr < 0.8))
+
+            # lepton isolation
+            self.add_selection(
+                name="lep_isolation",
+                sel=(((candidatelep.pt < 120) & (lep_reliso < 0.15)) | (candidatelep.pt >= 120)),
+                channel="ele",
+            )
+            self.add_selection(
+                name="lep_isolation",
+                sel=(((candidatelep.pt < 55) & (lep_reliso < 0.15)) | (candidatelep.pt >= 55)),
+                channel="mu",
+            )
+            self.add_selection(
+                name="lep_misolation",
+                sel=((candidatelep.pt < 55) | ((lep_miso < 0.2) & (candidatelep.pt >= 55))),
+                channel="mu",
+            )
         else:
             if self.apply_trigger:
                 for ch in self._channels:
@@ -465,6 +506,11 @@ class HwwProcessor(processor.ProcessorABC):
             variables["sel_notaus_ele"] = n_loose_taus_ele == 0
             variables["sel_notaus_mu"] = n_loose_taus_mu == 0
             variables["sel_leptonInJet"] = lep_fj_dr < 0.8
+
+            # lepton isolation
+            variables["sel_lep_isolation_ele"] = ((candidatelep.pt < 120) & (lep_reliso < 0.15)) | (candidatelep.pt >= 120)
+            variables["sel_lep_isolation_mu"] = ((candidatelep.pt < 55) & (lep_reliso < 0.15)) | (candidatelep.pt >= 55)
+            variables["sel_lep_misolation_mu"] = (candidatelep.pt < 55) | ((lep_miso < 0.2) & (candidatelep.pt >= 55))
 
         # gen-level matching
         signal_mask = None
