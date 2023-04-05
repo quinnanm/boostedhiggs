@@ -136,3 +136,5 @@ data:
     - EGamma_Run2018B
     - EGamma_Run2018C
     - EGamma_Run2018D
+test:
+ - TTToSemiLeptonic_test

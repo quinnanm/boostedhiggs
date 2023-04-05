@@ -278,7 +278,10 @@ class HwwProcessor(processor.ProcessorABC):
         # TODO: revert overlap cut
         # lep_in_fj_overlap_bool = good_fatjets.delta_r(candidatelep_p4) > 0.1
         # good_fatjets = good_fatjets[lep_in_fj_overlap_bool]
+
         fj_idx_lep = ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)
+        # fj_idx_lep = ak.argmax(good_fatjets.pt, axis=1, keepdims=True)
+
         candidatefj = ak.firsts(good_fatjets[fj_idx_lep])
 
         # MET
@@ -609,7 +612,6 @@ class HwwProcessor(processor.ProcessorABC):
                             fj_idx_lep[selection_ch],
                             model_name=model_name,
                         )
-
                         output[ch] = {
                             **output[ch],
                             **{key: value for (key, value) in pnet_vars.items()},

@@ -1322,6 +1322,9 @@
       ]
     },
     "TTbar": {
+      "TTToSemiLeptonic_test": [
+        "/store/user/cmantill/boostedhiggs/nano_mc2017_ttevt11.root"
+      ],
       "TTToSemiLeptonic": [
         "/store/user/lpcpfnano/cmantill/v2_4/2017/TTbar/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/TTToSemiLeptonic/230209_005348/0000/nano_mc2017_1-1.root",
         "/store/user/lpcpfnano/cmantill/v2_4/2017/TTbar/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/TTToSemiLeptonic/230209_005348/0000/nano_mc2017_1-10.root",
