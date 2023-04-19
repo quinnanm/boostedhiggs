@@ -1,4 +1,5 @@
 import json
+
 import yaml
 
 
@@ -22,6 +23,7 @@ def loadFiles(
     with open(samples_yaml, "r") as f:
         all_samples = yaml.safe_load(f)[config]
         if isinstance(all_samples, dict):
+            print("all_samples", all_samples.keys())
             all_samples = all_samples[year]
         if not isinstance(all_samples, list):
             raise Exception(f"Samples in config {config} and year {year} are not part of a list")
