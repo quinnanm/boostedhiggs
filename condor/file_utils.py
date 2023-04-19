@@ -24,7 +24,10 @@ def loadFiles(
         all_samples = yaml.safe_load(f)[config]
         if isinstance(all_samples, dict):
             print("all_samples", all_samples.keys())
-            all_samples = all_samples[year]
+            try:
+                all_samples = all_samples[year]
+            except KeyError:
+                all_samples = all_samples[str(year)]
         if not isinstance(all_samples, list):
             raise Exception(f"Samples in config {config} and year {year} are not part of a list")
 
