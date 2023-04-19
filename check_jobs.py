@@ -4,8 +4,8 @@
 Explores unproduced files due to condor job errors.
 """
 import argparse
-import os
 import json
+import os
 from math import ceil
 
 from condor.file_utils import loadFiles
@@ -21,8 +21,13 @@ def main(args):
     slist = args.slist.split(",") if args.slist is not None else None
 
     # TODO: add path from different username
+    if args.username == "cmantill":
+        metadata = (
+            f"/uscms/home/cmantill/nobackup/hww/boostedhiggs/condor/{args.tag}_{args.year}/metadata_{args.configkey}.json"
+        )
+    else:
+        metadata = f"condor/{args.tag}_{args.year}/metadata_{args.configkey}.json"
 
-    metadata = f"condor/{args.tag}_{args.year}/metadata_{args.configkey}.json"
     try:
         with open(metadata, "r") as f:
             files = json.load(f)
