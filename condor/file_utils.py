@@ -27,7 +27,7 @@ def loadFiles(
             try:
                 all_samples = all_samples[year]
             except KeyError:
-                all_samples = all_samples[str(year)]
+                all_samples = all_samples[int(year)]
         if not isinstance(all_samples, list):
             raise Exception(f"Samples in config {config} and year {year} are not part of a list")
 
