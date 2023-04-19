@@ -22,11 +22,10 @@ def main(args):
 
     # TODO: add path from different username
     if args.username == "cmantill":
-        metadata = (
-            f"/uscms/home/cmantill/nobackup/hww/boostedhiggs/condor/{args.tag}_{args.year}/metadata_{args.configkey}.json"
-        )
+        prepend = "/uscms/home/cmantill/nobackup/hww/boostedhiggs/"
     else:
-        metadata = f"condor/{args.tag}_{args.year}/metadata_{args.configkey}.json"
+        prepend = ""
+    metadata = prepend + f"condor/{args.tag}_{args.year}/metadata_{args.configkey}.json"
 
     try:
         with open(metadata, "r") as f:
@@ -34,8 +33,8 @@ def main(args):
     except KeyError:
         raise Exception(f"Could not open file {metadata}")
 
-    config = f"condor/{args.tag}_{args.year}/{args.config}"
-    splitname = f"condor/{args.tag}_{args.year}/pfnano_splitting.yaml"
+    config = prepend + f"condor/{args.tag}_{args.year}/{args.config}"
+    splitname = prepend + f"condor/{args.tag}_{args.year}/pfnano_splitting.yaml"
 
     _, nfiles_per_job = loadFiles(config, args.configkey, args.year, args.pfnano, slist, splitname)
 
