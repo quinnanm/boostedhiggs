@@ -164,7 +164,7 @@ def main(args):
     filehandler.close()
 
     # merge parquet
-    if args.processor != "lumi":
+    if args.processor == "hww" or args.processor == "vh":
         for ch in channels:
             data = pd.read_parquet("./outfiles/" + job_name + ch + "/parquet")
             data.to_parquet("./outfiles/" + job_name + "_" + ch + ".parquet")
