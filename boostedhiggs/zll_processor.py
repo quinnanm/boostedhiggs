@@ -46,7 +46,7 @@ def build_p4(cand):
     )
 
 
-class HwwProcessor(processor.ProcessorABC):
+class ZllProcessor(processor.ProcessorABC):
     def __init__(
         self,
         year="2017",
