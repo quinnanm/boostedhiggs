@@ -7,6 +7,7 @@ from coffea.nanoevents.methods import candidate
 from coffea.processor import ProcessorABC, column_accumulator
 
 from boostedhiggs.corrections import add_lepton_weight, add_pileup_weight, add_VJets_kFactors
+from boostedhiggs.utils import match_H
 
 # from boostedhiggs.utils import getParticles
 
@@ -23,20 +24,20 @@ def getParticles(genparticles, lowid=22, highid=25, flags=["fromHardProcess", "i
     return genparticles[((absid >= lowid) & (absid <= highid)) & genparticles.hasFlags(flags)]
 
 
-def simple_match_HWW(genparticles, candidatefj):
-    """
-    return the number of matched objects (hWW*),daughters,
-    and gen flavor (enuqq, munuqq, taunuqq)
-    """
-    higgs = getParticles(genparticles, 25)  # genparticles is the full set... this function selects Higgs particles
-    # W~24 so we get H->WW (limitation: only picking one W and assumes the other will be there)
-    is_hWW = ak.all(abs(higgs.children.pdgId) == 24, axis=2)
+# def simple_match_HWW(genparticles, candidatefj):
+#     """
+#     return the number of matched objects (hWW*),daughters,
+#     and gen flavor (enuqq, munuqq, taunuqq)
+#     """
+#     higgs = getParticles(genparticles, 25)  # genparticles is the full set... this function selects Higgs particles
+#     # W~24 so we get H->WW (limitation: only picking one W and assumes the other will be there)
+#     is_hWW = ak.all(abs(higgs.children.pdgId) == 24, axis=2)
 
-    higgs = higgs[is_hWW]
+#     higgs = higgs[is_hWW]
 
-    matchedH = candidatefj.nearest(higgs, axis=1, threshold=0.8)  # choose higgs closest to fj
+#     matchedH = candidatefj.nearest(higgs, axis=1, threshold=0.8)  # choose higgs closest to fj
 
-    return matchedH
+#     return matchedH
 
 
 def build_p4(cand):
@@ -235,8 +236,8 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             out[channel]["lep_pt"] = pad_val_nevents(candidatelep.pt)
 
             if "HToWW" in dataset:
-                matchedH = simple_match_HWW(events.GenPart, candidatefj)
-                matchedH_pt = ak.firsts(matchedH.pt)
+                genVars, _ = match_H(events.GenPart, candidatefj)
+                matchedH_pt = genVars["fj_genH_pt"]
             else:
                 matchedH_pt = ak.zeros_like(candidatefj.pt)
             out[channel]["higgspt"] = pad_val_nevents(matchedH_pt)
