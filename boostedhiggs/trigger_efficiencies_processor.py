@@ -2,9 +2,9 @@ import warnings
 
 import awkward as ak
 import numpy as np
-from coffea.analysis_tools import Weights
+from coffea.analysis_tools import PackedSelection, Weights
 from coffea.nanoevents.methods import candidate
-from coffea.processor import ProcessorABC
+from coffea.processor import ProcessorABC, column_accumulator
 
 from boostedhiggs.corrections import add_lepton_weight, add_pileup_weight, add_VJets_kFactors
 from boostedhiggs.utils import match_H
@@ -121,12 +121,12 @@ class TriggerEfficienciesProcessor(ProcessorABC):
 
         """ basic definitions """
         # DEFINE MUONS
-        # loose_muons = (
-        #     (((events.Muon.pt > 30) & (events.Muon.pfRelIso04_all < 0.25)) | (events.Muon.pt > 55))
-        #     & (np.abs(events.Muon.eta) < 2.4)
-        #     & (events.Muon.looseId)
-        # )
-        # n_loose_muons = ak.sum(loose_muons, axis=1)
+        loose_muons = (
+            (((events.Muon.pt > 30) & (events.Muon.pfRelIso04_all < 0.25)) | (events.Muon.pt > 55))
+            & (np.abs(events.Muon.eta) < 2.4)
+            & (events.Muon.looseId)
+        )
+        n_loose_muons = ak.sum(loose_muons, axis=1)
 
         good_muons = (
             (events.Muon.pt > 30)
@@ -136,16 +136,16 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             & (events.Muon.sip3d <= 4.0)
             & events.Muon.mediumId
         )
-        # n_good_muons = ak.sum(good_muons, axis=1)
+        n_good_muons = ak.sum(good_muons, axis=1)
 
         # DEFINE ELECTRONS
-        # loose_electrons = (
-        #     (((events.Electron.pt > 38) & (events.Electron.pfRelIso03_all < 0.25)) | (events.Electron.pt > 120))
-        #     & (np.abs(events.Electron.eta) < 2.4)
-        #     & ((np.abs(events.Electron.eta) < 1.44) | (np.abs(events.Electron.eta) > 1.57))
-        #     & (events.Electron.cutBased >= events.Electron.LOOSE)
-        # )
-        # n_loose_electrons = ak.sum(loose_electrons, axis=1)
+        loose_electrons = (
+            (((events.Electron.pt > 38) & (events.Electron.pfRelIso03_all < 0.25)) | (events.Electron.pt > 120))
+            & (np.abs(events.Electron.eta) < 2.4)
+            & ((np.abs(events.Electron.eta) < 1.44) | (np.abs(events.Electron.eta) > 1.57))
+            & (events.Electron.cutBased >= events.Electron.LOOSE)
+        )
+        n_loose_electrons = ak.sum(loose_electrons, axis=1)
 
         good_electrons = (
             (events.Electron.pt > 38)
@@ -156,7 +156,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             & (events.Electron.sip3d <= 4.0)
             & (events.Electron.mvaFall17V2noIso_WP90)
         )
-        # n_good_electrons = ak.sum(good_electrons, axis=1)
+        n_good_electrons = ak.sum(good_electrons, axis=1)
 
         # get candidate lepton
         goodleptons = ak.concatenate(
@@ -204,32 +204,31 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         # """ Baseline selection """
         # # define selections for different channels
         for channel in self._channels:
-            # selection = PackedSelection()
+            selection = PackedSelection()
             if channel == "mu":
                 add_lepton_weight(self.weights, candidatelep, self._year, "muon")
-            #         # selection.add(
-            #         #     "onemuon",
-            #         #     (
-            #         #         (n_good_muons == 1)
-            #         #         & (n_good_electrons == 0)
-            #         #         & (n_loose_electrons == 0)
-            #         #         & ~ak.any(loose_muons & ~good_muons, 1)
-            #         #     ),
-            #         # )
-            #         # selection.add("muonkin", (candidatelep.pt > 30))
+                selection.add(
+                    "onemuon",
+                    (
+                        (n_good_muons == 1)
+                        & (n_good_electrons == 0)
+                        & (n_loose_electrons == 0)
+                        & ~ak.any(loose_muons & ~good_muons, 1)
+                    ),
+                )
+                selection.add("muonkin", (candidatelep.pt > 30))
             elif channel == "ele":
                 add_lepton_weight(self.weights, candidatelep, self._year, "electron")
-            #         # selection.add(
-            #         #     "oneelectron",
-            #         #     (
-            #         #         (n_good_muons == 0)
-            #         #         & (n_loose_muons == 0)
-            #         #         & (n_good_electrons == 1)
-            #         #         & ~ak.any(loose_electrons & ~good_electrons, 1)
-            #         #     ),
-            #         # )
-            #         # selection.add("electronkin", (candidatelep.pt > 40))
-            #     selection.add("fatjetKin", candidatefj.pt > 0)  # dummy selection
+                selection.add(
+                    "oneelectron",
+                    (
+                        (n_good_muons == 0)
+                        & (n_loose_muons == 0)
+                        & (n_good_electrons == 1)
+                        & ~ak.any(loose_electrons & ~good_electrons, 1)
+                    ),
+                )
+                selection.add("electronkin", (candidatelep.pt > 40))
 
             """Define other variables to save"""
             out[channel]["vars"] = {}
@@ -251,20 +250,20 @@ class TriggerEfficienciesProcessor(ProcessorABC):
                 if channel in self.weights_per_ch.keys():
                     self.weights_per_ch[channel].append(key)
 
-            # # use column accumulators
-            # for key_ in out[channel].keys():
-            #     out[channel][key_] = {
-            #         key: column_accumulator(value[selection.all(*selection.names)])
-            #         for (key, value) in out[channel][key_].items()
-            #     }
+            # use column accumulators
+            for key_ in out[channel].keys():
+                out[channel][key_] = {
+                    key: column_accumulator(value[selection.all(*selection.names)])
+                    for (key, value) in out[channel][key_].items()
+                }
         return {self._year: {dataset: {"nevents": nevents, "skimmed_events": out}}}
 
     def postprocess(self, accumulator):
-        # for year, datasets in accumulator.items():
-        #     for dataset, output in datasets.items():
-        #         for channel in output["skimmed_events"].keys():
-        #             output["skimmed_events"][channel] = {
-        #                 key: value.value for (key, value) in output["skimmed_events"][channel].items()
-        #             }
+        for year, datasets in accumulator.items():
+            for dataset, output in datasets.items():
+                for channel in output["skimmed_events"].keys():
+                    output["skimmed_events"][channel] = {
+                        key: value.value for (key, value) in output["skimmed_events"][channel].items()
+                    }
 
         return accumulator
