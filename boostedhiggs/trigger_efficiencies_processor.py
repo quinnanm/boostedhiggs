@@ -107,7 +107,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         out = {}
         for channel in self._channels:
             out[channel] = {}
-        out[channel]["triggers"] = {}
+            out[channel]["triggers"] = {}
 
         """ Save OR of triggers as booleans """
         for channel in self._channels:
@@ -242,7 +242,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
                 matchedH_pt = genVars["fj_genH_pt"]
             else:
                 matchedH_pt = ak.zeros_like(candidatefj.pt)
-            out[channel]["vars"]["higgspt"] = pad_val_nevents(matchedH_pt)
+            out[channel]["vars"]["fj_genH_pt"] = pad_val_nevents(matchedH_pt)
 
             out[channel]["weights"] = {}
             for key in self.weights._weights.keys():
