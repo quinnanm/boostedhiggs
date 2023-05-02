@@ -6,7 +6,7 @@ import os
 import pickle as pkl
 import time
 
-# import pandas as pd
+import pandas as pd
 import uproot
 from coffea import nanoevents, processor
 
@@ -163,13 +163,13 @@ def main(args):
     pkl.dump(out, filehandler)
     filehandler.close()
 
-    # # merge parquet
-    # if args.processor != "lumi":
-    #     for ch in channels:
-    #         data = pd.read_parquet("./outfiles/" + job_name + ch + "/parquet")
-    #         data.to_parquet("./outfiles/" + job_name + "_" + ch + ".parquet")
-    #         # remove old parquet files
-    #         os.system("rm -rf ./outfiles/" + job_name + ch)
+    # merge parquet
+    if args.processor != "lumi":
+        for ch in channels:
+            data = pd.read_parquet("./outfiles/" + job_name + ch + "/parquet")
+            data.to_parquet("./outfiles/" + job_name + "_" + ch + ".parquet")
+            # remove old parquet files
+            os.system("rm -rf ./outfiles/" + job_name + ch)
 
 
 if __name__ == "__main__":
