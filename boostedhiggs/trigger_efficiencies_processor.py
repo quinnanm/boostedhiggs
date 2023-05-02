@@ -107,6 +107,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         out = {}
         for channel in self._channels:
             out[channel] = {}
+        out[channel]["triggers"] = {}
 
         """ Save OR of triggers as booleans """
         for channel in self._channels:
@@ -116,7 +117,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
                     np.array([events.HLT[trigger] for trigger in self._trigger_dict[t] if trigger in events.HLT.fields]),
                     axis=0,
                 )
-            out[channel] = {**out[channel], **HLT_triggers}
+            out[channel]["triggers"] = {**out[channel], **HLT_triggers}
 
         """ basic definitions """
         # DEFINE MUONS
@@ -228,27 +229,25 @@ class TriggerEfficienciesProcessor(ProcessorABC):
                 #     ),
                 # )
                 # selection.add("electronkin", (candidatelep.pt > 40))
-            selection.add("fatjetKin", candidatefj.pt > 0)
+            selection.add("fatjetKin", candidatefj.pt > 0)  # dummy selection
 
             """ Define other variables to save """
-            out[channel]["fj_pt"] = pad_val_nevents(candidatefj.pt)
-            out[channel]["fj_msoftdrop"] = pad_val_nevents(candidatefj.msoftdrop)
-            out[channel]["lep_pt"] = pad_val_nevents(candidatelep.pt)
+            out[channel]["vars"] = {}
+            out[channel]["vars"]["fj_pt"] = pad_val_nevents(candidatefj.pt)
+            out[channel]["vars"]["fj_msoftdrop"] = pad_val_nevents(candidatefj.msoftdrop)
+            out[channel]["vars"]["lep_pt"] = pad_val_nevents(candidatelep.pt)
 
             if "HToWW" in dataset:
                 genVars, _ = match_H(events.GenPart, candidatefj)
                 matchedH_pt = genVars["fj_genH_pt"]
             else:
                 matchedH_pt = ak.zeros_like(candidatefj.pt)
-            out[channel]["higgspt"] = pad_val_nevents(matchedH_pt)
+            out[channel]["vars"]["higgspt"] = pad_val_nevents(matchedH_pt)
 
-            # store the per channel weight
-            # if len(self.weights_per_ch[channel]) > 0:
-            #     out[channel][f"weight_{channel}"] = self.weights.partial_weight(self.weights_per_ch[channel])
-
+            out[channel]["weights"] = {}
             for key in self.weights._weights.keys():
                 # store the individual weights (ONLY for now until we debug)
-                out[channel][f"weight_{key}"] = self.weights.partial_weight([key])
+                out[channel]["weights"][f"weight_{key}"] = self.weights.partial_weight([key])
                 if channel in self.weights_per_ch.keys():
                     self.weights_per_ch[channel].append(key)
 
