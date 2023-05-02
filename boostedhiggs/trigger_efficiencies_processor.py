@@ -263,8 +263,9 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         for year, datasets in accumulator.items():
             for dataset, output in datasets.items():
                 for channel in output["skimmed_events"].keys():
-                    output["skimmed_events"][channel] = {
-                        key: value.value for (key, value) in output["skimmed_events"][channel].items()
-                    }
+                    for key_ in output["skimmed_events"][channel]:
+                        output["skimmed_events"][channel][key_] = {
+                            key: value.value for (key, value) in output["skimmed_events"][channel][key_].items()
+                        }
 
         return accumulator
