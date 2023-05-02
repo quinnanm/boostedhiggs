@@ -253,7 +253,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
 
             # use column accumulators
             for key_ in out[channel].keys():
-                out[channel] = {
+                out[channel][key_] = {
                     key: column_accumulator(value[selection.all(*selection.names)])
                     for (key, value) in out[channel][key_].items()
                 }
