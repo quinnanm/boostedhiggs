@@ -468,7 +468,7 @@ class ZllProcessor(processor.ProcessorABC):
             self.add_selection(name="leptonKin", sel=(candidatelep.pt > 40), channel="ele")
             self.add_selection(name="fatjetKin", sel=candidatefj.pt > 200)
             self.add_selection(name="ht", sel=(ht > 200))
-            self.add_selection(name="twoLepton", sel=(two_ele | two_mu | one_ele_one_mu))
+            # self.add_selection(name="twoLepton", sel=(two_ele | two_mu | one_ele_one_mu))
             self.add_selection(name="notaus", sel=(n_loose_taus_mu == 0), channel="mu")
             self.add_selection(name="notaus", sel=(n_loose_taus_ele == 0), channel="ele")
             self.add_selection(name="leptonInJet", sel=(lep_fj_dr < 0.8))
