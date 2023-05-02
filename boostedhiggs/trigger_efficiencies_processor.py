@@ -252,9 +252,11 @@ class TriggerEfficienciesProcessor(ProcessorABC):
                     self.weights_per_ch[channel].append(key)
 
             # use column accumulators
-            out[channel] = {
-                key: column_accumulator(value[selection.all(*selection.names)]) for (key, value) in out[channel].items()
-            }
+            for key_ in out[channel].keys():
+                out[channel] = {
+                    key: column_accumulator(value[selection.all(*selection.names)])
+                    for (key, value) in out[channel][key_].items()
+                }
         return {self._year: {dataset: {"nevents": nevents, "skimmed_events": out}}}
 
     def postprocess(self, accumulator):
