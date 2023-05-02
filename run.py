@@ -164,7 +164,7 @@ def main(args):
     filehandler.close()
 
     # merge parquet
-    if args.processor == "hww" or args.processor == "vh":
+    if args.processor != "lumi":
         for ch in channels:
             data = pd.read_parquet("./outfiles/" + job_name + ch + "/parquet")
             data.to_parquet("./outfiles/" + job_name + "_" + ch + ".parquet")
@@ -177,7 +177,7 @@ if __name__ == "__main__":
     # e.g.
     # noqa: run locally on lpc (hww mc) as: python run.py --year 2017 --processor hww --pfnano v2_2 --n 1 --starti 0 --config samples_inclusive.yaml --key mc
     # noqa: run locally on lpc (vh) as: python run.py --year 2018 --sample HZJ_HToWW_M-125 --processor vh --pfnano v2_2 --n 1 --starti 0 --config samples_vh.yaml --key mc --channels lep --executor iterative
-    # noqa: run locally on lpc (hww trigger) as: python run.py --year 2017 --processor trigger --pfnano v2_2 --n 45 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele --config samples_inclusive.yaml --key mc
+    # noqa: run locally on lpc (hww trigger) as: python run.py --year 2017 --processor trigger --pfnano v2_2 --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele --config samples_inclusive.yaml --key mc
 
     # noqa: run locally on single file (hww): python run.py --year 2017 --processor hww --pfnano v2_2 --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele --config samples_inclusive.yaml --key mc
     # noqa: run locally on on single file (zll): python run.py --year 2017 --processor zll --pfnano v2_2 --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele --config samples_inclusive.yaml --key mc
