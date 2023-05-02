@@ -359,6 +359,11 @@ class ZllProcessor(processor.ProcessorABC):
         # isvbf = ((deta > 3.5) & (mjj > 1000))
         # isvbf = ak.fill_none(isvbf,False)
 
+        # define dilepton mass
+        lep1 = goodleptons[:, 0:1]
+        lep2 = goodleptons[:, 1:2]
+        mll = (ak.firsts(lep1) + ak.firsts(lep2)).mass
+
         variables = {
             "fj_pt": candidatefj.pt,
             "fj_msoftdrop": candidatefj.msdcorr,
@@ -401,6 +406,7 @@ class ZllProcessor(processor.ProcessorABC):
             "n_bjets_ophem_M": n_bjets_ophem_M,
             "n_bjets_ophem_T": n_bjets_ophem_T,
             "mreg": candidatefj.particleNet_mass,
+            "mll": mll,
         }
 
         """
