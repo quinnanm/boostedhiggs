@@ -260,12 +260,11 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         return {self._year: {dataset: {"nevents": nevents, "skimmed_events": out}}}
 
     def postprocess(self, accumulator):
-        for year, datasets in accumulator.items():
-            for dataset, output in datasets.items():
-                for channel in output["skimmed_events"].keys():
-                    for key_ in output["skimmed_events"][channel]:
-                        output["skimmed_events"][channel][key_] = {
-                            key: value.value for (key, value) in output["skimmed_events"][channel][key_].items()
-                        }
+        # for year, datasets in accumulator.items():
+        #     for dataset, output in datasets.items():
+        #         for channel in output["skimmed_events"].keys():
+        #             output["skimmed_events"][channel] = {
+        #                 key: value.value for (key, value) in output["skimmed_events"][channel].items()
+        #             }
 
         return accumulator
