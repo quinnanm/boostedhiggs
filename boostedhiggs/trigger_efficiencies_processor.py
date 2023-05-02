@@ -119,11 +119,11 @@ class TriggerEfficienciesProcessor(ProcessorABC):
 
         """ basic definitions """
         # DEFINE MUONS
-        loose_muons = (
-            (((events.Muon.pt > 30) & (events.Muon.pfRelIso04_all < 0.25)) | (events.Muon.pt > 55))
-            & (np.abs(events.Muon.eta) < 2.4)
-            & (events.Muon.looseId)
-        )
+        # loose_muons = (
+        #     (((events.Muon.pt > 30) & (events.Muon.pfRelIso04_all < 0.25)) | (events.Muon.pt > 55))
+        #     & (np.abs(events.Muon.eta) < 2.4)
+        #     & (events.Muon.looseId)
+        # )
         # n_loose_muons = ak.sum(loose_muons, axis=1)
 
         good_muons = (
@@ -134,16 +134,16 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             & (events.Muon.sip3d <= 4.0)
             & events.Muon.mediumId
         )
-        n_good_muons = ak.sum(good_muons, axis=1)
+        # n_good_muons = ak.sum(good_muons, axis=1)
 
         # DEFINE ELECTRONS
-        loose_electrons = (
-            (((events.Electron.pt > 38) & (events.Electron.pfRelIso03_all < 0.25)) | (events.Electron.pt > 120))
-            & (np.abs(events.Electron.eta) < 2.4)
-            & ((np.abs(events.Electron.eta) < 1.44) | (np.abs(events.Electron.eta) > 1.57))
-            & (events.Electron.cutBased >= events.Electron.LOOSE)
-        )
-        n_loose_electrons = ak.sum(loose_electrons, axis=1)
+        # loose_electrons = (
+        #     (((events.Electron.pt > 38) & (events.Electron.pfRelIso03_all < 0.25)) | (events.Electron.pt > 120))
+        #     & (np.abs(events.Electron.eta) < 2.4)
+        #     & ((np.abs(events.Electron.eta) < 1.44) | (np.abs(events.Electron.eta) > 1.57))
+        #     & (events.Electron.cutBased >= events.Electron.LOOSE)
+        # )
+        # n_loose_electrons = ak.sum(loose_electrons, axis=1)
 
         good_electrons = (
             (events.Electron.pt > 38)
@@ -154,7 +154,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             & (events.Electron.sip3d <= 4.0)
             & (events.Electron.mvaFall17V2noIso_WP90)
         )
-        n_good_electrons = ak.sum(good_electrons, axis=1)
+        # n_good_electrons = ak.sum(good_electrons, axis=1)
 
         # get candidate lepton
         goodleptons = ak.concatenate(
@@ -205,16 +205,16 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             selection = PackedSelection()
             if channel == "mu":
                 add_lepton_weight(self.weights, candidatelep, self._year, "muon")
-                selection.add(
-                    "onemuon",
-                    (
-                        (n_good_muons == 1)
-                        & (n_good_electrons == 0)
-                        & (n_loose_electrons == 0)
-                        & ~ak.any(loose_muons & ~good_muons, 1)
-                    ),
-                )
-                selection.add("muonkin", (candidatelep.pt > 30))
+                # selection.add(
+                #     "onemuon",
+                #     (
+                #         (n_good_muons == 1)
+                #         & (n_good_electrons == 0)
+                #         & (n_loose_electrons == 0)
+                #         & ~ak.any(loose_muons & ~good_muons, 1)
+                #     ),
+                # )
+                # selection.add("muonkin", (candidatelep.pt > 30))
             elif channel == "ele":
                 add_lepton_weight(self.weights, candidatelep, self._year, "electron")
                 # selection.add(
