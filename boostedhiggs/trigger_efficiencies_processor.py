@@ -117,7 +117,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
                     np.array([events.HLT[trigger] for trigger in self._trigger_dict[t] if trigger in events.HLT.fields]),
                     axis=0,
                 )
-            out[channel]["triggers"] = {**out[channel], **HLT_triggers}
+            out[channel]["triggers"] = {**out[channel]["triggers"], **HLT_triggers}
 
         """ basic definitions """
         # DEFINE MUONS
