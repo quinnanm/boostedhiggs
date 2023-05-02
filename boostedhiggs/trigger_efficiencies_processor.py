@@ -255,7 +255,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             out[channel] = {
                 key: column_accumulator(value[selection.all(*selection.names)]) for (key, value) in out[channel].items()
             }
-
+        print("out", out)
         return {self._year: {dataset: {"nevents": nevents, "skimmed_events": out}}}
 
     def postprocess(self, accumulator):
