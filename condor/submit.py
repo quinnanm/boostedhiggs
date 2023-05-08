@@ -5,15 +5,14 @@ Splits the total fileset and creates condor job submission files for the specifi
 Author(s): Cristina Mantilla, Raghav Kansal, Farouk Mokhtar
 """
 import argparse
+import json
 import os
 from math import ceil
 
-import json
 from file_utils import loadFiles
 
 
 def main(args):
-
     try:
         proxy = os.environ["X509_USER_PROXY"]
     except ValueError:
@@ -135,7 +134,12 @@ if __name__ == "__main__":
     parser.add_argument("--year", dest="year", default="2017", help="year", type=str)
     parser.add_argument("--tag", dest="tag", default="Test", help="process tag", type=str)
     parser.add_argument(
-        "--processor", dest="processor", default="hww", help="which processor", type=str, choices=["hww", "trigger", "lumi"]
+        "--processor",
+        dest="processor",
+        default="hww",
+        help="which processor",
+        type=str,
+        choices=["hww", "trigger", "lumi", "zll"],
     )
     parser.add_argument("--config", dest="config", required=True, help="path to config yaml", type=str)
     parser.add_argument("--key", dest="configkey", required=True, help="config key: [data, mc, ... ]", type=str)
