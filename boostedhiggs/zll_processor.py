@@ -215,10 +215,31 @@ class ZllProcessor(processor.ProcessorABC):
         mll = (lep1 + lep2).mass
 
         # # lepton isolation
-        # lep1_reliso = lep1.pfRelIso04_all if hasattr(lep1, "pfRelIso04_all") else lep1.pfRelIso03_all
-        # lep2_reliso = lep2.pfRelIso04_all if hasattr(lep2, "pfRelIso04_all") else lep2.pfRelIso03_all
+        lep1_reliso = lep1.pfRelIso04_all if hasattr(lep1, "pfRelIso04_all") else lep1.pfRelIso03_all
+        lep2_reliso = lep2.pfRelIso04_all if hasattr(lep2, "pfRelIso04_all") else lep2.pfRelIso03_all
+
+        lep1_miso = lep1.miniPFRelIso_all
+        lep2_miso = lep2.miniPFRelIso_all
+
+        # fatjets
+        lep1_p4 = build_p4(lep1)  # build p4 for candidate lepton
+
+        fatjets = events.FatJet
+
+        good_fatjets = (fatjets.pt > 200) & (abs(fatjets.eta) < 2.5) & fatjets.isTight
+        good_fatjets = fatjets[good_fatjets]  # select good fatjets
+        good_fatjets = good_fatjets[ak.argsort(good_fatjets.pt, ascending=False)]  # sort them by pt
+
+        fj_idx_lep = ak.argmin(good_fatjets.delta_r(lep1_p4), axis=1, keepdims=True)
+        candidatefj = ak.firsts(good_fatjets[fj_idx_lep])
 
         variables = {
+            "fj_pt": candidatefj.pt,
+            "fj_msd": candidatefj.msd,
+            "lep1_reliso": lep1_reliso,
+            "lep2_reliso": lep2_reliso,
+            "lep1_miso": lep1_miso,
+            "lep2_miso": lep2_miso,
             "lep1_pt": lep1.pt,
             "lep1_mass": lep1.mass,
             "lep1_charge": lep1.charge,
