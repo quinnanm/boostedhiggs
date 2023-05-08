@@ -10,6 +10,8 @@ import pandas as pd
 import uproot
 from coffea import nanoevents, processor
 
+nanoevents.PFNanoAODSchema.warn_missing_crossrefs = False
+
 
 def main(args):
     # make directory for output
@@ -173,7 +175,6 @@ def main(args):
 
 
 if __name__ == "__main__":
-
     # e.g.
     # noqa: run locally on lpc (hww mc) as: python run.py --year 2017 --processor hww --pfnano v2_2 --n 1 --starti 0 --config samples_inclusive.yaml --key mc
     # noqa: run locally on lpc (vh) as: python run.py --year 2018 --sample HZJ_HToWW_M-125 --processor vh --pfnano v2_2 --n 1 --starti 0 --config samples_vh.yaml --key mc --channels lep --executor iterative
