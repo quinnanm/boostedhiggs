@@ -360,7 +360,7 @@ class ZllProcessor(processor.ProcessorABC):
         # isvbf = ak.fill_none(isvbf,False)
 
         # define dilepton mass
-        mmevents = events[ak.num(events.muon) == 2]
+        mmevents = events[ak.num(events.Muon) == 2]
         mll = mmevents.Muon[:, 0] + mmevents.Muon[:, 1]
         # lep1 = goodleptons[:, 0:1]
         # lep2 = goodleptons[:, 1:2]
