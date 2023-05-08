@@ -109,7 +109,14 @@ def main(args):
     elif args.processor == "zll":
         from boostedhiggs.zll_processor import ZllProcessor
 
-        p = ZllProcessor(year=args.year)
+        p = ZllProcessor(
+            year=year,
+            yearmod=yearmod,
+            channels=channels,
+            inference=args.inference,
+            output_location="./outfiles" + job_name,
+            apply_selection=False if args.without_selection else True,
+        )
 
     else:
         from boostedhiggs.trigger_efficiencies_processor import TriggerEfficienciesProcessor
