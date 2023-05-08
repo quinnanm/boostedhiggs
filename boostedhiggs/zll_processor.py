@@ -193,7 +193,7 @@ class ZllProcessor(processor.ProcessorABC):
             & (muons.sip3d <= 4.0)
             & muons.mediumId
         )
-        n_good_muons = ak.sum(good_muons, axis=1)
+        # n_good_muons = ak.sum(good_muons, axis=1)
 
         good_electrons = (
             (electrons.pt > 38)
@@ -204,7 +204,7 @@ class ZllProcessor(processor.ProcessorABC):
             & (electrons.sip3d <= 4.0)
             & (electrons.mvaFall17V2noIso_WP90)
         )
-        n_good_electrons = ak.sum(good_electrons, axis=1)
+        # n_good_electrons = ak.sum(good_electrons, axis=1)
 
         goodleptons = ak.concatenate([muons[good_muons], electrons[good_electrons]], axis=1)  # concat muons and electrons
         goodleptons = goodleptons[ak.argsort(goodleptons.pt, ascending=False)]  # sort by pt
@@ -215,8 +215,8 @@ class ZllProcessor(processor.ProcessorABC):
         mll = (lep1 + lep2).mass
 
         # lepton isolation
-        lep1_reliso = lep1.pfRelIso04_all if hasattr(lep1, "pfRelIso04_all") else lep1.pfRelIso03_all
-        lep2_reliso = lep2.pfRelIso04_all if hasattr(lep2, "pfRelIso04_all") else lep2.pfRelIso03_all
+        # lep1_reliso = lep1.pfRelIso04_all if hasattr(lep1, "pfRelIso04_all") else lep1.pfRelIso03_all
+        # lep2_reliso = lep2.pfRelIso04_all if hasattr(lep2, "pfRelIso04_all") else lep2.pfRelIso03_all
 
         variables = {
             "lep1_pt": lep1.pt,
@@ -268,28 +268,28 @@ class ZllProcessor(processor.ProcessorABC):
         self.add_selection(name="leptonKin", sel=(lep1.pt > 30) & (lep2.pt > 30), channel="mu")
         self.add_selection(name="leptonKin", sel=(lep1.pt > 40) & (lep2.pt > 40), channel="ele")
 
-        # dilepton selection
-        self.add_selection(name="twoLepton", sel=(n_good_muons >= 2), channel="mu")
-        self.add_selection(name="twoLepton", sel=(n_good_electrons >= 2), channel="ele")
-        self.add_selection(name="opposite_charge", sel=(lep1.charge * lep2.charge < 0))
+        # # dilepton selection
+        # self.add_selection(name="twoLepton", sel=(n_good_muons >= 2), channel="mu")
+        # self.add_selection(name="twoLepton", sel=(n_good_electrons >= 2), channel="ele")
+        # self.add_selection(name="oppositeCharge", sel=(lep1.charge * lep2.charge < 0))
 
-        # lepton isolation selection
-        self.add_selection(
-            name="lep_isolation",
-            sel=(
-                ((lep1.pt < 120) & (lep1_reliso < 0.15)) | (lep1.pt >= 120),
-                ((lep2.pt < 120) & (lep2_reliso < 0.15)) | (lep2.pt >= 120),
-            ),
-            channel="ele",
-        )
-        self.add_selection(
-            name="lep_isolation",
-            sel=(
-                ((lep1.pt < 55) & (lep1_reliso < 0.15)) | (lep1.pt >= 55),
-                ((lep2.pt < 55) & (lep2_reliso < 0.15)) | (lep2.pt >= 55),
-            ),
-            channel="mu",
-        )
+        # # lepton isolation selection
+        # self.add_selection(
+        #     name="lep_isolation",
+        #     sel=(
+        #         ((lep1.pt < 120) & (lep1_reliso < 0.15)) | (lep1.pt >= 120),
+        #         ((lep2.pt < 120) & (lep2_reliso < 0.15)) | (lep2.pt >= 120),
+        #     ),
+        #     channel="ele",
+        # )
+        # self.add_selection(
+        #     name="lep_isolation",
+        #     sel=(
+        #         ((lep1.pt < 55) & (lep1_reliso < 0.15)) | (lep1.pt >= 55),
+        #         ((lep2.pt < 55) & (lep2_reliso < 0.15)) | (lep2.pt >= 55),
+        #     ),
+        #     channel="mu",
+        # )
 
         # gen-level matching
         if self.isMC:
