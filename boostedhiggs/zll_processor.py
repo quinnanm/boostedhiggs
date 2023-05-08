@@ -14,7 +14,7 @@ from coffea.analysis_tools import PackedSelection, Weights
 from coffea.nanoevents.methods import candidate
 
 from boostedhiggs.btag import btagWPs
-from boostedhiggs.corrections import add_lepton_weight, add_pileup_weight, add_VJets_kFactors
+from boostedhiggs.corrections import add_lepton_weight, add_pileup_weight, add_VJets_kFactors, corrected_msoftdrop
 
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -225,6 +225,7 @@ class ZllProcessor(processor.ProcessorABC):
         lep1_p4 = build_p4(lep1)  # build p4 for candidate lepton
 
         fatjets = events.FatJet
+        fatjets["msdcorr"] = corrected_msoftdrop(fatjets)
 
         good_fatjets = (fatjets.pt > 200) & (abs(fatjets.eta) < 2.5) & fatjets.isTight
         good_fatjets = fatjets[good_fatjets]  # select good fatjets
@@ -235,7 +236,7 @@ class ZllProcessor(processor.ProcessorABC):
 
         variables = {
             "fj_pt": candidatefj.pt,
-            "fj_msd": candidatefj.msd,
+            "fj_msoftdrop": candidatefj.msdcorr,
             "lep1_reliso": lep1_reliso,
             "lep2_reliso": lep2_reliso,
             "lep1_miso": lep1_miso,
