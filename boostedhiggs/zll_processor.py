@@ -361,7 +361,7 @@ class ZllProcessor(processor.ProcessorABC):
 
         # define dilepton mass
         mmevents = events[ak.num(events.Muon) == 2]
-        mll = mmevents.Muon[:, 0] + mmevents.Muon[:, 1]
+        mll = (mmevents.Muon[:, 0] + mmevents.Muon[:, 1]).mass
         # lep1 = goodleptons[:, 0:1]
         # lep2 = goodleptons[:, 1:2]
         # mll = (ak.firsts(lep1) + ak.firsts(lep2)).mass
