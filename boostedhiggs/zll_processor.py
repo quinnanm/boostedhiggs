@@ -271,7 +271,7 @@ class ZllProcessor(processor.ProcessorABC):
         # # dilepton selection
         self.add_selection(name="twoLepton", sel=(n_good_muons >= 2), channel="mu")
         self.add_selection(name="twoLepton", sel=(n_good_electrons >= 2), channel="ele")
-        # self.add_selection(name="oppositeCharge", sel=(lep1.charge * lep2.charge < 0))
+        self.add_selection(name="oppositeCharge", sel=(lep1.charge * lep2.charge < 0))
 
         # # lepton isolation selection
         # self.add_selection(
