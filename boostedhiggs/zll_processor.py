@@ -228,6 +228,7 @@ class ZllProcessor(processor.ProcessorABC):
         # reject EE noisy jets for 2017
         if self._year == "2017":
             goodjets = goodjets[(goodjets.pt > 50) | (abs(goodjets.eta) < 2.65) | (abs(goodjets.eta) > 3.139)]
+        ht = ak.sum(goodjets.pt, axis=1)
 
         # fatjets
         fatjets = events.FatJet
@@ -323,6 +324,8 @@ class ZllProcessor(processor.ProcessorABC):
             for ch in self._channels:
                 self.add_selection(name="trigger", sel=trigger[ch], channel=ch)
         self.add_selection(name="metfilters", sel=metfilters)
+        self.add_selection(name="fatjetKin", sel=candidatefj.pt > 200)
+        self.add_selection(name="ht", sel=(ht > 200))
 
         # lepton kinematic selection
         self.add_selection(name="leptonKin", sel=(lep1.pt > 30) & (lep2.pt > 30), channel="mu")
