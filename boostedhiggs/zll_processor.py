@@ -221,9 +221,15 @@ class ZllProcessor(processor.ProcessorABC):
         lep1_miso = lep1.miniPFRelIso_all
         lep2_miso = lep2.miniPFRelIso_all
 
-        # fatjets
-        lep1_p4 = build_p4(lep1)  # build p4 for candidate lepton
+        # jets
+        goodjets = events.Jet[
+            (events.Jet.pt > 30) & (abs(events.Jet.eta) < 5.0) & events.Jet.isTight & (events.Jet.puId > 0)
+        ]
+        # reject EE noisy jets for 2017
+        if self._year == "2017":
+            goodjets = goodjets[(goodjets.pt > 50) | (abs(goodjets.eta) < 2.65) | (abs(goodjets.eta) > 3.139)]
 
+        # fatjets
         fatjets = events.FatJet
         fatjets["msdcorr"] = corrected_msoftdrop(fatjets)
 
@@ -231,12 +237,38 @@ class ZllProcessor(processor.ProcessorABC):
         good_fatjets = fatjets[good_fatjets]  # select good fatjets
         good_fatjets = good_fatjets[ak.argsort(good_fatjets.pt, ascending=False)]  # sort them by pt
 
+        lep1_p4 = build_p4(lep1)  # build p4 for candidate lepton
         fj_idx_lep = ak.argmin(good_fatjets.delta_r(lep1_p4), axis=1, keepdims=True)
         candidatefj = ak.firsts(good_fatjets[fj_idx_lep])
+
+        # delta R between AK8 jet and lepton
+        lep_fj_dr = candidatefj.delta_r(lep1_p4)
+
+        # b-jets
+        dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj))
+        dr_jet_lepfj = goodjets.delta_r(candidatefj)
+
+        n_bjets_L = ak.sum(goodjets[dr_jet_lepfj > 0.8].btagDeepFlavB > btagWPs["deepJet"][self._year]["L"], axis=1)
+        n_bjets_M = ak.sum(goodjets[dr_jet_lepfj > 0.8].btagDeepFlavB > btagWPs["deepJet"][self._year]["M"], axis=1)
+        n_bjets_T = ak.sum(goodjets[dr_jet_lepfj > 0.8].btagDeepFlavB > btagWPs["deepJet"][self._year]["T"], axis=1)
+
+        # max b-jet score for jet in opposite hemisphere from AK8 jet
+        bjets_away_lepfj = ak.max(goodjets[dphi_jet_lepfj > np.pi / 2].btagDeepFlavB, axis=1)
+        n_bjets_ophem_L = ak.sum(
+            goodjets[dphi_jet_lepfj > np.pi / 2].btagDeepFlavB > btagWPs["deepJet"][self._year]["L"], axis=1
+        )
+        n_bjets_ophem_M = ak.sum(
+            goodjets[dphi_jet_lepfj > np.pi / 2].btagDeepFlavB > btagWPs["deepJet"][self._year]["M"], axis=1
+        )
+        n_bjets_ophem_T = ak.sum(
+            goodjets[dphi_jet_lepfj > np.pi / 2].btagDeepFlavB > btagWPs["deepJet"][self._year]["T"], axis=1
+        )
 
         variables = {
             "fj_pt": candidatefj.pt,
             "fj_msoftdrop": candidatefj.msdcorr,
+            "fj_bjets_ophem": bjets_away_lepfj,
+            "lep_fj_dr": lep_fj_dr,
             "lep1_reliso": lep1_reliso,
             "lep2_reliso": lep2_reliso,
             "lep1_miso": lep1_miso,
@@ -248,6 +280,12 @@ class ZllProcessor(processor.ProcessorABC):
             "lep2_mass": lep2.mass,
             "lep2_charge": lep2.charge,
             "mll": mll,
+            "n_bjets_L": n_bjets_L,
+            "n_bjets_M": n_bjets_M,
+            "n_bjets_T": n_bjets_T,
+            "n_bjets_ophem_L": n_bjets_ophem_L,
+            "n_bjets_ophem_M": n_bjets_ophem_M,
+            "n_bjets_ophem_T": n_bjets_ophem_T,
         }
 
         """
