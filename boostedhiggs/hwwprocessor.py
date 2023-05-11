@@ -240,6 +240,7 @@ class HwwProcessor(processor.ProcessorABC):
 
         # get candidate lepton
         goodleptons = ak.concatenate([muons[good_muons], electrons[good_electrons]], axis=1)  # concat muons and electrons
+        # goodleptons = ak.concatenate(muons, electrons, axis=1)
         goodleptons = goodleptons[ak.argsort(goodleptons.pt, ascending=False)]  # sort by pt
 
         candidatelep = ak.firsts(goodleptons)  # pick highest pt
@@ -365,6 +366,8 @@ class HwwProcessor(processor.ProcessorABC):
         variables = {
             "fj_pt": candidatefj.pt,
             "fj_msoftdrop": candidatefj.msdcorr,
+            "fj_msoftdrop_nocorr": candidatefj.msoftdrop,
+            "fj_mass": candidatefj.mass,
             "fj_lsf3": candidatefj.lsf3,
             "fj_sj1_pt": subjet1.pt,
             "fj_sj2_pt": subjet2.pt,
@@ -516,20 +519,25 @@ class HwwProcessor(processor.ProcessorABC):
         signal_mask = None
         if self.isMC:
             if ("HToWW" in dataset) or ("HWW" in dataset) or ("ttHToNonbb" in dataset):
-                genVars, signal_mask = match_H(events.GenPart, candidatefj)
+                genVars, signal_mask = match_H(events.GenPart, candidatefj, candidatelep_p4)
                 if self.apply_selection:
                     self.add_selection(name="signal", sel=signal_mask)
                 else:
                     variables["signal"] = signal_mask
             elif "HToTauTau" in dataset:
-                genVars, signal_mask = match_H(events.GenPart, candidatefj, dau_pdgid=15)
-                self.add_selection(name="signal", sel=signal_mask)
+                genVars, signal_mask = match_H(events.GenPart, candidatefj, candidatelep_p4, dau_pdgid=15)
+                if self.apply_selection:
+                    self.add_selection(name="signal", sel=signal_mask)
+                else:
+                    variables["signal"] = signal_mask
             elif ("WJets" in dataset) or ("ZJets" in dataset) or ("DYJets" in dataset):
                 genVars = match_V(events.GenPart, candidatefj)
             elif "TT" in dataset:
                 genVars = match_Top(events.GenPart, candidatefj)
             else:
                 genVars = {}
+            # save gen jet mass (not msd)
+            genVars["fj_genjetmass"] = candidatefj.matched_gen.mass
             variables = {**variables, **genVars}
 
         """
@@ -650,7 +658,8 @@ class HwwProcessor(processor.ProcessorABC):
                 if self.inference:
                     for model_name in [
                         "particlenet_hww_inclv2_pre2",
-                        "ak8_MD_vminclv2ParT_manual_fixwrap_all_nodes",
+                        "ak8_MD_vminclv2ParT_manual_fixwrap",
+                        # "ak8_MD_vminclv2ParT_manual_fixwrap_all_nodes",
                     ]:
                         pnet_vars = runInferenceTriton(
                             self.tagger_resources_path,

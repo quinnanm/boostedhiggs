@@ -104,7 +104,7 @@ def runInferenceTriton(
         "05_10_ak8_ttbarwjets": ["PN_UCSD", "softmax__0"],
         "particlenet_hww_inclv2_pre2": ["ParticleNet", "output__0"],
         "particlenet_hww_inclv2_pre2_noreg": ["PN_v2_noreg", "softmax__0"],
-        "ak8_MD_vminclv2ParT_manual_fixwrap": ["ParT_noreg", "softmax"],
+        "ak8_MD_vminclv2ParT_manual_fixwrap": ["ParT", "softmax"],
         "ak8_MD_vminclv2ParT_manual_fixwrap_all_nodes": ["ParT", "softmax"],
     }[model_name]
 
@@ -171,6 +171,7 @@ def runInferenceTriton(
             # last index is mass regression
             tagger_outputs[:, :-1] = scipy.special.softmax(tagger_outputs[:, :-1], axis=1)
 
+        print(tagger_outputs)
         for i, output_name in enumerate(output_names):
             pnet_vars[f"fj_{pversion}_{output_name}"] = tagger_outputs[:, i]
 
