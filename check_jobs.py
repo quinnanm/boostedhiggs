@@ -48,12 +48,36 @@ def main(args):
         njobs_produced = len(glob.glob1(f"{outdir}/{sample}/outfiles", "*.pkl"))
         # print(f"Sample {sample} produced {njobs_produced} files")
 
+        id_failed = []
         if njobs_produced != njobs:  # debug which pkl file wasn't produced
             print(f"-----> SAMPLE {sample} HAS RAN INTO ERROR, #jobs produced: {njobs_produced}, # jobs {njobs}")
             for i, x in enumerate(range(0, njobs * nfiles_per_job[sample], nfiles_per_job[sample])):
                 fname = f"{x}-{x+nfiles_per_job[sample]}"
                 if not os.path.exists(f"{outdir}/{sample}/outfiles/{fname}.pkl"):
                     print(f"file {fname}.pkl wasn't produced which means job_idx {i} failed..")
+                    id_failed.append(i)
+
+        if args.resubmit and len(id_failed) > 0:
+            fname = f"condor/{args.tag}_{args.year}/{sample}.jdl"
+            condor_file = open(fname)
+
+            resub_name = f"condor/{args.tag}_{args.year}/{sample}_resubmit.txt"
+            tfile = open(resub_name, "w")
+            for i in id_failed:
+                tfile.write(f"{i}\n")
+            tfile.close()
+
+            f_fail = fname.replace(".jdl", "_resubmit.jdl")
+            condor_new = open(f_fail, "w")
+            for line in condor_file:
+                if "queue" in line:
+                    line = f"queue jobid from {resub_name}"
+                condor_new.write(line)
+            condor_new.close()
+            condor_file.close()
+
+            print("Submit ", f_fail)
+            os.system(f"condor_submit {f_fail}")
 
         # print("-----------------------------------------------------------------------------------------")
 
@@ -89,6 +113,10 @@ if __name__ == "__main__":
         default="v2_2",
         help="pfnano version",
     )
+    parser.add_argument("--resubmit", action="store_true")
+    parser.add_argument("--no-resubmit", dest="resubmit", action="store_false")
+    parser.set_defaults(resubmit=False)
+
     args = parser.parse_args()
 
     main(args)
