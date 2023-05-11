@@ -73,37 +73,6 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, lepton, dau_pdgid=W
 
     genVars = {"fj_genH_pt": ak.fill_none(higgs.pt, FILL_NONE_VALUE)}
 
-    def replace_photon(daughters):
-        # look at those decays where W W photon (24 24 22)
-        # distinctChildren results in [] [22]
-        # children results in (24 24 22)
-        # children.children results in [13, 14], [3, 4] []
-        try:
-            flat = ak.flatten(abs(daughters.pdgId), axis=3)
-        except KeyError:
-            flat = abs(daughters.pdgId)
-        try:
-            flat = ak.flatten(flat, axis=2)
-        except KeyError:
-            flat = flat
-        photon_mask = ak.any(flat == 22, axis=1)
-
-        try:
-            daus = ak.flatten(daughters.children, axis=4)
-        except KeyError:
-            daus = ak.flatten(daughters.children, axis=2)
-
-        # use a where condition to get all possible daughters
-        all_daughters = ak.where(photon_mask, daus, daughters)
-
-        if ak.any(photon_mask):
-            all_daughters = replace_photon(all_daughters)
-        else:
-            return all_daughters
-
-        if all_daughters is not None:
-            return all_daughters
-
     if dau_pdgid == W_PDGID:
         children_mask = get_pid_mask(matched_higgs_children, [W_PDGID], byall=False)
         is_hww_matched = ak.any(children_mask, axis=1)
@@ -122,8 +91,8 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, lepton, dau_pdgid=W
         }
 
         # VV daughters
-        # all_daus = replace_photon(higgs_children.children)
-        all_daus = higgs_children.children
+        # requires coffea-0.7.21
+        all_daus = higgs_children.distinctChildrenDeep
         all_daus = ak.flatten(all_daus, axis=2)
         all_daus_flat = ak.flatten(all_daus, axis=2)
         all_daus_flat_pdgId = abs(all_daus_flat.pdgId)
@@ -144,6 +113,8 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, lepton, dau_pdgid=W
             (all_daus_flat_pdgId == vELE_PDGID) | (all_daus_flat_pdgId == vMU_PDGID) | (all_daus_flat_pdgId == vTAU_PDGID)
         )
         leptons = (all_daus_flat_pdgId == ELE_PDGID) | (all_daus_flat_pdgId == MU_PDGID) | (all_daus_flat_pdgId == TAU_PDGID)
+
+        # num_m: number of matched leptons
         # number of quarks excludes neutrino and leptons
         num_m_quarks = ak.sum(fatjet.delta_r(all_daus_flat[~neutrinos & ~leptons]) < JET_DR, axis=1)
         num_m_leptons = ak.sum(fatjet.delta_r(all_daus_flat[leptons]) < JET_DR, axis=1)
@@ -180,7 +151,8 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, lepton, dau_pdgid=W
 
         is_htt_matched = ak.any(children_mask, axis=1)
 
-        taudaughters = daughters[(abs(daughters.pdgId) == TAU_PDGID)].children
+        # taudaughters = daughters[(abs(daughters.pdgId) == TAU_PDGID)].children
+        taudaughters = daughters[(abs(daughters.pdgId) == TAU_PDGID)].distinctChildrenDeep
         taudaughters = taudaughters[taudaughters.hasFlags(["isLastCopy"])]
         taudaughters_pdgId = abs(taudaughters.pdgId)
 
@@ -190,10 +162,6 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, lepton, dau_pdgid=W
         taudaughters_pdgId = abs(taudaughters.pdgId)
 
         flat_taudaughters_pdgId = ak.flatten(taudaughters_pdgId, axis=2)
-
-        extra_taus = ak.any(taudaughters_pdgId == TAU_PDGID, axis=2)
-        children_pdgId = abs(taudaughters[extra_taus].children.pdgId)
-
         taudecay = (
             # pions/kaons (full hadronic tau) * 1
             (
@@ -220,46 +188,10 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, lepton, dau_pdgid=W
             * 7
         )
 
-        extradecay = (
-            (
-                (
-                    ak.sum(
-                        ak.sum(
-                            (children_pdgId == PI_PDGID) | (children_pdgId == PO_PDGID) | (children_pdgId == PP_PDGID),
-                            axis=-1,
-                        ),
-                        axis=1,
-                    )
-                    > 0
-                )
-            )
-            * 1
-            + (ak.sum(ak.sum(children_pdgId == ELE_PDGID, axis=-1), axis=1) == 1) * 3
-            + (ak.sum(ak.sum(children_pdgId == MU_PDGID, axis=-1), axis=1) == 1) * 5
-            + (
-                (ak.sum(ak.sum(children_pdgId == MU_PDGID, axis=-1), axis=1) == 2)
-                | (ak.sum(ak.sum(children_pdgId == ELE_PDGID, axis=-1), axis=1) == 2)
-            )
-            * 7
-        )
-        extradecay = ak.sum(extradecay, axis=-1)
-
-        elehad = ((taudecay == 4) & (extradecay == 0)) | ((extradecay == 4) & (taudecay == 0))
-        muhad = ((taudecay == 6) & (extradecay == 0)) | ((extradecay == 6) & (taudecay == 0))
-        leplep = ((taudecay == 7) | (taudecay == 8)) | ((extradecay == 7) | (extradecay == 8))
+        elehad = taudecay == 4
+        muhad = taudecay == 6
+        leplep = taudecay == 7
         hadhad = ~elehad & ~muhad & ~leplep
-
-        # to painfully debug
-        # np.set_printoptions(threshold=np.inf)
-        # print(ak.argsort((is_htt_matched)).to_numpy())
-        # print(ak.flatten(taudecay).to_numpy())
-        # idx= ak.argsort((is_htt_matched)).to_numpy()
-        # idx = [74,2023,2037,2887,3121,3435,3838,4599,4702,4906,5266,5703,6063,6498,6799,7642,8820,8828,8999,9005,9455,9564,
-        # 11178,11597,11736,12207,12325,12504,12697,12780,13151,13690]
-        # for i in idx:
-        #     print(i,flat_taudaughters_pdgId[i],extra_taus[i],children_pdgId[i])
-        #     print(elehad[i],muhad[i],leplep[i],hadhad[i])
-        #     print(taudecay[i],extradecay[i])
 
         genHTTVars = {
             "fj_H_tt_hadhad": to_label(hadhad),

@@ -280,9 +280,9 @@ class HwwProcessor(processor.ProcessorABC):
         # lep_in_fj_overlap_bool = good_fatjets.delta_r(candidatelep_p4) > 0.1
         # good_fatjets = good_fatjets[lep_in_fj_overlap_bool]
 
+        # choose candidate fatjet
         fj_idx_lep = ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)
         # fj_idx_lep = ak.argmax(good_fatjets.pt, axis=1, keepdims=True)
-
         candidatefj = ak.firsts(good_fatjets[fj_idx_lep])
 
         # MET
@@ -312,17 +312,13 @@ class HwwProcessor(processor.ProcessorABC):
             behavior=candidate.behavior,
         )
         # candidateNeutrino = get_neutrino_z(candidatefj, met)
-        # rec_higgs_mass = (candidatefj + candidateNeutrino).mass  # mass of fatjet with lepton + neutrino
+        rec_W_lnu = candidatelep_p4 + candidateNeutrino
+        rec_W_qq = candidatefj - candidatelep_p4
+        rec_higgs = rec_W_qq + rec_W_lnu
 
         # subjets of that fatjet
         subjet1 = candidatefj.subjets[:, 0]
         subjet2 = candidatefj.subjets[:, 1]
-
-        # TODO: remove candidateNeutrino and plot dphi for VH
-        rec_W_lnu = candidatelep_p4 + candidateNeutrino
-        rec_W_qq = candidatefj - candidatelep_p4
-
-        rec_higgs = rec_W_qq + rec_W_lnu
 
         # b-jets
         dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj))
@@ -331,7 +327,6 @@ class HwwProcessor(processor.ProcessorABC):
         bjets = ak.max(goodjets[dr_jet_lepfj > 0.8].btagDeepFlavB, axis=1)
 
         # # TODO: save number of bjets at different working points
-        # n_bjets = ak.sum(goodjets[dr_jet_lepfj > 0.8].btagDeepFlavB>0.3, axis=1)
         n_bjets_L = ak.sum(goodjets[dr_jet_lepfj > 0.8].btagDeepFlavB > btagWPs["deepJet"][self._year]["L"], axis=1)
         n_bjets_M = ak.sum(goodjets[dr_jet_lepfj > 0.8].btagDeepFlavB > btagWPs["deepJet"][self._year]["M"], axis=1)
         n_bjets_T = ak.sum(goodjets[dr_jet_lepfj > 0.8].btagDeepFlavB > btagWPs["deepJet"][self._year]["T"], axis=1)
@@ -406,7 +401,6 @@ class HwwProcessor(processor.ProcessorABC):
             "n_bjets_ophem_L": n_bjets_ophem_L,
             "n_bjets_ophem_M": n_bjets_ophem_M,
             "n_bjets_ophem_T": n_bjets_ophem_T,
-            "mreg": candidatefj.particleNet_mass,
         }
 
         """
@@ -538,6 +532,7 @@ class HwwProcessor(processor.ProcessorABC):
                 genVars = {}
             # save gen jet mass (not msd)
             genVars["fj_genjetmass"] = candidatefj.matched_gen.mass
+            genVars["fj_genjetpt"] = candidatefj.matched_gen.pt
             variables = {**variables, **genVars}
 
         """
@@ -553,7 +548,6 @@ class HwwProcessor(processor.ProcessorABC):
         - Muon ID scale factors
         - Muon Isolation scale factors
         - Electron Isolation scale factors (ToDo)
-        - Mini-isolation scale factor (ToDo)
         - Jet Mass Scale (JMS) scale factor (ToDo)
         - Jet Mass Resolution (JMR) scale factor (ToDo)
         - NLO EWK scale factors for DY(ll)/W(lnu)/W(qq)/Z(qq)
