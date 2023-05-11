@@ -10,6 +10,8 @@ import pandas as pd
 import uproot
 from coffea import nanoevents, processor
 
+nanoevents.PFNanoAODSchema.warn_missing_crossrefs = False
+
 
 def main(args):
     # make directory for output
@@ -104,6 +106,18 @@ def main(args):
 
         p = LumiProcessor(year=args.year, yearmod=yearmod, output_location="./outfiles" + job_name)
 
+    elif args.processor == "zll":
+        from boostedhiggs.zll_processor import ZllProcessor
+
+        p = ZllProcessor(
+            year=year,
+            yearmod=yearmod,
+            channels=channels,
+            inference=args.inference,
+            output_location="./outfiles" + job_name,
+            apply_selection=False if args.without_selection else True,
+        )
+
     else:
         from boostedhiggs.trigger_efficiencies_processor import TriggerEfficienciesProcessor
 
@@ -159,7 +173,7 @@ def main(args):
     filehandler.close()
 
     # merge parquet
-    if args.processor == "hww" or args.processor == "vh":
+    if args.processor == "hww" or args.processor == "vh" or args.processor == "zll":
         for ch in channels:
             data = pd.read_parquet("./outfiles/" + job_name + ch + "/parquet")
             data.to_parquet("./outfiles/" + job_name + "_" + ch + ".parquet")
@@ -168,12 +182,13 @@ def main(args):
 
 
 if __name__ == "__main__":
-
     # e.g.
     # noqa: run locally on lpc (hww mc) as: python run.py --year 2017 --processor hww --pfnano v2_2 --n 1 --starti 0 --config samples_inclusive.yaml --key mc
     # noqa: run locally on lpc (vh) as: python run.py --year 2018 --sample HZJ_HToWW_M-125 --processor vh --pfnano v2_2 --n 1 --starti 0 --config samples_vh.yaml --key mc --channels lep --executor iterative
-    # noqa: run locally on lpc (hww trigger) as: python run.py --year 2017 --processor trigger --pfnano v2_2 --n 45 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele --config samples_inclusive.yaml --key mc
-    # noqa: run locally on lpc (hww trigger) as: python run.py --year 2017 --processor hww --pfnano v2_2 --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele --config samples_inclusive.yaml --key mc
+    # noqa: run locally on lpc (hww trigger) as: python run.py --year 2017 --processor trigger --pfnano v2_2 --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele --config samples_inclusive.yaml --key mc
+
+    # noqa: run locally on single file (hww): python run.py --year 2017 --processor hww --pfnano v2_2 --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele --config samples_inclusive.yaml --key mc
+    # noqa: run locally on on single file (zll): python run.py --year 2017 --processor zll --pfnano v2_2 --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele --config samples_inclusive.yaml --key mc
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--year", dest="year", default="2017", help="year", type=str)

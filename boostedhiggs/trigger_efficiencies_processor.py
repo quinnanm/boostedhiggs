@@ -7,6 +7,7 @@ from coffea.nanoevents.methods import candidate
 from coffea.processor import ProcessorABC, column_accumulator
 
 from boostedhiggs.corrections import add_lepton_weight, add_pileup_weight, add_VJets_kFactors
+from boostedhiggs.utils import match_H
 
 # from boostedhiggs.utils import getParticles
 
@@ -23,20 +24,20 @@ def getParticles(genparticles, lowid=22, highid=25, flags=["fromHardProcess", "i
     return genparticles[((absid >= lowid) & (absid <= highid)) & genparticles.hasFlags(flags)]
 
 
-def simple_match_HWW(genparticles, candidatefj):
-    """
-    return the number of matched objects (hWW*),daughters,
-    and gen flavor (enuqq, munuqq, taunuqq)
-    """
-    higgs = getParticles(genparticles, 25)  # genparticles is the full set... this function selects Higgs particles
-    # W~24 so we get H->WW (limitation: only picking one W and assumes the other will be there)
-    is_hWW = ak.all(abs(higgs.children.pdgId) == 24, axis=2)
+# def simple_match_HWW(genparticles, candidatefj):
+#     """
+#     return the number of matched objects (hWW*),daughters,
+#     and gen flavor (enuqq, munuqq, taunuqq)
+#     """
+#     higgs = getParticles(genparticles, 25)  # genparticles is the full set... this function selects Higgs particles
+#     # W~24 so we get H->WW (limitation: only picking one W and assumes the other will be there)
+#     is_hWW = ak.all(abs(higgs.children.pdgId) == 24, axis=2)
 
-    higgs = higgs[is_hWW]
+#     higgs = higgs[is_hWW]
 
-    matchedH = candidatefj.nearest(higgs, axis=1, threshold=0.8)  # choose higgs closest to fj
+#     matchedH = candidatefj.nearest(higgs, axis=1, threshold=0.8)  # choose higgs closest to fj
 
-    return matchedH
+#     return matchedH
 
 
 def build_p4(cand):
@@ -106,6 +107,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         out = {}
         for channel in self._channels:
             out[channel] = {}
+            out[channel]["triggers"] = {}
 
         """ Save OR of triggers as booleans """
         for channel in self._channels:
@@ -115,7 +117,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
                     np.array([events.HLT[trigger] for trigger in self._trigger_dict[t] if trigger in events.HLT.fields]),
                     axis=0,
                 )
-            out[channel] = {**out[channel], **HLT_triggers}
+            out[channel]["triggers"] = {**out[channel]["triggers"], **HLT_triggers}
 
         """ basic definitions """
         # DEFINE MUONS
@@ -124,7 +126,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             & (np.abs(events.Muon.eta) < 2.4)
             & (events.Muon.looseId)
         )
-        # n_loose_muons = ak.sum(loose_muons, axis=1)
+        n_loose_muons = ak.sum(loose_muons, axis=1)
 
         good_muons = (
             (events.Muon.pt > 30)
@@ -199,8 +201,8 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         add_pileup_weight(self.weights, self._year, "", nPU=ak.to_numpy(events.Pileup.nPU))
         add_VJets_kFactors(self.weights, events.GenPart, dataset)
 
-        """ Baseline selection """
-        # define selections for different channels
+        # """ Baseline selection """
+        # # define selections for different channels
         for channel in self._channels:
             selection = PackedSelection()
             if channel == "mu":
@@ -217,44 +219,43 @@ class TriggerEfficienciesProcessor(ProcessorABC):
                 selection.add("muonkin", (candidatelep.pt > 30))
             elif channel == "ele":
                 add_lepton_weight(self.weights, candidatelep, self._year, "electron")
-                # selection.add(
-                #     "oneelectron",
-                #     (
-                #         (n_good_muons == 0)
-                #         & (n_loose_muons == 0)
-                #         & (n_good_electrons == 1)
-                #         & ~ak.any(loose_electrons & ~good_electrons, 1)
-                #     ),
-                # )
-                # selection.add("electronkin", (candidatelep.pt > 40))
-            selection.add("fatjetKin", candidatefj.pt > 0)
+                selection.add(
+                    "oneelectron",
+                    (
+                        (n_good_muons == 0)
+                        & (n_loose_muons == 0)
+                        & (n_good_electrons == 1)
+                        & ~ak.any(loose_electrons & ~good_electrons, 1)
+                    ),
+                )
+                selection.add("electronkin", (candidatelep.pt > 40))
 
-            """ Define other variables to save """
-            out[channel]["fj_pt"] = pad_val_nevents(candidatefj.pt)
-            out[channel]["fj_msoftdrop"] = pad_val_nevents(candidatefj.msoftdrop)
-            out[channel]["lep_pt"] = pad_val_nevents(candidatelep.pt)
+            """Define other variables to save"""
+            out[channel]["vars"] = {}
+            out[channel]["vars"]["fj_pt"] = pad_val_nevents(candidatefj.pt)
+            out[channel]["vars"]["fj_msoftdrop"] = pad_val_nevents(candidatefj.msoftdrop)
+            out[channel]["vars"]["lep_pt"] = pad_val_nevents(candidatelep.pt)
 
             if "HToWW" in dataset:
-                matchedH = simple_match_HWW(events.GenPart, candidatefj)
-                matchedH_pt = ak.firsts(matchedH.pt)
+                genVars, _ = match_H(events.GenPart, candidatefj)
+                matchedH_pt = genVars["fj_genH_pt"]
             else:
                 matchedH_pt = ak.zeros_like(candidatefj.pt)
-            out[channel]["higgspt"] = pad_val_nevents(matchedH_pt)
+            out[channel]["vars"]["fj_genH_pt"] = pad_val_nevents(matchedH_pt)
 
-            # store the per channel weight
-            # if len(self.weights_per_ch[channel]) > 0:
-            #     out[channel][f"weight_{channel}"] = self.weights.partial_weight(self.weights_per_ch[channel])
-
+            out[channel]["weights"] = {}
             for key in self.weights._weights.keys():
                 # store the individual weights (ONLY for now until we debug)
-                out[channel][f"weight_{key}"] = self.weights.partial_weight([key])
+                out[channel]["weights"][f"weight_{key}"] = self.weights.partial_weight([key])
                 if channel in self.weights_per_ch.keys():
                     self.weights_per_ch[channel].append(key)
 
             # use column accumulators
-            out[channel] = {
-                key: column_accumulator(value[selection.all(*selection.names)]) for (key, value) in out[channel].items()
-            }
+            for key_ in out[channel].keys():
+                out[channel][key_] = {
+                    key: column_accumulator(value[selection.all(*selection.names)])
+                    for (key, value) in out[channel][key_].items()
+                }
 
         return {self._year: {dataset: {"nevents": nevents, "skimmed_events": out}}}
 
@@ -262,8 +263,10 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         for year, datasets in accumulator.items():
             for dataset, output in datasets.items():
                 for channel in output["skimmed_events"].keys():
-                    output["skimmed_events"][channel] = {
-                        key: value.value for (key, value) in output["skimmed_events"][channel].items()
-                    }
+                    for key_ in output["skimmed_events"][channel].keys():
+
+                        output["skimmed_events"][channel][key_] = {
+                            key: value.value for (key, value) in output["skimmed_events"][channel][key_].items()
+                        }
 
         return accumulator

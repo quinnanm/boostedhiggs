@@ -4,8 +4,8 @@
 Explores unproduced files due to condor job errors.
 """
 import argparse
-import os
 import json
+import os
 from math import ceil
 
 from condor.file_utils import loadFiles
@@ -21,16 +21,20 @@ def main(args):
     slist = args.slist.split(",") if args.slist is not None else None
 
     # TODO: add path from different username
+    if args.username == "cmantill":
+        prepend = "/uscms/home/cmantill/nobackup/hww/boostedhiggs/"
+    else:
+        prepend = ""
+    metadata = prepend + f"condor/{args.tag}_{args.year}/metadata_{args.configkey}.json"
 
-    metadata = f"condor/{args.tag}_{args.year}/metadata_{args.configkey}.json"
     try:
         with open(metadata, "r") as f:
             files = json.load(f)
     except KeyError:
         raise Exception(f"Could not open file {metadata}")
 
-    config = f"condor/{args.tag}_{args.year}/{args.config}"
-    splitname = f"condor/{args.tag}_{args.year}/pfnano_splitting.yaml"
+    config = prepend + f"condor/{args.tag}_{args.year}/{args.config}"
+    splitname = prepend + f"condor/{args.tag}_{args.year}/pfnano_splitting.yaml"
 
     _, nfiles_per_job = loadFiles(config, args.configkey, args.year, args.pfnano, slist, splitname)
 
