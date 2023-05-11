@@ -87,14 +87,14 @@ def add_VJets_kFactors(weights, genpart, dataset):
                 ewkcorr.evaluate(syst + "_down", vpt) / ewknom,
             )
 
-    if "ZJetsToQQ_HT" in dataset:
+    if "ZJetsToQQ_HT" in dataset or "DYJetsToLL_M-" in dataset:
         vpt = get_vpt(genpart)
         qcdcorr = vjets_kfactors["ULZ_MLMtoFXFX"].evaluate(vpt)
         ewkcorr = vjets_kfactors["Z_FixedOrderComponent"]
         add_systs(zsysts, qcdcorr, ewkcorr, vpt)
-    elif "DYJetsToLL" in dataset:
+    elif "DYJetsToLL_Pt" in dataset:
         vpt = get_vpt(genpart)
-        qcdcorr = 1
+        qcdcorr = None
         ewkcorr = vjets_kfactors["Z_FixedOrderComponent"]
         add_systs(znlosysts, qcdcorr, ewkcorr, vpt)
     elif "WJetsToQQ_HT" in dataset or "WJetsToLNu" in dataset:

@@ -124,14 +124,18 @@ xs["ZJetsToQQ_HT-600to800"] = 2.541e01
 xs["ZJetsToQQ_HT-800toInf"] = 1.291e01
 
 # DY+jets
-xs["DYJetsToLL_HT-70to100"] = 1.399e02
-xs["DYJetsToLL_HT-100to200"] = 1.401e02
-xs["DYJetsToLL_HT-200to400"] = 3.835e01
-xs["DYJetsToLL_HT-400to600"] = 5.217e00
-xs["DYJetsToLL_HT-600to800"] = 1.267e00
-xs["DYJetsToLL_HT-800to1200"] = 5.682e-01
-xs["DYJetsToLL_HT-1200to2500"] = 1.332e-01
-xs["DYJetsToLL_HT-2500toInf"] = 2.978e-03
+# ref: https://cms.cern.ch/iCMS/jsp/db_notes/noteInfo.jsp?cmsnoteid=CMS%20AN-2021/205 (v11)
+# they still need a k-factor depending on flavor composition?
+# k-factor of 0.93 is NNLO correction
+xs["DYJetsToLL_M-10to50"] = 15810.0 * 0.93
+xs["DYJetsToLL_M-50_HT-70to100"] = 146.5 * 0.93
+xs["DYJetsToLL_M-50_HT-100to200"] = 160.8 * 0.93
+xs["DYJetsToLL_M-50_HT-200to400"] = 48.63 * 0.93
+xs["DYJetsToLL_M-50_HT-400to600"] = 6.982 * 0.93
+xs["DYJetsToLL_M-50_HT-600to800"] = 1.756 * 0.93
+xs["DYJetsToLL_M-50_HT-800to1200"] = 0.8094 * 0.93
+xs["DYJetsToLL_M-50_HT-1200to2500"] = 0.1931 * 0.93
+xs["DYJetsToLL_M-50_HT-2500toInf"] = 0.003513 * 0.93
 
 xs["DYJetsToLL_Pt-50To100"] = 3.941e02
 xs["DYJetsToLL_Pt-100To250"] = 9.442e01

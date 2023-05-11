@@ -97,9 +97,12 @@ folders_to_index = {
         ##
         "/store/user/lpcpfnano/cmantill/v2_2/2016/DYJetsToLL",
         "/store/user/lpcpfnano/cmantill/v2_2/2016APV/DYJetsToLL",
-        "/store/user/lpcpfnano/cmantill/v2_3/2016APV/DYJetsToLL",
         "/store/user/lpcpfnano/cmantill/v2_2/2017/DYJetsToLL",
         "/store/user/lpcpfnano/cmantill/v2_2/2018/DYJetsToLL",
+        "/store/user/lpcpfnano/cmantill/v2_3/2016/DYJetsToLL",
+        "/store/user/lpcpfnano/cmantill/v2_3/2016APV/DYJetsToLL",
+        "/store/user/lpcpfnano/cmantill/v2_3/2017/DYJetsToLL",
+        "/store/user/lpcpfnano/cmantill/v2_3/2018/DYJetsToLL",
         ##
         "/store/user/lpcpfnano/jdickins/v2_2/2016/Diboson/",
         "/store/user/lpcpfnano/jdickins/v2_2/2016APV/Diboson/",
