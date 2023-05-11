@@ -78,6 +78,22 @@ def get_pfcands_features(
     feature_dict["pfcand_pz"] = jet_pfcands.pz
     feature_dict["pfcand_energy"] = jet_pfcands.energy
 
+    # work-around to match PKU
+    # https://github.com/colizz/DNNTuples/blob/dev-UL-hww/Ntupler/plugins/CustomDeepBoostedJetTagInfoProducer.cc#L486-L496
+    # jet_pfcands_p4 = ak.zip(
+    #     {
+    #         "pt": jet_pfcands.pt,
+    #         "eta": jet_pfcands.eta,
+    #         "phi": jet_pfcands.delta_phi(jet),
+    #         "energy": jet_pfcands.energy,
+    #     },
+    #     with_name="PtEtaPhiELorentzVector",
+    # )
+    # feature_dict["pfcand_px"] = jet_pfcands_p4.px
+    # feature_dict["pfcand_py"] = jet_pfcands_p4.py
+    # feature_dict["pfcand_pz"] = jet_pfcands_p4.pz
+    # feature_dict["pfcand_energy"] = jet_pfcands_p4.energy
+
     # btag vars
     for var in tagger_vars["pf_features"]["var_names"]:
         if "btag" in var:
@@ -138,11 +154,17 @@ def get_pfcands_features(
             vals = repl_values_dict[var]
             a[a == vals[0]] = vals[1]
 
+        # print(var)
+        # print(a[11])
+
         if normalize:
             if var in tagger_vars["pf_features"]["var_names"]:
                 info = tagger_vars["pf_features"]["var_infos"][var]
             else:
                 info = tagger_vars["pf_vectors"]["var_infos"][var]
+
+            # print(info)
+            # print("\n")
 
             a = (a - info["median"]) * info["norm_factor"]
             a = np.clip(a, info.get("lower_bound", -5), info.get("upper_bound", 5))
@@ -234,11 +256,18 @@ def get_svs_features(
         ).astype(np.float32)
         a = np.nan_to_num(a)
 
+        # print(var)
+        # print(a[11])
+
         if normalize:
             if var in tagger_vars["sv_features"]["var_names"]:
                 info = tagger_vars["sv_features"]["var_infos"][var]
             else:
                 info = tagger_vars["sv_vectors"]["var_infos"][var]
+
+            # print(info)
+            # print("\n")
+
             a = (a - info["median"]) * info["norm_factor"]
             a = np.clip(a, info.get("lower_bound", -5), info.get("upper_bound", 5))
 

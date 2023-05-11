@@ -23,7 +23,6 @@ def loadFiles(
     with open(samples_yaml, "r") as f:
         all_samples = yaml.safe_load(f)[config]
         if isinstance(all_samples, dict):
-            print("all_samples", all_samples.keys())
             try:
                 all_samples = all_samples[year]
             except KeyError:

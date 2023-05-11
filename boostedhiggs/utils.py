@@ -90,21 +90,29 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID):
         }
 
         # VV daughters
-        daughters = ak.flatten(matched_higgs_children.distinctChildren, axis=2)
-        daughters = daughters[daughters.hasFlags(GEN_FLAGS)]
-        daughters_pdgId = abs(daughters.pdgId)
+        daughters = matched_higgs_children.children
 
-        # exclude neutrinos from nprongs count
-        daughters_nov = daughters[
-            ((daughters_pdgId != vELE_PDGID) & (daughters_pdgId != vMU_PDGID) & (daughters_pdgId != vTAU_PDGID))
-        ]
-        nprongs = ak.sum(fatjet.delta_r(daughters_nov) < JET_DR, axis=1)
+        # look at those decays where W W photon (24 24 22)
+        """
+        distinctChildren results in [] [22]
+        children results in (24 24 22)
+        children.children results in [13, 14], [3, 4] []
+        """
+        flat_daughters_pdgId = ak.flatten(abs(daughters.pdgId), axis=2)
+        photon_mask = ak.any(flat_daughters_pdgId == 22, axis=1)
 
-        # get tau decays
+        # use a where condition to get all possible daughters
+        all_daughters = ak.where(photon_mask, ak.flatten(daughters.children, axis=3), daughters)
+        all_daughters = ak.flatten(all_daughters, axis=2)
+
+        daughters_pdgId = ak.where(photon_mask, ak.flatten(abs(daughters.children.pdgId), axis=-1), abs(daughters.pdgId))
+        flat_daughters_pdgId = ak.flatten(daughters_pdgId, axis=2)
+
+        # look at tau-daughters
         taudaughters = daughters[(daughters_pdgId == TAU_PDGID)].children
         taudaughters = taudaughters[taudaughters.hasFlags(["isLastCopy"])]
         taudaughters_pdgId = abs(taudaughters.pdgId)
-
+        taudaughters_pdgId = ak.flatten(taudaughters_pdgId, axis=2)
         taudecay = (
             # pions/kaons (hadronic tau) * 1
             (
@@ -123,45 +131,41 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID):
         # flatten taudecay - so painful
         taudecay = ak.sum(taudecay, axis=-1)
 
-        # lepton daughters
-        lepdaughters = daughters[
-            ((daughters_pdgId == ELE_PDGID) | (daughters_pdgId == MU_PDGID) | (daughters_pdgId == TAU_PDGID))
-        ]
-        lepinprongs = ak.sum(fatjet.delta_r(lepdaughters) < JET_DR, axis=1)  # should be 0 or 1
-
-        lepton_parent = ak.firsts(lepdaughters[fatjet.delta_r(lepdaughters) < JET_DR].distinctParent)
-        lepton_parent_mass = lepton_parent.mass
-
-        iswlepton = lepton_parent_mass == v.mass
-        iswstarlepton = lepton_parent_mass == v_star.mass
-
-        decay = (
-            # 2 quarks * 1
-            (ak.sum(daughters_pdgId <= b_PDGID, axis=1) == 2) * 1
-            # 1 electron * 3
-            + (ak.sum(daughters_pdgId == ELE_PDGID, axis=1) == 1) * 3
-            # 1 muon * 5
-            + (ak.sum(daughters_pdgId == MU_PDGID, axis=1) == 1) * 5
-            # 1 tau * 7
-            + (ak.sum(daughters_pdgId == TAU_PDGID, axis=1) == 1) * 7
-            # 4 quarks * 11
-            + (ak.sum(daughters_pdgId <= b_PDGID, axis=1) == 4) * 11
+        # the following tells you about the decay
+        num_quarks = ak.sum(flat_daughters_pdgId <= b_PDGID, axis=1)
+        num_leptons = ak.sum(
+            (flat_daughters_pdgId == ELE_PDGID) | (flat_daughters_pdgId == MU_PDGID) | (flat_daughters_pdgId == TAU_PDGID),
+            axis=1,
         )
+        num_electrons = ak.sum(flat_daughters_pdgId == ELE_PDGID, axis=1)
+        num_muons = ak.sum(flat_daughters_pdgId == MU_PDGID, axis=1)
+        num_taus = ak.sum(flat_daughters_pdgId == TAU_PDGID, axis=1)
 
-        # number of c quarks in V decay inside jet
-        cquarks = daughters_nov[abs(daughters_nov.pdgId) == c_PDGID]
-        ncquarks = ak.sum(fatjet.delta_r(cquarks) < JET_DR, axis=1)
+        # the following tells you about the matching
+        neutrinos = (
+            (all_daughters.pdgId == vELE_PDGID) | (all_daughters.pdgId == vMU_PDGID) | (all_daughters.pdgId == vTAU_PDGID)
+        )
+        leptons = (all_daughters.pdgId == ELE_PDGID) | (all_daughters.pdgId == MU_PDGID) | (all_daughters.pdgId == TAU_PDGID)
+        # number of quarks excludes leptons and neutrinos
+        num_m_quarks = ak.sum(fatjet.delta_r(all_daughters[~neutrinos & ~leptons]) < JET_DR, axis=1)
+        num_m_leptons = ak.sum(fatjet.delta_r(all_daughters[leptons]) < JET_DR, axis=1)
+        num_m_cquarks = ak.sum(fatjet.delta_r(all_daughters[all_daughters.pdgId == b_PDGID]) < JET_DR, axis=1)
+
+        lep_daughters = all_daughters[leptons]
+        lep_parent = ak.firsts(lep_daughters[fatjet.delta_r(lep_daughters) < JET_DR].distinctParent)
+        iswlepton = lep_parent.mass == v.mass
+        iswstarlepton = lep_parent.mass == v_star.mass
 
         genHVVVars = {
-            "fj_nprongs": nprongs,
-            "fj_ncquarks": ncquarks,
-            "fj_lepinprongs": lepinprongs,
-            "fj_H_VV_4q": to_label(decay == 11),
-            "fj_H_VV_elenuqq": to_label(decay == 4),
-            "fj_H_VV_munuqq": to_label(decay == 6),
-            "fj_H_VV_leptauelvqq": to_label((decay == 8) & (taudecay == 3)),
-            "fj_H_VV_leptaumuvqq": to_label((decay == 8) & (taudecay == 5)),
-            "fj_H_VV_hadtauvqq": to_label((decay == 8) & (taudecay == 1)),
+            "fj_nquarks": num_m_quarks,
+            "fj_ncquarks": num_m_cquarks,
+            "fj_lepinprongs": num_m_leptons,
+            "fj_H_VV_4q": to_label((num_quarks == 4) & (num_leptons == 0)),
+            "fj_H_VV_elenuqq": to_label((num_electrons == 1) & (num_quarks == 2) & (num_leptons == 1)),
+            "fj_H_VV_munuqq": to_label((num_muons == 1) & (num_quarks == 2) & (num_leptons == 1)),
+            "fj_H_VV_leptauelvqq": to_label((num_taus == 1) & (taudecay == 3) & (num_quarks == 2) & (num_leptons == 1)),
+            "fj_H_VV_leptaumuvqq": to_label((num_taus == 1) & (taudecay == 5) & (num_quarks == 2) & (num_leptons == 1)),
+            "fj_H_VV_hadtauvqq": to_label((num_taus == 1) & (taudecay == 1) & (num_quarks == 2) & (num_leptons == 1)),
             "fj_H_VV_isVlepton": iswlepton,
             "fj_H_VV_isVstarlepton": iswstarlepton,
             "fj_H_VV_isMatched": is_hww_matched,
@@ -266,12 +270,6 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID):
 
         genVars = {**genVars, **genHTTVars}
 
-    # added Feb13 2023
-    nmuons = {"n_gen_muons": (ak.sum(daughters_pdgId == MU_PDGID, axis=1))}
-    decay = {"decay": decay}
-
-    genVars = {**genVars, **nmuons, **decay}
-
     return genVars, signal_mask
 
 
@@ -327,62 +325,37 @@ def match_V(genparts: GenParticleArray, fatjet: FatJetArray):
 
 def match_Top(genparts: GenParticleArray, fatjet: FatJetArray):
     tops = genparts[get_pid_mask(genparts, TOP_PDGID, byall=False) * genparts.hasFlags(GEN_FLAGS)]
-    matched_tops = tops[ak.argmin(fatjet.delta_r(tops), axis=1, keepdims=True)]
-    matched_tops_mask = ak.any(fatjet.delta_r(matched_tops) < 0.8, axis=1)
-    daughters = ak.flatten(matched_tops.distinctChildren, axis=2)
+    matched_tops = tops[fatjet.delta_r(tops) < JET_DR]
+    num_matched_tops = ak.sum(fatjet.delta_r(matched_tops) < JET_DR, axis=1)
+
+    # take all possible daughters!
+    daughters = ak.flatten(tops.distinctChildren, axis=2)
     daughters = daughters[daughters.hasFlags(["fromHardProcess", "isLastCopy"])]
     daughters_pdgId = abs(daughters.pdgId)
 
-    wboson_daughters = ak.flatten(daughters[(daughters_pdgId == 24)].distinctChildren, axis=2)
+    wboson_daughters = ak.flatten(daughters[(daughters_pdgId == W_PDGID)].distinctChildren, axis=2)
     wboson_daughters = wboson_daughters[wboson_daughters.hasFlags(["fromHardProcess", "isLastCopy"])]
     wboson_daughters_pdgId = abs(wboson_daughters.pdgId)
-    decay = (
-        # 2 quarks
-        (ak.sum(wboson_daughters_pdgId < b_PDGID, axis=1) == 2) * 1
-        # 1 electron * 3
-        + (ak.sum(wboson_daughters_pdgId == ELE_PDGID, axis=1) == 1) * 3
-        # 1 muon * 5
-        + (ak.sum(wboson_daughters_pdgId == MU_PDGID, axis=1) == 1) * 5
-        # 1 tau * 7
-        + (ak.sum(wboson_daughters_pdgId == TAU_PDGID, axis=1) == 1) * 7
-    )
+
     bquark = daughters[(daughters_pdgId == 5)]
-    matched_b = ak.sum(fatjet.delta_r(bquark) < 0.8, axis=1)
-
-    wboson_daughters_nov = wboson_daughters[
-        (
-            (wboson_daughters_pdgId != vELE_PDGID)
-            & (wboson_daughters_pdgId != vMU_PDGID)
-            & (wboson_daughters_pdgId != vTAU_PDGID)
-        )
-    ]
-    # nprongs only includes the number of quarks from W decay (not b!)
-    nprongs = ak.sum(fatjet.delta_r(wboson_daughters_nov) < JET_DR, axis=1)
-
-    matched_topdaus_mask = ak.any(fatjet.delta_r(daughters) < 0.8, axis=1)
-    matched_mask = matched_tops_mask & matched_topdaus_mask
-
-    # number of c quarks in V decay inside jet
-    cquarks = wboson_daughters_nov[abs(wboson_daughters_nov.pdgId) == c_PDGID]
-    ncquarks = ak.sum(fatjet.delta_r(cquarks) < JET_DR, axis=1)
-
-    lepdaughters = wboson_daughters[
-        (
-            (wboson_daughters_pdgId == ELE_PDGID)
-            | (wboson_daughters_pdgId == MU_PDGID)
-            | (wboson_daughters_pdgId == TAU_PDGID)
-        )
-    ]
-
-    lepinprongs = 0
-    if len(lepdaughters) > 0:
-        lepinprongs = ak.sum(fatjet.delta_r(lepdaughters) < JET_DR, axis=1)  # should be 0 or 1
+    neutrinos = (
+        (wboson_daughters_pdgId == vELE_PDGID)
+        | (wboson_daughters_pdgId == vMU_PDGID)
+        | (wboson_daughters_pdgId == vTAU_PDGID)
+    )
+    leptons = (
+        (wboson_daughters_pdgId == ELE_PDGID) | (wboson_daughters_pdgId == MU_PDGID) | (wboson_daughters_pdgId == TAU_PDGID)
+    )
+    quarks = ~leptons & ~neutrinos
+    cquarks = wboson_daughters_pdgId == c_PDGID
+    electrons = wboson_daughters_pdgId == ELE_PDGID
+    muons = wboson_daughters_pdgId == ELE_PDGID
+    taus = wboson_daughters_pdgId == TAU_PDGID
 
     # get tau decays from V daughters
     taudaughters = wboson_daughters[(wboson_daughters_pdgId == TAU_PDGID)].children
     taudaughters = taudaughters[taudaughters.hasFlags(["isLastCopy"])]
     taudaughters_pdgId = abs(taudaughters.pdgId)
-
     taudecay = (
         # pions/kaons (hadronic tau) * 1
         (
@@ -401,19 +374,32 @@ def match_Top(genparts: GenParticleArray, fatjet: FatJetArray):
     # flatten taudecay - so painful
     taudecay = ak.sum(taudecay, axis=-1)
 
+    # get number of matched daughters
+    num_m_quarks_nob = ak.sum(fatjet.delta_r(wboson_daughters[quarks]) < JET_DR, axis=1)
+    num_m_bquarks = ak.sum(fatjet.delta_r(bquark) < JET_DR, axis=1)
+    num_m_cquarks = ak.sum(fatjet.delta_r(wboson_daughters[cquarks]) < JET_DR, axis=1)
+    num_m_leptons = ak.sum(fatjet.delta_r(wboson_daughters[leptons]) < JET_DR, axis=1)
+    num_m_electrons = ak.sum(fatjet.delta_r(wboson_daughters[electrons]) < JET_DR, axis=1)
+    num_m_muons = ak.sum(fatjet.delta_r(wboson_daughters[muons]) < JET_DR, axis=1)
+    num_m_taus = ak.sum(fatjet.delta_r(wboson_daughters[taus]) < JET_DR, axis=1)
+
+    matched_tops_mask = ak.any(fatjet.delta_r(tops) < JET_DR, axis=1)
+    matched_topdaus_mask = ak.any(fatjet.delta_r(daughters) < JET_DR, axis=1)
+    matched_mask = matched_tops_mask & matched_topdaus_mask
+
     genVars = {
-        "fj_Top_isMatched": matched_mask,
-        "fj_nprongs": nprongs,
-        "fj_lepinprongs": lepinprongs,
-        "fj_ncquarks": ncquarks,
-        "fj_Top_bmerged": to_label(matched_b == 1),
-        "fj_Top_2q": to_label(decay == 1),
-        "fj_Top_elenu": to_label(decay == 3),
-        "fj_Top_munu": to_label(decay == 5),
-        "fj_Top_hadtauvqq": to_label((decay == 7) & (taudecay == 1)),
-        "fj_Top_leptauelvnu": to_label((decay == 7) & (taudecay == 3)),
-        "fj_Top_leptaumuvnu": to_label((decay == 7) & (taudecay == 5)),
+        "fj_Top_isMatched": matched_mask,  # at least one top and one daugther matched..
+        "fj_Top_numMatched": num_matched_tops,  # number of tops matched
+        "fj_Top_nquarksnob": num_m_quarks_nob,  # number of quarks from W decay (not b) matched in dR
+        "fj_Top_nbquarks": num_m_bquarks,  # number of b quarks ..
+        "fj_Top_ncquarks": num_m_cquarks,  # number of c quarks ..
+        "fj_Top_nleptons": num_m_leptons,  # number of leptons ..
+        "fj_Top_nele": num_m_electrons,  # number of electrons...
+        "fj_Top_nmu": num_m_muons,  # number of muons...
+        "fj_Top_ntau": num_m_taus,  # number of taus...
+        "fj_Top_taudecay": taudecay,  # taudecay (1: hadronic, 3: electron, 5: muon)
     }
+
     return genVars
 
 
