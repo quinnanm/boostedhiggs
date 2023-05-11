@@ -45,7 +45,9 @@ def get_xsecweight(pkl_files, year, sample, is_data, luminosity):
 
 axis_dict = {
     "Zmass": hist2.axis.Regular(40, 30, 450, name="var", label=r"Zmass [GeV]", overflow=True),
+    "ht": hist2.axis.Regular(30, 200, 1200, name="var", label=r"ht [GeV]", overflow=True),
     "lep_pt": hist2.axis.Regular(40, 30, 450, name="var", label=r"Lepton $p_T$ [GeV]", overflow=True),
+    "met": hist2.axis.Regular(40, 0, 450, name="var", label=r"MET", overflow=True),
     "fj_minus_lep_m": hist2.axis.Regular(35, 0, 280, name="var", label=r"Jet - Lepton mass [GeV]", overflow=True),
     "fj_minus_lep_pt": hist2.axis.Regular(40, 0, 450, name="var", label=r"Jet - Lepton $p_T$ [GeV]", overflow=True),
     "lep_met_mt": hist2.axis.Regular(35, 0, 400, name="var", label=r"$m_T(lep, p_T^{miss})$ [GeV]", overflow=True),
@@ -55,18 +57,24 @@ axis_dict = {
     "mu_mvaId": hist2.axis.Variable([0, 1, 2, 3, 4, 5], name="var", label="Muon MVAID", overflow=True),
     "ele_highPtId": hist2.axis.Regular(5, 0, 5, name="var", label="Electron high pT ID", overflow=True),
     "mu_highPtId": hist2.axis.Regular(5, 0, 5, name="var", label="Muon high pT ID", overflow=True),
-    "fj_pt": hist2.axis.Regular(30, 200, 1000, name="var", label=r"Jet $p_T$ [GeV]", overflow=True),
+    "fj_pt": hist2.axis.Regular(30, 200, 600, name="var", label=r"Jet $p_T$ [GeV]", overflow=True),
     "fj_msoftdrop": hist2.axis.Regular(35, 20, 250, name="var", label=r"Jet $m_{sd}$ [GeV]", overflow=True),
     "rec_higgs_m": hist2.axis.Regular(35, 0, 480, name="var", label=r"Higgs reconstructed mass [GeV]", overflow=True),
     "rec_higgs_pt": hist2.axis.Regular(30, 0, 1000, name="var", label=r"Higgs reconstructed $p_T$ [GeV]", overflow=True),
     "fj_pt_over_lep_pt": hist2.axis.Regular(35, 1, 10, name="var", label=r"$p_T$(Jet) / $p_T$(Lepton)", overflow=True),
+    "rec_higgs_pt_over_lep_pt": hist2.axis.Regular(
+        35, 1, 10, name="var", label=r"$p_T$(Recontructed Higgs) / $p_T$(Lepton)", overflow=True
+    ),
     "golden_var": hist2.axis.Regular(35, 0, 10, name="var", label=r"$p_{T}(W_{l\nu})$ / $p_{T}(W_{qq})$", overflow=True),
     "rec_dphi_WW": hist2.axis.Regular(
-        35, 0, 3, name="var", label=r"$\left| \Delta \phi(W_{l\nu}, W_{qq}) \right|$", overflow=True
+        35, 0, 3.14, name="var", label=r"$\left| \Delta \phi(W_{l\nu}, W_{qq}) \right|$", overflow=True
     ),
-    "fj_ParT_mass": hist2.axis.Regular(35, 0, 250, name="var", label=r"ParT regressed mass [GeV]", overflow=True),
+    "fj_ParT_mass": hist2.axis.Regular(20, 0, 250, name="var", label=r"ParT regressed mass [GeV]", overflow=True),
     "fj_ParticleNet_mass": hist2.axis.Regular(
         35, 0, 250, name="var", label=r"fj_ParticleNet regressed mass [GeV]", overflow=True
+    ),
+    "met_fj_dphi": hist2.axis.Regular(
+        35, 0, 3.14, name="var", label=r"$\left| \Delta \phi(MET, Jet) \right|$", overflow=True
     ),
 }
 
@@ -74,9 +82,12 @@ axis_dict = {
 # new stuff
 combine_samples = {
     # data
-    "SingleElectron_": "SingleElectron",
-    "SingleMuon_": "SingleMuon",
-    "EGamma_": "EGamma",
+    # "SingleElectron_": "SingleElectron",
+    "SingleElectron_": "Data",
+    # "SingleMuon_": "SingleMuon_",
+    "SingleMuon_": "Data",
+    # "EGamma_": "EGamma",
+    "EGamma_": "Data",
     # signal
     "GluGluHToWW_Pt-200ToInf_M-125": "HWW",
     "HToWW_M-125": "VH",
@@ -92,6 +103,7 @@ combine_samples = {
     "WW": "Diboson",
     "WZ": "Diboson",
     "ZZ": "Diboson",
+    "GluGluHToTauTau": "HTauTau",
 }
 signals = ["HWW", "ttH", "VH", "VBF"]
 
@@ -125,7 +137,6 @@ weights = {
 
 # tagger definitions
 def disc_score(df, sigs, bkgs):
-
     num = df[sigs].sum(axis=1)
     den = df[sigs].sum(axis=1) + df[bkgs].sum(axis=1)
     return num / den
@@ -134,6 +145,16 @@ def disc_score(df, sigs, bkgs):
 # scores definition
 hwwev = ["fj_PN_probHWqqWev0c", "fj_PN_probHWqqWev1c", "fj_PN_probHWqqWtauev0c", "fj_PN_probHWqqWtauev1c"]
 hwwmv = ["fj_PN_probHWqqWmv0c", "fj_PN_probHWqqWmv1c", "fj_PN_probHWqqWtaumv0c", "fj_PN_probHWqqWtaumv1c"]
+hwwhad = [
+    "fj_PN_probHWqqWqq0c",
+    "fj_PN_probHWqqWqq1c",
+    "fj_PN_probHWqqWqq2c",
+    "fj_PN_probHWqqWq0c",
+    "fj_PN_probHWqqWq1c",
+    "fj_PN_probHWqqWq2c",
+    "fj_PN_probHWqqWtauhv0c",
+    "fj_PN_probHWqqWtauhv1c",
+]
 qcd = ["fj_PN_probQCDbb", "fj_PN_probQCDcc", "fj_PN_probQCDb", "fj_PN_probQCDc", "fj_PN_probQCDothers"]
 
 tope = ["fj_PN_probTopbWev", "fj_PN_probTopbWtauev"]
@@ -143,8 +164,10 @@ tophad = ["fj_PN_probTopbWqq0c", "fj_PN_probTopbWqq1c", "fj_PN_probTopbWq0c", "f
 top = tope + topm + tophad
 
 sigs = {
-    "ele": hwwev,
-    "mu": hwwmv,
+    # "ele": hwwev,
+    "ele": hwwev + hwwmv + hwwhad,
+    # "mu": hwwmv,
+    "mu": hwwev + hwwmv + hwwhad,
 }
 
 qcd_bkg = [b.replace("PN", "ParT") for b in qcd]
@@ -153,6 +176,7 @@ inclusive_bkg = [b.replace("PN", "ParT") for b in qcd + tope + topm + tophad]
 
 
 def event_skimmer(
+    year,
     channels,
     samples_dir,
     samples,
@@ -162,7 +186,6 @@ def event_skimmer(
     add_qcd_score=False,
     add_top_score=False,
 ):
-
     events_dict = {}
     for ch in channels:
         events_dict[ch] = {}
@@ -172,11 +195,10 @@ def event_skimmer(
 
         # get lumi
         with open("../fileset/luminosity.json") as f:
-            luminosity = json.load(f)[ch]["2017"]
+            luminosity = json.load(f)[ch][year]
 
         condor_dir = os.listdir(samples_dir)
         for sample in condor_dir:
-
             # get a combined label to combine samples of the same process
             for key in combine_samples:
                 if key in sample:
@@ -186,10 +208,12 @@ def event_skimmer(
                     sample_to_use = sample
 
             if sample_to_use not in samples:
+                print(f"ATTENTION: {sample} will be skipped")
                 continue
 
             is_data = False
-            if sample_to_use == data_by_ch[ch]:
+            # if sample_to_use == data_by_ch[ch]:
+            if sample_to_use == "Data":
                 is_data = True
 
             print(f"Finding {sample} samples and should combine them under {sample_to_use}")
@@ -207,9 +231,10 @@ def event_skimmer(
                 continue
 
             # replace the weight_pileup of the strange events with the mean weight_pileup of all the other events
-            strange_events = data["weight_pileup"] > 6
-            if len(strange_events) > 0:
-                data["weight_pileup"][strange_events] = data[~strange_events]["weight_pileup"].mean(axis=0)
+            if not is_data:
+                strange_events = data["weight_pileup"] > 6
+                if len(strange_events) > 0:
+                    data["weight_pileup"][strange_events] = data[~strange_events]["weight_pileup"].mean(axis=0)
 
             # apply selection
             print("---> Applying preselection.")
@@ -221,12 +246,18 @@ def event_skimmer(
             # get event_weight
             if not is_data:
                 print("---> Accumulating event weights.")
-                event_weight = get_xsecweight(pkl_files, "2017", sample, is_data, luminosity)
+                event_weight = get_xsecweight(pkl_files, year, sample, is_data, luminosity)
                 for w in weights[ch]:
                     if w not in data.keys():
                         print(f"{w} weight is not stored in parquet")
                         continue
-                    event_weight *= data[w]
+                    if weights[ch][w] == 1:
+                        print(f"Applying {w} weight")
+                        # if w == "weight_vjets_nominal":
+                        #     event_weight *= data[w] + 0.3
+                        # else:
+                        event_weight *= data[w]
+
                 print("---> Done with accumulating event weights.")
             else:
                 event_weight = np.ones_like(data["fj_pt"])
