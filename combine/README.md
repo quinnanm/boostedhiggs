@@ -1,8 +1,8 @@
 # Making templates
 
-We use the script here to produce the `.root` histograms (or templates).
+We use a python script to produce the `.root` histograms (or templates).
 ```
-python python/make_templates.py
+python ../python/make_templates.py
 ```
 
 ### Running combine on the output
