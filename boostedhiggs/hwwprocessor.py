@@ -15,8 +15,6 @@ from coffea.nanoevents.methods import candidate
 
 from boostedhiggs.btag import btagWPs
 from boostedhiggs.corrections import add_lepton_weight, add_pileup_weight, add_VJets_kFactors, corrected_msoftdrop
-
-# from boostedhiggs.utils import get_neutrino_z
 from boostedhiggs.utils import match_H, match_Top, match_V
 
 from .run_tagger_inference import runInferenceTriton
@@ -187,7 +185,7 @@ class HwwProcessor(processor.ProcessorABC):
             if mf in events.Flag.fields:
                 metfilters = metfilters & events.Flag[mf]
 
-        # taus (will need to refine to avoid overlap with htt)
+        # taus
         loose_taus_mu = (events.Tau.pt > 20) & (abs(events.Tau.eta) < 2.3) & (events.Tau.idAntiMu >= 1)  # loose antiMu ID
         loose_taus_ele = (
             (events.Tau.pt > 20)
