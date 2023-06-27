@@ -118,6 +118,11 @@ def main(args):
             apply_selection=False if args.without_selection else True,
         )
 
+    elif args.processor == "input":
+        from boostedhiggs.inputprocessor import InputProcessor
+
+        p = InputProcessor(num_jets=2)
+
     else:
         from boostedhiggs.trigger_efficiencies_processor import TriggerEfficienciesProcessor
 
@@ -173,7 +178,7 @@ def main(args):
     filehandler.close()
 
     # merge parquet
-    if args.processor == "hww" or args.processor == "vh" or args.processor == "zll":
+    if args.processor == "hww" or args.processor == "vh" or args.processor == "zll" or args.processor == "input":
         for ch in channels:
             data = pd.read_parquet("./outfiles/" + job_name + ch + "/parquet")
             data.to_parquet("./outfiles/" + job_name + "_" + ch + ".parquet")

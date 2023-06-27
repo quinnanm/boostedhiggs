@@ -1,9 +1,11 @@
-from typing import Union
+from typing import Union, List, Tuple, Dict
 
 import awkward as ak
 import numpy as np
 from coffea.analysis_tools import PackedSelection
 from coffea.nanoevents.methods.nanoaod import FatJetArray, GenParticleArray
+from coffea.nanoevents.methods.base import NanoEventsArray
+
 
 d_PDGID = 1
 c_PDGID = 4
@@ -253,7 +255,7 @@ def match_V(genparts: GenParticleArray, fatjet: FatJetArray):
         "fj_V_munu": to_label(decay == 5),
         "fj_V_taunu": to_label(decay == 7),
     }
-    return genVars
+    return genVars, matched_mask
 
 
 def match_Top(genparts: GenParticleArray, fatjet: FatJetArray):
@@ -333,7 +335,95 @@ def match_Top(genparts: GenParticleArray, fatjet: FatJetArray):
         "fj_Top_taudecay": taudecay,  # taudecay (1: hadronic, 3: electron, 5: muon)
     }
 
-    return genVars
+    return genVars, matched_mask
+
+
+def match_QCD(
+    genparts: GenParticleArray,
+    fatjets: FatJetArray,
+    genlabels: List[str],
+) -> Tuple[np.array, Dict[str, np.array]]:
+    """Gen matching for QCD samples, arguments as defined in ``tagger_gen_matching``"""
+    match_dR = 0.8
+
+    partons = genparts[get_pid_mask(genparts, [g_PDGID] + list(range(1, b_PDGID + 1)), ax=1, byall=False)]
+    matched_mask = ak.any(fatjets.delta_r(partons) < match_dR, axis=1)
+
+    genVars = {
+        "fj_isQCDb": (fatjets.nBHadrons == 1),
+        "fj_isQCDbb": (fatjets.nBHadrons > 1),
+        "fj_isQCDc": (fatjets.nCHadrons == 1) * (fatjets.nBHadrons == 0),
+        "fj_isQCDcc": (fatjets.nCHadrons > 1) * (fatjets.nBHadrons == 0),
+        "fj_isQCDothers": (fatjets.nBHadrons == 0) & (fatjets.nCHadrons == 0),
+    }
+
+    genVars = {key: to_label(var) for key, var in genVars.items()}
+
+    return genVars, matched_mask
+
+
+def get_genjet_vars(events: NanoEventsArray, fatjets: FatJetArray):
+    """Matched fat jet to gen-level jet and gets gen jet vars"""
+    GenJetVars = {}
+
+    # NanoAOD automatically matched ak8 fat jets
+    # No soft dropped gen jets however
+    GenJetVars["fj_genjetmass"] = fatjets.matched_gen.mass
+    matched_gen_jet_mask = np.ones(len(events), dtype="bool")
+
+    return GenJetVars, matched_gen_jet_mask
+
+
+def tagger_gen_matching(
+    events: NanoEventsArray,
+    genparts: GenParticleArray,
+    fatjets: FatJetArray,
+    genlabels: List[str],
+    label: str,
+) -> Tuple[np.array, Dict[str, np.array]]:
+    """Does fatjet -> gen-level matching and derives gen-level variables.
+
+    Args:
+        events (NanoEventsArray): events.
+        genparts (GenParticleArray): event gen particles.
+        fatjets (FatJetArray): event fat jets (should be only one fat jet per event!).
+        genlabels (List[str]): gen variables to return.
+        label (str): dataset label, formatted as
+          ``{AK15 or AK8}_{H or QCD}_{(optional) H decay products}``.
+        match_dR (float): max distance between fat jet and gen particle for matching.
+          Defaults to 1.0.
+
+    Returns:
+        np.array: Boolean selection array of shape ``[len(fatjets)]``.
+        Dict[str, np.array]: dict of gen variables.
+
+    """
+
+    matched_mask = np.ones(len(genparts), dtype="bool")
+
+    # only updated matched mask for signal
+    if "H_" in label:
+        GenVars, matched_mask = match_H(genparts, fatjets)
+    elif "QCD" in label:
+        GenVars, _ = match_QCD(genparts, fatjets)
+    elif "VJets" in label:
+        GenVars, _ = match_V(genparts, fatjets)
+    elif "Top" in label:
+        GenVars, _ = match_Top(genparts, fatjets)
+
+    genjet_vars, matched_gen_jet_mask = get_genjet_vars(events, fatjets)
+
+    AllGenVars = {**GenVars, **genjet_vars}
+
+    # if ``GenVars`` doesn't contain a gen var, that var is not applicable to this sample so fill with 0s
+    GenVars = {key: AllGenVars[key] if key in AllGenVars.keys() else np.zeros(len(genparts)) for key in genlabels}
+    for key, item in GenVars.items():
+        try:
+            GenVars[key] = GenVars[key].to_numpy()
+        except KeyError:
+            continue
+
+    return matched_mask * matched_gen_jet_mask, GenVars
 
 
 def pad_val(
