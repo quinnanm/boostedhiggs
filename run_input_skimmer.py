@@ -78,7 +78,7 @@ def main(args):
     # define processor
     from boostedhiggs.inputprocessor import InputProcessor
 
-    p = InputProcessor(num_jets=1, output_location=OUTPATH)
+    p = InputProcessor(num_jets=1, output_location=f"{OUTPATH}/{job_name}")
 
     tic = time.time()
     if args.executor == "dask":
