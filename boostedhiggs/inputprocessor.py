@@ -171,9 +171,9 @@ class InputProcessor(ProcessorABC):
         return output
 
     def process(self, events: ak.Array):
-        # import time
+        import time
 
-        # start = time.time()
+        start = time.time()
 
         def build_p4(cand):
             return ak.zip(
@@ -258,17 +258,17 @@ class InputProcessor(ProcessorABC):
         """
 
         # convert output to pandas
-        # df = self.ak_to_pandas(skimmed_vars)
+        df = self.ak_to_pandas(skimmed_vars)
 
-        # print(f"convert: {time.time() - start:.1f}s")
+        print(f"convert: {time.time() - start:.1f}s")
 
-        # print(df)
+        print(df)
 
         # save the output
         fname = events.behavior["__events_factory__"]._partition_key.replace("/", "_")
         fname = "condor_" + fname
 
-        self.save_dfs_parquet(fname, skimmed_vars)
+        self.save_dfs_parquet(fname, df)
 
         # save to parquet
         # self.dump_table(df, f"{PATH}/{fname}.parquet")
