@@ -9,7 +9,22 @@ from typing import Dict
 import awkward as ak
 import numpy as np
 import numpy.ma as ma
+from coffea.nanoevents.methods import candidate
 from coffea.nanoevents.methods.base import NanoEventsArray
+
+
+def build_p4(cand):
+    return ak.zip(
+        {
+            "pt": cand.pt,
+            "eta": cand.eta,
+            "phi": cand.phi,
+            "mass": cand.mass,
+            "charge": cand.charge,
+        },
+        with_name="PtEtaPhiMCandidate",
+        behavior=candidate.behavior,
+    )
 
 
 def get_pfcands_features(
@@ -268,6 +283,64 @@ def get_svs_features(
             # print(info)
             # print("\n")
 
+            a = (a - info["median"]) * info["norm_factor"]
+            a = np.clip(a, info.get("lower_bound", -5), info.get("upper_bound", 5))
+
+        feature_dict[var] = a
+
+    return feature_dict
+
+
+def get_lep_features(
+    tagger_vars,
+    preselected_events,
+    jet,
+    lepton,
+) -> Dict[str, np.ndarray]:
+    """
+    Extracts the lepton features specified in the ``tagger_vars`` dict from the
+    ``preselected_events`` and returns them as a dict of numpy arrays
+    """
+    feature_dict = {}
+
+    feature_dict["lep_dR_fj"] = lepton.delta_r(jet).to_numpy().filled(fill_value=0)
+    feature_dict["lep_pt"] = (lepton.pt).to_numpy().filled(fill_value=0)
+    feature_dict["lep_pt_ratio"] = (lepton.pt / jet.pt).to_numpy().filled(fill_value=0)
+
+    return feature_dict
+
+
+def get_met_features(
+    tagger_vars: dict,
+    preselected_events: NanoEventsArray,
+    jet,
+    met_label,
+    normalize=True,
+) -> Dict[str, np.ndarray]:
+    """
+    Extracts the MET features specified in the ``tagger_vars`` dict from the
+    ``preselected_events`` and returns them as a dict of numpy arrays
+    """
+    feature_dict = {}
+
+    met = preselected_events[met_label]
+
+    # get features
+    feature_dict["met_relpt"] = met.pt / jet.pt
+    feature_dict["met_relphi"] = met.delta_phi(jet)
+
+    for var in tagger_vars["met_features"]["var_names"]:
+        a = (
+            # ak.pad_none(
+            #     feature_dict[var], tagger_vars["met_features"]["var_length"], axis=1, clip=True
+            # )
+            feature_dict[var]  # just 1d, no pad_none
+            .to_numpy()
+            .filled(fill_value=0)
+        ).astype(np.float32)
+
+        if normalize:
+            info = tagger_vars["met_features"]["var_infos"][var]
             a = (a - info["median"]) * info["norm_factor"]
             a = np.clip(a, info.get("lower_bound", -5), info.get("upper_bound", 5))
 
