@@ -24,6 +24,7 @@ def main(args):
         files[args.sample] = [f"rootfiles/{args.sample}/nano_mc2017_{i}.root" for i in range(3)]
 
     elif args.local:
+        files = {}
         with open(f"fileset/pfnanoindex_{args.pfnano}_{args.year}.json", "r") as f:
             files_all = json.load(f)
             for subdir in files_all[args.year]:
@@ -136,6 +137,7 @@ def main(args):
 
 if __name__ == "__main__":
     # python run_input_skimmer.py --macos --processor input --sample GluGluHToWW_Pt-200ToInf_M-125 --n 1 --starti 0
+    # python run_input_skimmer.py --local --processor input --sample GluGluHToWW_Pt-200ToInf_M-125 --n 1 --starti 0
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--year", dest="year", default="2017", help="year", type=str)
