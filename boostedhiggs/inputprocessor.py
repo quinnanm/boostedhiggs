@@ -261,7 +261,7 @@ class InputProcessor(ProcessorABC):
         if self.inference:
             from .run_tagger_inference import runInferenceTriton
 
-            for model_name in ["ak8_MD_vminclv2ParT_manual_fixwrap"]:
+            for model_name in ["particlenet_hww_inclv2_pre2_noreg"]:
                 pnet_vars = runInferenceTriton(
                     self.tagger_resources_path,
                     events[selection.all(*selection.names)],
