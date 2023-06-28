@@ -421,7 +421,7 @@ def tagger_gen_matching(
     for key, item in GenVars.items():
         try:
             GenVars[key] = GenVars[key].to_numpy()
-        except KeyError:
+        except KeyError or AttributeError:
             continue
 
     return matched_mask * matched_gen_jet_mask, GenVars
