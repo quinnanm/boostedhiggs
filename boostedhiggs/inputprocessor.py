@@ -3,7 +3,6 @@ Skimmer for ParticleNet tagger inputs.
 
 Author(s): Cristina Mantilla Suarez, Raghav Kansal
 """
-
 import os
 import pathlib
 import warnings
@@ -12,6 +11,8 @@ from typing import Dict
 import awkward as ak
 import numpy as np
 import pandas as pd
+import pyarrow as pa
+import pyarrow.parquet as pq
 import uproot
 from coffea.analysis_tools import PackedSelection
 from coffea.nanoevents.methods import candidate
@@ -127,20 +128,15 @@ class InputProcessor(ProcessorABC):
     def accumulator(self):
         return self._accumulator
 
-    def dump_table(self, pddf: pd.DataFrame, fname: str) -> None:
-        """
-        Saves pandas dataframe events to './outparquet'
-        """
-        import pyarrow as pa
-        import pyarrow.parquet as pq
+    def save_dfs_parquet(self, fname, dfs_dict):
+        if self._output_location is not None:
+            PATH = f"{self._output_location}/parquet/"
+            if not os.path.exists(PATH):
+                os.makedirs(PATH)
 
-        local_dir = os.path.abspath(os.path.join(".", "outparquet"))
-        os.system(f"mkdir -p {local_dir}")
-
-        # need to write with pyarrow as pd.to_parquet doesn't support different types in
-        # multi-index column names
-        table = pa.Table.from_pandas(pddf)
-        pq.write_table(table, f"{local_dir}/{fname}")
+            table = pa.Table.from_pandas(dfs_dict)
+            if len(table) != 0:  # skip dataframes with empty entries
+                pq.write_table(table, f"{PATH}/{fname}.parquet")
 
     def dump_root(self, jet_vars: Dict[str, np.array], fname: str) -> None:
         """
@@ -175,9 +171,9 @@ class InputProcessor(ProcessorABC):
         return output
 
     def process(self, events: ak.Array):
-        import time
+        # import time
 
-        start = time.time()
+        # start = time.time()
 
         def build_p4(cand):
             return ak.zip(
@@ -262,24 +258,22 @@ class InputProcessor(ProcessorABC):
         """
 
         # convert output to pandas
-        df = self.ak_to_pandas(skimmed_vars)
+        # df = self.ak_to_pandas(skimmed_vars)
 
-        print(f"convert: {time.time() - start:.1f}s")
+        # print(f"convert: {time.time() - start:.1f}s")
 
-        print(df)
+        # print(df)
 
         # save the output
         fname = events.behavior["__events_factory__"]._partition_key.replace("/", "_")
         fname = "condor_" + fname
 
-        PATH = f"{self._output_location}/parquet/"
-        if not os.path.exists(PATH):
-            os.makedirs(PATH)
+        self.save_dfs_parquet(fname, skimmed_vars)
 
         # save to parquet
-        self.dump_table(df, f"{PATH}/{fname}.parquet")
+        # self.dump_table(df, f"{PATH}/{fname}.parquet")
 
-        print(f"dumped: {time.time() - start:.1f}s")
+        # print(f"dumped: {time.time() - start:.1f}s")
 
         return {}
 
