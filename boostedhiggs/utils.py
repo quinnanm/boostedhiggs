@@ -409,6 +409,8 @@ def tagger_gen_matching(
         GenVars, _ = match_V(genparts, fatjets)
     elif "Top" in label:
         GenVars, _ = match_Top(genparts, fatjets)
+    else:
+        GenVars = {}
 
     genjet_vars, matched_gen_jet_mask = get_genjet_vars(events, fatjets)
 
