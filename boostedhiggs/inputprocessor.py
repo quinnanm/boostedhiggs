@@ -41,7 +41,7 @@ class InputProcessor(ProcessorABC):
     Produces a flat training ntuple from PFNano.
     """
 
-    def __init__(self, num_jets=2):
+    def __init__(self, num_jets=1):
         """
         :param num_jets: Number of jets to save
         :type num_jets: int
