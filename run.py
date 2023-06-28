@@ -18,10 +18,16 @@ def main(args):
     if not os.path.exists("./outfiles"):
         os.makedirs("./outfiles")
 
-    channels = args.channels.split(",")
+    if args.channels:
+        channels = args.channels.split(",")
+
+    # if --macos is specified in args, process only the files provided
+    if args.macos:
+        files = {}
+        files[args.sample] = [f"rootfiles/{args.sample}/nano_mc2017_{i}.root" for i in range(3)]
 
     # if --local is specified in args, process only the args.sample provided
-    if args.local:
+    elif args.local:
         files = {}
         with open(f"fileset/pfnanoindex_{args.pfnano}_{args.year}.json", "r") as f:
             files_all = json.load(f)
@@ -98,13 +104,13 @@ def main(args):
             yearmod=yearmod,
             channel=channels[0],
             inference=args.inference,
-            output_location="./outfiles" + job_name,
+            output_location=f"./outfiles/{job_name}",
         )
 
     elif args.processor == "lumi":
         from boostedhiggs.lumi_processor import LumiProcessor
 
-        p = LumiProcessor(year=args.year, yearmod=yearmod, output_location="./outfiles" + job_name)
+        p = LumiProcessor(year=args.year, yearmod=yearmod, output_location=f"./outfiles/{job_name}")
 
     elif args.processor == "zll":
         from boostedhiggs.zll_processor import ZllProcessor
@@ -117,7 +123,11 @@ def main(args):
             output_location="./outfiles" + job_name,
             apply_selection=False if args.without_selection else True,
         )
+    elif args.processor == "input":
+        # define processor
+        from boostedhiggs.inputprocessor import InputProcessor
 
+        p = InputProcessor(num_jets=1, output_location=f"./outfiles/{job_name}")
     else:
         from boostedhiggs.trigger_efficiencies_processor import TriggerEfficienciesProcessor
 
@@ -179,6 +189,12 @@ def main(args):
             data.to_parquet("./outfiles/" + job_name + "_" + ch + ".parquet")
             # remove old parquet files
             os.system("rm -rf ./outfiles/" + job_name + ch)
+    elif args.processor == "input":
+        # merge parquet
+        data = pd.read_parquet("./outfiles/" + job_name + "/parquet")
+        data.to_parquet("./outfiles/" + job_name + ".parquet")
+        # remove old parquet files
+        os.system("rm -rf ./outfiles/" + job_name)
 
 
 if __name__ == "__main__":
@@ -190,6 +206,9 @@ if __name__ == "__main__":
     # noqa: run locally on single file (hww): python run.py --year 2017 --processor hww --pfnano v2_2 --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele --config samples_inclusive.yaml --key mc
     # noqa: run locally on on single file (zll): python run.py --year 2017 --processor zll --pfnano v2_2 --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele --config samples_inclusive.yaml --key mc
 
+    # python run.py --processor input --macos --sample GluGluHToWW_Pt-200ToInf_M-125 --n 1 --starti 0
+    # python run.py --processor input --local --sample GluGluHToWW_Pt-200ToInf_M-125 --n 1 --starti 0
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--year", dest="year", default="2017", help="year", type=str)
     parser.add_argument("--starti", dest="starti", default=0, help="start index of files", type=int)
@@ -199,7 +218,7 @@ if __name__ == "__main__":
     parser.add_argument("--sample", dest="sample", default=None, help="specify sample", type=str)
     parser.add_argument("--processor", dest="processor", required=True, help="processor", type=str)
     parser.add_argument("--chunksize", dest="chunksize", default=10000, help="chunk size in processor", type=int)
-    parser.add_argument("--channels", dest="channels", required=True, help="channels separated by commas")
+    parser.add_argument("--channels", dest="channels", default=None, help="channels separated by commas")
     parser.add_argument(
         "--executor",
         type=str,
@@ -214,6 +233,7 @@ if __name__ == "__main__":
         default="v2_2",
         help="pfnano version",
     )
+    parser.add_argument("--macos", dest="macos", action="store_true")
     parser.add_argument("--local", dest="local", action="store_true")
     parser.add_argument("--inference", dest="inference", action="store_true")
     parser.add_argument("--no-inference", dest="inference", action="store_false")

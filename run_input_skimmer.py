@@ -164,7 +164,6 @@ if __name__ == "__main__":
         help="pfnano version",
     )
     parser.add_argument("--macos", dest="macos", action="store_true")
-
     parser.add_argument("--local", dest="local", action="store_true")
     parser.add_argument("--inference", dest="inference", action="store_true")
     parser.add_argument("--no-inference", dest="inference", action="store_false")
