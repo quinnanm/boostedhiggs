@@ -41,7 +41,7 @@ class InputProcessor(ProcessorABC):
     Produces a flat training ntuple from PFNano.
     """
 
-    def __init__(self, num_jets=1):
+    def __init__(self, num_jets=1, output_location="./outfiles/"):
         """
         :param num_jets: Number of jets to save
         :type num_jets: int
@@ -50,6 +50,7 @@ class InputProcessor(ProcessorABC):
         """
         Skimming variables
         """
+        self._output_location = output_location
 
         self.skim_vars = {
             "Event": {
@@ -260,8 +261,6 @@ class InputProcessor(ProcessorABC):
         pnet_vars_jet = {**{key: value[:, jet_idx] for (key, value) in pnet_vars.items()}}
         """
 
-        fname = events.behavior["__events_factory__"]._partition_key.replace("/", "_")
-
         # convert output to pandas
         df = self.ak_to_pandas(skimmed_vars)
 
@@ -269,8 +268,16 @@ class InputProcessor(ProcessorABC):
 
         print(df)
 
+        # save the output
+        fname = events.behavior["__events_factory__"]._partition_key.replace("/", "_")
+        fname = "condor_" + fname
+
+        PATH = f"{self._output_location}/parquet/"
+        if not os.path.exists(PATH):
+            os.makedirs(PATH)
+
         # save to parquet
-        self.dump_table(df, fname + ".parquet")
+        self.dump_table(df, f"{PATH}/{fname}.parquet")
 
         print(f"dumped: {time.time() - start:.1f}s")
 

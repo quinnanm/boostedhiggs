@@ -15,8 +15,9 @@ nanoevents.PFNanoAODSchema.warn_missing_crossrefs = False
 
 def main(args):
     # make directory for output
-    if not os.path.exists("./outfiles"):
-        os.makedirs("./outfiles")
+    OUTPATH = "./outfiles"
+    if not os.path.exists(OUTPATH):
+        os.makedirs(OUTPATH)
 
     # if --local is specified in args, process only the args.sample provided
     if args.macos:
@@ -77,7 +78,7 @@ def main(args):
     # define processor
     from boostedhiggs.inputprocessor import InputProcessor
 
-    p = InputProcessor(num_jets=1)
+    p = InputProcessor(num_jets=1, output_location=OUTPATH)
 
     tic = time.time()
     if args.executor == "dask":
