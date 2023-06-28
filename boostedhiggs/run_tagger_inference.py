@@ -113,7 +113,6 @@ def runInferenceTriton(
     fatjet_label = "FatJet"
     pfcands_label = "FatJetPFCands"
     svs_label = "FatJetSVs"
-    # jet_label = "ak8"
 
     # prepare inputs for the fatjet
     tagger_inputs = []

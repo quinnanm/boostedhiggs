@@ -42,7 +42,7 @@ class InputProcessor(ProcessorABC):
     Produces a flat training ntuple from PFNano.
     """
 
-    def __init__(self, num_jets=1, output_location="./outfiles/"):
+    def __init__(self, label, num_jets, inference, output_location="./outfiles/"):
         """
         :param num_jets: Number of jets to save
         :type num_jets: int
@@ -51,6 +51,8 @@ class InputProcessor(ProcessorABC):
         """
         Skimming variables
         """
+        self.label = label
+        self.inference = inference
         self._output_location = output_location
 
         self.skim_vars = {
@@ -119,8 +121,6 @@ class InputProcessor(ProcessorABC):
         self.fatjet_label = "FatJet"
         self.pfcands_label = "FatJetPFCands"
         self.svs_label = "FatJetSVs"
-
-        self.num_jets = num_jets
 
         self._accumulator = dict_accumulator({})
 
@@ -233,8 +233,9 @@ class InputProcessor(ProcessorABC):
             events,
             genparts,
             fatjet,
+            # candidatelep_p4,
             self.skim_vars["GenPart"],
-            label="AK8",
+            label=self.label,
         )
         add_selection_no_cutflow("gen_match", matched_mask, selection)
 
@@ -256,6 +257,22 @@ class InputProcessor(ProcessorABC):
 
         pnet_vars_jet = {**{key: value[:, jet_idx] for (key, value) in pnet_vars.items()}}
         """
+        # fill inference
+        if self.inference:
+            from .run_tagger_inference import runInferenceTriton
+
+            for model_name in ["ak8_MD_vminclv2ParT_manual_fixwrap"]:
+                pnet_vars = runInferenceTriton(
+                    self.tagger_resources_path,
+                    events[selection.all(*selection.names)],
+                    fj_idx_lep[selection.all(*selection.names)],
+                    model_name=model_name,
+                )
+
+                skimmed_vars = {
+                    **skimmed_vars,
+                    **{key: value for (key, value) in pnet_vars.items()},
+                }
 
         # convert output to pandas
         df = self.ak_to_pandas(skimmed_vars)
@@ -270,10 +287,7 @@ class InputProcessor(ProcessorABC):
 
         self.save_dfs_parquet(fname, df)
 
-        # save to parquet
-        # self.dump_table(df, f"{PATH}/{fname}.parquet")
-
-        # print(f"dumped: {time.time() - start:.1f}s")
+        print(f"dumped: {time.time() - start:.1f}s")
 
         return {}
 

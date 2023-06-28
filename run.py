@@ -127,7 +127,7 @@ def main(args):
         # define processor
         from boostedhiggs.inputprocessor import InputProcessor
 
-        p = InputProcessor(num_jets=1, output_location=f"./outfiles/{job_name}")
+        p = InputProcessor(args.label, num_jets=2, inference=args.inference, output_location=f"./outfiles/{job_name}")
     else:
         from boostedhiggs.trigger_efficiencies_processor import TriggerEfficienciesProcessor
 
@@ -238,6 +238,8 @@ if __name__ == "__main__":
     parser.add_argument("--inference", dest="inference", action="store_true")
     parser.add_argument("--no-inference", dest="inference", action="store_false")
     parser.add_argument("--without_selection", dest="without_selection", action="store_true")
+
+    parser.add_argument("--label", dest="label", default=None, help="jet label for inputskimmer", type=str)
 
     parser.set_defaults(inference=False)
     args = parser.parse_args()

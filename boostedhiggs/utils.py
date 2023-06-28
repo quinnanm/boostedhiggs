@@ -61,7 +61,7 @@ def to_label(array: ak.Array) -> ak.Array:
     return ak.values_astype(array, np.int32)
 
 
-def match_H(genparts: GenParticleArray, fatjet: FatJetArray, lepton, dau_pdgid=W_PDGID):
+def match_H(genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID):
     """Gen matching for Higgs samples"""
     higgs = genparts[get_pid_mask(genparts, HIGGS_PDGID, byall=False) * genparts.hasFlags(GEN_FLAGS)]
 
@@ -141,7 +141,7 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, lepton, dau_pdgid=W
             "fj_H_VV_isVstarlepton": iswstarlepton,
             "fj_H_VV_isMatched": is_hww_matched,
             "gen_Vlep_pt": gen_lepton.pt,
-            "genlep_dR_lep": lepton.delta_r(gen_lepton),
+            # "genlep_dR_lep": lepton.delta_r(gen_lepton),
         }
 
         genVars = {**genVars, **genVVars, **genHVVVars}
@@ -377,6 +377,7 @@ def tagger_gen_matching(
     events: NanoEventsArray,
     genparts: GenParticleArray,
     fatjets: FatJetArray,
+    # candidatelep_p4,
     genlabels: List[str],
     label: str,
 ) -> Tuple[np.array, Dict[str, np.array]]:
