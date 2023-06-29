@@ -110,7 +110,7 @@ def main(args):
                 line = line.replace("SELECTION", "--without_selection")
             else:
                 line = line.replace("SELECTION", "")
-            line = line.replace("LABEL", f"--label {args.label}")
+            line = line.replace("LABEL", args.label)
 
             sh_file.write(line)
         sh_file.close()
