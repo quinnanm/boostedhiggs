@@ -24,7 +24,7 @@ def main(args):
     # if --macos is specified in args, process only the files provided
     if args.macos:
         files = {}
-        files[args.sample] = [f"rootfiles/{args.sample}/nano_mc2017_{i}.root" for i in range(3)]
+        files[args.sample] = [f"rootfiles2/rootfiles/{args.sample}/file{i+1}.root" for i in range(1)]
 
     # if --local is specified in args, process only the args.sample provided
     elif args.local:
@@ -127,7 +127,7 @@ def main(args):
         # define processor
         from boostedhiggs.inputprocessor import InputProcessor
 
-        p = InputProcessor(args.label, num_jets=2, inference=args.inference, output_location=f"./outfiles/{job_name}")
+        p = InputProcessor(args.label, inference=args.inference, output_location=f"./outfiles/{job_name}")
     else:
         from boostedhiggs.trigger_efficiencies_processor import TriggerEfficienciesProcessor
 

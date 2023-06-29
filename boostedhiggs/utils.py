@@ -340,7 +340,7 @@ def match_Top(genparts: GenParticleArray, fatjet: FatJetArray):
 def match_QCD(
     genparts: GenParticleArray,
     fatjets: FatJetArray,
-    genlabels: List[str],
+    # genlabels: List[str],
 ) -> Tuple[np.array, Dict[str, np.array]]:
     """Gen matching for QCD samples, arguments as defined in ``tagger_gen_matching``"""
     match_dR = 0.8
