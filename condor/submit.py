@@ -149,11 +149,12 @@ if __name__ == "__main__":
     parser.add_argument("--test", dest="test", action="store_true", help="only 2 jobs per sample will be created")
     parser.add_argument("--submit", dest="submit", action="store_true", help="submit jobs when created")
     parser.add_argument("--files-per-job", default=None, help="# files per condor job", type=int)
-    parser.add_argument("--channels", dest="channels", required=True, help="channels separated by commas")
+    parser.add_argument("--channels", dest="channels", default=None, help="channels separated by commas")
     parser.add_argument("--pfnano", dest="pfnano", type=str, default="v2_2", help="pfnano version")
     parser.add_argument("--inference", dest="inference", action="store_true")
     parser.add_argument("--no-inference", dest="inference", action="store_false")
     parser.add_argument("--without_selection", dest="without_selection", action="store_true")
+    parser.add_argument("--label", dest="label", default=None, help="jet label for inputskimmer", type=str)
 
     parser.set_defaults(inference=True)
     args = parser.parse_args()
