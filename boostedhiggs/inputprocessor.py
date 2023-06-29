@@ -246,21 +246,11 @@ class InputProcessor(ProcessorABC):
             key: np.squeeze(np.array(value[selection.all(*selection.names)])) for (key, value) in skimmed_vars.items()
         }
 
-        # Farouk fix this
-        """
-        pnet_vars = runInferenceTriton(
-            self.tagger_resources_path,
-            events[selection.all(*selection.names)],
-            ak15=False,
-        )
-
-        pnet_vars_jet = {**{key: value[:, jet_idx] for (key, value) in pnet_vars.items()}}
-        """
         # fill inference
         if self.inference:
             from .run_tagger_inference import runInferenceTriton
 
-            for model_name in ["ak8_MD_vminclv2ParT_manual_fixwrap"]:
+            for model_name in ["ak8_MD_vminclv2ParT_manual_fixwrap_all_nodes"]:
                 pnet_vars = runInferenceTriton(
                     self.tagger_resources_path,
                     events[selection.all(*selection.names)],
