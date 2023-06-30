@@ -158,6 +158,12 @@ dy:
  - DYJetsToLL_M-50_HT-2500toInf
 HWW:
   - GluGluHToWW_Pt-200ToInf_M-125
+  - VBFHToWWToLNuQQ_M-125_withDipoleRecoil
+  - HWminusJ_HToWW_M-125
+  - HWplusJ_HToWW_M-125
+  - HZJ_HToWW_M-125
+  - GluGluZH_HToWW_ZTo2L_M-125
+  - ttHToNonbb_M125
 Top:
   - TTToSemiLeptonic
 WJet:
