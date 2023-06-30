@@ -238,7 +238,8 @@ class InputProcessor(ProcessorABC):
             label=self.label,
         )
         # add_selection_no_cutflow("gen_match", matched_mask, selection)
-        skimmed_vars = {**FatJetVars, **{"matched_mask": matched_mask}, **genVars, **METVars, **LepVars}
+        # skimmed_vars = {**FatJetVars, **{"matched_mask": matched_mask}, **genVars, **METVars, **LepVars}
+        skimmed_vars = {**FatJetVars, **genVars, **METVars, **LepVars}
 
         # apply selections
         skimmed_vars = {
