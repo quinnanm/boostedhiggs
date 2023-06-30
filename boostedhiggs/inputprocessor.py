@@ -128,53 +128,26 @@ class InputProcessor(ProcessorABC):
     def accumulator(self):
         return self._accumulator
 
-    def save_dfs_parquet(self, fname, dfs_dict):
+    def save_dfs_parquet(self, df, fname):
         if self._output_location is not None:
             PATH = f"{self._output_location}/parquet/"
             if not os.path.exists(PATH):
                 os.makedirs(PATH)
 
-            table = pa.Table.from_pandas(dfs_dict)
+            table = pa.Table.from_pandas(df)
             if len(table) != 0:  # skip dataframes with empty entries
                 pq.write_table(table, f"{PATH}/{fname}.parquet")
 
-    def dump_root(self, jet_vars: Dict[str, np.array], fname: str) -> None:
+    def dump_root(self, skimmed_vars: Dict[str, np.array], fname: str) -> None:
         """
         Saves ``jet_vars`` dict as a rootfile to './outroot'
         """
-        local_dir = os.path.abspath(os.path.join(".", "outroot"))
+        local_dir = os.path.abspath(os.path.join(self._output_location, "outroot"))
         os.system(f"mkdir -p {local_dir}")
 
         with uproot.recreate(f"{local_dir}/{fname}", compression=uproot.LZ4(4)) as rfile:
-            rfile["Events"] = ak.Array(jet_vars)
-            # rfile["Events"].show()
-
-    def to_pandas(self, events: Dict[str, np.array]) -> pd.DataFrame:
-        """
-        Convert our dictionary of numpy arrays into a pandas data frame.
-        """
-        return pd.concat([pd.DataFrame(v) for k, v in events.items()], axis=1, keys=list(events.keys()))
-
-    def to_pandas_lists(self, events: Dict[str, np.array]) -> pd.DataFrame:
-        """
-        Convert our dictionary of numpy arrays into a pandas data frame.
-        Uses lists for numpy arrays with >1 dimension
-        (e.g. FatJet arrays with two columns)
-        """
-        output = pd.DataFrame()
-        for field in ak.fields(events):
-            if "sv_" in field or "pfcand_" in field:
-                output[field] = events[field].tolist()
-            else:
-                output[field] = ak.to_numpy(ak.flatten(events[field], axis=None))
-
-        return output
-
-    def ak_to_pandas(self, output_collection: ak.Array) -> pd.DataFrame:
-        output = pd.DataFrame()
-        for field in ak.fields(output_collection):
-            output[field] = ak.to_numpy(output_collection[field])
-        return output
+            rfile["Events"] = ak.Array(skimmed_vars)
+            rfile["Events"].show()
 
     def process(self, events: ak.Array):
         import time
@@ -273,10 +246,8 @@ class InputProcessor(ProcessorABC):
             skimmed_vars[key] = skimmed_vars[key].squeeze()
 
         # convert output to pandas
-        # df = self.ak_to_pandas(skimmed_vars)
         df = pd.DataFrame(skimmed_vars)
 
-        # df = self.to_pandas(skimmed_vars)
         print(f"convert: {time.time() - start:.1f}s")
 
         print(df)
@@ -285,9 +256,12 @@ class InputProcessor(ProcessorABC):
         fname = events.behavior["__events_factory__"]._partition_key.replace("/", "_")
         fname = "condor_" + fname
 
-        self.save_dfs_parquet(fname, df)
+        self.save_dfs_parquet(df, fname)
 
-        print(f"dumped: {time.time() - start:.1f}s")
+        print(f"dump parquet: {time.time() - start:.1f}s")
+
+        self.dump_root(skimmed_vars, fname)
+        print(f"dump rootfile: {time.time() - start:.1f}s")
 
         return {}
 
