@@ -440,7 +440,7 @@ def tagger_gen_Top_matching(genparts: GenParticleArray, fatjets: FatJetArray):
 
     genVars = {**genResVars, **genLabelVars}
 
-    return matched_mask, genVars
+    return genVars, matched_mask
 
 
 def match_QCD(
@@ -523,12 +523,15 @@ def tagger_gen_matching(
     else:
         print("no match")
         GenVars = {}
+        matched_mask = np.zeros(len(genparts), dtype="bool")
 
-    genjet_vars, matched_gen_jet_mask = get_genjet_vars(events, fatjets)
+    # genjet_vars, matched_gen_jet_mask = get_genjet_vars(events, fatjets)
+    # AllGenVars = {**GenVars, **genjet_vars}
 
-    AllGenVars = {**GenVars, **genjet_vars}
+    AllGenVars = {**GenVars, **{"fj_genjetmass": fatjets.matched_gen.mass}}  # add gen jet mass
 
-    # if ``GenVars`` doesn't contain a gen var, that var is not applicable to this sample so fill with 0s
+    # loop to keep only the specified variables in `genlabels`
+    # if ``GenVars`` doesn't contain a variable, that variable is not applicable to this sample so fill with 0s
     GenVars = {key: AllGenVars[key] if key in AllGenVars.keys() else np.zeros(len(genparts)) for key in genlabels}
     for key, item in GenVars.items():
         try:
@@ -540,23 +543,23 @@ def tagger_gen_matching(
     # return matched_mask * matched_gen_jet_mask, GenVars
 
 
-def FILL_NONE_VALUE(
-    arr: ak.Array,
-    value: float,
-    target: int = None,
-    axis: int = 0,
-    to_numpy: bool = False,
-    clip: bool = True,
-):
-    """
-    pads awkward array up to ``target`` index along axis ``axis`` with value ``value``,
-    optionally converts to numpy array
-    """
-    if target:
-        ret = ak.fill_none(ak.pad_none(arr, target, axis=axis, clip=clip), value, axis=None)
-    else:
-        ret = ak.fill_none(arr, value, axis=None)
-    return ret.to_numpy() if to_numpy else ret
+# def FILL_NONE_VALUE(
+#     arr: ak.Array,
+#     value: float,
+#     target: int = None,
+#     axis: int = 0,
+#     to_numpy: bool = False,
+#     clip: bool = True,
+# ):
+#     """
+#     pads awkward array up to ``target`` index along axis ``axis`` with value ``value``,
+#     optionally converts to numpy array
+#     """
+#     if target:
+#         ret = ak.fill_none(ak.pad_none(arr, target, axis=axis, clip=clip), value, axis=None)
+#     else:
+#         ret = ak.fill_none(arr, value, axis=None)
+#     return ret.to_numpy() if to_numpy else ret
 
 
 def add_selection(
