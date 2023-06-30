@@ -34,6 +34,13 @@ FILL_NONE_VALUE = -99999
 
 JET_DR = 0.8
 
+P4 = {
+    "eta": "Eta",
+    "phi": "Phi",
+    "mass": "Mass",
+    "pt": "Pt",
+}
+
 
 def get_pid_mask(
     genparts: GenParticleArray,
@@ -337,6 +344,105 @@ def match_Top(genparts: GenParticleArray, fatjet: FatJetArray):
     return genVars, matched_mask
 
 
+def tagger_gen_Top_matching(genparts: GenParticleArray, fatjets: FatJetArray):
+    """
+    Gen matching for TT samples
+    from: https://github.com/rkansal47/HHbbVV/blob/main/src/HHbbVV/processors/GenSelection.py#L657
+    """
+
+    jet_dR = JET_DR
+    match_dR = jet_dR
+
+    tops = genparts[get_pid_mask(genparts, TOP_PDGID, byall=False) * genparts.hasFlags(GEN_FLAGS)]
+    matched_tops = tops[ak.argmin(fatjets.delta_r(tops), axis=1, keepdims=True)]
+    matched_tops_mask = ak.any(fatjets.delta_r(matched_tops) < match_dR, axis=1)
+    genResVars = {f"fj_genRes_{key}": ak.fill_none(matched_tops[var], FILL_NONE_VALUE) for (var, key) in P4.items()}
+
+    daughters = ak.flatten(matched_tops.distinctChildren, axis=2)
+    daughters = daughters[daughters.hasFlags(GEN_FLAGS)]
+    daughters_pdgId = abs(daughters.pdgId)
+
+    wboson_daughters = ak.flatten(daughters[(daughters_pdgId == 24)].distinctChildren, axis=2)
+    wboson_daughters = wboson_daughters[wboson_daughters.hasFlags(GEN_FLAGS)]
+    wboson_daughters_pdgId = abs(wboson_daughters.pdgId)
+    decay = (
+        # 2 quarks
+        (ak.sum(wboson_daughters_pdgId < b_PDGID, axis=1) == 2) * 1
+        # 1 electron * 3
+        + (ak.sum(wboson_daughters_pdgId == ELE_PDGID, axis=1) == 1) * 3
+        # 1 muon * 5
+        + (ak.sum(wboson_daughters_pdgId == MU_PDGID, axis=1) == 1) * 5
+        # 1 tau * 7
+        + (ak.sum(wboson_daughters_pdgId == TAU_PDGID, axis=1) == 1) * 7
+    )
+
+    bquark = daughters[(daughters_pdgId == 5)]
+    matched_b = ak.sum(fatjets.delta_r(bquark) < jet_dR, axis=1)
+
+    # exclude neutrinos from nprongs count
+    wboson_daughters_nov = wboson_daughters[
+        (
+            (wboson_daughters_pdgId != vELE_PDGID)
+            & (wboson_daughters_pdgId != vMU_PDGID)
+            & (wboson_daughters_pdgId != vTAU_PDGID)
+        )
+    ]
+    # nprongs only includes the number of quarks from W decay (not b!)
+    nprongs = ak.sum(fatjets.delta_r(wboson_daughters_nov) < jet_dR, axis=1)
+
+    # number of c quarks in V decay inside jet
+    cquarks = wboson_daughters_nov[abs(wboson_daughters_nov.pdgId) == c_PDGID]
+    ncquarks = ak.sum(fatjets.delta_r(cquarks) < jet_dR, axis=1)
+
+    lepdaughters = wboson_daughters[
+        (
+            (wboson_daughters_pdgId == ELE_PDGID)
+            | (wboson_daughters_pdgId == MU_PDGID)
+            | (wboson_daughters_pdgId == TAU_PDGID)
+        )
+    ]
+
+    lepinprongs = 0
+    if len(lepdaughters) > 0:
+        lepinprongs = ak.sum(fatjets.delta_r(lepdaughters) < jet_dR, axis=1)  # should be 0 or 1
+
+    # get tau decays from V daughters
+    taudaughters = wboson_daughters[(wboson_daughters_pdgId == TAU_PDGID)].children
+    taudaughters = taudaughters[taudaughters.hasFlags(["isLastCopy"])]
+    taudaughters_pdgId = abs(taudaughters.pdgId)
+
+    taudecay = (
+        # pions/kaons (hadronic tau) * 1
+        (ak.sum((taudaughters_pdgId == ELE_PDGID) | (taudaughters_pdgId == MU_PDGID), axis=2) == 0) * 1
+        # 1 electron * 3
+        + (ak.sum(taudaughters_pdgId == ELE_PDGID, axis=2) == 1) * 3
+        # 1 muon * 5
+        + (ak.sum(taudaughters_pdgId == MU_PDGID, axis=2) == 1) * 5
+    )
+    # flatten taudecay - so painful
+    taudecay = ak.sum(taudecay, axis=-1)
+
+    genLabelVars = {
+        "fj_nprongs": nprongs,
+        "fj_lepinprongs": lepinprongs,
+        "fj_ncquarks": ncquarks,
+        "fj_Top_bmerged": to_label(matched_b == 1),
+        "fj_Top_2q": to_label(decay == 1),
+        "fj_Top_elenu": to_label(decay == 3),
+        "fj_Top_munu": to_label(decay == 5),
+        "fj_Top_hadtauvqq": to_label((decay == 7) & (taudecay == 1)),
+        "fj_Top_leptauelvnu": to_label((decay == 7) & (taudecay == 3)),
+        "fj_Top_leptaumuvnu": to_label((decay == 7) & (taudecay == 5)),
+    }
+
+    matched_topdaus_mask = ak.any(fatjets.delta_r(daughters) < match_dR, axis=1)
+    matched_mask = matched_tops_mask & matched_topdaus_mask
+
+    genVars = {**genResVars, **genLabelVars}
+
+    return matched_mask, genVars
+
+
 def match_QCD(
     genparts: GenParticleArray,
     fatjets: FatJetArray,
@@ -349,11 +455,11 @@ def match_QCD(
     matched_mask = ak.any(fatjets.delta_r(partons) < match_dR, axis=1)
 
     genVars = {
-        "fj_isQCDb": (fatjets.nBHadrons == 1),
-        "fj_isQCDbb": (fatjets.nBHadrons > 1),
-        "fj_isQCDc": (fatjets.nCHadrons == 1) * (fatjets.nBHadrons == 0),
-        "fj_isQCDcc": (fatjets.nCHadrons > 1) * (fatjets.nBHadrons == 0),
-        "fj_isQCDothers": (fatjets.nBHadrons == 0) & (fatjets.nCHadrons == 0),
+        "fj_QCDb": (fatjets.nBHadrons == 1),
+        "fj_QCDbb": (fatjets.nBHadrons > 1),
+        "fj_QCDc": (fatjets.nCHadrons == 1) * (fatjets.nBHadrons == 0),
+        "fj_QCDcc": (fatjets.nCHadrons > 1) * (fatjets.nBHadrons == 0),
+        "fj_QCDothers": (fatjets.nBHadrons == 0) & (fatjets.nCHadrons == 0),
     }
 
     genVars = {key: to_label(var) for key, var in genVars.items()}
@@ -412,7 +518,8 @@ def tagger_gen_matching(
         GenVars, matched_mask = match_V(genparts, fatjets)
     elif "Top" in label:
         print("match_Top")
-        GenVars, matched_mask = match_Top(genparts, fatjets)
+        # GenVars, matched_mask = match_Top(genparts, fatjets)
+        GenVars, matched_mask = tagger_gen_Top_matching(genparts, fatjets)
     else:
         print("no match")
         GenVars = {}
@@ -433,7 +540,7 @@ def tagger_gen_matching(
     # return matched_mask * matched_gen_jet_mask, GenVars
 
 
-def pad_val(
+def FILL_NONE_VALUE(
     arr: ak.Array,
     value: float,
     target: int = None,
