@@ -149,6 +149,12 @@ class InputProcessor(ProcessorABC):
             rfile["Events"] = ak.Array(jet_vars)
             # rfile["Events"].show()
 
+    def to_pandas(self, events: Dict[str, np.array]) -> pd.DataFrame:
+        """
+        Convert our dictionary of numpy arrays into a pandas data frame.
+        """
+        return pd.concat([pd.DataFrame(v) for k, v in events.items()], axis=1, keys=list(events.keys()))
+
     def to_pandas_lists(self, events: Dict[str, np.array]) -> pd.DataFrame:
         """
         Convert our dictionary of numpy arrays into a pandas data frame.
@@ -264,8 +270,8 @@ class InputProcessor(ProcessorABC):
                 }
 
         # convert output to pandas
-        df = self.ak_to_pandas(skimmed_vars)
-
+        # df = self.ak_to_pandas(skimmed_vars)
+        df = self.to_pandas(skimmed_vars)
         print(f"convert: {time.time() - start:.1f}s")
 
         print(df)
