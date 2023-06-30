@@ -401,15 +401,20 @@ def tagger_gen_matching(
 
     matched_mask = np.ones(len(genparts), dtype="bool")
 
-    if "H_" in label:
+    if "H" in label:
+        print("match_H")
         GenVars, matched_mask = match_H(genparts, fatjets)
     elif "QCD" in label:
+        print("match_QCD")
         GenVars, matched_mask = match_QCD(genparts, fatjets)
     elif "VJets" in label:
+        print("match_V")
         GenVars, matched_mask = match_V(genparts, fatjets)
     elif "Top" in label:
+        print("match_Top")
         GenVars, matched_mask = match_Top(genparts, fatjets)
     else:
+        print("no match")
         GenVars = {}
 
     genjet_vars, matched_gen_jet_mask = get_genjet_vars(events, fatjets)
