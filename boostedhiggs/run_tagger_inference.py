@@ -142,11 +142,11 @@ def runInferenceTriton(
         }
 
     # run inference on the fat jet
-    try:
-        tagger_outputs = triton_model(tagger_inputs)
-    except Exception:
-        print("---can't run inference due to error with the event or the server is not running--")
-        return {}
+    # try:
+    tagger_outputs = triton_model(tagger_inputs)
+    # except Exception:
+    #     print("---can't run inference due to error with the event or the server is not running--")
+    #     return {}
 
     # get the list of output labels defined in `model_name.json` and replace label_ by prob
     output_names = [x.replace("label_", "prob").replace("_", "") for x in tagger_vars["output_names"]]
