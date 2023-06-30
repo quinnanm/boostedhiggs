@@ -269,9 +269,14 @@ class InputProcessor(ProcessorABC):
                     **{key: value for (key, value) in pnet_vars.items()},
                 }
 
+        for key in skimmed_vars:
+            skimmed_vars[key] = skimmed_vars[key].unsqueeze()
+
         # convert output to pandas
         # df = self.ak_to_pandas(skimmed_vars)
-        df = self.to_pandas(skimmed_vars)
+        df = pd.DataFrame(skimmed_vars)
+
+        # df = self.to_pandas(skimmed_vars)
         print(f"convert: {time.time() - start:.1f}s")
 
         print(df)
