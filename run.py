@@ -191,13 +191,13 @@ def main(args):
             os.system("rm -rf ./outfiles/" + job_name + ch)
     elif args.processor == "input":
         # merge parquet
-        data = pd.read_parquet("./outfiles/" + job_name + "/parquet")
-        data.to_parquet("./outfiles/" + job_name + ".parquet")
+        data = pd.read_parquet(f"./outfiles/{job_name}/parquet")
+        data.to_parquet(f"./outfiles/{job_name}.parquet")
 
-        # os.system("mv ./outfiles" + job_name + "/outroot .." )
+        os.system(f"mv ./outfiles/{job_name}/outroot ./outfiles/outroot")
 
-        # remove old parquet files
-        # os.system("rm -rf ./outfiles/" + job_name)
+        # remove unmerged parquet files
+        os.system("rm -rf ./outfiles/" + job_name)
 
 
 if __name__ == "__main__":

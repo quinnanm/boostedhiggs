@@ -88,13 +88,21 @@ class InputProcessor(ProcessorABC):
                 "fj_V_elenu",
                 "fj_V_munu",
                 "fj_V_taunu",
-                "fj_Top_bmerged",
-                "fj_Top_2q",
-                "fj_Top_elenu",
-                "fj_Top_munu",
-                "fj_Top_hadtauvqq",
-                "fj_Top_leptauelvnu",
-                "fj_Top_leptaumuvnu",
+                # "fj_Top_bmerged",
+                # "fj_Top_2q",
+                # "fj_Top_elenu",
+                # "fj_Top_munu",
+                # "fj_Top_hadtauvqq",
+                # "fj_Top_leptauelvnu",
+                # "fj_Top_leptaumuvnu",
+                "fj_Top_nquarksnob",
+                "fj_Top_nbquarks",
+                "fj_Top_ncquarks",
+                "fj_Top_nleptons",
+                "fj_Top_nele",
+                "fj_Top_nmu",
+                "fj_Top_ntau",
+                "fj_Top_taudecay",
             ],
             # formatted to match weaver's preprocess.json
             "MET": {
@@ -145,7 +153,7 @@ class InputProcessor(ProcessorABC):
         local_dir = os.path.abspath(os.path.join(self._output_location, "outroot"))
         os.system(f"mkdir -p {local_dir}")
 
-        with uproot.recreate(f"{local_dir}/{fname}", compression=uproot.LZ4(4)) as rfile:
+        with uproot.recreate(f"{local_dir}/{fname}.root", compression=uproot.LZ4(4)) as rfile:
             rfile["Events"] = ak.Array(skimmed_vars)
             rfile["Events"].show()
 
