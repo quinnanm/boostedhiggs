@@ -270,7 +270,7 @@ class InputProcessor(ProcessorABC):
                 }
 
         for key in skimmed_vars:
-            skimmed_vars[key] = skimmed_vars[key].unsqueeze()
+            skimmed_vars[key] = skimmed_vars[key].squeeze()
 
         # convert output to pandas
         # df = self.ak_to_pandas(skimmed_vars)
