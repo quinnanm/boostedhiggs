@@ -16,5 +16,9 @@ python SCRIPTNAME --year YEAR --processor PROCESSOR PFNANO INFERENCE SELECTION -
 rm -rf outfiles/*mu
 rm -rf outfiles/*ele
 
+# in cmsenv
+hadd outfiles/job_name.root outfiles/outroot/job_name/*
+rm -r outfiles/outroot
+
 #move output to eos
 xrdcp -r -f outfiles/ EOSOUTPKL
