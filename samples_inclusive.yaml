@@ -187,3 +187,5 @@ QCD:
   - QCD_Pt_1800to2400
   - QCD_Pt_2400to3200
   - QCD_Pt_3200toInf
+ggf:
+  - GluGluHToWW_Pt-200ToInf_M-125
