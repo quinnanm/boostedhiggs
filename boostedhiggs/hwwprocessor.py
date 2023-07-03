@@ -464,7 +464,8 @@ class HwwProcessor(processor.ProcessorABC):
             )
             self.add_selection(name="notaus", sel=(n_loose_taus_mu == 0), channel="mu")
             self.add_selection(name="notaus", sel=(n_loose_taus_ele == 0), channel="ele")
-            self.add_selection(name="leptonInJet", sel=(lep_fj_dr < 0.8))
+            # self.add_selection(name="leptonInJet", sel=(lep_fj_dr < 0.8))
+            self.add_selection(name="leptonNotInJet", sel=(lep_fj_dr > 0.8))
 
             # lepton isolation
             self.add_selection(
