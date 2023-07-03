@@ -73,9 +73,12 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID):
     higgs = genparts[get_pid_mask(genparts, HIGGS_PDGID, byall=False) * genparts.hasFlags(GEN_FLAGS)]
 
     # only select events that match an specific decay
-    signal_mask = ak.firsts(ak.all(abs(higgs.children.pdgId) == dau_pdgid, axis=2))
+    # matched_higgs = higgs[ak.argmin(fatjet.delta_r(higgs), axis=1, keepdims=True)][:, 0]
+    matched_higgs = higgs[ak.argmin(fatjet.delta_r(higgs), axis=1, keepdims=True)]
+    matched_higgs_mask = ak.any(fatjet.delta_r(matched_higgs) < 0.8, axis=1)
 
-    matched_higgs = higgs[ak.argmin(fatjet.delta_r(higgs), axis=1, keepdims=True)][:, 0]
+    matched_higgs = ak.firsts(matched_higgs)
+
     matched_higgs_children = matched_higgs.children
     higgs_children = higgs.children
 
@@ -211,13 +214,13 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID):
 
         genVars = {**genVars, **genHTTVars}
 
-    return genVars, signal_mask
+    return genVars, matched_higgs_mask
 
 
 def match_V(genparts: GenParticleArray, fatjet: FatJetArray):
     vs = genparts[get_pid_mask(genparts, [W_PDGID, Z_PDGID], byall=False) * genparts.hasFlags(GEN_FLAGS)]
     matched_vs = vs[ak.argmin(fatjet.delta_r(vs), axis=1, keepdims=True)]
-    matched_vs_mask = ak.any(fatjet.delta_r(matched_vs) < 0.8, axis=1)
+    matched_vs_mask = ak.any(fatjet.delta_r(matched_vs) < JET_DR, axis=1)
 
     daughters = ak.flatten(matched_vs.distinctChildren, axis=2)
     daughters = daughters[daughters.hasFlags(["fromHardProcess", "isLastCopy"])]
@@ -350,10 +353,9 @@ def match_QCD(
     # genlabels: List[str],
 ) -> Tuple[np.array, Dict[str, np.array]]:
     """Gen matching for QCD samples, arguments as defined in ``tagger_gen_matching``"""
-    match_dR = 0.8
 
     partons = genparts[get_pid_mask(genparts, [g_PDGID] + list(range(1, b_PDGID + 1)), ax=1, byall=False)]
-    matched_mask = ak.any(fatjets.delta_r(partons) < match_dR, axis=1)
+    matched_mask = ak.any(fatjets.delta_r(partons) < JET_DR, axis=1)
 
     genVars = {
         "fj_QCDb": (fatjets.nBHadrons == 1),
@@ -397,7 +399,7 @@ def tagger_gen_matching(
         genlabels (List[str]): gen variables to return.
         label (str): dataset label, formatted as
           ``{AK15 or AK8}_{H or QCD}_{(optional) H decay products}``.
-        match_dR (float): max distance between fat jet and gen particle for matching.
+        JET_DR (float): max distance between fat jet and gen particle for matching.
           Defaults to 1.0.
 
     Returns:
@@ -405,8 +407,6 @@ def tagger_gen_matching(
         Dict[str, np.array]: dict of gen variables.
 
     """
-
-    matched_mask = np.ones(len(genparts), dtype="bool")
 
     if "H" in label:
         print("match_H")
