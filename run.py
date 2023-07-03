@@ -203,6 +203,10 @@ def main(args):
         # remove unmerged parquet files
         os.system("rm -rf ./outfiles/" + job_name)
 
+        # in cmsenv
+        # hadd outfiles/job_name.root outfiles/outroot/job_name/*
+        # rm -r outfiles/outroot
+
 
 if __name__ == "__main__":
     # e.g.
@@ -246,7 +250,7 @@ if __name__ == "__main__":
     parser.add_argument("--no-inference", dest="inference", action="store_false")
     parser.add_argument("--without_selection", dest="without_selection", action="store_true")
 
-    parser.add_argument("--label", dest="label", default="", help="jet label for inputskimmer", type=str)
+    parser.add_argument("--label", dest="label", default="H", help="jet label for inputskimmer", type=str)
 
     parser.set_defaults(inference=False)
     args = parser.parse_args()

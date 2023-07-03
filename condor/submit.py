@@ -155,7 +155,7 @@ if __name__ == "__main__":
     parser.add_argument("--no-inference", dest="inference", action="store_false")
     parser.add_argument("--without_selection", dest="without_selection", action="store_true")
 
-    parser.add_argument("--label", dest="label", default="", help="jet label for inputskimmer", type=str)
+    parser.add_argument("--label", dest="label", default="H", help="jet label for inputskimmer", type=str)
 
     parser.set_defaults(inference=True)
     args = parser.parse_args()
