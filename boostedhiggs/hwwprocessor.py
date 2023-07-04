@@ -526,9 +526,9 @@ class HwwProcessor(processor.ProcessorABC):
                 genVars, signal_mask = match_H(events.GenPart, candidatefj, dau_pdgid=15)
                 self.add_selection(name="signal", sel=signal_mask)
             elif ("WJets" in dataset) or ("ZJets" in dataset) or ("DYJets" in dataset):
-                genVars = match_V(events.GenPart, candidatefj)
+                genVars, _ = match_V(events.GenPart, candidatefj)
             elif "TT" in dataset:
-                genVars = match_Top(events.GenPart, candidatefj)
+                genVars, _ = match_Top(events.GenPart, candidatefj)
             else:
                 genVars = {}
             variables = {**variables, **genVars}
