@@ -189,3 +189,31 @@ QCD:
   - QCD_Pt_3200toInf
 ggF:
   - GluGluHToWW_Pt-200ToInf_M-125
+fix:
+  - WJetsToLNu_HT-70To100
+  - WJetsToLNu_HT-100To200
+  - WJetsToLNu_HT-200To400
+  - WJetsToLNu_HT-400To600
+  - WJetsToLNu_HT-600To800
+  - WJetsToLNu_HT-800To1200
+  - WJetsToLNu_HT-1200To2500
+  - WJetsToLNu_HT-2500ToInf
+  - TTTo2L2Nu
+  - TTToHadronic
+  - TTToSemiLeptonic
+  - DYJetsToLL_Pt-50To100
+  - DYJetsToLL_Pt-100To250
+  - DYJetsToLL_Pt-250To400
+  - DYJetsToLL_Pt-400To650
+  - DYJetsToLL_Pt-650ToInf
+  - WJetsToQQ_HT-200to400
+  - WJetsToQQ_HT-400to600
+  - WJetsToQQ_HT-600to800
+  - WJetsToQQ_HT-800toInf
+  - ZJetsToQQ_HT-200to400
+  - ZJetsToQQ_HT-400to600
+  - ZJetsToQQ_HT-600to800
+  - ZJetsToQQ_HT-800toInf
+  - WW
+  - ZZ
+  - WZ
