@@ -411,6 +411,7 @@ def tagger_gen_matching(
     if "H" in label:
         print("match_H")
         GenVars, matched_mask = match_H(genparts, fatjets)
+        GenVars["fj_genRes_mass"] = (125 * np.ones(len(events), dtype="bool"),)
     elif "QCD" in label:
         print("match_QCD")
         GenVars, matched_mask = match_QCD(genparts, fatjets)
