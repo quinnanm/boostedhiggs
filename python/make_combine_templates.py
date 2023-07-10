@@ -41,7 +41,7 @@ def make_templates(year, channels, samples_dir, samples, presel, weights, region
     for region in regions_selections:
         hists[region] = hist2.Hist(
             hist2.axis.StrCategory([], name="samples", growth=True),
-            hist2.axis.Regular(30, 200, 600, name="fj_pt", label=r"Jet $p_T$ [GeV]", overflow=True),
+            hist2.axis.Regular(20, 200, 600, name="fj_pt", label=r"Jet $p_T$ [GeV]", overflow=True),
             hist2.axis.Regular(35, 0, 480, name="rec_higgs_m", label=r"Higgs reconstructed mass [GeV]", overflow=True),
         )
 

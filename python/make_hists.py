@@ -25,9 +25,7 @@ def make_events_dict(
     presel,
     weights,
     columns="all",
-    add_inclusive_score=False,
-    apply_tagger=None,
-    apply_inverse_tagger=None,
+    add_tagger_score=False,
 ):
     """
     Postprocess the parquets by applying preselections, saving an event_weight column,
@@ -41,9 +39,7 @@ def make_events_dict(
         presel [dict]: selections to apply per ch (e.g. `presel = {"ele": {"pt cut": fj_pt>250}}`)
         weights [dict]: weights to include in the event_weight per ch (e.g. `weights = {"mu": {"weight_genweight": 1}})
         columns [list]: relevant columns of the parquets to keep (default="all" which keeps all columns)
-        add_inclusive_score [Bool]: adds a column which is the tagger score
-        apply_tagger [float]: applies a tagger cut such that score>apply_tagger
-        apply_inverse_tagger [float]: applies a tagger cut such that score<apply_inverse_tagger
+        add_tagger_score [Bool]: adds a column which is the tagger score (must be True if a tagger cut is in the presel)
 
     Returns
         a dict() object events_dict[year][channel][samples] that contains big dataframes of procesed events
@@ -75,7 +71,6 @@ def make_events_dict(
                         sample_to_use = sample
 
                 if sample_to_use not in samples:
-                    print(f"ATTENTION: {sample} will be skipped")
                     continue
 
                 is_data = False
@@ -97,31 +92,23 @@ def make_events_dict(
                     continue
 
                 # replace the weight_pileup of the strange events with the mean weight_pileup of all the other events
+                # TODO: draw distribution of number of primary vertices before and after applying this weight
                 if not is_data:
                     strange_events = data["weight_pileup"] > 6
                     if len(strange_events) > 0:
                         data["weight_pileup"][strange_events] = data[~strange_events]["weight_pileup"].mean(axis=0)
 
-                # apply selection
-                print("---> Applying preselection.")
-                for selection in presel[ch]:
-                    print(f"applying {selection} selection on {len(data)} events")
-                    data = data.query(presel[ch][selection])
-                print("---> Done with preselection.")
-
                 # get event_weight
                 if not is_data:
                     print("---> Accumulating event weights.")
                     event_weight = utils.get_xsecweight(pkl_files, year, sample, is_data, luminosity)
+                    print(event_weight)
                     for w in weights[ch]:
                         if w not in data.keys():
                             print(f"{w} weight is not stored in parquet")
                             continue
                         if weights[ch][w] == 1:
                             print(f"Applying {w} weight")
-                            # if w == "weight_vjets_nominal":
-                            #     event_weight *= data[w] + 0.3
-                            # else:
                             event_weight *= data[w]
 
                     print("---> Done with accumulating event weights.")
@@ -131,17 +118,15 @@ def make_events_dict(
                 data["event_weight"] = event_weight
 
                 # add tagger scores
-                if add_inclusive_score:
+                if add_tagger_score:
                     data["inclusive_score"] = utils.disc_score(data, utils.new_sig, utils.inclusive_bkg)
 
-                # applying tagger cut
-                if apply_tagger:
-                    print(f"Will apply tagger cut of score>{apply_tagger}")
-                    data = data[data["inclusive_score"] > apply_tagger]
-
-                if apply_inverse_tagger:
-                    print(f"Will apply tagger cut of score<{apply_inverse_tagger}")
-                    data = data[data["inclusive_score"] < apply_inverse_tagger]
+                # apply selection
+                print("---> Applying preselection.")
+                for selection in presel[ch]:
+                    print(f"applying {selection} selection on {len(data)} events")
+                    data = data.query(presel[ch][selection])
+                print("---> Done with preselection.")
 
                 print(f"Will fill the {sample_to_use} dataframe with the remaining {len(data)} events")
                 print(f"tot event weight {data['event_weight'].sum()} \n")
@@ -155,7 +140,7 @@ def make_events_dict(
                 else:
                     # specify columns to keep
                     cols = columns + ["event_weight"]
-                    if add_inclusive_score:
+                    if add_tagger_score:
                         cols += ["inclusive_score"]
 
                     # fill the big dataframe
@@ -212,9 +197,7 @@ def main(args):
             config["presel"],
             config["weights"],
             columns="all",
-            add_inclusive_score=True,
-            apply_tagger=None,
-            apply_inverse_tagger=None,
+            add_tagger_score=True,
         )
         with open(f"{args.outpath}/events_dict.pkl", "wb") as fp:
             pkl.dump(events_dict, fp)
