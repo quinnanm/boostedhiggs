@@ -63,7 +63,7 @@ class HwwProcessor(processor.ProcessorABC):
         self._yearmod = yearmod
         self._channels = channels
         self.region = region
-        print(f"Will apply selections applicable to region {region}")
+        print(f"Will apply selections applicable to {region} region")
 
         self._output_location = output_location
 
@@ -522,10 +522,7 @@ class HwwProcessor(processor.ProcessorABC):
         if self.isMC:
             if ("HToWW" in dataset) or ("HWW" in dataset) or ("ttHToNonbb" in dataset):
                 genVars, signal_mask = match_H(events.GenPart, candidatefj)
-                if self.apply_selection:
-                    self.add_selection(name="signal", sel=signal_mask)
-                else:
-                    variables["signal"] = signal_mask
+                self.add_selection(name="signal", sel=signal_mask)
             elif "HToTauTau" in dataset:
                 genVars, signal_mask = match_H(events.GenPart, candidatefj, dau_pdgid=15)
                 self.add_selection(name="signal", sel=signal_mask)
@@ -632,11 +629,10 @@ class HwwProcessor(processor.ProcessorABC):
             if not self.isMC and self.dataset_per_ch[ch] not in dataset:
                 fill_output = False
 
-            if self.apply_selection:
-                selection_ch = self.selections[ch].all(*self.selections[ch].names)
-                # only fill output for that channel if the selections yield any events
-                if np.sum(selection_ch) <= 0:
-                    fill_output = False
+            selection_ch = self.selections[ch].all(*self.selections[ch].names)
+            # only fill output for that channel if the selections yield any events
+            if np.sum(selection_ch) <= 0:
+                fill_output = False
             else:
                 selection_ch = np.ones(nevents, dtype="bool")
 
