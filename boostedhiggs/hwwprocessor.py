@@ -63,6 +63,7 @@ class HwwProcessor(processor.ProcessorABC):
         self._yearmod = yearmod
         self._channels = channels
         self.region = region
+        print(f"Will apply selections applicable to region {region}")
 
         self._output_location = output_location
 
