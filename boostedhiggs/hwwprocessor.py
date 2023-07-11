@@ -54,12 +54,15 @@ class HwwProcessor(processor.ProcessorABC):
         channels=["ele", "mu"],
         output_location="./outfiles/",
         inference=False,
-        apply_trigger=True,
-        apply_selection=True,
+        region="signal",
     ):
+        """
+        region can take ["signal", "zll", "qcd", "wjets"].
+        """
         self._year = year
         self._yearmod = yearmod
         self._channels = channels
+        self.region = region
 
         self._output_location = output_location
 
@@ -67,12 +70,6 @@ class HwwProcessor(processor.ProcessorABC):
         with importlib.resources.path("boostedhiggs.data", "triggers.json") as path:
             with open(path, "r") as f:
                 self._HLTs = json.load(f)[self._year]
-
-        # apply selection?
-        self.apply_selection = apply_selection
-
-        # apply trigger in selection?
-        self.apply_trigger = apply_trigger
 
         # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFiltersRun2
         with importlib.resources.path("boostedhiggs.data", "metfilters.json") as path:
@@ -437,45 +434,70 @@ class HwwProcessor(processor.ProcessorABC):
 
             variables["hem_cleaning"] = hem_cleaning
 
-        if self.apply_selection:
-            if self.apply_trigger:
-                for ch in self._channels:
-                    self.add_selection(name="trigger", sel=trigger[ch], channel=ch)
-            self.add_selection(name="metfilters", sel=metfilters)
-            self.add_selection(name="leptonKin", sel=(candidatelep.pt > 30), channel="mu")
-            self.add_selection(name="leptonKin", sel=(candidatelep.pt > 40), channel="ele")
-            self.add_selection(name="fatjetKin", sel=candidatefj.pt > 200)
-            self.add_selection(name="ht", sel=(ht > 200))
-            # self.add_selection(
-            #     name="oneLepton",
-            #     sel=(n_good_muons == 1)
-            #     & (n_good_electrons == 0)
-            #     & (n_loose_electrons == 0)
-            #     & ~ak.any(loose_muons & ~good_muons, 1),
-            #     channel="mu",
-            # )
-            # self.add_selection(
-            #     name="oneLepton",
-            #     sel=(n_good_muons == 0)
-            #     & (n_loose_muons == 0)
-            #     & (n_good_electrons == 1)
-            #     & ~ak.any(loose_electrons & ~good_electrons, 1),
-            #     channel="ele",
-            # )
+        # apply trigger
+        for ch in self._channels:
+            self.add_selection(name="trigger", sel=trigger[ch], channel=ch)
 
-            # TODO: remove zll stuff
-            # # dilepton selection
+        # apply selections
+        self.add_selection(name="metfilters", sel=metfilters)
+        self.add_selection(name="leptonKin", sel=(candidatelep.pt > 30), channel="mu")
+        self.add_selection(name="leptonKin", sel=(candidatelep.pt > 40), channel="ele")
+        self.add_selection(name="fatjetKin", sel=candidatefj.pt > 200)
+        self.add_selection(name="ht", sel=(ht > 200))
+        self.add_selection(name="notaus", sel=(n_loose_taus_mu == 0), channel="mu")
+        self.add_selection(name="notaus", sel=(n_loose_taus_ele == 0), channel="ele")
+
+        if self.region == "wjets":
+            # lepton not necessariliy inside the jet
+            self.add_selection(name="high_dR_jet_lep", sel=(lep_fj_dr > 0.5))
+        else:
+            self.add_selection(name="leptonInJet", sel=(lep_fj_dr < 0.8))
+
+        if self.region == "zll":
+            # dilepton selection
             self.add_selection(name="SameFlavor", sel=(n_good_muons == 2), channel="mu")
             self.add_selection(name="SameFlavor", sel=(n_good_electrons == 2), channel="ele")
             secondlep_p4 = build_p4(ak.firsts(goodleptons[:, 1:2]))
             variables["secondlep_pt"] = secondlep_p4.pt
             variables["mll"] = (candidatelep_p4 + secondlep_p4).mass
             self.add_selection(name="oppositeCharge", sel=(candidatelep_p4.charge * secondlep_p4.charge < 0))
+        else:
+            self.add_selection(
+                name="oneLepton",
+                sel=(n_good_muons == 1)
+                & (n_good_electrons == 0)
+                & (n_loose_electrons == 0)
+                & ~ak.any(loose_muons & ~good_muons, 1),
+                channel="mu",
+            )
+            self.add_selection(
+                name="oneLepton",
+                sel=(n_good_muons == 0)
+                & (n_loose_muons == 0)
+                & (n_good_electrons == 1)
+                & ~ak.any(loose_electrons & ~good_electrons, 1),
+                channel="ele",
+            )
 
-            self.add_selection(name="notaus", sel=(n_loose_taus_mu == 0), channel="mu")
-            self.add_selection(name="notaus", sel=(n_loose_taus_ele == 0), channel="ele")
-            self.add_selection(name="leptonInJet", sel=(lep_fj_dr < 0.8))
-
+        if self.region == "qcd":
+            # invert lepton isolation
+            self.add_selection(
+                name="lep_isolation",
+                sel=(((candidatelep.pt < 120) & (lep_reliso > 0.15)) | (candidatelep.pt >= 120)),
+                channel="ele",
+            )
+            self.add_selection(
+                name="lep_isolation",
+                sel=(((candidatelep.pt < 55) & (lep_reliso > 0.15)) | (candidatelep.pt >= 55)),
+                channel="mu",
+            )
+            # invert lepton misolation
+            self.add_selection(
+                name="lep_misolation",
+                sel=((candidatelep.pt < 55) | ((lep_miso > 0.2) & (candidatelep.pt >= 55))),
+                channel="mu",
+            )
+        else:
             # lepton isolation
             self.add_selection(
                 name="lep_isolation",
@@ -487,40 +509,12 @@ class HwwProcessor(processor.ProcessorABC):
                 sel=(((candidatelep.pt < 55) & (lep_reliso < 0.15)) | (candidatelep.pt >= 55)),
                 channel="mu",
             )
+            # lepton misolation
             self.add_selection(
                 name="lep_misolation",
                 sel=((candidatelep.pt < 55) | ((lep_miso < 0.2) & (candidatelep.pt >= 55))),
                 channel="mu",
             )
-        else:
-            if self.apply_trigger:
-                for ch in self._channels:
-                    variables[f"sel_trigger_{ch}"] = trigger[ch]
-            variables["sel_metfilters"] = metfilters
-            variables["sel_leptonKin_ele"] = candidatelep.pt > 40
-            variables["sel_leptonKin_mu"] = candidatelep.pt > 30
-            variables["sel_fatjetKin"] = candidatefj.pt > 200
-            variables["sel_ht"] = ht > 200
-            variables["sel_oneLepton_ele"] = (
-                (n_good_muons == 0)
-                & (n_loose_muons == 0)
-                & (n_good_electrons == 1)
-                & ~ak.any(loose_electrons & ~good_electrons, 1)
-            )
-            variables["sel_oneLepton_mu"] = (
-                (n_good_muons == 1)
-                & (n_good_electrons == 0)
-                & (n_loose_electrons == 0)
-                & ~ak.any(loose_muons & ~good_muons, 1)
-            )
-            variables["sel_notaus_ele"] = n_loose_taus_ele == 0
-            variables["sel_notaus_mu"] = n_loose_taus_mu == 0
-            variables["sel_leptonInJet"] = lep_fj_dr < 0.8
-
-            # lepton isolation
-            variables["sel_lep_isolation_ele"] = ((candidatelep.pt < 120) & (lep_reliso < 0.15)) | (candidatelep.pt >= 120)
-            variables["sel_lep_isolation_mu"] = ((candidatelep.pt < 55) & (lep_reliso < 0.15)) | (candidatelep.pt >= 55)
-            variables["sel_lep_misolation_mu"] = (candidatelep.pt < 55) | ((lep_miso < 0.2) & (candidatelep.pt >= 55))
 
         # gen-level matching
         signal_mask = None

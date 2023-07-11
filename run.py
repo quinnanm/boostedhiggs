@@ -93,7 +93,7 @@ def main(args):
             channels=channels,
             inference=args.inference,
             output_location="./outfiles" + job_name,
-            apply_selection=False if args.without_selection else True,
+            region=args.region,
         )
 
     elif args.processor == "vh":
@@ -121,7 +121,6 @@ def main(args):
             channels=channels,
             inference=args.inference,
             output_location="./outfiles" + job_name,
-            apply_selection=False if args.without_selection else True,
         )
     elif args.processor == "input":
         # define processor
@@ -230,6 +229,8 @@ if __name__ == "__main__":
     parser.add_argument("--processor", dest="processor", required=True, help="processor", type=str)
     parser.add_argument("--chunksize", dest="chunksize", default=10000, help="chunk size in processor", type=int)
     parser.add_argument("--channels", dest="channels", default=None, help="channels separated by commas")
+    parser.add_argument("--region", dest="region", default="signal", help="specify region for selections", type=str)
+
     parser.add_argument(
         "--executor",
         type=str,
@@ -248,7 +249,6 @@ if __name__ == "__main__":
     parser.add_argument("--local", dest="local", action="store_true")
     parser.add_argument("--inference", dest="inference", action="store_true")
     parser.add_argument("--no-inference", dest="inference", action="store_false")
-    parser.add_argument("--without_selection", dest="without_selection", action="store_true")
 
     parser.add_argument("--label", dest="label", default="H", help="jet label for inputskimmer", type=str)
 
