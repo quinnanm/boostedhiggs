@@ -468,6 +468,8 @@ class HwwProcessor(processor.ProcessorABC):
             self.add_selection(name="SameFlavor", sel=(n_good_muons == 2), channel="mu")
             self.add_selection(name="SameFlavor", sel=(n_good_electrons == 2), channel="ele")
             secondlep_p4 = build_p4(ak.firsts(goodleptons[:, 1:2]))
+            variables["secondlep_pt"] = secondlep_p4.pt
+            variables["mll"] = (candidatelep_p4 + secondlep_p4).mass
             self.add_selection(name="oppositeCharge", sel=(candidatelep_p4.charge * secondlep_p4.charge < 0))
 
             self.add_selection(name="notaus", sel=(n_loose_taus_mu == 0), channel="mu")
