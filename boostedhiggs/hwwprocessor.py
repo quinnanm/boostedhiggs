@@ -446,26 +446,33 @@ class HwwProcessor(processor.ProcessorABC):
             self.add_selection(name="leptonKin", sel=(candidatelep.pt > 40), channel="ele")
             self.add_selection(name="fatjetKin", sel=candidatefj.pt > 200)
             self.add_selection(name="ht", sel=(ht > 200))
-            self.add_selection(
-                name="oneLepton",
-                sel=(n_good_muons == 1)
-                & (n_good_electrons == 0)
-                & (n_loose_electrons == 0)
-                & ~ak.any(loose_muons & ~good_muons, 1),
-                channel="mu",
-            )
-            self.add_selection(
-                name="oneLepton",
-                sel=(n_good_muons == 0)
-                & (n_loose_muons == 0)
-                & (n_good_electrons == 1)
-                & ~ak.any(loose_electrons & ~good_electrons, 1),
-                channel="ele",
-            )
+            # self.add_selection(
+            #     name="oneLepton",
+            #     sel=(n_good_muons == 1)
+            #     & (n_good_electrons == 0)
+            #     & (n_loose_electrons == 0)
+            #     & ~ak.any(loose_muons & ~good_muons, 1),
+            #     channel="mu",
+            # )
+            # self.add_selection(
+            #     name="oneLepton",
+            #     sel=(n_good_muons == 0)
+            #     & (n_loose_muons == 0)
+            #     & (n_good_electrons == 1)
+            #     & ~ak.any(loose_electrons & ~good_electrons, 1),
+            #     channel="ele",
+            # )
+
+            # TODO: remove zll stuff
+            # # dilepton selection
+            self.add_selection(name="SameFlavor", sel=(n_good_muons == 2), channel="mu")
+            self.add_selection(name="SameFlavor", sel=(n_good_electrons == 2), channel="ele")
+            secondlep_p4 = build_p4(ak.firsts(goodleptons[:, 1:2]))
+            self.add_selection(name="oppositeCharge", sel=(candidatelep_p4.charge * secondlep_p4.charge < 0))
+
             self.add_selection(name="notaus", sel=(n_loose_taus_mu == 0), channel="mu")
             self.add_selection(name="notaus", sel=(n_loose_taus_ele == 0), channel="ele")
-            # self.add_selection(name="leptonInJet", sel=(lep_fj_dr < 0.8))
-            self.add_selection(name="dR(lepton,Jet)>0.5", sel=(lep_fj_dr > 0.5))
+            self.add_selection(name="leptonInJet", sel=(lep_fj_dr < 0.8))
 
             # lepton isolation
             self.add_selection(
