@@ -675,6 +675,8 @@ class HwwProcessor(processor.ProcessorABC):
             if "rec_higgs_m" in output[ch].keys():
                 output[ch]["rec_higgs_m"] = np.nan_to_num(output[ch]["rec_higgs_m"], nan=-1)
 
+            output[ch] = output[ch].dropna(subset=["fj_pt"])
+
         # now save pandas dataframes
         fname = events.behavior["__events_factory__"]._partition_key.replace("/", "_")
         fname = "condor_" + fname
