@@ -8,7 +8,6 @@ import json
 # import time
 from typing import Dict
 
-import awkward as ak
 import numpy as np
 import tritonclient.grpc as triton_grpc
 import tritonclient.http as triton_http
@@ -101,7 +100,6 @@ def runInferenceTriton(
         tagger_vars = json.load(f)
 
     pversion, out_name = {
-        "05_10_ak8_ttbarwjets": ["PN_UCSD", "softmax__0"],
         "particlenet_hww_inclv2_pre2": ["ParticleNet", "output__0"],
         "particlenet_hww_inclv2_pre2_noreg": ["PN_v2_noreg", "softmax__0"],
         "ak8_MD_vminclv2ParT_manual_fixwrap": ["ParT", "softmax"],
@@ -113,7 +111,6 @@ def runInferenceTriton(
     fatjet_label = "FatJet"
     pfcands_label = "FatJetPFCands"
     svs_label = "FatJetSVs"
-    # jet_label = "ak8"
 
     # prepare inputs for the fatjet
     tagger_inputs = []
@@ -145,44 +142,23 @@ def runInferenceTriton(
         }
 
     # run inference on the fat jet
-    tagger_outputs = []
+    # try:
+    tagger_outputs = triton_model(tagger_inputs)
+    # except Exception:
+    #     print("---can't run inference due to error with the event or the server is not running--")
+    #     return {}
 
-    try:
-        tagger_outputs = triton_model(tagger_inputs)
-    except Exception:
-        print("---can't run inference due to error with the event or the server is not running--")
-        return {}
+    # get the list of output labels defined in `model_name.json` and replace label_ by prob
+    output_names = [x.replace("label_", "prob").replace("_", "") for x in tagger_vars["output_names"]]
 
-    if pversion == "PN_UCSD":
-        pnet_vars = {
-            f"fj_{pversion}_ttbar": tagger_outputs[:, 0:1],
-            f"fj_{pversion}_wjets": tagger_outputs[:, 2],
-            f"fj_{pversion}_HVV_elenuqq": tagger_outputs[:, 3],
-            f"fj_{pversion}_HVV_munuqq": tagger_outputs[:, 4],
-            f"fj_{pversion}_HVV_taunuqq": tagger_outputs[:, 5],
-        }
-    else:
-        output_names = [x.replace("label_", "prob").replace("_", "") for x in tagger_vars["output_names"]]
+    pnet_vars = {}
+    if pversion == "ParticleNet":  # missing softmax for that model (unfortunately)
+        import scipy
 
-        pnet_vars = {}
-        if pversion == "ParticleNet":  # missing softmax for that model (unfortunately)
-            import scipy
+        # last index is mass regression
+        tagger_outputs[:, :-1] = scipy.special.softmax(tagger_outputs[:, :-1], axis=1)
 
-            # last index is mass regression
-            tagger_outputs[:, :-1] = scipy.special.softmax(tagger_outputs[:, :-1], axis=1)
-
-        print(tagger_outputs)
-        for i, output_name in enumerate(output_names):
-            pnet_vars[f"fj_{pversion}_{output_name}"] = tagger_outputs[:, i]
-
-        # if model is ParT, add pku vars of that jet. MUST BE pf_nano v2_4
-        if pversion == "ParT_noreg":
-            jet = ak.firsts(events[fatjet_label][fj_idx_lep])
-            pku_vars = {
-                f"fj_PKU_{pversion}_{output_name}": jet[f"inclParTMDV1_{output_name}"] for output_name in output_names
-            }
-            pku_vars[f"fj_PKU_{pversion}_mass"] = jet["inclParTMDV1_mass"]
-
-            pnet_vars = {**pnet_vars, **pku_vars}
+    for i, output_name in enumerate(output_names):
+        pnet_vars[f"fj_{pversion}_{output_name}"] = tagger_outputs[:, i]
 
     return pnet_vars

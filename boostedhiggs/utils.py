@@ -1,10 +1,10 @@
-from typing import Union, List, Tuple, Dict
+from typing import Dict, List, Tuple, Union
 
 import awkward as ak
 import numpy as np
 from coffea.analysis_tools import PackedSelection
-from coffea.nanoevents.methods.nanoaod import FatJetArray, GenParticleArray
 from coffea.nanoevents.methods.base import NanoEventsArray
+from coffea.nanoevents.methods.nanoaod import FatJetArray, GenParticleArray
 
 
 d_PDGID = 1
@@ -34,6 +34,13 @@ GEN_FLAGS = ["fromHardProcess", "isLastCopy"]
 FILL_NONE_VALUE = -99999
 
 JET_DR = 0.8
+
+P4 = {
+    "eta": "Eta",
+    "phi": "Phi",
+    "mass": "Mass",
+    "pt": "Pt",
+}
 
 
 def get_pid_mask(
@@ -67,9 +74,12 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, lepton, dau_pdgid=W
     higgs = genparts[get_pid_mask(genparts, HIGGS_PDGID, byall=False) * genparts.hasFlags(GEN_FLAGS)]
 
     # only select events that match an specific decay
-    signal_mask = ak.firsts(ak.all(abs(higgs.children.pdgId) == dau_pdgid, axis=2))
+    # matched_higgs = higgs[ak.argmin(fatjet.delta_r(higgs), axis=1, keepdims=True)][:, 0]
+    matched_higgs = higgs[ak.argmin(fatjet.delta_r(higgs), axis=1, keepdims=True)]
+    matched_higgs_mask = ak.any(fatjet.delta_r(matched_higgs) < 0.8, axis=1)
 
-    matched_higgs = higgs[ak.argmin(fatjet.delta_r(higgs), axis=1, keepdims=True)][:, 0]
+    matched_higgs = ak.firsts(matched_higgs)
+
     matched_higgs_children = matched_higgs.children
     higgs_children = higgs.children
 
@@ -142,7 +152,7 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, lepton, dau_pdgid=W
             "fj_H_VV_isVstarlepton": iswstarlepton,
             "fj_H_VV_isMatched": is_hww_matched,
             "gen_Vlep_pt": gen_lepton.pt,
-            "genlep_dR_lep": lepton.delta_r(gen_lepton),
+            # "genlep_dR_lep": lepton.delta_r(gen_lepton),
         }
 
         genVars = {**genVars, **genVVars, **genHVVVars}
@@ -205,13 +215,13 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, lepton, dau_pdgid=W
 
         genVars = {**genVars, **genHTTVars}
 
-    return genVars, signal_mask
+    return genVars, matched_higgs_mask
 
 
 def match_V(genparts: GenParticleArray, fatjet: FatJetArray):
     vs = genparts[get_pid_mask(genparts, [W_PDGID, Z_PDGID], byall=False) * genparts.hasFlags(GEN_FLAGS)]
     matched_vs = vs[ak.argmin(fatjet.delta_r(vs), axis=1, keepdims=True)]
-    matched_vs_mask = ak.any(fatjet.delta_r(matched_vs) < 0.8, axis=1)
+    matched_vs_mask = ak.any(fatjet.delta_r(matched_vs) < JET_DR, axis=1)
 
     daughters = ak.flatten(matched_vs.distinctChildren, axis=2)
     daughters = daughters[daughters.hasFlags(["fromHardProcess", "isLastCopy"])]
@@ -284,7 +294,7 @@ def match_Top(genparts: GenParticleArray, fatjet: FatJetArray):
     quarks = ~leptons & ~neutrinos
     cquarks = wboson_daughters_pdgId == c_PDGID
     electrons = wboson_daughters_pdgId == ELE_PDGID
-    muons = wboson_daughters_pdgId == ELE_PDGID
+    muons = wboson_daughters_pdgId == MU_PDGID
     taus = wboson_daughters_pdgId == TAU_PDGID
 
     # get tau decays from V daughters
@@ -341,20 +351,19 @@ def match_Top(genparts: GenParticleArray, fatjet: FatJetArray):
 def match_QCD(
     genparts: GenParticleArray,
     fatjets: FatJetArray,
-    genlabels: List[str],
+    # genlabels: List[str],
 ) -> Tuple[np.array, Dict[str, np.array]]:
     """Gen matching for QCD samples, arguments as defined in ``tagger_gen_matching``"""
-    match_dR = 0.8
 
     partons = genparts[get_pid_mask(genparts, [g_PDGID] + list(range(1, b_PDGID + 1)), ax=1, byall=False)]
-    matched_mask = ak.any(fatjets.delta_r(partons) < match_dR, axis=1)
+    matched_mask = ak.any(fatjets.delta_r(partons) < JET_DR, axis=1)
 
     genVars = {
-        "fj_isQCDb": (fatjets.nBHadrons == 1),
-        "fj_isQCDbb": (fatjets.nBHadrons > 1),
-        "fj_isQCDc": (fatjets.nCHadrons == 1) * (fatjets.nBHadrons == 0),
-        "fj_isQCDcc": (fatjets.nCHadrons > 1) * (fatjets.nBHadrons == 0),
-        "fj_isQCDothers": (fatjets.nBHadrons == 0) & (fatjets.nCHadrons == 0),
+        "fj_QCDb": (fatjets.nBHadrons == 1),
+        "fj_QCDbb": (fatjets.nBHadrons > 1),
+        "fj_QCDc": (fatjets.nCHadrons == 1) * (fatjets.nBHadrons == 0),
+        "fj_QCDcc": (fatjets.nCHadrons > 1) * (fatjets.nBHadrons == 0),
+        "fj_QCDothers": (fatjets.nBHadrons == 0) & (fatjets.nCHadrons == 0),
     }
 
     genVars = {key: to_label(var) for key, var in genVars.items()}
@@ -378,6 +387,7 @@ def tagger_gen_matching(
     events: NanoEventsArray,
     genparts: GenParticleArray,
     fatjets: FatJetArray,
+    # candidatelep_p4,
     genlabels: List[str],
     label: str,
 ) -> Tuple[np.array, Dict[str, np.array]]:
@@ -390,7 +400,7 @@ def tagger_gen_matching(
         genlabels (List[str]): gen variables to return.
         label (str): dataset label, formatted as
           ``{AK15 or AK8}_{H or QCD}_{(optional) H decay products}``.
-        match_dR (float): max distance between fat jet and gen particle for matching.
+        JET_DR (float): max distance between fat jet and gen particle for matching.
           Defaults to 1.0.
 
     Returns:
@@ -399,50 +409,59 @@ def tagger_gen_matching(
 
     """
 
-    matched_mask = np.ones(len(genparts), dtype="bool")
-
-    # only updated matched mask for signal
-    if "H_" in label:
+    if "H" in label:
+        print("match_H")
         GenVars, matched_mask = match_H(genparts, fatjets)
+        GenVars["fj_genRes_mass"] = 125 * np.ones(len(events))
     elif "QCD" in label:
-        GenVars, _ = match_QCD(genparts, fatjets)
+        print("match_QCD")
+        GenVars, matched_mask = match_QCD(genparts, fatjets)
     elif "VJets" in label:
-        GenVars, _ = match_V(genparts, fatjets)
+        print("match_V")
+        GenVars, matched_mask = match_V(genparts, fatjets)
     elif "Top" in label:
-        GenVars, _ = match_Top(genparts, fatjets)
+        print("match_Top")
+        GenVars, matched_mask = match_Top(genparts, fatjets)
+    else:
+        print("no match")
+        GenVars = {}
+        matched_mask = np.zeros(len(genparts), dtype="bool")
 
-    genjet_vars, matched_gen_jet_mask = get_genjet_vars(events, fatjets)
+    # genjet_vars, matched_gen_jet_mask = get_genjet_vars(events, fatjets)
+    # AllGenVars = {**GenVars, **genjet_vars}
 
-    AllGenVars = {**GenVars, **genjet_vars}
+    AllGenVars = {**GenVars, **{"fj_genjetmass": fatjets.matched_gen.mass}}  # add gen jet mass
 
-    # if ``GenVars`` doesn't contain a gen var, that var is not applicable to this sample so fill with 0s
+    # loop to keep only the specified variables in `genlabels`
+    # if ``GenVars`` doesn't contain a variable, that variable is not applicable to this sample so fill with 0s
     GenVars = {key: AllGenVars[key] if key in AllGenVars.keys() else np.zeros(len(genparts)) for key in genlabels}
     for key, item in GenVars.items():
         try:
             GenVars[key] = GenVars[key].to_numpy()
-        except KeyError:
+        except Exception:
             continue
 
-    return matched_mask * matched_gen_jet_mask, GenVars
+    return matched_mask, GenVars
+    # return matched_mask * matched_gen_jet_mask, GenVars
 
 
-def pad_val(
-    arr: ak.Array,
-    value: float,
-    target: int = None,
-    axis: int = 0,
-    to_numpy: bool = False,
-    clip: bool = True,
-):
-    """
-    pads awkward array up to ``target`` index along axis ``axis`` with value ``value``,
-    optionally converts to numpy array
-    """
-    if target:
-        ret = ak.fill_none(ak.pad_none(arr, target, axis=axis, clip=clip), value, axis=None)
-    else:
-        ret = ak.fill_none(arr, value, axis=None)
-    return ret.to_numpy() if to_numpy else ret
+# def FILL_NONE_VALUE(
+#     arr: ak.Array,
+#     value: float,
+#     target: int = None,
+#     axis: int = 0,
+#     to_numpy: bool = False,
+#     clip: bool = True,
+# ):
+#     """
+#     pads awkward array up to ``target`` index along axis ``axis`` with value ``value``,
+#     optionally converts to numpy array
+#     """
+#     if target:
+#         ret = ak.fill_none(ak.pad_none(arr, target, axis=axis, clip=clip), value, axis=None)
+#     else:
+#         ret = ak.fill_none(arr, value, axis=None)
+#     return ret.to_numpy() if to_numpy else ret
 
 
 def add_selection(

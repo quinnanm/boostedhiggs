@@ -9,8 +9,8 @@ from typing import Dict
 import awkward as ak
 import numpy as np
 import numpy.ma as ma
-from coffea.nanoevents.methods.base import NanoEventsArray
 from coffea.nanoevents.methods import candidate
+from coffea.nanoevents.methods.base import NanoEventsArray
 
 
 def build_p4(cand):

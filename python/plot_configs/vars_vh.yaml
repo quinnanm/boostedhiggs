@@ -1,5 +1,0 @@
-vars:
- cutflow: 1
-lep:
- weights:
-  weight: 1

@@ -18,10 +18,16 @@ def main(args):
     if not os.path.exists("./outfiles"):
         os.makedirs("./outfiles")
 
-    channels = args.channels.split(",")
+    if args.channels:
+        channels = args.channels.split(",")
+
+    # if --macos is specified in args, process only the files provided
+    if args.macos:
+        files = {}
+        files[args.sample] = [f"rootfiles2/rootfiles/{args.sample}/file{i+1}.root" for i in range(1)]
 
     # if --local is specified in args, process only the args.sample provided
-    if args.local:
+    elif args.local:
         files = {}
         with open(f"fileset/pfnanoindex_{args.pfnano}_{args.year}.json", "r") as f:
             files_all = json.load(f)
@@ -87,7 +93,7 @@ def main(args):
             channels=channels,
             inference=args.inference,
             output_location="./outfiles" + job_name,
-            apply_selection=False if args.without_selection else True,
+            region=args.region,
         )
 
     elif args.processor == "vh":
@@ -98,13 +104,13 @@ def main(args):
             yearmod=yearmod,
             channel=channels[0],
             inference=args.inference,
-            output_location="./outfiles" + job_name,
+            output_location=f"./outfiles/{job_name}",
         )
 
     elif args.processor == "lumi":
         from boostedhiggs.lumi_processor import LumiProcessor
 
-        p = LumiProcessor(year=args.year, yearmod=yearmod, output_location="./outfiles" + job_name)
+        p = LumiProcessor(year=args.year, yearmod=yearmod, output_location=f"./outfiles/{job_name}")
 
     elif args.processor == "zll":
         from boostedhiggs.zll_processor import ZllProcessor
@@ -115,14 +121,12 @@ def main(args):
             channels=channels,
             inference=args.inference,
             output_location="./outfiles" + job_name,
-            apply_selection=False if args.without_selection else True,
         )
-
     elif args.processor == "input":
+        # define processor
         from boostedhiggs.inputprocessor import InputProcessor
 
-        p = InputProcessor(num_jets=2)
-
+        p = InputProcessor(args.label, inference=args.inference, output_location=f"./outfiles/{job_name}")
     else:
         from boostedhiggs.trigger_efficiencies_processor import TriggerEfficienciesProcessor
 
@@ -184,6 +188,23 @@ def main(args):
             data.to_parquet("./outfiles/" + job_name + "_" + ch + ".parquet")
             # remove old parquet files
             os.system("rm -rf ./outfiles/" + job_name + ch)
+    elif args.processor == "input":
+        # merge parquet
+        data = pd.read_parquet(f"./outfiles/{job_name}/parquet")
+        data.to_parquet(f"./outfiles/{job_name}.parquet")
+
+        # make directory for output rootfiles
+        if not os.path.exists("./outfiles/outroot"):
+            os.makedirs("./outfiles/outroot")
+
+        os.system(f"mv ./outfiles/{job_name}/outroot ./outfiles/outroot/{job_name}")
+
+        # remove unmerged parquet files
+        os.system("rm -rf ./outfiles/" + job_name)
+
+        # in cmsenv
+        # hadd outfiles/job_name.root outfiles/outroot/job_name/*
+        # rm -r outfiles/outroot
 
 
 if __name__ == "__main__":
@@ -195,6 +216,9 @@ if __name__ == "__main__":
     # noqa: run locally on single file (hww): python run.py --year 2017 --processor hww --pfnano v2_2 --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele --config samples_inclusive.yaml --key mc
     # noqa: run locally on on single file (zll): python run.py --year 2017 --processor zll --pfnano v2_2 --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele --config samples_inclusive.yaml --key mc
 
+    # python run.py --processor input --macos --sample GluGluHToWW_Pt-200ToInf_M-125 --n 1 --starti 0 --label H --inference
+    # python run.py --processor input --local --sample GluGluHToWW_Pt-200ToInf_M-125 --n 1 --starti 0 --label H --inference
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--year", dest="year", default="2017", help="year", type=str)
     parser.add_argument("--starti", dest="starti", default=0, help="start index of files", type=int)
@@ -204,7 +228,9 @@ if __name__ == "__main__":
     parser.add_argument("--sample", dest="sample", default=None, help="specify sample", type=str)
     parser.add_argument("--processor", dest="processor", required=True, help="processor", type=str)
     parser.add_argument("--chunksize", dest="chunksize", default=10000, help="chunk size in processor", type=int)
-    parser.add_argument("--channels", dest="channels", required=True, help="channels separated by commas")
+    parser.add_argument("--channels", dest="channels", default=None, help="channels separated by commas")
+    parser.add_argument("--region", dest="region", default="signal", help="specify region for selections", type=str)
+
     parser.add_argument(
         "--executor",
         type=str,
@@ -219,10 +245,12 @@ if __name__ == "__main__":
         default="v2_2",
         help="pfnano version",
     )
+    parser.add_argument("--macos", dest="macos", action="store_true")
     parser.add_argument("--local", dest="local", action="store_true")
     parser.add_argument("--inference", dest="inference", action="store_true")
     parser.add_argument("--no-inference", dest="inference", action="store_false")
-    parser.add_argument("--without_selection", dest="without_selection", action="store_true")
+
+    parser.add_argument("--label", dest="label", default="H", help="jet label for inputskimmer", type=str)
 
     parser.set_defaults(inference=False)
     args = parser.parse_args()

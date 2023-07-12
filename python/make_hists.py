@@ -1,360 +1,243 @@
+#!/usr/bin/python
+
 import argparse
 import glob
 import json
 import os
 import pickle as pkl
+import warnings
 
 import hist as hist2
-import matplotlib.pyplot as plt
-import mplhep as hep
 import numpy as np
-import pyarrow.parquet as pq
+import pandas as pd
+import utils
 import yaml
-from utils import (
-    data_ref,
-    axis_dict,
-    get_cutflow,
-    get_cutflow_axis,
-    get_sample_to_use,
-    get_xsecweight,
-)
 
-plt.style.use(hep.style.CMS)
-plt.rcParams.update({"font.size": 20})
-
-import logging
+warnings.filterwarnings("ignore", message="Found duplicate branch ")
+pd.set_option("mode.chained_assignment", None)
 
 
-def make_hists(ch, idir, odir, vars_to_plot, weights, presel, samples, cut_keys, hists):
+def make_events_dict(
+    years,
+    channels,
+    samples_dir,
+    samples,
+    presel,
+    weights,
+    columns="all",
+    add_tagger_score=False,
+):
     """
-    Makes 1D histograms of the "vars_to_plot" to be plotted as stacked over the different samples.
+    Postprocess the parquets by applying preselections, saving an event_weight column,
+    saving the tagger score, and only keeping relevant columns in a big concatenated dataframe.
 
-    Args:
-        ch: string that represents the signal channel to look at... choices are ['ele', 'mu'].
-        idir: directory that holds the processed samples (e.g. {idir}/{sample}/outfiles/*_{ch}.parquet).
-        odir: output directory to hold the hist object.
-        vars_to_plot: the set of variables to plot 1D-histograms of.
-        presel: pre-selection dictionary.
-        weights: weights to be applied to MC.
-        samples: the set of samples to run over (by default: the samples defined in plot_configs/samples_all.json).
-        cut_keys: cut keys
-        hists: histogram dictionary to fill
+    Args
+        years [list]: years to postprocess and save in the output (e.g. ["2016APV", "2016"])
+        channels [list]: channels to postprocess and save in the output (e.g. ["ele", "mu"])
+        samples_dir [str]: points to the path of the parquets (note: the year will be appended to the string)
+        samples [list]: samples to postprocess and save in the output (e.g. ["HWW", "QCD", "Data"])
+        presel [dict]: selections to apply per ch (e.g. `presel = {"ele": {"pt cut": fj_pt>250}}`)
+        weights [dict]: weights to include in the event_weight per ch (e.g. `weights = {"mu": {"weight_genweight": 1}})
+        columns [list]: relevant columns of the parquets to keep (default="all" which keeps all columns)
+        add_tagger_score [Bool]: adds a column which is the tagger score (must be True if a tagger cut is in the presel)
+
+    Returns
+        a dict() object events_dict[year][channel][samples] that contains big dataframes of procesed events
+
     """
 
-    # dictionary to store cutflow
-    values = {}
+    events_dict = {}
+    for year in years:
+        events_dict[year] = {}
 
-    # loop over the years
-    for yr in samples.keys():
+        for ch in channels:
+            events_dict[year][ch] = {}
 
-        # get luminosity per year
-        f = open("../fileset/luminosity.json")
-        luminosity = json.load(f)[ch][yr]
-        f.close()
-        logger.info(f"Processing samples from year {yr} with luminosity {luminosity} for channel {ch}")
+            # get lumi
+            with open("../fileset/luminosity.json") as f:
+                luminosity = json.load(f)[ch][year]
 
-        # loop over samples
-        for sample in samples[yr][ch]:
-            logger.debug(f"Sample {sample}")
+            condor_dir = os.listdir(samples_dir + year)
+            for sample in condor_dir:
+                if sample == "DYJetsToLL_M-10to50":
+                    continue  # because tagger didnt run for it
 
-            # check if the sample was processed
-            pkl_dir = f"{idir}_{yr}/{sample}/outfiles/*.pkl"
-            pkl_files = glob.glob(pkl_dir)
-            if not pkl_files:  # skip samples which were not processed
-                logger.warning(f"- No processed files found... {pkl_dir} skipping sample... {sample}")
-                continue
+                # get a combined label to combine samples of the same process
+                for key in utils.combine_samples:
+                    if key in sample:
+                        sample_to_use = utils.combine_samples[key]
+                        break
+                    else:
+                        sample_to_use = sample
 
-            # get list of parquet files that have been post processed
-            parquet_files = glob.glob(f"{idir}_{yr}/{sample}/outfiles/*_{ch}.parquet")
+                if sample_to_use not in samples:
+                    continue
 
-            # define an is_data boolean
-            is_data = False
-            for data_label in data_ref:
-                if data_label in sample:
+                is_data = False
+                if sample_to_use == "Data":
                     is_data = True
 
-            # get name of sample to use (allows to merge samples)
-            sample_to_use = get_sample_to_use(sample, yr, is_data)
+                print(f"Finding {sample} samples and should combine them under {sample_to_use}")
 
-            # xsec weight
-            xsec_weight = get_xsecweight(pkl_files, yr, sample, is_data, luminosity)
+                out_files = f"{samples_dir + year}/{sample}/outfiles/"
+                parquet_files = glob.glob(f"{out_files}/*_{ch}.parquet")
+                pkl_files = glob.glob(f"{out_files}/*.pkl")
 
-            # get cutflow
-            cutflow = get_cutflow(cut_keys, pkl_files, yr, sample, xsec_weight, ch)
-            # print("cutflow ", cutflow)
-
-            if sample_to_use not in values.keys():
-                values[sample_to_use] = dict.fromkeys(cut_keys, 0)
-            for key, val in cutflow.items():
-                values[sample_to_use][key] += val
-
-            if presel is not None:
-                for key in presel.keys():
-                    values[sample_to_use][key] = 0
-
-            for i, parquet_file in enumerate(parquet_files):
-                try:
-                    data = pq.read_table(parquet_file).to_pandas()
-                except ValueError:
-                    if is_data:
-                        logger.warning(f"Not able to read data: {parquet_file} should remove events from scaling/lumi")
-                    else:
-                        logger.warning(f"Not able to read data from {parquet_file}")
+                if not parquet_files:
+                    print(f"No parquet file for {sample}")
                     continue
 
-                # print parquet content
-                # if i==0:
-                #    print(sample, data.columns)
-
+                data = pd.read_parquet(parquet_files)
                 if len(data) == 0:
-                    logger.warning(f"Parquet file empty {yr} {ch} {sample} {parquet_file}")
                     continue
 
-                # modify dataframe with string queries
-                if presel is not None:
-                    for sel_key, sel_str in presel.items():
-                        df = data.query(sel_str)
-                        if not is_data:
-                            try:
-                                genweight = df["weight_genweight"]
-                            except ValueError:
-                                logger.warning("weight weight_genweight not found in parquet")
-                                continue
-                            values[sample_to_use][sel_key] += np.sum(genweight * xsec_weight)
-                        else:
-                            weight_ones = np.ones_like(df["fj_pt"])
-                            values[sample_to_use][sel_key] += np.sum(weight_ones * xsec_weight)
-                        # print(sel_key,sel_str,np.sum(weight_ones),np.sum(weight_ones * xsec_weight))
-
-                # get event weight
+                # replace the weight_pileup of the strange events with the mean weight_pileup of all the other events
+                # TODO: draw distribution of number of primary vertices before and after applying this weight
                 if not is_data:
-                    event_weight = xsec_weight
-                    for w in weights:
-                        try:
-                            weight = data[w]
-                        except ValueError:
-                            print_warning = True
-                            if w == "weight_vjets_nominal" or (w == "weight_L1Prefiring" and yr == "2018"):
-                                print_warning = False
-                            if print_warning:
-                                logger.warning(f"No {w} variable in parquet for sample {sample}")
-                        event_weight *= weight
+                    strange_events = data["weight_pileup"] > 6
+                    if len(strange_events) > 0:
+                        data["weight_pileup"][strange_events] = data[~strange_events]["weight_pileup"].mean(axis=0)
+
+                # get event_weight
+                if not is_data:
+                    print("---> Accumulating event weights.")
+                    event_weight = utils.get_xsecweight(pkl_files, year, sample, is_data, luminosity)
+                    print(event_weight)
+                    for w in weights[ch]:
+                        if w not in data.keys():
+                            print(f"{w} weight is not stored in parquet")
+                            continue
+                        if weights[ch][w] == 1:
+                            print(f"Applying {w} weight")
+                            event_weight *= data[w]
+
+                    print("---> Done with accumulating event weights.")
                 else:
                     event_weight = np.ones_like(data["fj_pt"])
 
-                for var in vars_to_plot:
-                    if var == "cutflow":
-                        continue
+                data["event_weight"] = event_weight
 
-                    if var not in data.keys():
-                        if "gen" in var:
-                            continue
-                        logger.warning(f"Var {var} not in parquet keys")
-                        continue
+                # add tagger scores
+                if add_tagger_score:
+                    data["inclusive_score"] = utils.disc_score(data, utils.new_sig, utils.inclusive_bkg)
 
-                    # filling histograms
-                    hists[var].fill(
-                        samples=sample_to_use,
-                        var=data[var],
-                        weight=event_weight,
-                    )
+                # apply selection
+                print("---> Applying preselection.")
+                for selection in presel[ch]:
+                    print(f"applying {selection} selection on {len(data)} events")
+                    data = data.query(presel[ch][selection])
+                print("---> Done with preselection.")
 
-            # fill cutflow histogram once we have all the values
-            for key, numevents in values[sample_to_use].items():
-                cut_index = list(values[sample_to_use].keys()).index(key)
-                # print("fill histogram ", cut_index, numevents)
-                hists["cutflow"].fill(samples=sample_to_use, var=cut_index, weight=numevents)
+                print(f"Will fill the {sample_to_use} dataframe with the remaining {len(data)} events")
+                print(f"tot event weight {data['event_weight'].sum()} \n")
 
-    return hists, values
+                if columns == "all":
+                    # fill the big dataframe
+                    if sample_to_use not in events_dict[year][ch]:
+                        events_dict[year][ch][sample_to_use] = data
+                    else:
+                        events_dict[year][ch][sample_to_use] = pd.concat([events_dict[year][ch][sample_to_use], data])
+                else:
+                    # specify columns to keep
+                    cols = columns + ["event_weight"]
+                    if add_tagger_score:
+                        cols += ["inclusive_score"]
+
+                    # fill the big dataframe
+                    if sample_to_use not in events_dict[year][ch]:
+                        events_dict[year][ch][sample_to_use] = data[cols]
+                    else:
+                        events_dict[year][ch][sample_to_use] = pd.concat([events_dict[year][ch][sample_to_use], data[cols]])
+
+    return events_dict
+
+
+def make_hists_from_events_dict(events_dict, samples_to_plot, vars_to_plot):
+    """
+    Takes an `events_dict` object that was processed using `make_events_dict` and starts filling histograms.
+
+    """
+
+    hists = {}
+    for var in vars_to_plot:
+        hists[var] = hist2.Hist(
+            hist2.axis.StrCategory([], name="samples", growth=True),
+            utils.axis_dict[var],
+        )
+
+        for sample in samples_to_plot:
+            for year in events_dict:
+                for ch in events_dict[year]:
+                    df = events_dict[year][ch][sample]
+
+                    hists[var].fill(samples=sample, var=df[var], weight=df["event_weight"])
+
+    return hists
 
 
 def main(args):
-    # append '/year' to the output directory
-    odir = args.odir + "/" + args.year
-    if not os.path.exists(odir):
-        os.system(f"mkdir -p {odir}")
+    years = args.years.split(",")
+    channels = args.channels.split(",")
 
-    # get year
-    years = ["2016", "2016APV", "2017", "2018"] if args.year == "Run2" else [args.year]
+    if not os.path.exists(args.outpath):
+        os.makedirs(args.outpath)
 
-    # get json file with list of samples to make histograms
-    f = open(args.samples)
-    json_samples = json.load(f)
-    f.close()
+    os.system(f"cp make_hists_config.yaml {args.outpath}/")
 
-    # build samples
-    samples = {}
-    for year in years:
-        samples[year] = {}
-        for ch in json_samples[year]:
-            samples[year][ch] = []
-            for key, value in json_samples[year][ch].items():
-                if value == 1:
-                    samples[year][ch].append(key)
+    # load config from yaml
+    with open("make_hists_config.yaml", "r") as stream:
+        config = yaml.safe_load(stream)
 
-    # cut keys
-    cut_keys = args.cut_keys.split(",")
-
-    # load yaml config file
-    with open(args.vars) as f:
-        variables = yaml.safe_load(f)
-    os.system(f"cp {args.vars} {odir}/")
-
-    # extract extra cut keys from yaml file
-    axes = axis_dict
-    extra_cut_keys = []
-    if "selection" in variables.keys():
-        extra_cut_keys = list(variables["selection"].keys())
-    axes["cutflow"] = get_cutflow_axis(cut_keys + extra_cut_keys)
-
-    axis_sample = hist2.axis.StrCategory([], name="samples", growth=True)
-
-    # extract variables to plot
-    vars_to_plot = []
-    for key, value in variables["vars"].items():
-        if value == 1:
-            vars_to_plot.append(key)
-    logger.info(f"Variables to include {vars_to_plot}")
-
-    # define channels
-    if args.channels == "all":
-        channels = ["ele", "mu"]
-        hists = {}
-        values = {}
-        for var in vars_to_plot:
-            hists[var] = hist2.Hist(
-                axis_sample,
-                axes[var],
-            )
-    else:
-        channels = args.channels.split(",")
-        hists = None
-        values = None
-
-    # extract variables and weights from yaml file
-    for ch in channels:
-        if ch not in variables.keys():
-            raise Exception(f"Channel {ch} not included in yaml file")
-        logger.info(f"Making histograms for {ch}...")
-
-        weights = []
-        for key, value in variables[ch]["weights"].items():
-            if value == 1:
-                weights.append(key)
-        logger.info("Weights ", weights)
-
-        presel = {}
-        if "selection" in variables.keys():
-            cum_presel_str = "(1==1)"
-            for presel_key, presel_str in variables["selection"][ch].items():
-                cum_presel_str += "& " + presel_str
-                presel[presel_key] = cum_presel_str
-            logger.info("Pre-selection: %s" % presel.keys())
-
-        if len(glob.glob(f"{odir}/{ch}_hists.pkl")) > 0:
-            logger.warning("Histograms already exist - remaking them")
-
-        if hists is None:
-            hists_per_ch = {}
-            for var in vars_to_plot:
-                hists_per_ch[var] = hist2.Hist(
-                    axis_sample,
-                    axes[var],
-                )
-        else:
-            logging.info("Filling the same histogram to combine all channels")
-            hists_per_ch = hists
-
-        hists_per_ch, values_per_ch = make_hists(
-            ch,
-            args.idir,
-            odir,
-            vars_to_plot,
-            weights,
-            presel,
-            samples,
-            cut_keys,
-            hists_per_ch,
+    if args.make_events_dict:
+        events_dict = make_events_dict(
+            years,
+            channels,
+            args.samples_dir,
+            config["samples"],
+            config["presel"],
+            config["weights"],
+            columns="all",
+            add_tagger_score=True,
         )
-        print(values_per_ch)
-        print(args.channels)
+        with open(f"{args.outpath}/events_dict.pkl", "wb") as fp:
+            pkl.dump(events_dict, fp)
+    else:
+        with open(f"{args.outpath}/events_dict.pkl", "rb") as fp:
+            events_dict = pkl.load(fp)
 
-        if args.channels != "all":
-            logging.info(f"Saving histograms to {odir}/{ch}_hists.pkl")
-            with open(f"{odir}/{ch}_hists.pkl", "wb") as f:
-                pkl.dump(hists_per_ch, f)
-        else:
-            hists = hists_per_ch
-            for sample in values_per_ch:
-                if sample not in values.keys():
-                    values[sample] = {}
-                for cutkey, val in values_per_ch[sample].items():
-                    if cutkey in values[sample].keys():
-                        values[sample][cutkey] += val
-                    else:
-                        values[sample][cutkey] = val
+    if args.plot_hists:
+        hists = make_hists_from_events_dict(events_dict, config["samples_to_plot"], config["vars_to_plot"])
 
-    if args.channels == "all":
-        print(values)
-        print(hists["cutflow"])
-        with open(f"{odir}/{args.channels}_hists.pkl", "wb") as f:
-            pkl.dump(hists, f)
+        utils.plot_hists(
+            years,
+            channels,
+            hists,
+            config["vars_to_plot"],
+            add_data=False,
+            logy=False,
+            add_soverb=True,
+            only_sig=False,
+            mult=100,
+            outpath=f"{args.outpath}/hists/",
+        )
 
 
 if __name__ == "__main__":
-
-    # e.g. run locally as:
-    # # noqa: python make_hists.py --year 2017 --odir Jan23 --channels ele,mu --idir ../Jan20 --vars plot_configs/cutflow.yaml
+    # e.g.
+    # python make_hists.py --years 2017 --channels ele,mu --make_events_dict --plot_hists
 
     parser = argparse.ArgumentParser()
+    parser.add_argument("--years", dest="years", default="2017", help="years separated by commas")
+    parser.add_argument("--channels", dest="channels", default="ele", help="channels separated by commas")
     parser.add_argument(
-        "--year",
-        dest="year",
-        required=True,
-        choices=["2016", "2016APV", "2017", "2018", "Run2"],
-        help="year",
+        "--samples_dir", dest="samples_dir", default="../eos/Apr12_presel_", help="path to parquets", type=str
     )
     parser.add_argument(
-        "--vars",
-        dest="vars",
-        required=True,
-        help="path to yaml with variables to be plotted",
+        "--outpath", dest="outpath", default="/Users/fmokhtar/Desktop/hww/test", help="path of the output", type=str
     )
-    parser.add_argument(
-        "--samples",
-        dest="samples",
-        default="plot_configs/samples_all.json",
-        help="path to json with samples to be plotted",
-    )
-    parser.add_argument(
-        "--channels",
-        dest="channels",
-        default="ele,mu",
-        help="channels for which to plot this variable",
-    )
-    parser.add_argument(
-        "--odir",
-        dest="odir",
-        default="hists",
-        help="tag for output directory... will append '_{year}' to it",
-    )
-    parser.add_argument(
-        "--idir",
-        dest="idir",
-        default="../results/",
-        help="input directory with results - without _{year}",
-    )
-    parser.add_argument(
-        "--cut-keys",
-        dest="cut_keys",
-        # default="trigger,leptonKin,fatjetKin,ht,oneLepton,notaus,leptonInJet",
-        default="trigger",
-        help="cut keys for cutflow (split by commas)",
-    )
+    parser.add_argument("--make_events_dict", dest="make_events_dict", action="store_true")
+    parser.add_argument("--plot_hists", dest="plot_hists", action="store_true")
 
     args = parser.parse_args()
-
-    logging.basicConfig(level=20)
-    logger = logging.getLogger("make-hists")
 
     main(args)
