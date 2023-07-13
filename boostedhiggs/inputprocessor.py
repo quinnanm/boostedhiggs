@@ -139,6 +139,12 @@ class InputProcessor(ProcessorABC):
             if len(table) != 0:  # skip dataframes with empty entries
                 pq.write_table(table, f"{PATH}/{fname}.parquet")
 
+    def ak_to_pandas(self, output_collection: ak.Array) -> pd.DataFrame:
+        output = pd.DataFrame()
+        for field in ak.fields(output_collection):
+            output[field] = ak.to_numpy(output_collection[field])
+        return output
+
     def dump_root(self, skimmed_vars: Dict[str, np.array], fname: str) -> None:
         """
         Saves ``jet_vars`` dict as a rootfile to './outroot'
