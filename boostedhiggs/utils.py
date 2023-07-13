@@ -6,7 +6,6 @@ from coffea.analysis_tools import PackedSelection
 from coffea.nanoevents.methods.base import NanoEventsArray
 from coffea.nanoevents.methods.nanoaod import FatJetArray, GenParticleArray
 
-
 d_PDGID = 1
 c_PDGID = 4
 b_PDGID = 5
@@ -518,3 +517,47 @@ def get_neutrino_z(vis, inv, h_mass=125):
         with_name="LorentzVector",
     )
     return neutrino
+
+
+# TAGGER STUFF
+hwwev = [
+    "fj_ParT_probHWqqWev0c",
+    "fj_ParT_probHWqqWev1c",
+    "fj_ParT_probHWqqWtauev0c",
+    "fj_ParT_probHWqqWtauev1c",
+]
+hwwmv = [
+    "fj_ParT_probHWqqWmv0c",
+    "fj_ParT_probHWqqWmv1c",
+    "fj_ParT_probHWqqWtaumv0c",
+    "fj_ParT_probHWqqWtaumv1c",
+]
+hwwhad = [
+    "fj_ParT_probHWqqWqq0c",
+    "fj_ParT_probHWqqWqq1c",
+    "fj_ParT_probHWqqWqq2c",
+    "fj_ParT_probHWqqWq0c",
+    "fj_ParT_probHWqqWq1c",
+    "fj_ParT_probHWqqWq2c",
+    "fj_ParT_probHWqqWtauhv0c",
+    "fj_ParT_probHWqqWtauhv1c",
+]
+sigs = hwwev + hwwmv + hwwhad
+qcd = [
+    "fj_ParT_probQCDbb",
+    "fj_ParT_probQCDcc",
+    "fj_ParT_probQCDb",
+    "fj_ParT_probQCDc",
+    "fj_ParT_probQCDothers",
+]
+tope = ["fj_ParT_probTopbWev", "fj_ParT_probTopbWtauev"]
+topm = ["fj_ParT_probTopbWmv", "fj_ParT_probTopbWtaumv"]
+tophad = [
+    "fj_ParT_probTopbWqq0c",
+    "fj_ParT_probTopbWqq1c",
+    "fj_ParT_probTopbWq0c",
+    "fj_ParT_probTopbWq1c",
+    "fj_ParT_probTopbWtauhv",
+]
+top = tope + topm + tophad
+bkgs = qcd + top
