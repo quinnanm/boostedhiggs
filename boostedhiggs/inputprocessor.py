@@ -251,12 +251,12 @@ class InputProcessor(ProcessorABC):
                 scores = {"fj_ParT_inclusive_score": (num / den).values}
                 reg_mass = {"fj_ParT_mass": pnet_vars["fj_ParT_mass"]}
 
-                hidden_neurons = {}
+                hidNeurons = {}
                 for key in pnet_vars:
-                    if "hidden" in key:
-                        hidden_neurons[key] = pnet_vars[key]
+                    if "hidNeuron" in key:
+                        hidNeurons[key] = pnet_vars[key]
 
-                skimmed_vars = {**skimmed_vars, **scores, **reg_mass, **hidden_neurons}
+                skimmed_vars = {**skimmed_vars, **scores, **reg_mass, **hidNeurons}
 
                 # skimmed_vars = {
                 #     **skimmed_vars,
