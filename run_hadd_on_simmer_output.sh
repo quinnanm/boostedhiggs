@@ -2,23 +2,23 @@
 
 # MERGING ROOTFILES IN A CMSENV
 
-# merging signal files
-cd ntuples/GluGluHToWW_Pt-200ToInf_M-125/train
-hadd -fk out.root outroot/*/*
-rm -r outroot
-cd ../test
-hadd -fk out.root outroot/*/*
-rm -r outroot
-cd ../../
-
-# # merging TTbar files
-# cd ntuples/TTToSemiLeptonic/train
+# # merging signal files
+# cd ntuples/GluGluHToWW_Pt-200ToInf_M-125/train
 # hadd -fk out.root outroot/*/*
 # rm -r outroot
 # cd ../test
 # hadd -fk out.root outroot/*/*
 # rm -r outroot
 # cd ../../
+
+# merging TTbar files
+cd ntuples/TTToSemiLeptonic/train
+hadd -fk out.root outroot/*/*
+rm -r outroot
+cd ../test
+hadd -fk out.root outroot/*/*
+rm -r outroot
+cd ../../
 
 # # merging WJetsLNu files
 # for SAMPLE in WJetsToLNu_HT-200To400 WJetsToLNu_HT-400To600 WJetsToLNu_HT-600To800 WJetsToLNu_HT-800To1200
