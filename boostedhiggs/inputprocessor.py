@@ -258,16 +258,13 @@ class InputProcessor(ProcessorABC):
 
                 skimmed_vars = {**skimmed_vars, **scores, **reg_mass, **hidNeurons}
 
-                # skimmed_vars = {
-                #     **skimmed_vars,
-                #     **{key: value for (key, value) in pnet_vars.items()},
-                # }
-
         for key in skimmed_vars:
             skimmed_vars[key] = skimmed_vars[key].squeeze()
 
         # convert output to pandas
         df = pd.DataFrame(skimmed_vars)
+
+        df = df.dropna()  # very few events would have genjetmass NaN for some reason
 
         print(f"convert: {time.time() - start:.1f}s")
 
