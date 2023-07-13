@@ -244,7 +244,9 @@ class InputProcessor(ProcessorABC):
                     model_name=model_name,
                 )
 
-                pnet_df = self.ak_to_pandas(pnet_vars)
+                # pnet_df = self.ak_to_pandas(pnet_vars)
+                pnet_df = pd.DataFrame(pnet_vars)
+
                 num = pnet_df[sigs].sum(axis=1)
                 den = pnet_df[sigs].sum(axis=1) + pnet_df[bkgs].sum(axis=1)
 
