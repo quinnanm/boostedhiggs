@@ -1,22 +1,22 @@
 #!/usr/bin/bash
 
-# run over signal files
-mkdir -p ntuples/GluGluHToWW_Pt-200ToInf_M-125/
+# # run over signal files
+# mkdir -p ntuples/GluGluHToWW_Pt-200ToInf_M-125/
 
-python run.py --processor input --local --sample GluGluHToWW_Pt-200ToInf_M-125 --n 18 --starti 0 --label H --inference
-mv outfiles ntuples/GluGluHToWW_Pt-200ToInf_M-125/train
+# python run.py --processor input --local --sample GluGluHToWW_Pt-200ToInf_M-125 --n 18 --starti 0 --label H --inference
+# mv outfiles ntuples/GluGluHToWW_Pt-200ToInf_M-125/train
 
-python run.py --processor input --local --sample GluGluHToWW_Pt-200ToInf_M-125 --n 18 --starti 1 --label H --inference
-mv outfiles ntuples/GluGluHToWW_Pt-200ToInf_M-125/test
+# python run.py --processor input --local --sample GluGluHToWW_Pt-200ToInf_M-125 --n 18 --starti 1 --label H --inference
+# mv outfiles ntuples/GluGluHToWW_Pt-200ToInf_M-125/test
 
-# # run over TTbar files
-# mkdir -p ntuples/TTToSemiLeptonic/
+# run over TTbar files
+mkdir -p ntuples/TTToSemiLeptonic/
 
-# python run.py --processor input --local --sample TTToSemiLeptonic --n 50 --starti 0 --label Top --inference
-# mv outfiles ntuples/TTToSemiLeptonic/train
+python run.py --processor input --local --sample TTToSemiLeptonic --n 50 --starti 0 --label Top --inference
+mv outfiles ntuples/TTToSemiLeptonic/train
 
-# python run.py --processor input --local --sample TTToSemiLeptonic --n 50 --starti 1 --label Top --inference
-# mv outfiles ntuples/TTToSemiLeptonic/test
+python run.py --processor input --local --sample TTToSemiLeptonic --n 50 --starti 1 --label Top --inference
+mv outfiles ntuples/TTToSemiLeptonic/test
 
 # # run over WJetsLNu files
 # for SAMPLE in WJetsToLNu_HT-200To400 WJetsToLNu_HT-400To600 WJetsToLNu_HT-600To800 WJetsToLNu_HT-800To1200
