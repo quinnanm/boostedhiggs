@@ -176,18 +176,19 @@ def main(args):
     print(f"Metrics: {metrics}")
     print(f"Finished in {elapsed:.1f}s")
 
-    # dump to pickle
-    filehandler = open("./outfiles/" + job_name + ".pkl", "wb")
-    pkl.dump(out, filehandler)
-    filehandler.close()
-
-    # merge parquet
     if args.processor == "hww" or args.processor == "vh" or args.processor == "zll":
+        # dump to pickle
+        filehandler = open("./outfiles/" + job_name + ".pkl", "wb")
+        pkl.dump(out, filehandler)
+        filehandler.close()
+
+        # merge parquet
         for ch in channels:
             data = pd.read_parquet("./outfiles/" + job_name + ch + "/parquet")
             data.to_parquet("./outfiles/" + job_name + "_" + ch + ".parquet")
             # remove old parquet files
             os.system("rm -rf ./outfiles/" + job_name + ch)
+
     elif args.processor == "input":
         # merge parquet
         data = pd.read_parquet(f"./outfiles/{job_name}/parquet")
@@ -203,7 +204,7 @@ def main(args):
         os.system("rm -rf ./outfiles/" + job_name)
 
         # in cmsenv
-        # hadd outfiles/job_name.root outfiles/outroot/job_name/*
+        # hadd -fk outfiles/job_name.root outfiles/outroot/job_name/*
         # rm -r outfiles/outroot
 
 
