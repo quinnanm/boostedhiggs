@@ -700,7 +700,9 @@ class HwwProcessor(processor.ProcessorABC):
                         den = pnet_df[sigs].sum(axis=1) + pnet_df[bkgs].sum(axis=1)
 
                         scores = {"fj_ParT_inclusive_score": (num / den).values}
-                        output[ch] = {**output[ch], **scores}
+
+                        reg_mass = {"fj_ParT_mass": pnet_vars["fj_ParT_mass"]}
+                        output[ch] = {**output[ch], **scores, **reg_mass}
 
             else:
                 output[ch] = {}
