@@ -102,7 +102,7 @@ def runInferenceTriton(
     pversion, out_name = {
         "particlenet_hww_inclv2_pre2": ["ParticleNet", "output__0"],
         "particlenet_hww_inclv2_pre2_noreg": ["PN_v2_noreg", "softmax__0"],
-        "ak8_MD_vminclv2ParT_manual_fixwrap": ["ParT", "softmax"],
+        "ak8_MD_vminclv2ParT_manual_fixwrap": ["ParT_noreg", "softmax"],
         "ak8_MD_vminclv2ParT_manual_fixwrap_all_nodes": ["ParT", "softmax"],
     }[model_name]
 

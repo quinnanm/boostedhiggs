@@ -136,10 +136,9 @@ class HwwProcessor(processor.ProcessorABC):
 
             # add selection
             self.selections[ch].add(name, sel)
-
             selection_ch = self.selections[ch].all(*self.selections[ch].names)
+
             if self.isMC:
-                # for MC: multiply cutflow by gen weight
                 weight = self.weights.partial_weight(["genweight"])
                 self.cutflows[ch][name] = float(weight[selection_ch].sum())
             else:
@@ -432,82 +431,80 @@ class HwwProcessor(processor.ProcessorABC):
 
         # apply trigger
         for ch in self._channels:
-            self.add_selection(name="trigger", sel=trigger[ch], channel=ch)
+            self.add_selection(name="Trigger", sel=trigger[ch], channel=ch)
 
         # apply selections
-        self.add_selection(name="metfilters", sel=metfilters)
-        self.add_selection(name="leptonKin", sel=(candidatelep.pt > 30), channel="mu")
-        self.add_selection(name="leptonKin", sel=(candidatelep.pt > 40), channel="ele")
-        self.add_selection(name="fatjetKin", sel=candidatefj.pt > 200)
-        self.add_selection(name="ht", sel=(ht > 200))
-        self.add_selection(name="notaus", sel=(n_loose_taus_mu == 0), channel="mu")
-        self.add_selection(name="notaus", sel=(n_loose_taus_ele == 0), channel="ele")
+        self.add_selection(name="METFilters", sel=metfilters)
+        self.add_selection(name="LepKin", sel=(candidatelep.pt > 30), channel="mu")
+        self.add_selection(name="LepKin", sel=(candidatelep.pt > 40), channel="ele")
+        self.add_selection(name="FatJetKin", sel=(candidatefj.pt > 200) & (ht > 200))
 
         if self.region == "wjets":
-            # lepton not necessariliy inside the jet
-            self.add_selection(name="high_dR_jet_lep", sel=(lep_fj_dr > 0.5))
+            self.add_selection(name="dRFatJetLep08Inv", sel=(lep_fj_dr > 0.8))
         else:
-            self.add_selection(name="leptonInJet", sel=(lep_fj_dr < 0.8))
+            self.add_selection(name="dRFatJetLep08", sel=(lep_fj_dr < 0.8))
 
         if self.region == "zll":
-            # dilepton selection
-            self.add_selection(name="SameFlavor", sel=(n_good_muons == 2), channel="mu")
-            self.add_selection(name="SameFlavor", sel=(n_good_electrons == 2), channel="ele")
             secondlep_p4 = build_p4(ak.firsts(goodleptons[:, 1:2]))
             variables["secondlep_pt"] = secondlep_p4.pt
             variables["mll"] = (candidatelep_p4 + secondlep_p4).mass
-            self.add_selection(name="oppositeCharge", sel=(candidatelep_p4.charge * secondlep_p4.charge < 0))
+
+            self.add_selection(name="TwoLepSameFlavor", sel=(n_good_muons == 2), channel="mu")
+            self.add_selection(name="TwoLepSameFlavor", sel=(n_good_electrons == 2), channel="ele")
+            self.add_selection(name="TwoLepOppositeCharge", sel=(candidatelep_p4.charge * secondlep_p4.charge < 0))
         else:
             self.add_selection(
-                name="oneLepton",
+                name="OneLep",
                 sel=(n_good_muons == 1)
                 & (n_good_electrons == 0)
                 & (n_loose_electrons == 0)
-                & ~ak.any(loose_muons & ~good_muons, 1),
+                & ~ak.any(loose_muons & ~good_muons, 1)
+                & (n_loose_taus_mu == 0),
                 channel="mu",
             )
             self.add_selection(
-                name="oneLepton",
+                name="OneLep",
                 sel=(n_good_muons == 0)
                 & (n_loose_muons == 0)
                 & (n_good_electrons == 1)
-                & ~ak.any(loose_electrons & ~good_electrons, 1),
+                & ~ak.any(loose_electrons & ~good_electrons, 1)
+                & (n_loose_taus_ele == 0),
                 channel="ele",
             )
 
         if self.region == "qcd":
             # invert lepton isolation
             self.add_selection(
-                name="lep_isolation",
+                name="LepIsolationInv",
                 sel=(((candidatelep.pt < 120) & (lep_reliso > 0.15)) | (candidatelep.pt >= 120)),
                 channel="ele",
             )
             self.add_selection(
-                name="lep_isolation",
+                name="LepIsolationInv",
                 sel=(((candidatelep.pt < 55) & (lep_reliso > 0.15)) | (candidatelep.pt >= 55)),
                 channel="mu",
             )
             # invert lepton misolation
             self.add_selection(
-                name="lep_misolation",
+                name="LepMisolationInv",
                 sel=((candidatelep.pt < 55) | ((lep_miso > 0.2) & (candidatelep.pt >= 55))),
                 channel="mu",
             )
         else:
             # lepton isolation
             self.add_selection(
-                name="lep_isolation",
+                name="LepIsolation",
                 sel=(((candidatelep.pt < 120) & (lep_reliso < 0.15)) | (candidatelep.pt >= 120)),
                 channel="ele",
             )
             self.add_selection(
-                name="lep_isolation",
+                name="LepIsolation",
                 sel=(((candidatelep.pt < 55) & (lep_reliso < 0.15)) | (candidatelep.pt >= 55)),
                 channel="mu",
             )
             # lepton misolation
             self.add_selection(
-                name="lep_misolation",
+                name="LepMisolation",
                 sel=((candidatelep.pt < 55) | ((lep_miso < 0.2) & (candidatelep.pt >= 55))),
                 channel="mu",
             )
@@ -517,10 +514,10 @@ class HwwProcessor(processor.ProcessorABC):
         if self.isMC:
             if ("HToWW" in dataset) or ("HWW" in dataset) or ("ttHToNonbb" in dataset):
                 genVars, signal_mask = match_H(events.GenPart, candidatefj)
-                self.add_selection(name="signal", sel=signal_mask)
+                self.add_selection(name="Signal", sel=signal_mask)
             elif "HToTauTau" in dataset:
                 genVars, signal_mask = match_H(events.GenPart, candidatefj, candidatelep_p4, dau_pdgid=15)
-                self.add_selection(name="signal", sel=signal_mask)
+                self.add_selection(name="Signal", sel=signal_mask)
             elif ("WJets" in dataset) or ("ZJets" in dataset) or ("DYJets" in dataset):
                 genVars, _ = match_V(events.GenPart, candidatefj)
             elif "TT" in dataset:
@@ -642,13 +639,12 @@ class HwwProcessor(processor.ProcessorABC):
                 # fill the output dictionary after selections
                 output[ch] = {key: value[selection_ch] for (key, value) in out.items()}
 
-                print(output[ch])
                 # fill inference
                 if self.inference:
                     for model_name in [
-                        "particlenet_hww_inclv2_pre2",
-                        "ak8_MD_vminclv2ParT_manual_fixwrap",
-                        # "ak8_MD_vminclv2ParT_manual_fixwrap_all_nodes",
+                        # "particlenet_hww_inclv2_pre2",
+                        # "ak8_MD_vminclv2ParT_manual_fixwrap",
+                        "ak8_MD_vminclv2ParT_manual_fixwrap_all_nodes",
                     ]:
                         pnet_vars = runInferenceTriton(
                             self.tagger_resources_path,
@@ -656,10 +652,55 @@ class HwwProcessor(processor.ProcessorABC):
                             fj_idx_lep[selection_ch],
                             model_name=model_name,
                         )
-                        output[ch] = {
-                            **output[ch],
-                            **{key: value for (key, value) in pnet_vars.items()},
-                        }
+
+                        hwwev = [
+                            "fj_ParT_probHWqqWev0c",
+                            "fj_ParT_probHWqqWev1c",
+                            "fj_ParT_probHWqqWtauev0c",
+                            "fj_ParT_probHWqqWtauev1c",
+                        ]
+                        hwwmv = [
+                            "fj_ParT_probHWqqWmv0c",
+                            "fj_ParT_probHWqqWmv1c",
+                            "fj_ParT_probHWqqWtaumv0c",
+                            "fj_ParT_probHWqqWtaumv1c",
+                        ]
+                        hwwhad = [
+                            "fj_ParT_probHWqqWqq0c",
+                            "fj_ParT_probHWqqWqq1c",
+                            "fj_ParT_probHWqqWqq2c",
+                            "fj_ParT_probHWqqWq0c",
+                            "fj_ParT_probHWqqWq1c",
+                            "fj_ParT_probHWqqWq2c",
+                            "fj_ParT_probHWqqWtauhv0c",
+                            "fj_ParT_probHWqqWtauhv1c",
+                        ]
+                        sigs = hwwev + hwwmv + hwwhad
+                        qcd = [
+                            "fj_ParT_probQCDbb",
+                            "fj_ParT_probQCDcc",
+                            "fj_ParT_probQCDb",
+                            "fj_ParT_probQCDc",
+                            "fj_ParT_probQCDothers",
+                        ]
+                        tope = ["fj_ParT_probTopbWev", "fj_ParT_probTopbWtauev"]
+                        topm = ["fj_ParT_probTopbWmv", "fj_ParT_probTopbWtaumv"]
+                        tophad = [
+                            "fj_ParT_probTopbWqq0c",
+                            "fj_ParT_probTopbWqq1c",
+                            "fj_ParT_probTopbWq0c",
+                            "fj_ParT_probTopbWq1c",
+                            "fj_ParT_probTopbWtauhv",
+                        ]
+                        top = tope + topm + tophad
+                        bkgs = qcd + top
+
+                        pnet_df = self.ak_to_pandas(pnet_vars)
+                        num = pnet_df[sigs].sum(axis=1)
+                        den = pnet_df[sigs].sum(axis=1) + pnet_df[bkgs].sum(axis=1)
+
+                        scores = {"fj_ParT_inclusive_score": (num / den).values}
+                        output[ch] = {**output[ch], **scores}
 
             else:
                 output[ch] = {}
