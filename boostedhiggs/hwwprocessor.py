@@ -621,17 +621,15 @@ class HwwProcessor(processor.ProcessorABC):
         output = {}
 
         for ch in self._channels:
+            selection_ch = self.selections[ch].all(*self.selections[ch].names)
+
             fill_output = True
             # for data, only fill output for the dataset needed
             if not self.isMC and self.dataset_per_ch[ch] not in dataset:
                 fill_output = False
-
-            selection_ch = self.selections[ch].all(*self.selections[ch].names)
             # only fill output for that channel if the selections yield any events
             if np.sum(selection_ch) <= 0:
                 fill_output = False
-            else:
-                selection_ch = np.ones(nevents, dtype="bool")
 
             if fill_output:
                 out = {}
@@ -644,6 +642,7 @@ class HwwProcessor(processor.ProcessorABC):
                 # fill the output dictionary after selections
                 output[ch] = {key: value[selection_ch] for (key, value) in out.items()}
 
+                print(output[ch])
                 # fill inference
                 if self.inference:
                     for model_name in [

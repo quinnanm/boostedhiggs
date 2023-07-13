@@ -69,7 +69,7 @@ def to_label(array: ak.Array) -> ak.Array:
     return ak.values_astype(array, np.int32)
 
 
-def match_H(genparts: GenParticleArray, fatjet: FatJetArray, lepton, dau_pdgid=W_PDGID):
+def match_H(genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID):
     """Gen matching for Higgs samples"""
     higgs = genparts[get_pid_mask(genparts, HIGGS_PDGID, byall=False) * genparts.hasFlags(GEN_FLAGS)]
 
