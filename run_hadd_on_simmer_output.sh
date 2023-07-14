@@ -9,7 +9,7 @@
 # cd ../test
 # hadd -fk out.root outroot/*/*
 # rm -r outroot
-# cd ../../
+# cd ../../../
 
 # # merging TTbar files
 # cd ntuples/TTToSemiLeptonic/train
@@ -18,10 +18,10 @@
 # cd ../test
 # hadd -fk out.root outroot/*/*
 # rm -r outroot
-# cd ../../
+# cd ../../../
 
 # merging WJetsLNu files
-for SAMPLE in WJetsToLNu_HT-200To400 WJetsToLNu_HT-400To600 WJetsToLNu_HT-600To800 WJetsToLNu_HT-800To1200
+for SAMPLE in WJetsToLNu_HT-400To600 WJetsToLNu_HT-600To800 WJetsToLNu_HT-800To1200
 do
     cd ntuples/$SAMPLE/train
     hadd -fk out.root outroot/*/*
@@ -29,7 +29,7 @@ do
     cd ../test
     hadd -fk out.root outroot/*/*
     rm -r outroot
-    cd ../../
+    cd ../../../
 done
 
 # # merging QCD files
@@ -41,5 +41,5 @@ done
 #     cd ../test
 #     hadd -fk out.root outroot/*/*
 #     rm -r outroot
-#     cd ../../
+#     cd ../../../
 # done
