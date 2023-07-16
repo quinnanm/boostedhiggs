@@ -59,15 +59,20 @@ def main(args):
     # build fileset with files to run per job
     fileset = {}
     starti = args.starti
-    job_name = "/" + str(starti * args.n)
+    # job_name = "/" + str(starti * args.n)
+    job_name = "/" + str(starti)
+
     if args.n != -1:
-        job_name += "-" + str(args.starti * args.n + args.n)
+        # job_name += "-" + str(args.starti * args.n + args.n)
+        job_name += "-" + str(args.starti + args.n)
+
     for sample, flist in files.items():
         if args.sample:
             if sample not in args.sample.split(","):
                 continue
         if args.n != -1:
-            fileset[sample] = flist[args.starti * args.n : args.starti * args.n + args.n]
+            # fileset[sample] = flist[args.starti * args.n : args.starti * args.n + args.n]
+            fileset[sample] = flist[args.starti : args.starti + args.n]
         else:
             fileset[sample] = flist
 
