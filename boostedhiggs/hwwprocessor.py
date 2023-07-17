@@ -23,6 +23,7 @@ warnings.filterwarnings("ignore", message="Found duplicate branch ")
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", message="Missing cross-reference index ")
 warnings.filterwarnings("ignore", message="divide by zero encountered in log")
+warnings.filterwarnings("ignore", category=pd.errors.PerformanceWarning)
 np.seterr(invalid="ignore")
 
 import logging
