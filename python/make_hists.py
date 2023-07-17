@@ -119,7 +119,10 @@ def make_events_dict(
 
                 # add tagger scores
                 if add_tagger_score:
-                    data["inclusive_score"] = utils.disc_score(data, utils.new_sig, utils.inclusive_bkg)
+                    if "Apr12_presel" in args.outpath:
+                        data["inclusive_score"] = utils.disc_score(data, utils.new_sig, utils.inclusive_bkg)
+                    else:
+                        data["inclusive_score"] = data["fj_ParT_inclusive_score"]
 
                 # apply selection
                 print("---> Applying preselection.")
@@ -213,11 +216,11 @@ def main(args):
             channels,
             hists,
             config["vars_to_plot"],
-            add_data=False,
+            add_data=True,
             logy=False,
-            add_soverb=True,
+            add_soverb=False,
             only_sig=False,
-            mult=100,
+            mult=1,
             outpath=f"{args.outpath}/hists/",
         )
 
