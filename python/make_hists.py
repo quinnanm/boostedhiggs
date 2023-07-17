@@ -4,7 +4,8 @@ import argparse
 import glob
 import json
 import os
-import pickle as pkl
+
+# import pickle as pkl
 import warnings
 
 import hist as hist2
@@ -191,22 +192,22 @@ def main(args):
     with open("make_hists_config.yaml", "r") as stream:
         config = yaml.safe_load(stream)
 
-    if args.make_events_dict:
-        events_dict = make_events_dict(
-            years,
-            channels,
-            args.samples_dir,
-            config["samples"],
-            config["presel"],
-            config["weights"],
-            columns="all",
-            add_tagger_score=True,
-        )
-        with open(f"{args.outpath}/events_dict.pkl", "wb") as fp:
-            pkl.dump(events_dict, fp)
-    else:
-        with open(f"{args.outpath}/events_dict.pkl", "rb") as fp:
-            events_dict = pkl.load(fp)
+    # if args.make_events_dict:
+    events_dict = make_events_dict(
+        years,
+        channels,
+        args.samples_dir,
+        config["samples"],
+        config["presel"],
+        config["weights"],
+        columns="all",
+        add_tagger_score=True,
+    )
+    # with open(f"{args.outpath}/events_dict.pkl", "wb") as fp:
+    #     pkl.dump(events_dict, fp)
+    # else:
+    # with open(f"{args.outpath}/events_dict.pkl", "rb") as fp:
+    #     events_dict = pkl.load(fp)
 
     if args.plot_hists:
         hists = make_hists_from_events_dict(events_dict, config["samples_to_plot"], config["vars_to_plot"])
