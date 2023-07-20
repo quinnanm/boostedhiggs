@@ -151,7 +151,8 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID):
             "fj_H_VV_isVstarlepton": iswstarlepton,
             "fj_H_VV_isMatched": is_hww_matched,
             "gen_Vlep_pt": gen_lepton.pt,
-            # "genlep_dR_lep": lepton.delta_r(gen_lepton),
+            # "genlep_dR_lep": lepton.delta_r(gen_lepton)
+            "fj_genRes_mass": matched_higgs.mass,
         }
 
         genVars = {**genVars, **genVVars, **genHVVVars}
@@ -411,7 +412,7 @@ def tagger_gen_matching(
     if "H" in label:
         print("match_H")
         GenVars, matched_mask = match_H(genparts, fatjets)
-        GenVars["fj_genRes_mass"] = 125 * np.ones(len(events))
+        # GenVars["fj_genRes_mass"] = 125 * np.ones(len(events))
     elif "QCD" in label:
         print("match_QCD")
         GenVars, matched_mask = match_QCD(genparts, fatjets)
