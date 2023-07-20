@@ -11,6 +11,15 @@
 # rm -r outroot
 # cd ../../../
 
+# merging variable mass higgs files
+cd ntuples/BulkGravitonToHHTo4W_JHUGen_MX-600to6000_MH-15to250_v2/train
+hadd -fk out.root outroot/*/*
+rm -r outroot
+cd ../test
+hadd -fk out.root outroot/*/*
+rm -r outroot
+cd ../../../
+
 # # merging TTbar files
 # cd ntuples/TTToSemiLeptonic/train
 # hadd -fk out.root outroot/*/*
@@ -32,14 +41,14 @@
 #     cd ../../../
 # done
 
-# merging QCD files
-for SAMPLE in QCD_Pt_300to470 QCD_Pt_470to600 QCD_Pt_600to800 QCD_Pt_800to1000
-do
-    cd ntuples/$SAMPLE/train
-    hadd -fk out.root outroot/*/*
-    rm -r outroot
-    cd ../test
-    hadd -fk out.root outroot/*/*
-    rm -r outroot
-    cd ../../../
-done
+# # merging QCD files
+# for SAMPLE in QCD_Pt_300to470 QCD_Pt_470to600 QCD_Pt_600to800 QCD_Pt_800to1000
+# do
+#     cd ntuples/$SAMPLE/train
+#     hadd -fk out.root outroot/*/*
+#     rm -r outroot
+#     cd ../test
+#     hadd -fk out.root outroot/*/*
+#     rm -r outroot
+#     cd ../../../
+# done
