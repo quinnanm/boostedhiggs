@@ -13,10 +13,10 @@
 # run over variable mass higgs files
 mkdir -p ntuples/BulkGravitonToHHTo4W_JHUGen_MX-600to6000_MH-15to250_v2/
 
-python run.py --processor input --local --sample BulkGravitonToHHTo4W_JHUGen_MX-600to6000_MH-15to250_v2 --n 18 --starti 0 --label H --inference
+python run.py --processor input --local --sample BulkGravitonToHHTo4W_JHUGen_MX-600to6000_MH-15to250_v2 --n 125 --starti 0 --label H --inference
 mv outfiles ntuples/BulkGravitonToHHTo4W_JHUGen_MX-600to6000_MH-15to250_v2/train
 
-python run.py --processor input --local --sample BulkGravitonToHHTo4W_JHUGen_MX-600to6000_MH-15to250_v2 --n 18 --starti 1 --label H --inference
+python run.py --processor input --local --sample BulkGravitonToHHTo4W_JHUGen_MX-600to6000_MH-15to250_v2 --n 125 --starti 1 --label H --inference
 mv outfiles ntuples/BulkGravitonToHHTo4W_JHUGen_MX-600to6000_MH-15to250_v2/test
 
 # # run over TTbar files
