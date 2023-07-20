@@ -6,6 +6,7 @@ Explores unproduced files due to condor job errors.
 import argparse
 import json
 import os
+import glob
 from math import ceil
 
 from condor.file_utils import loadFiles
@@ -20,11 +21,7 @@ def main(args):
     # check only specific samples
     slist = args.slist.split(",") if args.slist is not None else None
 
-    # TODO: add path from different username
-    if args.username == "cmantill":
-        prepend = "/uscms/home/cmantill/nobackup/hww/boostedhiggs/"
-    else:
-        prepend = ""
+    prepend = ""
     metadata = prepend + f"condor/{args.tag}_{args.year}/metadata_{args.configkey}.json"
 
     try:
@@ -36,21 +33,17 @@ def main(args):
     config = prepend + f"condor/{args.tag}_{args.year}/{args.config}"
     splitname = prepend + f"condor/{args.tag}_{args.year}/pfnano_splitting.yaml"
 
+    print(f"Loading files from {splitname}")
     _, nfiles_per_job = loadFiles(config, args.configkey, args.year, args.pfnano, slist, splitname)
 
+    nfailed = 0
     # submit a cluster of jobs per sample
     for sample in files.keys():
         tot_files = len(files[sample])
 
         njobs = ceil(tot_files / nfiles_per_job[sample])
-        # files_per_job = str(nfiles_per_job[sample])
-
-        # print(f"Sample {sample} should produce {njobs} files")
-
-        import glob
 
         njobs_produced = len(glob.glob1(f"{outdir}/{sample}/outfiles", "*.pkl"))
-        # print(f"Sample {sample} produced {njobs_produced} files")
 
         id_failed = []
         if njobs_produced != njobs:  # debug which pkl file wasn't produced
@@ -60,18 +53,31 @@ def main(args):
                 if not os.path.exists(f"{outdir}/{sample}/outfiles/{fname}.pkl"):
                     print(f"file {fname}.pkl wasn't produced which means job_idx {i} failed..")
                     id_failed.append(i)
+                    nfailed = nfailed + 1
+        else:
+            print(f"Sample {sample} produced {njobs_produced} files - as expected")
 
         if args.resubmit and len(id_failed) > 0:
             fname = f"condor/{args.tag}_{args.year}/{sample}.jdl"
             condor_file = open(fname)
 
             resub_name = f"condor/{args.tag}_{args.year}/{sample}_resubmit.txt"
+            iresub = 0
+            while iresub < 100:
+                if not os.path.exists(resub_name):
+                    break
+                iresub = iresub + 1
+                resub_name = resub_name.replace(".txt", f"_{iresub}.txt")
+
             tfile = open(resub_name, "w")
             for i in id_failed:
                 tfile.write(f"{i}\n")
             tfile.close()
 
-            f_fail = fname.replace(".jdl", "_resubmit.jdl")
+            if iresub == 0:
+                f_fail = fname.replace(".jdl", "_resubmit.jdl")
+            else:
+                f_fail = fname.replace(".jdl", "_resubmit_{iresub}.jdl")
             condor_new = open(f_fail, "w")
             for line in condor_file:
                 if "queue" in line:
@@ -83,7 +89,8 @@ def main(args):
             print("Submit ", f_fail)
             os.system(f"condor_submit {f_fail}")
 
-        # print("-----------------------------------------------------------------------------------------")
+    print("-----------------------------------------------------------------------------------------")
+    print(f"Number of jobs that failed: {nfailed}")
 
 
 if __name__ == "__main__":
@@ -102,7 +109,9 @@ if __name__ == "__main__":
         type=str,
     )
     parser.add_argument("--tag", dest="tag", default="Test", help="process tag", type=str)
-    parser.add_argument("--config", dest="config", default=None, help="path to datafiles", type=str)
+    parser.add_argument(
+        "--config", dest="config", required=True, help="path to datafiles, e.g. samples_inclusive.yaml", type=str
+    )
     parser.add_argument("--key", dest="configkey", default=None, help="config key: [data, mc, ... ]", type=str)
     parser.add_argument(
         "--slist",
