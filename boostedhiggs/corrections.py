@@ -1,9 +1,60 @@
 import importlib.resources
 import warnings
-
+import pickle
+from coffea import util as cutil
+from coffea.analysis_tools import Weights
+from coffea.nanoevents.methods.nanoaod import JetArray
+from typing import Dict
 import awkward as ak
 import correctionlib
 import numpy as np
+
+btagWPs = {
+    "deepJet": {
+        "2016APV": {
+            "L": 0.0508,
+            "M": 0.2598,
+            "T": 0.6502,
+        },
+        "2016": {
+            "L": 0.0480,
+            "M": 0.2489,
+            "T": 0.6377,
+        },
+        "2017": {
+            "L": 0.0532,
+            "M": 0.3040,
+            "T": 0.7476,
+        },
+        "2018": {
+            "L": 0.0490,
+            "M": 0.2783,
+            "T": 0.7100,
+        },
+    },
+    "deepCSV": {
+        "2016APV": {
+            "L": 0.2027,
+            "M": 0.6001,
+            "T": 0.8819,
+        },
+        "2016": {
+            "L": 0.1918,
+            "M": 0.5847,
+            "T": 0.8767,
+        },
+        "2017": {
+            "L": 0.1355,
+            "M": 0.4506,
+            "T": 0.7738,
+        },
+        "2018": {
+            "L": 0.1208,
+            "M": 0.4168,
+            "T": 0.7665,
+        },
+    },
+}
 
 with importlib.resources.path("boostedhiggs.data", "msdcorr.json") as filename:
     msdcorr = correctionlib.CorrectionSet.from_file(str(filename))
@@ -92,32 +143,18 @@ def add_VJets_kFactors(weights, genpart, dataset):
         qcdcorr = vjets_kfactors["ULZ_MLMtoFXFX"].evaluate(vpt)
         ewkcorr = vjets_kfactors["Z_FixedOrderComponent"]
         add_systs(zsysts, qcdcorr, ewkcorr, vpt)
+
     elif "DYJetsToLL_Pt" in dataset:
         vpt = get_vpt(genpart)
         qcdcorr = None
         ewkcorr = vjets_kfactors["Z_FixedOrderComponent"]
         add_systs(znlosysts, qcdcorr, ewkcorr, vpt)
+
     elif "WJetsToQQ_HT" in dataset or "WJetsToLNu" in dataset:
         vpt = get_vpt(genpart)
         qcdcorr = vjets_kfactors["ULW_MLMtoFXFX"].evaluate(vpt)
         ewkcorr = vjets_kfactors["W_FixedOrderComponent"]
         add_systs(wsysts, qcdcorr, ewkcorr, vpt)
-
-
-with importlib.resources.path("boostedhiggs.data", "fatjet_triggerSF_Hbb.json") as filename:
-    jet_triggerSF = correctionlib.CorrectionSet.from_file(str(filename))
-
-
-def add_jetTriggerSF(weights, leadingjet, year, selection):
-    def mask(w):
-        return np.where(selection.all("oneFatjet"), w, 1.0)
-
-    jet_pt = np.array(ak.fill_none(leadingjet.pt, 0.0))
-    jet_msd = np.array(ak.fill_none(leadingjet.msoftdrop, 0.0))  # note: uncorrected
-    nom = mask(jet_triggerSF[f"fatjet_triggerSF{year}"].evaluate("nominal", jet_pt, jet_msd))
-    up = mask(jet_triggerSF[f"fatjet_triggerSF{year}"].evaluate("stat_up", jet_pt, jet_msd))
-    down = mask(jet_triggerSF[f"fatjet_triggerSF{year}"].evaluate("stat_dn", jet_pt, jet_msd))
-    weights.add("trigger_had", nom, up, down)
 
 
 def add_pdf_weight(weights, pdf_weights):
@@ -164,6 +201,7 @@ def add_scalevar_7pt(weights, var_weights):
 
     if len(var_weights) > 0:
         if len(var_weights[0]) == 9:
+            # you skip the extremes, where one (uR, uF) is multiplied by 2 and the other by 0.5
             up = np.maximum.reduce(
                 [
                     var_weights[:, 0],
@@ -229,6 +267,36 @@ def add_ps_weight(weights, ps_weights):
     weights.add("UEPS_FSR", nom, up_fsr, down_fsr)
 
 
+with importlib.resources.path("boostedhiggs.data", "EWHiggsCorrections.json") as filename:
+    hew_kfactors = correctionlib.CorrectionSet.from_file(str(filename))
+
+
+def add_HiggsEW_kFactors(weights, genpart, dataset):
+    """EW Higgs corrections"""
+
+    def get_hpt():
+        boson = ak.firsts(genpart[(genpart.pdgId == 25) & genpart.hasFlags(["fromHardProcess", "isLastCopy"])])
+        return np.array(ak.fill_none(boson.pt, 0.0))
+
+    if "VBF" in dataset:
+        hpt = get_hpt()
+        ewkcorr = hew_kfactors["VBF_EW"]
+        ewknom = ewkcorr.evaluate(hpt)
+        weights.add("VBF_EW", ewknom)
+
+    if "WplusH" in dataset or "WminusH" in dataset or "ZH" in dataset:
+        hpt = get_hpt()
+        ewkcorr = hew_kfactors["VH_EW"]
+        ewknom = ewkcorr.evaluate(hpt)
+        weights.add("VH_EW", ewknom)
+
+    if "ttH" in dataset:
+        hpt = get_hpt()
+        ewkcorr = hew_kfactors["ttH_EW"]
+        ewknom = ewkcorr.evaluate(hpt)
+        weights.add("ttH_EW", ewknom)
+
+
 def build_lumimask(filename):
     from coffea.lumi_tools import LumiMask
 
@@ -251,6 +319,8 @@ pog_jsons = {
     "muon": ["MUO", "muon_Z.json.gz"],
     "electron": ["EGM", "electron.json.gz"],
     "pileup": ["LUM", "puWeights.json.gz"],
+    "jec": ["JME", "fatJet_jerc.json.gz"],
+    "btagging": ["BTV", "btagging.json.gz"],
 }
 
 
@@ -269,12 +339,53 @@ def get_pog_json(obj, year):
         print(f"No json for {obj}")
     year = get_UL_year(year)
     return f"{pog_correction_path}POG/{pog_json[0]}/{year}/{pog_json[1]}"
-    # noqa: os.system(f"cp {pog_correction_path}POG/{pog_json[0]}/{year}/{pog_json[1]} boostedhiggs/data/POG_{pog_json[0]}_{year}_{pog_json[1]}")
-    # fname = ""
-    # with importlib.resources.path("boostedhiggs.data", f"POG_{pog_json[0]}_{year}_{pog_json[1]}") as filename:
-    #     fname = str(filename)
-    # print(fname)
-    # return fname
+
+
+def add_btag_weights(
+    weights: Weights,
+    year: str,
+    jets: JetArray,
+    jet_selector: ak.Array,
+    wp: str = "M",
+    algo: str = "deepJet",
+):
+    def _btagSF(cset, jets, flavour, wp="M", algo="deepJet", syst="central"):
+        j, nj = ak.flatten(jets), ak.num(jets)
+        corrs = cset[f"{algo}_comb"] if flavour == "bc" else cset[f"{algo}_incl"]
+        sf = corrs.evaluate(
+            syst,
+            wp,
+            np.array(j.hadronFlavour),
+            np.array(abs(j.eta)),
+            np.array(j.pt),
+        )
+        return ak.unflatten(sf, nj)
+
+    def _btag_prod(eff, sf):
+        num = ak.fill_none(ak.prod(1 - sf * eff, axis=-1), 1)
+        den = ak.fill_none(ak.prod(1 - eff, axis=-1), 1)
+        return num, den
+
+    cset = correctionlib.CorrectionSet.from_file(get_pog_json("btagging", year))
+
+    ul_year = get_UL_year(year)
+    with importlib.resources.path("boostedhiggs.data", f"btageff_{algo}_{wp}_{ul_year}.coffea") as filename:
+        efflookup = cutil.load(filename)
+
+    lightJets = jets[jet_selector & (jets.hadronFlavour == 0) & (abs(jets.eta) < 2.5)]
+    bcJets = jets[jet_selector & (jets.hadronFlavour > 0) & (abs(jets.eta) < 2.5)]
+
+    lightEff = efflookup(lightJets.pt, abs(lightJets.eta), lightJets.hadronFlavour)
+    bcEff = efflookup(bcJets.pt, abs(bcJets.eta), bcJets.hadronFlavour)
+
+    lightSF = _btagSF(cset, lightJets, "light", wp, algo)
+    bcSF = _btagSF(cset, bcJets, "bc", wp, algo)
+
+    lightnum, lightden = _btag_prod(lightEff, lightSF)
+    bcnum, bcden = _btag_prod(bcEff, bcSF)
+
+    weight = np.nan_to_num((1 - lightnum * bcnum) / (1 - lightden * bcden), nan=1)
+    weights.add("btagSF", weight)
 
 
 """
@@ -297,15 +408,11 @@ https://twiki.cern.ch/twiki/bin/view/CMS/MuonUL2018
 Electrons:
 - UL CorrectionLib htmlfiles:
   https://cms-nanoaod-integration.web.cern.ch/commonJSONSFs/EGM_electron_Run2_UL/
-  - ID: wp90noiso
+  - ID and Isolation:
+    - wp90noiso for high pT electrons
+    - wp90iso for low pT electrons
   - Reconstruction: RecoAbove20
-  - Trigger:
-    Looks like the EGM group does not provide them but applying these for now.
-    https://twiki.cern.ch/twiki/bin/viewauth/CMS/EgHLTScaleFactorMeasurements (derived by Siqi Yuan)
-    These include 2017: (HLT_ELE35 OR HLT_ELE115 OR HLT_Photon200)
-    and 2018: (HLT_Ele32 OR HLT_ELE115 OR HLT_Photon200)
-  - Isolation:
-    No SFs for RelIso?
+  - Trigger: Derived using EGamma recommendation: https://twiki.cern.ch/twiki/bin/viewauth/CMS/EgHLTScaleFactorMeasurements
 """
 
 lepton_corrections = {
@@ -332,10 +439,13 @@ lepton_corrections = {
             "2017": "NUM_LooseRelIso_DEN_MediumPromptID",
             "2018": "NUM_LooseRelIso_DEN_MediumPromptID",
         },
-        # "electron": {
-        # },
+        "electron": {
+            "2016APV": "wp90iso",
+            "2016": "wp90iso",
+            "2017": "wp90iso",
+            "2018": "wp90iso",
+        },
     },
-    # NOTE: We do not have SFs for mini-isolation yet
     "id": {
         "muon": {
             "2016APV": "NUM_MediumPromptID_DEN_TrackerMuons",
@@ -343,7 +453,6 @@ lepton_corrections = {
             "2017": "NUM_MediumPromptID_DEN_TrackerMuons",
             "2018": "NUM_MediumPromptID_DEN_TrackerMuons",
         },
-        # NOTE: should check that we do not have electrons w pT>500 GeV (I do not think we do)
         "electron": {
             "2016APV": "wp90noiso",
             "2016": "wp90noiso",
@@ -366,9 +475,13 @@ def add_lepton_weight(weights, lepton, year, lepton_type="muon"):
     ul_year = get_UL_year(year)
     if lepton_type == "electron":
         ul_year = ul_year.replace("_UL", "")
+
     cset = correctionlib.CorrectionSet.from_file(get_pog_json(lepton_type, year))
 
     def set_isothreshold(corr, value, lepton_pt, lepton_type):
+        """
+        restrict values to 1 for some SFs if we are above/below the ISO threshold
+        """
         iso_threshold = {
             "muon": 55.0,
             "electron": 120.0,
@@ -379,6 +492,8 @@ def add_lepton_weight(weights, lepton, year, lepton_type="muon"):
             value[lepton_pt < iso_threshold] = 1.0
         elif corr == "isolation":
             value[lepton_pt > iso_threshold] = 1.0
+        elif corr == "id" and lepton_type == "electron":
+            value[lepton_pt < iso_threshold] = 1.0
         return value
 
     def get_clip(lep_pt, lep_eta, lepton_type, corr=None):
@@ -407,6 +522,7 @@ def add_lepton_weight(weights, lepton, year, lepton_type="muon"):
             continue
         if year not in corrDict[lepton_type].keys():
             continue
+
         json_map_name = corrDict[lepton_type][year]
 
         lepton_pt, lepton_eta = get_clip(lep_pt, lep_eta, lepton_type, corr)
@@ -425,7 +541,6 @@ def add_lepton_weight(weights, lepton, year, lepton_type="muon"):
             values["down"] = cset["UL-Electron-ID-SF"].evaluate(ul_year, "sfdown", json_map_name, lepton_eta, lepton_pt)
 
         for key, val in values.items():
-            # restrict values to 1 for some SFs if we are above/below the ISO threshold
             values[key] = set_isothreshold(corr, val, np.array(ak.fill_none(lepton.pt, 0.0)), lepton_type)
 
         # add weights (for now only the nominal weight)
@@ -437,10 +552,14 @@ def add_lepton_weight(weights, lepton, year, lepton_type="muon"):
         with importlib.resources.path("boostedhiggs.data", f"electron_trigger_{ul_year}_UL.json") as filename:
             cset = correctionlib.CorrectionSet.from_file(str(filename))
             lepton_pt, lepton_eta = get_clip(lep_pt, lep_eta, lepton_type, corr)
-            # stil need to add uncertanties..
-            values["nominal"] = cset["UL-Electron-Trigger-SF"].evaluate(lepton_eta, lepton_pt)
-            # print(values["nominal"][lep_pt>30])
-            weights.add(f"{corr}_{lepton_type}", values["nominal"])
+            values["nominal"] = cset["UL-Electron-Trigger-SF"].evaluate(
+                ul_year + "_UL", "sf", "trigger", lepton_eta, lepton_pt
+            )
+            values["up"] = cset["UL-Electron-Trigger-SF"].evaluate(ul_year + "_UL", "sfup", "trigger", lepton_eta, lepton_pt)
+            values["down"] = cset["UL-Electron-Trigger-SF"].evaluate(
+                ul_year + "_UL", "sfdown", "trigger", lepton_eta, lepton_pt
+            )
+            weights.add(f"{corr}_{lepton_type}", values["nominal"], values["up"], values["down"])
 
 
 def add_pileup_weight(weights, year, mod, nPU):
@@ -462,5 +581,80 @@ def add_pileup_weight(weights, year, mod, nPU):
     values["up"] = cset[year_to_corr[year]].evaluate(nPU, "up")
     values["down"] = cset[year_to_corr[year]].evaluate(nPU, "down")
 
-    # add weights (for now only the nominal weight)
+    # add weights
     weights.add("pileup", values["nominal"], values["up"], values["down"])
+
+
+# find corrections path using this file's path
+try:
+    with importlib.resources.path("boostedhiggs.data", "jec_compiled.pkl") as filename:
+        with open(filename, "rb") as filehandler:
+            jmestuff = pickle.load(filehandler)
+        ak4jet_factory = jmestuff["jet_factory"]
+        fatjet_factory = jmestuff["fatjet_factory"]
+        met_factory = jmestuff["met_factory"]
+except KeyError:
+    print("Failed loading compiled JECs")
+
+
+def _add_jec_variables(jets: JetArray, event_rho: ak.Array) -> JetArray:
+    """add variables needed for JECs"""
+    jets["pt_raw"] = (1 - jets.rawFactor) * jets.pt
+    jets["mass_raw"] = (1 - jets.rawFactor) * jets.mass
+    # gen pT needed for smearing
+    jets["pt_gen"] = ak.values_astype(ak.fill_none(jets.matched_gen.pt, 0), np.float32)
+    jets["event_rho"] = ak.broadcast_arrays(event_rho, jets.pt)[0]
+    return jets
+
+
+def get_jec_jets(
+    events,
+    jets,
+    year: str,
+    isData: bool = False,
+    jecs: Dict[str, str] = None,
+    fatjets: bool = True,
+):
+    """
+    Based on https://github.com/nsmith-/boostedhiggs/blob/master/boostedhiggs/hbbprocessor.py
+    Eventually update to V5 JECs once I figure out what's going on with the 2017 UL V5 JER scale factors
+
+    See https://cms-nanoaod-integration.web.cern.ch/commonJSONSFs/summaries/
+
+    If ``jecs`` is not None, returns the shifted values of variables are affected by JECs.
+    """
+
+    jec_vars = ["pt"]  # variables we are saving that are affected by JECs
+    if fatjets:
+        jet_factory = fatjet_factory
+    else:
+        jet_factory = ak4jet_factory
+
+    apply_jecs = not (not ak.any(jets.pt) or isData)
+
+    import cachetools
+
+    jec_cache = cachetools.Cache(np.inf)
+
+    corr_key = f"{get_UL_year(year)}mc".replace("_UL", "")
+
+    # fatjet_factory.build gives an error if there are no fatjets in event
+    if apply_jecs:
+        jets = jet_factory[corr_key].build(_add_jec_variables(jets, events.fixedGridRhoFastjetAll), jec_cache)
+
+    # return only fatjets if no jecs given
+    if jecs is None:
+        return jets
+
+    jec_shifted_vars = {}
+
+    for jec_var in jec_vars:
+        tdict = {"": jets[jec_var]}
+        if apply_jecs:
+            for key, shift in jecs.items():
+                for var in ["up", "down"]:
+                    tdict[f"{key}_{var}"] = jets[shift][var][jec_var]
+
+        jec_shifted_vars[jec_var] = tdict
+
+    return jets, jec_shifted_vars

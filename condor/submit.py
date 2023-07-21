@@ -106,6 +106,10 @@ def main(args):
                 line = line.replace("INFERENCE", "--inference")
             else:
                 line = line.replace("INFERENCE", "--no-inference")
+            if args.systematics:
+                line = line.replace("SYSTEMATICS", "--systematics")
+            else:
+                line = line.replace("SYSTEMATICS", "--no-systematics")
             line = line.replace("LABEL", args.label)
             line = line.replace("REGION", args.region)
 
@@ -150,7 +154,8 @@ if __name__ == "__main__":
     parser.add_argument("--pfnano", dest="pfnano", type=str, default="v2_2", help="pfnano version")
     parser.add_argument("--inference", dest="inference", action="store_true")
     parser.add_argument("--no-inference", dest="inference", action="store_false")
-
+    parser.add_argument("--systematics", dest="systematics", action="store_true")
+    parser.add_argument("--no-systematics", dest="systematics", action="store_false")
     parser.add_argument("--label", dest="label", default="H", help="jet label for inputskimmer", type=str)
     parser.add_argument("--region", dest="region", default="signal", help="specify region for selections", type=str)
 
