@@ -10,7 +10,7 @@ mkdir outfiles
 
 # run code
 # pip install --user onnxruntime
-python SCRIPTNAME --year YEAR --processor PROCESSOR PFNANO INFERENCE --n NUMJOBS --starti ${jobid} --sample SAMPLE --config METADATAFILE --channels CHANNELS --label LABEL --region REGION
+python SCRIPTNAME --year YEAR --processor PROCESSOR PFNANO INFERENCE SYSTEMATICS --n NUMJOBS --starti ${jobid} --sample SAMPLE --config METADATAFILE --channels CHANNELS --label LABEL --region REGION
 
 # remove incomplete jobs
 rm -rf outfiles/*mu
