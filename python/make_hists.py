@@ -4,6 +4,7 @@ import argparse
 import glob
 import json
 import os
+
 import pickle as pkl
 import warnings
 
@@ -88,6 +89,7 @@ def make_events_dict(
                     continue
 
                 data = pd.read_parquet(parquet_files)
+
                 if len(data) == 0:
                     continue
 
@@ -119,7 +121,11 @@ def make_events_dict(
 
                 # add tagger scores
                 if add_tagger_score:
-                    data["inclusive_score"] = utils.disc_score(data, utils.new_sig, utils.inclusive_bkg)
+                    if "Apr12_presel" in samples_dir:
+                        data["inclusive_score"] = utils.disc_score(data, utils.new_sig, utils.inclusive_bkg)
+                        data["inclusive_score2"] = data[utils.new_sig].sum(axis=1)
+                    else:
+                        data["inclusive_score"] = data["fj_ParT_inclusive_score"]
 
                 # apply selection
                 print("---> Applying preselection.")

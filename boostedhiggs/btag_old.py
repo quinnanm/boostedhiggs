@@ -28,31 +28,12 @@ btagWPs = {
             "M": 0.2783,
             "T": 0.7100,
         },
-    },
-    "deepCSV": {
-        "2016APV": {
-            "L": 0.2027,
-            "M": 0.6001,
-            "T": 0.8819,
-        },
-        "2016": {
-            "L": 0.1918,
-            "M": 0.5847,
-            "T": 0.8767,
-        },
-        "2017": {
-            "L": 0.1355,
-            "M": 0.4506,
-            "T": 0.7738,
-        },
-        "2018": {
-            "L": 0.1208,
-            "M": 0.4168,
-            "T": 0.7665,
-        },
-    },
+    }
 }
-taggerBranch = {"deepJet": "btagDeepFlavB", "deepCSV": "btagDeep"}
+taggerBranch = {
+    "deepJet": "btagDeepFlavB",
+    #    "deepCSV": "btagDeep"
+}
 
 
 class BTagEfficiency(processor.ProcessorABC):

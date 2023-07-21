@@ -13,13 +13,42 @@ samples:
     - TTbar
     - SingleTop
     - Diboson
-    - Data
+    # - Data
 
 presel:
     ele:
         lepton jet overlap: ( ( lep_fj_dr>0.03) )
+
+        # signal region
+        tagger: ( ( inclusive_score<0.99) )
+        tagger2: ( ( inclusive_score>0.9) )
+
+        # # ttbar region
+        # tagger: ( ( inclusive_score<0.9) )
+        # b veto: ( ( n_bjets_T>0) )
+
+        # wjets region
+        # b veto: ( ( n_bjets_L==0) )
+
+        # qcd region
+        # tagger: ( ( inclusive_score<0.9) )
+
     mu:
         lepton jet overlap: ( ( lep_fj_dr>0.03) )
+
+        # signal region
+        tagger: ( ( inclusive_score<0.99) )
+        tagger2: ( ( inclusive_score>0.9) )
+
+        # # ttbar region
+        # tagger: ( ( inclusive_score<0.9) )
+        # b veto: ( ( n_bjets_T>0) )
+
+        # wjets region
+        # b veto: ( ( n_bjets_L==0) )
+
+        # qcd region
+        # tagger: ( ( inclusive_score<0.9) )
 
 weights:
     ele:
@@ -74,4 +103,4 @@ samples_to_plot:
     - TTbar
     - SingleTop
     - Diboson
-    - Data
+    # - Data
