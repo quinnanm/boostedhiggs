@@ -18,13 +18,13 @@ warnings.filterwarnings("ignore", message="Found duplicate branch ")
 pd.set_option("mode.chained_assignment", None)
 
 
-def make_templates(year, channels, samples_dir, samples, presel, weights, regions_selections):
+def make_templates(years, channels, samples_dir, samples, presel, weights, regions_selections):
     """
     Postprocess the parquets by applying preselections, saving an event_weight column, and
     fills histograms/templates for different regions.
 
     Args
-        year [str]: years to postprocess and save in the output (e.g. ["2016APV", "2016"])
+        years [list]: years to postprocess and save in the output (e.g. ["2016APV", "2016"])
         channels [list]: channels to postprocess and save in the output (e.g. ["ele", "mu"])
         samples_dir [str]: points to the path of the parquets (note: the year will be appended to the string)
         samples [list]: samples to postprocess and save in the output (e.g. ["HWW", "QCD", "Data"])
@@ -45,88 +45,94 @@ def make_templates(year, channels, samples_dir, samples, presel, weights, region
             hist2.axis.Regular(35, 0, 480, name="rec_higgs_m", label=r"Higgs reconstructed mass [GeV]", overflow=True),
         )
 
-    for ch in channels:
-        # get lumi
-        luminosity = 0
-        with open("../fileset/luminosity.json") as f:
-            luminosity += json.load(f)[ch][year]
+    for year in years:
+        print(f"Processing year {year}")
+        for ch in channels:
+            # get lumi
+            luminosity = 0
+            with open("../fileset/luminosity.json") as f:
+                luminosity += json.load(f)[ch][year]
 
-        condor_dir = os.listdir(samples_dir + year)
-        for sample in condor_dir:
-            if sample == "DYJetsToLL_M-10to50":
-                continue  # because tagger didnt run for it
+            condor_dir = os.listdir(samples_dir + year)
+            for sample in condor_dir:
+                if sample == "DYJetsToLL_M-10to50":
+                    continue  # because tagger didnt run for it
 
-            # get a combined label to combine samples of the same process
-            for key in utils.combine_samples:
-                if key in sample:
-                    sample_to_use = utils.combine_samples[key]
-                    break
+                # get a combined label to combine samples of the same process
+                for key in utils.combine_samples:
+                    if key in sample:
+                        sample_to_use = utils.combine_samples[key]
+                        break
+                    else:
+                        sample_to_use = sample
+
+                if sample_to_use not in samples:
+                    print(f"ATTENTION: {sample} will be skipped")
+                    continue
+
+                is_data = False
+                if sample_to_use == "Data":
+                    is_data = True
+
+                print(f"Finding {sample} samples and should combine them under {sample_to_use}")
+
+                out_files = f"{samples_dir + year}/{sample}/outfiles/"
+                parquet_files = glob.glob(f"{out_files}/*_{ch}.parquet")
+                pkl_files = glob.glob(f"{out_files}/*.pkl")
+
+                if not parquet_files:
+                    print(f"No parquet file for {sample}")
+                    continue
+
+                data = pd.read_parquet(parquet_files)
+                if len(data) == 0:
+                    continue
+
+                # replace the weight_pileup of the strange events with the mean weight_pileup of all the other events
+                if not is_data:
+                    strange_events = data["weight_pileup"] > 6
+                    if len(strange_events) > 0:
+                        data["weight_pileup"][strange_events] = data[~strange_events]["weight_pileup"].mean(axis=0)
+
+                # apply selection
+                for selection in presel[ch]:
+                    data = data.query(presel[ch][selection])
+
+                # get event_weight
+                if not is_data:
+                    event_weight = utils.get_xsecweight(pkl_files, year, sample, is_data, luminosity)
+                    for w in weights[ch]:
+                        if w not in data.keys():
+                            continue
+                        if weights[ch][w] == 1:
+                            event_weight *= data[w]
                 else:
-                    sample_to_use = sample
+                    event_weight = np.ones_like(data["fj_pt"])
 
-            if sample_to_use not in samples:
-                print(f"ATTENTION: {sample} will be skipped")
-                continue
+                data["event_weight"] = event_weight
 
-            is_data = False
-            if sample_to_use == "Data":
-                is_data = True
+                # add tagger scores
+                if "Apr12_presel" in samples_dir:
+                    data["inclusive_score"] = utils.disc_score(data, utils.new_sig, utils.inclusive_bkg)
+                else:
+                    data["inclusive_score"] = data["fj_ParT_inclusive_score"]
 
-            print(f"Finding {sample} samples and should combine them under {sample_to_use}")
+                for region in regions_selections:
+                    data1 = data.copy()  # get fresh copy of the data to apply selections on
+                    data1 = data1.query(regions_selections[region])
 
-            out_files = f"{samples_dir + year}/{sample}/outfiles/"
-            parquet_files = glob.glob(f"{out_files}/*_{ch}.parquet")
-            pkl_files = glob.glob(f"{out_files}/*.pkl")
-
-            if not parquet_files:
-                print(f"No parquet file for {sample}")
-                continue
-
-            data = pd.read_parquet(parquet_files)
-            if len(data) == 0:
-                continue
-
-            # replace the weight_pileup of the strange events with the mean weight_pileup of all the other events
-            if not is_data:
-                strange_events = data["weight_pileup"] > 6
-                if len(strange_events) > 0:
-                    data["weight_pileup"][strange_events] = data[~strange_events]["weight_pileup"].mean(axis=0)
-
-            # apply selection
-            for selection in presel[ch]:
-                data = data.query(presel[ch][selection])
-
-            # get event_weight
-            if not is_data:
-                event_weight = utils.get_xsecweight(pkl_files, year, sample, is_data, luminosity)
-                for w in weights[ch]:
-                    if w not in data.keys():
-                        continue
-                    if weights[ch][w] == 1:
-                        event_weight *= data[w]
-            else:
-                event_weight = np.ones_like(data["fj_pt"])
-
-            data["event_weight"] = event_weight
-
-            # add tagger scores
-            data["inclusive_score"] = utils.disc_score(data, utils.new_sig, utils.inclusive_bkg)
-
-            for region in regions_selections:
-                data1 = data.copy()  # get fresh copy of the data to apply selections on
-                data1 = data1.query(regions_selections[region])
-
-                hists[region].fill(
-                    samples=sample_to_use,
-                    fj_pt=data1["fj_pt"],
-                    rec_higgs_m=data1["rec_higgs_m"],
-                    weight=data1["event_weight"],
-                )
+                    hists[region].fill(
+                        samples=sample_to_use,
+                        fj_pt=data1["fj_pt"],
+                        rec_higgs_m=data1["rec_higgs_m"],
+                        weight=data1["event_weight"],
+                    )
+        print("-------------------------------------------------")
     return hists
 
 
 def main(args):
-    year = args.year
+    years = args.years.split(",")
     channels = args.channels.split(",")
 
     if not os.path.exists(args.outpath):
@@ -139,7 +145,7 @@ def main(args):
         config = yaml.safe_load(stream)
 
     hists = make_templates(
-        year,
+        years,
         channels,
         args.samples_dir,
         config["samples"],
@@ -167,10 +173,10 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # python make_combine_templates.py --year 2017 --channels ele,mu
+    # python make_combine_templates.py --years 2017 --channels ele,mu
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--year", dest="year", default="2017", type=str, help="year to process")
+    parser.add_argument("--years", dest="years", default="2017", help="years separated by commas")
     parser.add_argument("--channels", dest="channels", default="ele", help="channels separated by commas")
     parser.add_argument(
         "--samples_dir", dest="samples_dir", default="../eos/Apr12_presel_", type=str, help="path to parquets"
