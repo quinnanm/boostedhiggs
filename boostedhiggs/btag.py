@@ -19,6 +19,7 @@ pog_jsons = {
     "muon": ["MUO", "muon_Z.json.gz"],
     "electron": ["EGM", "electron.json.gz"],
     "pileup": ["LUM", "puWeights.json.gz"],
+    "btagging": ["BTV", "btagging.json.gz"],
 }
 
 
