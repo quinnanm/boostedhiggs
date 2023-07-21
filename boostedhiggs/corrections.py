@@ -381,11 +381,50 @@ def add_btag_weights(
     lightSF = _btagSF(cset, lightJets, "light", wp, algo)
     bcSF = _btagSF(cset, bcJets, "bc", wp, algo)
 
-    lightnum, lightden = _btag_prod(lightEff, lightSF)
-    bcnum, bcden = _btag_prod(bcEff, bcSF)
+    lightSFUp = _btagSF(cset, lightJets, "light", wp, algo, syst="up")
+    lightSFDown = _btagSF(cset, lightJets, "light", wp, algo, syst="down")
+    lightSFUpCorr = _btagSF(cset, lightJets, "light", wp, algo, syst="up_correlated")
+    lightSFDownCorr = _btagSF(cset, lightJets, "light", wp, algo, syst="down_correlated")
+    bcSFUp = _btagSF(cset, bcJets, "bc", wp, algo, syst="up")
+    bcSFDown = _btagSF(cset, bcJets, "bc", wp, algo, syst="down")
+    bcSFUpCorr = _btagSF(cset, bcJets, "bc", wp, algo, syst="up_correlated")
+    bcSFDownCorr = _btagSF(cset, bcJets, "bc", wp, algo, syst="down_correlated")
 
-    weight = np.nan_to_num((1 - lightnum * bcnum) / (1 - lightden * bcden), nan=1)
+    def _get_weight(lightEff, lightSF, bcEff, bcSF):
+        lightnum, lightden = _btag_prod(lightEff, lightSF)
+        bcnum, bcden = _btag_prod(bcEff, bcSF)
+        weight = np.nan_to_num((1 - lightnum * bcnum) / (1 - lightden * bcden), nan=1)
+        return weight
+
+    weight = _get_weight(lightEff, lightSF, bcEff, bcSF)
     weights.add("btagSF", weight)
+
+    # add systematics
+    nominal = np.ones(len(weight))
+    weights.add(
+        f"btagSFlight_{year}",
+        nominal,
+        weightUp=_get_weight(lightEff, lightSFUp, bcEff, bcSF),
+        weightDown=_get_weight(lightEff, lightSFDown, bcEff, bcSF),
+    )
+    weights.add(
+        f"btagSFbc_{year}",
+        nominal,
+        weightUp=_get_weight(lightEff, lightSF, bcEff, bcSFUp),
+        weightDown=_get_weight(lightEff, lightSF, bcEff, bcSFDown),
+    )
+    weights.add(
+        "btagSFlight_correlated",
+        nominal,
+        weightUp=_get_weight(lightEff, lightSFUpCorr, bcEff, bcSF),
+        weightDown=_get_weight(lightEff, lightSFDownCorr, bcEff, bcSF),
+    )
+    weights.add(
+        "btagSFbc_correlated",
+        nominal,
+        weightUp=_get_weight(lightEff, lightSF, bcEff, bcSFUpCorr),
+        weightDown=_get_weight(lightEff, lightSF, bcEff, bcSFDownCorr),
+    )
 
 
 """
