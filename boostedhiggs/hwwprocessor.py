@@ -278,7 +278,7 @@ class HwwProcessor(processor.ProcessorABC):
         candidatefj = ak.firsts(good_fatjets[fj_idx_lep])
 
         # MET
-        met = met_factory.build(events.MET, goodjets, {})
+        met = met_factory.build(events.MET, goodjets, {}) if self.isMC else events.MET
 
         mt_lep_met = np.sqrt(
             2.0 * candidatelep_p4.pt * met.pt * (ak.ones_like(met.pt) - np.cos(candidatelep_p4.delta_phi(met)))
@@ -397,7 +397,7 @@ class HwwProcessor(processor.ProcessorABC):
                 continue
             jecvariables = getJECVariables(fatjetvars, candidatelep_p4, met, pt_shift=shift, met_shift=None)
             variables = {**variables, **jecvariables}
-        if self._systematics:
+        if self._systematics and self.isMC:
             for met_shift in ["UES_up", "UES_down"]:
                 jecvariables = getJECVariables(fatjetvars, candidatelep_p4, met, pt_shift=None, met_shift=met_shift)
                 variables = {**variables, **jecvariables}
