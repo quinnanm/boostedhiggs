@@ -33,7 +33,7 @@ def main(args):
     config = prepend + f"condor/{args.tag}_{args.year}/{args.config}"
     splitname = prepend + f"condor/{args.tag}_{args.year}/pfnano_splitting.yaml"
 
-    print(f"Loading files from {splitname}")
+    print(f"Loading files from {splitname} and {config}")
     _, nfiles_per_job = loadFiles(config, args.configkey, args.year, args.pfnano, slist, splitname)
 
     nfailed = 0
