@@ -1,9 +1,9 @@
-from coffea.nanoevents import NanoEventsFactory, NanoAODSchema
-from coffea import util as cutil
-import numpy as np
-from coffea.lookup_tools.dense_lookup import dense_lookup
-import hist
 import awkward as ak
+import hist
+import numpy as np
+from coffea import util as cutil
+from coffea.lookup_tools.dense_lookup import dense_lookup
+from coffea.nanoevents import NanoAODSchema, NanoEventsFactory
 
 btagWPs = {
     "deepJet": {
@@ -54,10 +54,10 @@ btagWPs = {
 
 # single TT files to derive efficiency
 tt_files = {
-    "2016preVFP_UL": "/store/user/lpcpfnano/drankin/v2_2/2016APV/TTbar/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/TTToSemiLeptonic_ext1/211112_131727/0000/nano_mc2016pre_1-10.root",
-    "2016postVFP_UL": "/store/user/lpcpfnano/drankin/v2_2/2016/TTbar/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/TTToSemiLeptonic_ext1/211112_131315/0000/nano_mc2016post_18.root",
-    "2017_UL": "/store/user/lpcpfnano/drankin/v2_2/2017/TTbar/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/TTToSemiLeptonic_ext1/211112_132937/0000/nano_mc2017_1-32.root",
-    "2018_UL": "/store/user/lpcpfnano/drankin/v2_2/2018/TTbar/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/TTToSemiLeptonic_ext1/211112_133130/0000/nano_mc2018_2-57.root",
+    "2016preVFP_UL": "/store/user/lpcpfnano/drankin/v2_2/2016APV/TTbar/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/TTToSemiLeptonic_ext1/211112_131727/0000/nano_mc2016pre_1-10.root",  # noqa
+    "2016postVFP_UL": "/store/user/lpcpfnano/drankin/v2_2/2016/TTbar/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/TTToSemiLeptonic_ext1/211112_131315/0000/nano_mc2016post_18.root",  # noqa
+    "2017_UL": "/store/user/lpcpfnano/drankin/v2_2/2017/TTbar/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/TTToSemiLeptonic_ext1/211112_132937/0000/nano_mc2017_1-32.root",  # noqa
+    "2018_UL": "/store/user/lpcpfnano/drankin/v2_2/2018/TTbar/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/TTToSemiLeptonic_ext1/211112_133130/0000/nano_mc2018_2-57.root",  # noqa
 }
 
 taggerBranch = {"deepJet": "btagDeepFlavB", "deepCSV": "btagDeepB"}

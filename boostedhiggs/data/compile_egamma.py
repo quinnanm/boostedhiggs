@@ -1,7 +1,6 @@
-from correctionlib.schemav2 import CorrectionSet
 import correctionlib.schemav2 as schema
-from correctionlib.schemav2 import Correction
 import uproot
+from correctionlib.schemav2 import Correction, CorrectionSet
 
 corrections = {
     "trigger": {
@@ -13,6 +12,7 @@ corrections = {
         },
     },
 }
+
 
 # Function to extract SFs from EGamma standard root files
 def getSFs(fn="filename", IsSF="sf"):
@@ -109,7 +109,7 @@ for corrName, corrDict in corrections.items():
                 {
                     "version": 2,
                     "name": "UL-Electron-Trigger-SF",
-                    "description": f"These are the electron Trigger Scale Factors (nominal, up or down) for {year} Ultra Legacy dataset. They are dependent on the transverse momenta and pseudorapidity of the electron.",
+                    "description": f"These are the electron Trigger Scale Factors (nominal, up or down) for {year} Ultra Legacy dataset. They are dependent on the transverse momenta and pseudorapidity of the electron.",  # noqa
                     "inputs": [
                         {"name": "year", "type": "string", "description": "year/scenario: example 2016preVFP, 2017 etc"},
                         {
@@ -149,7 +149,7 @@ for corrName, corrDict in corrections.items():
             cset = CorrectionSet(
                 schema_version=2,
                 corrections=corrs,
-                description=f"These are the electron ID Scale Factors (nominal, up or down) for {year} Ultra Legacy dataset. They are available for the cut-based and MVA IDs. They are dependent on the transverse momenta and pseudorapidity of the electron.",
+                description=f"These are the electron ID Scale Factors (nominal, up or down) for {year} Ultra Legacy dataset. They are available for the cut-based and MVA IDs. They are dependent on the transverse momenta and pseudorapidity of the electron.",  # noqa
             )
 
             with open(f"{lepton_type}_{corrName}_{year}.json", "w") as fout:
