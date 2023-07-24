@@ -92,6 +92,7 @@ def main(args):
             yearmod=yearmod,
             channels=channels,
             inference=args.inference,
+            systematics=args.systematics,
             output_location="./outfiles" + job_name,
             region=args.region,
         )
@@ -250,7 +251,8 @@ if __name__ == "__main__":
     parser.add_argument("--local", dest="local", action="store_true")
     parser.add_argument("--inference", dest="inference", action="store_true")
     parser.add_argument("--no-inference", dest="inference", action="store_false")
-
+    parser.add_argument("--systematics", dest="systematics", action="store_true")
+    parser.add_argument("--no-systematics", dest="systematics", action="store_false")
     parser.add_argument("--label", dest="label", default="H", help="jet label for inputskimmer", type=str)
 
     parser.set_defaults(inference=False)
