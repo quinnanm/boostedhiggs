@@ -21,24 +21,6 @@ presel:
     mu:
         lep_fj_dr: ( ( lep_fj_dr>0.03) )
 
-weights:
-    ele:
-        weight_L1Prefiring: 1
-        weight_genweight: 1
-        weight_id_electron: 1
-        weight_pileup: 1
-        weight_reco_electron: 1
-        weight_trigger_electron: 1
-        weight_vjets_nominal: 1
-    mu:
-        weight_L1Prefiring: 1
-        weight_genweight: 1
-        weight_id_muon: 1
-        weight_isolation_muon: 1
-        weight_pileup: 1
-        weight_trigger_iso_muon: 1
-        weight_trigger_noniso_muon: 1
-        weight_vjets_nominal: 1
 
 regions_selections:
     cat1_sr: ( (inclusive_score>0.9) )
