@@ -46,7 +46,11 @@ weights = {
         "weight_mu_d1kappa_EW",
         "weight_mu_W_d2kappa_EW",
         "weight_mu_W_d3kappa_EW",
-        # HWW
+        # DY
+        "weight_mu_Z_d2kappa_EW",
+        "weight_mu_Z_d3kappa_EW",
+        # HWW & VBF
+        "weight_mu_aS_weight",
         "weight_mu_UEPS_FSR",
         "weight_mu_UEPS_ISR",
         "weight_mu_PDF_weight",
@@ -163,6 +167,7 @@ def get_templates(years, channels, samples_dir, samples, presel, regions_selecti
                 if sample_to_use == "Data":
                     data[f"weight_{ch}"] = 1
 
+                # fill histograms
                 for region in regions_selections:
                     data1 = data.copy()  # get fresh copy of the data to apply selections on
                     data1 = data1.query(regions_selections[region])
@@ -181,7 +186,7 @@ def get_templates(years, channels, samples_dir, samples, presel, regions_selecti
                         try:
                             syst = data1[f"{weight}Up"]
 
-                        except Exception:
+                        except KeyError:
                             logging.info(f"can't find {weight}Up systematic for {sample} sample")
                             syst = np.zeros_like(data1["fj_pt"])
 
@@ -197,7 +202,7 @@ def get_templates(years, channels, samples_dir, samples, presel, regions_selecti
                         try:
                             syst = data1[f"{weight}Down"]
 
-                        except Exception:
+                        except KeyError:
                             logging.info(f"can't find {weight}Down systematic for {sample} sample")
                             syst = np.zeros_like(data1["fj_pt"])
 
