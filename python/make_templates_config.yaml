@@ -3,16 +3,16 @@
 # when making `events_dict`
 samples:
     - HWW
-    # - VH
-    # - VBF
-    # - ttH
+    - VH
+    - VBF
+    - ttH
     - QCD
-    # - DYJets
+    - DYJets
     - WJetsLNu
-    # - WZQQ
+    - WZQQ
     - TTbar
-    # - SingleTop
-    # - Diboson
+    - SingleTop
+    - Diboson
     - Data
 
 presel:
@@ -23,7 +23,10 @@ presel:
 
 
 regions_selections:
-    cat1_sr: ( (inclusive_score>0.9) )
+    pass: ( (inclusive_score>0.90) )
+    fail: ( (inclusive_score<0.90) )
+
+    # cat1_sr: ( (inclusive_score>0.9) )
     # tt_cr: ( (inclusive_score<0.90) & (n_bjets_M >=2 ) & (lep_fj_dr>0.3) )
     # wjets_cr: ( (inclusive_score>0.99) & (n_bjets_M < 1) & (lep_fj_dr>0.3) )
     # qcd_cr: (inclusive_score<0.90) & ( ( (lep_pt < 55) & (lep_isolation>0.15)) |  (lep_pt >= 55) ) & ( ( (lep_pt < 55) & (lep_isolation>0.15)) |  (lep_pt >= 55) ),
