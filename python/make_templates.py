@@ -87,13 +87,13 @@ weights = {
 }
 
 
-def get_templates(years, channels, samples_dir, samples, presel, regions_selections):
+def get_templates(year, ch, samples_dir, samples, presel, regions_selections):
     """
     Postprocess the parquets by applying preselections, and fills templates for different regions.
 
     Args
-        years [list]: years to postprocess and save in the output (e.g. ["2016APV", "2016"])
-        channels [list]: channels to postprocess and save in the output (e.g. ["ele", "mu"])
+        year [str]: year to postprocess and save in the output (e.g. ["2016APV", "2016"])
+        ch [str]: channel to postprocess and save in the output (e.g. ["ele", "mu"])
         samples_dir [str]: points to the path of the parquets (note: the year will be appended to the string)
         samples [list]: samples to postprocess and save in the output (e.g. ["HWW", "QCD", "Data"])
         presel [dict]: selections to apply per ch (e.g. `presel = {"ele": {"pt cut": fj_pt>250}}`)
@@ -105,7 +105,7 @@ def get_templates(years, channels, samples_dir, samples, presel, regions_selecti
     """
 
     bins = {
-        "fj_pt": [200, 300, 450, 650, 1200],
+        "fj_pt": [200, 300, 450, 600, 800, 1400],
         "rec_higgs_m": list(range(40, 240, 21)),
     }
 
@@ -120,99 +120,116 @@ def get_templates(years, channels, samples_dir, samples, presel, regions_selecti
             ),
         )
 
-    for year in years:
-        logging.info(f"Processing year {year}")
-        for ch in channels:
-            # get lumi
-            luminosity = 0
-            with open("../fileset/luminosity.json") as f:
-                luminosity += json.load(f)[ch][year]
+    logging.info(f"Processing year {year}")
 
-            condor_dir = os.listdir(samples_dir + year)
-            for sample in condor_dir:
-                if sample == "DYJetsToLL_M-10to50":
-                    continue  # because tagger didnt run for it
+    # get lumi
+    luminosity = 0
+    with open("../fileset/luminosity.json") as f:
+        luminosity += json.load(f)[ch][year]
 
-                # get a combined label to combine samples of the same process
-                for key in utils.combine_samples:
-                    if key in sample:
-                        sample_to_use = utils.combine_samples[key]
-                        break
-                    else:
-                        sample_to_use = sample
+    condor_dir = os.listdir(samples_dir + year)
+    for sample in condor_dir:
+        if sample == "DYJetsToLL_M-10to50":
+            continue  # because tagger didnt run for it
 
-                if sample_to_use not in samples:
-                    logging.info(f"ATTENTION: {sample} will be skipped")
-                    continue
+        # get a combined label to combine samples of the same process
+        for key in utils.combine_samples:
+            if key in sample:
+                sample_to_use = utils.combine_samples[key]
+                break
+            else:
+                sample_to_use = sample
 
-                logging.info(f"Finding {sample} samples and should combine them under {sample_to_use}")
+        if sample_to_use not in samples:
+            logging.info(f"ATTENTION: {sample} will be skipped")
+            continue
 
-                out_files = f"{samples_dir + year}/{sample}/outfiles/"
-                parquet_files = glob.glob(f"{out_files}/*_{ch}.parquet")
+        logging.info(f"Finding {sample} samples and should combine them under {sample_to_use}")
 
-                if not parquet_files:
-                    logging.info(f"No parquet file for {sample}")
-                    continue
+        is_data = False
+        if sample_to_use == "Data":
+            is_data = True
 
-                data = pd.read_parquet(parquet_files)
-                if len(data) == 0:
-                    continue
+        out_files = f"{samples_dir + year}/{sample}/outfiles/"
+        parquet_files = glob.glob(f"{out_files}/*_{ch}.parquet")
+        pkl_files = glob.glob(f"{out_files}/*.pkl")
 
-                # apply selection
-                for selection in presel[ch]:
-                    data = data.query(presel[ch][selection])
+        if not parquet_files:
+            logging.info(f"No parquet file for {sample}")
+            continue
 
-                data["inclusive_score"] = data["fj_ParT_inclusive_score"]
+        data = pd.read_parquet(parquet_files)
+        if len(data) == 0:
+            continue
 
-                if sample_to_use == "Data":
-                    data[f"weight_{ch}"] = 1
+        # apply selection
+        for selection in presel[ch]:
+            data = data.query(presel[ch][selection])
 
-                # fill histograms
-                for region in regions_selections:
-                    data1 = data.copy()  # get fresh copy of the data to apply selections on
-                    data1 = data1.query(regions_selections[region])
+        # get event_weight
+        if not is_data:
+            event_weight = utils.get_xsecweight(pkl_files, year, sample, is_data, luminosity)
+        else:
+            data[f"weight_{ch}"] = 1  # not stored for data
+            event_weight = 1
 
-                    # Nominal weight
-                    hists[region].fill(
-                        samples=sample_to_use,
-                        systematic="Nominal",
-                        fj_pt=data1["fj_pt"],
-                        rec_higgs_m=data1["rec_higgs_m"],
-                        weight=data1[f"weight_{ch}"],
-                    )
+        # add tagger scores
+        data["inclusive_score"] = data["fj_ParT_inclusive_score"]
 
-                    # Up weight
-                    for weight in weights[ch]:
-                        try:
-                            syst = data1[f"{weight}Up"]
+        # fill histograms
+        for region in regions_selections:
+            data1 = data.copy()  # get fresh copy of the data to apply selections on
+            data1 = data1.query(regions_selections[region])
 
-                        except KeyError:
-                            logging.info(f"can't find {weight}Up systematic for {sample} sample")
-                            syst = np.zeros_like(data1["fj_pt"])
+            # Nominal weight
+            nominal = data1[f"weight_{ch}"] * event_weight
 
-                        hists[region].fill(
-                            samples=sample_to_use,
-                            systematic=f"{weight}Up",
-                            fj_pt=data1["fj_pt"],
-                            rec_higgs_m=data1["rec_higgs_m"],
-                            weight=syst,
-                        )
+            hists[region].fill(
+                samples=sample_to_use,
+                systematic="nominal",
+                fj_pt=data1["fj_pt"],
+                rec_higgs_m=data1["rec_higgs_m"],
+                weight=nominal,
+            )
 
-                        # Down weight
-                        try:
-                            syst = data1[f"{weight}Down"]
+            # Up weight
+            for weight in weights[ch]:
+                try:
+                    syst = data1[f"{weight}Up"] * event_weight
 
-                        except KeyError:
-                            logging.info(f"can't find {weight}Down systematic for {sample} sample")
-                            syst = np.zeros_like(data1["fj_pt"])
+                except KeyError:
+                    # logging.info(f"can't find {weight}Up systematic for {sample} sample")
+                    syst = np.zeros_like(data1["fj_pt"])
 
-                        hists[region].fill(
-                            samples=sample_to_use,
-                            systematic=f"{weight}Down",
-                            fj_pt=data1["fj_pt"],
-                            rec_higgs_m=data1["rec_higgs_m"],
-                            weight=syst,
-                        )
+                # if (syst < 0).sum() != 0:
+                #     print(f"SYSTEMATIC {weight}Up has negative values")
+
+                hists[region].fill(
+                    samples=sample_to_use,
+                    systematic=f"{weight}Up",
+                    fj_pt=data1["fj_pt"],
+                    rec_higgs_m=data1["rec_higgs_m"],
+                    weight=syst,
+                )
+
+                # Down weight
+                try:
+                    syst = data1[f"{weight}Down"] * event_weight
+
+                except KeyError:
+                    # logging.info(f"can't find {weight}Down systematic for {sample} sample")
+                    syst = np.zeros_like(data1["fj_pt"])
+
+                # if (syst < 0).sum() != 0:
+                #     print(f"SYSTEMATIC {weight}Down has negative values")
+
+                hists[region].fill(
+                    samples=sample_to_use,
+                    systematic=f"{weight}Down",
+                    fj_pt=data1["fj_pt"],
+                    rec_higgs_m=data1["rec_higgs_m"],
+                    weight=syst,
+                )
 
     logging.info(hists)
 
@@ -220,9 +237,6 @@ def get_templates(years, channels, samples_dir, samples, presel, regions_selecti
 
 
 def main(args):
-    years = args.years.split(",")
-    channels = args.channels.split(",")
-
     if not os.path.exists(args.outpath):
         os.makedirs(args.outpath)
 
@@ -233,15 +247,15 @@ def main(args):
         config = yaml.safe_load(stream)
 
     hists = get_templates(
-        years,
-        channels,
+        args.year,
+        args.ch,
         args.samples_dir,
         config["samples"],
         config["presel"],
         config["regions_selections"],
     )
 
-    with open(f"{args.outpath}/hists_templates.pkl", "wb") as fp:
+    with open(f"{args.outpath}/hists_templates_{args.year}_{args.ch}.pkl", "wb") as fp:
         pkl.dump(hists, fp)
 
     # # dump the templates of each region in a rootfile
@@ -260,11 +274,11 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # python make_templates.py --years 2017 --channels ele,mu
+    # python make_templates.py --year 2017 --ch mu
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--years", dest="years", default="2017", help="years separated by commas")
-    parser.add_argument("--channels", dest="channels", default="ele", help="channels separated by commas")
+    parser.add_argument("--year", dest="year", help="year", choices=["2016APV", "2016", "2017", "2018"])
+    parser.add_argument("--ch", dest="ch", help="channel", choices=["mu", "ele"])
     parser.add_argument("--samples_dir", dest="samples_dir", default="../eos/Jul21_", type=str, help="path to parquets")
     parser.add_argument(
         "--outpath", dest="outpath", default="/Users/fmokhtar/Desktop/hww/test", type=str, help="path of the output"
