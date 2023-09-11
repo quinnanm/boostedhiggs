@@ -4,7 +4,6 @@ import argparse
 import glob
 import json
 import os
-
 import pickle as pkl
 import warnings
 
@@ -94,28 +93,34 @@ def make_events_dict(
                     continue
 
                 # replace the weight_pileup of the strange events with the mean weight_pileup of all the other events
-                # TODO: draw distribution of number of primary vertices before and after applying this weight
-                if not is_data:
-                    strange_events = data["weight_pileup"] > 6
-                    if len(strange_events) > 0:
-                        data["weight_pileup"][strange_events] = data[~strange_events]["weight_pileup"].mean(axis=0)
+                # # TODO: draw distribution of number of primary vertices before and after applying this weight
+                # if not is_data:
+                #     strange_events = data["weight_pileup"] > 6
+                #     if len(strange_events) > 0:
+                #         data["weight_pileup"][strange_events] = data[~strange_events]["weight_pileup"].mean(axis=0)
 
                 # get event_weight
                 if not is_data:
-                    print("---> Accumulating event weights.")
                     event_weight = utils.get_xsecweight(pkl_files, year, sample, is_data, luminosity)
-                    print(event_weight)
-                    for w in weights[ch]:
-                        if w not in data.keys():
-                            print(f"{w} weight is not stored in parquet")
-                            continue
-                        if weights[ch][w] == 1:
-                            print(f"Applying {w} weight")
-                            event_weight *= data[w]
+                    data["lol"] = event_weight
+                    if "Jul21_" in samples_dir:
+                        print("---> Using already stored event weight")
+                        event_weight = data[f"weight_{ch}"]
+                    else:
+                        print("---> Accumulating event weights.")
+                        for w in weights[ch]:
+                            if w not in data.keys():
+                                print(f"{w} weight is not stored in parquet")
+                                continue
+                            if weights[ch][w] == 1:
+                                print(f"Applying {w} weight")
+                                # event_weight *= data[w]
+                                event_weight = data[w]
 
-                    print("---> Done with accumulating event weights.")
+                        print("---> Done with accumulating event weights.")
                 else:
                     event_weight = np.ones_like(data["fj_pt"])
+                    data["lol"] = event_weight
 
                 data["event_weight"] = event_weight
 
@@ -123,7 +128,6 @@ def make_events_dict(
                 if add_tagger_score:
                     if "Apr12_presel" in samples_dir:
                         data["inclusive_score"] = utils.disc_score(data, utils.new_sig, utils.inclusive_bkg)
-                        data["inclusive_score2"] = data[utils.new_sig].sum(axis=1)
                     else:
                         data["inclusive_score"] = data["fj_ParT_inclusive_score"]
 
