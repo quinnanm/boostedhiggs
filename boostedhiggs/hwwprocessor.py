@@ -14,18 +14,18 @@ from coffea.analysis_tools import PackedSelection, Weights
 from coffea.nanoevents.methods import candidate
 
 from boostedhiggs.corrections import (
-    get_jec_jets,
-    btagWPs,
     add_btag_weights,
-    add_lepton_weight,
-    add_pileup_weight,
-    add_VJets_kFactors,
-    corrected_msoftdrop,
-    add_ps_weight,
-    add_pdf_weight,
-    add_scalevar_7pt,
-    add_scalevar_3pt,
     add_HiggsEW_kFactors,
+    add_lepton_weight,
+    add_pdf_weight,
+    add_pileup_weight,
+    add_ps_weight,
+    add_scalevar_3pt,
+    add_scalevar_7pt,
+    add_VJets_kFactors,
+    btagWPs,
+    corrected_msoftdrop,
+    get_jec_jets,
     met_factory,
 )
 from boostedhiggs.utils import match_H, match_Top, match_V
@@ -291,8 +291,10 @@ class HwwProcessor(processor.ProcessorABC):
         dr_jet_lepfj = goodjets.delta_r(candidatefj)
         ak4_outside_ak8 = goodjets[dr_jet_lepfj > 0.8]
 
+        n_bjets_L = ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["L"], axis=1)
         n_bjets_M = ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["M"], axis=1)
         n_bjets_T = ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["T"], axis=1)
+        n_bjetsDeepCSV_L = ak.sum(ak4_outside_ak8.btagDeepB > btagWPs["deepCSV"][self._year]["L"], axis=1)
         n_bjetsDeepCSV_M = ak.sum(ak4_outside_ak8.btagDeepB > btagWPs["deepCSV"][self._year]["M"], axis=1)
         n_bjetsDeepCSV_T = ak.sum(ak4_outside_ak8.btagDeepB > btagWPs["deepCSV"][self._year]["T"], axis=1)
 
@@ -316,8 +318,10 @@ class HwwProcessor(processor.ProcessorABC):
             "met_pt": met.pt,
             "deta": deta,
             "mjj": mjj,
+            "n_bjets_L": n_bjets_L,
             "n_bjets_M": n_bjets_M,
             "n_bjets_T": n_bjets_T,
+            "n_bjetsDeepCSV_L": n_bjetsDeepCSV_L,
             "n_bjetsDeepCSV_M": n_bjetsDeepCSV_M,
             "n_bjetsDeepCSV_T": n_bjetsDeepCSV_T,
         }
