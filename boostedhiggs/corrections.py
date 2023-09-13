@@ -1,13 +1,14 @@
 import importlib.resources
-import warnings
 import pickle
-from coffea import util as cutil
-from coffea.analysis_tools import Weights
-from coffea.nanoevents.methods.nanoaod import JetArray
+import warnings
 from typing import Dict
+
 import awkward as ak
 import correctionlib
 import numpy as np
+from coffea import util as cutil
+from coffea.analysis_tools import Weights
+from coffea.nanoevents.methods.nanoaod import JetArray
 
 btagWPs = {
     "deepJet": {
@@ -339,6 +340,50 @@ def get_pog_json(obj, year):
         print(f"No json for {obj}")
     year = get_UL_year(year)
     return f"{pog_correction_path}POG/{pog_json[0]}/{year}/{pog_json[1]}"
+
+
+def add_btag_weights_farouk(year: str, jets: JetArray, jet_selector: ak.Array, wp: str = "M", algo: str = "deepJet"):
+    """
+    Following https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods#1b_Event_reweighting_using_scale
+
+    """
+
+    def _btagSF(cset, jets, flavour, wp="M", algo="deepJet", syst="central"):
+        j, nj = ak.flatten(jets), ak.num(jets)
+        corrs = cset[f"{algo}_comb"] if flavour == "bc" else cset[f"{algo}_incl"]
+        sf = corrs.evaluate(
+            syst,
+            wp,
+            np.array(j.hadronFlavour),
+            np.array(abs(j.eta)),
+            np.array(j.pt),
+        )
+        return ak.unflatten(sf, nj)
+
+    cset = correctionlib.CorrectionSet.from_file(get_pog_json("btagging", year))
+
+    ul_year = get_UL_year(year)
+    with importlib.resources.path("boostedhiggs.data", f"btageff_{algo}_{wp}_{ul_year}.coffea") as filename:
+        efflookup = cutil.load(filename)
+
+    lightJets = jets[jet_selector & (jets.hadronFlavour == 0) & (abs(jets.eta) < 2.5)]
+    bcJets = jets[jet_selector & (jets.hadronFlavour > 0) & (abs(jets.eta) < 2.5)]
+
+    lightEff = efflookup(lightJets.pt, abs(lightJets.eta), lightJets.hadronFlavour)
+    bcEff = efflookup(bcJets.pt, abs(bcJets.eta), bcJets.hadronFlavour)
+
+    lightSF = _btagSF(cset, lightJets, "light", wp, algo)
+    bcSF = _btagSF(cset, bcJets, "bc", wp, algo)
+
+    light_probs = ak.fill_none(ak.prod(1 - lightSF * lightEff, axis=-1), 1)
+    bc_probs = ak.fill_none(ak.prod(1 - bcSF * bcEff, axis=-1), 1)
+
+    weight = light_probs * bc_probs
+
+    # weight(>0 btag) = 1 - weight(0 btag)
+    weight = 1 - weight
+
+    return weight
 
 
 def add_btag_weights(
