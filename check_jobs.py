@@ -4,9 +4,9 @@
 Explores unproduced files due to condor job errors.
 """
 import argparse
+import glob
 import json
 import os
-import glob
 from math import ceil
 
 from condor.file_utils import loadFiles
@@ -96,7 +96,7 @@ def main(args):
 if __name__ == "__main__":
     """
     e.g.
-    python check_jobs.py --year 2017 --username cmantill --tag Mar19 --config samples_inclusive.yaml --key mc_s_over_b
+    python check_jobs.py --year 2017 --username fmokhtar --tag Sep12_QCD --config samples_inclusive.yaml --key mc
     """
 
     parser = argparse.ArgumentParser()
