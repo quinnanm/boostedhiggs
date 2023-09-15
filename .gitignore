@@ -13,9 +13,11 @@ metadata.json
 binder/plots/*
 binder/DY*
 
+eos
+
 *.root
 *.parquet
-*.pkl
+# *.pkl
 *.pdf
 
 histo
