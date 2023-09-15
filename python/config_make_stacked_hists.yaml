@@ -1,8 +1,6 @@
-#!/usr/bin/python
-
-# when making `events_dict`
+############## FOR BUILDING `events_dict` PURPOSES
 samples:
-    - HWW
+    - ggF
     - VH
     - VBF
     - ttH
@@ -13,15 +11,15 @@ samples:
     - TTbar
     - SingleTop
     - Diboson
-    # - Data
+    - Data
 
 presel:
     ele:
         lepton jet overlap: ( ( lep_fj_dr>0.03) )
 
         # signal region
-        tagger: ( ( inclusive_score<0.99) )
-        tagger2: ( ( inclusive_score>0.9) )
+        # tagger: ( ( inclusive_score<0.99) )
+        # tagger2: ( ( inclusive_score>0.9) )
 
         # # ttbar region
         # tagger: ( ( inclusive_score<0.9) )
@@ -31,14 +29,14 @@ presel:
         # b veto: ( ( n_bjets_L==0) )
 
         # qcd region
-        # tagger: ( ( inclusive_score<0.9) )
+        tagger: ( ( inclusive_score<0.9) )
 
     mu:
         lepton jet overlap: ( ( lep_fj_dr>0.03) )
 
         # signal region
-        tagger: ( ( inclusive_score<0.99) )
-        tagger2: ( ( inclusive_score>0.9) )
+        # tagger: ( ( inclusive_score<0.99) )
+        # tagger2: ( ( inclusive_score>0.9) )
 
         # # ttbar region
         # tagger: ( ( inclusive_score<0.9) )
@@ -48,7 +46,7 @@ presel:
         # b veto: ( ( n_bjets_L==0) )
 
         # qcd region
-        # tagger: ( ( inclusive_score<0.9) )
+        tagger: ( ( inclusive_score<0.9) )
 
 weights:
     ele:
@@ -69,30 +67,30 @@ weights:
         weight_trigger_noniso_muon: 1
         weight_vjets_nominal: 1
 
-# FOR PLOTTING PURPOSES
+############## FOR PLOTTING PURPOSES
 vars_to_plot:
-    - fj_minus_lep_m
-    - fj_pt
-    - lep_pt
-    - fj_msoftdrop
-    - fj_bjets_ophem
-    - fj_bjets
-    - lep_fj_dr
-    - lep_met_mt
-    - ht
-    - met_fj_dphi
-    - deta
-    - met
-    - mjj
+    # - fj_minus_lep_m
+    # - fj_pt
+    # - lep_pt
+    # - fj_msoftdrop
+    # - fj_bjets_ophem
+    # - fj_bjets
+    # - lep_fj_dr
+    # - lep_met_mt
+    # - ht
+    # - met_fj_dphi
+    # - deta
+    # - met
+    # - mjj
     - rec_higgs_m
-    - rec_higgs_pt
-    - rec_dphi_WW
+    # - rec_higgs_pt
+    # - rec_dphi_WW
     # - fj_ParT_mass
-    - fj_ParticleNet_mass
-    - inclusive_score
+    # - fj_ParticleNet_mass
+    # - inclusive_score
 
 samples_to_plot:
-    - HWW
+    - ggF
     - VH
     - VBF
     - ttH
@@ -103,4 +101,11 @@ samples_to_plot:
     - TTbar
     - SingleTop
     - Diboson
-    # - Data
+    - Data
+
+# plotting config
+add_data: True
+logy: False
+add_soverb: False
+only_sig: False
+mult: 1

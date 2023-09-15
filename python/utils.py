@@ -21,7 +21,7 @@ combine_samples = {
     "SingleMuon_": "Data",
     "EGamma_": "Data",
     # signal
-    "GluGluHToWW_Pt-200ToInf_M-125": "HWW",
+    "GluGluHToWW_Pt-200ToInf_M-125": "ggF",
     "HToWW_M-125": "VH",
     "VBFHToWWToLNuQQ_M-125_withDipoleRecoil": "VBF",
     "ttHToNonbb_M125": "ttH",
@@ -37,7 +37,7 @@ combine_samples = {
     "ZZ": "Diboson",
     "GluGluHToTauTau": "HTauTau",
 }
-signals = ["HWW", "ttH", "VH", "VBF"]
+signals = ["ggF", "ttH", "VH", "VBF"]
 
 
 def get_sum_sumgenweight(pkl_files, year, sample):
@@ -110,7 +110,7 @@ inclusive_bkg = [b.replace("PN", "ParT") for b in qcd + tope + topm + tophad]
 
 # PLOTTING UTILS
 color_by_sample = {
-    "HWW": "pink",
+    "ggF": "pink",
     "VH": "tab:brown",
     "VBF": "tab:gray",
     "ttH": "tab:olive",
@@ -130,7 +130,7 @@ color_by_sample = {
 }
 
 plot_labels = {
-    "HWW": "ggH(WW)-Pt200",
+    "ggF": "ggH(WW)-Pt200",
     "VH": "VH(WW)",
     "VBF": r"VBFH(WW) $(qq\ell\nu)$",
     "ttH": "ttH(WW)",
@@ -149,12 +149,12 @@ plot_labels = {
     #     "VBFHToTauTau": "VBFHToTauTau"
 }
 
-sig_labels = {
-    "HWW": "ggF",
-    "VBF": "VBF",
-    "VH": "VH",
-    "ttH": "ttH",
-}
+# sig_labels = {
+#     "HWW": "ggF",
+#     "VBF": "VBF",
+#     "VH": "VH",
+#     "ttH": "ttH",
+# }
 
 label_by_ch = {"mu": "Muon", "ele": "Electron"}
 
