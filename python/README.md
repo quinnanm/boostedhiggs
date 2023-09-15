@@ -23,6 +23,6 @@ To make 2d-histograms from the `events_dict` see e.g. binder/July6_VBF_explorati
 
 We use a python script to produce the templates ready for datacard creation. But make sure to first edit the `config_make_templates.yaml`.
 ```
-python make_templates.py --year 2017 --channels mu,ele --tag test
+python make_templates.py --year 2017 --channels mu --tag test
 ```
-The output templates should be stored by default under `combine/templates` in the parent repository.
+The output templates should be stored by default under `combine/templates` in the parent directory.

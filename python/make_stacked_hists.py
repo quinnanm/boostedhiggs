@@ -1,6 +1,6 @@
 """
 Loads the config from `config_make_stacked_hists.yaml`, and postprocesses
-the condor output to make stacked histograms.
+the condor output to make stacked histograms
 
 Author: Farouk Mokhtar
 """
@@ -240,7 +240,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--years", dest="years", default="2017", help="years separated by commas")
-    parser.add_argument("--channels", dest="channels", default="ele", help="channels separated by commas")
+    parser.add_argument("--channels", dest="channels", default="mu", help="channels separated by commas")
     parser.add_argument(
         "--samples_dir", dest="samples_dir", default="../eos/Apr12_presel_", help="path to parquets", type=str
     )

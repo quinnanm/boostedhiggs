@@ -1,12 +1,5 @@
 """
-Creates "combine datacards" using hist.Hist templates
-(1) Adds systematics for all samples,
-(2) Sets up data-driven QCD background estimate ('rhalphabet' method)
-
-Adapted from
-    https://github.com/rkansal47/HHbbVV/blob/main/src/HHbbVV/postprocessing/CreateDatacard.py
-    https://github.com/jennetd/vbf-hbb-fits/blob/master/hbb-unblind-ewkz/make_cards.py
-    https://github.com/LPC-HH/combine-hh/blob/master/create_datacard.py
+Builds hist.Hist templates after adding systematics for all samples
 
 Author: Farouk Mokhtar
 """
@@ -278,7 +271,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--year", dest="year", help="year", choices=["2016APV", "2016", "2017", "2018"])
-    parser.add_argument("--channels", dest="channels", default="ele", help="channels separated by commas (e.g. mu,ele)")
+    parser.add_argument("--channels", dest="channels", default="mu", help="channels separated by commas (e.g. mu,ele)")
     parser.add_argument("--outpath", dest="outpath", default="../combine/templates/", type=str, help="path of the output")
     parser.add_argument("--tag", dest="tag", default="test", type=str, help="name of template directory")
 
