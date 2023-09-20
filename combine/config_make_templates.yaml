@@ -1,0 +1,34 @@
+samples:
+    - ggF
+    - VH
+    - VBF
+    - ttH
+    - QCD
+    - DYJets
+    - WJetsLNu
+    - WZQQ
+    - TTbar
+    - SingleTop
+    - Diboson
+    - Data
+
+presel:
+    ele:
+        lep_fj_dr: ( ( lep_fj_dr>0.03) )
+    mu:
+        lep_fj_dr: ( ( lep_fj_dr>0.03) )
+
+regions_selections:
+    pass: ( (inclusive_score>0.90) & (lep_fj_dr < 0.5) ) # signal region
+    fail: ( (inclusive_score<0.90) & (n_bjets_T > 0 ) ) # qcd control region
+
+    ttbar_cr: ( (inclusive_score<0.90) & (n_bjets_T > 0 ) )
+    wjets_cr: ( (lep_fj_dr > 0.5) & (n_bjets_T == 0) )
+
+    # qcd_cr: (inclusive_score<0.90) & ( ( (lep_pt < 55) & (lep_isolation>0.15)) |  (lep_pt >= 55) ) & ( ( (lep_pt < 55) & (lep_isolation>0.15)) |  (lep_pt >= 55) ),
+
+samples_dir: # keys here should match the keys above
+    pass: ../eos/Jul21_
+    fail: ../eos/Sep12_QCD_
+    ttbar_cr: ../eos/Jul21_
+    wjets_cr: ../eos/Jul21_

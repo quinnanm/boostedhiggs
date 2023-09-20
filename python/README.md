@@ -1,11 +1,3 @@
-# Making combine templates
-
-We use a python script to produce the templates ready for datacard creation. But make sure to first edit the `config_make_templates.yaml`.
-```
-python make_templates.py --year 2017 --channels mu --tag test
-```
-The output templates should be stored by default under `combine/templates` in the parent directory.
-
 # Making stacked histograms
 
 We build stacked histograms after processing the parquets into an `events_dict` object.

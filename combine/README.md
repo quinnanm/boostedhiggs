@@ -1,9 +1,7 @@
 # Summary of the full pipeline
 
 ```
-cd ../python/
 python make_templates.py --year 2017 --channels mu --tag test
-cd ../combine/
 
 python create_datacard.py --years 2017 --channels mu --tag test
 
@@ -14,9 +12,7 @@ python produce_datacard.py --years 2017 --channels mu --tag test
 
 ## Step 1. Making combine templates
 
-We use a python script to produce the templates ready for datacard creation. The script can be found under `python/` in the parent repository [here](https://github.com/farakiko/boostedhiggs/tree/main/python).
-
-The output templates should be stored by default here under `templates/`.
+We use the python script `make_templates.py` to produce the templates ready for datacard creation. The output templates should be stored by default here under `templates/`.
 
 Sample templates produced can be found [here](https://github.com/farakiko/boostedhiggs/tree/main/combine/templates/v1/) as `hists_templates_2017_mu.pkl`.
 
