@@ -68,6 +68,7 @@ weights = {
         "weight_ele_trigger_electron",
         "weight_ele_reco_electron",
         # ggF & VBF
+        "weight_ele_aS_weight",
         "weight_ele_UEPS_FSR",
         "weight_ele_UEPS_ISR",
         "weight_ele_PDF_weight",
@@ -81,6 +82,10 @@ weights = {
         "weight_ele_d1kappa_EW",
         "weight_ele_W_d2kappa_EW",
         "weight_ele_W_d3kappa_EW",
+        # DY
+        "weight_ele_d1kappa_EW",
+        "weight_ele_Z_d2kappa_EW",
+        "weight_ele_Z_d3kappa_EW",
     ],
 }
 
