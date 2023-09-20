@@ -114,6 +114,63 @@ def systs_from_parquets(year):
                 "weight_mu_Z_d3kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d3kappa_EW_{year}", "lnN"),
             },
         },
+        "ele": {
+            "all_samples": {
+                # "weight_ele_btagSFlight_2017": rl.NuisanceParameter(
+                #     f"{CMS_PARAMS_LABEL}_btagSFlight_{year}", "lnN"
+                #     ),
+                # "weight_ele_btagSFlight_correlated": rl.NuisanceParameter(
+                #     f"{CMS_PARAMS_LABEL}_btagSFlight_correlated", "lnN"
+                # ),
+                # "weight_ele_btagSFbc_2017": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_btagSFbc_{year}", "lnN"),
+                # "weight_ele_btagSFbc_correlated": rl.NuisanceParameter(
+                #     f"{CMS_PARAMS_LABEL}_btagSFbc_correlated", "lnN"
+                # ),
+                "weight_ele_pileup": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_PU_{year}", "shape"),
+                "weight_ele_isolation_electron": rl.NuisanceParameter(f"CMS_ele_iso_{year}", "lnN"),
+                "weight_ele_id_electron": rl.NuisanceParameter(f"CMS_ele_id_{year}", "lnN"),
+                "weight_ele_L1Prefiring": rl.NuisanceParameter(f"CMS_L1Prefiring_{year}", "lnN"),
+                "weight_ele_reco_electron": rl.NuisanceParameter("CMS_ele_reconstruction", "lnN"),
+                "weight_ele_trigger_electron": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_trigger_{year}", "lnN"),
+            },
+            # signal
+            "ggF": {
+                "weight_ele_UEPS_FSR": rl.NuisanceParameter("UEPS_FSR_ggF", "shape"),
+                "weight_ele_UEPS_ISR": rl.NuisanceParameter("UEPS_ISR_ggF", "shape"),
+                "weight_ele_PDF_weight": rl.NuisanceParameter("pdf_Higgs_ggF", "lnN"),
+                "weight_ele_PDFaS_weight": rl.NuisanceParameter("pdfAS_Higgs_ggF", "lnN"),
+                "weight_ele_aS_weight": rl.NuisanceParameter("aS_Higgs_ggF", "lnN"),
+                "weight_ele_scalevar_3pt": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_scale_pt_3_ggF_{year}", "lnN"),
+                "weight_ele_scalevar_7pt": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_scale_pt_7_ggF_{year}", "lnN"),
+            },
+            "VBF": {
+                "weight_ele_UEPS_FSR": rl.NuisanceParameter("UEPS_FSR_VBF", "shape"),
+                "weight_ele_UEPS_ISR": rl.NuisanceParameter("UEPS_ISR_VBF", "shape"),
+                "weight_ele_PDF_weight": rl.NuisanceParameter("pdf_Higgs_VBF", "lnN"),
+                "weight_ele_PDFaS_weight": rl.NuisanceParameter("pdfAS_Higgs_VBF", "lnN"),
+                "weight_ele_aS_weight": rl.NuisanceParameter("aS_Higgs_VBF", "lnN"),
+                "weight_ele_scalevar_3pt": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_scale_pt_3_VBF_{year}", "lnN"),
+                "weight_ele_scalevar_7pt": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_scale_pt_7_VBF_{year}", "lnN"),
+            },
+            "VH": {},
+            "ttH": {},
+            # bkgs
+            "TTbar": {},
+            "WJetsLNu": {
+                "weight_ele_d1kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_W_d1kappa_EW_{year}", "lnN"),
+                "weight_ele_W_d2kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_W_d2kappa_EW_{year}", "lnN"),
+                "weight_ele_W_d3kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_W_d3kappa_EW_{year}", "lnN"),
+                "weight_ele_d1K_NLO": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d1K_NLO_{year}", "lnN"),
+                "weight_ele_d2K_NLO": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d2K_NLO_{year}", "lnN"),
+                "weight_ele_d3K_NLO": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d3K_NLO_{year}", "lnN"),
+            },
+            "SingleTop": {},
+            "DYJets": {
+                "weight_ele_d1kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d1kappa_EW_{year}", "lnN"),
+                "weight_ele_Z_d2kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d2kappa_EW_{year}", "lnN"),
+                "weight_ele_Z_d3kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d3kappa_EW_{year}", "lnN"),
+            },
+        },
     }
 
     return systs_from_parquets
@@ -176,13 +233,10 @@ def rhalphabet(hists_templates, year, lep_ch, blind, blind_samples, blind_region
 
                 # systematics NOT from parquets
                 for sys_name, sys_value in systs_dict.items():
-                    sample.setParamEffect(
-                        sys_value,
-                        systs_dict_values[sys_name][0],
-                        systs_dict_values[sys_name][1]
-                        if systs_dict_values[sys_name][1] is not None
-                        else systs_dict_values[sys_name][0],
-                    )
+                    if systs_dict_values[sys_name][1] is None:  # if max is the same as min
+                        sample.setParamEffect(sys_value, systs_dict_values[sys_name][0])
+                    else:
+                        sample.setParamEffect(sys_value, systs_dict_values[sys_name][0], systs_dict_values[sys_name][1])
 
                 # systematics from parquets
                 # apply systematics that are common for all samples
@@ -293,8 +347,8 @@ def main(args):
                 hists_templates,
                 year,
                 lep_ch,
-                blind=True,
-                blind_samples=[],
+                blind=args.blind,
+                blind_samples=args.samples_to_blind.split(","),
                 blind_region=[40, 200],
                 qcd_estimation=True,
             )
@@ -305,12 +359,16 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # python create_datacard.py --years 2017 --channels mu --tag test
+    # python create_datacard.py --years 2017 --channels mu,ele --tag test
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--years", dest="years", default="2017", help="years separated by commas")
     parser.add_argument("--channels", dest="channels", default="mu", help="channels separated by commas (e.g. mu,ele)")
     parser.add_argument("--tag", dest="tag", default="test", type=str, help="name of template directory")
+    parser.add_argument("--blind", dest="blind", action="store_true")
+    parser.add_argument(
+        "--samples_to_blind", dest="samples_to_blind", default="", help="samples to blind separated by commas"
+    )
 
     args = parser.parse_args()
 
