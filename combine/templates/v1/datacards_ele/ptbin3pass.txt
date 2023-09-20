@@ -1,0 +1,58 @@
+# Datacard for <Channel (ptbin3pass) instance at 0x7fa529813e50> generated on 2023-09-20 04:45:08.139101
+imax 1 # number of categories ('bins' but here we are using shape templates)
+jmax 8 # number of samples minus 1
+kmax 29 # number of nuisance parameters
+shapes * ptbin3pass testModel.root testModel:ptbin3pass_$PROCESS testModel:ptbin3pass_$PROCESS_$SYSTEMATIC
+bin ptbin3pass
+observation 61.000
+bin                                         ptbin3pass  ptbin3pass     ptbin3pass     ptbin3pass     ptbin3pass     ptbin3pass     ptbin3pass     ptbin3pass  ptbin3pass
+process                                            ggF         VBF             VH            ttH          ttbar          wjets      singletop          zjets         qcd
+process                                             -3          -2             -1              0              1              2              3              4           5
+rate                                             5.365       0.000         84.167          2.429      20323.735       7199.757        563.447       4570.060       1.000
+BR_hww lnN                               0.9848/1.0153           -  0.9848/1.0153  0.9848/1.0153  0.9848/1.0153  0.9848/1.0153  0.9848/1.0153  0.9848/1.0153           -
+CMS_HWW_boosted_PU_2017 shape                   1.0000           -         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000           -
+CMS_HWW_boosted_W_d1kappa_EW_2017 lnN                -           -              -              -              -  1.5000/1.5000              -              -           -
+CMS_HWW_boosted_W_d2kappa_EW_2017 lnN                -           -              -              -              -  0.9933/1.0067              -              -           -
+CMS_HWW_boosted_W_d3kappa_EW_2017 lnN                -           -              -              -              -  0.9988/1.0012              -              -           -
+CMS_HWW_boosted_Z_d1kappa_EW_2017 lnN                -           -              -              -              -              -              -  1.5000/1.5000           -
+CMS_HWW_boosted_Z_d2kappa_EW_2017 lnN                -           -              -              -              -              -              -  0.9955/1.0045           -
+CMS_HWW_boosted_Z_d3kappa_EW_2017 lnN                -           -              -              -              -              -              -  0.9994/1.0006           -
+CMS_HWW_boosted_d1K_NLO_2017 lnN                     -           -              -              -              -  0.9224/1.0776              -              -           -
+CMS_HWW_boosted_d2K_NLO_2017 lnN                     -           -              -              -              -  1.0412/0.9588              -              -           -
+CMS_HWW_boosted_d3K_NLO_2017 lnN                     -           -              -              -              -  0.9888/1.0112              -              -           -
+CMS_HWW_boosted_ele_trigger_2017 lnN     0.9976/1.0024     nan/nan  0.9974/1.0026  0.9980/1.0020  0.9971/1.0029  0.9964/1.0036  0.9977/1.0023  0.9909/1.0091           -
+CMS_HWW_boosted_scale_pt_3_VBF_2017 lnN              -     nan/nan              -              -              -              -              -              -           -
+CMS_HWW_boosted_scale_pt_3_ggF_2017 lnN  0.8047/1.2005           -              -              -              -              -              -              -           -
+CMS_HWW_boosted_scale_pt_7_VBF_2017 lnN              -     nan/nan              -              -              -              -              -              -           -
+CMS_HWW_boosted_scale_pt_7_ggF_2017 lnN  0.8047/1.2056           -              -              -              -              -              -              -           -
+CMS_L1Prefiring_2017 lnN                 1.2609/1.0801     nan/nan  1.0262/1.0077  0.9613/0.9808  1.0094/1.0052  1.0198/1.0093  1.0295/1.0144  1.1205/1.0626           -
+CMS_ele_id_2017 lnN                      0.9736/1.0264     nan/nan  0.9797/1.0203  0.9862/1.0138  0.9819/1.0181  0.9855/1.0145  0.9877/1.0123  0.9863/1.0137           -
+CMS_ele_iso_2017 lnN                     1.0000/1.0000     nan/nan  0.9998/1.0002  0.9988/1.0012  0.9996/1.0004  0.9992/1.0008  0.9986/1.0014  0.9962/1.0038           -
+CMS_ele_reconstruction lnN               0.9943/1.0057     nan/nan  0.9945/1.0055  0.9947/1.0053  0.9947/1.0053  0.9945/1.0055  0.9935/1.0065  0.9943/1.0057           -
+CMS_lumi_13TeV_2017 lnN                         1.0200           -         1.0200         1.0200         1.0200         1.0200         1.0200         1.0200           -
+UEPS_FSR_ggF shape                              1.0000           -              -              -              -              -              -              -           -
+UEPS_ISR_ggF shape                              1.0000           -              -              -              -              -              -              -           -
+aS_Higgs_VBF lnN                                     -     nan/nan              -              -              -              -              -              -           -
+aS_Higgs_ggF lnN                         0.9491/1.0544           -              -              -              -              -              -              -           -
+pdfAS_Higgs_VBF lnN                                  -     nan/nan              -              -              -              -              -              -           -
+pdfAS_Higgs_ggF lnN                      0.9458/1.0589           -              -              -              -              -              -              -           -
+pdf_Higgs_VBF lnN                                    -     nan/nan              -              -              -              -              -              -           -
+pdf_Higgs_ggF lnN                        0.9869/1.0145           -              -              -              -              -              -              -           -
+CMS_HWW_boosted_tf_dataResidual_pt_par0_rho_par0 extArg testModel.root:testModel
+CMS_HWW_boosted_tf_dataResidual_pt_par0_rho_par1 extArg testModel.root:testModel
+CMS_HWW_boosted_tf_dataResidual_pt_par0_rho_par2 extArg testModel.root:testModel
+CMS_HWW_boosted_tf_dataResidual_pt_par1_rho_par0 extArg testModel.root:testModel
+CMS_HWW_boosted_tf_dataResidual_pt_par1_rho_par1 extArg testModel.root:testModel
+CMS_HWW_boosted_tf_dataResidual_pt_par1_rho_par2 extArg testModel.root:testModel
+CMS_HWW_boosted_tf_dataResidual_pt_par2_rho_par0 extArg testModel.root:testModel
+CMS_HWW_boosted_tf_dataResidual_pt_par2_rho_par1 extArg testModel.root:testModel
+CMS_HWW_boosted_tf_dataResidual_pt_par2_rho_par2 extArg testModel.root:testModel
+ptbin3pass_qcd_bin0 extArg testModel.root:testModel
+qcdparam_ptbin3_massbin1 extArg testModel.root:testModel
+qcdparam_ptbin3_massbin2 extArg testModel.root:testModel
+qcdparam_ptbin3_massbin3 extArg testModel.root:testModel
+qcdparam_ptbin3_massbin4 extArg testModel.root:testModel
+qcdparam_ptbin3_massbin5 extArg testModel.root:testModel
+qcdparam_ptbin3_massbin6 extArg testModel.root:testModel
+qcdparam_ptbin3_massbin7 extArg testModel.root:testModel
+qcdparam_ptbin3_massbin8 extArg testModel.root:testModel
