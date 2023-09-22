@@ -27,10 +27,10 @@ pd.set_option("mode.chained_assignment", None)
 
 weights = {
     "mu": [
-        "weight_mu_btagSFlight_2017",
-        "weight_mu_btagSFlight_correlated",
-        "weight_mu_btagSFbc_2017",
-        "weight_mu_btagSFbc_correlated",
+        # "weight_mu_btagSFlight_2017",
+        # "weight_mu_btagSFlight_correlated",
+        # "weight_mu_btagSFbc_2017",
+        # "weight_mu_btagSFbc_correlated",
         "weight_mu_pileup",
         "weight_mu_isolation_muon",
         "weight_mu_id_muon",
@@ -57,10 +57,10 @@ weights = {
         "weight_mu_Z_d3kappa_EW",
     ],
     "ele": [
-        "weight_ele_btagSFlight_2017",
-        "weight_ele_btagSFlight_correlated",
-        "weight_ele_btagSFbc_2017",
-        "weight_ele_btagSFbc_correlated",
+        # "weight_ele_btagSFlight_2017",
+        # "weight_ele_btagSFlight_correlated",
+        # "weight_ele_btagSFbc_2017",
+        # "weight_ele_btagSFbc_correlated",
         "weight_ele_pileup",
         "weight_ele_isolation_electron",
         "weight_ele_id_electron",
@@ -114,7 +114,7 @@ def get_templates(year, ch, samples_dir, samples, presel, regions_selections):
 
     bins = {
         "fj_pt": [200, 300, 450, 650, 2000],
-        "rec_higgs_m": list(range(40, 240, 21)),
+        "rec_higgs_m": list(range(30, 240, 21)),
     }
 
     hists = {}

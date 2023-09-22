@@ -6,6 +6,7 @@ Adapted from
     https://github.com/rkansal47/HHbbVV/blob/main/src/HHbbVV/postprocessing/CreateDatacard.py
     https://github.com/jennetd/vbf-hbb-fits/blob/master/hbb-unblind-ewkz/make_cards.py
     https://github.com/LPC-HH/combine-hh/blob/master/create_datacard.py
+    https://github.com/nsmith-/rhalphalib/blob/master/tests/test_rhalphalib.py
 
 Author: Farouk Mokhtar
 """
@@ -15,6 +16,7 @@ from __future__ import division, print_function
 import argparse
 import json
 import logging
+import math
 import pickle as pkl
 import warnings
 
@@ -73,7 +75,7 @@ def systs_from_parquets(year):
                 "weight_mu_isolation_muon": rl.NuisanceParameter(f"CMS_mu_iso_{year}", "lnN"),
                 "weight_mu_id_muon": rl.NuisanceParameter(f"CMS_mu_id_{year}", "lnN"),
                 "weight_mu_L1Prefiring": rl.NuisanceParameter(f"CMS_L1Prefiring_{year}", "lnN"),
-                "weight_mu_trigger_iso_muon": rl.NuisanceParameter("CMS_btagSF", "lnN"),
+                "weight_mu_trigger_iso_muon": rl.NuisanceParameter(f"CMS_mu_trigger_iso_{year}", "lnN"),
                 "weight_mu_trigger_noniso_muon": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_trigger_{year}", "lnN"),
             },
             # signal
@@ -231,45 +233,39 @@ def rhalphabet(hists_templates, year, lep_ch, blind, blind_samples, blind_region
                 stype = rl.Sample.SIGNAL if sName in sigs else rl.Sample.BACKGROUND
                 sample = rl.TemplateSample(ch.name + "_" + labels[sName], stype, templ)
 
-                # systematics NOT from parquets
+                # SYSTEMATICS NOT FROM PARQUETS
                 for sys_name, sys_value in systs_dict.items():
-                    if systs_dict_values[sys_name][1] is None:  # if max is the same as min
+                    if systs_dict_values[sys_name][1] is None:  # if up and down are the same
                         sample.setParamEffect(sys_value, systs_dict_values[sys_name][0])
                     else:
                         sample.setParamEffect(sys_value, systs_dict_values[sys_name][0], systs_dict_values[sys_name][1])
 
-                # systematics from parquets
-                # apply systematics that are common for all samples
-                for sys_name, sys_value in sys_from_parquets[lep_ch]["all_samples"].items():
-                    syst_up = h[{"samples": sName, "fj_pt": ptbin, "systematic": sys_name + "Up"}].values()
-                    syst_do = h[{"samples": sName, "fj_pt": ptbin, "systematic": sys_name + "Down"}].values()
-
-                    if sys_value.combinePrior == "lnN":
+                # SYSTEMATICS FROM PARQUETS
+                for syst_on_sample in ["all_samples", sName]:  # apply common systs and per sample systs
+                    for sys_name, sys_value in sys_from_parquets[lep_ch][syst_on_sample].items():
+                        syst_up = h[{"samples": sName, "fj_pt": ptbin, "systematic": sys_name + "Up"}].values()
+                        syst_do = h[{"samples": sName, "fj_pt": ptbin, "systematic": sys_name + "Down"}].values()
                         nominal = h[{"samples": sName, "fj_pt": ptbin, "systematic": "nominal"}].values()
 
-                        eff_up = shape_to_num(syst_up, nominal)
-                        eff_do = shape_to_num(syst_do, nominal)
+                        if sys_value.combinePrior == "lnN":
+                            eff_up = shape_to_num(syst_up, nominal)
+                            eff_do = shape_to_num(syst_do, nominal)
 
-                        sample.setParamEffect(sys_value, eff_up, eff_do)
+                            # if (math.isclose(1, eff_up, rel_tol=1e-4)) & (
+                            #     math.isclose(1, eff_do, rel_tol=1e-4)
+                            # ):  # leave it as '-'
+                            #     continue
 
-                    else:
-                        sample.setParamEffect(sys_value, syst_up, syst_do)
+                            if math.isclose(eff_up, eff_do, rel_tol=1e-2):  # if up and down are the same
+                                sample.setParamEffect(
+                                    sys_value, max(eff_up, eff_do)
+                                )  # TODO: should not need max here so fix negative weights
+                            else:
+                                sample.setParamEffect(sys_value, eff_up, eff_do)
 
-                # apply systematics that are common for this particular sample
-                for sys_name, sys_value in sys_from_parquets[lep_ch][sName].items():
-                    syst_up = h[{"samples": sName, "fj_pt": ptbin, "systematic": sys_name + "Up"}].values()
-                    syst_do = h[{"samples": sName, "fj_pt": ptbin, "systematic": sys_name + "Down"}].values()
-
-                    if sys_value.combinePrior == "lnN":
-                        nominal = h[{"samples": sName, "fj_pt": ptbin, "systematic": "nominal"}].values()
-
-                        eff_up = shape_to_num(syst_up, nominal)
-                        eff_do = shape_to_num(syst_do, nominal)
-
-                        sample.setParamEffect(sys_value, eff_up, eff_do)
-
-                    else:
-                        sample.setParamEffect(sys_value, syst_up, syst_do)
+                        else:
+                            sample.setParamEffect(sys_value, (syst_up / nominal), (syst_do / nominal))
+                            # sample.setParamEffect(sys_value, syst_up, syst_do)
 
                 ch.addSample(sample)
 
@@ -300,7 +296,10 @@ def rhalphabet(hists_templates, year, lep_ch, blind, blind_samples, blind_region
             / h_fail[{"samples": "QCD", "systematic": "nominal"}].sum()
         )
 
-        tf_dataResidual = rl.BernsteinPoly(f"{CMS_PARAMS_LABEL}_tf_dataResidual", (2, 2), ["pt", "rho"], limits=(-20, 20))
+        tf_dataResidual = rl.BasisPoly(
+            f"{CMS_PARAMS_LABEL}_tf_dataResidual", (2, 2), ["pt", "rho"], limits=(-20, 20), basis="Bernstein"
+        )
+
         tf_dataResidual_params = tf_dataResidual(pt_scaled, rho_scaled)
         tf_params_pass = qcd_eff * tf_dataResidual_params
 
@@ -359,7 +358,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # python create_datacard.py --years 2017 --channels mu,ele --tag test
+    # python create_datacard.py --years 2017 --channels mu --tag v1
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--years", dest="years", default="2017", help="years separated by commas")

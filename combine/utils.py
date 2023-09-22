@@ -97,6 +97,12 @@ def shape_to_num(var, nom, clip=1.5):
     nom_rate = np.sum(nom)
     var_rate = np.sum(var)
 
+    # print("nom", nom_rate, "var", var_rate, "ratio", var_rate / nom_rate)
+    # print(var)
+
+    if var_rate == nom_rate:  # in cases when both are zero
+        return 1
+
     if abs(var_rate / nom_rate) > clip:
         var_rate = clip * nom_rate
 

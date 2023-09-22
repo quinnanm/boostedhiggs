@@ -1,38 +1,32 @@
-# Datacard for <Channel (ptbin3fail) instance at 0x7fa52c177c10> generated on 2023-09-20 04:45:10.131041
+# Datacard for <Channel (ptbin3fail) instance at 0x7f111b3eac50> generated on 2023-09-22 08:39:35.226537
 imax 1 # number of categories ('bins' but here we are using shape templates)
 jmax 8 # number of samples minus 1
-kmax 24 # number of nuisance parameters
+kmax 18 # number of nuisance parameters
 shapes * ptbin3fail testModel.root testModel:ptbin3fail_$PROCESS testModel:ptbin3fail_$PROCESS_$SYSTEMATIC
 bin ptbin3fail
-observation 448.000
-bin                                      ptbin3fail  ptbin3fail     ptbin3fail     ptbin3fail     ptbin3fail     ptbin3fail     ptbin3fail  ptbin3fail  ptbin3fail
-process                                         ggF         VBF             VH            ttH          ttbar          wjets      singletop       zjets         qcd
-process                                          -3          -2             -1              0              1              2              3           4           5
-rate                                          0.000       0.000          3.313          3.276      28860.829        314.952       5099.295    -272.310       1.000
-BR_hww lnN                                        -           -  0.9848/1.0153  0.9848/1.0153  0.9848/1.0153  0.9848/1.0153  0.9848/1.0153           -           -
-CMS_HWW_boosted_PU_2017 shape                     -           -         1.0000         1.0000         1.0000         1.0000         1.0000      1.0000           -
-CMS_HWW_boosted_W_d1kappa_EW_2017 lnN             -           -              -              -              -  0.9993/1.0007              -           -           -
-CMS_HWW_boosted_W_d2kappa_EW_2017 lnN             -           -              -              -              -  0.9957/1.0043              -           -           -
-CMS_HWW_boosted_W_d3kappa_EW_2017 lnN             -           -              -              -              -  0.9994/1.0006              -           -           -
-CMS_HWW_boosted_d1K_NLO_2017 lnN                  -           -              -              -              -  0.9292/1.0708              -           -           -
-CMS_HWW_boosted_d2K_NLO_2017 lnN                  -           -              -              -              -  1.0505/0.9495              -           -           -
-CMS_HWW_boosted_d3K_NLO_2017 lnN                  -           -              -              -              -  0.9884/1.0116              -           -           -
-CMS_HWW_boosted_mu_trigger_2017 lnN         nan/nan     nan/nan  0.9989/1.0011  0.9991/1.0009  0.9984/1.0016  0.9990/1.0010  0.9988/1.0012           -           -
-CMS_HWW_boosted_scale_pt_3_VBF_2017 lnN           -     nan/nan              -              -              -              -              -           -           -
-CMS_HWW_boosted_scale_pt_3_ggF_2017 lnN     nan/nan           -              -              -              -              -              -           -           -
-CMS_HWW_boosted_scale_pt_7_VBF_2017 lnN           -     nan/nan              -              -              -              -              -           -           -
-CMS_HWW_boosted_scale_pt_7_ggF_2017 lnN     nan/nan           -              -              -              -              -              -           -           -
-CMS_L1Prefiring_2017 lnN                    nan/nan     nan/nan  1.0047/0.9952  1.0015/0.9984  1.0079/0.9921  1.0048/0.9951  1.0066/0.9935           -           -
-CMS_btagSF lnN                              nan/nan     nan/nan  1.0000/1.0000  1.0000/1.0000  0.9999/1.0001  0.9999/1.0001  0.9999/1.0001           -           -
-CMS_lumi_13TeV_2017 lnN                           -           -         1.0200         1.0200         1.0200         1.0200         1.0200           -           -
-CMS_mu_id_2017 lnN                          nan/nan     nan/nan  0.9988/1.0012  0.9993/1.0007  0.9990/1.0010  0.9990/1.0010  0.9991/1.0009           -           -
-CMS_mu_iso_2017 lnN                         nan/nan     nan/nan  1.0000/1.0000  1.0000/1.0000  1.0000/1.0000  0.9999/1.0001  1.0000/1.0000           -           -
-aS_Higgs_VBF lnN                                  -     nan/nan              -              -              -              -              -           -           -
-aS_Higgs_ggF lnN                            nan/nan           -              -              -              -              -              -           -           -
-pdfAS_Higgs_VBF lnN                               -     nan/nan              -              -              -              -              -           -           -
-pdfAS_Higgs_ggF lnN                         nan/nan           -              -              -              -              -              -           -           -
-pdf_Higgs_VBF lnN                                 -     nan/nan              -              -              -              -              -           -           -
-pdf_Higgs_ggF lnN                           nan/nan           -              -              -              -              -              -           -           -
+observation 435.000
+bin                                    ptbin3fail  ptbin3fail     ptbin3fail     ptbin3fail     ptbin3fail     ptbin3fail     ptbin3fail  ptbin3fail  ptbin3fail
+process                                       ggF         VBF             VH            ttH          ttbar          wjets      singletop       zjets         qcd
+process                                        -3          -2             -1              0              1              2              3           4           5
+rate                                        0.000       0.000          3.313          3.276      27099.892        305.630       4955.435    -287.179       1.000
+BR_hww lnN                                      -           -  0.9848/1.0153  0.9848/1.0153  0.9848/1.0153  0.9848/1.0153  0.9848/1.0153           -           -
+CMS_HWW_boosted_PU_2017 shape              1.0000      1.0000         1.0000         1.0000         1.0000         1.0000         1.0000           -           -
+CMS_HWW_boosted_W_d1kappa_EW_2017 lnN           -           -              -              -              -         1.0007              -           -           -
+CMS_HWW_boosted_W_d2kappa_EW_2017 lnN           -           -              -              -              -         1.0043              -           -           -
+CMS_HWW_boosted_W_d3kappa_EW_2017 lnN           -           -              -              -              -         1.0006              -           -           -
+CMS_HWW_boosted_d1K_NLO_2017 lnN                -           -              -              -              -  0.9291/1.0709              -           -           -
+CMS_HWW_boosted_d2K_NLO_2017 lnN                -           -              -              -              -  1.0504/0.9496              -           -           -
+CMS_HWW_boosted_d3K_NLO_2017 lnN                -           -              -              -              -  0.9884/1.0116              -           -           -
+CMS_HWW_boosted_mu_trigger_2017 lnN             -           -         1.0011         1.0009         1.0016         1.0010         1.0012           -           -
+CMS_L1Prefiring_2017 lnN                        -           -         1.0047         1.0015  1.0070/0.9929         1.0049  1.0055/0.9947           -           -
+CMS_lumi_13TeV_2017 lnN                         -           -         1.0200         1.0200         1.0200         1.0200         1.0200           -           -
+CMS_mu_id_2017 lnN                              -           -         1.0012         1.0007         1.0010         1.0010         1.0008           -           -
+CMS_mu_iso_2017 lnN                             -           -              -              -         1.0000         1.0001         1.0000           -           -
+CMS_mu_trigger_iso_2017 lnN                     -           -              -              -         1.0001         1.0001         1.0001           -           -
+UEPS_FSR_VBF shape                              -      1.0000              -              -              -              -              -           -           -
+UEPS_FSR_ggF shape                         1.0000           -              -              -              -              -              -           -           -
+UEPS_ISR_VBF shape                              -      1.0000              -              -              -              -              -           -           -
+UEPS_ISR_ggF shape                         1.0000           -              -              -              -              -              -           -           -
 ptbin3fail_qcd_bin0 extArg testModel.root:testModel
 qcdparam_ptbin3_massbin1 extArg testModel.root:testModel
 qcdparam_ptbin3_massbin2 extArg testModel.root:testModel
