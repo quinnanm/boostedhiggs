@@ -26,7 +26,7 @@ warnings.filterwarnings("ignore", message="Found duplicate branch ")
 pd.set_option("mode.chained_assignment", None)
 
 
-def make_events_dict(years, channels, samples_dir, samples, presel, weights):
+def make_events_dict(years, channels, samples_dir, samples, presel, weights, logging_=True):
     """
     Postprocess the parquets by applying preselections, saving an `event_weight` column, and
     a tagger score column in a big concatenated dataframe.
@@ -43,6 +43,10 @@ def make_events_dict(years, channels, samples_dir, samples, presel, weights):
         a dict() object events_dict[year][channel][samples] that contains big dataframes of procesed events
 
     """
+
+    if logging_ is False:
+        logger = logging.getLogger()
+        logger.disabled = True
 
     events_dict = {}
     for year in years:
@@ -154,7 +158,7 @@ def make_events_dict(years, channels, samples_dir, samples, presel, weights):
     return events_dict
 
 
-def make_hists_from_events_dict(events_dict, samples_to_plot, vars_to_plot):
+def make_hists_from_events_dict(events_dict, samples_to_plot, vars_to_plot, selections):
     """
     Takes an `events_dict` object that was processed by `make_events_dict` and starts filling histograms.
 
@@ -179,6 +183,9 @@ def make_hists_from_events_dict(events_dict, samples_to_plot, vars_to_plot):
             for year in events_dict:
                 for ch in events_dict[year]:
                     df = events_dict[year][ch][sample]
+
+                    for sel, value in selections[ch].items():
+                        df = df.query(value)
 
                     hists[var].fill(samples=sample, var=df[var], weight=df["event_weight"])
 
@@ -218,7 +225,20 @@ def main(args):
             exit()
 
     if args.plot_hists:
-        hists = make_hists_from_events_dict(events_dict, config["samples_to_plot"], config["vars_to_plot"])
+        PATH = args.outpath + f"stacked_hists_{args.tag}"
+        if not os.path.exists(PATH):
+            os.makedirs(PATH)
+
+        os.system(f"cp config_make_stacked_hists.yaml {PATH}/")
+
+        logging.info("##### SELECTIONS")
+        for ch in config["sel"]:
+            logging.info(f"{ch} CHANNEL")
+            for sel, value in config["sel"][ch].items():
+                logging.info(f"{sel}: {value}")
+            logging.info("-----------------------------")
+
+        hists = make_hists_from_events_dict(events_dict, config["samples_to_plot"], config["vars_to_plot"], config["sel"])
 
         utils.plot_hists(
             years,
@@ -230,23 +250,21 @@ def main(args):
             config["add_soverb"],
             config["only_sig"],
             config["mult"],
-            outpath=f"{args.outpath}/stacked_hists/",
+            outpath=PATH,
         )
 
 
 if __name__ == "__main__":
     # e.g.
-    # python make_stacked_hists.py --years 2017 --channels ele,mu --make_events_dict --plot_hists
+    # python make_stacked_hists.py --years 2017 --channels ele,mu --plot_hists --make_events_dict --tag v1
+    # python make_stacked_hists.py --years 2017 --channels ele,mu --plot_hists --tag v1
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--years", dest="years", default="2017", help="years separated by commas")
     parser.add_argument("--channels", dest="channels", default="mu", help="channels separated by commas")
-    parser.add_argument(
-        "--samples_dir", dest="samples_dir", default="../eos/Apr12_presel_", help="path to parquets", type=str
-    )
-    parser.add_argument(
-        "--outpath", dest="outpath", default="/Users/fmokhtar/Desktop/hww/test", help="path of the output", type=str
-    )
+    parser.add_argument("--samples_dir", dest="samples_dir", default="../eos/Jul21_", help="path to parquets", type=str)
+    parser.add_argument("--outpath", dest="outpath", default="hists/", help="path of the output", type=str)
+    parser.add_argument("--tag", dest="tag", default="test/", help="path of the output", type=str)
     parser.add_argument("--make_events_dict", dest="make_events_dict", help="Make events dictionary", action="store_true")
     parser.add_argument("--plot_hists", dest="plot_hists", help="Plot histograms", action="store_true")
 

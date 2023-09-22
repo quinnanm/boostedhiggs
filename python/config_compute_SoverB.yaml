@@ -11,7 +11,6 @@ samples:
     - TTbar
     - SingleTop
     - Diboson
-    - Data
 
 presel:
     ele:
@@ -21,11 +20,8 @@ presel:
 
 sel:
     ele:
-        none: ( ( fj_pt>0) )
-
-        # tagger99: ( ( inclusive_score<0.99) )
-        # tagger90: ( ( inclusive_score>0.5) )
-
+        tagger99: ( ( inclusive_score>0.99) )
+        # tagger90: ( ( inclusive_score>0.9) )
         # taggerINV: ( ( inclusive_score<0.9) )
 
         # bT: ( ( n_bjets_T>0) )
@@ -34,17 +30,11 @@ sel:
         # bT=: ( ( n_bjets_T==0) )
         # bM=: ( ( n_bjets_M==0) )
 
-        # lep_fj_dr: ( ( lep_fj_dr>0.6) )
+        lep_fj_dr: ( ( lep_fj_dr>0.5) )
 
     mu:
-        none: ( ( fj_pt>0) )
-
-        # tagger99: ( ( inclusive_score<0.99) )
-        # tagger90: ( ( inclusive_score>0.5) )
-
-        # tagger90: ( ( fj_ParT_all_score>0.9) )
-        # tagger90: ( ( fj_ParT_inclusive_score>0.9) )
-
+        tagger99: ( ( inclusive_score>0.99) )
+        # tagger90: ( ( inclusive_score>0.9) )
         # taggerINV: ( ( inclusive_score<0.9) )
 
         # bT: ( ( n_bjets_T>0) )
@@ -53,7 +43,7 @@ sel:
         # bT=: ( ( n_bjets_T==0) )
         # bM=: ( ( n_bjets_M==0) )
 
-        # lep_fj_dr: ( ( lep_fj_dr>0.6) )
+        lep_fj_dr: ( ( lep_fj_dr>0.5) )
 
 weights:
     ele:
@@ -73,46 +63,3 @@ weights:
         weight_trigger_iso_muon: 1
         weight_trigger_noniso_muon: 1
         weight_vjets_nominal: 1
-
-############## FOR PLOTTING PURPOSES
-vars_to_plot:
-    # - fj_minus_lep_m
-    # - fj_pt
-    # - lep_pt
-    # - fj_msoftdrop
-    # - fj_bjets_ophem
-    # - fj_bjets
-    - lep_fj_dr
-    # - lep_met_mt
-    # - ht
-    # - met_fj_dphi
-    # - deta
-    # - met
-    # - mjj
-    - rec_higgs_m
-    # - rec_higgs_pt
-    # - rec_dphi_WW
-    # - fj_ParT_mass
-    # - fj_ParticleNet_mass
-    # - inclusive_score
-
-samples_to_plot:
-    - ggF
-    - VH
-    - VBF
-    # - ttH
-    # - QCD
-    # - DYJets
-    - WJetsLNu
-    # - WZQQ
-    # - TTbar
-    # - SingleTop
-    # - Diboson
-    # - Data
-
-# plotting config
-add_data: 0
-logy: 0
-add_soverb: 1
-only_sig: False
-mult: 100
