@@ -562,3 +562,12 @@ tophad = [
 ]
 top = tope + topm + tophad
 bkgs = qcd + top
+others = [
+    "fj_ParT_probHbb",
+    "fj_ParT_probHcc",
+    "fj_ParT_probHss",
+    "fj_ParT_probHqq",
+    "fj_ParT_probHtauhtaue",
+    "fj_ParT_probHtauhtaum",
+    "fj_ParT_probHtauhtauh",
+]
