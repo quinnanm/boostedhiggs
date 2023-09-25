@@ -250,12 +250,28 @@ class InputProcessor(ProcessorABC):
         LepVars["lep_pt_ratio"] = (candidatelep_p4.pt / candidatefj.pt).to_numpy().filled(fill_value=0)
 
         Others = {}
-        Others["n_bjets_L"] = ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["L"], axis=1)
-        Others["n_bjets_M"] = ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["M"], axis=1)
-        Others["n_bjets_T"] = ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["T"], axis=1)
-        Others["rec_W_lnu"] = candidatelep_p4 + candidateNeutrino
-        Others["rec_W_qq"] = candidatefj - candidatelep_p4
-        Others["rec_higgs"] = Others["rec_W_qq"] + Others["rec_W_lnu"]
+        Others["n_bjets_L"] = (
+            ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["L"], axis=1)
+            .to_numpy()
+            .filled(fill_value=0)
+        )
+        Others["n_bjets_M"] = (
+            ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["M"], axis=1)
+            .to_numpy()
+            .filled(fill_value=0)
+        )
+        Others["n_bjets_T"] = (
+            ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["T"], axis=1)
+            .to_numpy()
+            .filled(fill_value=0)
+        )
+
+        rec_W_lnu = candidatelep_p4 + candidateNeutrino
+        rec_W_qq = candidatefj - candidatelep_p4
+
+        Others["rec_W_lnu_m"] = rec_W_lnu.mass.to_numpy().filled(fill_value=0)
+        Others["rec_W_qq_m"] = rec_W_qq.mass.to_numpy().filled(fill_value=0)
+        Others["rec_higgs_m"] = (rec_W_qq + rec_W_lnu).mass.to_numpy().filled(fill_value=0)
 
         METVars = {
             **get_met_features(
@@ -312,7 +328,7 @@ class InputProcessor(ProcessorABC):
 
         # convert output to pandas
         df = pd.DataFrame(skimmed_vars)
-        # df = df.dropna()  # very few events would have genjetmass NaN for some reason
+        df = df.dropna()  # very few events would have genjetmass NaN for some reason
 
         print(f"convert: {time.time() - start:.1f}s")
 
