@@ -19,7 +19,6 @@ from coffea.nanoevents.methods import candidate
 from coffea.processor import ProcessorABC, dict_accumulator
 
 from .corrections import btagWPs
-from .get_tagger_inputs import get_met_features
 from .run_tagger_inference import runInferenceTriton
 
 # from .run_tagger_inference import runInferenceTriton
@@ -31,13 +30,6 @@ warnings.filterwarnings("ignore", message="Missing cross-reference index ")
 warnings.filterwarnings("ignore", message="divide by zero encountered in log")
 np.seterr(invalid="ignore")
 
-P4 = {
-    "eta": "eta",
-    "phi": "phi",
-    "mass": "mass",
-    "pt": "pt",
-}
-
 
 class InputProcessor(ProcessorABC):
     """
@@ -45,27 +37,12 @@ class InputProcessor(ProcessorABC):
     """
 
     def __init__(self, year, label, inference, output_location="./outfiles/"):
-        """
-        :param num_jets: Number of jets to save
-        :type num_jets: int
-        """
-
-        """
-        Skimming variables
-        """
         self._year = year
         self.label = label
         self.inference = inference
         self._output_location = output_location
 
         self.skim_vars = {
-            "Event": {
-                "event": "event",
-            },
-            "FatJet": {
-                **P4,
-                "msoftdrop": "msoftdrop",
-            },
             "GenPart": [
                 "fj_genjetmass",
                 "fj_genRes_pt",
@@ -100,23 +77,22 @@ class InputProcessor(ProcessorABC):
                 "fj_Top_ntau",
                 "fj_Top_taudecay",
             ],
-            # formatted to match weaver's preprocess.json
+            "FatJet": {
+                "eta",
+                "phi",
+                "mass",
+                "pt",
+                "msoftdrop",
+            },
             "MET": {
-                "met_features": {
-                    "var_names": [
-                        "met_relpt",
-                        "met_relphi",
-                    ],
-                },
-                "met_points": {"var_length": 1},
+                "met_relpt",
+                "met_relphi",
             },
             "Lep": {
-                "fj_features": {
-                    "fj_lep_dR",
-                    "fj_lep_pt",
-                    "fj_lep_iso",
-                    "fj_lep_miniiso",
-                },
+                "fj_lep_dR",
+                "fj_lep_pt",
+                "fj_lep_iso",
+                "fj_lep_miniiso",
             },
             "Others": {
                 "n_bjets_L",
@@ -195,6 +171,11 @@ class InputProcessor(ProcessorABC):
         leptons = leptons[ak.argsort(leptons.pt, ascending=False)]
         candidatelep_p4 = build_p4(ak.firsts(leptons))
 
+        lep_reliso = (
+            candidatelep_p4.pfRelIso04_all if hasattr(candidatelep_p4, "pfRelIso04_all") else candidatelep_p4.pfRelIso03_all
+        )  # reliso for candidate lepton
+        lep_miso = candidatelep_p4.miniPFRelIso_all  # miniso for candidate lepton
+
         # fatjet
         fatjets = events[self.fatjet_label]
         good_fatjets = (fatjets.pt > 200) & (abs(fatjets.eta) < 2.5) & fatjets.isTight
@@ -220,6 +201,7 @@ class InputProcessor(ProcessorABC):
         dr_jet_lepfj = goodjets.delta_r(candidatefj)
         ak4_outside_ak8 = goodjets[dr_jet_lepfj > 0.8]
 
+        # rec_higgs
         candidateNeutrino = ak.zip(
             {
                 "pt": met.pt,
@@ -231,6 +213,9 @@ class InputProcessor(ProcessorABC):
             with_name="PtEtaPhiMCandidate",
             behavior=candidate.behavior,
         )
+        rec_W_lnu = candidatelep_p4 + candidateNeutrino
+        rec_W_qq = candidatefj - candidatelep_p4
+        rec_higgs = rec_W_qq + rec_W_lnu
 
         # selection
         selection = PackedSelection()
@@ -241,13 +226,15 @@ class InputProcessor(ProcessorABC):
 
         # variables
         FatJetVars = {
-            f"fj_{key}": ak.fill_none(candidatefj[var], FILL_NONE_VALUE) for (var, key) in self.skim_vars["FatJet"].items()
+            f"fj_{key}": ak.fill_none(candidatefj[var], FILL_NONE_VALUE) for (var, key) in self.skim_vars["FatJet"]
         }
 
         LepVars = {}
         LepVars["lep_dR_fj"] = candidatelep_p4.delta_r(candidatefj).to_numpy().filled(fill_value=0)
         LepVars["lep_pt"] = (candidatelep_p4.pt).to_numpy().filled(fill_value=0)
         LepVars["lep_pt_ratio"] = (candidatelep_p4.pt / candidatefj.pt).to_numpy().filled(fill_value=0)
+        LepVars["lep_reliso"] = lep_reliso.to_numpy().filled(fill_value=0)
+        LepVars["lep_miso"] = lep_miso.to_numpy().filled(fill_value=0)
 
         Others = {}
         Others["n_bjets_L"] = (
@@ -266,22 +253,13 @@ class InputProcessor(ProcessorABC):
             .filled(fill_value=0)
         )
 
-        rec_W_lnu = candidatelep_p4 + candidateNeutrino
-        rec_W_qq = candidatefj - candidatelep_p4
-
         Others["rec_W_lnu_m"] = rec_W_lnu.mass.to_numpy().filled(fill_value=0)
         Others["rec_W_qq_m"] = rec_W_qq.mass.to_numpy().filled(fill_value=0)
-        Others["rec_higgs_m"] = (rec_W_qq + rec_W_lnu).mass.to_numpy().filled(fill_value=0)
+        Others["rec_higgs_m"] = rec_higgs.mass.to_numpy().filled(fill_value=0)
 
-        METVars = {
-            **get_met_features(
-                self.skim_vars["MET"],
-                events,
-                candidatefj,
-                "MET",
-                normalize=False,
-            ),
-        }
+        METVars = {}
+        METVars["met_relpt"] = met.pt / candidatefj.pt
+        METVars["met_relphi"] = met.delta_phi(candidatefj)
 
         genparts = events.GenPart
         matched_mask, genVars = tagger_gen_matching(
