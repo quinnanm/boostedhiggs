@@ -21,7 +21,7 @@ from coffea.processor import ProcessorABC, dict_accumulator
 from .get_tagger_inputs import get_lep_features, get_met_features
 
 # from .run_tagger_inference import runInferenceTriton
-from .utils import FILL_NONE_VALUE, add_selection_no_cutflow, bkgs, sigs, tagger_gen_matching
+from .utils import FILL_NONE_VALUE, add_selection_no_cutflow, bkgs, others, sigs, tagger_gen_matching
 
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -248,7 +248,11 @@ class InputProcessor(ProcessorABC):
                 pnet_df = pd.DataFrame(pnet_vars)
 
                 num = pnet_df[sigs].sum(axis=1)
-                den = pnet_df[sigs].sum(axis=1) + pnet_df[bkgs].sum(axis=1)
+                den = pnet_df[sigs].sum(axis=1) + pnet_df[bkgs + others].sum(axis=1)
+                print("den1", den)
+
+                den = pnet_df.sum(axis=1)
+                print("den2", den)
 
                 scores = {"fj_ParT_inclusive_score": (num / den).values}
                 reg_mass = {"fj_ParT_mass": pnet_vars["fj_ParT_mass"]}
