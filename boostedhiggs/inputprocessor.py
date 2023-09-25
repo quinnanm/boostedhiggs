@@ -226,6 +226,15 @@ class InputProcessor(ProcessorABC):
             return {}
 
         # variables
+        genparts = events.GenPart
+        matched_mask, genVars = tagger_gen_matching(
+            events,
+            genparts,
+            candidatefj,
+            self.skim_vars["GenPart"],
+            label=self.label,
+        )
+
         FatJetVars = {f"fj_{var}": ak.fill_none(candidatefj[var], FILL_NONE_VALUE) for var in self.skim_vars["FatJet"]}
 
         LepVars = {}
@@ -259,15 +268,6 @@ class InputProcessor(ProcessorABC):
         METVars = {}
         METVars["met_relpt"] = met.pt / candidatefj.pt
         METVars["met_relphi"] = met.delta_phi(candidatefj)
-
-        genparts = events.GenPart
-        matched_mask, genVars = tagger_gen_matching(
-            events,
-            genparts,
-            candidatefj,
-            self.skim_vars["GenPart"],
-            label=self.label,
-        )
 
         skimmed_vars = {**FatJetVars, **{"matched_mask": matched_mask}, **genVars, **METVars, **LepVars, **Others}
 
