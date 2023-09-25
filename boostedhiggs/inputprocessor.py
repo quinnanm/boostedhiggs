@@ -169,12 +169,13 @@ class InputProcessor(ProcessorABC):
         muons = events["Muon"][events["Muon"].pt > 30]
         leptons = ak.concatenate([electrons, muons], axis=1)
         leptons = leptons[ak.argsort(leptons.pt, ascending=False)]
-        candidatelep_p4 = build_p4(ak.firsts(leptons))
+        candidatelep = ak.firsts(leptons)
+        candidatelep_p4 = build_p4(candidatelep)
 
         lep_reliso = (
-            candidatelep_p4.pfRelIso04_all if hasattr(candidatelep_p4, "pfRelIso04_all") else candidatelep_p4.pfRelIso03_all
+            candidatelep.pfRelIso04_all if hasattr(candidatelep, "pfRelIso04_all") else candidatelep.pfRelIso03_all
         )  # reliso for candidate lepton
-        lep_miso = candidatelep_p4.miniPFRelIso_all  # miniso for candidate lepton
+        lep_miso = candidatelep.miniPFRelIso_all  # miniso for candidate lepton
 
         # fatjet
         fatjets = events[self.fatjet_label]
