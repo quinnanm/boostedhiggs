@@ -290,7 +290,7 @@ class InputProcessor(ProcessorABC):
             # pnet_df = self.ak_to_pandas(pnet_vars)
             pnet_df = pd.DataFrame(pnet_vars)
 
-            scores = {"fj_ParT_inclusive_score": (pnet_df[sigs].sum(axis=1)).values}
+            scores = {"fj_ParT_score": (pnet_df[sigs].sum(axis=1)).values}
             reg_mass = {"fj_ParT_mass": pnet_vars["fj_ParT_mass"]}
 
             hidNeurons = {}
