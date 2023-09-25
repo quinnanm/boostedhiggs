@@ -77,24 +77,24 @@ class InputProcessor(ProcessorABC):
                 "fj_Top_ntau",
                 "fj_Top_taudecay",
             ],
-            "FatJet": {
+            "FatJet": [
                 "eta",
                 "phi",
                 "mass",
                 "pt",
                 "msoftdrop",
-            },
-            "MET": {
+            ],
+            "MET": [
                 "met_relpt",
                 "met_relphi",
-            },
-            "Lep": {
+            ],
+            "Lep": [
                 "fj_lep_dR",
                 "fj_lep_pt",
                 "fj_lep_iso",
                 "fj_lep_miniiso",
-            },
-            "Others": {
+            ],
+            "Others": [
                 "n_bjets_L",
                 "n_bjets_M",
                 "n_bjets_T",
@@ -102,7 +102,7 @@ class InputProcessor(ProcessorABC):
                 "rec_W_qq",
                 "rec_higgs",
                 "rec_higgs_m",
-            },
+            ],
         }
 
         self.tagger_resources_path = str(pathlib.Path(__file__).parent.resolve()) + "/tagger_resources/"
@@ -226,9 +226,7 @@ class InputProcessor(ProcessorABC):
             return {}
 
         # variables
-        FatJetVars = {
-            f"fj_{key}": ak.fill_none(candidatefj[var], FILL_NONE_VALUE) for (var, key) in self.skim_vars["FatJet"]
-        }
+        FatJetVars = {f"fj_{var}": ak.fill_none(candidatefj[var], FILL_NONE_VALUE) for var in self.skim_vars["FatJet"]}
 
         LepVars = {}
         LepVars["lep_dR_fj"] = candidatelep_p4.delta_r(candidatefj).to_numpy().filled(fill_value=0)
