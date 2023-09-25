@@ -326,9 +326,9 @@ class InputProcessor(ProcessorABC):
 
         print(f"dump parquet: {time.time() - start:.1f}s")
 
-        # TODO: drop NaNs from rootfiles
-        self.dump_root(skimmed_vars, fname)
-        print(f"dump rootfile: {time.time() - start:.1f}s")
+        # # TODO: drop NaNs from rootfiles
+        # self.dump_root(skimmed_vars, fname)
+        # print(f"dump rootfile: {time.time() - start:.1f}s")
 
         # for now do something like this to dump the parquets in root
         # OUTPATH = "../datafiles/ntuples/"
