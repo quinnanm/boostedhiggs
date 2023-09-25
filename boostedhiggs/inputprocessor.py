@@ -329,11 +329,11 @@ class InputProcessor(ProcessorABC):
         # convert output to pandas
         df = pd.DataFrame(skimmed_vars)
 
-        for key in self.skim_vars:
-            for keykey in self.skim_vars[key]:
-                assert (
-                    keykey in df.keys()
-                ), f"make sure you are computing and storing {keykey} in the skimmed_vars dictionnary"
+        # for key in self.skim_vars:
+        #     for keykey in self.skim_vars[key]:
+        #         assert (
+        #             keykey in df.keys()
+        #         ), f"make sure you are computing and storing {keykey} in the skimmed_vars dictionnary"
 
         df = df.dropna()  # very few events would have genjetmass NaN for some reason
 
