@@ -312,7 +312,7 @@ class InputProcessor(ProcessorABC):
 
         # convert output to pandas
         df = pd.DataFrame(skimmed_vars)
-        df = df.dropna()  # very few events would have genjetmass NaN for some reason
+        # df = df.dropna()  # very few events would have genjetmass NaN for some reason
 
         print(f"convert: {time.time() - start:.1f}s")
 
