@@ -44,7 +44,7 @@ class InputProcessor(ProcessorABC):
     Produces a flat training ntuple from PFNano.
     """
 
-    def __init__(self, label, inference, output_location="./outfiles/"):
+    def __init__(self, year, label, inference, output_location="./outfiles/"):
         """
         :param num_jets: Number of jets to save
         :type num_jets: int
@@ -53,6 +53,7 @@ class InputProcessor(ProcessorABC):
         """
         Skimming variables
         """
+        self._year = year
         self.label = label
         self.inference = inference
         self._output_location = output_location

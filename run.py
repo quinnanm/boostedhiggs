@@ -127,7 +127,9 @@ def main(args):
         # define processor
         from boostedhiggs.inputprocessor import InputProcessor
 
-        p = InputProcessor(args.label, inference=args.inference, output_location=f"./outfiles/{job_name}")
+        p = InputProcessor(
+            year=args.year, label=args.label, inference=args.inference, output_location=f"./outfiles/{job_name}"
+        )
     else:
         from boostedhiggs.trigger_efficiencies_processor import TriggerEfficienciesProcessor
 
