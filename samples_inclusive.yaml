@@ -115,14 +115,14 @@ sig:
 tau:
   - GluGluHToTauTau
 data:
- 2016:
+  2016:
     - SingleMuon_Run2016F
     - SingleMuon_Run2016G
     - SingleMuon_Run2016H
     - SingleElectron_Run2016F
     - SingleElectron_Run2016G
     - SingleElectron_Run2016H
- 2016APV:
+  2016APV:
     - SingleMuon_Run2016B_ver2_HIPM
     - SingleMuon_Run2016C_HIPM
     - SingleMuon_Run2016D_HIPM
@@ -133,7 +133,7 @@ data:
     - SingleElectron_Run2016D_HIPM
     - SingleElectron_Run2016E_HIPM
     - SingleElectron_Run2016F_HIPM
- 2017:
+  2017:
     - SingleMuon_Run2017B
     - SingleMuon_Run2017C
     - SingleMuon_Run2017D
@@ -144,7 +144,7 @@ data:
     - SingleElectron_Run2017D
     - SingleElectron_Run2017E
     - SingleElectron_Run2017F
- 2018:
+  2018:
     - SingleMuon_Run2018A
     - SingleMuon_Run2018B
     - SingleMuon_Run2018C
@@ -153,3 +153,5 @@ data:
     - EGamma_Run2018B
     - EGamma_Run2018C
     - EGamma_Run2018D
+top:
+  - TTToSemiLeptonic
