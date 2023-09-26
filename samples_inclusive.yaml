@@ -155,3 +155,8 @@ data:
     - EGamma_Run2018D
 top:
   - TTToSemiLeptonic
+wjets:
+  - WJetsToLNu_HT-100To200
+  - WJetsToLNu_HT-200To400
+  - WJetsToLNu_HT-400To600
+  - WJetsToLNu_HT-600To800
