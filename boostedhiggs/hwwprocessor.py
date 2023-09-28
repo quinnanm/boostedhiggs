@@ -445,6 +445,7 @@ class HwwProcessor(processor.ProcessorABC):
         self.add_selection(name="LepKin", sel=(candidatelep.pt > 30), channel="mu")
         self.add_selection(name="LepKin", sel=(candidatelep.pt > 40), channel="ele")
         self.add_selection(name="FatJetKin", sel=(candidatefj.pt > 200) & (ht > 200))
+        self.add_selection(name="dRFatJetLepOverlap", sel=(lep_fj_dr > 0.03))
 
         if self._region == "wjets":
             self.add_selection(name="dRFatJetLep08InvSameHemisphere", sel=(lep_fj_dr > 0.8) & (dphi_jet_lepfj < np.pi / 2))
@@ -626,6 +627,7 @@ class HwwProcessor(processor.ProcessorABC):
                             fj_idx_lep[selection_ch],
                             model_name=model_name,
                         )
+                        pnet_df = self.ak_to_pandas(pnet_vars)
 
                         hwwev = [
                             "fj_ParT_probHWqqWev0c",
@@ -650,43 +652,16 @@ class HwwProcessor(processor.ProcessorABC):
                             "fj_ParT_probHWqqWtauhv1c",
                         ]
                         sigs = hwwev + hwwmv + hwwhad
-                        qcd = [
-                            "fj_ParT_probQCDbb",
-                            "fj_ParT_probQCDcc",
-                            "fj_ParT_probQCDb",
-                            "fj_ParT_probQCDc",
-                            "fj_ParT_probQCDothers",
-                        ]
-                        tope = ["fj_ParT_probTopbWev", "fj_ParT_probTopbWtauev"]
-                        topm = ["fj_ParT_probTopbWmv", "fj_ParT_probTopbWtaumv"]
-                        tophad = [
-                            "fj_ParT_probTopbWqq0c",
-                            "fj_ParT_probTopbWqq1c",
-                            "fj_ParT_probTopbWq0c",
-                            "fj_ParT_probTopbWq1c",
-                            "fj_ParT_probTopbWtauhv",
-                        ]
-                        top = tope + topm + tophad
-                        bkgs = qcd + top
-                        others = [
-                            "fj_ParT_probHbb",
-                            "fj_ParT_probHcc",
-                            "fj_ParT_probHss",
-                            "fj_ParT_probHqq",
-                            "fj_ParT_probHtauhtaue",
-                            "fj_ParT_probHtauhtaum",
-                            "fj_ParT_probHtauhtauh",
-                        ]
 
-                        pnet_df = self.ak_to_pandas(pnet_vars)
-                        num = pnet_df[sigs].sum(axis=1)
-                        den = pnet_df[sigs].sum(axis=1) + pnet_df[bkgs].sum(axis=1)
-                        den_all = pnet_df[sigs].sum(axis=1) + pnet_df[bkgs + others].sum(axis=1)
+                        scores = {"fj_ParT_score": pnet_df[sigs].sum(axis=1).values}
 
-                        scores = {"fj_ParT_inclusive_score": (num / den).values, "fj_ParT_all_score": (num / den_all).values}
+                        hidNeurons = {}
+                        for key in pnet_vars:
+                            if "hidNeuron" in key:
+                                hidNeurons[key] = pnet_vars[key]
 
                         reg_mass = {"fj_ParT_mass": pnet_vars["fj_ParT_mass"]}
-                        output[ch] = {**output[ch], **scores, **reg_mass}
+                        output[ch] = {**output[ch], **scores, **reg_mass, **hidNeurons}
 
             else:
                 output[ch] = {}
