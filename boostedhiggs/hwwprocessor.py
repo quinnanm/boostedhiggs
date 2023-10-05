@@ -77,7 +77,7 @@ class HwwProcessor(processor.ProcessorABC):
         self._channels = channels
         self._region = region
         self._systematics = systematics
-        print(f"Will apply selections applicable to {region} region")
+        # print(f"Will apply selections applicable to {region} region")
 
         self._output_location = output_location
 
