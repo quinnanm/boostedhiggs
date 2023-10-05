@@ -14,7 +14,6 @@ from coffea.analysis_tools import PackedSelection, Weights
 from coffea.nanoevents.methods import candidate
 
 from boostedhiggs.corrections import (
-    add_btag_weights,
     add_HiggsEW_kFactors,
     add_lepton_weight,
     add_pdf_weight,
@@ -25,6 +24,7 @@ from boostedhiggs.corrections import (
     add_VJets_kFactors,
     btagWPs,
     corrected_msoftdrop,
+    get_btag_weights_farouk,
     get_jec_jets,
     met_factory,
 )
@@ -287,7 +287,7 @@ class HwwProcessor(processor.ProcessorABC):
         met_fjlep_dphi = candidatefj.delta_phi(met)
 
         # b-jets
-        dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj))
+        # dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj))
         dr_jet_lepfj = goodjets.delta_r(candidatefj)
         ak4_outside_ak8 = goodjets[dr_jet_lepfj > 0.8]
 
@@ -324,6 +324,7 @@ class HwwProcessor(processor.ProcessorABC):
             "n_bjetsDeepCSV_L": n_bjetsDeepCSV_L,
             "n_bjetsDeepCSV_M": n_bjetsDeepCSV_M,
             "n_bjetsDeepCSV_T": n_bjetsDeepCSV_T,
+            "fj_lsf3": candidatefj.lsf3,
         }
 
         fatjetvars = {
@@ -447,11 +448,6 @@ class HwwProcessor(processor.ProcessorABC):
         self.add_selection(name="FatJetKin", sel=(candidatefj.pt > 200) & (ht > 200))
         self.add_selection(name="dRFatJetLepOverlap", sel=(lep_fj_dr > 0.03))
 
-        if self._region == "wjets":
-            self.add_selection(name="dRFatJetLep08InvSameHemisphere", sel=(lep_fj_dr > 0.8) & (dphi_jet_lepfj < np.pi / 2))
-        else:
-            self.add_selection(name="dRFatJetLep08", sel=(lep_fj_dr < 0.8))
-
         if self._region == "zll":
             secondlep_p4 = build_p4(ak.firsts(goodleptons[:, 1:2]))
             variables["secondlep_pt"] = secondlep_p4.pt
@@ -480,42 +476,42 @@ class HwwProcessor(processor.ProcessorABC):
                 channel="ele",
             )
 
-        if self._region == "qcd":
-            # invert lepton isolation
-            self.add_selection(
-                name="LepIsolationInv",
-                sel=(((candidatelep.pt < 120) & (lep_reliso > 0.15)) | (candidatelep.pt >= 120)),
-                channel="ele",
-            )
-            self.add_selection(
-                name="LepIsolationInv",
-                sel=(((candidatelep.pt < 55) & (lep_reliso > 0.15)) | (candidatelep.pt >= 55)),
-                channel="mu",
-            )
-            # invert lepton misolation
-            self.add_selection(
-                name="LepMisolationInv",
-                sel=((candidatelep.pt < 55) | ((lep_miso > 0.2) & (candidatelep.pt >= 55))),
-                channel="mu",
-            )
-        else:
-            # lepton isolation
-            self.add_selection(
-                name="LepIsolation",
-                sel=(((candidatelep.pt < 120) & (lep_reliso < 0.15)) | (candidatelep.pt >= 120)),
-                channel="ele",
-            )
-            self.add_selection(
-                name="LepIsolation",
-                sel=(((candidatelep.pt < 55) & (lep_reliso < 0.15)) | (candidatelep.pt >= 55)),
-                channel="mu",
-            )
-            # lepton misolation
-            self.add_selection(
-                name="LepMisolation",
-                sel=((candidatelep.pt < 55) | ((lep_miso < 0.2) & (candidatelep.pt >= 55))),
-                channel="mu",
-            )
+        # if self._region == "qcd":
+        #     # invert lepton isolation
+        #     self.add_selection(
+        #         name="LepIsolationInv",
+        #         sel=(((candidatelep.pt < 120) & (lep_reliso > 0.15)) | (candidatelep.pt >= 120)),
+        #         channel="ele",
+        #     )
+        #     self.add_selection(
+        #         name="LepIsolationInv",
+        #         sel=(((candidatelep.pt < 55) & (lep_reliso > 0.15)) | (candidatelep.pt >= 55)),
+        #         channel="mu",
+        #     )
+        #     # invert lepton misolation
+        #     self.add_selection(
+        #         name="LepMisolationInv",
+        #         sel=((candidatelep.pt < 55) | ((lep_miso > 0.2) & (candidatelep.pt >= 55))),
+        #         channel="mu",
+        #     )
+        # else:
+        #     # lepton isolation
+        #     self.add_selection(
+        #         name="LepIsolation",
+        #         sel=(((candidatelep.pt < 120) & (lep_reliso < 0.15)) | (candidatelep.pt >= 120)),
+        #         channel="ele",
+        #     )
+        #     self.add_selection(
+        #         name="LepIsolation",
+        #         sel=(((candidatelep.pt < 55) & (lep_reliso < 0.15)) | (candidatelep.pt >= 55)),
+        #         channel="mu",
+        #     )
+        #     # lepton misolation
+        #     self.add_selection(
+        #         name="LepMisolation",
+        #         sel=((candidatelep.pt < 55) | ((lep_miso < 0.2) & (candidatelep.pt >= 55))),
+        #         channel="mu",
+        #     )
 
         # gen-level matching
         signal_mask = None
@@ -558,13 +554,15 @@ class HwwProcessor(processor.ProcessorABC):
                 elif ch == "ele":
                     add_lepton_weight(self.weights[ch], candidatelep, self._year + self._yearmod, "electron")
 
-                # TODO: fix btag weights
-                add_btag_weights(self.weights[ch], self._year, events.Jet, ak4_jet_selector_no_btag)
+                # # TODO: fix btag weights
+                # add_btag_weights(self.weights[ch], self._year, events.Jet, ak4_jet_selector_no_btag)
 
-                # if self.region == "top":
-                #     variables["btag_weights_farouk"] = add_btag_weights_farouk(
-                #         self._year, events.Jet, ak4_jet_selector_no_btag, wp="T"
-                #     )
+                for veto_ in [True, False]:
+                    for wp_ in ["T", "M", "L"]:
+                        variables = {
+                            **variables,
+                            **get_btag_weights_farouk(self._year, events.Jet, ak4_jet_selector_no_btag, veto=veto_, wp=wp_),
+                        }
 
                 add_VJets_kFactors(self.weights[ch], events.GenPart, dataset)
 
