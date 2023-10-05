@@ -342,9 +342,12 @@ def get_pog_json(obj, year):
     return f"{pog_correction_path}POG/{pog_json[0]}/{year}/{pog_json[1]}"
 
 
-def add_btag_weights_farouk(year: str, jets: JetArray, jet_selector: ak.Array, wp: str = "M", algo: str = "deepJet"):
+def get_btag_weights_farouk(year: str, jets: JetArray, jet_selector: ak.Array, veto, wp: str = "M", algo: str = "deepJet"):
     """
     Following https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods#1b_Event_reweighting_using_scale
+
+    Args:
+        veto: True means nbjets==0; and False means nbjets>0
 
     """
 
@@ -375,15 +378,48 @@ def add_btag_weights_farouk(year: str, jets: JetArray, jet_selector: ak.Array, w
     lightSF = _btagSF(cset, lightJets, "light", wp, algo)
     bcSF = _btagSF(cset, bcJets, "bc", wp, algo)
 
-    light_probs = ak.fill_none(ak.prod(1 - lightSF * lightEff, axis=-1), 1)
-    bc_probs = ak.fill_none(ak.prod(1 - bcSF * bcEff, axis=-1), 1)
+    lightSFUp = _btagSF(cset, lightJets, "light", wp, algo, syst="up")
+    lightSFDown = _btagSF(cset, lightJets, "light", wp, algo, syst="down")
+    lightSFUpCorr = _btagSF(cset, lightJets, "light", wp, algo, syst="up_correlated")
+    lightSFDownCorr = _btagSF(cset, lightJets, "light", wp, algo, syst="down_correlated")
+    bcSFUp = _btagSF(cset, bcJets, "bc", wp, algo, syst="up")
+    bcSFDown = _btagSF(cset, bcJets, "bc", wp, algo, syst="down")
+    bcSFUpCorr = _btagSF(cset, bcJets, "bc", wp, algo, syst="up_correlated")
+    bcSFDownCorr = _btagSF(cset, bcJets, "bc", wp, algo, syst="down_correlated")
 
-    weight = light_probs * bc_probs
+    def _get_weight(veto, lightEff, lightSF, bcEff, bcSF):
+        light_probs = ak.fill_none(ak.prod(1 - lightSF * lightEff, axis=-1), 1)
+        bc_probs = ak.fill_none(ak.prod(1 - bcSF * bcEff, axis=-1), 1)
+        weight = light_probs * bc_probs
 
-    # weight(>0 btag) = 1 - weight(0 btag)
-    weight = 1 - weight
+        if veto:
+            return weight
+        else:
+            return 1 - weight
 
-    return weight
+    weight = _get_weight(veto, lightEff, lightSF, bcEff, bcSF)
+
+    ret_weights = {}
+
+    if veto:
+        app = f"veto{wp}_"
+    else:
+        app = f"{wp}_"
+
+    ret_weights[app + "btagSF"] = weight
+    ret_weights[app + f"btagSFlight_{year}Up"] = _get_weight(veto, lightEff, lightSFUp, bcEff, bcSF)
+    ret_weights[app + f"btagSFlight_{year}Down"] = _get_weight(veto, lightEff, lightSFDown, bcEff, bcSF)
+
+    ret_weights[app + f"btagSFbc_{year}Up"] = _get_weight(veto, lightEff, lightSF, bcEff, bcSFUp)
+    ret_weights[app + f"btagSFbc_{year}Down"] = _get_weight(veto, lightEff, lightSF, bcEff, bcSFDown)
+
+    ret_weights[app + "btagSFlight_correlatedUp"] = _get_weight(veto, lightEff, lightSFUpCorr, bcEff, bcSF)
+    ret_weights[app + "btagSFlight_correlatedDown"] = _get_weight(veto, lightEff, lightSFDownCorr, bcEff, bcSF)
+
+    ret_weights[app + "btagSFbc_correlatedUp"] = _get_weight(veto, lightEff, lightSF, bcEff, bcSFUpCorr)
+    ret_weights[app + "btagSFbc_correlatedDown"] = _get_weight(veto, lightEff, lightSF, bcEff, bcSFDownCorr)
+
+    return ret_weights
 
 
 def add_btag_weights(
