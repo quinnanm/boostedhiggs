@@ -175,7 +175,7 @@ axis_dict = {
     "mu_highPtId": hist2.axis.Regular(5, 0, 5, name="var", label="Muon high pT ID", overflow=True),
     "fj_pt": hist2.axis.Regular(30, 200, 600, name="var", label=r"Jet $p_T$ [GeV]", overflow=True),
     "fj_msoftdrop": hist2.axis.Regular(35, 20, 250, name="var", label=r"Jet $m_{sd}$ [GeV]", overflow=True),
-    "rec_higgs_m": hist2.axis.Regular(35, 0, 480, name="var", label=r"Higgs reconstructed mass [GeV]", overflow=True),
+    "rec_higgs_m": hist2.axis.Regular(36, 50, 400, name="var", label=r"Higgs reconstructed mass [GeV]", overflow=True),
     "rec_higgs_pt": hist2.axis.Regular(30, 0, 1000, name="var", label=r"Higgs reconstructed $p_T$ [GeV]", overflow=True),
     "fj_pt_over_lep_pt": hist2.axis.Regular(35, 1, 10, name="var", label=r"$p_T$(Jet) / $p_T$(Lepton)", overflow=True),
     "rec_higgs_pt_over_lep_pt": hist2.axis.Regular(
@@ -201,12 +201,13 @@ axis_dict = {
     ),
     "nj": hist2.axis.Regular(40, 0, 10, name="var", label="number of jets outside candidate jet", overflow=True),
     "inclusive_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
+    "fj_ParT_score_finetuned_v2_1_12": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
     "fj_ParT_inclusive_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
     "fj_ParT_all_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
 }
 
 
-def plot_hists(years, channels, hists, vars_to_plot, add_data, logy, add_soverb, only_sig, mult, outpath):
+def plot_hists(years, channels, hists, vars_to_plot, add_data, logy, add_soverb, only_sig, mult, outpath, text_=""):
     # luminosity
     luminosity = 0
     for year in years:
@@ -377,6 +378,8 @@ def plot_hists(years, channels, hists, vars_to_plot, add_data, logy, add_soverb,
                 **errps,
                 label="Stat. unc.",
             )
+
+        ax.text(0.5, 0.9, text_, fontsize=14, transform=ax.transAxes, weight="bold")
 
         # plot the signal (times 10)
         if len(signal) > 0:
