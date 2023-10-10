@@ -56,7 +56,7 @@ def postprocess(years, channels, samples_dir, outpath):
                 data.to_parquet(f"{outpath}/{sample}/outfiles/{ch}.parquet")
 
                 for ifile in pkl_files:
-                    os.system(f"cp {out_files}/{ifile} {outpath}/{sample}/outfiles/{ifile}")
+                    os.system(f"cp {ifile} {outpath}/{sample}/outfiles/{os.path.basename(ifile)}")
 
 
 def main(args):
