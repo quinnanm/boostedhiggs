@@ -475,6 +475,7 @@ class HwwProcessor(processor.ProcessorABC):
                 & (n_loose_taus_ele == 0),
                 channel="ele",
             )
+        self.add_selection(name="dRFatJetLep08", sel=(lep_fj_dr < 0.8))
 
         # if self._region == "qcd":
         #     # invert lepton isolation
