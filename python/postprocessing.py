@@ -52,7 +52,7 @@ def postprocess(years, channels, samples_dir, outpath):
 
                 logging.info("---> Done with preselection")
 
-                os.mkdir(f"{outpath}/{sample}/outfiles/")
+                os.system(f"mkdir -p {outpath}/{sample}/outfiles/")
                 data.to_parquet(f"{outpath}/{sample}/outfiles/{ch}.parquet")
 
                 for ifile in pkl_files:
