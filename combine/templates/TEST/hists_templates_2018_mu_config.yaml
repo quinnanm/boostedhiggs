@@ -20,12 +20,12 @@ presel:
 
 regions_selections:
     pass: ( (fj_ParT_score_finetuned>0.97) ) # signal region
-    fail: ( (fj_ParT_score_finetuned<0.20) & (n_bjets_T == 0) ) # qcd control region
+    fail: ( (fj_ParT_score_finetuned<0.20) & (n_bjets_T == 0 ) ) # qcd control region
 
     ttbar_cr: ( (fj_ParT_score_finetuned<0.20) & (n_bjets_T > 0) )
     wjets_cr: ( (fj_ParT_score_finetuned<0.85) & (fj_ParT_score_finetuned>0.20) & (n_bjets_L == 0) )
 
-    pass2: ( (fj_ParT_score_finetuned<0.97) & (fj_ParT_score_finetuned>0.85) ) # signal region medium purity
+    pass2: ( (fj_ParT_score_finetuned<0.97) & (fj_ParT_score_finetuned>0.85) ) # signal region
 
 samples_dir: # keys here should match the keys above
     pass: ../eos/postprocessOct5_hidNeurons_

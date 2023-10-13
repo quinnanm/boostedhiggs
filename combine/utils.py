@@ -9,6 +9,9 @@ from typing import List
 import matplotlib.pyplot as plt
 import mplhep as hep
 import numpy as np
+import onnx
+import onnxruntime as ort
+import scipy
 from hist import Hist
 
 plt.style.use(hep.style.CMS)
@@ -145,3 +148,23 @@ def blindBins(h: Hist, blind_region: List, blind_samples: List[str] = []):
         h.view(flow=True)[:, :, :, lv:rv] = 0
 
     return h
+
+
+def get_finetuned_score(data, modelv="v2_nor2"):
+    # add finetuned tagger score
+    PATH = f"../../weaver-core-dev/experiments_finetuning/{modelv}/model.onnx"
+
+    input_dict = {
+        "highlevel": data.loc[:, "fj_ParT_hidNeuron000":"fj_ParT_hidNeuron127"].values.astype("float32"),
+    }
+
+    onnx_model = onnx.load(PATH)
+    onnx.checker.check_model(onnx_model)
+
+    ort_sess = ort.InferenceSession(
+        PATH,
+        providers=["AzureExecutionProvider"],
+    )
+    outputs = ort_sess.run(None, input_dict)
+
+    return scipy.special.softmax(outputs[0], axis=1)[:, 0]

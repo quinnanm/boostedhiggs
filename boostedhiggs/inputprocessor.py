@@ -100,7 +100,6 @@ class InputProcessor(ProcessorABC):
                 "n_bjets_T",
                 "rec_W_lnu",
                 "rec_W_qq",
-                "rec_higgs",
                 "rec_higgs_m",
             ],
         }

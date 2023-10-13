@@ -134,6 +134,8 @@ def make_events_dict(years, channels, samples_dir, samples, presel, weights, log
                 # add tagger score
                 if "Apr12_presel" in samples_dir:
                     data["inclusive_score"] = utils.disc_score(data, utils.new_sig, utils.inclusive_bkg)
+                elif "hidNeurons" in samples_dir:
+                    data["inclusive_score"] = data["fj_ParT_score"]
                 else:
                     data["inclusive_score"] = data["fj_ParT_all_score"]
 

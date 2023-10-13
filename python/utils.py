@@ -175,7 +175,7 @@ axis_dict = {
     "mu_highPtId": hist2.axis.Regular(5, 0, 5, name="var", label="Muon high pT ID", overflow=True),
     "fj_pt": hist2.axis.Regular(30, 200, 600, name="var", label=r"Jet $p_T$ [GeV]", overflow=True),
     "fj_msoftdrop": hist2.axis.Regular(35, 20, 250, name="var", label=r"Jet $m_{sd}$ [GeV]", overflow=True),
-    "rec_higgs_m": hist2.axis.Regular(36, 50, 400, name="var", label=r"Higgs reconstructed mass [GeV]", overflow=True),
+    "rec_higgs_m": hist2.axis.Regular(26, 50, 300, name="var", label=r"Higgs reconstructed mass [GeV]", overflow=True),
     "rec_higgs_pt": hist2.axis.Regular(30, 0, 1000, name="var", label=r"Higgs reconstructed $p_T$ [GeV]", overflow=True),
     "fj_pt_over_lep_pt": hist2.axis.Regular(35, 1, 10, name="var", label=r"$p_T$(Jet) / $p_T$(Lepton)", overflow=True),
     "rec_higgs_pt_over_lep_pt": hist2.axis.Regular(
@@ -207,7 +207,9 @@ axis_dict = {
 }
 
 
-def plot_hists(years, channels, hists, vars_to_plot, add_data, logy, add_soverb, only_sig, mult, outpath, text_=""):
+def plot_hists(
+    years, channels, hists, vars_to_plot, add_data, logy, add_soverb, only_sig, mult, outpath, text_="", blind_region=None
+):
     # luminosity
     luminosity = 0
     for year in years:
@@ -326,6 +328,14 @@ def plot_hists(years, channels, hists, vars_to_plot, add_data, logy, add_soverb,
                 "markersize": 10.0,
                 "elinewidth": 1,
             }
+
+            if blind_region:
+                massbins = data.axes[-1].edges
+                lv = int(np.searchsorted(massbins, blind_region[0], "right"))
+                rv = int(np.searchsorted(massbins, blind_region[1], "left") + 1)
+
+                data.view(flow=True)[lv:rv] = 0
+
             hep.histplot(
                 data,
                 ax=ax,
@@ -512,4 +522,4 @@ def plot_hists(years, channels, hists, vars_to_plot, add_data, logy, add_soverb,
         if not os.path.exists(outpath):
             os.makedirs(outpath)
 
-        plt.savefig(f"{outpath}/{var}.pdf", bbox_inches="tight")
+        plt.savefig(f"{outpath}/stacked_hists_{var}.pdf", bbox_inches="tight")

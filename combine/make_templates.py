@@ -89,6 +89,17 @@ weights = {
     ],
 }
 
+sel = {
+    "pass": {
+        "mu": [[("lep_pt", "<", 55), (("lep_isolation", "<", 0.15))], [("lep_misolation", "<", 0.2), ("lep_pt", ">=", 55)]],
+        "ele": [[("lep_pt", "<", 120), (("lep_isolation", "<", 0.15))], [("lep_pt", ">=", 120)]],
+    },
+    "fail": {
+        "mu": [[("lep_pt", "<", 55), (("lep_isolation", ">", 0.15))], [("lep_misolation", ">", 0.2), ("lep_pt", ">=", 55)]],
+        "ele": [[("lep_pt", "<", 120), (("lep_isolation", ">", 0.15))], [("lep_pt", ">=", 120)]],
+    },
+}
+
 
 def get_templates(year, ch, samples_dir, samples, presel, regions_selections):
     """
@@ -147,15 +158,21 @@ def get_templates(year, ch, samples_dir, samples, presel, regions_selections):
             logging.info(f"Finding {sample} samples and should combine them under {sample_to_use}")
 
             out_files = f"{samples_dir[region] + year}/{sample}/outfiles/"
-            parquet_files = glob.glob(f"{out_files}/*_{ch}.parquet")
+
+            if "postprocess" in samples_dir[region]:
+                parquet_files = glob.glob(f"{out_files}/{ch}.parquet")
+            else:
+                parquet_files = glob.glob(f"{out_files}/*_{ch}.parquet")
             pkl_files = glob.glob(f"{out_files}/*.pkl")
 
             if not parquet_files:
                 logging.info(f"No parquet file for {sample}")
                 continue
-
             try:
-                data = pd.read_parquet(parquet_files)
+                if "fail" in region:
+                    data = pd.read_parquet(parquet_files, filters=sel["fail"][ch])
+                else:
+                    data = pd.read_parquet(parquet_files, filters=sel["pass"][ch])
 
             except pyarrow.lib.ArrowInvalid:
                 # empty parquet because no event passed selection
@@ -166,7 +183,18 @@ def get_templates(year, ch, samples_dir, samples, presel, regions_selections):
 
             # apply selection
             for selection in presel[ch]:
+                print(presel[ch][selection])
+                logging.info(f"Applying {selection} selection on {len(data)} events")
                 data = data.query(presel[ch][selection])
+
+            # use hidNeurons to get the finetuned scores
+            data["fj_ParT_score_finetuned"] = utils.get_finetuned_score(data, modelv="v2_nor2")
+
+            # drop hidNeurons which are not needed anymore
+            data = data[data.columns.drop(list(data.filter(regex="hidNeuron")))]
+
+            # fill histograms
+            data = data.query(regions_selections[region])
 
             # get event_weight
             if sample_to_use != "Data":
@@ -174,12 +202,6 @@ def get_templates(year, ch, samples_dir, samples, presel, regions_selections):
             else:
                 data[f"weight_{ch}"] = 1  # not stored for data
                 event_weight = 1
-
-            # add tagger scores
-            data["inclusive_score"] = data["fj_ParT_all_score"]
-
-            # fill histograms
-            data = data.query(regions_selections[region])
 
             # Nominal weight
             nominal = data[f"weight_{ch}"] * event_weight
