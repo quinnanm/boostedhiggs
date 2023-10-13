@@ -85,7 +85,9 @@ input_feat = {
 }
 
 
-def make_events_dict(years, channels, samples_dir, samples, presel, logging_=True, region="signal_region"):
+def make_events_dict(
+    years, channels, samples_dir, samples, presel, logging_=True, region="signal_region", keep_weights=False
+):
     """
     Postprocess the parquets by applying preselections, saving an `event_weight` column, and
     a tagger score column in a big concatenated dataframe.
@@ -158,15 +160,16 @@ def make_events_dict(years, channels, samples_dir, samples, presel, logging_=Tru
                 if len(data) == 0:
                     continue
 
-                data = data[data.columns.drop(list(data.filter(regex="weight_mu_")))]
-                data = data[data.columns.drop(list(data.filter(regex="weight_ele_")))]
-                data = data[data.columns.drop(list(data.filter(regex="L_btag")))]
-                data = data[data.columns.drop(list(data.filter(regex="M_btag")))]
-                data = data[data.columns.drop(list(data.filter(regex="T_btag")))]
-                data = data[data.columns.drop(list(data.filter(regex="veto")))]
-                data = data[data.columns.drop(list(data.filter(regex="fj_H_VV_")))]
-                data = data[data.columns.drop(list(data.filter(regex="_up")))]
-                data = data[data.columns.drop(list(data.filter(regex="_down")))]
+                if not keep_weights:
+                    data = data[data.columns.drop(list(data.filter(regex="weight_mu_")))]
+                    data = data[data.columns.drop(list(data.filter(regex="weight_ele_")))]
+                    data = data[data.columns.drop(list(data.filter(regex="L_btag")))]
+                    data = data[data.columns.drop(list(data.filter(regex="M_btag")))]
+                    data = data[data.columns.drop(list(data.filter(regex="T_btag")))]
+                    data = data[data.columns.drop(list(data.filter(regex="veto")))]
+                    data = data[data.columns.drop(list(data.filter(regex="fj_H_VV_")))]
+                    data = data[data.columns.drop(list(data.filter(regex="_up")))]
+                    data = data[data.columns.drop(list(data.filter(regex="_down")))]
 
                 # get event_weight
                 if sample_to_use != "Data":

@@ -243,6 +243,11 @@ def rhalphabet(hists_templates, year, lep_ch, blind, blind_samples, blind_region
                 # SYSTEMATICS FROM PARQUETS
                 for syst_on_sample in ["all_samples", sName]:  # apply common systs and per sample systs
                     for sys_name, sys_value in sys_from_parquets[lep_ch][syst_on_sample].items():
+                        if (year == "2018") and ("L1Prefiring" in sys_name):
+                            continue
+
+                        # print(sName, sys_value, ptbin, region, lep_ch)
+
                         syst_up = h[{"samples": sName, "fj_pt": ptbin, "systematic": sys_name + "Up"}].values()
                         syst_do = h[{"samples": sName, "fj_pt": ptbin, "systematic": sys_name + "Down"}].values()
                         nominal = h[{"samples": sName, "fj_pt": ptbin, "systematic": "nominal"}].values()
@@ -257,15 +262,12 @@ def rhalphabet(hists_templates, year, lep_ch, blind, blind_samples, blind_region
                             #     continue
 
                             if math.isclose(eff_up, eff_do, rel_tol=1e-2):  # if up and down are the same
-                                sample.setParamEffect(
-                                    sys_value, max(eff_up, eff_do)
-                                )  # TODO: should not need max here so fix negative weights
+                                sample.setParamEffect(sys_value, max(eff_up, eff_do))
                             else:
-                                sample.setParamEffect(sys_value, eff_up, eff_do)
+                                sample.setParamEffect(sys_value, max(eff_up, eff_do), min(eff_up, eff_do))
 
                         else:
                             sample.setParamEffect(sys_value, (syst_up / nominal), (syst_do / nominal))
-                            # sample.setParamEffect(sys_value, syst_up, syst_do)
 
                 ch.addSample(sample)
 

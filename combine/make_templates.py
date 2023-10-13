@@ -67,7 +67,7 @@ weights = {
         "weight_ele_L1Prefiring",
         "weight_ele_trigger_electron",
         "weight_ele_reco_electron",
-        # ggF & VBF
+        # # ggF & VBF
         "weight_ele_aS_weight",
         "weight_ele_UEPS_FSR",
         "weight_ele_UEPS_ISR",
@@ -82,8 +82,7 @@ weights = {
         "weight_ele_d1kappa_EW",
         "weight_ele_W_d2kappa_EW",
         "weight_ele_W_d3kappa_EW",
-        # DY
-        "weight_ele_d1kappa_EW",
+        # # DY
         "weight_ele_Z_d2kappa_EW",
         "weight_ele_Z_d3kappa_EW",
     ],
@@ -152,7 +151,6 @@ def get_templates(year, ch, samples_dir, samples, presel, regions_selections):
                     sample_to_use = sample
 
             if sample_to_use not in samples:
-                logging.info(f"ATTENTION: {sample} will be skipped")
                 continue
 
             logging.info(f"Finding {sample} samples and should combine them under {sample_to_use}")
@@ -215,6 +213,19 @@ def get_templates(year, ch, samples_dir, samples, presel, regions_selections):
             )
 
             for weight in weights[ch]:
+                if (year == "2018") and ("L1Prefiring" in weight):
+                    continue
+
+                if sample_to_use == "Data":
+                    hists[region].fill(
+                        samples=sample_to_use,
+                        systematic=f"{weight}Up",
+                        fj_pt=data["fj_pt"],
+                        rec_higgs_m=data["rec_higgs_m"],
+                        weight=np.ones_like(data["fj_pt"]),
+                    )
+                    continue
+
                 # Up weight
                 try:
                     syst = data[f"{weight}Up"] * event_weight

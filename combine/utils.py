@@ -109,7 +109,9 @@ def shape_to_num(var, nom, clip=1.5):
     """
     nom_rate = np.sum(nom)
     var_rate = np.sum(var)
-
+    # print("nom", nom)
+    # print("var", var)
+    # print("-----------------------------------")
     # print("nom", nom_rate, "var", var_rate, "ratio", var_rate / nom_rate)
     # print(var)
 
