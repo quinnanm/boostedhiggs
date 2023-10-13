@@ -475,44 +475,7 @@ class HwwProcessor(processor.ProcessorABC):
                 & (n_loose_taus_ele == 0),
                 channel="ele",
             )
-        self.add_selection(name="dRFatJetLep08", sel=(lep_fj_dr < 0.8))
-
-        # if self._region == "qcd":
-        #     # invert lepton isolation
-        #     self.add_selection(
-        #         name="LepIsolationInv",
-        #         sel=(((candidatelep.pt < 120) & (lep_reliso > 0.15)) | (candidatelep.pt >= 120)),
-        #         channel="ele",
-        #     )
-        #     self.add_selection(
-        #         name="LepIsolationInv",
-        #         sel=(((candidatelep.pt < 55) & (lep_reliso > 0.15)) | (candidatelep.pt >= 55)),
-        #         channel="mu",
-        #     )
-        #     # invert lepton misolation
-        #     self.add_selection(
-        #         name="LepMisolationInv",
-        #         sel=((candidatelep.pt < 55) | ((lep_miso > 0.2) & (candidatelep.pt >= 55))),
-        #         channel="mu",
-        #     )
-        # else:
-        #     # lepton isolation
-        #     self.add_selection(
-        #         name="LepIsolation",
-        #         sel=(((candidatelep.pt < 120) & (lep_reliso < 0.15)) | (candidatelep.pt >= 120)),
-        #         channel="ele",
-        #     )
-        #     self.add_selection(
-        #         name="LepIsolation",
-        #         sel=(((candidatelep.pt < 55) & (lep_reliso < 0.15)) | (candidatelep.pt >= 55)),
-        #         channel="mu",
-        #     )
-        #     # lepton misolation
-        #     self.add_selection(
-        #         name="LepMisolation",
-        #         sel=((candidatelep.pt < 55) | ((lep_miso < 0.2) & (candidatelep.pt >= 55))),
-        #         channel="mu",
-        #     )
+        # self.add_selection(name="dRFatJetLep08", sel=(lep_fj_dr < 0.8))
 
         # gen-level matching
         signal_mask = None
