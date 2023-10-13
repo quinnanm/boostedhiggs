@@ -57,9 +57,19 @@ labels = {
     "DYJets": "zjets",
 }
 
-bkgs = ["TTbar", "WJetsLNu", "SingleTop", "DYJets"]
+bkgs = [
+    "TTbar",
+    "WJetsLNu",
+    "SingleTop",
+    "DYJets",
+]
 
-sigs = ["ggF", "VBF", "VH", "ttH"]
+sigs = [
+    "ggF",
+    "VBF",
+    "VH",
+    "ttH",
+]
 samples = sigs + bkgs
 
 
