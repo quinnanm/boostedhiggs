@@ -26,3 +26,5 @@ samples_dir:
     "2017": ../eos/postprocessOct9_hidNeurons_2017
     "2016APV": ../eos/postprocessOct13_hidNeurons_2016APV
     "2016": ../eos/postprocessOct13_hidNeurons_2016
+
+model_path: ../eos/model.onnx

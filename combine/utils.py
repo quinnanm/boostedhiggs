@@ -162,19 +162,16 @@ def blindBins(h: Hist, blind_region: List, blind_samples: List[str] = []):
     return h
 
 
-def get_finetuned_score(data, modelv="v2_nor2"):
-    # add finetuned tagger score
-    PATH = f"../../weaver-core-dev/experiments_finetuning/{modelv}/model.onnx"
-
+def get_finetuned_score(data, model_path):
     input_dict = {
         "highlevel": data.loc[:, "fj_ParT_hidNeuron000":"fj_ParT_hidNeuron127"].values.astype("float32"),
     }
 
-    onnx_model = onnx.load(PATH)
+    onnx_model = onnx.load(model_path)
     onnx.checker.check_model(onnx_model)
 
     ort_sess = ort.InferenceSession(
-        PATH,
+        model_path,
         providers=["AzureExecutionProvider"],
     )
     outputs = ort_sess.run(None, input_dict)

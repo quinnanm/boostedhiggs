@@ -89,7 +89,7 @@ weights = {
 }
 
 
-def get_templates(years, ch, samples, samples_dir, regions_selections):
+def get_templates(years, ch, samples, samples_dir, regions_selections, model_path):
     """
     Postprocesses the parquets by applying preselections, and fills templates for different regions.
 
@@ -99,6 +99,7 @@ def get_templates(years, ch, samples, samples_dir, regions_selections):
         samples [list]: samples to postprocess and save in the output (e.g. ["ggF", "QCD", "Data"])
         samples_dir [dict]: points to the path of the parquets for each region (note: the year will be appended)
         regions_selections [dict]: (e.g. `{"pass": ( (fj_ParT_score>0.97) & (n_bjets_M < 2) )}`)
+        model_path [str]: path to the ParT finetuned model.onnx
 
     Returns
         a dict() object hists[region] that contains histograms
@@ -134,7 +135,6 @@ def get_templates(years, ch, samples, samples_dir, regions_selections):
             luminosity += json.load(f)[ch][year] / 1000.0
 
     bins = {
-        # "fj_pt": [200, 300, 450, 650, 2000],
         "fj_pt": [200, 300, 450, 2000],
         "rec_higgs_m": list(range(50, 240, 20)),
     }
@@ -192,7 +192,7 @@ def get_templates(years, ch, samples, samples_dir, regions_selections):
                     continue
 
                 # use hidNeurons to get the finetuned scores
-                data["fj_ParT_score_finetuned"] = utils.get_finetuned_score(data, modelv="v2_nor2")
+                data["fj_ParT_score_finetuned"] = utils.get_finetuned_score(data, model_path)
 
                 # drop hidNeurons which are not needed anymore
                 data = data[data.columns.drop(list(data.filter(regex="hidNeuron")))]
@@ -220,6 +220,7 @@ def get_templates(years, ch, samples, samples_dir, regions_selections):
                     weight=nominal,
                 )
 
+                # Up and Down weights
                 for weight in weights[ch]:
                     if sample_to_use == "Data":
                         hists[region].fill(
@@ -237,9 +238,6 @@ def get_templates(years, ch, samples, samples_dir, regions_selections):
                             weight=np.ones_like(data["fj_pt"]),
                         )
                         continue
-
-                    # if (year == "2018") and ("L1Prefiring" in weight):
-                    #     continue
 
                     # Up weight
                     try:
@@ -279,27 +277,18 @@ def get_templates(years, ch, samples, samples_dir, regions_selections):
 def main(args):
     years = args.years.split(",")
     channels = args.channels.split(",")
-
-    os.system(f"mkdir -p {args.outdir}")
+    with open("config_make_templates.yaml", "r") as stream:
+        config = yaml.safe_load(stream)
 
     if len(years) == 4:
         save_as = "Run2"
     else:
         save_as = "_".join(years)
 
+    os.system(f"mkdir -p {args.outdir}")
     for ch in channels:
-        # os.system(f"cp config_make_templates.yaml {args.outdir}/hists_templates_{save_as}_{ch}_config.yaml")
-
-        # load config from yaml
-        with open("config_make_templates.yaml", "r") as stream:
-            config = yaml.safe_load(stream)
-
         hists = get_templates(
-            years,
-            ch,
-            config["samples"],
-            config["samples_dir"],
-            config["regions_selections"],
+            years, ch, config["samples"], config["samples_dir"], config["regions_selections"], config["model_path"]
         )
 
         with open(f"{args.outdir}/hists_templates_{save_as}_{ch}.pkl", "wb") as fp:
