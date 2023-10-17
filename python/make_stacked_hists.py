@@ -26,7 +26,21 @@ warnings.filterwarnings("ignore", message="Found duplicate branch ")
 pd.set_option("mode.chained_assignment", None)
 
 
-def make_events_dict(years, channels, samples_dir, samples, presel, weights, logging_=True):
+sel = {
+    "signal_region": {
+        "mu": [[("lep_pt", "<", 55), (("lep_isolation", "<", 0.15))], [("lep_misolation", "<", 0.2), ("lep_pt", ">=", 55)]],
+        "ele": [[("lep_pt", "<", 120), (("lep_isolation", "<", 0.15))], [("lep_pt", ">=", 120)]],
+    },
+    "qcd_region": {
+        "mu": [[("lep_pt", "<", 55), (("lep_isolation", ">", 0.15))], [("lep_misolation", ">", 0.2), ("lep_pt", ">=", 55)]],
+        "ele": [[("lep_pt", "<", 120), (("lep_isolation", ">", 0.15))], [("lep_pt", ">=", 120)]],
+    },
+}
+
+
+def make_events_dict(
+    years, channels, samples_dir, samples, presel, logging_=True, region="signal_region", keep_weights=False
+):
     """
     Postprocess the parquets by applying preselections, saving an `event_weight` column, and
     a tagger score column in a big concatenated dataframe.
@@ -34,10 +48,9 @@ def make_events_dict(years, channels, samples_dir, samples, presel, weights, log
     Args
         years [list]: years to postprocess and save in the output (e.g. ["2016APV", "2016"])
         channels [list]: channels to postprocess and save in the output (e.g. ["ele", "mu"])
-        samples_dir [str]: points to the path of the parquets (note: the year will be appended to the string)
+        samples_dir [str]: points to the path of the parquets
         samples [list]: samples to postprocess and save in the output (e.g. ["HWW", "QCD", "Data"])
         presel [dict]: selections to apply per ch (e.g. `presel = {"ele": {"pt cut": fj_pt>250}}`)
-        weights [dict]: weights to include in the event_weight per ch (e.g. `weights = {"mu": {"weight_genweight": 1}})
 
     Returns
         a dict() object events_dict[year][channel][samples] that contains big dataframes of procesed events
@@ -59,7 +72,7 @@ def make_events_dict(years, channels, samples_dir, samples, presel, weights, log
             with open("../fileset/luminosity.json") as f:
                 luminosity = json.load(f)[ch][year]
 
-            condor_dir = os.listdir(samples_dir + year)
+            condor_dir = os.listdir(samples_dir)
 
             for sample in condor_dir:
                 if sample == "DYJetsToLL_M-10to50":
@@ -78,8 +91,12 @@ def make_events_dict(years, channels, samples_dir, samples, presel, weights, log
 
                 logging.info(f"Finding {sample} samples and should combine them under {sample_to_use}")
 
-                out_files = f"{samples_dir + year}/{sample}/outfiles/"
-                parquet_files = glob.glob(f"{out_files}/*_{ch}.parquet")
+                out_files = f"{samples_dir}/{sample}/outfiles/"
+                if "postprocess" in samples_dir:
+                    parquet_files = glob.glob(f"{out_files}/{ch}.parquet")
+                else:
+                    parquet_files = glob.glob(f"{out_files}/*_{ch}.parquet")
+
                 pkl_files = glob.glob(f"{out_files}/*.pkl")
 
                 if not parquet_files:
@@ -87,7 +104,7 @@ def make_events_dict(years, channels, samples_dir, samples, presel, weights, log
                     continue
 
                 try:
-                    data = pd.read_parquet(parquet_files)
+                    data = pd.read_parquet(parquet_files, filters=sel[region][ch])
 
                 except pyarrow.lib.ArrowInvalid:
                     # empty parquet because no event passed selection
@@ -96,57 +113,39 @@ def make_events_dict(years, channels, samples_dir, samples, presel, weights, log
                 if len(data) == 0:
                     continue
 
-                # # replace the weight_pileup of the strange events with the mean weight_pileup of all the other events
-                # # TODO: draw distribution of number of primary vertices before and after applying this weight
-                # if sample_to_use != "Data":
-                #     strange_events = data["weight_pileup"] > 4
-                #     if len(strange_events) > 0:
-                #         data["weight_pileup"][strange_events] = data[~strange_events]["weight_pileup"].mean(axis=0)
+                if not keep_weights:
+                    data = data[data.columns.drop(list(data.filter(regex="weight_mu_")))]
+                    data = data[data.columns.drop(list(data.filter(regex="weight_ele_")))]
+                    data = data[data.columns.drop(list(data.filter(regex="L_btag")))]
+                    data = data[data.columns.drop(list(data.filter(regex="M_btag")))]
+                    data = data[data.columns.drop(list(data.filter(regex="T_btag")))]
+                    data = data[data.columns.drop(list(data.filter(regex="veto")))]
+                    data = data[data.columns.drop(list(data.filter(regex="fj_H_VV_")))]
+                    data = data[data.columns.drop(list(data.filter(regex="_up")))]
+                    data = data[data.columns.drop(list(data.filter(regex="_down")))]
 
                 # get event_weight
                 if sample_to_use != "Data":
                     event_weight = utils.get_xsecweight(pkl_files, year, sample, False, luminosity)
 
-                    if (
-                        ("Apr12_presel" in samples_dir)
-                        or ("Jul12QCD" in samples_dir)
-                        or ("Jul15_region_wjets" in samples_dir)
-                    ):
-                        logging.info("---> Accumulating event weights")
-                        for w in weights[ch]:
-                            if w not in data.keys():
-                                logging.info(f"{w} weight is not stored in parquet")
-                                continue
-                            if weights[ch][w] == 1:
-                                logging.info(f"Applying {w} weight")
-                                event_weight *= data[w]
-
-                        logging.info("---> Done with accumulating event weights")
-                    else:
-                        logging.info("---> Using already stored event weight")
-                        event_weight *= data[f"weight_{ch}"]
+                    logging.info("---> Using already stored event weight")
+                    event_weight *= data[f"weight_{ch}"]
 
                 else:
                     event_weight = np.ones_like(data["fj_pt"])
 
                 data["event_weight"] = event_weight
 
-                # add tagger score
-                if "Apr12_presel" in samples_dir:
-                    data["inclusive_score"] = utils.disc_score(data, utils.new_sig, utils.inclusive_bkg)
-                elif "hidNeurons" in samples_dir:
-                    data["inclusive_score"] = data["fj_ParT_score"]
-                else:
-                    data["inclusive_score"] = data["fj_ParT_all_score"]
+                # use hidNeurons to get the finetuned scores
+                data["fj_ParT_score_finetuned"] = utils.get_finetuned_score(data, modelv="v2_nor2")
+
+                # drop hidNeuron columns for memory
+                data = data[data.columns.drop(list(data.filter(regex="hidNeuron")))]
 
                 # apply selection
-                logging.info("---> Applying preselection")
-
                 for selection in presel[ch]:
-                    logging.info(f"applying {selection} selection on {len(data)} events")
+                    logging.info(f"Applying {selection} selection on {len(data)} events")
                     data = data.query(presel[ch][selection])
-
-                logging.info("---> Done with preselection")
 
                 logging.info(f"Will fill the {sample_to_use} dataframe with the remaining {len(data)} events")
                 logging.info(f"tot event weight {data['event_weight'].sum()} \n")
@@ -214,7 +213,6 @@ def main(args):
             args.samples_dir,
             config["samples"],
             config["presel"],
-            config["weights"],
         )
         with open(f"{args.outpath}/events_dict.pkl", "wb") as fp:
             pkl.dump(events_dict, fp)
@@ -258,13 +256,13 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # python make_stacked_hists.py --years 2017 --channels ele,mu --plot_hists --make_events_dict --tag v1
-    # python make_stacked_hists.py --years 2017 --channels ele,mu --plot_hists --tag v1
+    # python finetuned_make_stacked_hists.py --years 2017 --channels ele,mu --plot_hists --make_events_dict --tag v1
+    # python finetuned_make_stacked_hists.py --years 2017 --channels ele,mu --plot_hists --tag v1
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--years", dest="years", default="2017", help="years separated by commas")
     parser.add_argument("--channels", dest="channels", default="mu", help="channels separated by commas")
-    parser.add_argument("--samples_dir", dest="samples_dir", default="../eos/Jul21_", help="path to parquets", type=str)
+    parser.add_argument("--samples_dir", dest="samples_dir", default="../eos/Jul21_2017", help="path to parquets", type=str)
     parser.add_argument("--outpath", dest="outpath", default="hists/", help="path of the output", type=str)
     parser.add_argument("--tag", dest="tag", default="test/", help="path of the output", type=str)
     parser.add_argument("--make_events_dict", dest="make_events_dict", help="Make events dictionary", action="store_true")

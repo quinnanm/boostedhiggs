@@ -9,6 +9,9 @@ import hist as hist2
 import matplotlib.pyplot as plt
 import mplhep as hep
 import numpy as np
+import onnx
+import onnxruntime as ort
+import scipy
 
 plt.style.use(hep.style.CMS)
 
@@ -72,40 +75,26 @@ def get_xsecweight(pkl_files, year, sample, is_data, luminosity):
 
 # ---------------------------------------------------------
 # TAGGER STUFF
-def disc_score(df, sigs, bkgs):
-    num = df[sigs].sum(axis=1)
-    den = df[sigs].sum(axis=1) + df[bkgs].sum(axis=1)
-    return num / den
+def get_finetuned_score(data, modelv="v2_nor2"):
+    # add finetuned tagger score
+    PATH = f"../../weaver-core-dev/experiments_finetuning/{modelv}/model.onnx"
+
+    input_dict = {
+        "highlevel": data.loc[:, "fj_ParT_hidNeuron000":"fj_ParT_hidNeuron127"].values.astype("float32"),
+    }
+
+    onnx_model = onnx.load(PATH)
+    onnx.checker.check_model(onnx_model)
+
+    ort_sess = ort.InferenceSession(
+        PATH,
+        providers=["AzureExecutionProvider"],
+    )
+    outputs = ort_sess.run(None, input_dict)
+
+    return scipy.special.softmax(outputs[0], axis=1)[:, 0]
 
 
-# signal scores definition
-hwwev = ["fj_PN_probHWqqWev0c", "fj_PN_probHWqqWev1c", "fj_PN_probHWqqWtauev0c", "fj_PN_probHWqqWtauev1c"]
-hwwmv = ["fj_PN_probHWqqWmv0c", "fj_PN_probHWqqWmv1c", "fj_PN_probHWqqWtaumv0c", "fj_PN_probHWqqWtaumv1c"]
-hwwhad = [
-    "fj_PN_probHWqqWqq0c",
-    "fj_PN_probHWqqWqq1c",
-    "fj_PN_probHWqqWqq2c",
-    "fj_PN_probHWqqWq0c",
-    "fj_PN_probHWqqWq1c",
-    "fj_PN_probHWqqWq2c",
-    "fj_PN_probHWqqWtauhv0c",
-    "fj_PN_probHWqqWtauhv1c",
-]
-sigs = hwwev + hwwmv + hwwhad
-
-# background scores definition
-qcd = ["fj_PN_probQCDbb", "fj_PN_probQCDcc", "fj_PN_probQCDb", "fj_PN_probQCDc", "fj_PN_probQCDothers"]
-
-tope = ["fj_PN_probTopbWev", "fj_PN_probTopbWtauev"]
-topm = ["fj_PN_probTopbWmv", "fj_PN_probTopbWtaumv"]
-tophad = ["fj_PN_probTopbWqq0c", "fj_PN_probTopbWqq1c", "fj_PN_probTopbWq0c", "fj_PN_probTopbWq1c", "fj_PN_probTopbWtauhv"]
-top = tope + topm + tophad
-
-# use ParT
-new_sig = [s.replace("PN", "ParT") for s in sigs]
-qcd_bkg = [b.replace("PN", "ParT") for b in qcd]
-top_bkg = [b.replace("PN", "ParT") for b in tope + topm + tophad]
-inclusive_bkg = [b.replace("PN", "ParT") for b in qcd + tope + topm + tophad]
 # ---------------------------------------------------------
 
 # PLOTTING UTILS

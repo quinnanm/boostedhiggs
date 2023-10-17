@@ -16,44 +16,33 @@ samples:
 presel:
     ele:
         lepton jet overlap: ( ( lep_fj_dr>0.03) )
+        # tagger99: ( ( fj_ParT_score_finetuned<0.99) )
+        # tagger90: ( ( fj_ParT_score_finetuned>0.5) )
+
+        # taggerINV: ( ( fj_ParT_score_finetuned<0.9) )
+
+        # bT: ( ( n_bjets_T>0) )
+        # bM: ( ( n_bjets_M>0) )
+
+        # bT=: ( ( n_bjets_T==0) )
+        # bM=: ( ( n_bjets_M==0) )
+
     mu:
         lepton jet overlap: ( ( lep_fj_dr>0.03) )
 
-sel:
-    ele:
-        none: ( ( fj_pt>0) )
+        # tagger99: ( ( fj_ParT_score_finetuned<0.99) )
+        # tagger90: ( ( fj_ParT_score_finetuned>0.5) )
 
-        # tagger99: ( ( inclusive_score<0.99) )
-        # tagger90: ( ( inclusive_score>0.5) )
+        # tagger90: ( ( fj_ParT_score_finetuned>0.9) )
+        # tagger90: ( ( fj_ParT_score_finetuned>0.9) )
 
-        # taggerINV: ( ( inclusive_score<0.9) )
-
-        # bT: ( ( n_bjets_T>0) )
-        # bM: ( ( n_bjets_M>0) )
-
-        # bT=: ( ( n_bjets_T==0) )
-        # bM=: ( ( n_bjets_M==0) )
-
-        # lep_fj_dr: ( ( lep_fj_dr>0.6) )
-
-    mu:
-        none: ( ( fj_pt>0) )
-
-        # tagger99: ( ( inclusive_score<0.99) )
-        # tagger90: ( ( inclusive_score>0.5) )
-
-        # tagger90: ( ( fj_ParT_all_score>0.9) )
-        # tagger90: ( ( fj_ParT_inclusive_score>0.9) )
-
-        # taggerINV: ( ( inclusive_score<0.9) )
+        # taggerINV: ( ( fj_ParT_score_finetuned<0.9) )
 
         # bT: ( ( n_bjets_T>0) )
         # bM: ( ( n_bjets_M>0) )
 
         # bT=: ( ( n_bjets_T==0) )
         # bM=: ( ( n_bjets_M==0) )
-
-        # lep_fj_dr: ( ( lep_fj_dr>0.6) )
 
 weights:
     ele:

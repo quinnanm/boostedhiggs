@@ -34,29 +34,59 @@ pd.set_option("mode.chained_assignment", None)
 CMS_PARAMS_LABEL = "CMS_HWW_boosted"
 
 
-def systs_not_from_parquets(year, LUMI, full_lumi):
+def systs_not_from_parquets(years, LUMI, full_lumi):
     """
     Define systematics that are NOT stored in the parquets
+
+    Returns
+        systs_dict [dict]:        keys are systematics; values are rl.NuisanceParameters
+        systs_dict_values [dict]: keys are same as above; values are tuples (up, down) and if (up, None) then down=up
     """
 
-    systs_dict = {
-        f"lumi_13TeV_{year}": rl.NuisanceParameter(f"CMS_lumi_13TeV_{year}", "lnN"),
-        "BR_hww": rl.NuisanceParameter("BR_hww", "lnN"),
-    }
+    systs_dict, systs_dict_values = {}, {}
 
-    # tuple (value_up, value_down) and if (value_up, None) is given then value_down=value_up
-    systs_dict_values = {
-        f"lumi_13TeV_{year}": (1.02 ** (LUMI["2017"] / full_lumi), None),
-        "BR_hww": (1.0153, 0.9848),
-    }
+    # branching ratio systematics
+    systs_dict["BR_hww"] = rl.NuisanceParameter("BR_hww", "lnN")
+    systs_dict_values["BR_hww"] = (1.0153, 0.9848)
+
+    # lumi systematics
+    if "2016" in years:
+        systs_dict["lumi_13TeV_2016"] = rl.NuisanceParameter("CMS_lumi_13TeV_2016", "lnN")
+        systs_dict_values["lumi_13TeV_2016"] = (1.01 ** ((LUMI["2016"] + LUMI["2016APV"]) / full_lumi), None)
+    if "2017" in years:
+        systs_dict["lumi_13TeV_2017"] = rl.NuisanceParameter("CMS_lumi_13TeV_2017", "lnN")
+        systs_dict_values["lumi_13TeV_2017"] = (1.02 ** (LUMI["2017"] / full_lumi), None)
+
+    if "2018" in years:
+        systs_dict["lumi_13TeV_2018"] = rl.NuisanceParameter("CMS_lumi_13TeV_2018", "lnN")
+        systs_dict_values["lumi_13TeV_2018"] = (1.015 ** (LUMI["2018"] / full_lumi), None)
+
+    if len(years) == 4:
+        systs_dict["lumi_13TeV_correlated"] = rl.NuisanceParameter("CMS_lumi_13TeV_corelated", "lnN")
+        systs_dict_values["lumi_13TeV_correlated"] = (
+            (
+                (1.006 ** ((LUMI["2016"] + LUMI["2016APV"]) / full_lumi))
+                * (1.009 ** (LUMI["2017"] / full_lumi))
+                * (1.02 ** (LUMI["2018"] / full_lumi))
+            ),
+            None,
+        )
+
+        systs_dict["lumi_13TeV_1718"] = rl.NuisanceParameter("CMS_lumi_13TeV_1718", "lnN")
+        systs_dict_values["lumi_13TeV_1718"] = (
+            (1.006 ** (LUMI["2017"] / full_lumi)) * (1.002 ** (LUMI["2018"] / full_lumi)),
+            None,
+        )
 
     return systs_dict, systs_dict_values
 
 
-def systs_from_parquets(year):
+def systs_from_parquets(years):
     """
     Specify systematics that ARE stored in the parquets
     """
+    if len(years) == 4:
+        year = "Run2"
 
     systs_from_parquets = {
         "mu": {
@@ -178,15 +208,19 @@ def systs_from_parquets(year):
     return systs_from_parquets
 
 
-def rhalphabet(hists_templates, year, lep_ch, blind, blind_samples, blind_region, qcd_estimation):
+def rhalphabet(hists_templates, years, lep_ch, blind, blind_samples, blind_region, qcd_estimation):
     # get the LUMI
     with open("../fileset/luminosity.json") as f:
         LUMI = json.load(f)[lep_ch]
-    full_lumi = LUMI[year]
+
+    # get the LUMI covered in the templates
+    full_lumi = 0
+    for year_ in years:
+        full_lumi += LUMI[year_]
 
     # define the systematics
-    systs_dict, systs_dict_values = systs_not_from_parquets(year, LUMI, full_lumi)
-    sys_from_parquets = systs_from_parquets(year)
+    systs_dict, systs_dict_values = systs_not_from_parquets(years, LUMI, full_lumi)
+    sys_from_parquets = systs_from_parquets(years)
 
     ptbins = hists_templates["pass"].axes[2].edges
     npt = len(ptbins) - 1
@@ -243,8 +277,8 @@ def rhalphabet(hists_templates, year, lep_ch, blind, blind_samples, blind_region
                 # SYSTEMATICS FROM PARQUETS
                 for syst_on_sample in ["all_samples", sName]:  # apply common systs and per sample systs
                     for sys_name, sys_value in sys_from_parquets[lep_ch][syst_on_sample].items():
-                        if (year == "2018") and ("L1Prefiring" in sys_name):
-                            continue
+                        # if (year == "2018") and ("L1Prefiring" in sys_name):
+                        #     continue
 
                         # print(sName, sys_value, ptbin, region, lep_ch)
 
@@ -339,33 +373,37 @@ def main(args):
     years = args.years.split(",")
     channels = args.channels.split(",")
 
-    for year in years:
-        for lep_ch in channels:
-            with open(f"templates/{args.tag}/hists_templates_{year}_{lep_ch}.pkl", "rb") as f:
-                hists_templates = pkl.load(f)
+    if len(years) == 4:
+        save_as = "Run2"
+    else:
+        save_as = "_".join(years)
 
-            model = rhalphabet(
-                hists_templates,
-                year,
-                lep_ch,
-                blind=args.blind,
-                blind_samples=args.samples_to_blind.split(","),
-                blind_region=[40, 200],
-                qcd_estimation=True,
-            )
+    for lep_ch in channels:
+        with open(f"{args.outdir}/hists_templates_{save_as}_{lep_ch}.pkl", "rb") as f:
+            hists_templates = pkl.load(f)
 
-            with open(f"templates/{args.tag}/model_{year}_{lep_ch}.pkl", "wb") as fout:
-                pkl.dump(model, fout, protocol=2)
+        model = rhalphabet(
+            hists_templates,
+            years,
+            lep_ch,
+            blind=args.blind,
+            blind_samples=args.samples_to_blind.split(","),
+            blind_region=[80, 160],
+            qcd_estimation=True,
+        )
+
+        with open(f"{args.outdir}/model_{save_as}_{lep_ch}.pkl", "wb") as fout:
+            pkl.dump(model, fout, protocol=2)
 
 
 if __name__ == "__main__":
     # e.g.
-    # python create_datacard.py --years 2017 --channels mu --tag v1
+    # python create_datacard.py --years 2016,2016APV,2017,2018 --channels mu,ele --outdir templates/test
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--years", dest="years", default="2017", help="years separated by commas")
     parser.add_argument("--channels", dest="channels", default="mu", help="channels separated by commas (e.g. mu,ele)")
-    parser.add_argument("--tag", dest="tag", default="test", type=str, help="name of template directory")
+    parser.add_argument("--outdir", dest="outdir", default="templates/test", type=str, help="name of template directory")
     parser.add_argument("--blind", dest="blind", action="store_true")
     parser.add_argument(
         "--samples_to_blind", dest="samples_to_blind", default="", help="samples to blind separated by commas"
