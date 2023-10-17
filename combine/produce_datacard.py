@@ -19,26 +19,30 @@ def main(args):
     years = args.years.split(",")
     channels = args.channels.split(",")
 
-    for year in years:
-        for ch in channels:
-            model_name = "model_{}_{}".format(year, ch)
+    if len(years) == 4:
+        save_as = "Run2"
+    else:
+        save_as = "_".join(years)
 
-            tmpdir = "{}/{}/{}.pkl".format("templates", args.tag, model_name)
+    for ch in channels:
+        model_name = "model_{}_{}".format(save_as, ch)
 
-            with open(tmpdir, "rb") as fout:
-                model = pickle.load(fout)
+        tmpdir = "{}/{}.pkl".format(args.outdir, model_name)
 
-            model.renderCombine(os.path.join(str("{}/{}".format("templates", args.tag)), "datacards"))
+        with open(tmpdir, "rb") as fout:
+            model = pickle.load(fout)
+
+        model.renderCombine(os.path.join(str("{}".format(args.outdir)), "datacards"))
 
 
 if __name__ == "__main__":
     # e.g.
-    # python produce_datacard.py --years 2017 --channels mu --tag test
+    # python produce_datacard.py --years 2016,2016APV,2017,2018 --channels mu --outdir templates/test
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--years", dest="years", default="2017", help="years separated by commas")
     parser.add_argument("--channels", dest="channels", default="mu", help="channels separated by commas (e.g. mu,ele)")
-    parser.add_argument("--tag", dest="tag", default="test", type=str, help="name of template directory")
+    parser.add_argument("--outdir", dest="outdir", default="templates/test", type=str, help="path to template directory")
 
     args = parser.parse_args()
 
