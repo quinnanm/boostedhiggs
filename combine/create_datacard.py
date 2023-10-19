@@ -87,131 +87,81 @@ def systs_from_parquets(years):
     """
     if len(years) == 4:
         year = "Run2"
+    else:
+        year = years[0]
 
     systs_from_parquets = {
-        "mu": {
-            "all_samples": {
-                # "weight_mu_btagSFlight_2017": rl.NuisanceParameter(
-                #     f"{CMS_PARAMS_LABEL}_btagSFlight_{year}", "lnN"
-                #     ),
-                # "weight_mu_btagSFlight_correlated": rl.NuisanceParameter(
-                #     f"{CMS_PARAMS_LABEL}_btagSFlight_correlated", "lnN"
-                # ),
-                # "weight_mu_btagSFbc_2017": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_btagSFbc_{year}", "lnN"),
-                # "weight_mu_btagSFbc_correlated": rl.NuisanceParameter(
-                #     f"{CMS_PARAMS_LABEL}_btagSFbc_correlated", "lnN"
-                # ),
-                "weight_mu_pileup": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_PU_{year}", "shape"),
-                "weight_mu_isolation_muon": rl.NuisanceParameter(f"CMS_mu_iso_{year}", "lnN"),
-                "weight_mu_id_muon": rl.NuisanceParameter(f"CMS_mu_id_{year}", "lnN"),
-                "weight_mu_L1Prefiring": rl.NuisanceParameter(f"CMS_L1Prefiring_{year}", "lnN"),
-                "weight_mu_trigger_iso_muon": rl.NuisanceParameter(f"CMS_mu_trigger_iso_{year}", "lnN"),
-                "weight_mu_trigger_noniso_muon": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_trigger_{year}", "lnN"),
-            },
-            # signal
-            "ggF": {
-                "weight_mu_UEPS_FSR": rl.NuisanceParameter("UEPS_FSR_ggF", "shape"),
-                "weight_mu_UEPS_ISR": rl.NuisanceParameter("UEPS_ISR_ggF", "shape"),
-                "weight_mu_PDF_weight": rl.NuisanceParameter("pdf_Higgs_ggF", "lnN"),
-                "weight_mu_PDFaS_weight": rl.NuisanceParameter("pdfAS_Higgs_ggF", "lnN"),
-                "weight_mu_aS_weight": rl.NuisanceParameter("aS_Higgs_ggF", "lnN"),
-                "weight_mu_scalevar_3pt": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_scale_pt_3_ggF_{year}", "lnN"),
-                "weight_mu_scalevar_7pt": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_scale_pt_7_ggF_{year}", "lnN"),
-            },
-            "VBF": {
-                "weight_mu_UEPS_FSR": rl.NuisanceParameter("UEPS_FSR_VBF", "shape"),
-                "weight_mu_UEPS_ISR": rl.NuisanceParameter("UEPS_ISR_VBF", "shape"),
-                "weight_mu_PDF_weight": rl.NuisanceParameter("pdf_Higgs_VBF", "lnN"),
-                "weight_mu_PDFaS_weight": rl.NuisanceParameter("pdfAS_Higgs_VBF", "lnN"),
-                "weight_mu_aS_weight": rl.NuisanceParameter("aS_Higgs_VBF", "lnN"),
-                "weight_mu_scalevar_3pt": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_scale_pt_3_VBF_{year}", "lnN"),
-                "weight_mu_scalevar_7pt": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_scale_pt_7_VBF_{year}", "lnN"),
-            },
-            "VH": {},
-            "ttH": {},
-            # bkgs
-            "TTbar": {},
-            "WJetsLNu": {
-                "weight_mu_d1kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_W_d1kappa_EW_{year}", "lnN"),
-                "weight_mu_W_d2kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_W_d2kappa_EW_{year}", "lnN"),
-                "weight_mu_W_d3kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_W_d3kappa_EW_{year}", "lnN"),
-                "weight_mu_d1K_NLO": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d1K_NLO_{year}", "lnN"),
-                "weight_mu_d2K_NLO": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d2K_NLO_{year}", "lnN"),
-                "weight_mu_d3K_NLO": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d3K_NLO_{year}", "lnN"),
-            },
-            "SingleTop": {},
-            "DYJets": {
-                "weight_mu_d1kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d1kappa_EW_{year}", "lnN"),
-                "weight_mu_Z_d2kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d2kappa_EW_{year}", "lnN"),
-                "weight_mu_Z_d3kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d3kappa_EW_{year}", "lnN"),
-            },
+        "all_samples": {
+            # "weight_mu_btagSFlight_2017": rl.NuisanceParameter(
+            #     f"{CMS_PARAMS_LABEL}_btagSFlight_{year}", "lnN"
+            #     ),
+            # "weight_mu_btagSFlight_correlated": rl.NuisanceParameter(
+            #     f"{CMS_PARAMS_LABEL}_btagSFlight_correlated", "lnN"
+            # ),
+            # "weight_mu_btagSFbc_2017": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_btagSFbc_{year}", "lnN"),
+            # "weight_mu_btagSFbc_correlated": rl.NuisanceParameter(
+            #     f"{CMS_PARAMS_LABEL}_btagSFbc_correlated", "lnN"
+            # ),
+            "weight_pileup": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_PU_{year}", "shape"),
+            "weight_isolation": rl.NuisanceParameter(f"CMS_mu_iso_{year}", "lnN"),
+            "weight_id": rl.NuisanceParameter(f"CMS_mu_id_{year}", "lnN"),
+            "weight_reco_ele": rl.NuisanceParameter("CMS_ele_reconstruction", "lnN"),
+            "weight_L1Prefiring": rl.NuisanceParameter(f"CMS_L1Prefiring_{year}", "lnN"),
+            "weight_trigger_ele": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_trigger_{year}", "lnN"),
+            "weight_trigger_iso_mu": rl.NuisanceParameter(f"CMS_mu_trigger_iso_{year}", "lnN"),
+            "weight_trigger_noniso_mu": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_trigger_{year}", "lnN"),
         },
-        "ele": {
-            "all_samples": {
-                # "weight_ele_btagSFlight_2017": rl.NuisanceParameter(
-                #     f"{CMS_PARAMS_LABEL}_btagSFlight_{year}", "lnN"
-                #     ),
-                # "weight_ele_btagSFlight_correlated": rl.NuisanceParameter(
-                #     f"{CMS_PARAMS_LABEL}_btagSFlight_correlated", "lnN"
-                # ),
-                # "weight_ele_btagSFbc_2017": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_btagSFbc_{year}", "lnN"),
-                # "weight_ele_btagSFbc_correlated": rl.NuisanceParameter(
-                #     f"{CMS_PARAMS_LABEL}_btagSFbc_correlated", "lnN"
-                # ),
-                "weight_ele_pileup": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_PU_{year}", "shape"),
-                "weight_ele_isolation_electron": rl.NuisanceParameter(f"CMS_ele_iso_{year}", "lnN"),
-                "weight_ele_id_electron": rl.NuisanceParameter(f"CMS_ele_id_{year}", "lnN"),
-                "weight_ele_L1Prefiring": rl.NuisanceParameter(f"CMS_L1Prefiring_{year}", "lnN"),
-                "weight_ele_reco_electron": rl.NuisanceParameter("CMS_ele_reconstruction", "lnN"),
-                "weight_ele_trigger_electron": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_trigger_{year}", "lnN"),
-            },
-            # signal
-            "ggF": {
-                "weight_ele_UEPS_FSR": rl.NuisanceParameter("UEPS_FSR_ggF", "shape"),
-                "weight_ele_UEPS_ISR": rl.NuisanceParameter("UEPS_ISR_ggF", "shape"),
-                "weight_ele_PDF_weight": rl.NuisanceParameter("pdf_Higgs_ggF", "lnN"),
-                "weight_ele_PDFaS_weight": rl.NuisanceParameter("pdfAS_Higgs_ggF", "lnN"),
-                "weight_ele_aS_weight": rl.NuisanceParameter("aS_Higgs_ggF", "lnN"),
-                "weight_ele_scalevar_3pt": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_scale_pt_3_ggF_{year}", "lnN"),
-                "weight_ele_scalevar_7pt": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_scale_pt_7_ggF_{year}", "lnN"),
-            },
-            "VBF": {
-                "weight_ele_UEPS_FSR": rl.NuisanceParameter("UEPS_FSR_VBF", "shape"),
-                "weight_ele_UEPS_ISR": rl.NuisanceParameter("UEPS_ISR_VBF", "shape"),
-                "weight_ele_PDF_weight": rl.NuisanceParameter("pdf_Higgs_VBF", "lnN"),
-                "weight_ele_PDFaS_weight": rl.NuisanceParameter("pdfAS_Higgs_VBF", "lnN"),
-                "weight_ele_aS_weight": rl.NuisanceParameter("aS_Higgs_VBF", "lnN"),
-                "weight_ele_scalevar_3pt": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_scale_pt_3_VBF_{year}", "lnN"),
-                "weight_ele_scalevar_7pt": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_scale_pt_7_VBF_{year}", "lnN"),
-            },
-            "VH": {},
-            "ttH": {},
-            # bkgs
-            "TTbar": {},
-            "WJetsLNu": {
-                "weight_ele_d1kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_W_d1kappa_EW_{year}", "lnN"),
-                "weight_ele_W_d2kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_W_d2kappa_EW_{year}", "lnN"),
-                "weight_ele_W_d3kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_W_d3kappa_EW_{year}", "lnN"),
-                "weight_ele_d1K_NLO": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d1K_NLO_{year}", "lnN"),
-                "weight_ele_d2K_NLO": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d2K_NLO_{year}", "lnN"),
-                "weight_ele_d3K_NLO": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d3K_NLO_{year}", "lnN"),
-            },
-            "SingleTop": {},
-            "DYJets": {
-                "weight_ele_d1kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d1kappa_EW_{year}", "lnN"),
-                "weight_ele_Z_d2kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d2kappa_EW_{year}", "lnN"),
-                "weight_ele_Z_d3kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d3kappa_EW_{year}", "lnN"),
-            },
+        # signal
+        "ggF": {
+            "weight_aS_weight": rl.NuisanceParameter("aS_Higgs_ggF", "lnN"),
+            "weight_UEPS_FSR": rl.NuisanceParameter("UEPS_FSR_ggF", "shape"),
+            "weight_UEPS_ISR": rl.NuisanceParameter("UEPS_ISR_ggF", "shape"),
+            "weight_PDF_weight": rl.NuisanceParameter("pdf_Higgs_ggF", "lnN"),
+            "weight_PDFaS_weight": rl.NuisanceParameter("pdfAS_Higgs_ggF", "lnN"),
+            "weight_scalevar_3pt": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_scale_pt_3_ggF_{year}", "lnN"),
+            "weight_scalevar_7pt": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_scale_pt_7_ggF_{year}", "lnN"),
+        },
+        "VBF": {
+            "weight_aS_weight": rl.NuisanceParameter("aS_Higgs_VBF", "lnN"),
+            "weight_UEPS_FSR": rl.NuisanceParameter("UEPS_FSR_VBF", "shape"),
+            "weight_UEPS_ISR": rl.NuisanceParameter("UEPS_ISR_VBF", "shape"),
+            "weight_PDF_weight": rl.NuisanceParameter("pdf_Higgs_VBF", "lnN"),
+            "weight_PDFaS_weight": rl.NuisanceParameter("pdfAS_Higgs_VBF", "lnN"),
+            "weight_scalevar_3pt": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_scale_pt_3_VBF_{year}", "lnN"),
+            "weight_scalevar_7pt": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_scale_pt_7_VBF_{year}", "lnN"),
+        },
+        "VH": {},
+        "ttH": {},
+        # bkgs
+        "TTbar": {},
+        "WJetsLNu": {
+            "weight_d1K_NLO": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d1K_NLO_{year}", "lnN"),
+            "weight_d2K_NLO": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d2K_NLO_{year}", "lnN"),
+            "weight_d3K_NLO": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d3K_NLO_{year}", "lnN"),
+            "weight_d1kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_W_d1kappa_EW_{year}", "lnN"),
+            "weight_W_d2kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_W_d2kappa_EW_{year}", "lnN"),
+            "weight_W_d3kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_W_d3kappa_EW_{year}", "lnN"),
+        },
+        "SingleTop": {},
+        "DYJets": {
+            "weight_d1kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d1kappa_EW_{year}", "lnN"),
+            "weight_Z_d2kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d2kappa_EW_{year}", "lnN"),
+            "weight_Z_d3kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d3kappa_EW_{year}", "lnN"),
         },
     }
 
     return systs_from_parquets
 
 
-def rhalphabet(hists_templates, years, lep_ch, blind, blind_samples, blind_region, qcd_estimation):
-    # get the LUMI
-    with open("../fileset/luminosity.json") as f:
-        LUMI = json.load(f)[lep_ch]
+def rhalphabet(hists_templates, years, channels, blind, blind_samples, blind_region, qcd_estimation):
+    # get the LUMI (must average lumi over both channels)
+    LUMI = {}
+    for year in years:
+        LUMI[year] = 0.0
+        for lep_ch in channels:
+            with open("../fileset/luminosity.json") as f:
+                LUMI[year] += json.load(f)[lep_ch][year]
+        LUMI[year] /= len(channels)
 
     # get the LUMI covered in the templates
     full_lumi = 0
@@ -226,7 +176,7 @@ def rhalphabet(hists_templates, years, lep_ch, blind, blind_samples, blind_regio
     npt = len(ptbins) - 1
 
     massbins = hists_templates["pass"].axes[3].edges
-    mass = rl.Observable("reco_higgs_m", massbins)
+    mass = rl.Observable("mass_observable", massbins)
 
     # here we derive these all at once with 2D array
     ptpts, masspts = np.meshgrid(ptbins[:-1] + 0.3 * np.diff(ptbins), massbins[:-1] + 0.5 * np.diff(massbins), indexing="ij")
@@ -240,7 +190,7 @@ def rhalphabet(hists_templates, years, lep_ch, blind, blind_samples, blind_regio
 
     # Raghav:
     # https://github.com/rkansal47/HHbbVV/blob/68dd5738ebe6950a6b5ea16049c4047b7de7892d/src/HHbbVV/postprocessing/CreateDatacard.py#L66-L77
-    # bins = hists_templates["pass"][{"samples": sum, "rec_higgs_m": sum, "systematic": sum}].values()
+    # bins = hists_templates["pass"][{"samples": sum, "rec_higgs_m": sum, "systematics": sum}].values()
     # pts = bins[:-1] + 0.5 * np.diff(bins)
     # ptscaled = (pts - ptbins[0]) / (ptbins[-1] - ptbins[0])
 
@@ -276,15 +226,15 @@ def rhalphabet(hists_templates, years, lep_ch, blind, blind_samples, blind_regio
 
                 # SYSTEMATICS FROM PARQUETS
                 for syst_on_sample in ["all_samples", sName]:  # apply common systs and per sample systs
-                    for sys_name, sys_value in sys_from_parquets[lep_ch][syst_on_sample].items():
-                        # if (year == "2018") and ("L1Prefiring" in sys_name):
+                    for sys_name, sys_value in sys_from_parquets[syst_on_sample].items():
+                        # if "L1Prefiring" not in sys_name:
                         #     continue
 
-                        # print(sName, sys_value, ptbin, region, lep_ch)
+                        # print(sName, sys_value, ptbin, region)
 
-                        syst_up = h[{"samples": sName, "fj_pt": ptbin, "systematic": sys_name + "Up"}].values()
-                        syst_do = h[{"samples": sName, "fj_pt": ptbin, "systematic": sys_name + "Down"}].values()
-                        nominal = h[{"samples": sName, "fj_pt": ptbin, "systematic": "nominal"}].values()
+                        syst_up = h[{"samples": sName, "categories": ptbin, "systematics": sys_name + "Up"}].values()
+                        syst_do = h[{"samples": sName, "categories": ptbin, "systematics": sys_name + "Down"}].values()
+                        nominal = h[{"samples": sName, "categories": ptbin, "systematics": "nominal"}].values()
 
                         if sys_value.combinePrior == "lnN":
                             eff_up = shape_to_num(syst_up, nominal)
@@ -328,8 +278,8 @@ def rhalphabet(hists_templates, years, lep_ch, blind, blind_samples, blind_regio
 
         # get the transfer factor
         qcd_eff = (
-            h_pass[{"samples": "QCD", "systematic": "nominal"}].sum()
-            / h_fail[{"samples": "QCD", "systematic": "nominal"}].sum()
+            h_pass[{"samples": "QCD", "systematics": "nominal"}].sum()
+            / h_fail[{"samples": "QCD", "systematics": "nominal"}].sum()
         )
 
         tf_dataResidual = rl.BasisPoly(
@@ -378,27 +328,29 @@ def main(args):
     else:
         save_as = "_".join(years)
 
-    for lep_ch in channels:
-        with open(f"{args.outdir}/hists_templates_{save_as}_{lep_ch}.pkl", "rb") as f:
-            hists_templates = pkl.load(f)
+    if len(channels) == 1:
+        save_as += f"_{channels[0]}_"
 
-        model = rhalphabet(
-            hists_templates,
-            years,
-            lep_ch,
-            blind=args.blind,
-            blind_samples=args.samples_to_blind.split(","),
-            blind_region=[80, 160],
-            qcd_estimation=True,
-        )
+    with open(f"{args.outdir}/hists_templates_{save_as}.pkl", "rb") as f:
+        hists_templates = pkl.load(f)
 
-        with open(f"{args.outdir}/model_{save_as}_{lep_ch}.pkl", "wb") as fout:
-            pkl.dump(model, fout, protocol=2)
+    model = rhalphabet(
+        hists_templates,
+        years,
+        channels,
+        blind=args.blind,
+        blind_samples=args.samples_to_blind.split(","),
+        blind_region=[80, 160],
+        qcd_estimation=False,
+    )
+
+    with open(f"{args.outdir}/model_{save_as}.pkl", "wb") as fout:
+        pkl.dump(model, fout, protocol=2)
 
 
 if __name__ == "__main__":
     # e.g.
-    # python create_datacard.py --years 2016,2016APV,2017,2018 --channels mu,ele --outdir templates/test
+    # python create_datacard.py --years 2016,2016APV,2017,2018 --channels mu,ele --outdir templates/v11
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--years", dest="years", default="2017", help="years separated by commas")

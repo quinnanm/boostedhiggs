@@ -25,7 +25,7 @@ def main(args):
         save_as = "_".join(years)
 
     if len(channels) == 1:
-        save_as += f"_{channels[0]}_"
+        save_as += "_{}_".format(channels[0])
 
     for ch in channels:
         model_name = "model_{}_{}".format(save_as, ch)
