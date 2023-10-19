@@ -27,15 +27,14 @@ def main(args):
     if len(channels) == 1:
         save_as += "_{}_".format(channels[0])
 
-    for ch in channels:
-        model_name = "model_{}_{}".format(save_as, ch)
+    model_name = "model_{}".format(save_as)
 
-        tmpdir = "{}/{}.pkl".format(args.outdir, model_name)
+    tmpdir = "{}/{}.pkl".format(args.outdir, model_name)
 
-        with open(tmpdir, "rb") as fout:
-            model = pickle.load(fout)
+    with open(tmpdir, "rb") as fout:
+        model = pickle.load(fout)
 
-        model.renderCombine(os.path.join(str("{}".format(args.outdir)), "datacards"))
+    model.renderCombine(os.path.join(str("{}".format(args.outdir)), "datacards"))
 
 
 if __name__ == "__main__":
