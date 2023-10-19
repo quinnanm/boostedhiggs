@@ -24,6 +24,9 @@ def main(args):
     else:
         save_as = "_".join(years)
 
+    if len(channels) == 1:
+        save_as += f"_{channels[0]}_"
+
     for ch in channels:
         model_name = "model_{}_{}".format(save_as, ch)
 
@@ -37,7 +40,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # python produce_datacard.py --years 2016,2016APV,2017,2018 --channels mu --outdir templates/test
+    # python produce_datacard.py --years 2016,2016APV,2017,2018 --channels mu --outdir templates/v11
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--years", dest="years", default="2017", help="years separated by commas")
