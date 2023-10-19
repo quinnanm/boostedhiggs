@@ -12,14 +12,25 @@ samples:
     - Diboson
     - Data
 
-regions_selections:
+regions_sel:
     pass: ( (fj_ParT_score_finetuned>0.97) ) # high purity signal region
     fail: ( (fj_ParT_score_finetuned<0.20) & (n_bjets_T == 0) ) # qcd control region
 
-    ttbar_cr: ( (fj_ParT_score_finetuned<0.20) & (n_bjets_T > 0) )
-    wjets_cr: ( (fj_ParT_score_finetuned<0.85) & (fj_ParT_score_finetuned>0.20) & (n_bjets_L == 0) )
+    # sig_region2: ( (fj_ParT_score_finetuned<0.97) & (fj_ParT_score_finetuned>0.85) ) # medium purity signal region
+    # ttbar_cr: ( (fj_ParT_score_finetuned<0.20) & (n_bjets_T > 0) )
+    # wjets_cr: ( (fj_ParT_score_finetuned<0.85) & (fj_ParT_score_finetuned>0.20) & (n_bjets_L == 0) )
 
-    pass2: ( (fj_ParT_score_finetuned<0.97) & (fj_ParT_score_finetuned>0.85) ) # medium purity signal region
+lepiso_sel: # keys must match keys in regions_sel above; values are either [lepiso, lepisoinv]
+    pass: lepiso
+    fail: lepisoinv
+    sig_region2: lepiso
+    wjets_cr: lepiso
+    ttbar_cr: lepiso
+
+categories_sel:
+    VBF_pt200toinf: ( (mjj>1000) & (deta>3.5) )
+    ggF_pt200to300: ( (mjj<1000) & (deta<3.5) & (fj_pt<300) )
+    ggF_pt300toinf: ( (mjj<1000) & (deta<3.5) & (fj_pt>300) )
 
 samples_dir:
     "2018": ../eos/postprocessOct5_hidNeurons_2018

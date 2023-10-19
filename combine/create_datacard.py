@@ -200,7 +200,7 @@ def rhalphabet(hists_templates, years, channels, blind, blind_samples, blind_reg
     # fill datacard with systematics and rates
     for ptbin in range(npt):
         for region in ["pass", "fail"]:
-            ch = rl.Channel("ptbin%d%s" % (ptbin, region))
+            ch = rl.Channel(f"{hists_templates[region].axes[2][ptbin].replace('_', '')}bin%s" % (region))
             model.addChannel(ch)
 
             # isPass = region == "pass"
