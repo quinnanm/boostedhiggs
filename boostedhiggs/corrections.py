@@ -1,13 +1,14 @@
 import importlib.resources
-import warnings
 import pickle
-from coffea import util as cutil
-from coffea.analysis_tools import Weights
-from coffea.nanoevents.methods.nanoaod import JetArray
+import warnings
 from typing import Dict
+
 import awkward as ak
 import correctionlib
 import numpy as np
+from coffea import util as cutil
+from coffea.analysis_tools import Weights
+from coffea.nanoevents.methods.nanoaod import JetArray
 
 btagWPs = {
     "deepJet": {
@@ -339,6 +340,86 @@ def get_pog_json(obj, year):
         print(f"No json for {obj}")
     year = get_UL_year(year)
     return f"{pog_correction_path}POG/{pog_json[0]}/{year}/{pog_json[1]}"
+
+
+def get_btag_weights_farouk(year: str, jets: JetArray, jet_selector: ak.Array, veto, wp: str = "M", algo: str = "deepJet"):
+    """
+    Following https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods#1b_Event_reweighting_using_scale
+
+    Args:
+        veto: True means nbjets==0; and False means nbjets>0
+
+    """
+
+    def _btagSF(cset, jets, flavour, wp="M", algo="deepJet", syst="central"):
+        j, nj = ak.flatten(jets), ak.num(jets)
+        corrs = cset[f"{algo}_comb"] if flavour == "bc" else cset[f"{algo}_incl"]
+        sf = corrs.evaluate(
+            syst,
+            wp,
+            np.array(j.hadronFlavour),
+            np.array(abs(j.eta)),
+            np.array(j.pt),
+        )
+        return ak.unflatten(sf, nj)
+
+    cset = correctionlib.CorrectionSet.from_file(get_pog_json("btagging", year))
+
+    ul_year = get_UL_year(year)
+    with importlib.resources.path("boostedhiggs.data", f"btageff_{algo}_{wp}_{ul_year}.coffea") as filename:
+        efflookup = cutil.load(filename)
+
+    lightJets = jets[jet_selector & (jets.hadronFlavour == 0) & (abs(jets.eta) < 2.5)]
+    bcJets = jets[jet_selector & (jets.hadronFlavour > 0) & (abs(jets.eta) < 2.5)]
+
+    lightEff = efflookup(lightJets.pt, abs(lightJets.eta), lightJets.hadronFlavour)
+    bcEff = efflookup(bcJets.pt, abs(bcJets.eta), bcJets.hadronFlavour)
+
+    lightSF = _btagSF(cset, lightJets, "light", wp, algo)
+    bcSF = _btagSF(cset, bcJets, "bc", wp, algo)
+
+    lightSFUp = _btagSF(cset, lightJets, "light", wp, algo, syst="up")
+    lightSFDown = _btagSF(cset, lightJets, "light", wp, algo, syst="down")
+    lightSFUpCorr = _btagSF(cset, lightJets, "light", wp, algo, syst="up_correlated")
+    lightSFDownCorr = _btagSF(cset, lightJets, "light", wp, algo, syst="down_correlated")
+    bcSFUp = _btagSF(cset, bcJets, "bc", wp, algo, syst="up")
+    bcSFDown = _btagSF(cset, bcJets, "bc", wp, algo, syst="down")
+    bcSFUpCorr = _btagSF(cset, bcJets, "bc", wp, algo, syst="up_correlated")
+    bcSFDownCorr = _btagSF(cset, bcJets, "bc", wp, algo, syst="down_correlated")
+
+    def _get_weight(veto, lightEff, lightSF, bcEff, bcSF):
+        light_probs = ak.fill_none(ak.prod(1 - lightSF * lightEff, axis=-1), 1)
+        bc_probs = ak.fill_none(ak.prod(1 - bcSF * bcEff, axis=-1), 1)
+        weight = light_probs * bc_probs
+
+        if veto:
+            return weight
+        else:
+            return 1 - weight
+
+    weight = _get_weight(veto, lightEff, lightSF, bcEff, bcSF)
+
+    ret_weights = {}
+
+    if veto:
+        app = f"veto{wp}_"
+    else:
+        app = f"{wp}_"
+
+    ret_weights[app + "btagSF"] = weight
+    ret_weights[app + f"btagSFlight_{year}Up"] = _get_weight(veto, lightEff, lightSFUp, bcEff, bcSF)
+    ret_weights[app + f"btagSFlight_{year}Down"] = _get_weight(veto, lightEff, lightSFDown, bcEff, bcSF)
+
+    ret_weights[app + f"btagSFbc_{year}Up"] = _get_weight(veto, lightEff, lightSF, bcEff, bcSFUp)
+    ret_weights[app + f"btagSFbc_{year}Down"] = _get_weight(veto, lightEff, lightSF, bcEff, bcSFDown)
+
+    ret_weights[app + "btagSFlight_correlatedUp"] = _get_weight(veto, lightEff, lightSFUpCorr, bcEff, bcSF)
+    ret_weights[app + "btagSFlight_correlatedDown"] = _get_weight(veto, lightEff, lightSFDownCorr, bcEff, bcSF)
+
+    ret_weights[app + "btagSFbc_correlatedUp"] = _get_weight(veto, lightEff, lightSF, bcEff, bcSFUpCorr)
+    ret_weights[app + "btagSFbc_correlatedDown"] = _get_weight(veto, lightEff, lightSF, bcEff, bcSFDownCorr)
+
+    return ret_weights
 
 
 def add_btag_weights(

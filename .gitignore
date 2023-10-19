@@ -13,9 +13,11 @@ metadata.json
 binder/plots/*
 binder/DY*
 
+eos/
+
 *.root
 *.parquet
-*.pkl
+# *.pkl
 *.pdf
 
 histo
@@ -35,3 +37,9 @@ shell
 docker_stderror
 
 boostedhiggs/data/Efficiencies_muon_generalTracks_Z_Run2017_UL_SingleMuonTriggers_schemaV2.json
+
+playground/
+
+python/hists*
+python/soverb/*
+Oct9*

@@ -127,7 +127,9 @@ def main(args):
         # define processor
         from boostedhiggs.inputprocessor import InputProcessor
 
-        p = InputProcessor(args.label, inference=args.inference, output_location=f"./outfiles/{job_name}")
+        p = InputProcessor(
+            year=args.year, label=args.label, inference=args.inference, output_location=f"./outfiles/{job_name}"
+        )
     else:
         from boostedhiggs.trigger_efficiencies_processor import TriggerEfficienciesProcessor
 
@@ -195,11 +197,11 @@ def main(args):
         data = pd.read_parquet(f"./outfiles/{job_name}/parquet")
         data.to_parquet(f"./outfiles/{job_name}.parquet")
 
-        # make directory for output rootfiles
-        if not os.path.exists("./outfiles/outroot"):
-            os.makedirs("./outfiles/outroot")
+        # # make directory for output rootfiles
+        # if not os.path.exists("./outfiles/outroot"):
+        #     os.makedirs("./outfiles/outroot")
 
-        os.system(f"mv ./outfiles/{job_name}/outroot ./outfiles/outroot/{job_name}")
+        # os.system(f"mv ./outfiles/{job_name}/outroot ./outfiles/outroot/{job_name}")
 
         # remove unmerged parquet files
         os.system("rm -rf ./outfiles/" + job_name)

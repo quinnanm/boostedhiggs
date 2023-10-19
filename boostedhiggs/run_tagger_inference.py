@@ -5,18 +5,20 @@ Author(s): Raghav Kansal, Cristina Mantilla Suarez, Melissa Quinnan, Farouk Mokh
 
 import json
 
+# import onnxruntime as ort
+import time
+
 # import time
 from typing import Dict
 
 import numpy as np
+import tritonclient
 import tritonclient.grpc as triton_grpc
 import tritonclient.http as triton_http
 from coffea.nanoevents.methods.base import NanoEventsArray
 from tqdm import tqdm
 
 from .get_tagger_inputs import get_pfcands_features, get_svs_features
-
-# import onnxruntime as ort
 
 
 # adapted from https://github.com/lgray/hgg-coffea/blob/triton-bdts/src/hgg_coffea/tools/chained_quantile.py
@@ -80,6 +82,20 @@ class wrapped_triton:
             inputs=inputs,
             outputs=[output],
         )
+
+        # in case of a server error, keep trying to connect for 5 minutes
+        for i in range(60):
+            try:
+                request = client.infer(
+                    self._model,
+                    model_version=self._version,
+                    inputs=inputs,
+                    outputs=[output],
+                )
+                break
+            except tritonclient.utils.InferenceServerException as e:
+                print("Triton Error:", e)
+                time.sleep(5)
 
         return request.as_numpy(self._out_name)
 

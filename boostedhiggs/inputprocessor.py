@@ -18,10 +18,11 @@ from coffea.analysis_tools import PackedSelection
 from coffea.nanoevents.methods import candidate
 from coffea.processor import ProcessorABC, dict_accumulator
 
-from .get_tagger_inputs import get_lep_features, get_met_features
+from .corrections import btagWPs
+from .run_tagger_inference import runInferenceTriton
 
 # from .run_tagger_inference import runInferenceTriton
-from .utils import FILL_NONE_VALUE, add_selection_no_cutflow, bkgs, sigs, tagger_gen_matching
+from .utils import FILL_NONE_VALUE, add_selection_no_cutflow, sigs, tagger_gen_matching
 
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -29,40 +30,19 @@ warnings.filterwarnings("ignore", message="Missing cross-reference index ")
 warnings.filterwarnings("ignore", message="divide by zero encountered in log")
 np.seterr(invalid="ignore")
 
-P4 = {
-    "eta": "eta",
-    "phi": "phi",
-    "mass": "mass",
-    "pt": "pt",
-}
-
 
 class InputProcessor(ProcessorABC):
     """
     Produces a flat training ntuple from PFNano.
     """
 
-    def __init__(self, label, inference, output_location="./outfiles/"):
-        """
-        :param num_jets: Number of jets to save
-        :type num_jets: int
-        """
-
-        """
-        Skimming variables
-        """
+    def __init__(self, year, label, inference, output_location="./outfiles/"):
+        self._year = year
         self.label = label
         self.inference = inference
         self._output_location = output_location
 
         self.skim_vars = {
-            "Event": {
-                "event": "event",
-            },
-            "FatJet": {
-                **P4,
-                "msoftdrop": "msoftdrop",
-            },
             "GenPart": [
                 "fj_genjetmass",
                 "fj_genRes_pt",
@@ -97,24 +77,31 @@ class InputProcessor(ProcessorABC):
                 "fj_Top_ntau",
                 "fj_Top_taudecay",
             ],
-            # formatted to match weaver's preprocess.json
-            "MET": {
-                "met_features": {
-                    "var_names": [
-                        "met_relpt",
-                        "met_relphi",
-                    ],
-                },
-                "met_points": {"var_length": 1},
-            },
-            "Lep": {
-                "fj_features": {
-                    "fj_lep_dR",
-                    "fj_lep_pt",
-                    "fj_lep_iso",
-                    "fj_lep_miniiso",
-                },
-            },
+            "FatJet": [
+                "eta",
+                "phi",
+                "mass",
+                "pt",
+                "msoftdrop",
+            ],
+            "MET": [
+                "met_relpt",
+                "met_relphi",
+            ],
+            "Lep": [
+                "fj_lep_dR",
+                "fj_lep_pt",
+                "fj_lep_iso",
+                "fj_lep_miniiso",
+            ],
+            "Others": [
+                "n_bjets_L",
+                "n_bjets_M",
+                "n_bjets_T",
+                "rec_W_lnu",
+                "rec_W_qq",
+                "rec_higgs_m",
+            ],
         }
 
         self.tagger_resources_path = str(pathlib.Path(__file__).parent.resolve()) + "/tagger_resources/"
@@ -174,58 +161,114 @@ class InputProcessor(ProcessorABC):
                 behavior=candidate.behavior,
             )
 
+        met = events.MET
+
+        # lepton
         electrons = events["Electron"][events["Electron"].pt > 40]
         muons = events["Muon"][events["Muon"].pt > 30]
         leptons = ak.concatenate([electrons, muons], axis=1)
         leptons = leptons[ak.argsort(leptons.pt, ascending=False)]
-        fatjets = events[self.fatjet_label]
-        candidatelep_p4 = build_p4(ak.firsts(leptons))
+        candidatelep = ak.firsts(leptons)
+        candidatelep_p4 = build_p4(candidatelep)
 
-        fj_idx_lep = ak.argmin(fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)
-        fatjet = ak.firsts(fatjets[fj_idx_lep])
+        lep_reliso = (
+            candidatelep.pfRelIso04_all if hasattr(candidatelep, "pfRelIso04_all") else candidatelep.pfRelIso03_all
+        )  # reliso for candidate lepton
+        lep_miso = candidatelep.miniPFRelIso_all  # miniso for candidate lepton
+
+        # fatjet
+        fatjets = events[self.fatjet_label]
+        good_fatjets = (fatjets.pt > 200) & (abs(fatjets.eta) < 2.5) & fatjets.isTight
+        good_fatjets = fatjets[good_fatjets]  # select good fatjets
+        good_fatjets = good_fatjets[ak.argsort(good_fatjets.pt, ascending=False)]  # sort them by pt
+
+        # candidatefj
+        fj_idx_lep = ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)
+        candidatefj = ak.firsts(good_fatjets[fj_idx_lep])
+
+        # ak4 jets
+        ak4_jet_selector_no_btag = (
+            (events.Jet.pt > 30) & (abs(events.Jet.eta) < 5.0) & events.Jet.isTight & (events.Jet.puId > 0)
+        )
+        # reject EE noisy jets for 2017
+        if self._year == "2017":
+            ak4_jet_selector_no_btag = ak4_jet_selector_no_btag & (
+                (events.Jet.pt > 50) | (abs(events.Jet.eta) < 2.65) | (abs(events.Jet.eta) > 3.139)
+            )
+
+        goodjets = events.Jet[ak4_jet_selector_no_btag]
+
+        dr_jet_lepfj = goodjets.delta_r(candidatefj)
+        ak4_outside_ak8 = goodjets[dr_jet_lepfj > 0.8]
+
+        # rec_higgs
+        candidateNeutrino = ak.zip(
+            {
+                "pt": met.pt,
+                "eta": candidatelep_p4.eta,
+                "phi": met.phi,
+                "mass": 0,
+                "charge": 0,
+            },
+            with_name="PtEtaPhiMCandidate",
+            behavior=candidate.behavior,
+        )
+        rec_W_lnu = candidatelep_p4 + candidateNeutrino
+        rec_W_qq = candidatefj - candidatelep_p4
+        rec_higgs = rec_W_qq + rec_W_lnu
 
         # selection
         selection = PackedSelection()
-        add_selection_no_cutflow("fjselection", (fatjet.pt > 200), selection)
+        add_selection_no_cutflow("fjselection", (candidatefj.pt > 200), selection)
 
         if np.sum(selection.all(*selection.names)) == 0:
             return {}
 
         # variables
-        FatJetVars = {
-            f"fj_{key}": ak.fill_none(fatjet[var], FILL_NONE_VALUE) for (var, key) in self.skim_vars["FatJet"].items()
-        }
-        LepVars = {
-            **get_lep_features(
-                self.skim_vars["Lep"],
-                events,
-                fatjet,
-                candidatelep_p4,
-            ),
-        }
-
-        METVars = {
-            **get_met_features(
-                self.skim_vars["MET"],
-                events,
-                fatjet,
-                "MET",
-                normalize=False,
-            ),
-        }
-
         genparts = events.GenPart
         matched_mask, genVars = tagger_gen_matching(
             events,
             genparts,
-            fatjet,
-            # candidatelep_p4,
+            candidatefj,
             self.skim_vars["GenPart"],
             label=self.label,
         )
-        # add_selection_no_cutflow("gen_match", matched_mask, selection)
 
-        skimmed_vars = {**FatJetVars, **{"matched_mask": matched_mask}, **genVars, **METVars, **LepVars}
+        FatJetVars = {f"fj_{var}": ak.fill_none(candidatefj[var], FILL_NONE_VALUE) for var in self.skim_vars["FatJet"]}
+
+        LepVars = {}
+        LepVars["lep_dR_fj"] = candidatelep_p4.delta_r(candidatefj).to_numpy().filled(fill_value=0)
+        LepVars["lep_pt"] = (candidatelep_p4.pt).to_numpy().filled(fill_value=0)
+        LepVars["lep_pt_ratio"] = (candidatelep_p4.pt / candidatefj.pt).to_numpy().filled(fill_value=0)
+        LepVars["lep_reliso"] = lep_reliso.to_numpy().filled(fill_value=0)
+        LepVars["lep_miso"] = lep_miso.to_numpy().filled(fill_value=0)
+
+        Others = {}
+        Others["n_bjets_L"] = (
+            ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["L"], axis=1)
+            .to_numpy()
+            .filled(fill_value=0)
+        )
+        Others["n_bjets_M"] = (
+            ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["M"], axis=1)
+            .to_numpy()
+            .filled(fill_value=0)
+        )
+        Others["n_bjets_T"] = (
+            ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["T"], axis=1)
+            .to_numpy()
+            .filled(fill_value=0)
+        )
+
+        Others["rec_W_lnu_m"] = rec_W_lnu.mass.to_numpy().filled(fill_value=0)
+        Others["rec_W_qq_m"] = rec_W_qq.mass.to_numpy().filled(fill_value=0)
+        Others["rec_higgs_m"] = rec_higgs.mass.to_numpy().filled(fill_value=0)
+
+        METVars = {}
+        METVars["met_relpt"] = met.pt / candidatefj.pt
+        METVars["met_relphi"] = met.delta_phi(candidatefj)
+
+        skimmed_vars = {**FatJetVars, **{"matched_mask": matched_mask}, **genVars, **METVars, **LepVars, **Others}
 
         # apply selections
         skimmed_vars = {
@@ -233,38 +276,40 @@ class InputProcessor(ProcessorABC):
         }
 
         # fill inference
-        if self.inference:
-            from .run_tagger_inference import runInferenceTriton
+        assert self.inference is True, "enable --inference to run skimmer"
 
-            for model_name in ["ak8_MD_vminclv2ParT_manual_fixwrap_all_nodes"]:
-                pnet_vars = runInferenceTriton(
-                    self.tagger_resources_path,
-                    events[selection.all(*selection.names)],
-                    fj_idx_lep[selection.all(*selection.names)],
-                    model_name=model_name,
-                )
+        for model_name in ["ak8_MD_vminclv2ParT_manual_fixwrap_all_nodes"]:
+            pnet_vars = runInferenceTriton(
+                self.tagger_resources_path,
+                events[selection.all(*selection.names)],
+                fj_idx_lep[selection.all(*selection.names)],
+                model_name=model_name,
+            )
 
-                # pnet_df = self.ak_to_pandas(pnet_vars)
-                pnet_df = pd.DataFrame(pnet_vars)
+            # pnet_df = self.ak_to_pandas(pnet_vars)
+            pnet_df = pd.DataFrame(pnet_vars)
 
-                num = pnet_df[sigs].sum(axis=1)
-                den = pnet_df[sigs].sum(axis=1) + pnet_df[bkgs].sum(axis=1)
+            scores = {"fj_ParT_score": (pnet_df[sigs].sum(axis=1)).values}
+            reg_mass = {"fj_ParT_mass": pnet_vars["fj_ParT_mass"]}
 
-                scores = {"fj_ParT_inclusive_score": (num / den).values}
-                reg_mass = {"fj_ParT_mass": pnet_vars["fj_ParT_mass"]}
+            hidNeurons = {}
+            for key in pnet_vars:
+                if "hidNeuron" in key:
+                    hidNeurons[key] = pnet_vars[key]
 
-                hidNeurons = {}
-                for key in pnet_vars:
-                    if "hidNeuron" in key:
-                        hidNeurons[key] = pnet_vars[key]
-
-                skimmed_vars = {**skimmed_vars, **scores, **reg_mass, **hidNeurons}
+            skimmed_vars = {**skimmed_vars, **scores, **reg_mass, **hidNeurons}
 
         for key in skimmed_vars:
             skimmed_vars[key] = skimmed_vars[key].squeeze()
 
         # convert output to pandas
         df = pd.DataFrame(skimmed_vars)
+
+        # for key in self.skim_vars:
+        #     for keykey in self.skim_vars[key]:
+        #         assert (
+        #             keykey in df.keys()
+        #         ), f"make sure you are computing and storing {keykey} in the skimmed_vars dictionnary"
 
         df = df.dropna()  # very few events would have genjetmass NaN for some reason
 
@@ -280,9 +325,9 @@ class InputProcessor(ProcessorABC):
 
         print(f"dump parquet: {time.time() - start:.1f}s")
 
-        # TODO: drop NaNs from rootfiles
-        self.dump_root(skimmed_vars, fname)
-        print(f"dump rootfile: {time.time() - start:.1f}s")
+        # # TODO: drop NaNs from rootfiles
+        # self.dump_root(skimmed_vars, fname)
+        # print(f"dump rootfile: {time.time() - start:.1f}s")
 
         # for now do something like this to dump the parquets in root
         # OUTPATH = "../datafiles/ntuples/"

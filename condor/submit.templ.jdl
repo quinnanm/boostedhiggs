@@ -13,6 +13,6 @@ output                  = DIRECTORY/logs/PREFIX_$(jobid).out
 error                   = DIRECTORY/logs/PREFIX_$(jobid).err
 log                     = DIRECTORY/logs/PREFIX_$(jobid).log
 
-+SingularityImage = "/cvmfs/unpacked.cern.ch/registry.hub.docker.com/coffeateam/coffea-dask:latest"
++SingularityImage = "/cvmfs/unpacked.cern.ch/registry.hub.docker.com/coffeateam/coffea-dask:0.7.21-fastjet-3.4.0.1-g6238ea8"
 
 queue jobid from JOBIDS_FILE

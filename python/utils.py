@@ -9,6 +9,9 @@ import hist as hist2
 import matplotlib.pyplot as plt
 import mplhep as hep
 import numpy as np
+import onnx
+import onnxruntime as ort
+import scipy
 
 plt.style.use(hep.style.CMS)
 
@@ -21,7 +24,7 @@ combine_samples = {
     "SingleMuon_": "Data",
     "EGamma_": "Data",
     # signal
-    "GluGluHToWW_Pt-200ToInf_M-125": "HWW",
+    "GluGluHToWW_Pt-200ToInf_M-125": "ggF",
     "HToWW_M-125": "VH",
     "VBFHToWWToLNuQQ_M-125_withDipoleRecoil": "VBF",
     "ttHToNonbb_M125": "ttH",
@@ -37,7 +40,7 @@ combine_samples = {
     "ZZ": "Diboson",
     "GluGluHToTauTau": "HTauTau",
 }
-signals = ["HWW", "ttH", "VH", "VBF"]
+signals = ["ggF", "ttH", "VH", "VBF"]
 
 
 def get_sum_sumgenweight(pkl_files, year, sample):
@@ -72,45 +75,31 @@ def get_xsecweight(pkl_files, year, sample, is_data, luminosity):
 
 # ---------------------------------------------------------
 # TAGGER STUFF
-def disc_score(df, sigs, bkgs):
-    num = df[sigs].sum(axis=1)
-    den = df[sigs].sum(axis=1) + df[bkgs].sum(axis=1)
-    return num / den
+def get_finetuned_score(data, modelv="v2_nor2"):
+    # add finetuned tagger score
+    PATH = f"../../weaver-core-dev/experiments_finetuning/{modelv}/model.onnx"
+
+    input_dict = {
+        "highlevel": data.loc[:, "fj_ParT_hidNeuron000":"fj_ParT_hidNeuron127"].values.astype("float32"),
+    }
+
+    onnx_model = onnx.load(PATH)
+    onnx.checker.check_model(onnx_model)
+
+    ort_sess = ort.InferenceSession(
+        PATH,
+        providers=["AzureExecutionProvider"],
+    )
+    outputs = ort_sess.run(None, input_dict)
+
+    return scipy.special.softmax(outputs[0], axis=1)[:, 0]
 
 
-# signal scores definition
-hwwev = ["fj_PN_probHWqqWev0c", "fj_PN_probHWqqWev1c", "fj_PN_probHWqqWtauev0c", "fj_PN_probHWqqWtauev1c"]
-hwwmv = ["fj_PN_probHWqqWmv0c", "fj_PN_probHWqqWmv1c", "fj_PN_probHWqqWtaumv0c", "fj_PN_probHWqqWtaumv1c"]
-hwwhad = [
-    "fj_PN_probHWqqWqq0c",
-    "fj_PN_probHWqqWqq1c",
-    "fj_PN_probHWqqWqq2c",
-    "fj_PN_probHWqqWq0c",
-    "fj_PN_probHWqqWq1c",
-    "fj_PN_probHWqqWq2c",
-    "fj_PN_probHWqqWtauhv0c",
-    "fj_PN_probHWqqWtauhv1c",
-]
-sigs = hwwev + hwwmv + hwwhad
-
-# background scores definition
-qcd = ["fj_PN_probQCDbb", "fj_PN_probQCDcc", "fj_PN_probQCDb", "fj_PN_probQCDc", "fj_PN_probQCDothers"]
-
-tope = ["fj_PN_probTopbWev", "fj_PN_probTopbWtauev"]
-topm = ["fj_PN_probTopbWmv", "fj_PN_probTopbWtaumv"]
-tophad = ["fj_PN_probTopbWqq0c", "fj_PN_probTopbWqq1c", "fj_PN_probTopbWq0c", "fj_PN_probTopbWq1c", "fj_PN_probTopbWtauhv"]
-top = tope + topm + tophad
-
-# use ParT
-new_sig = [s.replace("PN", "ParT") for s in sigs]
-qcd_bkg = [b.replace("PN", "ParT") for b in qcd]
-top_bkg = [b.replace("PN", "ParT") for b in tope + topm + tophad]
-inclusive_bkg = [b.replace("PN", "ParT") for b in qcd + tope + topm + tophad]
 # ---------------------------------------------------------
 
 # PLOTTING UTILS
 color_by_sample = {
-    "HWW": "pink",
+    "ggF": "pink",
     "VH": "tab:brown",
     "VBF": "tab:gray",
     "ttH": "tab:olive",
@@ -130,7 +119,7 @@ color_by_sample = {
 }
 
 plot_labels = {
-    "HWW": "ggH(WW)-Pt200",
+    "ggF": "ggH(WW)-Pt200",
     "VH": "VH(WW)",
     "VBF": r"VBFH(WW) $(qq\ell\nu)$",
     "ttH": "ttH(WW)",
@@ -149,12 +138,12 @@ plot_labels = {
     #     "VBFHToTauTau": "VBFHToTauTau"
 }
 
-sig_labels = {
-    "HWW": "ggF",
-    "VBF": "VBF",
-    "VH": "VH",
-    "ttH": "ttH",
-}
+# sig_labels = {
+#     "HWW": "ggF",
+#     "VBF": "VBF",
+#     "VH": "VH",
+#     "ttH": "ttH",
+# }
 
 label_by_ch = {"mu": "Muon", "ele": "Electron"}
 
@@ -175,7 +164,7 @@ axis_dict = {
     "mu_highPtId": hist2.axis.Regular(5, 0, 5, name="var", label="Muon high pT ID", overflow=True),
     "fj_pt": hist2.axis.Regular(30, 200, 600, name="var", label=r"Jet $p_T$ [GeV]", overflow=True),
     "fj_msoftdrop": hist2.axis.Regular(35, 20, 250, name="var", label=r"Jet $m_{sd}$ [GeV]", overflow=True),
-    "rec_higgs_m": hist2.axis.Regular(35, 0, 480, name="var", label=r"Higgs reconstructed mass [GeV]", overflow=True),
+    "rec_higgs_m": hist2.axis.Regular(26, 50, 300, name="var", label=r"Higgs reconstructed mass [GeV]", overflow=True),
     "rec_higgs_pt": hist2.axis.Regular(30, 0, 1000, name="var", label=r"Higgs reconstructed $p_T$ [GeV]", overflow=True),
     "fj_pt_over_lep_pt": hist2.axis.Regular(35, 1, 10, name="var", label=r"$p_T$(Jet) / $p_T$(Lepton)", overflow=True),
     "rec_higgs_pt_over_lep_pt": hist2.axis.Regular(
@@ -201,10 +190,15 @@ axis_dict = {
     ),
     "nj": hist2.axis.Regular(40, 0, 10, name="var", label="number of jets outside candidate jet", overflow=True),
     "inclusive_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
+    "fj_ParT_score_finetuned_v2_1_12": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
+    "fj_ParT_inclusive_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
+    "fj_ParT_all_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
 }
 
 
-def plot_hists(years, channels, hists, vars_to_plot, add_data, logy, add_soverb, only_sig, mult, outpath):
+def plot_hists(
+    years, channels, hists, vars_to_plot, add_data, logy, add_soverb, only_sig, mult, outpath, text_="", blind_region=None
+):
     # luminosity
     luminosity = 0
     for year in years:
@@ -323,6 +317,14 @@ def plot_hists(years, channels, hists, vars_to_plot, add_data, logy, add_soverb,
                 "markersize": 10.0,
                 "elinewidth": 1,
             }
+
+            if blind_region:
+                massbins = data.axes[-1].edges
+                lv = int(np.searchsorted(massbins, blind_region[0], "right"))
+                rv = int(np.searchsorted(massbins, blind_region[1], "left") + 1)
+
+                data.view(flow=True)[lv:rv] = 0
+
             hep.histplot(
                 data,
                 ax=ax,
@@ -375,6 +377,8 @@ def plot_hists(years, channels, hists, vars_to_plot, add_data, logy, add_soverb,
                 **errps,
                 label="Stat. unc.",
             )
+
+        ax.text(0.5, 0.9, text_, fontsize=14, transform=ax.transAxes, weight="bold")
 
         # plot the signal (times 10)
         if len(signal) > 0:
@@ -507,4 +511,4 @@ def plot_hists(years, channels, hists, vars_to_plot, add_data, logy, add_soverb,
         if not os.path.exists(outpath):
             os.makedirs(outpath)
 
-        plt.savefig(f"{outpath}/{var}.pdf", bbox_inches="tight")
+        plt.savefig(f"{outpath}/stacked_hists_{var}.pdf", bbox_inches="tight")

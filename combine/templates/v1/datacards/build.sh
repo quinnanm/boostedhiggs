@@ -1,0 +1,2 @@
+combineCards.py ggFpt200to300binpass=ggFpt200to300binpass.txt VBFpt200toinfbinfail=VBFpt200toinfbinfail.txt ggFpt300toinfbinpass=ggFpt300toinfbinpass.txt ggFpt200to300binfail=ggFpt200to300binfail.txt VBFpt200toinfbinpass=VBFpt200toinfbinpass.txt ggFpt300toinfbinfail=ggFpt300toinfbinfail.txt > model_combined.txt
+text2workspace.py model_combined.txt
