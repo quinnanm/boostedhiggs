@@ -26,7 +26,7 @@ xs = {}
 # pp->ZH 8.839E-01
 ##From GenXsecAnalyzer: 7.891e-01 +/- 3.047e-03	
 ##cmsRun ana.py inputFiles="file:root://cmsxrootd.fnal.gov//store/mc/RunIIAutumn18MiniAOD/HZJ_HToWW_M125_13TeV_powheg_jhugen714_pythia8_TuneCP5/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/280000/B18DBE21-109B-6F4C-9920-A797AAC1D1CE.root" maxEvents=-1
-xs["HZJ_HToWW_M-125"] = 0.7891 * BR_HWW
+#xs["HZJ_HToWW_M-125"] = 0.7891 * BR_HWW
 
 
 # GluGluToHToWWPt200
@@ -61,7 +61,8 @@ xs["ttHToNonbb_M125"] = 5.013e-01 * (1 - BR_HBB)
 # Cross xcheck the following numbers
 xs["HWminusJ_HToWW_M-125"] = 0.5445 * BR_HWW
 xs["HWplusJ_HToWW_M-125"] = 0.8720 * BR_HWW
-xs["HZJ_HToWW_M-125"] = 0.9595 * BR_HWW
+#xs["HZJ_HToWW_M-125"] = 0.9595 * BR_HWW
+xs["HZJ_HToWW_M-125"] = 0.7891 * BR_HWW  #this was replaced with above GenXSecAnalyzer Number
 # cross check -  this in xsdb is 0.006185
 xs["GluGluZH_HToWW_ZTo2L_M-125"] = 0.1223 * 3 * 0.033658 * BR_HWW
 
