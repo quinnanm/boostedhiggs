@@ -24,7 +24,9 @@ xs = {}
 
 # VH - this needs to be checked for qqZH, also need to add ggZH
 # pp->ZH 8.839E-01
-xs["HZJ_HToWW_M-125"] = 0.8839 * BR_HWW
+##From GenXsecAnalyzer: 7.891e-01 +/- 3.047e-03	
+##cmsRun ana.py inputFiles="file:root://cmsxrootd.fnal.gov//store/mc/RunIIAutumn18MiniAOD/HZJ_HToWW_M125_13TeV_powheg_jhugen714_pythia8_TuneCP5/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/280000/B18DBE21-109B-6F4C-9920-A797AAC1D1CE.root" maxEvents=-1
+xs["HZJ_HToWW_M-125"] = 0.7891 * BR_HWW
 
 
 # GluGluToHToWWPt200
