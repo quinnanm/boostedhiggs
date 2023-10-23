@@ -29,7 +29,7 @@ combine_samples = {
     "VBFHToWWToLNuQQ_M-125_withDipoleRecoil": "VBF",
     "ttHToNonbb_M125": "ttH",
     # bkg
-    "QCD_Pt": "QCD",
+    # "QCD_Pt": "QCD",
     "DYJets": "DYJets",
     "WJetsToLNu_": "WJetsLNu",
     "JetsToQQ": "WZQQ",
@@ -164,7 +164,7 @@ axis_dict = {
     "mu_highPtId": hist2.axis.Regular(5, 0, 5, name="var", label="Muon high pT ID", overflow=True),
     "fj_pt": hist2.axis.Regular(30, 200, 600, name="var", label=r"Jet $p_T$ [GeV]", overflow=True),
     "fj_msoftdrop": hist2.axis.Regular(35, 20, 250, name="var", label=r"Jet $m_{sd}$ [GeV]", overflow=True),
-    "rec_higgs_m": hist2.axis.Regular(26, 50, 300, name="var", label=r"Higgs reconstructed mass [GeV]", overflow=True),
+    "rec_higgs_m": hist2.axis.Regular(20, 50, 250, name="var", label=r"Higgs reconstructed mass [GeV]", overflow=True),
     "rec_higgs_pt": hist2.axis.Regular(30, 0, 1000, name="var", label=r"Higgs reconstructed $p_T$ [GeV]", overflow=True),
     "fj_pt_over_lep_pt": hist2.axis.Regular(35, 1, 10, name="var", label=r"$p_T$(Jet) / $p_T$(Lepton)", overflow=True),
     "rec_higgs_pt_over_lep_pt": hist2.axis.Regular(
@@ -440,8 +440,8 @@ def plot_hists(
                 # integrate soverb in a given range for rec_higgs_m
                 if var == "rec_higgs_m":
                     bin_array = tot_signal.axes[0].edges[:-1]  # remove last element since bins have one extra element
-                    range_max = 200
-                    range_min = 50
+                    range_max = 160
+                    range_min = 80
 
                     condition = (bin_array >= range_min) & (bin_array <= range_max)
 
@@ -449,7 +449,7 @@ def plot_hists(
                     b = np.sqrt(tot_val[condition].sum())  # sum/integrate bkg counts in the range and take sqrt
 
                     soverb_integrated = round((s / b).item(), 2)
-                    sax.legend(title=f"S/sqrt(B) (in 50-200)={soverb_integrated:.2f}")
+                    sax.legend(title=f"S/sqrt(B) (in {range_min}-{range_max})={soverb_integrated:.2f}")
 
         ax.set_ylabel("Events")
         if sax is not None:
