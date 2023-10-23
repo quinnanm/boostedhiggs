@@ -34,6 +34,25 @@ pd.set_option("mode.chained_assignment", None)
 CMS_PARAMS_LABEL = "CMS_HWW_boosted"
 
 
+from dataclasses import dataclass
+
+
+@dataclass
+class ShapeVar:
+
+    """For storing and calculating info about variables used in fit"""
+
+    name: str = None
+    bins: np.ndarray = None  # bin edges
+    order: int = None  # TF order
+
+    def __post_init__(self):
+        # use bin centers for polynomial fit
+        self.pts = self.bins[:-1] + 0.5 * np.diff(self.bins)
+        # scale to be between [0, 1]
+        self.scaled = (self.pts - self.bins[0]) / (self.bins[-1] - self.bins[0])
+
+
 def systs_not_from_parquets(years, LUMI, full_lumi):
     """
     Define systematics that are NOT stored in the parquets
@@ -103,13 +122,13 @@ def systs_from_parquets(years):
             #     f"{CMS_PARAMS_LABEL}_btagSFbc_correlated", "lnN"
             # ),
             "weight_pileup": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_PU_{year}", "shape"),
-            "weight_isolation": rl.NuisanceParameter(f"CMS_mu_iso_{year}", "lnN"),
-            "weight_id": rl.NuisanceParameter(f"CMS_mu_id_{year}", "lnN"),
-            "weight_reco_ele": rl.NuisanceParameter("CMS_ele_reconstruction", "lnN"),
+            "weight_isolation": rl.NuisanceParameter(f"CMS_iso_{year}", "lnN"),
+            "weight_id": rl.NuisanceParameter(f"CMS_id_{year}", "lnN"),
+            "weight_reco_ele": rl.NuisanceParameter("CMS_reconstruction_ele", "lnN"),
             "weight_L1Prefiring": rl.NuisanceParameter(f"CMS_L1Prefiring_{year}", "lnN"),
-            "weight_trigger_ele": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_trigger_{year}", "lnN"),
-            "weight_trigger_iso_mu": rl.NuisanceParameter(f"CMS_mu_trigger_iso_{year}", "lnN"),
-            "weight_trigger_noniso_mu": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_trigger_{year}", "lnN"),
+            "weight_trigger_ele": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_trigger_{year}_ele", "lnN"),
+            "weight_trigger_iso_mu": rl.NuisanceParameter(f"CMS_mu_trigger_iso_{year}_mu", "lnN"),
+            "weight_trigger_noniso_mu": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_trigger_{year}_mu", "lnN"),
         },
         # signal
         "ggF": {
@@ -154,7 +173,7 @@ def systs_from_parquets(years):
 
 
 def rhalphabet(hists_templates, years, channels, blind, blind_samples, blind_region, qcd_estimation):
-    # get the LUMI (must average lumi over both channels)
+    # get the LUMI (must average lumi over the lepton channels provided)
     LUMI = {}
     for year in years:
         LUMI[year] = 0.0
@@ -172,48 +191,29 @@ def rhalphabet(hists_templates, years, channels, blind, blind_samples, blind_reg
     systs_dict, systs_dict_values = systs_not_from_parquets(years, LUMI, full_lumi)
     sys_from_parquets = systs_from_parquets(years)
 
-    ptbins = hists_templates["pass"].axes[2].edges
-    npt = len(ptbins) - 1
+    categories = list(hists_templates["pass"].axes["categories"])
+    shape_var = ShapeVar(
+        name=hists_templates["pass"].axes["mass_observable"].name,
+        bins=hists_templates["pass"].axes["mass_observable"].edges,
+        order=2,
+    )
+    m_obs = rl.Observable(shape_var.name, shape_var.bins)
 
-    massbins = hists_templates["pass"].axes[3].edges
-    mass = rl.Observable("mass_observable", massbins)
-
-    # here we derive these all at once with 2D array
-    ptpts, masspts = np.meshgrid(ptbins[:-1] + 0.3 * np.diff(ptbins), massbins[:-1] + 0.5 * np.diff(massbins), indexing="ij")
-
-    rhopts = 2 * np.log(masspts / ptpts)
-    pt_scaled = (ptpts - ptbins[0]) / (ptbins[-1] - ptbins[0])
-    rho_scaled = (rhopts - (-6)) / ((-2.1) - (-6))  # TODO: understand why
-
-    validbins = (rho_scaled >= 0) & (rho_scaled <= 1)
-    rho_scaled[~validbins] = 1  # we will mask these out later
-
-    # Raghav:
-    # https://github.com/rkansal47/HHbbVV/blob/68dd5738ebe6950a6b5ea16049c4047b7de7892d/src/HHbbVV/postprocessing/CreateDatacard.py#L66-L77
-    # bins = hists_templates["pass"][{"samples": sum, "rec_higgs_m": sum, "systematics": sum}].values()
-    # pts = bins[:-1] + 0.5 * np.diff(bins)
-    # ptscaled = (pts - ptbins[0]) / (ptbins[-1] - ptbins[0])
-
-    # build actual fit model now
     model = rl.Model("testModel")
 
     # fill datacard with systematics and rates
-    for ptbin in range(npt):
+    for category in categories:
         for region in ["pass", "fail"]:
-            ch = rl.Channel(f"{hists_templates[region].axes[2][ptbin].replace('_', '')}bin%s" % (region))
-            model.addChannel(ch)
-
-            # isPass = region == "pass"
-            # ptnorm = 1.0
-
             if blind:
                 h = blindBins(hists_templates[region], blind_region, blind_samples)
-
             else:
                 h = hists_templates[region]
 
+            ch = rl.Channel(f"{region}{category.replace('_', '')}")
+            model.addChannel(ch)
+
             for sName in samples:
-                templ = get_template(h, sName, ptbin)
+                templ = get_template(h, sName, category)
                 stype = rl.Sample.SIGNAL if sName in sigs else rl.Sample.BACKGROUND
                 sample = rl.TemplateSample(ch.name + "_" + labels[sName], stype, templ)
 
@@ -230,11 +230,11 @@ def rhalphabet(hists_templates, years, channels, blind, blind_samples, blind_reg
                         # if "L1Prefiring" not in sys_name:
                         #     continue
 
-                        # print(sName, sys_value, ptbin, region)
+                        # print(sName, sys_value, category, region)
 
-                        syst_up = h[{"samples": sName, "categories": ptbin, "systematics": sys_name + "Up"}].values()
-                        syst_do = h[{"samples": sName, "categories": ptbin, "systematics": sys_name + "Down"}].values()
-                        nominal = h[{"samples": sName, "categories": ptbin, "systematics": "nominal"}].values()
+                        syst_up = h[{"samples": sName, "categories": category, "systematics": sys_name + "Up"}].values()
+                        syst_do = h[{"samples": sName, "categories": category, "systematics": sys_name + "Down"}].values()
+                        nominal = h[{"samples": sName, "categories": category, "systematics": "nominal"}].values()
 
                         if sys_value.combinePrior == "lnN":
                             eff_up = shape_to_num(syst_up, nominal)
@@ -256,63 +256,82 @@ def rhalphabet(hists_templates, years, channels, blind, blind_samples, blind_reg
                 ch.addSample(sample)
 
             # add data
-            data_obs = get_template(h, "Data", ptbin)
+            data_obs = get_template(h, "Data", category)
             ch.setObservation(data_obs)
 
-            # drop bins outside rho validity
-            mask = validbins[ptbin]
-            # blind bins 3:6
-            #         mask[3:6] = False
-            ch.mask = mask
+        if qcd_estimation:  # qcd data-driven estimation per category
+            if blind:
+                h_pass = blindBins(hists_templates["pass"], blind_region, blind_samples)
+                h_fail = blindBins(hists_templates["fail"], blind_region, blind_samples)
 
-    if qcd_estimation:
-        # qcd data-driven estimation
+            else:
+                h_pass = hists_templates["pass"]
+                h_fail = hists_templates["fail"]
 
-        if blind:
-            h_pass = blindBins(hists_templates["pass"], blind_region, blind_samples)
-            h_fail = blindBins(hists_templates["fail"], blind_region, blind_samples)
-
-        else:
-            h_pass = hists_templates["pass"]
-            h_fail = hists_templates["fail"]
-
-        # get the transfer factor
-        qcd_eff = (
-            h_pass[{"samples": "QCD", "systematics": "nominal"}].sum()
-            / h_fail[{"samples": "QCD", "systematics": "nominal"}].sum()
-        )
-
-        tf_dataResidual = rl.BasisPoly(
-            f"{CMS_PARAMS_LABEL}_tf_dataResidual", (2, 2), ["pt", "rho"], limits=(-20, 20), basis="Bernstein"
-        )
-
-        tf_dataResidual_params = tf_dataResidual(pt_scaled, rho_scaled)
-        tf_params_pass = qcd_eff * tf_dataResidual_params
-
-        for ptbin in range(npt):
-            failCh = model["ptbin%dfail" % ptbin]
-            passCh = model["ptbin%dpass" % ptbin]
-
-            qcdparams = np.array(
-                [rl.IndependentParameter("qcdparam_ptbin%d_massbin%d" % (ptbin, i), 0) for i in range(mass.nbins)]
+            # get the transfer factor
+            qcd_eff = (
+                h_pass[{"categories": category, "samples": "QCD", "systematics": "nominal"}].sum()
+                / h_fail[{"categories": category, "samples": "QCD", "systematics": "nominal"}].sum()
             )
-            initial_qcd = failCh.getObservation().astype(
-                float
-            )  # was integer, and numpy complained about subtracting float from it
 
+            # transfer factor
+            tf_dataResidual = rl.BasisPoly(
+                f"{CMS_PARAMS_LABEL}_tf_dataResidual",
+                (shape_var.order,),
+                [shape_var.name],
+                basis="Bernstein",
+                limits=(-20, 20),
+                # square_params=True,
+            )
+            tf_dataResidual_params = tf_dataResidual(shape_var.scaled)
+            tf_params_pass = qcd_eff * tf_dataResidual_params  # scale params initially by qcd eff
+
+            # qcd params
+            qcd_params = np.array(
+                [rl.IndependentParameter(f"{CMS_PARAMS_LABEL}_tf_dataResidual_Bin{i}", 0) for i in range(m_obs.nbins)]
+            )
+
+            passChName = f"pass{category.replace('_', '')}"
+            failChName = f"fail{category.replace('_', '')}"
+
+            logging.info(f"setting transfer factor for pass region {passChName}, fail region {failChName}")
+
+            failCh = model[failChName]
+            passCh = model[passChName]
+
+            # sideband fail
+            # was integer, and numpy complained about subtracting float from it
+            initial_qcd = failCh.getObservation().astype(float)
             for sample in failCh:
+                # logging.info(f"subtracting {sample._name} from qcd")
                 initial_qcd -= sample.getExpectation(nominal=True)
 
             if np.any(initial_qcd < 0.0):
-                initial_qcd[np.where(initial_qcd < 0)] = 0
-            #         raise ValueError("initial_qcd negative for some bins..", initial_qcd)
+                # raise ValueError("initial_qcd negative for some bins..", initial_qcd)
+                logging.warning(f"initial_qcd negative for some bins... {initial_qcd}")
+                initial_qcd[initial_qcd < 0] = 0
+
+            # idea here is that the error should be 1/sqrt(N), so parametrizing it as (1 + 1/sqrt(N))^qcdparams
+            # will result in qcdparams errors ~±1
+            # but because qcd is poorly modelled we're scaling sigma scale
 
             sigmascale = 10  # to scale the deviation from initial
-            scaledparams = initial_qcd * (1 + sigmascale / np.maximum(1.0, np.sqrt(initial_qcd))) ** qcdparams
-            fail_qcd = rl.ParametericSample("ptbin%dfail_qcd" % ptbin, rl.Sample.BACKGROUND, mass, scaledparams)
+            scaled_params = initial_qcd * (1 + sigmascale / np.maximum(1.0, np.sqrt(initial_qcd))) ** qcd_params
+
+            # add samples
+            fail_qcd = rl.ParametericSample(
+                f"{failChName}_{CMS_PARAMS_LABEL}_qcd_datadriven",
+                rl.Sample.BACKGROUND,
+                m_obs,
+                scaled_params,
+            )
             failCh.addSample(fail_qcd)
+
             pass_qcd = rl.TransferFactorSample(
-                "ptbin%dpass_qcd" % ptbin, rl.Sample.BACKGROUND, tf_params_pass[ptbin, :], fail_qcd
+                f"{passChName}_{CMS_PARAMS_LABEL}_qcd_datadriven",
+                rl.Sample.BACKGROUND,
+                tf_params_pass,
+                fail_qcd,
             )
             passCh.addSample(pass_qcd)
 
@@ -341,7 +360,7 @@ def main(args):
         blind=args.blind,
         blind_samples=args.samples_to_blind.split(","),
         blind_region=[80, 160],
-        qcd_estimation=False,
+        qcd_estimation=True,
     )
 
     with open(f"{args.outdir}/model_{save_as}.pkl", "wb") as fout:
@@ -350,7 +369,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # python create_datacard.py --years 2016,2016APV,2017,2018 --channels mu,ele --outdir templates/v11
+    # python create_datacard.py --years 2016,2016APV,2017,2018 --channels mu,ele --outdir templates/v1
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--years", dest="years", default="2017", help="years separated by commas")
