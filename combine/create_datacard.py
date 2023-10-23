@@ -195,7 +195,7 @@ def rhalphabet(hists_templates, years, channels, blind, blind_samples, blind_reg
     shape_var = ShapeVar(
         name=hists_templates["pass"].axes["mass_observable"].name,
         bins=hists_templates["pass"].axes["mass_observable"].edges,
-        order=2,
+        order=2,    # TODO: make the order of the polynomial configurable
     )
     m_obs = rl.Observable(shape_var.name, shape_var.bins)
 
