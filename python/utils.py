@@ -197,7 +197,19 @@ axis_dict = {
 
 
 def plot_hists(
-    years, channels, hists, vars_to_plot, add_data, logy, add_soverb, only_sig, mult, outpath, text_="", blind_region=None
+    years,
+    channels,
+    hists,
+    vars_to_plot,
+    add_data,
+    logy,
+    add_soverb,
+    only_sig,
+    mult,
+    outpath,
+    text_="",
+    blind_region=None,
+    save_as=None,
 ):
     # luminosity
     luminosity = 0
@@ -511,4 +523,7 @@ def plot_hists(
         if not os.path.exists(outpath):
             os.makedirs(outpath)
 
-        plt.savefig(f"{outpath}/stacked_hists_{var}.pdf", bbox_inches="tight")
+        if save_as:
+            plt.savefig(f"{outpath}/{save_as}_stacked_hists_{var}.pdf", bbox_inches="tight")
+        else:
+            plt.savefig(f"{outpath}/stacked_hists_{var}.pdf", bbox_inches="tight")

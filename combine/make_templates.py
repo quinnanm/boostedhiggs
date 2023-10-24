@@ -159,7 +159,7 @@ def get_templates(years, channels, samples, samples_dir, lepiso_sel, regions_sel
 
                     # get event_weight
                     if sample_to_use != "Data":
-                        event_weight = utils.get_xsecweight(pkl_files, year, sample, True, luminosity)
+                        event_weight = utils.get_xsecweight(pkl_files, year, sample, False, luminosity)
 
                     for category, category_sel in categories_sel.items():  # vbf, ggF, etc.
                         df = data.copy().query(category_sel)
