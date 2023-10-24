@@ -127,10 +127,9 @@ def shape_to_num(var, nom, clip=1.5):
     return var_rate / nom_rate
 
 
-def get_template(h, sample, ptbin):
-    mass_axis = 3
-    massbins = h.axes[mass_axis].edges
-    return (h[{"samples": sample, "systematics": "nominal", "categories": ptbin}].values(), massbins, "mass_observable")
+def get_template(h, sample, category):
+    massbins = h.axes["mass_observable"].edges
+    return (h[{"samples": sample, "systematics": "nominal", "categories": category}].values(), massbins, "mass_observable")
 
 
 def blindBins(h: Hist, blind_region: List, blind_samples: List[str] = []):
@@ -144,9 +143,7 @@ def blindBins(h: Hist, blind_region: List, blind_samples: List[str] = []):
 
     h = h.copy()
 
-    #     mass_axis = np.argmax(np.array(list(h.axes.name))=="rec_higgs_m")
-    mass_axis = 3
-    massbins = h.axes[mass_axis].edges
+    massbins = h.axes["mass_observable"].edges
 
     lv = int(np.searchsorted(massbins, blind_region[0], "right"))
     rv = int(np.searchsorted(massbins, blind_region[1], "left") + 1)

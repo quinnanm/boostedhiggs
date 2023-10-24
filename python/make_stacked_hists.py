@@ -78,16 +78,21 @@ def make_events_dict(
                 if sample == "DYJetsToLL_M-10to50":
                     continue  # because tagger didnt run for it for one of the years
 
-                # get a combined label to combine samples of the same process
-                for key in utils.combine_samples:
-                    if key in sample:
-                        sample_to_use = utils.combine_samples[key]
-                        break
-                    else:
-                        sample_to_use = sample
+                # # get a combined label to combine samples of the same process
+                # for key in utils.combine_samples:
+                #     if key in sample:
+                #         sample_to_use = utils.combine_samples[key]
+                #         break
+                #     else:
+                #         sample_to_use = sample
 
-                if sample_to_use not in samples:
+                # if sample_to_use not in samples:
+                #     print(sample_to_use)
+                #     continue
+
+                if "QCD" not in sample:
                     continue
+                sample_to_use = sample
 
                 logging.info(f"Finding {sample} samples and should combine them under {sample_to_use}")
 
