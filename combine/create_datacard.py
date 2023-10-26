@@ -133,8 +133,8 @@ def systs_from_parquets(years):
         # signal
         "ggF": {
             "weight_aS_weight": rl.NuisanceParameter("aS_Higgs_ggF", "lnN"),
-            "weight_UEPS_FSR": rl.NuisanceParameter("UEPS_FSR_ggF", "shape"),
-            "weight_UEPS_ISR": rl.NuisanceParameter("UEPS_ISR_ggF", "shape"),
+            # "weight_UEPS_FSR": rl.NuisanceParameter("UEPS_FSR_ggF", "shape"),
+            # "weight_UEPS_ISR": rl.NuisanceParameter("UEPS_ISR_ggF", "shape"),
             "weight_PDF_weight": rl.NuisanceParameter("pdf_Higgs_ggF", "lnN"),
             "weight_PDFaS_weight": rl.NuisanceParameter("pdfAS_Higgs_ggF", "lnN"),
             "weight_scalevar_3pt": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_scale_pt_3_ggF_{year}", "lnN"),
@@ -143,7 +143,7 @@ def systs_from_parquets(years):
         "VBF": {
             "weight_aS_weight": rl.NuisanceParameter("aS_Higgs_VBF", "lnN"),
             # "weight_UEPS_FSR": rl.NuisanceParameter("UEPS_FSR_VBF", "shape"),
-            "weight_UEPS_ISR": rl.NuisanceParameter("UEPS_ISR_VBF", "shape"),
+            # "weight_UEPS_ISR": rl.NuisanceParameter("UEPS_ISR_VBF", "shape"),
             "weight_PDF_weight": rl.NuisanceParameter("pdf_Higgs_VBF", "lnN"),
             "weight_PDFaS_weight": rl.NuisanceParameter("pdfAS_Higgs_VBF", "lnN"),
             "weight_scalevar_3pt": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_scale_pt_3_VBF_{year}", "lnN"),
