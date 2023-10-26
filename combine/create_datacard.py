@@ -379,7 +379,6 @@ if __name__ == "__main__":
     parser.add_argument("--years", dest="years", default="2017", help="years separated by commas")
     parser.add_argument("--channels", dest="channels", default="mu", help="channels separated by commas (e.g. mu,ele)")
     parser.add_argument("--outdir", dest="outdir", default="templates/test", type=str, help="name of template directory")
-    parser.add_argument("--blind", dest="blind", action="store_true")
     parser.add_argument(
         "--samples_to_blind", dest="samples_to_blind", default="", help="samples to blind separated by commas"
     )
