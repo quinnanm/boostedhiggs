@@ -121,7 +121,7 @@ def systs_from_parquets(years):
             # "weight_mu_btagSFbc_correlated": rl.NuisanceParameter(
             #     f"{CMS_PARAMS_LABEL}_btagSFbc_correlated", "lnN"
             # ),
-            "weight_pileup": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_PU_{year}", "shape"),
+            # "weight_pileup": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_PU_{year}", "shape"),
             "weight_isolation": rl.NuisanceParameter(f"CMS_iso_{year}", "lnN"),
             "weight_id": rl.NuisanceParameter(f"CMS_id_{year}", "lnN"),
             "weight_reco_ele": rl.NuisanceParameter("CMS_reconstruction_ele", "lnN"),
