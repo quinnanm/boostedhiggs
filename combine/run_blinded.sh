@@ -122,13 +122,7 @@ seed=$seed numtoys=$numtoys"
 
 dataset=data_obs
 cards_dir="/uscms/home/fmokhtar/nobackup/boostedhiggs/combine/templates/v2/datacards"
-
-# wsm=${ws}_withmasks
-# wsm_snapshot=higgsCombineSnapshot.MultiDimFit.mH125
-# CMS_PARAMS_LABEL="CMS_HWW_boosted"
-
-outsdir=${cards_dir}/outs
-mkdir -p $outsdir
+CMS_PARAMS_LABEL="CMS_HWW_boosted"
 
 echo "actually run the following: "
 # nonresonant args
@@ -163,6 +157,9 @@ freezeparamsblinded="${freezeparamsblinded},var{.*lp_sf.*}"
 
 ws=${cards_dir}/combined
 wsm=${cards_dir}/workspace
+outsdir=${cards_dir}/outs
+mkdir -p $outsdir
+
 if [ $workspace = 1 ]; then
     echo "Combining cards"
     echo $ccargs
