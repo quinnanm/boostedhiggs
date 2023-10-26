@@ -133,6 +133,12 @@ ccargs="fail=${cards_dir}/${cr}.txt failBlinded=${cards_dir}/${cr}Blinded.txt pa
 maskunblindedargs="mask_${sr}=1,mask_${cr}=1,mask_${sr}Blinded=0,mask_${cr}Blinded=0"
 maskblindedargs="mask_${sr}=0,mask_${cr}=0,mask_${sr}Blinded=1,mask_${cr}Blinded=1"
 
+maskblindedargs=${maskblindedargs%,}
+maskunblindedargs=${maskunblindedargs%,}
+echo "cards args=${ccargs}"
+echo "maskblinded=${maskblindedargs}"
+echo "maskunblinded=${maskunblindedargs}"
+
 # freeze qcd params in blinded bins
 setparamsblinded=""
 freezeparamsblinded=""

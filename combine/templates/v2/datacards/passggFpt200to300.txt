@@ -1,4 +1,4 @@
-# Datacard for <Channel (passggFpt200to300) instance at 0x7f4c945eecd0> generated on 2023-10-26 07:54:04.056599
+# Datacard for <Channel (passggFpt200to300) instance at 0x7f7c32b83cd0> generated on 2023-10-26 08:29:36.214920
 imax 1 # number of categories ('bins' but here we are using shape templates)
 jmax 8 # number of samples minus 1
 kmax 32 # number of nuisance parameters

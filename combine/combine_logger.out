@@ -1,0 +1,14 @@
+INFO: (function: run) Combine.cc: 685 -- Freezing the following parameters: 
+INFO: (function: run) Combine.cc: 688  r 
+INFO: (function: run) Combine.cc: 688  CMS_HWW_boosted_tf_dataResidual_Bin0 
+INFO: (function: run) Combine.cc: 688  CMS_HWW_boosted_tf_dataResidual_Bin1 
+INFO: (function: run) Combine.cc: 688  CMS_HWW_boosted_tf_dataResidual_Bin2 
+INFO: (function: run) Combine.cc: 688  CMS_HWW_boosted_tf_dataResidual_Bin3 
+INFO: (function: run) Combine.cc: 688  CMS_HWW_boosted_tf_dataResidual_Bin4 
+INFO: (function: run) Combine.cc: 688  CMS_HWW_boosted_tf_dataResidual_Bin5 
+INFO: (function: run) Combine.cc: 688  CMS_HWW_boosted_tf_dataResidual_Bin6 
+INFO: (function: run) Combine.cc: 688  CMS_HWW_boosted_tf_dataResidual_Bin7 
+INFO: (function: run) Combine.cc: 688  CMS_HWW_boosted_tf_dataResidual_Bin8 
+INFO: (function: improveOnce) CascadeMinimizer.cc: 188 -- Minimisation configured with Type=Minuit2, Algo=Migrad, strategy=0, tolerance=0.5
+INFO: (function: improveOnce) CascadeMinimizer.cc: 211 -- Minimisation finished with status=0
+INFO: (function: improveOnce) CascadeMinimizer.cc: 216 -- Minimization success! status=0
