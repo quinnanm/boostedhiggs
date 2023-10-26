@@ -347,6 +347,11 @@ def main(args):
     years = args.years.split(",")
     channels = args.channels.split(",")
 
+    if len(args.samples_to_blind) >= 1:
+        blind_samples = args.samples_to_blind.split(",")
+    else:
+        blind_samples = []
+
     if len(years) == 4:
         save_as = "Run2"
     else:
@@ -362,9 +367,9 @@ def main(args):
         hists_templates,
         years,
         channels,
-        blind_samples=args.samples_to_blind.split(","),  # default is all
+        blind_samples=blind_samples,  # default is [] which means blind all samples
         blind_region=[80, 160],
-        qcd_estimation=True,
+        qcd_estimation=False,
     )
 
     with open(f"{args.outdir}/model_{save_as}.pkl", "wb") as fout:

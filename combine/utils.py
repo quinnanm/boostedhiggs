@@ -59,16 +59,16 @@ labels = {
 
 bkgs = [
     "TTbar",
-    # "WJetsLNu",
-    # "SingleTop",
-    # "DYJets",
+    "WJetsLNu",
+    "SingleTop",
+    "DYJets",
 ]
 
 sigs = [
-    # "ggF",
-    # "VBF",
-    # "VH",
-    # "ttH",
+    "ggF",
+    "VBF",
+    "VH",
+    "ttH",
 ]
 samples = sigs + bkgs
 
@@ -147,8 +147,7 @@ def blindBins(h: Hist, blind_region: List, blind_samples: List[str] = []):
 
     lv = int(np.searchsorted(massbins, blind_region[0], "right"))
     rv = int(np.searchsorted(massbins, blind_region[1], "left") + 1)
-
-    if blind_samples:
+    if len(blind_samples) >= 1:
         for blind_sample in blind_samples:
             sample_index = np.argmax(np.array(list(h.axes[0])) == blind_sample)
             h.view(flow=True)[sample_index, :, :, lv:rv] = 0
