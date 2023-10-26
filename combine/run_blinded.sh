@@ -14,7 +14,6 @@
 # 9) Bias test: run a bias test on toys (using post-fit nuisances) with expected signal strength
 #    given by --bias X.
 #
-# Specify resonant with --resonant / -r, otherwise does nonresonant
 # Specify seed with --seed (default 42) and number of toys with --numtoys (default 100)
 #
 # Usage ./run_blinded.sh [-wblsdgt] [--numtoys 100] [--seed 42]
@@ -30,7 +29,6 @@ bfit=0
 limits=0
 significance=0
 dfit=0
-resonant=0 #always do non-resonant option
 gofdata=0
 goftoys=0
 impactsi=0
@@ -42,7 +40,7 @@ bias=-1
 mintol=0.5 # --cminDefaultMinimizerTolerance
 # maxcalls=1000000000  # --X-rtd MINIMIZER_MaxCalls
 
-options=$(getopt -o "wblsdrgti" --long "workspace,bfit,limits,significance,dfit,resonant,gofdata,goftoys,impactsi,impactsf:,impactsc:,bias:,seed:,numtoys:,mintol:" -- "$@")
+options=$(getopt -o "wblsdrgti" --long "workspace,bfit,limits,significance,dfit,gofdata,goftoys,impactsi,impactsf:,impactsc:,bias:,seed:,numtoys:,mintol:" -- "$@")
 eval set -- "$options"
 
 while true; do
@@ -61,9 +59,6 @@ while true; do
             ;;
         -d|--dfit)
             dfit=1
-            ;;
-        -r|--resonant)
-            resonant=0
             ;;
         -g|--gofdata)
             gofdata=1
@@ -113,7 +108,7 @@ while true; do
     shift
 done
 
-echo "Arguments: resonant=$resonant workspace=$workspace bfit=$bfit limits=$limits \
+echo "Arguments: workspace=$workspace bfit=$bfit limits=$limits \
 significance=$significance dfit=$dfit gofdata=$gofdata goftoys=$goftoys \
 seed=$seed numtoys=$numtoys"
 
@@ -126,23 +121,22 @@ seed=$seed numtoys=$numtoys"
 ####################################################################################################
 
 dataset=data_obs
-cards_dir="./templates/v2/datacards/"
-ws=${cards_dir}/combined
-wsm=${ws}_withmasks
-wsm_snapshot=higgsCombineSnapshot.MultiDimFit.mH125
-CMS_PARAMS_LABEL="CMS_HWW_boosted"
+cards_dir="/uscms/home/fmokhtar/nobackup/boostedhiggs/combine/templates/v2/datacards"
+
+# wsm=${ws}_withmasks
+# wsm_snapshot=higgsCombineSnapshot.MultiDimFit.mH125
+# CMS_PARAMS_LABEL="CMS_HWW_boosted"
 
 outsdir=${cards_dir}/outs
 mkdir -p $outsdir
-
 
 echo "actually run the following: "
 # nonresonant args
 setparamsblinded=""
 freezeparamsblinded=""
 
-cr="${failggFpt200to300}"
-sr="${passggFpt200to300}"
+cr="failggFpt200to300"
+sr="passggFpt200to300"
 
 # nonresonant args
 ccargs="fail=${cards_dir}/${cr}.txt failBlinded=${cards_dir}/${cr}Blinded.txt pass=${cards_dir}/${sr}.txt passBlinded=${cards_dir}/${sr}Blinded.txt"
@@ -157,73 +151,52 @@ do
     setparamsblinded+="${CMS_PARAMS_LABEL}_tf_dataResidual_Bin${bin}=0,"
     freezeparamsblinded+="${CMS_PARAMS_LABEL}_tf_dataResidual_Bin${bin},"
 done
-
 # remove last comma
 setparamsblinded=${setparamsblinded%,}
 freezeparamsblinded="${freezeparamsblinded},var{.*lp_sf.*}"
 
-# floating parameters using var{} floats a bunch of parameters which shouldn't be floated,
-# so countering this inside --freezeParameters which takes priority.
-# Although, practically even if those are set to "float", I didn't see them ever being fitted,
-# so this is just to be extra safe.
-unblindedparams="--freezeParameters var{.*_In},var{.*__norm},var{n_exp_.*} --setParameters $maskblindedargs"
-excludeimpactparams='rgx{.*tf_dataResidual_Bin.*}'
-
-echo "mask args:"
-echo $maskblindedargs
-
-echo "set params:"
-echo $setparamsblinded
-
-echo "freeze params:"
-echo $freezeparamsblinded
-
-echo "unblinded params:"
-echo $unblindedparams
-
 # ####################################################################################################
 # # Combine cards, text2workspace, fit, limits, significances, fitdiagnositcs, GoFs
 # ####################################################################################################
+# # # need to run this for large # of nuisances
+# # # https://cms-talk.web.cern.ch/t/segmentation-fault-in-combine/20735
 
-# # need to run this for large # of nuisances
-# # https://cms-talk.web.cern.ch/t/segmentation-fault-in-combine/20735
-# ulimit -s unlimited
+ws=${cards_dir}/combined
+wsm=${cards_dir}/workspace
+if [ $workspace = 1 ]; then
+    echo "Combining cards"
+    echo $ccargs
+    combineCards.py $ccargs > $ws.txt
 
-# if [ $workspace = 1 ]; then
-#     echo "Combining cards"
-#     combineCards.py $ccargs > $ws.txt
-
-#     echo "Running text2workspace"
-#     # text2workspace.py -D $dataset $ws.txt --channel-masks -o $wsm.root 2>&1 | tee $outsdir/text2workspace.txt
-#     # new version got rid of -D arg??
-#     # use --channel-masks options to mask the channels
-#     text2workspace.py $ws.txt --channel-masks -o $wsm.root 2>&1 | tee $outsdir/text2workspace.txt
-# else
-#     if [ ! -f "$wsm.root" ]; then
-#         echo "Workspace doesn't exist! Use the -w|--workspace option to make workspace first"
-#         exit 1
-#     fi
-# fi
+    echo "Running text2workspace"
+    text2workspace.py $ws.txt --channel-masks -o $wsm.root 2>&1 | tee $outsdir/text2workspace.txt
+else
+    if [ ! -f "$wsm.root" ]; then
+        echo "Workspace doesn't exist! Use the -w|--workspace option to make workspace first"
+        exit 1
+    fi
+fi
 
 
-# if [ $bfit = 1 ]; then
-#     echo "Blinded background-only fit"
-#     combine -D $dataset -M MultiDimFit --saveWorkspace -m 125 -d ${wsm}.root -v 9 \
-#     --cminDefaultMinimizerStrategy 0 --cminDefaultMinimizerTolerance $mintol --X-rtd MINIMIZER_MaxCalls=5000000 \
-#     --setParameters ${maskunblindedargs},${setparamsblinded},r=0  \
-#     --freezeParameters r,${freezeparamsblinded} \
-#     -n Snapshot 2>&1 | tee $outsdir/MultiDimFit.txt
-# else
-#     if [ ! -f "higgsCombineSnapshot.MultiDimFit.mH125.root" ]; then
-#         echo "Background-only fit snapshot doesn't exist! Use the -b|--bfit option to run fit first"
-#         exit 1
-#     fi
-# fi
+if [ $bfit = 1 ]; then
+    echo "Blinded background-only fit"
+    combine -D $dataset -M MultiDimFit --saveWorkspace -m 125 -d ${wsm}.root -v 9 \
+    --cminDefaultMinimizerStrategy 0 --cminDefaultMinimizerTolerance $mintol --X-rtd MINIMIZER_MaxCalls=5000000 \
+    --setParameters ${maskunblindedargs},${setparamsblinded},r=0  \
+    --freezeParameters r,${freezeparamsblinded} \
+    -n Snapshot 2>&1 | tee $outsdir/MultiDimFit.txt
+else
+    if [ ! -f "higgsCombineSnapshot.MultiDimFit.mH125.root" ]; then
+        echo "Background-only fit snapshot doesn't exist! Use the -b|--bfit option to run fit first"
+        exit 1
+    fi
+fi
 
 
+# # wsm_snapshot=/uscms/home/fmokhtar/nobackup/boostedhiggs/combine/templates/v2/datacards/testModel
 # if [ $limits = 1 ]; then
 #     echo "Expected limits"
-#     combine -M AsymptoticLimits -m 125 -n "" -d ${wsm_snapshot}.root --snapshotName MultiDimFit -v 9 \
+#     combine -M AsymptoticLimits -m 125 -n "" -d ${wsm}.root --snapshotName MultiDimFit -v 9 \
 #     --saveWorkspace --saveToys --bypassFrequentistFit \
 #     ${unblindedparams},r=0 -s $seed \
 #     --floatParameters ${freezeparamsblinded},r --toysFrequentist --run blind 2>&1 | tee $outsdir/AsymptoticLimits.txt
