@@ -368,7 +368,7 @@ def main(args):
         years,
         channels,
         blind_samples=blind_samples,  # default is [] which means blind all samples
-        blind_region=[80, 160],
+        blind_region=[90, 150],
         qcd_estimation=True,
     )
 
