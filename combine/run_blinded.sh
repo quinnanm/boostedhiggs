@@ -125,14 +125,10 @@ cards_dir="/uscms/home/fmokhtar/nobackup/boostedhiggs/combine/templates/v2/datac
 CMS_PARAMS_LABEL="CMS_HWW_boosted"
 
 echo "actually run the following: "
-# nonresonant args
-setparamsblinded=""
-freezeparamsblinded=""
 
 cr="failggFpt200to300"
 sr="passggFpt200to300"
 
-# nonresonant args
 ccargs="fail=${cards_dir}/${cr}.txt failBlinded=${cards_dir}/${cr}Blinded.txt pass=${cards_dir}/${sr}.txt passBlinded=${cards_dir}/${sr}Blinded.txt"
 maskunblindedargs="mask_${sr}=1,mask_${cr}=1,mask_${sr}Blinded=0,mask_${cr}Blinded=0"
 maskblindedargs="mask_${sr}=0,mask_${cr}=0,mask_${sr}Blinded=1,mask_${cr}Blinded=1"
