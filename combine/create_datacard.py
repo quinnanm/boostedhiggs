@@ -142,7 +142,7 @@ def systs_from_parquets(years):
         },
         "VBF": {
             "weight_aS_weight": rl.NuisanceParameter("aS_Higgs_VBF", "lnN"),
-            "weight_UEPS_FSR": rl.NuisanceParameter("UEPS_FSR_VBF", "shape"),
+            # "weight_UEPS_FSR": rl.NuisanceParameter("UEPS_FSR_VBF", "shape"),
             "weight_UEPS_ISR": rl.NuisanceParameter("UEPS_ISR_VBF", "shape"),
             "weight_PDF_weight": rl.NuisanceParameter("pdf_Higgs_VBF", "lnN"),
             "weight_PDFaS_weight": rl.NuisanceParameter("pdfAS_Higgs_VBF", "lnN"),
