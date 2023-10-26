@@ -172,7 +172,7 @@ def systs_from_parquets(years):
     return systs_from_parquets
 
 
-def rhalphabet(hists_templates, years, channels, blind, blind_samples, blind_region, qcd_estimation):
+def rhalphabet(hists_templates, years, channels, blind_samples, blind_region, qcd_estimation):
     # get the LUMI (must average lumi over the lepton channels provided)
     LUMI = {}
     for year in years:
@@ -191,7 +191,7 @@ def rhalphabet(hists_templates, years, channels, blind, blind_samples, blind_reg
     systs_dict, systs_dict_values = systs_not_from_parquets(years, LUMI, full_lumi)
     sys_from_parquets = systs_from_parquets(years)
 
-    categories = list(hists_templates["pass"].axes["categories"])
+    categories = list(hists_templates["pass"].axes["Category"])
     shape_var = ShapeVar(
         name=hists_templates["pass"].axes["mass_observable"].name,
         bins=hists_templates["pass"].axes["mass_observable"].edges,
@@ -202,138 +202,143 @@ def rhalphabet(hists_templates, years, channels, blind, blind_samples, blind_reg
     model = rl.Model("testModel")
 
     # fill datacard with systematics and rates
-    for category in categories:
-        for region in ["pass", "fail"]:
-            if blind:
-                h = blindBins(hists_templates[region], blind_region, blind_samples)
-            else:
-                h = hists_templates[region]
+    for blind in [True, False]:
+        for category in categories:
+            for region in ["pass", "fail"]:
+                if blind:
+                    h = blindBins(hists_templates[region], blind_region, blind_samples)
+                    ChName = f"{region}{category}Blinded"
+                else:
+                    h = hists_templates[region]
+                    ChName = f"{region}{category}"
 
-            ch = rl.Channel(f"{region}{category.replace('_', '')}")
-            model.addChannel(ch)
+                ch = rl.Channel(ChName)
+                model.addChannel(ch)
 
-            for sName in samples:
-                templ = get_template(h, sName, category)
-                stype = rl.Sample.SIGNAL if sName in sigs else rl.Sample.BACKGROUND
-                sample = rl.TemplateSample(ch.name + "_" + labels[sName], stype, templ)
+                for sName in samples:
+                    templ = get_template(h, sName, category)
+                    stype = rl.Sample.SIGNAL if sName in sigs else rl.Sample.BACKGROUND
+                    sample = rl.TemplateSample(ch.name + "_" + labels[sName], stype, templ)
 
-                # SYSTEMATICS NOT FROM PARQUETS
-                for sys_name, sys_value in systs_dict.items():
-                    if systs_dict_values[sys_name][1] is None:  # if up and down are the same
-                        sample.setParamEffect(sys_value, systs_dict_values[sys_name][0])
-                    else:
-                        sample.setParamEffect(sys_value, systs_dict_values[sys_name][0], systs_dict_values[sys_name][1])
+                    # SYSTEMATICS NOT FROM PARQUETS
+                    for sys_name, sys_value in systs_dict.items():
+                        if systs_dict_values[sys_name][1] is None:  # if up and down are the same
+                            sample.setParamEffect(sys_value, systs_dict_values[sys_name][0])
+                        else:
+                            sample.setParamEffect(sys_value, systs_dict_values[sys_name][0], systs_dict_values[sys_name][1])
 
-                # SYSTEMATICS FROM PARQUETS
-                for syst_on_sample in ["all_samples", sName]:  # apply common systs and per sample systs
-                    for sys_name, sys_value in sys_from_parquets[syst_on_sample].items():
-                        # if "L1Prefiring" not in sys_name:
-                        #     continue
-
-                        # print(sName, sys_value, category, region)
-
-                        syst_up = h[{"samples": sName, "categories": category, "systematics": sys_name + "Up"}].values()
-                        syst_do = h[{"samples": sName, "categories": category, "systematics": sys_name + "Down"}].values()
-                        nominal = h[{"samples": sName, "categories": category, "systematics": "nominal"}].values()
-
-                        if sys_value.combinePrior == "lnN":
-                            eff_up = shape_to_num(syst_up, nominal)
-                            eff_do = shape_to_num(syst_do, nominal)
-
-                            # if (math.isclose(1, eff_up, rel_tol=1e-4)) & (
-                            #     math.isclose(1, eff_do, rel_tol=1e-4)
-                            # ):  # leave it as '-'
+                    # SYSTEMATICS FROM PARQUETS
+                    for syst_on_sample in ["all_samples", sName]:  # apply common systs and per sample systs
+                        for sys_name, sys_value in sys_from_parquets[syst_on_sample].items():
+                            # if "L1Prefiring" not in sys_name:
                             #     continue
 
-                            if math.isclose(eff_up, eff_do, rel_tol=1e-2):  # if up and down are the same
-                                sample.setParamEffect(sys_value, max(eff_up, eff_do))
+                            # print(sName, sys_value, category, region)
+
+                            syst_up = h[{"Sample": sName, "Category": category, "Systematic": sys_name + "Up"}].values()
+                            syst_do = h[{"Sample": sName, "Category": category, "Systematic": sys_name + "Down"}].values()
+                            nominal = h[{"Sample": sName, "Category": category, "Systematic": "nominal"}].values()
+
+                            if sys_value.combinePrior == "lnN":
+                                eff_up = shape_to_num(syst_up, nominal)
+                                eff_do = shape_to_num(syst_do, nominal)
+
+                                # if (math.isclose(1, eff_up, rel_tol=1e-4)) & (
+                                #     math.isclose(1, eff_do, rel_tol=1e-4)
+                                # ):  # leave it as '-'
+                                #     continue
+
+                                if math.isclose(eff_up, eff_do, rel_tol=1e-2):  # if up and down are the same
+                                    sample.setParamEffect(sys_value, max(eff_up, eff_do))
+                                else:
+                                    sample.setParamEffect(sys_value, max(eff_up, eff_do), min(eff_up, eff_do))
+
                             else:
-                                sample.setParamEffect(sys_value, max(eff_up, eff_do), min(eff_up, eff_do))
+                                sample.setParamEffect(sys_value, (syst_up / nominal), (syst_do / nominal))
 
-                        else:
-                            sample.setParamEffect(sys_value, (syst_up / nominal), (syst_do / nominal))
+                    ch.addSample(sample)
 
-                ch.addSample(sample)
+                # add data
+                data_obs = get_template(h, "Data", category)
+                ch.setObservation(data_obs)
 
-            # add data
-            data_obs = get_template(h, "Data", category)
-            ch.setObservation(data_obs)
+            if qcd_estimation:  # qcd data-driven estimation per category
+                if blind:
+                    h_pass = blindBins(hists_templates["pass"], blind_region, blind_samples)
+                    h_fail = blindBins(hists_templates["fail"], blind_region, blind_samples)
+                    passChName = f"pass{category}Blinded"
+                    failChName = f"fail{category}Blinded"
+                else:
+                    h_pass = hists_templates["pass"]
+                    h_fail = hists_templates["fail"]
+                    passChName = f"pass{category}"
+                    failChName = f"fail{category}"
 
-        if qcd_estimation:  # qcd data-driven estimation per category
-            if blind:
-                h_pass = blindBins(hists_templates["pass"], blind_region, blind_samples)
-                h_fail = blindBins(hists_templates["fail"], blind_region, blind_samples)
+                # get the transfer factor
+                qcd_eff = (
+                    h_pass[{"Category": category, "Sample": "QCD", "Systematic": "nominal"}].sum()
+                    / h_fail[{"Category": category, "Sample": "QCD", "Systematic": "nominal"}].sum()
+                )
 
-            else:
-                h_pass = hists_templates["pass"]
-                h_fail = hists_templates["fail"]
+                # transfer factor
+                tf_dataResidual = rl.BasisPoly(
+                    f"{CMS_PARAMS_LABEL}_tf_dataResidual",
+                    (shape_var.order,),
+                    [shape_var.name],
+                    basis="Bernstein",
+                    limits=(-20, 20),
+                    # square_params=True,
+                )
+                tf_dataResidual_params = tf_dataResidual(shape_var.scaled)
+                tf_params_pass = qcd_eff * tf_dataResidual_params  # scale params initially by qcd eff
 
-            # get the transfer factor
-            qcd_eff = (
-                h_pass[{"categories": category, "samples": "QCD", "systematics": "nominal"}].sum()
-                / h_fail[{"categories": category, "samples": "QCD", "systematics": "nominal"}].sum()
-            )
+                # qcd params
+                qcd_params = np.array(
+                    [rl.IndependentParameter(f"{CMS_PARAMS_LABEL}_tf_dataResidual_Bin{i}", 0) for i in range(m_obs.nbins)]
+                )
 
-            # transfer factor
-            tf_dataResidual = rl.BasisPoly(
-                f"{CMS_PARAMS_LABEL}_tf_dataResidual",
-                (shape_var.order,),
-                [shape_var.name],
-                basis="Bernstein",
-                limits=(-20, 20),
-                # square_params=True,
-            )
-            tf_dataResidual_params = tf_dataResidual(shape_var.scaled)
-            tf_params_pass = qcd_eff * tf_dataResidual_params  # scale params initially by qcd eff
+                logging.info(f"setting transfer factor for pass region {passChName}, fail region {failChName}")
 
-            # qcd params
-            qcd_params = np.array(
-                [rl.IndependentParameter(f"{CMS_PARAMS_LABEL}_tf_dataResidual_Bin{i}", 0) for i in range(m_obs.nbins)]
-            )
+                failCh = model[failChName]
+                passCh = model[passChName]
 
-            passChName = f"pass{category.replace('_', '')}"
-            failChName = f"fail{category.replace('_', '')}"
+                # sideband fail
+                # was integer, and numpy complained about subtracting float from it
+                initial_qcd = failCh.getObservation().astype(float)
+                for sample in failCh:
+                    if sample.sampletype == rl.Sample.SIGNAL:
+                        continue
+                    # logging.info(f"subtracting {sample._name} from qcd")
+                    initial_qcd -= sample.getExpectation(nominal=True)
 
-            logging.info(f"setting transfer factor for pass region {passChName}, fail region {failChName}")
+                if np.any(initial_qcd < 0.0):
+                    # raise ValueError("initial_qcd negative for some bins..", initial_qcd)
+                    logging.warning(f"initial_qcd negative for some bins... {initial_qcd}")
+                    initial_qcd[initial_qcd < 0] = 0
 
-            failCh = model[failChName]
-            passCh = model[passChName]
+                # idea here is that the error should be 1/sqrt(N), so parametrizing it as (1 + 1/sqrt(N))^qcdparams
+                # will result in qcdparams errors ~±1
+                # but because qcd is poorly modelled we're scaling sigma scale
 
-            # sideband fail
-            # was integer, and numpy complained about subtracting float from it
-            initial_qcd = failCh.getObservation().astype(float)
-            for sample in failCh:
-                # logging.info(f"subtracting {sample._name} from qcd")
-                initial_qcd -= sample.getExpectation(nominal=True)
+                sigmascale = 10  # to scale the deviation from initial
+                scaled_params = initial_qcd * (1 + sigmascale / np.maximum(1.0, np.sqrt(initial_qcd))) ** qcd_params
 
-            if np.any(initial_qcd < 0.0):
-                # raise ValueError("initial_qcd negative for some bins..", initial_qcd)
-                logging.warning(f"initial_qcd negative for some bins... {initial_qcd}")
-                initial_qcd[initial_qcd < 0] = 0
+                # add samples
+                fail_qcd = rl.ParametericSample(
+                    f"{failChName}_{CMS_PARAMS_LABEL}_qcd_datadriven",
+                    rl.Sample.BACKGROUND,
+                    m_obs,
+                    scaled_params,
+                )
+                failCh.addSample(fail_qcd)
 
-            # idea here is that the error should be 1/sqrt(N), so parametrizing it as (1 + 1/sqrt(N))^qcdparams
-            # will result in qcdparams errors ~±1
-            # but because qcd is poorly modelled we're scaling sigma scale
-
-            sigmascale = 10  # to scale the deviation from initial
-            scaled_params = initial_qcd * (1 + sigmascale / np.maximum(1.0, np.sqrt(initial_qcd))) ** qcd_params
-
-            # add samples
-            fail_qcd = rl.ParametericSample(
-                f"{failChName}_{CMS_PARAMS_LABEL}_qcd_datadriven",
-                rl.Sample.BACKGROUND,
-                m_obs,
-                scaled_params,
-            )
-            failCh.addSample(fail_qcd)
-
-            pass_qcd = rl.TransferFactorSample(
-                f"{passChName}_{CMS_PARAMS_LABEL}_qcd_datadriven",
-                rl.Sample.BACKGROUND,
-                tf_params_pass,
-                fail_qcd,
-            )
-            passCh.addSample(pass_qcd)
+                pass_qcd = rl.TransferFactorSample(
+                    f"{passChName}_{CMS_PARAMS_LABEL}_qcd_datadriven",
+                    rl.Sample.BACKGROUND,
+                    tf_params_pass,
+                    fail_qcd,
+                )
+                passCh.addSample(pass_qcd)
 
     return model
 
@@ -357,8 +362,7 @@ def main(args):
         hists_templates,
         years,
         channels,
-        blind=args.blind,
-        blind_samples=args.samples_to_blind.split(","),
+        blind_samples=args.samples_to_blind.split(","),  # default is all
         blind_region=[80, 160],
         qcd_estimation=True,
     )
