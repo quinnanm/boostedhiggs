@@ -369,7 +369,7 @@ def main(args):
         channels,
         blind_samples=blind_samples,  # default is [] which means blind all samples
         blind_region=[80, 160],
-        qcd_estimation=False,
+        qcd_estimation=True,
     )
 
     with open(f"{args.outdir}/model_{save_as}.pkl", "wb") as fout:
