@@ -277,23 +277,23 @@ def rhalphabet(
                 ch.setObservation(data_obs)
 
                 if "wjetsCR" in ChName:
-                    tqqfail = ch["wjets"]
+                    wlnufail = ch["wjets"]
                 elif "pass" in ChName:
-                    tqqpass = ch["wjets"]
+                    wlnupass = ch["wjets"]
 
             if wjets_estimation:
                 # wjets params
-                tqqeffSF = rl.IndependentParameter("tqqeffSF_{}".format(year), 1.0, -50, 50)
-                tqqnormSF = rl.IndependentParameter("tqqnormSF_{}".format(year), 1.0, -50, 50)
+                wlnueffSF = rl.IndependentParameter("wlnueffSF_{}".format(year), 1.0, -50, 50)
+                wlnunormSF = rl.IndependentParameter("wlnunormSF_{}".format(year), 1.0, -50, 50)
 
-                sumPass = tqqpass.getExpectation(nominal=True).sum()
-                sumFail = tqqfail.getExpectation(nominal=True).sum()
+                sumPass = wlnupass.getExpectation(nominal=True).sum()
+                sumFail = wlnufail.getExpectation(nominal=True).sum()
 
-                tqqPF = sumPass / sumFail
-                tqqpass.setParamEffect(tqqeffSF, 1 * tqqeffSF)
-                tqqfail.setParamEffect(tqqeffSF, (1 - tqqeffSF) * tqqPF + 1)
-                tqqpass.setParamEffect(tqqnormSF, 1 * tqqnormSF)
-                tqqfail.setParamEffect(tqqnormSF, 1 * tqqnormSF)
+                wlnuPF = sumPass / sumFail
+                wlnupass.setParamEffect(wlnueffSF, 1 * wlnueffSF)
+                wlnufail.setParamEffect(wlnueffSF, (1 - wlnueffSF) * wlnuPF + 1)
+                wlnupass.setParamEffect(wlnunormSF, 1 * wlnunormSF)
+                wlnufail.setParamEffect(wlnunormSF, 1 * wlnunormSF)
 
             if qcd_estimation:  # qcd data-driven estimation per category
                 if blind:
