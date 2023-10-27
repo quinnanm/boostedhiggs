@@ -215,10 +215,13 @@ def rhalphabet(
 
     model = rl.Model("testModel")
 
+    wjetsfail = {}
+    wjetspass = {}
+
     # fill datacard with systematics and rates
-    for blind in [True]:
-        for category in categories:
-            for region in ["pass", "fail", "wjetsCR"]:
+    for category in categories:
+        for region in ["pass", "fail", "wjetsCR"]:
+            for blind in [True, False]:
                 if blind:
                     h = blindBins(hists_templates[region], blind_region, blind_samples)
                     ChName = f"{region}{category}Blinded"
@@ -276,24 +279,30 @@ def rhalphabet(
                 data_obs = get_template(h, "Data", category)
                 ch.setObservation(data_obs)
 
-                if "wjetsCR" in ChName:
-                    wjetsfail = ch["wjets"]
-                elif "pass" in ChName:
-                    wjetspass = ch["wjets"]
+                if ("wjetsCR" in ChName) and ("Blinded" in ChName):
+                    wjetsfail["blinded"] = ch["wjets"]
+                elif ("pass" in ChName) and ("Blinded" in ChName):
+                    wjetspass["blinded"] = ch["wjets"]
 
-            if wjets_estimation:
+                elif "wjetsCR" in ChName:
+                    wjetsfail["unblinded"] = ch["wjets"]
+                elif "pass" in ChName:
+                    wjetspass["unblinded"] = ch["wjets"]
+
+        if wjets_estimation:
+            for t in ["blinded", "unblinded"]:
                 # wjets params
                 wjetseffSF = rl.IndependentParameter("wjetseffSF_{}".format(year), 1.0, -50, 50)
                 wjetsnormSF = rl.IndependentParameter("wjetsnormSF_{}".format(year), 1.0, -50, 50)
 
-                sumPass = wjetspass.getExpectation(nominal=True).sum()
-                sumFail = wjetsfail.getExpectation(nominal=True).sum()
+                sumPass = wjetspass[t].getExpectation(nominal=True).sum()
+                sumFail = wjetsfail[t].getExpectation(nominal=True).sum()
 
                 wjetsPF = sumPass / sumFail
-                wjetspass.setParamEffect(wjetseffSF, 1 * wjetseffSF)
-                wjetsfail.setParamEffect(wjetseffSF, (1 - wjetseffSF) * wjetsPF + 1)
-                wjetspass.setParamEffect(wjetsnormSF, 1 * wjetsnormSF)
-                wjetsfail.setParamEffect(wjetsnormSF, 1 * wjetsnormSF)
+                wjetspass[t].setParamEffect(wjetseffSF, 1 * wjetseffSF)
+                wjetsfail[t].setParamEffect(wjetseffSF, (1 - wjetseffSF) * wjetsPF + 1)
+                wjetspass[t].setParamEffect(wjetsnormSF, 1 * wjetsnormSF)
+                wjetsfail[t].setParamEffect(wjetsnormSF, 1 * wjetsnormSF)
 
             if qcd_estimation:  # qcd data-driven estimation per category
                 if blind:
