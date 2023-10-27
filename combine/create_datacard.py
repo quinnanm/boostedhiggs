@@ -403,7 +403,7 @@ def main(args):
         channels,
         blind_samples=blind_samples,  # default is [] which means blind all samples
         blind_region=[90, 150],
-        wjets_estimation=True,
+        wjets_estimation=False,
         qcd_estimation=True,
         qcd_data_regions=["pass", "wjetsCR"],
     )
