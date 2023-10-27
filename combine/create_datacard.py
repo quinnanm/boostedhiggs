@@ -172,7 +172,16 @@ def systs_from_parquets(years):
     return systs_from_parquets
 
 
-def rhalphabet(hists_templates, years, channels, blind_samples, blind_region, qcd_estimation):
+def rhalphabet(
+    hists_templates,
+    years,
+    channels,
+    blind_samples,
+    blind_region,
+    wjets_estimation,
+    qcd_estimation,
+    qcd_data_regions=["pass"],
+):
     # get the LUMI (must average lumi over the lepton channels provided)
     LUMI = {}
     for year in years:
@@ -202,9 +211,9 @@ def rhalphabet(hists_templates, years, channels, blind_samples, blind_region, qc
     model = rl.Model("testModel")
 
     # fill datacard with systematics and rates
-    for blind in [True, False]:
+    for blind in [True]:
         for category in categories:
-            for region in ["pass", "fail"]:
+            for region in ["pass", "fail", "wjetsCR"]:
                 if blind:
                     h = blindBins(hists_templates[region], blind_region, blind_samples)
                     ChName = f"{region}{category}Blinded"
@@ -262,45 +271,39 @@ def rhalphabet(hists_templates, years, channels, blind_samples, blind_region, qc
                 data_obs = get_template(h, "Data", category)
                 ch.setObservation(data_obs)
 
+                if "wjetsCR" in ChName:
+                    tqqfail = ch["wjets"]
+                elif "pass" in ChName:
+                    tqqpass = ch["wjets"]
+
+            if wjets_estimation:
+                # wjets params
+                tqqeffSF = rl.IndependentParameter("tqqeffSF_{}".format(year), 1.0, -50, 50)
+                tqqnormSF = rl.IndependentParameter("tqqnormSF_{}".format(year), 1.0, -50, 50)
+
+                sumPass = tqqpass.getExpectation(nominal=True).sum()
+                sumFail = tqqfail.getExpectation(nominal=True).sum()
+
+                tqqPF = sumPass / sumFail
+                tqqpass.setParamEffect(tqqeffSF, 1 * tqqeffSF)
+                tqqfail.setParamEffect(tqqeffSF, (1 - tqqeffSF) * tqqPF + 1)
+                tqqpass.setParamEffect(tqqnormSF, 1 * tqqnormSF)
+                tqqfail.setParamEffect(tqqnormSF, 1 * tqqnormSF)
+
             if qcd_estimation:  # qcd data-driven estimation per category
                 if blind:
-                    h_pass = blindBins(hists_templates["pass"], blind_region, blind_samples)
                     h_fail = blindBins(hists_templates["fail"], blind_region, blind_samples)
-                    passChName = f"pass{category}Blinded"
                     failChName = f"fail{category}Blinded"
                 else:
-                    h_pass = hists_templates["pass"]
                     h_fail = hists_templates["fail"]
-                    passChName = f"pass{category}"
                     failChName = f"fail{category}"
 
-                # get the transfer factor
-                qcd_eff = (
-                    h_pass[{"Category": category, "Sample": "QCD", "Systematic": "nominal"}].sum()
-                    / h_fail[{"Category": category, "Sample": "QCD", "Systematic": "nominal"}].sum()
-                )
-
-                # transfer factor
-                tf_dataResidual = rl.BasisPoly(
-                    f"{CMS_PARAMS_LABEL}_tf_dataResidual",
-                    (shape_var.order,),
-                    [shape_var.name],
-                    basis="Bernstein",
-                    limits=(-20, 20),
-                    # square_params=True,
-                )
-                tf_dataResidual_params = tf_dataResidual(shape_var.scaled)
-                tf_params_pass = qcd_eff * tf_dataResidual_params  # scale params initially by qcd eff
+                failCh = model[failChName]
 
                 # qcd params
                 qcd_params = np.array(
                     [rl.IndependentParameter(f"{CMS_PARAMS_LABEL}_tf_dataResidual_Bin{i}", 0) for i in range(m_obs.nbins)]
                 )
-
-                logging.info(f"setting transfer factor for pass region {passChName}, fail region {failChName}")
-
-                failCh = model[failChName]
-                passCh = model[passChName]
 
                 # sideband fail
                 # was integer, and numpy complained about subtracting float from it
@@ -332,13 +335,44 @@ def rhalphabet(hists_templates, years, channels, blind_samples, blind_region, qc
                 )
                 failCh.addSample(fail_qcd)
 
-                pass_qcd = rl.TransferFactorSample(
-                    f"{passChName}_{CMS_PARAMS_LABEL}_qcd_datadriven",
-                    rl.Sample.BACKGROUND,
-                    tf_params_pass,
-                    fail_qcd,
-                )
-                passCh.addSample(pass_qcd)
+                # estimate qcd in however many regions defined in "qcd_data_regions"
+                for qcd_data_region in qcd_data_regions:
+                    if blind:
+                        h_pass = blindBins(hists_templates[qcd_data_region], blind_region, blind_samples)
+                        passChName = f"{qcd_data_region}{category}Blinded"
+                    else:
+                        h_pass = hists_templates[qcd_data_region]
+                        passChName = f"{qcd_data_region}{category}"
+
+                    # get the transfer factor
+                    qcd_eff = (
+                        h_pass[{"Category": category, "Sample": "QCD", "Systematic": "nominal"}].sum()
+                        / h_fail[{"Category": category, "Sample": "QCD", "Systematic": "nominal"}].sum()
+                    )
+
+                    # transfer factor
+                    tf_dataResidual = rl.BasisPoly(
+                        f"{CMS_PARAMS_LABEL}_tf_dataResidual",
+                        (shape_var.order,),
+                        [shape_var.name],
+                        basis="Bernstein",
+                        limits=(-20, 20),
+                        # square_params=True,
+                    )
+                    tf_dataResidual_params = tf_dataResidual(shape_var.scaled)
+                    tf_params_pass = qcd_eff * tf_dataResidual_params  # scale params initially by qcd eff
+
+                    logging.info(f"setting transfer factor for pass region {passChName}, fail region {failChName}")
+
+                    passCh = model[passChName]
+
+                    pass_qcd = rl.TransferFactorSample(
+                        f"{passChName}_{CMS_PARAMS_LABEL}_qcd_datadriven",
+                        rl.Sample.BACKGROUND,
+                        tf_params_pass,
+                        fail_qcd,
+                    )
+                    passCh.addSample(pass_qcd)
 
     return model
 
@@ -369,7 +403,9 @@ def main(args):
         channels,
         blind_samples=blind_samples,  # default is [] which means blind all samples
         blind_region=[90, 150],
+        wjets_estimation=True,
         qcd_estimation=True,
+        qcd_data_regions=["pass", "wjetsCR"],
     )
 
     with open(f"{args.outdir}/model_{save_as}.pkl", "wb") as fout:
