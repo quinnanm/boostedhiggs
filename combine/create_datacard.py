@@ -163,7 +163,7 @@ def systs_from_parquets(years):
         },
         "SingleTop": {},
         "DYJets": {
-            "weight_d1kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d1kappa_EW_{year}", "lnN"),
+            # "weight_d1kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d1kappa_EW_{year}", "lnN"),
             "weight_Z_d2kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d2kappa_EW_{year}", "lnN"),
             "weight_Z_d3kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d3kappa_EW_{year}", "lnN"),
         },
@@ -277,23 +277,23 @@ def rhalphabet(
                 ch.setObservation(data_obs)
 
                 if "wjetsCR" in ChName:
-                    wlnufail = ch["wjets"]
+                    wjetsfail = ch["wjets"]
                 elif "pass" in ChName:
-                    wlnupass = ch["wjets"]
+                    wjetspass = ch["wjets"]
 
             if wjets_estimation:
                 # wjets params
-                wlnueffSF = rl.IndependentParameter("wlnueffSF_{}".format(year), 1.0, -50, 50)
-                wlnunormSF = rl.IndependentParameter("wlnunormSF_{}".format(year), 1.0, -50, 50)
+                wjetseffSF = rl.IndependentParameter("wjetseffSF_{}".format(year), 1.0, -50, 50)
+                wjetsnormSF = rl.IndependentParameter("wjetsnormSF_{}".format(year), 1.0, -50, 50)
 
-                sumPass = wlnupass.getExpectation(nominal=True).sum()
-                sumFail = wlnufail.getExpectation(nominal=True).sum()
+                sumPass = wjetspass.getExpectation(nominal=True).sum()
+                sumFail = wjetsfail.getExpectation(nominal=True).sum()
 
-                wlnuPF = sumPass / sumFail
-                wlnupass.setParamEffect(wlnueffSF, 1 * wlnueffSF)
-                wlnufail.setParamEffect(wlnueffSF, (1 - wlnueffSF) * wlnuPF + 1)
-                wlnupass.setParamEffect(wlnunormSF, 1 * wlnunormSF)
-                wlnufail.setParamEffect(wlnunormSF, 1 * wlnunormSF)
+                wjetsPF = sumPass / sumFail
+                wjetspass.setParamEffect(wjetseffSF, 1 * wjetseffSF)
+                wjetsfail.setParamEffect(wjetseffSF, (1 - wjetseffSF) * wjetsPF + 1)
+                wjetspass.setParamEffect(wjetsnormSF, 1 * wjetsnormSF)
+                wjetsfail.setParamEffect(wjetsnormSF, 1 * wjetsnormSF)
 
             if qcd_estimation:  # qcd data-driven estimation per category
                 if blind:
