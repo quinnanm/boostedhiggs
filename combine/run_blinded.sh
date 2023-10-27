@@ -124,10 +124,9 @@ dataset=data_obs
 cards_dir="/uscms/home/fmokhtar/nobackup/boostedhiggs/combine/templates/v2/datacards"
 CMS_PARAMS_LABEL="CMS_HWW_boosted"
 
-echo "actually run the following: "
-
-cr="failggFpt200to300"
-sr="passggFpt200to300"
+category="ggFpt200to300"
+cr="fail${category}"
+sr="pass${category}"
 
 ccargs="fail=${cards_dir}/${cr}.txt failBlinded=${cards_dir}/${cr}Blinded.txt pass=${cards_dir}/${sr}.txt passBlinded=${cards_dir}/${sr}Blinded.txt"
 maskunblindedargs="mask_${sr}=1,mask_${cr}=1,mask_${sr}Blinded=0,mask_${cr}Blinded=0"
@@ -142,7 +141,7 @@ echo "maskunblinded=${maskunblindedargs}"
 # freeze qcd params in blinded bins
 setparamsblinded=""
 freezeparamsblinded=""
-for bin in {0..8}
+for bin in {2..5}
 do
     setparamsblinded+="${CMS_PARAMS_LABEL}_tf_dataResidual_Bin${bin}=0,"
     freezeparamsblinded+="${CMS_PARAMS_LABEL}_tf_dataResidual_Bin${bin},"
@@ -157,10 +156,13 @@ freezeparamsblinded="${freezeparamsblinded},var{.*lp_sf.*}"
 # # # need to run this for large # of nuisances
 # # # https://cms-talk.web.cern.ch/t/segmentation-fault-in-combine/20735
 
-ws=${cards_dir}/combined
-wsm=${cards_dir}/workspace
-outsdir=${cards_dir}/outs
-mkdir -p $outsdir
+outdir=${cards_dir}/combined_${category}
+mkdir -p ${outdir}
+
+ws=${outdir}/combined
+wsm=${outdir}/workspace
+logsdir=${outdir}/logs
+mkdir -p $logsdir
 
 if [ $workspace = 1 ]; then
     echo "Combining cards"
@@ -168,7 +170,7 @@ if [ $workspace = 1 ]; then
     combineCards.py $ccargs > $ws.txt
 
     echo "Running text2workspace"
-    text2workspace.py $ws.txt --channel-masks -o $wsm.root 2>&1 | tee $outsdir/text2workspace.txt
+    text2workspace.py $ws.txt --channel-masks -o $wsm.root 2>&1 | tee $logsdir/text2workspace.txt
 else
     if [ ! -f "$wsm.root" ]; then
         echo "Workspace doesn't exist! Use the -w|--workspace option to make workspace first"
@@ -183,7 +185,7 @@ if [ $bfit = 1 ]; then
     --cminDefaultMinimizerStrategy 0 --cminDefaultMinimizerTolerance $mintol --X-rtd MINIMIZER_MaxCalls=5000000 \
     --setParameters ${maskunblindedargs},${setparamsblinded},r=0  \
     --freezeParameters r,${freezeparamsblinded} \
-    -n Snapshot 2>&1 | tee $outsdir/MultiDimFit.txt
+    -n Snapshot 2>&1 | tee $logsdir/MultiDimFit.txt
 else
     if [ ! -f "higgsCombineSnapshot.MultiDimFit.mH125.root" ]; then
         echo "Background-only fit snapshot doesn't exist! Use the -b|--bfit option to run fit first"
@@ -211,19 +213,19 @@ fi
 # fi
 
 
-# if [ $dfit = 1 ]; then
-#     echo "Fit Diagnostics"
-#     combine -M FitDiagnostics -m 125 -d ${wsm}.root \
-#     --setParameters ${maskunblindedargs},${setparamsblinded} \
-#     --freezeParameters ${freezeparamsblinded} \
-#     --cminDefaultMinimizerStrategy 0  --cminDefaultMinimizerTolerance $mintol --X-rtd MINIMIZER_MaxCalls=5000000 \
-#     -n Blinded --ignoreCovWarning -v 9 2>&1 | tee $outsdir/FitDiagnostics.txt
-#     # --saveShapes --saveNormalizations --saveWithUncertainties --saveOverallShapes \
+if [ $dfit = 1 ]; then
+    echo "Fit Diagnostics"
+    combine -M FitDiagnostics -m 125 -d ${wsm}.root \
+    --setParameters ${maskunblindedargs},${setparamsblinded} \
+    --freezeParameters ${freezeparamsblinded} \
+    --cminDefaultMinimizerStrategy 0  --cminDefaultMinimizerTolerance $mintol --X-rtd MINIMIZER_MaxCalls=5000000 \
+    -n Blinded --ignoreCovWarning -v 9 2>&1 | tee $outsdir/FitDiagnostics.txt
+    # --saveShapes --saveNormalizations --saveWithUncertainties --saveOverallShapes \
 
-#     echo "Fit Shapes"
-#     PostFitShapesFromWorkspace --dataset $dataset -w ${wsm}.root --output FitShapes.root \
-#     -m 125 -f fitDiagnosticsBlinded.root:fit_b --postfit --print 2>&1 | tee $outsdir/FitShapes.txt
-# fi
+    # echo "Fit Shapes"
+    PostFitShapesFromWorkspace --dataset $dataset -w ${wsm}.root --output FitShapes.root \
+    -m 125 -f fitDiagnosticsBlinded.root:fit_b --postfit --print 2>&1 | tee $outsdir/FitShapes.txt
+fi
 
 # # try to change "setparams" to "setparamsblinded" and see the effect
 # # if [ $gofdata = 1 ]; then
