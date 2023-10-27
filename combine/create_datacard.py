@@ -376,19 +376,20 @@ def rhalphabet(
                     passCh.addSample(pass_qcd)
 
     if wjets_estimation:
-        for t in ["blinded", "unblinded"]:
-            # wjets params
-            wjetseffSF = rl.IndependentParameter("wjetseffSF_{}".format(year), 1.0, -50, 50)
-            wjetsnormSF = rl.IndependentParameter("wjetsnormSF_{}".format(year), 1.0, -50, 50)
+        for category in categories:
+            for t in ["blinded", "unblinded"]:
+                # wjets params
+                wjetseffSF = rl.IndependentParameter("wjetseffSF_{}".format(year), 1.0, -50, 50)
+                wjetsnormSF = rl.IndependentParameter("wjetsnormSF_{}".format(year), 1.0, -50, 50)
 
-            sumPass = wjetspass[category][t].getExpectation(nominal=True).sum()
-            sumFail = wjetsfail[category][t].getExpectation(nominal=True).sum()
+                sumPass = wjetspass[category][t].getExpectation(nominal=True).sum()
+                sumFail = wjetsfail[category][t].getExpectation(nominal=True).sum()
 
-            wjetsPF = sumPass / sumFail
-            wjetspass[category][t].setParamEffect(wjetseffSF, 1 * wjetseffSF)
-            wjetsfail[category][t].setParamEffect(wjetseffSF, (1 - wjetseffSF) * wjetsPF + 1)
-            wjetspass[category][t].setParamEffect(wjetsnormSF, 1 * wjetsnormSF)
-            wjetsfail[category][t].setParamEffect(wjetsnormSF, 1 * wjetsnormSF)
+                wjetsPF = sumPass / sumFail
+                wjetspass[category][t].setParamEffect(wjetseffSF, 1 * wjetseffSF)
+                wjetsfail[category][t].setParamEffect(wjetseffSF, (1 - wjetseffSF) * wjetsPF + 1)
+                wjetspass[category][t].setParamEffect(wjetsnormSF, 1 * wjetsnormSF)
+                wjetsfail[category][t].setParamEffect(wjetsnormSF, 1 * wjetsnormSF)
 
     return model
 
