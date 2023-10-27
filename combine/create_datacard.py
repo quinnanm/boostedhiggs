@@ -191,6 +191,11 @@ def rhalphabet(
                 LUMI[year] += json.load(f)[lep_ch][year]
         LUMI[year] /= len(channels)
 
+    if len(years) == 4:
+        year = "Run2"
+    else:
+        year = years[0]
+
     # get the LUMI covered in the templates
     full_lumi = 0
     for year_ in years:
