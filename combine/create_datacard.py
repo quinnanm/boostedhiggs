@@ -223,6 +223,8 @@ def rhalphabet(
     # fill datacard with systematics and rates
     for blind in [True, False]:
         for category in categories:
+            if category != "ggFpt200to300":
+                continue
             for region in ["pass", "fail", "wjetsCR"]:
                 if blind:
                     h = blindBins(hists_templates[region], blind_region, blind_samples)
@@ -377,10 +379,12 @@ def rhalphabet(
 
     if wjets_estimation:
         for category in categories:
+            if category != "ggFpt200to300":
+                continue
             for t in ["blinded", "unblinded"]:
                 # wjets params
-                wjetseffSF = rl.IndependentParameter("wjetseffSF_{}".format(year), 1.0, -50, 50)
-                wjetsnormSF = rl.IndependentParameter("wjetsnormSF_{}".format(year), 1.0, -50, 50)
+                wjetseffSF = rl.IndependentParameter(f"wjetseffSF_{year}", 1.0, -50, 50)
+                wjetsnormSF = rl.IndependentParameter(f"wjetsnormSF_{year}", 1.0, -50, 50)
 
                 sumPass = wjetspass[category][t].getExpectation(nominal=True).sum()
                 sumFail = wjetsfail[category][t].getExpectation(nominal=True).sum()
