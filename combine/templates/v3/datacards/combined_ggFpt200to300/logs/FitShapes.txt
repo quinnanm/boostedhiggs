@@ -1,0 +1,70 @@
+[SetFlag] Changing value of flag "workspaces-use-clone" from 0 to 1
+[#1] INFO:ObjectHandling -- RooWorkspace::import(w) importing dataset fail
+[#1] INFO:ObjectHandling -- RooWorkspace::import(w) importing dataset failBlinded
+[#1] INFO:ObjectHandling -- RooWorkspace::import(w) importing dataset pass
+[#1] INFO:ObjectHandling -- RooWorkspace::import(w) importing dataset passBlinded
+[SetFlag] Changing value of flag "workspaces-use-clone" from 0 to 1
+>> Doing prefit: fail,CMS_HWW_boosted_qcd_datadriven
+>> Doing prefit: fail,VBF
+>> Doing prefit: fail,VH
+>> Doing prefit: fail,ggF
+>> Doing prefit: fail,singletop
+>> Doing prefit: fail,ttH
+>> Doing prefit: fail,ttbar
+>> Doing prefit: fail,wjets
+>> Doing prefit: fail,zjets
+>> Doing prefit: fail,TotalBkg
+>> Doing prefit: fail,TotalSig
+>> Doing prefit: fail,TotalProcs
+>> Doing prefit: failBlinded,CMS_HWW_boosted_qcd_datadriven
+>> Doing prefit: failBlinded,VBF
+>> Doing prefit: failBlinded,VH
+>> Doing prefit: failBlinded,ggF
+>> Doing prefit: failBlinded,singletop
+>> Doing prefit: failBlinded,ttH
+>> Doing prefit: failBlinded,ttbar
+>> Doing prefit: failBlinded,wjets
+>> Doing prefit: failBlinded,zjets
+>> Doing prefit: failBlinded,TotalBkg
+>> Doing prefit: failBlinded,TotalSig
+>> Doing prefit: failBlinded,TotalProcs
+>> Doing prefit: pass,CMS_HWW_boosted_qcd_datadriven
+>> Doing prefit: pass,VBF
+>> Doing prefit: pass,VH
+>> Doing prefit: pass,ggF
+>> Doing prefit: pass,singletop
+>> Doing prefit: pass,ttH
+>> Doing prefit: pass,ttbar
+>> Doing prefit: pass,wjets
+>> Doing prefit: pass,zjets
+>> Doing prefit: pass,TotalBkg
+>> Doing prefit: pass,TotalSig
+>> Doing prefit: pass,TotalProcs
+>> Doing prefit: passBlinded,CMS_HWW_boosted_qcd_datadriven
+>> Doing prefit: passBlinded,VBF
+>> Doing prefit: passBlinded,VH
+>> Doing prefit: passBlinded,ggF
+>> Doing prefit: passBlinded,singletop
+>> Doing prefit: passBlinded,ttH
+>> Doing prefit: passBlinded,ttbar
+>> Doing prefit: passBlinded,wjets
+>> Doing prefit: passBlinded,zjets
+>> Doing prefit: passBlinded,TotalBkg
+>> Doing prefit: passBlinded,TotalSig
+>> Doing prefit: passBlinded,TotalProcs
+Bin                       Total relative bkg uncert. (prefit)
+----------------------------------------------------------
+fail                      0.00282   
+failBlinded               0.00257   
+pass                      0.05086   
+passBlinded               0.05158   
+terminate called after throwing an instance of 'std::runtime_error'
+  what():  
+*******************************************************************************
+Context: Function ch::OpenFromTFile at 
+  /uscms_data/d3/fmokhtar/combine/CMSSW_11_3_4/src/CombineHarvester/CombineTools/interface/TFileIO.h:73
+Problem: Object fit_b is missing or of wrong type
+*******************************************************************************
+Please report issues at
+  https://github.com/cms-analysis/CombineHarvester/issues
+*******************************************************************************

@@ -121,12 +121,13 @@ seed=$seed numtoys=$numtoys"
 ####################################################################################################
 
 dataset=data_obs
-cards_dir="/uscms/home/fmokhtar/nobackup/boostedhiggs/combine/templates/v2/datacards"
+cards_dir="/uscms/home/fmokhtar/nobackup/boostedhiggs/combine/templates/v3/datacards"
 CMS_PARAMS_LABEL="CMS_HWW_boosted"
 
 category="ggFpt200to300"
 cr="fail${category}"
-sr="pass${category}"
+# sr="pass${category}"
+sr="wjetsCR${category}"
 
 ccargs="fail=${cards_dir}/${cr}.txt failBlinded=${cards_dir}/${cr}Blinded.txt pass=${cards_dir}/${sr}.txt passBlinded=${cards_dir}/${sr}Blinded.txt"
 maskunblindedargs="mask_${sr}=1,mask_${cr}=1,mask_${sr}Blinded=0,mask_${cr}Blinded=0"
@@ -158,11 +159,13 @@ freezeparamsblinded="${freezeparamsblinded},var{.*lp_sf.*}"
 
 outdir=${cards_dir}/combined_${category}
 mkdir -p ${outdir}
+chmod +x ${outdir}
 
 ws=${outdir}/combined
 wsm=${outdir}/workspace
 logsdir=${outdir}/logs
 mkdir -p $logsdir
+chmod +x ${logsdir}
 
 if [ $workspace = 1 ]; then
     echo "Combining cards"
@@ -178,22 +181,33 @@ else
     fi
 fi
 
+if [ $dfit = 1 ]; then
+    echo "Fit Diagnostics"
+    combine -M FitDiagnostics -m 125 -d ${wsm}.root \
+    --setParameters ${maskunblindedargs},${setparamsblinded} \
+    --freezeParameters ${freezeparamsblinded} \
+    --cminDefaultMinimizerStrategy 0  --cminDefaultMinimizerTolerance $mintol --X-rtd MINIMIZER_MaxCalls=5000000 \
+    -n Blinded --ignoreCovWarning -v 9 2>&1 | tee $logsdir/FitDiagnostics.txt
+    # --saveShapes --saveNormalizations --saveWithUncertainties --saveOverallShapes \
 
-if [ $bfit = 1 ]; then
-    echo "Blinded background-only fit"
-    combine -D $dataset -M MultiDimFit --saveWorkspace -m 125 -d ${wsm}.root -v 9 \
-    --cminDefaultMinimizerStrategy 0 --cminDefaultMinimizerTolerance $mintol --X-rtd MINIMIZER_MaxCalls=5000000 \
-    --setParameters ${maskunblindedargs},${setparamsblinded},r=0  \
-    --freezeParameters r,${freezeparamsblinded} \
-    -n Snapshot 2>&1 | tee $logsdir/MultiDimFit.txt
-else
-    if [ ! -f "higgsCombineSnapshot.MultiDimFit.mH125.root" ]; then
-        echo "Background-only fit snapshot doesn't exist! Use the -b|--bfit option to run fit first"
-        exit 1
-    fi
+    echo "Fit Shapes"
+    PostFitShapesFromWorkspace --dataset $dataset -w ${wsm}.root --output FitShapes.root \
+    -m 125 -f fitDiagnosticsBlinded.root:fit_b --postfit --print 2>&1 | tee $logsdir/FitShapes.txt
 fi
 
-
+# if [ $bfit = 1 ]; then
+#     echo "Blinded background-only fit"
+#     combine -D $dataset -M MultiDimFit --saveWorkspace -m 125 -d ${wsm}.root -v 9 \
+#     --cminDefaultMinimizerStrategy 0 --cminDefaultMinimizerTolerance $mintol --X-rtd MINIMIZER_MaxCalls=5000000 \
+#     --setParameters ${maskunblindedargs},${setparamsblinded},r=0  \
+#     --freezeParameters r,${freezeparamsblinded} \
+#     -n Snapshot 2>&1 | tee $logsdir/MultiDimFit.txt
+# else
+#     if [ ! -f "higgsCombineSnapshot.MultiDimFit.mH125.root" ]; then
+#         echo "Background-only fit snapshot doesn't exist! Use the -b|--bfit option to run fit first"
+#         exit 1
+#     fi
+# fi
 # # wsm_snapshot=/uscms/home/fmokhtar/nobackup/boostedhiggs/combine/templates/v2/datacards/testModel
 # if [ $limits = 1 ]; then
 #     echo "Expected limits"
@@ -211,21 +225,6 @@ fi
 #     ${unblindedparams},r=1 \
 #     --floatParameters ${freezeparamsblinded},r --toysFrequentist 2>&1 | tee $outsdir/Significance.txt
 # fi
-
-
-if [ $dfit = 1 ]; then
-    echo "Fit Diagnostics"
-    combine -M FitDiagnostics -m 125 -d ${wsm}.root \
-    --setParameters ${maskunblindedargs},${setparamsblinded} \
-    --freezeParameters ${freezeparamsblinded} \
-    --cminDefaultMinimizerStrategy 0  --cminDefaultMinimizerTolerance $mintol --X-rtd MINIMIZER_MaxCalls=5000000 \
-    -n Blinded --ignoreCovWarning -v 9 2>&1 | tee $outsdir/FitDiagnostics.txt
-    # --saveShapes --saveNormalizations --saveWithUncertainties --saveOverallShapes \
-
-    # echo "Fit Shapes"
-    PostFitShapesFromWorkspace --dataset $dataset -w ${wsm}.root --output FitShapes.root \
-    -m 125 -f fitDiagnosticsBlinded.root:fit_b --postfit --print 2>&1 | tee $outsdir/FitShapes.txt
-fi
 
 # # try to change "setparams" to "setparamsblinded" and see the effect
 # # if [ $gofdata = 1 ]; then
