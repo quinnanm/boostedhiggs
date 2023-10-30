@@ -4,7 +4,7 @@
 Setting runtime-define MINIMIZER_MaxCalls to 5000000
 Adding /uscms_data/d3/fmokhtar/combine/CMSSW_11_3_4/src to include path
 Adding /cvmfs/cms.cern.ch/slc7_amd64_gcc900/lcg/root/6.22.08-ljfedo//include to include path
-Input workspace 'w': 
+Input workspace 'w':
 
 RooWorkspace(w) w contents
 
@@ -348,7 +348,7 @@ Nuisance Parameters:     RooArgSet:: = (BR_hww,CMS_HWW_boosted_W_d1kappa_EW_Run2
 Global Observables:      RooArgSet:: = (BR_hww_In,CMS_HWW_boosted_W_d1kappa_EW_Run2_In,CMS_HWW_boosted_W_d2kappa_EW_Run2_In,CMS_HWW_boosted_W_d3kappa_EW_Run2_In,CMS_HWW_boosted_Z_d1kappa_EW_Run2_In,CMS_HWW_boosted_Z_d2kappa_EW_Run2_In,CMS_HWW_boosted_Z_d3kappa_EW_Run2_In,CMS_HWW_boosted_d1K_NLO_Run2_In,CMS_HWW_boosted_d2K_NLO_Run2_In,CMS_HWW_boosted_d3K_NLO_Run2_In,CMS_HWW_boosted_mu_trigger_Run2_mu_In,CMS_HWW_boosted_scale_pt_3_VBF_Run2_In,CMS_HWW_boosted_scale_pt_3_ggF_Run2_In,CMS_HWW_boosted_scale_pt_7_VBF_Run2_In,CMS_HWW_boosted_scale_pt_7_ggF_Run2_In,CMS_HWW_boosted_trigger_Run2_ele_In,CMS_L1Prefiring_Run2_In,CMS_id_Run2_In,CMS_iso_Run2_In,CMS_lumi_13TeV_1718_In,CMS_lumi_13TeV_2016_In,CMS_lumi_13TeV_2017_In,CMS_lumi_13TeV_2018_In,CMS_lumi_13TeV_corelated_In,CMS_mu_trigger_iso_Run2_mu_In,CMS_reconstruction_ele_In,aS_Higgs_VBF_In,aS_Higgs_ggF_In,pdfAS_Higgs_VBF_In,pdfAS_Higgs_ggF_In,pdf_Higgs_VBF_In,pdf_Higgs_ggF_In)
 PDF:                     RooSimultaneousOpt::model_s[ indexCat=CMS_channel fail=pdf_binfail failBlinded=pdf_binfailBlinded pass=pdf_binpass passBlinded=pdf_binpassBlinded extraConstraints=() channelMasks=(mask_fail,mask_failBlinded,mask_pass,mask_passBlinded) ] = 5.25959
 
-Input ModelConfig 'ModelConfig': 
+Input ModelConfig 'ModelConfig':
 
 === Using the following for ModelConfig ===
 Observables:             RooArgSet:: = (mass_observable,CMS_channel)
@@ -445,7 +445,7 @@ Saved snapshot 'clean'
 [#1] INFO:Eval -- RooRealVar::setRange(pdfAS_Higgs_ggF) new range named 'optimizeBoundRange' created with bounds [-7,7]
 [#1] INFO:Eval -- RooRealVar::setRange(pdf_Higgs_VBF) new range named 'optimizeBoundRange' created with bounds [-7,7]
 [#1] INFO:Eval -- RooRealVar::setRange(pdf_Higgs_ggF) new range named 'optimizeBoundRange' created with bounds [-7,7]
-SimNLL created with 0 channels, 0 generic constraints, 32 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+SimNLL created with 0 channels, 0 generic constraints, 32 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints,
 Minuit2Minimizer: Minimize with max-calls 5000000 convergence for edm < 0.5 strategy 0
 Minuit2Minimizer::Minuit  - Changing default options
              StorageLevel :               0
@@ -490,8 +490,8 @@ pdfAS_Higgs_VBF	  = 0	 +/-  1
 pdfAS_Higgs_ggF	  = 0	 +/-  1
 pdf_Higgs_VBF	  = 0	 +/-  1
 pdf_Higgs_ggF	  = 0	 +/-  1
-SimNLL created with 4 channels, 0 generic constraints, 32 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
-do first Minimization 
+SimNLL created with 4 channels, 0 generic constraints, 32 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints,
+do first Minimization
 Minuit2Minimizer: Minimize with max-calls 5000000 convergence for edm < 0.5 strategy 0
 Minuit2Minimizer::Minuit  - Changing default options
              StorageLevel :               0
@@ -557,7 +557,7 @@ Nfcn  = 177
 Minimized in : Real time 0:00:00, CP time 0.000
 FINAL NLL - NLL0 VALUE = 0
 Initial minimization failed. Aborting.
-do first Minimization 
+do first Minimization
 Minuit2Minimizer: Minimize with max-calls 5000000 convergence for edm < 0.5 strategy 0
 Minuit2Minimizer::Minuit  - Changing default options
              StorageLevel :               0
@@ -634,11 +634,11 @@ Messages of type INFO : 15
 Messages of type DEBUG : 2
 Messages of type ERROR : 0
 ----------------------------------------------
-INFO: (function: run) Combine.cc: 708 -- Freezing the following parameters: 
-INFO: (function: run) Combine.cc: 711  CMS_HWW_boosted_tf_dataResidual_Bin2 
-INFO: (function: run) Combine.cc: 711  CMS_HWW_boosted_tf_dataResidual_Bin3 
-INFO: (function: run) Combine.cc: 711  CMS_HWW_boosted_tf_dataResidual_Bin4 
-INFO: (function: run) Combine.cc: 711  CMS_HWW_boosted_tf_dataResidual_Bin5 
+INFO: (function: run) Combine.cc: 708 -- Freezing the following parameters:
+INFO: (function: run) Combine.cc: 711  CMS_HWW_boosted_tf_dataResidual_Bin2
+INFO: (function: run) Combine.cc: 711  CMS_HWW_boosted_tf_dataResidual_Bin3
+INFO: (function: run) Combine.cc: 711  CMS_HWW_boosted_tf_dataResidual_Bin4
+INFO: (function: run) Combine.cc: 711  CMS_HWW_boosted_tf_dataResidual_Bin5
 INFO: (function: improveOnce) CascadeMinimizer.cc: 188 -- Minimisation configured with Type=Minuit2, Algo=Migrad, strategy=0, tolerance=0.5
 INFO: (function: improveOnce) CascadeMinimizer.cc: 211 -- Minimisation finished with status=0
 INFO: (function: improveOnce) CascadeMinimizer.cc: 216 -- Minimization success! status=0

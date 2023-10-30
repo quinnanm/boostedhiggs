@@ -54,14 +54,14 @@
 >> Doing prefit: passBlinded,TotalProcs
 Bin                       Total relative bkg uncert. (prefit)
 ----------------------------------------------------------
-fail                      0.00282   
-failBlinded               0.00257   
-pass                      0.05086   
-passBlinded               0.05158   
+fail                      0.00282
+failBlinded               0.00257
+pass                      0.05086
+passBlinded               0.05158
 terminate called after throwing an instance of 'std::runtime_error'
-  what():  
+  what():
 *******************************************************************************
-Context: Function ch::OpenFromTFile at 
+Context: Function ch::OpenFromTFile at
   /uscms_data/d3/fmokhtar/combine/CMSSW_11_3_4/src/CombineHarvester/CombineTools/interface/TFileIO.h:73
 Problem: Object fit_b is missing or of wrong type
 *******************************************************************************
