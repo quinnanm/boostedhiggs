@@ -383,15 +383,15 @@ def rhalphabet(
                 continue
             for t in ["blinded", "unblinded"]:
                 # wjets params
-                wjetseffSF = rl.IndependentParameter(f"wjetseffSF_{year}", 1.0, -50, 50)
+                # wjetseffSF = rl.IndependentParameter(f"wjetseffSF_{year}", 1.0, -50, 50)
                 wjetsnormSF = rl.IndependentParameter(f"wjetsnormSF_{year}", 1.0, -50, 50)
 
-                sumPass = wjetspass[category][t].getExpectation(nominal=True).sum()
-                sumFail = wjetsfail[category][t].getExpectation(nominal=True).sum()
+                # sumPass = wjetspass[category][t].getExpectation(nominal=True).sum()
+                # sumFail = wjetsfail[category][t].getExpectation(nominal=True).sum()
 
-                wjetsPF = sumPass / sumFail
-                wjetspass[category][t].setParamEffect(wjetseffSF, 1 * wjetseffSF)
-                wjetsfail[category][t].setParamEffect(wjetseffSF, (1 - wjetseffSF) * wjetsPF + 1)
+                # wjetsPF = sumPass / sumFail
+                # wjetspass[category][t].setParamEffect(wjetseffSF, 1 * wjetseffSF)
+                # wjetsfail[category][t].setParamEffect(wjetseffSF, (1 - wjetseffSF) * wjetsPF + 1)
                 wjetspass[category][t].setParamEffect(wjetsnormSF, 1 * wjetsnormSF)
                 wjetsfail[category][t].setParamEffect(wjetsnormSF, 1 * wjetsnormSF)
 
