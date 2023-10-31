@@ -383,6 +383,14 @@ def rhalphabet(
                 continue
             for t in ["blinded", "unblinded"]:
                 # wjets params
+
+                # seperate rate of process by taking into account normalization (how well it fits data/mc in one region)
+                # from mistag efficiency (i.e. tagger)
+                # 2 indep dof: we don't - we choose (for now) one parameter on the overall normalization of wjets
+                # we reparametrize both as: one normalization (both equally up and down) + effSF (one that is asymetric -
+                # if increases, will increase in pass and decrease in fail)
+                # for now just use normalization and see data/mc
+
                 # wjetseffSF = rl.IndependentParameter(f"wjetseffSF_{year}", 1.0, -50, 50)
                 wjetsnormSF = rl.IndependentParameter(f"wjetsnormSF_{year}", 1.0, -50, 50)
 
@@ -424,7 +432,7 @@ def main(args):
         channels,
         blind_samples=blind_samples,  # default is [] which means blind all samples
         blind_region=[90, 150],
-        wjets_estimation=False,
+        wjets_estimation=True,
         qcd_estimation=True,
         qcd_data_regions=["pass", "wjetsCR"],
     )
