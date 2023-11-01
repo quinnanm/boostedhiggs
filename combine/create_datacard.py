@@ -380,6 +380,13 @@ def rhalphabet(
                     passCh.addSample(pass_qcd)
 
     if wjets_estimation:
+        normparam, effparam = True, False
+
+        if normparam:
+            wjetsnormSF = rl.IndependentParameter(f"wjetsnormSF_{year}", 1.0, -50, 50)
+        if effparam:
+            wjetseffSF = rl.IndependentParameter(f"wjetseffSF_{year}", 1.0, -50, 50)
+
         for category in categories:
             if category != "ggFpt200to300":
                 continue
@@ -393,13 +400,11 @@ def rhalphabet(
                 # if increases, will increase in pass and decrease in fail)
                 # for now just use normalization and see data/mc
 
-                # wjetsnormSF = rl.IndependentParameter(f"wjetsnormSF_{year}", 1.0, -10, 10)
+                if normparam:
+                    wjetspass[category][t].setParamEffect(wjetsnormSF, 1 * wjetsnormSF)
+                    wjetsfail[category][t].setParamEffect(wjetsnormSF, 1 * wjetsnormSF)
 
-                # wjetspass[category][t].setParamEffect(wjetsnormSF, 1 * wjetsnormSF)
-                # wjetsfail[category][t].setParamEffect(wjetsnormSF, 1 * wjetsnormSF)
-
-                if True:
-                    wjetseffSF = rl.IndependentParameter(f"wjetseffSF_{year}", 1.0, -50, 50)
+                if effparam:
                     sumPass = wjetspass[category][t].getExpectation(nominal=True).sum()
                     sumFail = wjetsfail[category][t].getExpectation(nominal=True).sum()
 
