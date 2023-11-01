@@ -357,7 +357,7 @@ def rhalphabet(
 
                     # transfer factor
                     tf_dataResidual = rl.BasisPoly(
-                        f"{CMS_PARAMS_LABEL}_tf_dataResidual",
+                        f"{CMS_PARAMS_LABEL}_tf_dataResidual_{qcd_data_region}",
                         (shape_var.order,),
                         [shape_var.name],
                         basis="Bernstein",
@@ -372,7 +372,7 @@ def rhalphabet(
                     passCh = model[passChName]
 
                     pass_qcd = rl.TransferFactorSample(
-                        f"{passChName}_{CMS_PARAMS_LABEL}_qcd_datadriven",
+                        f"{passChName}_{CMS_PARAMS_LABEL}_qcd_datadriven_{qcd_data_region}",
                         rl.Sample.BACKGROUND,
                         tf_params_pass,
                         fail_qcd,
@@ -444,8 +444,7 @@ def main(args):
         blind_region=[90, 150],
         wjets_estimation=True,
         qcd_estimation=True,
-        # qcd_data_regions=["pass", "wjetsCR"],
-        qcd_data_regions=["pass"],
+        qcd_data_regions=["pass", "wjetsCR"],
     )
 
     with open(f"{args.outdir}/model_{save_as}.pkl", "wb") as fout:
