@@ -391,17 +391,19 @@ def rhalphabet(
                 # if increases, will increase in pass and decrease in fail)
                 # for now just use normalization and see data/mc
 
-                # wjetseffSF = rl.IndependentParameter(f"wjetseffSF_{year}", 1.0, -50, 50)
                 wjetsnormSF = rl.IndependentParameter(f"wjetsnormSF_{year}", 1.0, -50, 50)
 
-                # sumPass = wjetspass[category][t].getExpectation(nominal=True).sum()
-                # sumFail = wjetsfail[category][t].getExpectation(nominal=True).sum()
-
-                # wjetsPF = sumPass / sumFail
-                # wjetspass[category][t].setParamEffect(wjetseffSF, 1 * wjetseffSF)
-                # wjetsfail[category][t].setParamEffect(wjetseffSF, (1 - wjetseffSF) * wjetsPF + 1)
                 wjetspass[category][t].setParamEffect(wjetsnormSF, 1 * wjetsnormSF)
                 wjetsfail[category][t].setParamEffect(wjetsnormSF, 1 * wjetsnormSF)
+
+                if True:
+                    wjetseffSF = rl.IndependentParameter(f"wjetseffSF_{year}", 1.0, -50, 50)
+                    sumPass = wjetspass[category][t].getExpectation(nominal=True).sum()
+                    sumFail = wjetsfail[category][t].getExpectation(nominal=True).sum()
+
+                    wjetsPF = sumPass / sumFail
+                    wjetspass[category][t].setParamEffect(wjetseffSF, 1 * wjetseffSF)
+                    wjetsfail[category][t].setParamEffect(wjetseffSF, (1 - wjetseffSF) * wjetsPF + 1)
 
     return model
 
