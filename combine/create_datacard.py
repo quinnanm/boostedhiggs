@@ -384,6 +384,7 @@ def rhalphabet(
 
         if normparam:
             wjetsnormSF = rl.IndependentParameter(f"wjetsnormSF_{year}", 1.0, -50, 50)
+
         if effparam:
             wjetseffSF = rl.IndependentParameter(f"wjetseffSF_{year}", 1.0, -50, 50)
 
@@ -443,6 +444,7 @@ def main(args):
         blind_region=[90, 150],
         wjets_estimation=True,
         qcd_estimation=True,
+        # qcd_data_regions=["pass", "wjetsCR"],
         qcd_data_regions=["pass", "wjetsCR"],
     )
 
