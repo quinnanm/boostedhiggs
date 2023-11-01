@@ -445,7 +445,7 @@ def main(args):
         wjets_estimation=True,
         qcd_estimation=True,
         # qcd_data_regions=["pass", "wjetsCR"],
-        qcd_data_regions=["pass", "wjetsCR"],
+        qcd_data_regions=["pass"],
     )
 
     with open(f"{args.outdir}/model_{save_as}.pkl", "wb") as fout:
