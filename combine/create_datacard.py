@@ -241,6 +241,8 @@ def rhalphabet(
                     stype = rl.Sample.SIGNAL if sName in sigs else rl.Sample.BACKGROUND
                     sample = rl.TemplateSample(ch.name + "_" + labels[sName], stype, templ)
 
+                    # sample.autoMCStats(lnN=True)
+
                     # SYSTEMATICS NOT FROM PARQUETS
                     for sys_name, sys_value in systs_dict.items():
                         if systs_dict_values[sys_name][1] is None:  # if up and down are the same
@@ -391,12 +393,12 @@ def rhalphabet(
                 # if increases, will increase in pass and decrease in fail)
                 # for now just use normalization and see data/mc
 
-                wjetsnormSF = rl.IndependentParameter(f"wjetsnormSF_{year}", 1.0, -50, 50)
+                wjetsnormSF = rl.IndependentParameter(f"wjetsnormSF_{year}", 1.0, -10, 10)
 
                 wjetspass[category][t].setParamEffect(wjetsnormSF, 1 * wjetsnormSF)
                 wjetsfail[category][t].setParamEffect(wjetsnormSF, 1 * wjetsnormSF)
 
-                if True:
+                if False:
                     wjetseffSF = rl.IndependentParameter(f"wjetseffSF_{year}", 1.0, -50, 50)
                     sumPass = wjetspass[category][t].getExpectation(nominal=True).sum()
                     sumFail = wjetsfail[category][t].getExpectation(nominal=True).sum()
