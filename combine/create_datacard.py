@@ -296,6 +296,10 @@ def rhalphabet(
                     wjetspass[category]["unblinded"] = ch["wjets"]
 
             if qcd_estimation:  # qcd data-driven estimation per category
+                # estimate qcd in however many regions defined in "qcd_data_regions"
+
+                # sideband fail
+                # was integer, and numpy complained about subtracting float from it
                 if blind:
                     h_fail = blindBins(hists_templates["fail"], blind_region, blind_samples)
                     failChName = f"fail{category}Blinded"
@@ -305,43 +309,43 @@ def rhalphabet(
 
                 failCh = model[failChName]
 
-                # qcd params
-                qcd_params = np.array(
-                    [rl.IndependentParameter(f"{CMS_PARAMS_LABEL}_tf_dataResidual_Bin{i}", 0) for i in range(m_obs.nbins)]
-                )
-
-                # sideband fail
-                # was integer, and numpy complained about subtracting float from it
                 initial_qcd = failCh.getObservation().astype(float)
+                if np.any(initial_qcd < 0.0):
+                    # raise ValueError("initial_qcd negative for some bins..", initial_qcd)
+                    logging.warning(f"initial_qcd negative for some bins... {initial_qcd}")
+                    initial_qcd[initial_qcd < 0] = 0
+
                 for sample in failCh:
                     if sample.sampletype == rl.Sample.SIGNAL:
                         continue
                     # logging.info(f"subtracting {sample._name} from qcd")
                     initial_qcd -= sample.getExpectation(nominal=True)
 
-                if np.any(initial_qcd < 0.0):
-                    # raise ValueError("initial_qcd negative for some bins..", initial_qcd)
-                    logging.warning(f"initial_qcd negative for some bins... {initial_qcd}")
-                    initial_qcd[initial_qcd < 0] = 0
-
-                # idea here is that the error should be 1/sqrt(N), so parametrizing it as (1 + 1/sqrt(N))^qcdparams
-                # will result in qcdparams errors ~±1
-                # but because qcd is poorly modelled we're scaling sigma scale
-
-                sigmascale = 10  # to scale the deviation from initial
-                scaled_params = initial_qcd * (1 + sigmascale / np.maximum(1.0, np.sqrt(initial_qcd))) ** qcd_params
-
-                # add samples
-                fail_qcd = rl.ParametericSample(
-                    f"{failChName}_{CMS_PARAMS_LABEL}_qcd_datadriven",
-                    rl.Sample.BACKGROUND,
-                    m_obs,
-                    scaled_params,
-                )
-                failCh.addSample(fail_qcd)
-
-                # estimate qcd in however many regions defined in "qcd_data_regions"
                 for qcd_data_region in qcd_data_regions:
+                    # qcd params
+                    qcd_params = np.array(
+                        [
+                            rl.IndependentParameter(f"{CMS_PARAMS_LABEL}_tf_dataResidual_{qcd_data_region}_Bin{i}", 0)
+                            for i in range(m_obs.nbins)
+                        ]
+                    )
+
+                    # idea here is that the error should be 1/sqrt(N), so parametrizing it as (1 + 1/sqrt(N))^qcdparams
+                    # will result in qcdparams errors ~±1
+                    # but because qcd is poorly modelled we're scaling sigma scale
+
+                    sigmascale = 10  # to scale the deviation from initial
+                    scaled_params = initial_qcd * (1 + sigmascale / np.maximum(1.0, np.sqrt(initial_qcd))) ** qcd_params
+
+                    # add samples
+                    fail_qcd = rl.ParametericSample(
+                        f"{failChName}_{CMS_PARAMS_LABEL}_qcd_datadriven_{qcd_data_region}",
+                        rl.Sample.BACKGROUND,
+                        m_obs,
+                        scaled_params,
+                    )
+                    failCh.addSample(fail_qcd)
+
                     if blind:
                         h_pass = blindBins(hists_templates[qcd_data_region], blind_region, blind_samples)
                         passChName = f"{qcd_data_region}{category}Blinded"
