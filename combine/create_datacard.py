@@ -217,18 +217,21 @@ def rhalphabet(
 
     wjetsfail = {}
     wjetspass = {}
-    for category in categories:
-        wjetspass[category], wjetsfail[category] = {}, {}
+    # for category in categories:
+    #     wjetspass[category], wjetsfail[category] = {}, {}
 
     # fill datacard with systematics and rates
     for category in categories:
         if category != "ggFpt200to300":
             continue
-        for region in ["passBlinded", "pass", "fail", "wjetsCR"]:
+        for region in ["passBlinded", "failBlinded", "wjetsCRBlinded"]:
             if "passBlinded" in region:
                 h = blindBins(hists_templates["pass"], blind_region, blind_samples)
-            else:
-                h = hists_templates[region]
+            elif "failBlinded" in region:
+                h = blindBins(hists_templates["fail"], blind_region, blind_samples)
+            elif "wjetsCRBlinded" in region:
+                h = blindBins(hists_templates["wjetsCR"], blind_region, blind_samples)
+
             ChName = f"{region}{category}"
 
             ch = rl.Channel(ChName)
@@ -283,25 +286,16 @@ def rhalphabet(
             data_obs = get_template(h, "Data", category)
             ch.setObservation(data_obs)
 
-            # get the relevant channels for wjets estimation
-            if "wjetsCR" in ChName:
+            # get the relevant channels for wjets estimation in pass region
+            if "wjetsCRBlinded" in ChName:
                 wjetsfail[category] = ch["wjets"]
             elif "passBlinded" in ChName:
-                wjetspass[category]["passBlinded"] = ch["wjets"]
-            elif "pass" in ChName:
-                wjetspass[category]["pass"] = ch["wjets"]
+                wjetspass[category] = ch["wjets"]
 
         if qcd_estimation:  # qcd data-driven estimation per category
-            # estimate qcd in however many regions defined in "qcd_data_regions"
+            h_fail = blindBins(hists_templates["fail"], blind_region, blind_samples)
 
-            # sideband fail
-            # was integer, and numpy complained about subtracting float from it
-            # if blind:
-            #     h_fail = blindBins(hists_templates["fail"], blind_region, blind_samples)
-            #     failChName = f"fail{category}Blinded"
-            # else:
-            h_fail = hists_templates["fail"]
-            failChName = f"fail{category}"
+            failChName = f"failBlinded{category}"
 
             failCh = model[failChName]
 
@@ -317,7 +311,20 @@ def rhalphabet(
                 # logging.info(f"subtracting {sample._name} from qcd")
                 initial_qcd -= sample.getExpectation(nominal=True)
 
-            for qcd_data_region in qcd_data_regions:
+            for qcd_data_region in qcd_data_regions:  # estimate qcd in however many regions defined in "qcd_data_regions"
+                if "passBlinded" in qcd_data_region:  # use failBlinded
+                    h_pass = blindBins(hists_templates["pass"], blind_region, blind_samples)
+                elif "wjetsCRBlinded" in qcd_data_region:  # use failBlinded
+                    h_pass = blindBins(hists_templates["wjetsCR"], blind_region, blind_samples)
+
+                passChName = f"{qcd_data_region}{category}"
+
+                # get the transfer factor
+                qcd_eff = (
+                    h_pass[{"Category": category, "Sample": "QCD", "Systematic": "nominal"}].sum()
+                    / h_fail[{"Category": category, "Sample": "QCD", "Systematic": "nominal"}].sum()
+                )
+
                 # qcd params
                 qcd_params = np.array(
                     [
@@ -341,19 +348,6 @@ def rhalphabet(
                     scaled_params,
                 )
                 failCh.addSample(fail_qcd)
-
-                if "passBlinded" in qcd_data_region:
-                    h_pass = blindBins(hists_templates["pass"], blind_region, blind_samples)
-                else:
-                    h_pass = hists_templates[qcd_data_region]
-
-                passChName = f"{qcd_data_region}{category}"
-
-                # get the transfer factor
-                qcd_eff = (
-                    h_pass[{"Category": category, "Sample": "QCD", "Systematic": "nominal"}].sum()
-                    / h_fail[{"Category": category, "Sample": "QCD", "Systematic": "nominal"}].sum()
-                )
 
                 # transfer factor
                 tf_dataResidual = rl.BasisPoly(
@@ -380,25 +374,22 @@ def rhalphabet(
                 passCh.addSample(pass_qcd)
 
     if wjets_estimation:
-        wjetsnormSF = rl.IndependentParameter(f"wjetsnormSF_{year}", 1.0, -50, 50)
-
         for category in categories:
             if category != "ggFpt200to300":
                 continue
 
+            wjetsnormSF = rl.IndependentParameter(f"wjetsnormSF_{year}", 1.0, -50, 50)
+
+            # wjets params
+
+            # seperate rate of process by taking into account normalization (how well it fits data/mc in one region)
+            # from mistag efficiency (i.e. tagger)
+            # 2 indep dof: we don't - we choose (for now) one parameter on the overall normalization of wjets
+            # we reparametrize both as: one normalization (both equally up and down) + effSF (one that is asymetric -
+            # if increases, will increase in pass and decrease in fail)
+            # for now just use normalization and see data/mc
             wjetsfail[category].setParamEffect(wjetsnormSF, 1 * wjetsnormSF)
-
-            for t in ["passBlinded", "pass"]:
-                # wjets params
-
-                # seperate rate of process by taking into account normalization (how well it fits data/mc in one region)
-                # from mistag efficiency (i.e. tagger)
-                # 2 indep dof: we don't - we choose (for now) one parameter on the overall normalization of wjets
-                # we reparametrize both as: one normalization (both equally up and down) + effSF (one that is asymetric -
-                # if increases, will increase in pass and decrease in fail)
-                # for now just use normalization and see data/mc
-
-                wjetspass[category][t].setParamEffect(wjetsnormSF, 1 * wjetsnormSF)
+            wjetspass[category].setParamEffect(wjetsnormSF, 1 * wjetsnormSF)
 
     return model
 
@@ -431,7 +422,7 @@ def main(args):
         blind_region=[90, 150],
         wjets_estimation=True,
         qcd_estimation=True,
-        qcd_data_regions=["passBlinded", "pass", "wjetsCR"],
+        qcd_data_regions=["passBlinded", "wjetsCRBlinded"],
     )
 
     with open(f"{args.outdir}/model_{save_as}.pkl", "wb") as fout:
