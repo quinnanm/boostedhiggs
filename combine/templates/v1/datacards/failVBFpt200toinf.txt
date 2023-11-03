@@ -1,4 +1,4 @@
-# Datacard for <Channel (failVBFpt200toinf) instance at 0x7f1cd9dd1150> generated on 2023-10-24 10:00:52.924794
+# Datacard for <Channel (failVBFpt200toinf) instance at 0x7f7da1450820> generated on 2023-11-01 16:01:12.170984
 imax 1 # number of categories ('bins' but here we are using shape templates)
 jmax 8 # number of samples minus 1
 kmax 37 # number of nuisance parameters

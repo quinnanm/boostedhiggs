@@ -12,7 +12,7 @@ import ROOT
 import scipy.stats
 
 rl.util.install_roofit_helpers()
-rl.ParametericSample.PreferRooParametricHist = False
+rl.ParametericSample.PreferRooParametricHist = True
 
 
 def main(args):

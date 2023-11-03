@@ -106,6 +106,7 @@ def get_templates(years, channels, samples, samples_dir, lepiso_sel, regions_sel
             hist2.axis.Variable(
                 list(range(50, 240, 20)), name="mass_observable", label=r"Higgs reconstructed mass [GeV]", overflow=True
             ),
+            storage="weight",
         )
         for year in years:  # e.g. 2018, 2017, 2016APV, 2016
             for ch in channels:  # e.g. mu, ele

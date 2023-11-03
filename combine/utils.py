@@ -6,15 +6,11 @@ import pickle as pkl
 import warnings
 from typing import List
 
-import matplotlib.pyplot as plt
-import mplhep as hep
 import numpy as np
 import onnx
 import onnxruntime as ort
 import scipy
 from hist import Hist
-
-plt.style.use(hep.style.CMS)
 
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 

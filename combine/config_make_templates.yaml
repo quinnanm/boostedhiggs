@@ -17,8 +17,8 @@ regions_sel:
     fail: ( (fj_ParT_score_finetuned<0.20) & (n_bjets_T == 0) ) # qcd control region
 
     # sigregion2: ( (fj_ParT_score_finetuned<0.97) & (fj_ParT_score_finetuned>0.85) ) # medium purity signal region
-    ttbarCR: ( (fj_ParT_score_finetuned<0.20) & (n_bjets_T > 0) )
     wjetsCR: ( (fj_ParT_score_finetuned<0.85) & (fj_ParT_score_finetuned>0.20) & (n_bjets_L == 0) )
+    ttbarCR: ( (fj_ParT_score_finetuned<0.20) & (n_bjets_T > 0) )
 
 lepiso_sel: # keys must match keys in regions_sel above; values are either [lepiso, lepisoinv]
     pass: lepiso
