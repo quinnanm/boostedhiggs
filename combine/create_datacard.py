@@ -25,7 +25,7 @@ import pandas as pd
 import rhalphalib as rl
 from utils import blindBins, get_template, labels, samples, shape_to_num, sigs
 
-# rl.ParametericSample.PreferRooParametricHist = True
+rl.ParametericSample.PreferRooParametricHist = True
 logging.basicConfig(level=logging.INFO)
 
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
