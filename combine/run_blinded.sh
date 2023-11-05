@@ -150,7 +150,7 @@ do
     freezeparamsblinded+="${CMS_PARAMS_LABEL}_tf_dataResidual_pass_Bin${bin},"
 
     setparamsblinded+="${CMS_PARAMS_LABEL}_tf_dataResidual_pass_Bin${bin}=0,"
-    freezeparamsblinded+="${CMS_PARAMS_LABEL}_tf_dataResidual_pass_Bin${bin},"    
+    freezeparamsblinded+="${CMS_PARAMS_LABEL}_tf_dataResidual_pass_Bin${bin},"
 done
 # remove last comma
 setparamsblinded=${setparamsblinded%,}
@@ -230,19 +230,19 @@ fi
 # if [ $significance = 1 ]; then
 #     echo "Expected significance"
 #     xxx=${cards_dir}/combined_ggFpt200to300/workspace
-    
+
 #     # combine -M Significance -d ${wsm_snapshot}.root -n "" --significance -m 125 --snapshotName MultiDimFit -v 9 \
 #     # -t -1 --expectSignal=1 --saveWorkspace --saveToys --bypassFrequentistFit \
 #     # ${unblindedparams},r=1 \
 #     # --floatParameters ${freezeparamsblinded},r --toysFrequentist 2>&1 | tee $logsdir/Significance.txt
-    
+
 #     # combine -M Significance ${xxx}.root -m 200 --rMin -1 --rMax 5 -t -1 --expectSignal 1.5
 #     combine -M Significance ${xxx}.root -m 200 --rMin -1 --rMax 5 -t -1 --expectSignal 1.5 --toysFrequentist
 
 #     # combine -M Significance -d ${xxx}.root -m 125 \
 #     # -t -1 --expectSignal=1 --saveWorkspace --saveToys --bypassFrequentistFit \
 #     # ${unblindedparams},r=1 \
-#     # --floatParameters ${freezeparamsblinded},r --toysFrequentist 2>&1    
+#     # --floatParameters ${freezeparamsblinded},r --toysFrequentist 2>&1
 # fi
 
 # # try to change "setparams" to "setparamsblinded" and see the effect

@@ -162,12 +162,14 @@ def get_templates(years, channels, samples, samples_dir, lepiso_sel, regions_sel
                     if sample_to_use != "Data":
                         event_weight = utils.get_xsecweight(pkl_files, year, sample, False, luminosity)
 
-                    if "pass" in region:  # TODO
-                        print(region, "ha3mel")
-                        for category, category_sel in categories_sel.items():  # vbf, ggF, etc.
-                            df = data.copy().query(category_sel)
-                    else:
-                        df = data.copy()
+                    for category, category_sel in categories_sel.items():  # vbf, ggF, etc.
+
+                        df = data.copy().query(category_sel)
+                        # if "pass" in region:  # TODO
+                        #     print(region, "ha3mel")
+                        #     df = data.copy().query(category_sel)
+                        # else:
+                        #     df = data.copy()
 
                         # nominal weight
                         if sample_to_use == "Data":  # for data (fill as 1)
