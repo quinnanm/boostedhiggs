@@ -7,8 +7,6 @@ import warnings
 from typing import List
 
 import numpy as np
-import onnx
-import onnxruntime as ort
 import scipy
 from hist import Hist
 
@@ -155,6 +153,9 @@ def blindBins(h: Hist, blind_region: List, blind_samples: List[str] = []):
 
 
 def get_finetuned_score(data, model_path):
+    import onnx
+    import onnxruntime as ort
+
     input_dict = {
         "highlevel": data.loc[:, "fj_ParT_hidNeuron000":"fj_ParT_hidNeuron127"].values.astype("float32"),
     }
