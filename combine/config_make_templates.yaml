@@ -14,16 +14,15 @@ samples:
 
 regions_sel:
     pass: ( (fj_ParT_score_finetuned>0.97) ) # high purity signal region
+    passMedium: ( (fj_ParT_score_finetuned<0.97) & (fj_ParT_score_finetuned>0.85) ) # medium purity signal region
     fail: ( (fj_ParT_score_finetuned<0.20) & (n_bjets_T == 0) ) # qcd control region
-
-    # sigregion2: ( (fj_ParT_score_finetuned<0.97) & (fj_ParT_score_finetuned>0.85) ) # medium purity signal region
     wjetsCR: ( (fj_ParT_score_finetuned<0.85) & (fj_ParT_score_finetuned>0.20) & (n_bjets_L == 0) )
     ttbarCR: ( (fj_ParT_score_finetuned<0.20) & (n_bjets_T > 0) )
 
 lepiso_sel: # keys must match keys in regions_sel above; values are either [lepiso, lepisoinv]
     pass: lepiso
+    passMedium: lepiso
     fail: lepisoinv
-    sigregion2: lepiso
     wjetsCR: lepiso
     ttbarCR: lepiso
 

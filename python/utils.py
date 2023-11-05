@@ -29,7 +29,7 @@ combine_samples = {
     "VBFHToWWToLNuQQ_M-125_withDipoleRecoil": "VBF",
     "ttHToNonbb_M125": "ttH",
     # bkg
-    # "QCD_Pt": "QCD",
+    "QCD_Pt": "QCD",
     "DYJets": "DYJets",
     "WJetsToLNu_": "WJetsLNu",
     "JetsToQQ": "WZQQ",

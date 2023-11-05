@@ -81,11 +81,9 @@ def make_events_dict(
                     else:
                         sample_to_use = sample
 
-                if sample_to_use not in samples:
-                    print(sample_to_use)
-                    continue
-
-                sample_to_use = sample
+                # if sample_to_use not in samples:
+                #     print(sample_to_use)
+                #     continue
 
                 logging.info(f"Finding {sample} samples and should combine them under {sample_to_use}")
 

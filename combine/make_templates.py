@@ -106,7 +106,7 @@ def get_templates(years, channels, samples, samples_dir, lepiso_sel, regions_sel
             hist2.axis.Variable(
                 list(range(50, 240, 20)), name="mass_observable", label=r"Higgs reconstructed mass [GeV]", overflow=True
             ),
-            storage="weight",
+            # storage="weight",
         )
         for year in years:  # e.g. 2018, 2017, 2016APV, 2016
             for ch in channels:  # e.g. mu, ele
@@ -162,8 +162,12 @@ def get_templates(years, channels, samples, samples_dir, lepiso_sel, regions_sel
                     if sample_to_use != "Data":
                         event_weight = utils.get_xsecweight(pkl_files, year, sample, False, luminosity)
 
-                    for category, category_sel in categories_sel.items():  # vbf, ggF, etc.
-                        df = data.copy().query(category_sel)
+                    if "pass" in region:  # TODO
+                        print(region, "ha3mel")
+                        for category, category_sel in categories_sel.items():  # vbf, ggF, etc.
+                            df = data.copy().query(category_sel)
+                    else:
+                        df = data.copy()
 
                         # nominal weight
                         if sample_to_use == "Data":  # for data (fill as 1)
