@@ -86,11 +86,10 @@ xs["QCD_Pt_2400to3200"] = 5.237e-03
 xs["QCD_Pt_3200toInf"] = 1.353e-04
 
 # TTbar
-xstt = 6.871e02
-# xstt = 670.3*1.24088
-xs["TTTo2L2Nu"] = xstt * BR_TLeptonic**2
-xs["TTToHadronic"] = xstt * BR_THadronic**2  # pku 380.094
-xs["TTToSemiLeptonic"] = xstt * 2 * BR_TLeptonic * BR_THadronic  # pku 364.351
+# from XSDB
+xs["TTTo2L2Nu"] = 87.314
+xs["TTToHadronic"] = 380.094
+xs["TTToSemiLeptonic"] = 364.351
 
 # Single Top
 xs["ST_s-channel_4f_hadronicDecays"] = 3.549e00 * BR_THadronic
@@ -111,14 +110,15 @@ xs["WJetsToQQ_HT-600to800"] = 5.906e01
 xs["WJetsToQQ_HT-800toInf"] = 2.875e01
 
 # W+jets W(lv)
-xs["WJetsToLNu_HT-70To100"] = 1.270e03
-xs["WJetsToLNu_HT-100To200"] = 1.252e03
-xs["WJetsToLNu_HT-200To400"] = 3.365e02
-xs["WJetsToLNu_HT-400To600"] = 4.512e01
-xs["WJetsToLNu_HT-600To800"] = 1.099e01
-xs["WJetsToLNu_HT-800To1200"] = 4.938e00
-xs["WJetsToLNu_HT-1200To2500"] = 1.155e00
-xs["WJetsToLNu_HT-2500ToInf"] = 2.625e-02
+# from XSDB
+xs["WJetsToLNu_HT-70To100"] = 1264.0
+xs["WJetsToLNu_HT-100To200"] = 1256.0
+xs["WJetsToLNu_HT-200To400"] = 335.5
+xs["WJetsToLNu_HT-400To600"] = 45.25
+xs["WJetsToLNu_HT-600To800"] = 10.97
+xs["WJetsToLNu_HT-800To1200"] = 4.933
+xs["WJetsToLNu_HT-1200To2500"] = 1.16
+xs["WJetsToLNu_HT-2500ToInf"] = 0.02646
 
 # Z+jets Z(qq)
 xs["ZJetsToQQ_HT-200to400"] = 1012.0
@@ -147,18 +147,10 @@ xs["DYJetsToLL_Pt-400To650"] = 4.986e-01
 xs["DYJetsToLL_Pt-650ToInf"] = 4.678e-02
 
 # VV
-xs["WW"] = 7.583e01
-xs["WZ"] = 2.756e01
-xs["ZZ"] = 1.214e01
-
-# VV NLO
-xs["WWTo1L1Nu2Q_NLO"] = 5.090e01
-xs["WWTo4Q_NLO"] = 5.157e01
-xs["WZTo1L1Nu2Q_NLO"] = 9.152e00
-xs["WZTo2Q2L_NLO"] = 6.422e00
-xs["ZZTo2Q2L_NLO"] = 3.705e00
-xs["ZZTo2Q2Nu_NLO"] = 4.498e00
-xs["ZZTo4Q_NLO"] = 3.295e00
+# NLO prediction from papers
+xs["WW"] = 118.7
+xs["WZ"] = 46.74
+xs["ZZ"] = 16.91
 
 # EWK Z
 xs["EWKZ_ZToQQ"] = 9.791e00
