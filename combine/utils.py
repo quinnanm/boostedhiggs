@@ -145,10 +145,14 @@ def blindBins(h: Hist, blind_region: List, blind_samples: List[str] = []):
     if len(blind_samples) >= 1:
         for blind_sample in blind_samples:
             sample_index = np.argmax(np.array(list(h.axes[0])) == blind_sample)
-            h.view(flow=True)[sample_index, :, :, lv:rv] = 0
+            # h.view(flow=True)[sample_index, :, :, lv:rv] = 0
+            h.view(flow=True)[sample_index, :, :, lv:rv].value = 0
+            h.view(flow=True)[sample_index, :, :, lv:rv].variance = 0
 
     else:
-        h.view(flow=True)[:, :, :, lv:rv] = 0
+        # h.view(flow=True)[:, :, :, lv:rv] = 0
+        h.view(flow=True)[:, :, :, lv:rv].value = 0
+        h.view(flow=True)[:, :, :, lv:rv].variance = 0
 
     return h
 
