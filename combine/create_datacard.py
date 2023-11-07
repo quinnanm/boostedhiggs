@@ -236,7 +236,7 @@ def rhalphabet(
                 stype = rl.Sample.SIGNAL if sName in sigs else rl.Sample.BACKGROUND
                 sample = rl.TemplateSample(ch.name + "_" + labels[sName], stype, templ)
 
-                # sample.autoMCStats(lnN=True)
+                sample.autoMCStats(lnN=True)
 
                 # SYSTEMATICS NOT FROM PARQUETS
                 for sys_name, sys_value in systs_dict.items():
@@ -426,7 +426,7 @@ def main(args):
         blind_samples=blind_samples,  # default is [] which means blind all samples
         blind_region=[90, 150],
         wjets_estimation=True,
-        qcd_estimation=True,
+        qcd_estimation=False,
     )
 
     with open(f"{args.outdir}/model_{save_as}.pkl", "wb") as fout:
