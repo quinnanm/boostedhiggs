@@ -7,8 +7,6 @@ Adapted from
     https://github.com/jennetd/vbf-hbb-fits/blob/master/hbb-unblind-ewkz/make_cards.py
     https://github.com/LPC-HH/combine-hh/blob/master/create_datacard.py
     https://github.com/nsmith-/rhalphalib/blob/master/tests/test_rhalphalib.py
-
-Author: Farouk Mokhtar
 """
 
 from __future__ import division, print_function
