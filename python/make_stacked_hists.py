@@ -74,6 +74,11 @@ def make_events_dict(
 
             for sample in os.listdir(samples_dir):
                 # get a combined label to combine samples of the same process
+
+                # if sample == "QCD_Pt_170to300":
+                #     print(f"Skipping sample {sample}")
+                #     continue
+
                 for key in utils.combine_samples:
                     if key in sample:
                         sample_to_use = utils.combine_samples[key]
@@ -81,8 +86,8 @@ def make_events_dict(
                     else:
                         sample_to_use = sample
 
-                # if sample_to_use not in samples:
-                #     print(sample_to_use)
+                # sample_to_use = sample
+                # if "QCD" not in sample:
                 #     continue
 
                 logging.info(f"Finding {sample} samples and should combine them under {sample_to_use}")

@@ -332,7 +332,7 @@ def plot_hists(
                 "elinewidth": 1,
             }
 
-            if blind_region:
+            if blind_region and (var == "rec_higgs_m"):
                 massbins = data.axes[-1].edges
                 lv = int(np.searchsorted(massbins, blind_region[0], "right"))
                 rv = int(np.searchsorted(massbins, blind_region[1], "left") + 1)

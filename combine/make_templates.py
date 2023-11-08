@@ -106,8 +106,9 @@ def get_templates(years, channels, samples, samples_dir, lepiso_sel, regions_sel
             hist2.axis.Variable(
                 list(range(50, 240, 20)), name="mass_observable", label=r"Higgs reconstructed mass [GeV]", overflow=True
             ),
-            storage="weight",
+            storage=hist2.storage.Weight(),
         )
+
         for year in years:  # e.g. 2018, 2017, 2016APV, 2016
             for ch in channels:  # e.g. mu, ele
                 logging.info(f"Processing year {year} and {ch} channel for region {region}")
@@ -116,6 +117,10 @@ def get_templates(years, channels, samples, samples_dir, lepiso_sel, regions_sel
                     luminosity = json.load(f)[ch][year]
 
                 for sample in os.listdir(samples_dir[year]):
+                    if (sample == "QCD_Pt_170to300") and (region == "passHigh"):
+                        print(f"Skipping sample {sample} for region {region}")
+                        continue
+
                     for key in utils.combine_samples:  # get a combined label to combine samples of the same process
                         if key in sample:
                             sample_to_use = utils.combine_samples[key]
@@ -163,13 +168,18 @@ def get_templates(years, channels, samples, samples_dir, lepiso_sel, regions_sel
                         event_weight = utils.get_xsecweight(pkl_files, year, sample, False, luminosity)
 
                     for category, category_sel in categories_sel.items():  # vbf, ggF, etc.
-
                         # df = data.copy().query(category_sel)
                         if "pass" in region:  # TODO
-                            print(region, "ha3mel")
                             df = data.copy().query(category_sel)
                         else:
                             df = data.copy()
+
+                        # TODO: apply MET selection for selected regions
+                        if region != "passHigh":
+                            if ch == "ele":
+                                df = df[df["met_pt"] > 70]
+                            else:
+                                df = df[df["met_pt"] > 50]
 
                         # nominal weight
                         if sample_to_use == "Data":  # for data (fill as 1)

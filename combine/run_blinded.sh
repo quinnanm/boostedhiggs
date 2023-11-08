@@ -113,6 +113,7 @@ significance=$significance dfit=$dfit gofdata=$gofdata goftoys=$goftoys \
 seed=$seed numtoys=$numtoys"
 
 
+
 ####################################################################################################
 # Set up fit arguments
 #
@@ -121,7 +122,7 @@ seed=$seed numtoys=$numtoys"
 ####################################################################################################
 
 dataset=data_obs
-cards_dir="/uscms/home/fmokhtar/nobackup/boostedhiggs/combine/templates/v3/datacards"
+cards_dir="/uscms/home/fmokhtar/nobackup/boostedhiggs/combine/templates/v4/datacards"
 cp ${cards_dir}/testModel.root testModel.root # TODO: avoid this
 CMS_PARAMS_LABEL="CMS_HWW_boosted"
 wsm_snapshot=higgsCombineSnapshot.MultiDimFit.mH125
@@ -174,6 +175,71 @@ chmod +x ${logsdir}
 
 combined_datacard=${outdir}/combined.txt
 ws=${outdir}/workspace.root
+################################################################################# qcd data driven estimation only in wjestCR START
+# ##################################### [fail, wjetsCR] START 1
+# cr="fail${category}"
+# cr2="wjetsCR${category}"
+
+# ccargs="fail=${cards_dir}/${cr}.txt wjetsCR=${cards_dir}/${cr2}.txt"
+
+# echo "cards args=${ccargs}"
+# ##################################### [fail, wjetsCR] END 1
+
+# ##################################### [fail, passBlinded] START 2
+# cr="fail${category}"
+# srb="passBlinded${category}"
+
+# ccargs="fail=${cards_dir}/${cr}.txt passBlinded=${cards_dir}/${srb}.txt"
+
+# echo "cards args=${ccargs}"
+# ##################################### [fail, passBlinded] END 2
+
+# ##################################### [fail, passBlinded, wjetsCR] START 3
+# cr="fail${category}"
+# srb="passBlinded${category}"
+# cr2="wjetsCR${category}"
+
+# ccargs="fail=${cards_dir}/${cr}.txt passBlinded=${cards_dir}/${srb}.txt wjetsCR=${cards_dir}/${cr2}.txt"
+
+# echo "cards args=${ccargs}"
+##################################### [fail, passBlinded, wjetsCR] END 3
+
+# crb="failBlinded${category}"
+# srb="passBlinded${category}"
+# cr2="wjetsCR${category}"
+
+# ccargs="failBlinded=${cards_dir}/${crb}.txt passBlinded=${cards_dir}/${srb}.txt wjetsCR=${cards_dir}/${cr2}.txt"
+
+# # ##################################### simple create_datacardnew.py START
+# cr="fail${category}"
+# crb="failBlinded${category}"
+# sr="pass${category}"
+# srb="passBlinded${category}"
+# cr2="wjetsCR${category}"
+
+# ccargs="fail=${cards_dir}/${cr}.txt failBlinded=${cards_dir}/${crb}.txt pass=${cards_dir}/${sr}.txt passBlinded=${cards_dir}/${srb}.txt wjetsCR=${cards_dir}/${cr2}.txt"
+
+# echo "cards args=${ccargs}"
+
+# # maskunblindedargs="mask_fail=1,mask_pass=1"
+# maskunblindedargs="mask_pass=1"
+# maskblindedargs="mask_failBlinded=1,mask_passBlinded=1"
+# ##################################### simple create_datacardnew.py END
+
+# ####################################################################################################
+# # Combine cards, text2workspace, fit, limits, significances, fitdiagnositcs, GoFs
+# ####################################################################################################
+# # # need to run this for large # of nuisances
+# # # https://cms-talk.web.cern.ch/t/segmentation-fault-in-combine/20735
+
+
+cr="fail${category}"
+srb="passBlinded${category}"
+cr2="wjetsCR${category}"
+
+ccargs="fail=${cards_dir}/${cr}.txt passBlinded=${cards_dir}/${srb}.txt wjetsCR=${cards_dir}/${cr2}.txt"
+
+echo "cards args=${ccargs}"
 
 if [ $workspace = 1 ]; then
     echo "Combining cards"
@@ -192,17 +258,20 @@ fi
 if [ $dfit = 1 ]; then
     echo "Fit Diagnostics"
     combine -M FitDiagnostics -m 125 -d $ws \
-    --setParameters ${maskunblindedargs},${setparamsblinded} \
-    --freezeParameters ${freezeparamsblinded} \
     --cminDefaultMinimizerStrategy 0  --cminDefaultMinimizerTolerance $mintol --X-rtd MINIMIZER_MaxCalls=5000000 \
-    -n Blinded --ignoreCovWarning -v 13 --skipSBFit 2>&1 | tee $logsdir/FitDiagnostics.txt \
-
-    # --saveShapes --saveNormalizations --saveWithUncertainties --saveOverallShapes \
-
-    # echo "Fit Shapes"
-    # PostFitShapesFromWorkspace --dataset $dataset -w $ws --output FitShapes.root \
-    # -m 125 -f fitDiagnosticsBlinded.root:fit_b --postfit --print 2>&1 | tee $logsdir/FitShapes.txt
+    -n Blinded --ignoreCovWarning -v 13 --skipSBFit \
+    --saveShapes --saveNormalizations --saveWithUncertainties --saveOverallShapes 2>&1 | tee $logsdir/FitDiagnostics.txt
 fi
+
+    # echo "Fit Diagnostics"
+    # combine -M FitDiagnostics -m 125 -d $ws \
+    # --setParameters ${maskunblindedargs},${setparamsblinded} \
+    # --freezeParameters ${freezeparamsblinded} \
+    # --cminDefaultMinimizerStrategy 0  --cminDefaultMinimizerTolerance $mintol --X-rtd MINIMIZER_MaxCalls=5000000 \
+    # -n Blinded --ignoreCovWarning -v 13 --skipSBFit \
+    # --saveShapes --saveNormalizations --saveWithUncertainties --saveOverallShapes 2>&1 | tee $logsdir/FitDiagnostics.txt
+
+
 
 # if [ $bfit = 1 ]; then
 #     echo "Blinded background-only fit"
