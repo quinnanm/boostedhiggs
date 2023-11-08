@@ -475,7 +475,7 @@ class HwwProcessor(processor.ProcessorABC):
                 & (n_loose_taus_ele == 0),
                 channel="ele",
             )
-        # self.add_selection(name="dRFatJetLep08", sel=(lep_fj_dr < 0.8))
+        self.add_selection(name="dRFatJetLep08", sel=(lep_fj_dr < 0.8))
 
         # gen-level matching
         signal_mask = None
