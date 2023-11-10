@@ -167,11 +167,11 @@ def add_VJets_kFactors(weights, genpart, dataset, events):
         nB0 = (ak.sum(genjets.hadronFlavour == 5, axis=1) == 0).to_numpy()
         nB1 = (ak.sum(genjets.hadronFlavour == 5, axis=1) == 1).to_numpy()
         nB2 = (ak.sum(genjets.hadronFlavour == 5, axis=1) == 2).to_numpy()
-        qcdcorrnew = np.zeros_like(vpt)
+        qcdcorr = np.zeros_like(vpt)
 
-        qcdcorrnew[nB0] = 1.628 - (1.339 * 1e-3 * vpt[nB0])
-        qcdcorrnew[nB1] = 1.586 - (1.531 * 1e-3 * vpt[nB1])
-        qcdcorrnew[nB2] = 1.440 - (0.925 * 1e-3 * vpt[nB2])
+        qcdcorr[nB0] = 1.628 - (1.339 * 1e-3 * vpt[nB0])
+        qcdcorr[nB1] = 1.586 - (1.531 * 1e-3 * vpt[nB1])
+        qcdcorr[nB2] = 1.440 - (0.925 * 1e-3 * vpt[nB2])
 
         ewkcorr = vjets_kfactors["W_FixedOrderComponent"]  # keep
         add_systs(wsysts, qcdcorr, ewkcorr, vpt)
