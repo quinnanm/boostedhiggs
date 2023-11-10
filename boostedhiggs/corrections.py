@@ -104,7 +104,7 @@ def get_vpt(genpart, check_offshell=False):
     return np.array(ak.fill_none(boson.pt, 0.0))
 
 
-def add_VJets_kFactors(weights, genpart, dataset):
+def add_VJets_kFactors(weights, genpart, dataset, events):
     """Revised version of add_VJets_NLOkFactor, for both NLO EW and ~NNLO QCD"""
 
     common_systs = [
@@ -129,7 +129,7 @@ def add_VJets_kFactors(weights, genpart, dataset):
 
     def add_systs(systlist, qcdcorr, ewkcorr, vpt):
         ewknom = ewkcorr.evaluate("nominal", vpt)
-        weights.add("vjets_nominal", qcdcorr * ewknom if qcdcorr is not None else ewknom)
+        weights.add("vjets_nominal", qcdcorr * ewknom if qcdcorr is not None else ewknom)  # you multiply
         ones = np.ones_like(vpt)
         for syst in systlist:
             weights.add(
@@ -153,8 +153,27 @@ def add_VJets_kFactors(weights, genpart, dataset):
 
     elif "WJetsToQQ_HT" in dataset or "WJetsToLNu" in dataset:
         vpt = get_vpt(genpart)
-        qcdcorr = vjets_kfactors["ULW_MLMtoFXFX"].evaluate(vpt)
-        ewkcorr = vjets_kfactors["W_FixedOrderComponent"]
+        # qcdcorr = vjets_kfactors["ULW_MLMtoFXFX"].evaluate(vpt)  # replace
+
+        # added by farouk
+        """
+        from: https://cms.cern.ch/iCMS/jsp/db_notes/noteInfo.jsp?cmsnoteid=CMS%20AN-2019/229
+        Bhadrons       Systematic
+        0             1.628±0.005 - (1.339±0.020)·10−3 pT(V)
+        1             1.586±0.027 - (1.531±0.112)·10−3 pT(V)
+        2             1.440±0.048 - (0.925±0.203)·10−3 pT(V)
+        """
+        genjets = events.GenJet
+        nB0 = (ak.sum(genjets.hadronFlavour == 5, axis=1) == 0).to_numpy()
+        nB1 = (ak.sum(genjets.hadronFlavour == 5, axis=1) == 1).to_numpy()
+        nB2 = (ak.sum(genjets.hadronFlavour == 5, axis=1) == 2).to_numpy()
+        qcdcorrnew = np.zeros_like(vpt)
+
+        qcdcorrnew[nB0] = 1.628 - (1.339 * 1e-3 * vpt[nB0])
+        qcdcorrnew[nB1] = 1.586 - (1.531 * 1e-3 * vpt[nB1])
+        qcdcorrnew[nB2] = 1.440 - (0.925 * 1e-3 * vpt[nB2])
+
+        ewkcorr = vjets_kfactors["W_FixedOrderComponent"]  # keep
         add_systs(wsysts, qcdcorr, ewkcorr, vpt)
 
 

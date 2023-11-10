@@ -528,7 +528,7 @@ class HwwProcessor(processor.ProcessorABC):
                             **get_btag_weights_farouk(self._year, events.Jet, ak4_jet_selector_no_btag, veto=veto_, wp=wp_),
                         }
 
-                add_VJets_kFactors(self.weights[ch], events.GenPart, dataset)
+                add_VJets_kFactors(self.weights[ch], events.GenPart, dataset, events)
 
                 if "HToWW" in dataset and self._region == "signal":
                     add_HiggsEW_kFactors(self.weights[ch], events.GenPart, dataset)
