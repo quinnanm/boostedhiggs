@@ -164,7 +164,7 @@ def add_VJets_kFactors(weights, genpart, dataset, events):
         2             1.440±0.048 - (0.925±0.203)·10−3 pT(V)
         """
         genjets = events.GenJet
-        goodgenjets = genjets[(genjets.pt > 25.0) & (np.abs(genjets.eta) < 2.4)]
+        goodgenjets = genjets[(genjets.pt > 20.0) & (np.abs(genjets.eta) < 2.4)]
 
         nB0 = (ak.sum(goodgenjets.hadronFlavour == 5, axis=1) == 0).to_numpy()
         nB1 = (ak.sum(goodgenjets.hadronFlavour == 5, axis=1) == 1).to_numpy()
