@@ -72,27 +72,23 @@ def make_events_dict(
             with open("../fileset/luminosity.json") as f:
                 luminosity = json.load(f)[ch][year]
 
-            condor_dir = os.listdir(samples_dir)
+            for sample in os.listdir(samples_dir):
+                # get a combined label to combine samples of the same process
 
-            for sample in condor_dir:
-                if sample == "DYJetsToLL_M-10to50":
-                    continue  # because tagger didnt run for it for one of the years
-
-                # # get a combined label to combine samples of the same process
-                # for key in utils.combine_samples:
-                #     if key in sample:
-                #         sample_to_use = utils.combine_samples[key]
-                #         break
-                #     else:
-                #         sample_to_use = sample
-
-                # if sample_to_use not in samples:
-                #     print(sample_to_use)
+                # if sample == "QCD_Pt_170to300":
+                #     print(f"Skipping sample {sample}")
                 #     continue
 
-                if "QCD" not in sample:
-                    continue
-                sample_to_use = sample
+                for key in utils.combine_samples:
+                    if key in sample:
+                        sample_to_use = utils.combine_samples[key]
+                        break
+                    else:
+                        sample_to_use = sample
+
+                # sample_to_use = sample
+                # if "QCD" not in sample:
+                #     continue
 
                 logging.info(f"Finding {sample} samples and should combine them under {sample_to_use}")
 

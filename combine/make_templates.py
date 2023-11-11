@@ -100,13 +100,15 @@ def get_templates(years, channels, samples, samples_dir, lepiso_sel, regions_sel
     hists = {}
     for region, region_sel in regions_sel.items():  # e.g. pass, fail, top control region, etc.
         hists[region] = hist2.Hist(
-            hist2.axis.StrCategory([], name="samples", growth=True),
-            hist2.axis.StrCategory([], name="systematics", growth=True),
-            hist2.axis.StrCategory([], name="categories", growth=True),
+            hist2.axis.StrCategory([], name="Sample", growth=True),
+            hist2.axis.StrCategory([], name="Systematic", growth=True),
+            hist2.axis.StrCategory([], name="Category", growth=True),
             hist2.axis.Variable(
                 list(range(50, 240, 20)), name="mass_observable", label=r"Higgs reconstructed mass [GeV]", overflow=True
             ),
+            storage=hist2.storage.Weight(),
         )
+
         for year in years:  # e.g. 2018, 2017, 2016APV, 2016
             for ch in channels:  # e.g. mu, ele
                 logging.info(f"Processing year {year} and {ch} channel for region {region}")
@@ -115,6 +117,10 @@ def get_templates(years, channels, samples, samples_dir, lepiso_sel, regions_sel
                     luminosity = json.load(f)[ch][year]
 
                 for sample in os.listdir(samples_dir[year]):
+                    if (sample == "QCD_Pt_170to300") and (region == "passHigh"):
+                        print(f"Skipping sample {sample} for region {region}")
+                        continue
+
                     for key in utils.combine_samples:  # get a combined label to combine samples of the same process
                         if key in sample:
                             sample_to_use = utils.combine_samples[key]
@@ -159,26 +165,37 @@ def get_templates(years, channels, samples, samples_dir, lepiso_sel, regions_sel
 
                     # get event_weight
                     if sample_to_use != "Data":
-                        event_weight = utils.get_xsecweight(pkl_files, year, sample, True, luminosity)
+                        event_weight = utils.get_xsecweight(pkl_files, year, sample, False, luminosity)
 
                     for category, category_sel in categories_sel.items():  # vbf, ggF, etc.
-                        df = data.copy().query(category_sel)
+                        # df = data.copy().query(category_sel)
+                        if "pass" in region:  # TODO
+                            df = data.copy().query(category_sel)
+                        else:
+                            df = data.copy()
+
+                        # TODO: apply MET selection for selected regions
+                        if region != "passHigh":
+                            if ch == "ele":
+                                df = df[df["met_pt"] > 70]
+                            else:
+                                df = df[df["met_pt"] > 50]
 
                         # nominal weight
                         if sample_to_use == "Data":  # for data (fill as 1)
                             hists[region].fill(
-                                samples=sample_to_use,
-                                systematics="nominal",
-                                categories=category,
+                                Sample=sample_to_use,
+                                Systematic="nominal",
+                                Category=category,
                                 mass_observable=df["rec_higgs_m"],
                                 weight=np.ones_like(df["fj_pt"]),
                             )
                         else:
                             nominal = df[f"weight_{ch}"] * event_weight
                             hists[region].fill(
-                                samples=sample_to_use,
-                                systematics="nominal",
-                                categories=category,
+                                Sample=sample_to_use,
+                                Systematic="nominal",
+                                Category=category,
                                 mass_observable=df["rec_higgs_m"],
                                 weight=nominal,
                             )
@@ -187,16 +204,16 @@ def get_templates(years, channels, samples, samples_dir, lepiso_sel, regions_sel
                             # up and down weights
                             if sample_to_use == "Data":  # for data (fill as 1)
                                 hists[region].fill(
-                                    samples=sample_to_use,
-                                    systematics=f"{weight}Up",
-                                    categories=category,
+                                    Sample=sample_to_use,
+                                    Systematic=f"{weight}Up",
+                                    Category=category,
                                     mass_observable=df["rec_higgs_m"],
                                     weight=np.ones_like(df["fj_pt"]),
                                 )
                                 hists[region].fill(
-                                    samples=sample_to_use,
-                                    systematics=f"{weight}Down",
-                                    categories=category,
+                                    Sample=sample_to_use,
+                                    Systematic=f"{weight}Down",
+                                    Category=category,
                                     mass_observable=df["rec_higgs_m"],
                                     weight=np.ones_like(df["fj_pt"]),
                                 )
@@ -208,9 +225,9 @@ def get_templates(years, channels, samples, samples_dir, lepiso_sel, regions_sel
                                     syst = nominal
 
                                 hists[region].fill(
-                                    samples=sample_to_use,
-                                    systematics=f"{weight}Up",
-                                    categories=category,
+                                    Sample=sample_to_use,
+                                    Systematic=f"{weight}Up",
+                                    Category=category,
                                     mass_observable=df["rec_higgs_m"],
                                     weight=syst,
                                 )
@@ -222,9 +239,9 @@ def get_templates(years, channels, samples, samples_dir, lepiso_sel, regions_sel
                                     syst = nominal
 
                                 hists[region].fill(
-                                    samples=sample_to_use,
-                                    systematics=f"{weight}Down",
-                                    categories=category,
+                                    Sample=sample_to_use,
+                                    Systematic=f"{weight}Down",
+                                    Category=category,
                                     mass_observable=df["rec_higgs_m"],
                                     weight=syst,
                                 )

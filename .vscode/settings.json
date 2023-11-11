@@ -2,11 +2,6 @@
     "workbench.colorCustomizations": {
         "titleBar.activeBackground": "#08070799"
     },
-    "python.linting.enabled": true,
-    "python.formatting.provider": "black",
-    "python.formatting.blackArgs": [
-        "--line-length=125"
-    ],
     "flake8.args": [
         "--max-line-length=125",
         "--extend-ignore=E203,E402"

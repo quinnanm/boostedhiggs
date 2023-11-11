@@ -29,7 +29,7 @@ combine_samples = {
     "VBFHToWWToLNuQQ_M-125_withDipoleRecoil": "VBF",
     "ttHToNonbb_M125": "ttH",
     # bkg
-    # "QCD_Pt": "QCD",
+    "QCD_Pt": "QCD",
     "DYJets": "DYJets",
     "WJetsToLNu_": "WJetsLNu",
     "JetsToQQ": "WZQQ",
@@ -164,7 +164,9 @@ axis_dict = {
     "mu_highPtId": hist2.axis.Regular(5, 0, 5, name="var", label="Muon high pT ID", overflow=True),
     "fj_pt": hist2.axis.Regular(30, 200, 600, name="var", label=r"Jet $p_T$ [GeV]", overflow=True),
     "fj_msoftdrop": hist2.axis.Regular(35, 20, 250, name="var", label=r"Jet $m_{sd}$ [GeV]", overflow=True),
-    "rec_higgs_m": hist2.axis.Regular(20, 50, 250, name="var", label=r"Higgs reconstructed mass [GeV]", overflow=True),
+    "rec_higgs_m": hist2.axis.Variable(
+        list(range(50, 240, 20)), name="var", label=r"Higgs reconstructed mass [GeV]", overflow=True
+    ),
     "rec_higgs_pt": hist2.axis.Regular(30, 0, 1000, name="var", label=r"Higgs reconstructed $p_T$ [GeV]", overflow=True),
     "fj_pt_over_lep_pt": hist2.axis.Regular(35, 1, 10, name="var", label=r"$p_T$(Jet) / $p_T$(Lepton)", overflow=True),
     "rec_higgs_pt_over_lep_pt": hist2.axis.Regular(
@@ -197,7 +199,19 @@ axis_dict = {
 
 
 def plot_hists(
-    years, channels, hists, vars_to_plot, add_data, logy, add_soverb, only_sig, mult, outpath, text_="", blind_region=None
+    years,
+    channels,
+    hists,
+    vars_to_plot,
+    add_data,
+    logy,
+    add_soverb,
+    only_sig,
+    mult,
+    outpath,
+    text_="",
+    blind_region=None,
+    save_as=None,
 ):
     # luminosity
     luminosity = 0
@@ -318,7 +332,7 @@ def plot_hists(
                 "elinewidth": 1,
             }
 
-            if blind_region:
+            if blind_region and (var == "rec_higgs_m"):
                 massbins = data.axes[-1].edges
                 lv = int(np.searchsorted(massbins, blind_region[0], "right"))
                 rv = int(np.searchsorted(massbins, blind_region[1], "left") + 1)
@@ -511,4 +525,7 @@ def plot_hists(
         if not os.path.exists(outpath):
             os.makedirs(outpath)
 
-        plt.savefig(f"{outpath}/stacked_hists_{var}.pdf", bbox_inches="tight")
+        if save_as:
+            plt.savefig(f"{outpath}/{save_as}_stacked_hists_{var}.pdf", bbox_inches="tight")
+        else:
+            plt.savefig(f"{outpath}/stacked_hists_{var}.pdf", bbox_inches="tight")

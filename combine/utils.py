@@ -6,15 +6,9 @@ import pickle as pkl
 import warnings
 from typing import List
 
-import matplotlib.pyplot as plt
-import mplhep as hep
 import numpy as np
-import onnx
-import onnxruntime as ort
 import scipy
 from hist import Hist
-
-plt.style.use(hep.style.CMS)
 
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
@@ -128,8 +122,9 @@ def shape_to_num(var, nom, clip=1.5):
 
 
 def get_template(h, sample, category):
-    massbins = h.axes["mass_observable"].edges
-    return (h[{"samples": sample, "systematics": "nominal", "categories": category}].values(), massbins, "mass_observable")
+    # massbins = h.axes["mass_observable"].edges
+    # return (h[{"Sample": sample, "Systematic": "nominal", "Category": category}].values(), massbins, "mass_observable")
+    return h[{"Sample": sample, "Systematic": "nominal", "Category": category}]
 
 
 def blindBins(h: Hist, blind_region: List, blind_samples: List[str] = []):
@@ -147,19 +142,25 @@ def blindBins(h: Hist, blind_region: List, blind_samples: List[str] = []):
 
     lv = int(np.searchsorted(massbins, blind_region[0], "right"))
     rv = int(np.searchsorted(massbins, blind_region[1], "left") + 1)
-
-    if blind_samples:
+    if len(blind_samples) >= 1:
         for blind_sample in blind_samples:
             sample_index = np.argmax(np.array(list(h.axes[0])) == blind_sample)
-            h.view(flow=True)[sample_index, :, :, lv:rv] = 0
+            # h.view(flow=True)[sample_index, :, :, lv:rv] = 0
+            h.view(flow=True)[sample_index, :, :, lv:rv].value = 0
+            h.view(flow=True)[sample_index, :, :, lv:rv].variance = 0
 
     else:
-        h.view(flow=True)[:, :, :, lv:rv] = 0
+        # h.view(flow=True)[:, :, :, lv:rv] = 0
+        h.view(flow=True)[:, :, :, lv:rv].value = 0
+        h.view(flow=True)[:, :, :, lv:rv].variance = 0
 
     return h
 
 
 def get_finetuned_score(data, model_path):
+    import onnx
+    import onnxruntime as ort
+
     input_dict = {
         "highlevel": data.loc[:, "fj_ParT_hidNeuron000":"fj_ParT_hidNeuron127"].values.astype("float32"),
     }

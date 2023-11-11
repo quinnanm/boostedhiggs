@@ -12,7 +12,7 @@ import ROOT
 import scipy.stats
 
 rl.util.install_roofit_helpers()
-rl.ParametericSample.PreferRooParametricHist = False
+rl.ParametericSample.PreferRooParametricHist = True
 
 
 def main(args):
@@ -39,7 +39,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # python produce_datacard.py --years 2016,2016APV,2017,2018 --channels mu --outdir templates/v11
+    # python produce_datacard.py --years 2016,2016APV,2017,2018 --channels ele,mu --outdir templates/v1
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--years", dest="years", default="2017", help="years separated by commas")
