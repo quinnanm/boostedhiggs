@@ -54,7 +54,7 @@ def get_pid_mask(
     """
     gen_pdgids = abs(genparts.pdgId)
 
-    if type(pdgids) == list:
+    if type(pdgids) is list:
         mask = gen_pdgids == pdgids[0]
         for pdgid in pdgids[1:]:
             mask = mask | (gen_pdgids == pdgid)
@@ -86,7 +86,7 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID):
 
     if dau_pdgid == W_PDGID:
         children_mask = get_pid_mask(matched_higgs_children, [W_PDGID], byall=False)
-        is_hww_matched = ak.any(children_mask, axis=1)
+        is_hww = ak.any(children_mask, axis=1)
 
         # order by mass, select lower mass child as V* and higher as V
         matched_higgs_children = matched_higgs_children[children_mask]
@@ -149,7 +149,8 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID):
             "fj_H_VV_taunuqq": to_label((num_taus == 1) & (num_quarks == 2) & (num_leptons == 1)),
             "fj_H_VV_isVlepton": iswlepton,
             "fj_H_VV_isVstarlepton": iswstarlepton,
-            "fj_H_VV_isMatched": is_hww_matched,
+            "fj_H_VV": is_hww,
+            "fj_H_VV_isMatched": matched_higgs_mask,
             "gen_Vlep_pt": gen_lepton.pt,
             # "genlep_dR_lep": lepton.delta_r(gen_lepton)
             "fj_genRes_mass": matched_higgs.mass,
@@ -215,7 +216,7 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID):
 
         genVars = {**genVars, **genHTTVars}
 
-    return genVars, matched_higgs_mask
+    return genVars, is_hww
 
 
 def match_V(genparts: GenParticleArray, fatjet: FatJetArray):
