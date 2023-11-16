@@ -56,6 +56,7 @@ bkgs = [
     "WJetsLNu",
     "SingleTop",
     "DYJets",
+    "QCD",
 ]
 
 sigs = [

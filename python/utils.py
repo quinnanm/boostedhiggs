@@ -119,10 +119,14 @@ color_by_sample = {
 }
 
 plot_labels = {
-    "ggF": "ggH(WW)-Pt200",
-    "VH": "VH(WW)",
-    "VBF": r"VBFH(WW) $(qq\ell\nu)$",
-    "ttH": "ttH(WW)",
+    # "ggF": "ggH(WW)-Pt200",
+    "ggF": "ggH",
+    "VH": "VH",
+    # "VH": "VH(WW)",
+    # "VBF": r"VBFH(WW) $(qq\ell\nu)$",
+    "VBF": r"VBF",
+    # "ttH": "ttH(WW)",
+    "ttH": "ttH",
     "DYJets": r"Z$(\ell\ell)$+jets",
     "QCD": "Multijet",
     "Diboson": "VV",
@@ -162,7 +166,7 @@ axis_dict = {
     "mu_mvaId": hist2.axis.Variable([0, 1, 2, 3, 4, 5], name="var", label="Muon MVAID", overflow=True),
     "ele_highPtId": hist2.axis.Regular(5, 0, 5, name="var", label="Electron high pT ID", overflow=True),
     "mu_highPtId": hist2.axis.Regular(5, 0, 5, name="var", label="Muon high pT ID", overflow=True),
-    "fj_pt": hist2.axis.Regular(30, 200, 600, name="var", label=r"Jet $p_T$ [GeV]", overflow=True),
+    "fj_pt": hist2.axis.Regular(30, 300, 600, name="var", label=r"Jet $p_T$ [GeV]", overflow=True),
     "fj_msoftdrop": hist2.axis.Regular(35, 20, 250, name="var", label=r"Jet $m_{sd}$ [GeV]", overflow=True),
     "rec_higgs_m": hist2.axis.Variable(
         list(range(50, 240, 20)), name="var", label=r"Higgs reconstructed mass [GeV]", overflow=True
@@ -192,7 +196,7 @@ axis_dict = {
     ),
     "nj": hist2.axis.Regular(40, 0, 10, name="var", label="number of jets outside candidate jet", overflow=True),
     "inclusive_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
-    "fj_ParT_score_finetuned_v2_1_12": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
+    "fj_ParT_score_finetuned": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
     "fj_ParT_inclusive_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
     "fj_ParT_all_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
 }
@@ -348,6 +352,7 @@ def plot_hists(
                 yerr=True,
                 label="Data",
                 **data_err_opts,
+                flow="none",
             )
 
             if len(bkg) > 0:
@@ -366,6 +371,7 @@ def plot_hists(
                     histtype="errorbar",
                     color="k",
                     capsize=4,
+                    flow="none",
                 )
 
                 rax.axhline(1, ls="--", color="k")
@@ -383,6 +389,7 @@ def plot_hists(
                 histtype="fill",
                 label=[plot_labels[bkg_label] for bkg_label in bkg_labels],
                 color=[color_by_sample[bkg_label] for bkg_label in bkg_labels],
+                flow="none",
             )
             ax.stairs(
                 values=tot.values() + tot_err,
@@ -392,7 +399,7 @@ def plot_hists(
                 label="Stat. unc.",
             )
 
-        ax.text(0.5, 0.9, text_, fontsize=14, transform=ax.transAxes, weight="bold")
+        # ax.text(0.5, 0.9, text_, fontsize=14, transform=ax.transAxes, weight="bold")
 
         # plot the signal (times 10)
         if len(signal) > 0:
@@ -407,6 +414,7 @@ def plot_hists(
                     label=lab_sig_mult,
                     linewidth=3,
                     color=color_by_sample[signal_labels[i]],
+                    flow="none",
                 )
 
                 if tot_signal is None:
@@ -415,7 +423,7 @@ def plot_hists(
                     tot_signal = tot_signal + signal[i]
 
             # plot the total signal (w/o scaling)
-            hep.histplot(tot_signal, ax=ax, label="ggF+VBF+VH+ttH", linewidth=3, color="tab:red")
+            hep.histplot(tot_signal, ax=ax, label="ggF+VBF+VH+ttH", linewidth=3, color="tab:red", flow="none")
             # add MC stat errors
             ax.stairs(
                 values=tot_signal.values() + np.sqrt(tot_signal.values()),
@@ -436,6 +444,7 @@ def plot_hists(
                     ax=sax,
                     linewidth=3,
                     color="tab:red",
+                    flow="none",
                 )
 
                 # integrate soverb in a given range for fj_minus_lep_mass
@@ -450,7 +459,7 @@ def plot_hists(
                     b = np.sqrt(tot_val[condition].sum())  # sum/integrate bkg counts in the range and take sqrt
 
                     soverb_integrated = round((s / b).item(), 2)
-                    sax.legend(title=f"S/sqrt(B) (in 0-150)={soverb_integrated:.2f}")
+                    # sax.legend(title=f"S/sqrt(B) (in 0-150)={soverb_integrated:.2f}")
                 # integrate soverb in a given range for rec_higgs_m
                 if var == "rec_higgs_m":
                     bin_array = tot_signal.axes[0].edges[:-1]  # remove last element since bins have one extra element
@@ -463,7 +472,13 @@ def plot_hists(
                     b = np.sqrt(tot_val[condition].sum())  # sum/integrate bkg counts in the range and take sqrt
 
                     soverb_integrated = round((s / b).item(), 2)
-                    sax.legend(title=f"S/sqrt(B) (in {range_min}-{range_max})={soverb_integrated:.2f}")
+                    # sax.legend(title=f"S/sqrt(B) (in {range_min}-{range_max})={soverb_integrated:.2f}")
+                sax.set_ylim(0, 1.2)
+                sax.set_yticks([0, 0.5, 1.0])
+                # sax.set_ylim(0, 0.5)
+                # sax.set_yticks([0, 0.3])
+                # sax.set_ylim(0, 0.5)
+                # sax.set_yticks([0, 0.2, 0.4])
 
         ax.set_ylabel("Events")
         if sax is not None:
@@ -471,14 +486,14 @@ def plot_hists(
             if rax is not None:
                 rax.set_xlabel("")
                 rax.set_ylabel("Data/MC", fontsize=20)
-            sax.set_ylabel(r"S/$\sqrt{B}$", fontsize=20)
+            sax.set_ylabel(r"S/$\sqrt{B}$", fontsize=20, y=0.4, labelpad=0)
             sax.set_xlabel(f"{h.axes[-1].label}")  # assumes the variable to be plotted is at the last axis
 
         elif rax is not None:
             ax.set_xlabel("")
             rax.set_xlabel(f"{h.axes[-1].label}")  # assumes the variable to be plotted is at the last axis
 
-            rax.set_ylabel("Data/MC", fontsize=20)
+            rax.set_ylabel("Data/MC", fontsize=20, labelpad=0)
 
         # get handles and labels of legend
         handles, labels = ax.get_legend_handles_labels()
@@ -497,22 +512,36 @@ def plot_hists(
         hand = [handles[-1]] + [handles[i] for i in order] + handles[len(bkg) : -1]
         lab = [labels[-1]] + [labels[i] for i in order] + labels[len(bkg) : -1]
 
-        if len(channels) == 2:
-            ax.legend(
-                [hand[idx] for idx in range(len(hand))],
-                [lab[idx] for idx in range(len(lab))],
-                bbox_to_anchor=(1.05, 1),
-                loc="upper left",
-                title="Semi-Leptonic Channel",
-            )
-        else:
-            ax.legend(
-                [hand[idx] for idx in range(len(hand))],
-                [lab[idx] for idx in range(len(lab))],
-                bbox_to_anchor=(1.05, 1),
-                loc="upper left",
-                title=f"{label_by_ch[ch]} Channel",
-            )
+        if len(channels) == 1:
+            if channels[0] == "ele":
+                text_ += " electron"
+            else:
+                text_ += " muon"
+
+        ax.legend(
+            [hand[idx] for idx in range(len(hand))],
+            [lab[idx] for idx in range(len(lab))],
+            bbox_to_anchor=(1.05, 1),
+            loc="upper left",
+            title=text_,
+        )
+
+        # if len(channels) == 2:
+        #     ax.legend(
+        #         [hand[idx] for idx in range(len(hand))],
+        #         [lab[idx] for idx in range(len(lab))],
+        #         bbox_to_anchor=(1.05, 1),
+        #         loc="upper left",
+        #         title="Semi-Leptonic Channel",
+        #     )
+        # else:
+        #     ax.legend(
+        #         [hand[idx] for idx in range(len(hand))],
+        #         [lab[idx] for idx in range(len(lab))],
+        #         bbox_to_anchor=(1.05, 1),
+        #         loc="upper left",
+        #         title=f"{label_by_ch[ch]} Channel",
+        #     )
 
         if logy:
             ax.set_yscale("log")

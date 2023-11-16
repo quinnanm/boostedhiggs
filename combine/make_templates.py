@@ -97,6 +97,23 @@ def get_templates(years, channels, samples, samples_dir, lepiso_sel, regions_sel
         },
     }
 
+    presel = {
+        "mu": {
+            "lep_fj_dr003": "( ( lep_fj_dr>0.03) )",
+            "lep_fj_dr08": "( ( lep_fj_dr<0.8) )",
+            "fj_pt300": "( ( fj_pt>300) )",
+            "dphi<1.57": "(abs_met_fj_dphi<1.57)",
+            "tagger>0.5": "fj_ParT_score_finetuned>0.5",
+        },
+        "ele": {
+            "lep_fj_dr003": "( ( lep_fj_dr>0.03) )",
+            "lep_fj_dr08": "( ( lep_fj_dr<0.8) )",
+            "fj_pt300": "( ( fj_pt>300) )",
+            "dphi<1.57": "(abs_met_fj_dphi<1.57)",
+            "tagger>0.5": "fj_ParT_score_finetuned>0.5",
+        },
+    }
+
     hists = {}
     for region, region_sel in regions_sel.items():  # e.g. pass, fail, top control region, etc.
         hists[region] = hist2.Hist(
@@ -117,7 +134,7 @@ def get_templates(years, channels, samples, samples_dir, lepiso_sel, regions_sel
                     luminosity = json.load(f)[ch][year]
 
                 for sample in os.listdir(samples_dir[year]):
-                    if (sample == "QCD_Pt_170to300") and (region == "passHigh"):
+                    if sample == "QCD_Pt_170to300":
                         print(f"Skipping sample {sample} for region {region}")
                         continue
 
@@ -158,6 +175,13 @@ def get_templates(years, channels, samples, samples_dir, lepiso_sel, regions_sel
                     # drop hidNeurons which are not needed anymore
                     data = data[data.columns.drop(list(data.filter(regex="hidNeuron")))]
 
+                    data["abs_met_fj_dphi"] = np.abs(data["met_fj_dphi"])
+
+                    # apply selection
+                    for selection in presel[ch]:
+                        logging.info(f"Applying {selection} selection on {len(data)} events")
+                        data = data.query(presel[ch][selection])
+
                     # apply pass/fail selections
                     logging.info(f"Applying {region} selection on {len(data)} events")
                     data = data.query(region_sel)
@@ -167,19 +191,15 @@ def get_templates(years, channels, samples, samples_dir, lepiso_sel, regions_sel
                     if sample_to_use != "Data":
                         event_weight = utils.get_xsecweight(pkl_files, year, sample, False, luminosity)
 
-                    for category, category_sel in categories_sel.items():  # vbf, ggF, etc.
-                        # df = data.copy().query(category_sel)
-                        if "pass" in region:  # TODO
-                            df = data.copy().query(category_sel)
-                        else:
-                            df = data.copy()
+                    if ("SR2" in region) and (sample == "DYJets"):  # literally two events out of 25k
+                        threshold = 100
+                        data = data[data["event_weight"] < threshold]
 
-                        # TODO: apply MET selection for selected regions
-                        if region != "passHigh":
-                            if ch == "ele":
-                                df = df[df["met_pt"] > 70]
-                            else:
-                                df = df[df["met_pt"] > 50]
+                    for category, category_sel in categories_sel.items():  # vbf, ggF, etc.
+                        if "CR" in region:
+                            df = data.copy()  # don't apply category selections for CR
+                        else:
+                            df = data.copy().query(category_sel)
 
                         # nominal weight
                         if sample_to_use == "Data":  # for data (fill as 1)

@@ -170,15 +170,11 @@ def systs_from_parquets(years):
     return systs_from_parquets
 
 
-def rhalphabet(
-    hists_templates,
-    years,
-    channels,
-    blind_samples,
-    blind_region,
-    wjets_estimation,
-    qcd_estimation,
-):
+def create_datacard(hists_templates, years, channels, blind_samples, blind_region, wjets_estimation, top_estimation):
+    if wjets_estimation:  # will estimate from data in the end
+        samples.remove("WJetsLNu")
+        samples.remove("QCD")
+
     # get the LUMI (must average lumi over the lepton channels provided)
     LUMI = {}
     for year in years:
@@ -220,7 +216,7 @@ def rhalphabet(
 
     # fill datacard with systematics and rates
     for category in categories:
-        for region in ["wjetsCR", "fail", "pass", "passBlinded", "failBlinded"]:
+        for region in ["SR1", "SR1Blinded", "SR2", "SR2Blinded", "WJetsCR", "WJetsCRBlinded", "TopCR"]:
             if "Blinded" in region:
                 h = blindBins(hists_templates[region.replace("Blinded", "")], blind_region, blind_samples)
             else:
@@ -283,8 +279,8 @@ def rhalphabet(
             # elif "passBlinded" in ChName:
             #     wjetspass[category] = ch["wjets"]
 
-        if qcd_estimation:  # qcd data-driven estimation per category
-            qcd_data_estimation(
+        if wjets_estimation:  # data-driven estimation per category
+            rhalphabet(
                 model,
                 hists_templates,
                 category,
@@ -292,8 +288,8 @@ def rhalphabet(
                 shape_var,
                 blind_region,
                 blind_samples,
-                from_region="fail",
-                to_region="wjetsCR",
+                from_region="WJetsCRBlinded",
+                to_region="SR1Blinded",
             )
 
     # if wjets_estimation:
@@ -317,7 +313,7 @@ def rhalphabet(
     return model
 
 
-def qcd_data_estimation(
+def rhalphabet(
     model, hists_templates, category, m_obs, shape_var, blind_region, blind_samples, from_region="fail", to_region="pass"
 ):
     if "Blinded" in from_region:
@@ -348,10 +344,17 @@ def qcd_data_estimation(
         initial_qcd -= sample.getExpectation(nominal=True)
 
     # get the transfer factor
-    qcd_eff = (
+    num = (
         h_pass[{"Category": category, "Sample": "QCD", "Systematic": "nominal"}].sum()
-        / h_fail[{"Category": category, "Sample": "QCD", "Systematic": "nominal"}].sum()
+        + h_pass[{"Category": category, "Sample": "WJetsLNu", "Systematic": "nominal"}].sum()
     )
+
+    den = (
+        h_fail[{"Category": category, "Sample": "QCD", "Systematic": "nominal"}].sum()
+        + h_fail[{"Category": category, "Sample": "WJetsLNu", "Systematic": "nominal"}].sum()
+    )
+
+    qcd_eff = num / den
 
     # qcd params
     qcd_params = np.array(
@@ -419,14 +422,14 @@ def main(args):
     with open(f"{args.outdir}/hists_templates_{save_as}.pkl", "rb") as f:
         hists_templates = pkl.load(f)
 
-    model = rhalphabet(
+    model = create_datacard(
         hists_templates,
         years,
         channels,
         blind_samples=blind_samples,  # default is [] which means blind all samples
         blind_region=[90, 150],
         wjets_estimation=True,
-        qcd_estimation=False,
+        top_estimation=True,
     )
 
     with open(f"{args.outdir}/model_{save_as}.pkl", "wb") as fout:
