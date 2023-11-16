@@ -127,14 +127,42 @@ cp ${cards_dir}/testModel.root testModel.root # TODO: avoid this
 CMS_PARAMS_LABEL="CMS_HWW_boosted"
 wsm_snapshot=higgsCombineSnapshot.MultiDimFit.mH125
 
+category="ggFpt200to300"
+cr="fail${category}"
+sr="pass${category}"
+cr2="wjetsCR${category}"    # needed to constraint wjets in pass region
+
+ccargs="fail=${cards_dir}/${cr}.txt pass=${cards_dir}/${sr}.txt passBlinded=${cards_dir}/${sr}Blinded.txt wjetsCR=${cards_dir}/${cr2}.txt"
+
+# params WITH SAME NAME across channels in combine cards are tied up
+maskunblindedargs="mask_${sr}=1"
+maskblindedargs="mask_${sr}Blinded=1"
+
+maskblindedargs=${maskblindedargs%,}
+maskunblindedargs=${maskunblindedargs%,}
+echo "cards args=${ccargs}"
+
+# freeze qcd params in blinded bins
+setparamsblinded=""
+freezeparamsblinded=""
+for bin in {2..5}
+do
+    setparamsblinded+="${CMS_PARAMS_LABEL}_tf_dataResidual_pass_Bin${bin}=0,"
+    freezeparamsblinded+="${CMS_PARAMS_LABEL}_tf_dataResidual_pass_Bin${bin},"
+
+    setparamsblinded+="${CMS_PARAMS_LABEL}_tf_dataResidual_pass_Bin${bin}=0,"
+    freezeparamsblinded+="${CMS_PARAMS_LABEL}_tf_dataResidual_pass_Bin${bin},"
+done
+# remove last comma
+setparamsblinded=${setparamsblinded%,}
+freezeparamsblinded="${freezeparamsblinded},var{.*lp_sf.*}"
+unblindedparams="--freezeParameters var{.*_In},var{.*__norm},var{n_exp_.*} --setParameters $maskblindedargs"
+
 # ####################################################################################################
 # # Combine cards, text2workspace, fit, limits, significances, fitdiagnositcs, GoFs
 # ####################################################################################################
 # # # need to run this for large # of nuisances
 # # # https://cms-talk.web.cern.ch/t/segmentation-fault-in-combine/20735
-
-category="ggFpt300toinf"
-# category="VBFpt200toinf"
 
 # outdir is the combined directory with the combine.txt datafile
 outdir=${cards_dir}/combined_${category}
@@ -147,18 +175,69 @@ chmod +x ${logsdir}
 
 combined_datacard=${outdir}/combined.txt
 ws=${outdir}/workspace.root
+################################################################################# qcd data driven estimation only in wjestCR START
+# ##################################### [fail, wjetsCR] START 1
+# cr="fail${category}"
+# cr2="wjetsCR${category}"
 
-sr1="SR1Blinded${category}"
-sr2="SR2Blinded${category}"
-cr1="WJetsCR${category}"
-cr2="WJetsCR${category}"
+# ccargs="fail=${cards_dir}/${cr}.txt wjetsCR=${cards_dir}/${cr2}.txt"
 
-ccargs="SR1Blinded=${cards_dir}/${sr1}.txt WJetsCR=${cards_dir}/${cr1}.txt"
-# ccargs="passMediumBlinded=${cards_dir}/${sr2}.txt wjetsCR=${cards_dir}/${cr}.txt"
-# ccargs="passHighBlinded=${cards_dir}/${sr1}.txt passMediumBlinded=${cards_dir}/${sr2}.txt wjetsCR=${cards_dir}/${cr}.txt"
-# ccargs="passHighBlinded=${cards_dir}/${sr1}.txt passMediumBlinded=${cards_dir}/${sr2}.txt"
-# ccargs="passHighBlinded=${cards_dir}/${sr1}.txt"
-# ccargs="passMediumBlinded=${cards_dir}/${sr2}.txt"
+# echo "cards args=${ccargs}"
+# ##################################### [fail, wjetsCR] END 1
+
+# ##################################### [fail, passBlinded] START 2
+# cr="fail${category}"
+# srb="passBlinded${category}"
+
+# ccargs="fail=${cards_dir}/${cr}.txt passBlinded=${cards_dir}/${srb}.txt"
+
+# echo "cards args=${ccargs}"
+# ##################################### [fail, passBlinded] END 2
+
+# ##################################### [fail, passBlinded, wjetsCR] START 3
+# cr="fail${category}"
+# srb="passBlinded${category}"
+# cr2="wjetsCR${category}"
+
+# ccargs="fail=${cards_dir}/${cr}.txt passBlinded=${cards_dir}/${srb}.txt wjetsCR=${cards_dir}/${cr2}.txt"
+
+# echo "cards args=${ccargs}"
+##################################### [fail, passBlinded, wjetsCR] END 3
+
+# crb="failBlinded${category}"
+# srb="passBlinded${category}"
+# cr2="wjetsCR${category}"
+
+# ccargs="failBlinded=${cards_dir}/${crb}.txt passBlinded=${cards_dir}/${srb}.txt wjetsCR=${cards_dir}/${cr2}.txt"
+
+# # ##################################### simple create_datacardnew.py START
+# cr="fail${category}"
+# crb="failBlinded${category}"
+# sr="pass${category}"
+# srb="passBlinded${category}"
+# cr2="wjetsCR${category}"
+
+# ccargs="fail=${cards_dir}/${cr}.txt failBlinded=${cards_dir}/${crb}.txt pass=${cards_dir}/${sr}.txt passBlinded=${cards_dir}/${srb}.txt wjetsCR=${cards_dir}/${cr2}.txt"
+
+# echo "cards args=${ccargs}"
+
+# # maskunblindedargs="mask_fail=1,mask_pass=1"
+# maskunblindedargs="mask_pass=1"
+# maskblindedargs="mask_failBlinded=1,mask_passBlinded=1"
+# ##################################### simple create_datacardnew.py END
+
+# ####################################################################################################
+# # Combine cards, text2workspace, fit, limits, significances, fitdiagnositcs, GoFs
+# ####################################################################################################
+# # # need to run this for large # of nuisances
+# # # https://cms-talk.web.cern.ch/t/segmentation-fault-in-combine/20735
+
+
+cr="fail${category}"
+srb="passBlinded${category}"
+cr2="wjetsCR${category}"
+
+ccargs="fail=${cards_dir}/${cr}.txt passBlinded=${cards_dir}/${srb}.txt wjetsCR=${cards_dir}/${cr2}.txt"
 
 echo "cards args=${ccargs}"
 
@@ -178,15 +257,10 @@ fi
 
 if [ $dfit = 1 ]; then
     echo "Fit Diagnostics"
-    # combine -M FitDiagnostics -m 125 -d $ws \
-    # --cminDefaultMinimizerStrategy 0  --cminDefaultMinimizerTolerance $mintol --X-rtd MINIMIZER_MaxCalls=5000000 \
-    # -n Blinded --ignoreCovWarning -v 13 --skipSBFit \
-    # --saveShapes --saveNormalizations --saveWithUncertainties --saveOverallShapes 2>&1 | tee $logsdir/FitDiagnostics.txt
-
     combine -M FitDiagnostics -m 125 -d $ws \
     --cminDefaultMinimizerStrategy 0  --cminDefaultMinimizerTolerance $mintol --X-rtd MINIMIZER_MaxCalls=5000000 \
-    -n Blinded --ignoreCovWarning -v 13 \
-    --saveShapes --saveNormalizations --saveWithUncertainties --saveOverallShapes 2>&1 | tee $logsdir/FitDiagnostics.txt    
+    -n Blinded --ignoreCovWarning -v 13 --skipSBFit \
+    --saveShapes --saveNormalizations --saveWithUncertainties --saveOverallShapes 2>&1 | tee $logsdir/FitDiagnostics.txt
 fi
 
     # echo "Fit Diagnostics"
@@ -231,7 +305,13 @@ fi
 #     # ${unblindedparams},r=1 \
 #     # --floatParameters ${freezeparamsblinded},r --toysFrequentist 2>&1 | tee $logsdir/Significance.txt
 
-#     combine -M Significance ${xxx}.root -m 125 --rMin -1 --rMax 5 -t -1 --expectSignal 1
+#     # combine -M Significance ${xxx}.root -m 200 --rMin -1 --rMax 5 -t -1 --expectSignal 1.5
+#     combine -M Significance ${xxx}.root -m 200 --rMin -1 --rMax 5 -t -1 --expectSignal 1.5 --toysFrequentist
+
+#     # combine -M Significance -d ${xxx}.root -m 125 \
+#     # -t -1 --expectSignal=1 --saveWorkspace --saveToys --bypassFrequentistFit \
+#     # ${unblindedparams},r=1 \
+#     # --floatParameters ${freezeparamsblinded},r --toysFrequentist 2>&1
 # fi
 
 # # try to change "setparams" to "setparamsblinded" and see the effect

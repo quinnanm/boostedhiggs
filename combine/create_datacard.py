@@ -165,6 +165,7 @@ def systs_from_parquets(years):
             "weight_Z_d2kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d2kappa_EW_{year}", "lnN"),
             "weight_Z_d3kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d3kappa_EW_{year}", "lnN"),
         },
+        "QCD": {},
     }
 
     return systs_from_parquets
@@ -198,12 +199,12 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
     systs_dict, systs_dict_values = systs_not_from_parquets(years, LUMI, full_lumi)
     sys_from_parquets = systs_from_parquets(years)
 
-    categories = list(hists_templates["pass"].axes["Category"])
-    categories = ["ggFpt200to300"]  # TODO: remove
+    categories = list(hists_templates["SR1"].axes["Category"])
+    categories = ["ggFpt300toinf"]  # TODO: remove
 
     shape_var = ShapeVar(
-        name=hists_templates["pass"].axes["mass_observable"].name,
-        bins=hists_templates["pass"].axes["mass_observable"].edges,
+        name=hists_templates["SR1"].axes["mass_observable"].name,
+        bins=hists_templates["SR1"].axes["mass_observable"].edges,
         order=2,  # TODO: make the order of the polynomial configurable
     )
     m_obs = rl.Observable(shape_var.name, shape_var.bins)
@@ -345,13 +346,13 @@ def rhalphabet(
 
     # get the transfer factor
     num = (
-        h_pass[{"Category": category, "Sample": "QCD", "Systematic": "nominal"}].sum()
-        + h_pass[{"Category": category, "Sample": "WJetsLNu", "Systematic": "nominal"}].sum()
+        h_pass[{"Category": category, "Sample": "QCD", "Systematic": "nominal"}].sum().value
+        + h_pass[{"Category": category, "Sample": "WJetsLNu", "Systematic": "nominal"}].sum().value
     )
 
     den = (
-        h_fail[{"Category": category, "Sample": "QCD", "Systematic": "nominal"}].sum()
-        + h_fail[{"Category": category, "Sample": "WJetsLNu", "Systematic": "nominal"}].sum()
+        h_fail[{"Category": category, "Sample": "QCD", "Systematic": "nominal"}].sum().value
+        + h_fail[{"Category": category, "Sample": "WJetsLNu", "Systematic": "nominal"}].sum().value
     )
 
     qcd_eff = num / den
@@ -428,7 +429,7 @@ def main(args):
         channels,
         blind_samples=blind_samples,  # default is [] which means blind all samples
         blind_region=[90, 150],
-        wjets_estimation=True,
+        wjets_estimation=False,
         top_estimation=True,
     )
 
