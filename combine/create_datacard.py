@@ -62,25 +62,27 @@ def systs_not_from_parquets(years, LUMI, full_lumi):
 
     systs_dict, systs_dict_values = {}, {}
 
+    systs_dict["all_samples"], systs_dict_values["all_samples"] = {}, {}
+
     # branching ratio systematics
-    systs_dict["BR_hww"] = rl.NuisanceParameter("BR_hww", "lnN")
-    systs_dict_values["BR_hww"] = (1.0153, 0.9848)
+    systs_dict["all_samples"]["BR_hww"] = rl.NuisanceParameter("BR_hww", "lnN")
+    systs_dict_values["all_samples"]["BR_hww"] = (1.0153, 0.9848)
 
     # lumi systematics
     if "2016" in years:
-        systs_dict["lumi_13TeV_2016"] = rl.NuisanceParameter("CMS_lumi_13TeV_2016", "lnN")
-        systs_dict_values["lumi_13TeV_2016"] = (1.01 ** ((LUMI["2016"] + LUMI["2016APV"]) / full_lumi), None)
+        systs_dict["all_samples"]["lumi_13TeV_2016"] = rl.NuisanceParameter("CMS_lumi_13TeV_2016", "lnN")
+        systs_dict_values["all_samples"]["lumi_13TeV_2016"] = (1.01 ** ((LUMI["2016"] + LUMI["2016APV"]) / full_lumi), None)
     if "2017" in years:
-        systs_dict["lumi_13TeV_2017"] = rl.NuisanceParameter("CMS_lumi_13TeV_2017", "lnN")
-        systs_dict_values["lumi_13TeV_2017"] = (1.02 ** (LUMI["2017"] / full_lumi), None)
+        systs_dict["all_samples"]["lumi_13TeV_2017"] = rl.NuisanceParameter("CMS_lumi_13TeV_2017", "lnN")
+        systs_dict_values["all_samples"]["lumi_13TeV_2017"] = (1.02 ** (LUMI["2017"] / full_lumi), None)
 
     if "2018" in years:
-        systs_dict["lumi_13TeV_2018"] = rl.NuisanceParameter("CMS_lumi_13TeV_2018", "lnN")
-        systs_dict_values["lumi_13TeV_2018"] = (1.015 ** (LUMI["2018"] / full_lumi), None)
+        systs_dict["all_samples"]["lumi_13TeV_2018"] = rl.NuisanceParameter("CMS_lumi_13TeV_2018", "lnN")
+        systs_dict_values["all_samples"]["lumi_13TeV_2018"] = (1.015 ** (LUMI["2018"] / full_lumi), None)
 
     if len(years) == 4:
-        systs_dict["lumi_13TeV_correlated"] = rl.NuisanceParameter("CMS_lumi_13TeV_corelated", "lnN")
-        systs_dict_values["lumi_13TeV_correlated"] = (
+        systs_dict["all_samples"]["lumi_13TeV_correlated"] = rl.NuisanceParameter("CMS_lumi_13TeV_corelated", "lnN")
+        systs_dict_values["all_samples"]["lumi_13TeV_correlated"] = (
             (
                 (1.006 ** ((LUMI["2016"] + LUMI["2016APV"]) / full_lumi))
                 * (1.009 ** (LUMI["2017"] / full_lumi))
@@ -89,11 +91,15 @@ def systs_not_from_parquets(years, LUMI, full_lumi):
             None,
         )
 
-        systs_dict["lumi_13TeV_1718"] = rl.NuisanceParameter("CMS_lumi_13TeV_1718", "lnN")
-        systs_dict_values["lumi_13TeV_1718"] = (
+        systs_dict["all_samples"]["lumi_13TeV_1718"] = rl.NuisanceParameter("CMS_lumi_13TeV_1718", "lnN")
+        systs_dict_values["all_samples"]["lumi_13TeV_1718"] = (
             (1.006 ** (LUMI["2017"] / full_lumi)) * (1.002 ** (LUMI["2018"] / full_lumi)),
             None,
         )
+
+    for sample in ["ggF", "VBF", "VH", "ttH"]:
+        systs_dict[sample]["taggereff"] = rl.NuisanceParameter("taggereff", "lnN")
+        systs_dict_values[sample]["taggereff"] = (1.1, None)
 
     return systs_dict, systs_dict_values
 
@@ -236,11 +242,12 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
                 sample.autoMCStats(lnN=True)
 
                 # SYSTEMATICS NOT FROM PARQUETS
-                for sys_name, sys_value in systs_dict.items():
-                    if systs_dict_values[sys_name][1] is None:  # if up and down are the same
-                        sample.setParamEffect(sys_value, systs_dict_values[sys_name][0])
-                    else:
-                        sample.setParamEffect(sys_value, systs_dict_values[sys_name][0], systs_dict_values[sys_name][1])
+                for syst_on_sample in ["all_samples", sName]:  # apply common systs and per sample systs
+                    for sys_name, sys_value in systs_dict[syst_on_sample].items():
+                        if systs_dict_values[sys_name][1] is None:  # if up and down are the same
+                            sample.setParamEffect(sys_value, systs_dict_values[sys_name][0])
+                        else:
+                            sample.setParamEffect(sys_value, systs_dict_values[sys_name][0], systs_dict_values[sys_name][1])
 
                 # SYSTEMATICS FROM PARQUETS
                 for syst_on_sample in ["all_samples", sName]:  # apply common systs and per sample systs
@@ -293,12 +300,12 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
                 to_region="SR1Blinded",
             )
 
-    # if wjets_estimation:
-    #     for category in categories:
-    #         if category != "ggFpt200to300":
-    #             continue
+            # if wjets_estimation:
+            #     for category in categories:
+            #         if category != "ggFpt200to300":
+            #             continue
 
-            wjetsnormSF = rl.IndependentParameter(f"wjetsnormSF_{year}", 1.0, -50, 50)
+            # wjetsnormSF = rl.IndependentParameter(f"wjetsnormSF_{year}", 1.0, -50, 50)
 
     #         # wjets params
 
