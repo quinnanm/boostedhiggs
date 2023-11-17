@@ -53,10 +53,9 @@ class ShapeVar:
 
 
 def create_datacard(hists_templates, years, channels, blind_samples, blind_region, wjets_estimation, top_estimation):
-    Samples = samples
     if wjets_estimation:  # will estimate from data in the end
-        Samples.remove("WJetsLNu")
-        Samples.remove("QCD")
+        samples.remove("WJetsLNu")
+        samples.remove("QCD")
 
     # get the LUMI (must average lumi over the lepton channels provided)
     LUMI = {}
@@ -101,7 +100,9 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
     for category in categories:
         for region in ["SR1", "SR1Blinded", "SR2", "SR2Blinded", "WJetsCR", "WJetsCRBlinded", "TopCR"]:
             if region == "TopCR":
-                Samples += ["WJetsLNu", "QCD"]
+                Samples = samples + ["WJetsLNu", "QCD"]
+            else:
+                Samples = samples
 
             if "Blinded" in region:
                 h = blindBins(hists_templates[region.replace("Blinded", "")], blind_region, blind_samples)
