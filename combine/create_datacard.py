@@ -96,11 +96,11 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
     for category in categories:
         for region in ["SR1", "SR1Blinded", "SR2", "SR2Blinded", "WJetsCR", "WJetsCRBlinded", "TopCR"]:
             if wjets_estimation and (region != "TopCR"):
-                Samples = samples
+                Samples = samples.copy()
                 Samples.remove("WJetsLNu")
                 Samples.remove("QCD")
             else:
-                Samples = samples
+                Samples = samples.copy()
 
             if "Blinded" in region:
                 h = blindBins(hists_templates[region.replace("Blinded", "")], blind_region, blind_samples)
