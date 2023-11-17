@@ -389,7 +389,7 @@ def rhalphabet(
 
     # qcd params
     qcd_params = np.array(
-        [rl.IndependentParameter(f"{CMS_PARAMS_LABEL}_tf_dataResidual_{to_region}_Bin{i}", 0) for i in range(m_obs.nbins)]
+        [rl.IndependentParameter(f"{CMS_PARAMS_LABEL}_tf_dataResidual_Bin{i}", 0) for i in range(m_obs.nbins)]
     )
 
     # idea here is that the error should be 1/sqrt(N), so parametrizing it as (1 + 1/sqrt(N))^qcdparams
@@ -401,7 +401,7 @@ def rhalphabet(
 
     # add samples
     fail_qcd = rl.ParametericSample(
-        f"{failChName}_{CMS_PARAMS_LABEL}_qcd_datadriven_{to_region}",
+        f"{failChName}_{CMS_PARAMS_LABEL}_qcd_datadriven",
         rl.Sample.BACKGROUND,
         m_obs,
         scaled_params,
@@ -410,7 +410,7 @@ def rhalphabet(
 
     # transfer factor
     tf_dataResidual = rl.BasisPoly(
-        f"{CMS_PARAMS_LABEL}_tf_dataResidual_{to_region}",
+        f"{CMS_PARAMS_LABEL}_tf_dataResidual",
         (shape_var.order,),
         [shape_var.name],
         basis="Bernstein",
@@ -425,7 +425,7 @@ def rhalphabet(
     passCh = model[passChName]
 
     pass_qcd = rl.TransferFactorSample(
-        f"{passChName}_{CMS_PARAMS_LABEL}_qcd_datadriven_{to_region}",
+        f"{passChName}_{CMS_PARAMS_LABEL}_qcd_datadriven",
         rl.Sample.BACKGROUND,
         tf_params_pass,
         fail_qcd,
