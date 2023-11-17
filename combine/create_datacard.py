@@ -162,9 +162,9 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
 
             # get the relevant channels for wjets estimation in pass region
             if "TopCR" in ChName:
-                topfail[category] = ch["ttbar"]
+                topfail = ch["ttbar"]
             elif "SR1Blinded" in ChName:
-                toppass[category] = ch["ttbar"]
+                toppass = ch["ttbar"]
 
         if wjets_estimation:  # data-driven estimation per category
             rhalphabet(
@@ -181,17 +181,16 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
             )
 
         if top_estimation:
-            for category in categories:
-                topnormSF = rl.IndependentParameter(f"topnormSF_{year}", 1.0, -50, 50)
+            topnormSF = rl.IndependentParameter(f"topnormSF_{year}", 1.0, -50, 50)
 
-                # seperate rate of process by taking into account normalization (how well it fits data/mc in one region)
-                # from mistag efficiency (i.e. tagger)
-                # 2 indep dof: we don't - we choose (for now) one parameter on the overall normalization of wjets
-                # we reparametrize both as: one normalization (both equally up and down) + effSF (one that is asymetric -
-                # if increases, will increase in pass and decrease in fail)
-                # for now just use normalization and see data/mc
-                topfail[category].setParamEffect(topnormSF, 1 * topnormSF)
-                toppass[category].setParamEffect(topnormSF, 1 * topnormSF)
+            # seperate rate of process by taking into account normalization (how well it fits data/mc in one region)
+            # from mistag efficiency (i.e. tagger)
+            # 2 indep dof: we don't - we choose (for now) one parameter on the overall normalization of wjets
+            # we reparametrize both as: one normalization (both equally up and down) + effSF (one that is asymetric -
+            # if increases, will increase in pass and decrease in fail)
+            # for now just use normalization and see data/mc
+            topfail.setParamEffect(topnormSF, 1 * topnormSF)
+            toppass.setParamEffect(topnormSF, 1 * topnormSF)
 
     return model
 
