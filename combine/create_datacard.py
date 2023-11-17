@@ -62,6 +62,7 @@ def systs_not_from_parquets(years, LUMI, full_lumi):
 
     systs_dict, systs_dict_values = {}, {}
 
+    # COMMON SYSTEMATICS
     systs_dict["all_samples"], systs_dict_values["all_samples"] = {}, {}
 
     # branching ratio systematics
@@ -96,6 +97,10 @@ def systs_not_from_parquets(years, LUMI, full_lumi):
             (1.006 ** (LUMI["2017"] / full_lumi)) * (1.002 ** (LUMI["2018"] / full_lumi)),
             None,
         )
+
+    # PER SAMPLE SYSTEMATICS
+    for sample in samples:
+        systs_dict[sample], systs_dict_values = {}, {}
 
     for sample in ["ggF", "VBF", "VH", "ttH"]:
         systs_dict[sample]["taggereff"] = rl.NuisanceParameter("taggereff", "lnN")
