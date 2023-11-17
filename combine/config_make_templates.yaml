@@ -32,8 +32,9 @@ lepiso_sel: # keys must match keys in regions_sel above; values are either [lepi
     # ttbarCR: lepiso
 
 categories_sel:
-    VBFpt200toinf: ( (mjj>1000) & (deta>3.5) )
-    ggFpt300toinf: ( (mjj<1000) | (deta<3.5) )
+    VBFpt300toinf: ( (mjj>1000) & (deta>3.5) )
+    ggFpt300to450: ( (mjj<1000) | (deta<3.5) ) & (fj_pt<450)
+    ggFpt450toinf: ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
 
 samples_dir:
     "2018": ../eos/postprocessNov12_2018
