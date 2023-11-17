@@ -100,7 +100,8 @@ def systs_not_from_parquets(years, LUMI, full_lumi):
 
     # PER SAMPLE SYSTEMATICS
     for sample in samples:
-        systs_dict[sample], systs_dict_values = {}, {}
+        print(sample)
+        systs_dict[sample], systs_dict_values[sample] = {}, {}
 
     for sample in ["ggF", "VBF", "VH", "ttH"]:
         systs_dict[sample]["taggereff"] = rl.NuisanceParameter("taggereff", "lnN")
