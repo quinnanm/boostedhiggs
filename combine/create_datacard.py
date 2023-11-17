@@ -53,9 +53,10 @@ class ShapeVar:
 
 
 def create_datacard(hists_templates, years, channels, blind_samples, blind_region, wjets_estimation, top_estimation):
+    Samples = samples
     if wjets_estimation:  # will estimate from data in the end
-        samples.remove("WJetsLNu")
-        samples.remove("QCD")
+        Samples.remove("WJetsLNu")
+        Samples.remove("QCD")
 
     # get the LUMI (must average lumi over the lepton channels provided)
     LUMI = {}
@@ -99,6 +100,9 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
     # fill datacard with systematics and rates
     for category in categories:
         for region in ["SR1", "SR1Blinded", "SR2", "SR2Blinded", "WJetsCR", "WJetsCRBlinded", "TopCR"]:
+            if region == "TTbar":
+                Samples += ["WJetsLNu", "QCD"]
+
             if "Blinded" in region:
                 h = blindBins(hists_templates[region.replace("Blinded", "")], blind_region, blind_samples)
             else:
@@ -109,7 +113,7 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
             ch = rl.Channel(ChName)
             model.addChannel(ch)
 
-            for sName in samples:
+            for sName in Samples:
                 templ = get_template(h, sName, category)
                 stype = rl.Sample.SIGNAL if sName in sigs else rl.Sample.BACKGROUND
                 sample = rl.TemplateSample(ch.name + "_" + labels[sName], stype, templ)
