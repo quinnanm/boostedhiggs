@@ -100,12 +100,11 @@ def systs_not_from_parquets(years, LUMI, full_lumi):
 
     # PER SAMPLE SYSTEMATICS
     for sample in samples:
-        print(sample)
         systs_dict[sample], systs_dict_values[sample] = {}, {}
 
     for sample in ["ggF", "VBF", "VH", "ttH"]:
         systs_dict[sample]["taggereff"] = rl.NuisanceParameter("taggereff", "lnN")
-        systs_dict_values[sample]["taggereff"] = (1.1, None)
+        systs_dict_values[sample]["taggereff"] = (1.10, None)
 
     return systs_dict, systs_dict_values
 
@@ -250,10 +249,14 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
                 # SYSTEMATICS NOT FROM PARQUETS
                 for syst_on_sample in ["all_samples", sName]:  # apply common systs and per sample systs
                     for sys_name, sys_value in systs_dict[syst_on_sample].items():
-                        if systs_dict_values[sys_name][1] is None:  # if up and down are the same
-                            sample.setParamEffect(sys_value, systs_dict_values[sys_name][0])
+                        if systs_dict_values[syst_on_sample][sys_name][1] is None:  # if up and down are the same
+                            sample.setParamEffect(sys_value, systs_dict_values[syst_on_sample][sys_name][0])
                         else:
-                            sample.setParamEffect(sys_value, systs_dict_values[sys_name][0], systs_dict_values[sys_name][1])
+                            sample.setParamEffect(
+                                sys_value,
+                                systs_dict_values[syst_on_sample][sys_name][0],
+                                systs_dict_values[syst_on_sample][sys_name][1],
+                            )
 
                 # SYSTEMATICS FROM PARQUETS
                 for syst_on_sample in ["all_samples", sName]:  # apply common systs and per sample systs
