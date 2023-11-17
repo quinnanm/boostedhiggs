@@ -306,7 +306,8 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
                 shape_var,
                 blind_region,
                 blind_samples,
-                from_region="WJetsCRBlinded",
+                # from_region="WJetsCRBlinded",
+                from_region="WJetsCR",
                 to_region="SR1Blinded",
             )
 
