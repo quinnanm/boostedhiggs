@@ -5,6 +5,7 @@ import warnings
 
 import pandas as pd
 import rhalphalib as rl
+from utils import samples
 
 rl.ParametericSample.PreferRooParametricHist = True
 logging.basicConfig(level=logging.INFO)
@@ -15,7 +16,7 @@ pd.set_option("mode.chained_assignment", None)
 CMS_PARAMS_LABEL = "CMS_HWW_boosted"
 
 
-def systs_not_from_parquets(years, LUMI, full_lumi, samples):
+def systs_not_from_parquets(years, LUMI, full_lumi):
     """
     Define systematics that are NOT stored in the parquets
 
