@@ -100,7 +100,7 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
     # fill datacard with systematics and rates
     for category in categories:
         for region in ["SR1", "SR1Blinded", "SR2", "SR2Blinded", "WJetsCR", "WJetsCRBlinded", "TopCR"]:
-            if region == "TopCR":
+            if region == "TTbar":
                 Samples += ["WJetsLNu", "QCD"]
 
             if "Blinded" in region:
