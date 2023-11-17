@@ -22,7 +22,10 @@ def main(args):
     slist = args.slist.split(",") if args.slist is not None else None
 
     prepend = ""
-    metadata = prepend + f"/uscms/home/cmantill/nobackup/hww/boostedhiggs/condor/{args.tag}_{args.year}/metadata_{args.configkey}.json"
+    metadata = (
+        prepend
+        + f"/uscms/home/cmantill/nobackup/hww/boostedhiggs/condor/{args.tag}_{args.year}/metadata_{args.configkey}.json"
+    )
 
     try:
         with open(metadata, "r") as f:
@@ -31,7 +34,9 @@ def main(args):
         raise Exception(f"Could not open file {metadata}")
 
     config = prepend + f"/uscms/home/cmantill/nobackup/hww/boostedhiggs/condor//{args.tag}_{args.year}/{args.config}"
-    splitname = prepend + f"/uscms/home/cmantill/nobackup/hww/boostedhiggs/condor//{args.tag}_{args.year}/pfnano_splitting.yaml"
+    splitname = (
+        prepend + f"/uscms/home/cmantill/nobackup/hww/boostedhiggs/condor//{args.tag}_{args.year}/pfnano_splitting.yaml"
+    )
 
     print(f"Loading files from {splitname}")
     _, nfiles_per_job = loadFiles(config, args.configkey, args.year, args.pfnano, slist, splitname)
