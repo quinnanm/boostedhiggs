@@ -77,7 +77,7 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
         full_lumi += LUMI[year_]
 
     # define the systematics
-    systs_dict, systs_dict_values = systs_not_from_parquets(years, LUMI, full_lumi, samples)
+    systs_dict, systs_dict_values = systs_not_from_parquets(years, LUMI, full_lumi)
     sys_from_parquets = systs_from_parquets(years)
 
     categories = list(hists_templates["SR1"].axes["Category"])
