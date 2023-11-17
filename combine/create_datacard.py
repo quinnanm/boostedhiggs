@@ -200,7 +200,7 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
     sys_from_parquets = systs_from_parquets(years)
 
     categories = list(hists_templates["SR1"].axes["Category"])
-    categories = ["ggFpt300toinf"]  # TODO: remove
+    # categories = ["ggFpt300toinf"]  # TODO: remove
 
     shape_var = ShapeVar(
         name=hists_templates["SR1"].axes["mass_observable"].name,
@@ -298,7 +298,7 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
     #         if category != "ggFpt200to300":
     #             continue
 
-    #         wjetsnormSF = rl.IndependentParameter(f"wjetsnormSF_{year}", 1.0, -50, 50)
+            wjetsnormSF = rl.IndependentParameter(f"wjetsnormSF_{year}", 1.0, -50, 50)
 
     #         # wjets params
 
@@ -429,7 +429,7 @@ def main(args):
         channels,
         blind_samples=blind_samples,  # default is [] which means blind all samples
         blind_region=[90, 150],
-        wjets_estimation=False,
+        wjets_estimation=True,
         top_estimation=True,
     )
 
