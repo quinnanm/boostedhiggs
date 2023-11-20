@@ -107,6 +107,7 @@ def create_datacard(hists_templates, years, channels):
                                 systs_dict_values[syst_on_sample][sys_name][0],
                                 systs_dict_values[syst_on_sample][sys_name][1],
                             )
+                ch.addSample(sample)
 
             # add data
             data_obs = get_template(h, "Data", category)
