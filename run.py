@@ -103,9 +103,12 @@ def main(args):
         p = vhProcessor(
             year=year,
             yearmod=yearmod,
-            channel=channels[0],
+            #channel=channels[0],
+            channels=channels,
             inference=args.inference,
+            systematics=args.systematics,
             output_location=f"./outfiles/{job_name}",
+            region=args.region,
         )
 
     elif args.processor == "lumi":
