@@ -197,12 +197,10 @@ def rhalphabet(model, hists_templates, m_obs, shape_var, blind_region, blind_sam
 
     if "Blinded" not in to_region:
         h_pass = hists_templates.copy()
-
         passChName = f"{to_region}"
 
-    elif "Blinded" in from_region:
+    elif "Blinded" in to_region:
         h_pass = blindBins(hists_templates.copy(), blind_region, blind_samples)
-
         passChName = f"{to_region}"
 
         to_region = to_region.replace("Blinded", "")
