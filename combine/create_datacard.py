@@ -191,6 +191,8 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
             else:
                 cr = f"WJetsCRfor{region}"
 
+            logging.info(f"attempt transfer factor for region {region}, from region {cr}")
+
             rhalphabet(
                 model,
                 hists_templates,
