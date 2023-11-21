@@ -182,17 +182,18 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
             toppass = ch["ttbar"]
 
     if wjets_estimation:  # data-driven estimation per category
-        rhalphabet(
-            model,
-            hists_templates,
-            m_obs,
-            shape_var,
-            blind_region,
-            blind_samples,
-            from_region="WJetsCRBlinded",
-            # from_region="WJetsCR",
-            to_region="SR1Blinded",
-        )
+        for region in ["SR1VBF", "SR1ggpt300to450Blinded", "SR1ggpt450toInfBlinded"]:
+            rhalphabet(
+                model,
+                hists_templates,
+                m_obs,
+                shape_var,
+                blind_region,
+                blind_samples,
+                from_region="WJetsCRBlinded",
+                # from_region="WJetsCR",
+                to_region=region,
+            )
 
     if top_estimation:
         topnormSF = rl.IndependentParameter(f"topnormSF_{year}", 1.0, -50, 50)
