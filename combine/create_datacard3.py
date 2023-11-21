@@ -90,9 +90,12 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
     # for category in regions:
     #     topfail[category], toppass[category] = {}, {}
 
-    regions = ["SR1VBF", "SR1ggFpt300to450", "SR1ggFpt450toInf", "SR2"]  # put the signal regions here
-    for region in regions.copy():
-        regions += [f"{region}Blinded"]
+    regions = [
+        "SR1VBFBlinded",
+        "SR1ggFpt300to450Blinded",
+        "SR1ggFpt450toInfBlinded",
+        "SR2Blinded",
+    ]  # put the signal regions here
 
     for region in regions.copy():
         if wjets_estimation:
