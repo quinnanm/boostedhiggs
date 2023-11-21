@@ -15,6 +15,7 @@ import argparse
 import json
 import logging
 import math
+import os
 import pickle as pkl
 import warnings
 
@@ -90,6 +91,7 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
     #     topfail[category], toppass[category] = {}, {}
 
     regions = ["SR1VBF", "SR1ggpt300to450", "SR1ggFpt450toInf", "SR2"]  # put the signal regions here
+    regions = ["SR1ggpt300to450"]  # put the signal regions here
     for region in regions:
         regions += f"{region}Blinded"
 
@@ -341,6 +343,8 @@ def main(args):
 
     with open(f"{args.outdir}/model_{save_as}.pkl", "wb") as fout:
         pkl.dump(model, fout, protocol=2)
+
+    model.renderCombine(os.path.join(str("{}".format(args.outdir)), "datacards"))
 
 
 if __name__ == "__main__":
