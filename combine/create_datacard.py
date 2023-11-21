@@ -217,7 +217,16 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
 
 
 def rhalphabet(model, hists_templates, m_obs, shape_var, blind_region, blind_samples, from_region="fail", to_region="pass"):
-    if "Blinded" in from_region:
+    if "Blinded" not in from_region:
+        assert "Blinded" not in to_region
+        print("NOT BLINDED")
+        h_fail = hists_templates.copy()
+        h_pass = hists_templates.copy()
+
+        failChName = f"{from_region}"
+        passChName = f"{to_region}"
+
+    elif "Blinded" in from_region:
         assert "Blinded" in to_region
         h_fail = blindBins(hists_templates.copy(), blind_region, blind_samples)
         h_pass = blindBins(hists_templates.copy(), blind_region, blind_samples)
@@ -229,15 +238,6 @@ def rhalphabet(model, hists_templates, m_obs, shape_var, blind_region, blind_sam
         from_region = from_region.replace("Blinded", "")
         print("BLINDED")
         print("failChName", failChName)
-
-    if "Blinded" not in from_region:
-        assert "Blinded" not in to_region
-        print("NOT BLINDED")
-        h_fail = hists_templates.copy()
-        h_pass = hists_templates.copy()
-
-        failChName = f"{from_region}"
-        passChName = f"{to_region}"
 
     failCh = model[failChName]
 
