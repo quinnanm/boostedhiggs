@@ -76,8 +76,6 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
     systs_dict, systs_dict_values = systs_not_from_parquets(years, LUMI, full_lumi)
     sys_from_parquets = systs_from_parquets(years)
 
-    regions = list(hists_templates.axes["Region"])
-
     shape_var = ShapeVar(
         name=hists_templates.axes["mass_observable"].name,
         bins=hists_templates.axes["mass_observable"].edges,
@@ -87,12 +85,11 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
 
     model = rl.Model("testModel")
 
-    topfail, toppass = {}, {}
-    for category in regions:
-        topfail[category], toppass[category] = {}, {}
+    # topfail, toppass = {}, {}
+    # for category in regions:
+    #     topfail[category], toppass[category] = {}, {}
 
-    # fill datacard with systematics and rates
-    for region in [
+    regions = [
         "SR1VBF",
         "SR1ggpt300to450",
         "SR1ggFpt450toInf",
@@ -104,7 +101,10 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
         "WJetsCR",
         "WJetsCRBlinded",
         "TopCR",
-    ]:
+    ]
+
+    # fill datacard with systematics and rates
+    for region in regions:
         if wjets_estimation and (region != "TopCR"):
             Samples = samples.copy()
             Samples.remove("WJetsLNu")
@@ -117,7 +117,6 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
             ChName = f"{region}"
 
             region = region.replace("Blinded", "")
-            print(region, "Blinded", ChName)
         else:
             h = hists_templates.copy()
             ChName = f"{region}"
@@ -176,14 +175,22 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
         data_obs = get_template(h, "Data", region)
         ch.setObservation(data_obs)
 
-        # get the relevant channels for wjets estimation in pass region
-        if "TopCR" in ChName:
-            topfail = ch["ttbar"]
-        elif "SR1Blinded" in ChName:
-            toppass = ch["ttbar"]
+        # # get the relevant channels for wjets estimation in pass region
+        # if "TopCR" in ChName:
+        #     topfail = ch["ttbar"]
+        # elif "SR1Blinded" in ChName:
+        #     toppass = ch["ttbar"]
 
     if wjets_estimation:  # data-driven estimation per category
-        for region in ["SR1VBFBlinded", "SR1ggpt300to450Blinded", "SR1ggpt450toInfBlinded"]:
+        for region in regions:
+            if "SR" not in region:
+                continue
+
+            if "Blinded" in region:
+                cr = "WJetsCRBlinded"
+            else:
+                cr = "WJetsCR"
+
             rhalphabet(
                 model,
                 hists_templates,
@@ -191,22 +198,21 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
                 shape_var,
                 blind_region,
                 blind_samples,
-                from_region="WJetsCRBlinded",
-                # from_region="WJetsCR",
+                from_region=cr,
                 to_region=region,
             )
 
-    if top_estimation:
-        topnormSF = rl.IndependentParameter(f"topnormSF_{year}", 1.0, -50, 50)
+    # if top_estimation:
+    #     topnormSF = rl.IndependentParameter(f"topnormSF_{year}", 1.0, -50, 50)
 
-        # seperate rate of process by taking into account normalization (how well it fits data/mc in one region)
-        # from mistag efficiency (i.e. tagger)
-        # 2 indep dof: we don't - we choose (for now) one parameter on the overall normalization of wjets
-        # we reparametrize both as: one normalization (both equally up and down) + effSF (one that is asymetric -
-        # if increases, will increase in pass and decrease in fail)
-        # for now just use normalization and see data/mc
-        topfail.setParamEffect(topnormSF, 1 * topnormSF)
-        toppass.setParamEffect(topnormSF, 1 * topnormSF)
+    #     # seperate rate of process by taking into account normalization (how well it fits data/mc in one region)
+    #     # from mistag efficiency (i.e. tagger)
+    #     # 2 indep dof: we don't - we choose (for now) one parameter on the overall normalization of wjets
+    #     # we reparametrize both as: one normalization (both equally up and down) + effSF (one that is asymetric -
+    #     # if increases, will increase in pass and decrease in fail)
+    #     # for now just use normalization and see data/mc
+    #     topfail.setParamEffect(topnormSF, 1 * topnormSF)
+    #     toppass.setParamEffect(topnormSF, 1 * topnormSF)
 
     return model
 
