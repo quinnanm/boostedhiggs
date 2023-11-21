@@ -180,15 +180,12 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
 
     if wjets_estimation:  # data-driven estimation per category
         for region in regions:
-            if not region.startswith("SR"):
-                continue
-
-            if "Blinded" not in region:
+            if not region.startswith("SR"):  # only do wjets estimation for SR
                 continue
 
             cr = f"WJetsCRfor{region}"
 
-            logging.info(f"attempt transfer factor for region {region}, from region {cr}")
+            logging.info(f"setting transfer factor for region {region}, from region {cr}")
 
             rhalphabet(
                 model,
@@ -295,8 +292,6 @@ def rhalphabet(model, hists_templates, m_obs, shape_var, blind_region, blind_sam
     )
     tf_dataResidual_params = tf_dataResidual(shape_var.scaled)
     tf_params_pass = qcd_eff * tf_dataResidual_params  # scale params initially by qcd eff
-
-    logging.info(f"setting transfer factor for region {passChName}, from region {failChName}")
 
     passCh = model[passChName]
 
