@@ -90,8 +90,8 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
     # for category in regions:
     #     topfail[category], toppass[category] = {}, {}
 
-    # regions = ["SR1VBF", "SR1ggFpt300to450", "SR1ggFpt450toInf", "SR2"]  # put the signal regions here
-    regions = ["SR1VBF"]  # put the signal regions here
+    regions = ["SR1VBF", "SR1ggFpt300to450", "SR1ggFpt450toInf", "SR2"]  # put the signal regions here
+    # regions = ["SR1VBF"]  # put the signal regions here
 
     for region in regions.copy():
         regions += [f"{region}Blinded"]
@@ -262,9 +262,21 @@ def rhalphabet(model, hists_templates, m_obs, shape_var, blind_region, blind_sam
 
     qcd_eff = num / den
 
+    # transfer factor
+    tf_dataResidual = rl.BasisPoly(
+        f"{CMS_PARAMS_LABEL}_tf_dataResidual",
+        (shape_var.order,),
+        [shape_var.name],
+        basis="Bernstein",
+        limits=(-20, 20),
+        # square_params=True,
+    )
+    tf_dataResidual_params = tf_dataResidual(shape_var.scaled)
+    tf_params_pass = qcd_eff * tf_dataResidual_params  # scale params initially by qcd eff
+
     # qcd params
     qcd_params = np.array(
-        [rl.IndependentParameter(f"{CMS_PARAMS_LABEL}_tf_dataResidual_{passChName}_Bin{i}", 0) for i in range(m_obs.nbins)]
+        [rl.IndependentParameter(f"{CMS_PARAMS_LABEL}_tf_dataResidual_Bin{i}", 0) for i in range(m_obs.nbins)]
     )
 
     # idea here is that the error should be 1/sqrt(N), so parametrizing it as (1 + 1/sqrt(N))^qcdparams
@@ -276,30 +288,16 @@ def rhalphabet(model, hists_templates, m_obs, shape_var, blind_region, blind_sam
 
     # add samples
     fail_qcd = rl.ParametericSample(
-        f"{failChName}_{CMS_PARAMS_LABEL}_qcd_datadriven_{failChName}",
+        f"{failChName}_{CMS_PARAMS_LABEL}_qcd_datadriven",
         rl.Sample.BACKGROUND,
         m_obs,
         scaled_params,
     )
     failCh.addSample(fail_qcd)
 
-    # transfer factor
-    tf_dataResidual = rl.BasisPoly(
-        f"{CMS_PARAMS_LABEL}_tf_dataResidual_{passChName}",
-        (shape_var.order,),
-        [shape_var.name],
-        basis="Bernstein",
-        limits=(-20, 20),
-        # square_params=True,
-    )
-    tf_dataResidual_params = tf_dataResidual(shape_var.scaled)
-    tf_params_pass = qcd_eff * tf_dataResidual_params  # scale params initially by qcd eff
-
     passCh = model[passChName]
-
-    print("passChName", passChName)
     pass_qcd = rl.TransferFactorSample(
-        f"{CMS_PARAMS_LABEL}_qcd_datadriven_{passChName}",
+        f"{passChName}_{CMS_PARAMS_LABEL}_qcd_datadriven",
         rl.Sample.BACKGROUND,
         tf_params_pass,
         fail_qcd,
