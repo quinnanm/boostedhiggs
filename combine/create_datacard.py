@@ -178,37 +178,22 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
         #     toppass = ch["ttbar"]
 
     if wjets_estimation:  # data-driven estimation per category
-        failChName = "WJetsCR"
-        failCh = model[failChName]
-
-        initial_qcd = failCh.getObservation().astype(float)
-        if np.any(initial_qcd < 0.0):
-            # raise ValueError("initial_qcd negative for some bins..", initial_qcd)
-            logging.warning(f"initial_qcd negative for some bins... {initial_qcd}")
-            initial_qcd[initial_qcd < 0] = 0
-
-        for sample in failCh:
-            if sample.sampletype == rl.Sample.SIGNAL:
-                continue
-            # logging.info(f"subtracting {sample._name} from qcd")
-            initial_qcd -= sample.getExpectation(nominal=True)
-
         for region in regions:
             if not region.startswith("SR"):  # only do wjets estimation for SR
                 continue
 
-            logging.info(f"setting transfer factor for region {region}, from region {failChName}")
+            cr = "WJetsCR"
+
+            logging.info(f"setting transfer factor for region {region}, from region {cr}")
 
             rhalphabet(
                 model,
                 hists_templates,
-                failCh,
-                failChName,
                 m_obs,
                 shape_var,
-                initial_qcd,
                 blind_region,
                 blind_samples,
+                from_region=cr,
                 to_region=region,
             )
 
@@ -227,24 +212,39 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
     return model
 
 
-def rhalphabet(
-    model, hists_templates, failCh, failChName, m_obs, shape_var, initial_qcd, blind_region, blind_samples, to_region="pass"
-):
-    h_fail = hists_templates.copy()
-
-    if "Blinded" not in to_region:
+def rhalphabet(model, hists_templates, m_obs, shape_var, blind_region, blind_samples, from_region="fail", to_region="pass"):
+    if "Blinded" not in from_region:
         assert "Blinded" not in to_region
+        h_fail = hists_templates.copy()
         h_pass = hists_templates.copy()
 
+        failChName = f"{from_region}"
         passChName = f"{to_region}"
 
-    elif "Blinded" in to_region:
+    elif "Blinded" in from_region:
         assert "Blinded" in to_region
+        h_fail = blindBins(hists_templates.copy(), blind_region, blind_samples)
         h_pass = blindBins(hists_templates.copy(), blind_region, blind_samples)
 
+        failChName = f"{from_region}"
         passChName = f"{to_region}"
 
         to_region = to_region.replace("Blinded", "")
+        from_region = from_region.replace("Blinded", "")
+
+    failCh = model[failChName]
+
+    initial_qcd = failCh.getObservation().astype(float)
+    if np.any(initial_qcd < 0.0):
+        # raise ValueError("initial_qcd negative for some bins..", initial_qcd)
+        logging.warning(f"initial_qcd negative for some bins... {initial_qcd}")
+        initial_qcd[initial_qcd < 0] = 0
+
+    for sample in failCh:
+        if sample.sampletype == rl.Sample.SIGNAL:
+            continue
+        # logging.info(f"subtracting {sample._name} from qcd")
+        initial_qcd -= sample.getExpectation(nominal=True)
 
     # get the transfer factor
     num = (
@@ -253,8 +253,8 @@ def rhalphabet(
     )
 
     den = (
-        h_fail[{"Region": "WJetsCRforSR1VBF", "Sample": "QCD", "Systematic": "nominal"}].sum().value
-        + h_fail[{"Region": "WJetsCRforSR1VBF", "Sample": "WJetsLNu", "Systematic": "nominal"}].sum().value
+        h_fail[{"Region": from_region, "Sample": "QCD", "Systematic": "nominal"}].sum().value
+        + h_fail[{"Region": from_region, "Sample": "WJetsLNu", "Systematic": "nominal"}].sum().value
     )
 
     qcd_eff = num / den
