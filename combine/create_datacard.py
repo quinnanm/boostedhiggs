@@ -185,6 +185,8 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
         for region in regions:
             if "SR" not in region:
                 continue
+            if "Blinded" not in region:
+                continue
 
             if "Blinded" in region:
                 cr = "WJetsCRBlinded"
