@@ -330,7 +330,7 @@ def main(args):
         blind_samples=blind_samples,  # default is [] which means blind all samples
         blind_region=[90, 150],
         wjets_estimation=True,
-        top_estimation=True,
+        top_estimation=False,
     )
 
     with open(f"{args.outdir}/model_{save_as}.pkl", "wb") as fout:
