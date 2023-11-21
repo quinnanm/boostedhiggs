@@ -218,8 +218,8 @@ def rhalphabet(model, hists_templates, m_obs, shape_var, blind_region, blind_sam
         failChName = f"{from_region}"
         passChName = f"{to_region}"
 
-        to_region.replace("Blinded", "")
-        from_region.replace("Blinded", "")
+        to_region = to_region.replace("Blinded", "")
+        from_region = from_region.replace("Blinded", "")
 
     if "Blinded" not in from_region:
         assert "Blinded" not in to_region
