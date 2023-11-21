@@ -1,0 +1,2 @@
+combineCards.py SR1VBFBlinded=SR1VBFBlinded.txt SR1ggFpt300to450Blinded=SR1ggFpt300to450Blinded.txt SR1ggFpt450toInfBlinded=SR1ggFpt450toInfBlinded.txt SR2Blinded=SR2Blinded.txt WJetsCRforSR1VBF=WJetsCRforSR1VBF.txt WJetsCRforSR1ggFpt300to450=WJetsCRforSR1ggFpt300to450.txt WJetsCRforSR1ggFpt450toInf=WJetsCRforSR1ggFpt450toInf.txt WJetsCRforSR2=WJetsCRforSR2.txt > model_combined.txt
+text2workspace.py model_combined.txt
