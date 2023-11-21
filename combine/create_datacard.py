@@ -114,12 +114,12 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
 
         if "Blinded" in region:
             h = blindBins(hists_templates.copy(), blind_region, blind_samples)
-            ChName = f"{region}"
+            ChName = f"{region.copy()}"
 
             region = region.replace("Blinded", "")
         else:
             h = hists_templates.copy()
-            ChName = f"{region}"
+            ChName = f"{region.copy()}"
 
         ch = rl.Channel(ChName)
         model.addChannel(ch)
@@ -216,8 +216,8 @@ def rhalphabet(model, hists_templates, m_obs, shape_var, blind_region, blind_sam
         h_fail = blindBins(hists_templates.copy(), blind_region, blind_samples)
         h_pass = blindBins(hists_templates.copy(), blind_region, blind_samples)
 
-        failChName = f"{from_region}"
-        passChName = f"{to_region}"
+        failChName = f"{from_region.copy()}"
+        passChName = f"{to_region.copy()}"
 
         to_region = to_region.replace("Blinded", "")
         from_region = from_region.replace("Blinded", "")
@@ -227,8 +227,8 @@ def rhalphabet(model, hists_templates, m_obs, shape_var, blind_region, blind_sam
         h_fail = hists_templates.copy()
         h_pass = hists_templates.copy()
 
-        failChName = f"{from_region}"
-        passChName = f"{to_region}"
+        failChName = f"{from_region.copy()}"
+        passChName = f"{to_region.copy()}"
 
     failCh = model[failChName]
 
