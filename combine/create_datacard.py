@@ -330,7 +330,7 @@ def main(args):
         channels,
         blind_samples=blind_samples,  # default is [] which means blind all samples
         blind_region=[90, 150],
-        wjets_estimation=True,
+        wjets_estimation=args.wjets_estimation,
         top_estimation=False,
     )
 
@@ -348,9 +348,7 @@ if __name__ == "__main__":
     parser.add_argument("--years", dest="years", default="2017", help="years separated by commas")
     parser.add_argument("--channels", dest="channels", default="mu", help="channels separated by commas (e.g. mu,ele)")
     parser.add_argument("--outdir", dest="outdir", default="templates/test", type=str, help="name of template directory")
-    parser.add_argument(
-        "--samples_to_blind", dest="samples_to_blind", default="", help="samples to blind separated by commas"
-    )
+    parser.add_argument("--wjets-estimation", dest="--wjets-estimation", action="store_true")
 
     args = parser.parse_args()
 
