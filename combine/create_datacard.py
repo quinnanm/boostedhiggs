@@ -182,7 +182,7 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
             toppass = ch["ttbar"]
 
     if wjets_estimation:  # data-driven estimation per category
-        for region in ["SR1VBF", "SR1ggpt300to450Blinded", "SR1ggpt450toInfBlinded"]:
+        for region in ["SR1VBFBlinded", "SR1ggpt300to450Blinded", "SR1ggpt450toInfBlinded"]:
             rhalphabet(
                 model,
                 hists_templates,
