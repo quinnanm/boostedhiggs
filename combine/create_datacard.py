@@ -262,7 +262,7 @@ def rhalphabet(model, hists_templates, m_obs, shape_var, blind_region, blind_sam
 
     # qcd params
     qcd_params = np.array(
-        [rl.IndependentParameter(f"{CMS_PARAMS_LABEL}_tf_dataResidual_Bin{i}", 0) for i in range(m_obs.nbins)]
+        [rl.IndependentParameter(f"{CMS_PARAMS_LABEL}_tf_dataResidual_{to_region}_Bin{i}", 0) for i in range(m_obs.nbins)]
     )
 
     # idea here is that the error should be 1/sqrt(N), so parametrizing it as (1 + 1/sqrt(N))^qcdparams
@@ -274,7 +274,7 @@ def rhalphabet(model, hists_templates, m_obs, shape_var, blind_region, blind_sam
 
     # add samples
     fail_qcd = rl.ParametericSample(
-        f"{failChName}_{CMS_PARAMS_LABEL}_qcd_datadriven",
+        f"{failChName}_{CMS_PARAMS_LABEL}_qcd_datadriven_",
         rl.Sample.BACKGROUND,
         m_obs,
         scaled_params,
@@ -283,7 +283,7 @@ def rhalphabet(model, hists_templates, m_obs, shape_var, blind_region, blind_sam
 
     # transfer factor
     tf_dataResidual = rl.BasisPoly(
-        f"{CMS_PARAMS_LABEL}_tf_dataResidual",
+        f"{CMS_PARAMS_LABEL}_tf_dataResidual_{to_region}",
         (shape_var.order,),
         [shape_var.name],
         basis="Bernstein",
@@ -295,6 +295,7 @@ def rhalphabet(model, hists_templates, m_obs, shape_var, blind_region, blind_sam
 
     passCh = model[passChName]
 
+    print("passChName", passChName)
     pass_qcd = rl.TransferFactorSample(
         f"{passChName}_{CMS_PARAMS_LABEL}_qcd_datadriven",
         rl.Sample.BACKGROUND,
