@@ -180,7 +180,7 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
 
     if wjets_estimation:  # data-driven estimation per category
         for region in regions:
-            if "SR" not in region:
+            if not region.startswith("SR"):
                 continue
 
             if "Blinded" not in region:
