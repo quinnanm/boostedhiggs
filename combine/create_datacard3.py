@@ -183,6 +183,9 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
             if not region.startswith("SR"):  # only do wjets estimation for SR
                 continue
 
+            if "Blinded" not in region:  # only do wjets estimation for SR
+                continue
+
             cr = f'WJetsCRfor{region.replace("Blinded", "")}'
 
             logging.info(f"setting transfer factor for region {region}, from region {cr}")
