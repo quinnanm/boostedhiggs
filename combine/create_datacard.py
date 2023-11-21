@@ -76,11 +76,11 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
     systs_dict, systs_dict_values = systs_not_from_parquets(years, LUMI, full_lumi)
     sys_from_parquets = systs_from_parquets(years)
 
-    regions = list(hists_templates["SR1"].axes["Region"])
+    regions = list(hists_templates.axes["Region"])
 
     shape_var = ShapeVar(
-        name=hists_templates["SR1"].axes["mass_observable"].name,
-        bins=hists_templates["SR1"].axes["mass_observable"].edges,
+        name=hists_templates.axes["mass_observable"].name,
+        bins=hists_templates.axes["mass_observable"].edges,
         order=2,  # TODO: make the order of the polynomial configurable
     )
     m_obs = rl.Observable(shape_var.name, shape_var.bins)
