@@ -203,6 +203,7 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
                 from_region=cr,
                 to_region=region,
             )
+            break
 
     # if top_estimation:
     #     topnormSF = rl.IndependentParameter(f"topnormSF_{year}", 1.0, -50, 50)
