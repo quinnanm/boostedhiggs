@@ -146,9 +146,9 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
                 for sys_name, sys_value in sys_from_parquets[syst_on_sample].items():
                     # print(sName, sys_value, category, region)
 
-                    syst_up = h[{"Sample": sName, "Category": category, "Systematic": sys_name + "Up"}].values()
-                    syst_do = h[{"Sample": sName, "Category": category, "Systematic": sys_name + "Down"}].values()
-                    nominal = h[{"Sample": sName, "Category": category, "Systematic": "nominal"}].values()
+                    syst_up = h[{"Sample": sName, "Region": region, "Systematic": sys_name + "Up"}].values()
+                    syst_do = h[{"Sample": sName, "Region": region, "Systematic": sys_name + "Down"}].values()
+                    nominal = h[{"Sample": sName, "Region": region, "Systematic": "nominal"}].values()
 
                     if sys_value.combinePrior == "lnN":
                         eff_up = shape_to_num(syst_up, nominal)
