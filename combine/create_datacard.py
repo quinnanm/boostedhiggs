@@ -89,23 +89,19 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
     # for category in regions:
     #     topfail[category], toppass[category] = {}, {}
 
-    regions = [
-        "SR1VBF",
-        "SR1ggpt300to450",
-        "SR1ggFpt450toInf",
-        "SR1VBFBlinded",
-        "SR1ggpt300to450Blinded",
-        "SR1ggFpt450toInfBlinded",
-        "SR2",
-        "SR2Blinded",
-        "WJetsCR",
-        "WJetsCRBlinded",
-        "TopCR",
-    ]
+    regions = ["SR1VBF", "SR1ggpt300to450", "SR1ggFpt450toInf", "SR2"]  # put the signal regions here
+    for region in regions:
+        regions += f"{region}Blinded"
+
+    for region in regions:
+        if wjets_estimation:
+            regions += f"WJetsCRfor{region}"
+        if top_estimation:
+            regions += f"TopCRfor{region}"
 
     # fill datacard with systematics and rates
     for region in regions:
-        if wjets_estimation and (region != "TopCR"):
+        if wjets_estimation and (region != "TopCR"):  # only use MC qcd and wjets for Top control region
             Samples = samples.copy()
             Samples.remove("WJetsLNu")
             Samples.remove("QCD")
@@ -185,13 +181,14 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
         for region in regions:
             if "SR" not in region:
                 continue
+
             if "Blinded" not in region:
                 continue
 
             if "Blinded" in region:
-                cr = "WJetsCRBlinded"
+                cr = f"WJetsCRBlindedfor{region}"
             else:
-                cr = "WJetsCR"
+                cr = f"WJetsCRfor{region}"
 
             rhalphabet(
                 model,
@@ -203,7 +200,6 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
                 from_region=cr,
                 to_region=region,
             )
-            break
 
     # if top_estimation:
     #     topnormSF = rl.IndependentParameter(f"topnormSF_{year}", 1.0, -50, 50)
