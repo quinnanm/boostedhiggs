@@ -76,8 +76,7 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
     systs_dict, systs_dict_values = systs_not_from_parquets(years, LUMI, full_lumi)
     sys_from_parquets = systs_from_parquets(years)
 
-    categories = list(hists_templates["SR1"].axes["Category"])
-    # categories = ["ggFpt300toinf"]  # TODO: remove
+    regions = list(hists_templates["SR1"].axes["Region"])
 
     shape_var = ShapeVar(
         name=hists_templates["SR1"].axes["mass_observable"].name,
@@ -89,142 +88,144 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
     model = rl.Model("testModel")
 
     topfail, toppass = {}, {}
-    for category in categories:
+    for category in regions:
         topfail[category], toppass[category] = {}, {}
 
     # fill datacard with systematics and rates
-    for category in categories:
-        for region in ["SR1", "SR1Blinded", "SR2", "SR2Blinded", "WJetsCR", "WJetsCRBlinded", "TopCR"]:
-            if wjets_estimation and (region != "TopCR"):
-                Samples = samples.copy()
-                Samples.remove("WJetsLNu")
-                Samples.remove("QCD")
-            else:
-                Samples = samples.copy()
+    for region in [
+        "SR1VBF",
+        "SR1ggpt300to450",
+        "SR1ggFpt450toInf",
+        "SR1Blinded",
+        "SR2",
+        "SR2Blinded",
+        "WJetsCR",
+        "WJetsCRBlinded",
+        "TopCR",
+    ]:
+        if wjets_estimation and (region != "TopCR"):
+            Samples = samples.copy()
+            Samples.remove("WJetsLNu")
+            Samples.remove("QCD")
+        else:
+            Samples = samples.copy()
 
-            if "Blinded" in region:
-                h = blindBins(hists_templates[region.replace("Blinded", "")], blind_region, blind_samples)
-            else:
-                h = hists_templates[region]
+        if "Blinded" in region:
+            h = blindBins(hists_templates.copy(), blind_region, blind_samples)
+            ChName = f"{region}"
 
-            ChName = f"{region}{category}"
+            region = region.replace("Blinded", "")
+        else:
+            h = hists_templates.copy()
+            ChName = f"{region}"
 
-            ch = rl.Channel(ChName)
-            model.addChannel(ch)
+        ch = rl.Channel(ChName)
+        model.addChannel(ch)
 
-            for sName in Samples:
-                templ = get_template(h, sName, category)
-                stype = rl.Sample.SIGNAL if sName in sigs else rl.Sample.BACKGROUND
-                sample = rl.TemplateSample(ch.name + "_" + labels[sName], stype, templ)
+        for sName in Samples:
+            templ = get_template(h, sName, region)
+            stype = rl.Sample.SIGNAL if sName in sigs else rl.Sample.BACKGROUND
+            sample = rl.TemplateSample(ch.name + "_" + labels[sName], stype, templ)
 
-                sample.autoMCStats(lnN=True)
+            sample.autoMCStats(lnN=True)
 
-                # SYSTEMATICS NOT FROM PARQUETS
-                for syst_on_sample in ["all_samples", sName]:  # apply common systs and per sample systs
-                    for sys_name, sys_value in systs_dict[syst_on_sample].items():
-                        if systs_dict_values[syst_on_sample][sys_name][1] is None:  # if up and down are the same
-                            sample.setParamEffect(sys_value, systs_dict_values[syst_on_sample][sys_name][0])
+            # SYSTEMATICS NOT FROM PARQUETS
+            for syst_on_sample in ["all_samples", sName]:  # apply common systs and per sample systs
+                for sys_name, sys_value in systs_dict[syst_on_sample].items():
+                    if systs_dict_values[syst_on_sample][sys_name][1] is None:  # if up and down are the same
+                        sample.setParamEffect(sys_value, systs_dict_values[syst_on_sample][sys_name][0])
+                    else:
+                        sample.setParamEffect(
+                            sys_value,
+                            systs_dict_values[syst_on_sample][sys_name][0],
+                            systs_dict_values[syst_on_sample][sys_name][1],
+                        )
+
+            # SYSTEMATICS FROM PARQUETS
+            for syst_on_sample in ["all_samples", sName]:  # apply common systs and per sample systs
+                for sys_name, sys_value in sys_from_parquets[syst_on_sample].items():
+                    # print(sName, sys_value, category, region)
+
+                    syst_up = h[{"Sample": sName, "Category": category, "Systematic": sys_name + "Up"}].values()
+                    syst_do = h[{"Sample": sName, "Category": category, "Systematic": sys_name + "Down"}].values()
+                    nominal = h[{"Sample": sName, "Category": category, "Systematic": "nominal"}].values()
+
+                    if sys_value.combinePrior == "lnN":
+                        eff_up = shape_to_num(syst_up, nominal)
+                        eff_do = shape_to_num(syst_do, nominal)
+
+                        # if (math.isclose(1, eff_up, rel_tol=1e-4)) & (
+                        #     math.isclose(1, eff_do, rel_tol=1e-4)
+                        # ):  # leave it as '-'
+                        #     continue
+
+                        if math.isclose(eff_up, eff_do, rel_tol=1e-2):  # if up and down are the same
+                            sample.setParamEffect(sys_value, max(eff_up, eff_do))
                         else:
-                            sample.setParamEffect(
-                                sys_value,
-                                systs_dict_values[syst_on_sample][sys_name][0],
-                                systs_dict_values[syst_on_sample][sys_name][1],
-                            )
+                            sample.setParamEffect(sys_value, max(eff_up, eff_do), min(eff_up, eff_do))
 
-                # SYSTEMATICS FROM PARQUETS
-                for syst_on_sample in ["all_samples", sName]:  # apply common systs and per sample systs
-                    for sys_name, sys_value in sys_from_parquets[syst_on_sample].items():
-                        # print(sName, sys_value, category, region)
+                    else:
+                        sample.setParamEffect(sys_value, (syst_up / nominal), (syst_do / nominal))
 
-                        syst_up = h[{"Sample": sName, "Category": category, "Systematic": sys_name + "Up"}].values()
-                        syst_do = h[{"Sample": sName, "Category": category, "Systematic": sys_name + "Down"}].values()
-                        nominal = h[{"Sample": sName, "Category": category, "Systematic": "nominal"}].values()
+            ch.addSample(sample)
 
-                        if sys_value.combinePrior == "lnN":
-                            eff_up = shape_to_num(syst_up, nominal)
-                            eff_do = shape_to_num(syst_do, nominal)
+        # add data
+        data_obs = get_template(h, "Data", region)
+        ch.setObservation(data_obs)
 
-                            # if (math.isclose(1, eff_up, rel_tol=1e-4)) & (
-                            #     math.isclose(1, eff_do, rel_tol=1e-4)
-                            # ):  # leave it as '-'
-                            #     continue
+        # get the relevant channels for wjets estimation in pass region
+        if "TopCR" in ChName:
+            topfail = ch["ttbar"]
+        elif "SR1Blinded" in ChName:
+            toppass = ch["ttbar"]
 
-                            if math.isclose(eff_up, eff_do, rel_tol=1e-2):  # if up and down are the same
-                                sample.setParamEffect(sys_value, max(eff_up, eff_do))
-                            else:
-                                sample.setParamEffect(sys_value, max(eff_up, eff_do), min(eff_up, eff_do))
+    if wjets_estimation:  # data-driven estimation per category
+        rhalphabet(
+            model,
+            hists_templates,
+            m_obs,
+            shape_var,
+            blind_region,
+            blind_samples,
+            from_region="WJetsCRBlinded",
+            # from_region="WJetsCR",
+            to_region="SR1Blinded",
+        )
 
-                        else:
-                            sample.setParamEffect(sys_value, (syst_up / nominal), (syst_do / nominal))
+    if top_estimation:
+        topnormSF = rl.IndependentParameter(f"topnormSF_{year}", 1.0, -50, 50)
 
-                ch.addSample(sample)
-
-            # add data
-            data_obs = get_template(h, "Data", category)
-            ch.setObservation(data_obs)
-
-            # get the relevant channels for wjets estimation in pass region
-            if "TopCR" in ChName:
-                topfail = ch["ttbar"]
-            elif "SR1Blinded" in ChName:
-                toppass = ch["ttbar"]
-
-        if wjets_estimation:  # data-driven estimation per category
-            rhalphabet(
-                model,
-                hists_templates,
-                category,
-                m_obs,
-                shape_var,
-                blind_region,
-                blind_samples,
-                # from_region="WJetsCRBlinded",
-                from_region="WJetsCR",
-                to_region="SR1Blinded",
-            )
-
-        if top_estimation:
-            topnormSF = rl.IndependentParameter(f"topnormSF_{year}", 1.0, -50, 50)
-
-            # seperate rate of process by taking into account normalization (how well it fits data/mc in one region)
-            # from mistag efficiency (i.e. tagger)
-            # 2 indep dof: we don't - we choose (for now) one parameter on the overall normalization of wjets
-            # we reparametrize both as: one normalization (both equally up and down) + effSF (one that is asymetric -
-            # if increases, will increase in pass and decrease in fail)
-            # for now just use normalization and see data/mc
-            topfail.setParamEffect(topnormSF, 1 * topnormSF)
-            toppass.setParamEffect(topnormSF, 1 * topnormSF)
+        # seperate rate of process by taking into account normalization (how well it fits data/mc in one region)
+        # from mistag efficiency (i.e. tagger)
+        # 2 indep dof: we don't - we choose (for now) one parameter on the overall normalization of wjets
+        # we reparametrize both as: one normalization (both equally up and down) + effSF (one that is asymetric -
+        # if increases, will increase in pass and decrease in fail)
+        # for now just use normalization and see data/mc
+        topfail.setParamEffect(topnormSF, 1 * topnormSF)
+        toppass.setParamEffect(topnormSF, 1 * topnormSF)
 
     return model
 
 
-def rhalphabet(
-    model, hists_templates, category, m_obs, shape_var, blind_region, blind_samples, from_region="fail", to_region="pass"
-):
-    # if "Blinded" in from_region:
-    #     assert "Blinded" in to_region
-    #     h_fail = blindBins(hists_templates[from_region.replace("Blinded", "")], blind_region, blind_samples)
-    #     h_pass = blindBins(hists_templates[to_region.replace("Blinded", "")], blind_region, blind_samples)
-
-    # if "Blinded" not in from_region:
-    #     assert "Blinded" not in to_region
-    #     h_fail = hists_templates[from_region]
-    #     h_pass = hists_templates[to_region]
-
+def rhalphabet(model, hists_templates, m_obs, shape_var, blind_region, blind_samples, from_region="fail", to_region="pass"):
     if "Blinded" in from_region:
-        h_fail = blindBins(hists_templates[from_region.replace("Blinded", "")], blind_region, blind_samples)
+        assert "Blinded" in to_region
+        h_fail = blindBins(hists_templates.copy(), blind_region, blind_samples)
+        h_pass = blindBins(hists_templates.copy(), blind_region, blind_samples)
 
-    elif "Blinded" not in from_region:
-        h_fail = hists_templates[from_region]
+        failChName = f"{from_region}"
+        passChName = f"{to_region}"
 
-    if "Blinded" in to_region:
-        h_pass = blindBins(hists_templates[to_region.replace("Blinded", "")], blind_region, blind_samples)
+        to_region.replace("Blinded", "")
+        from_region.replace("Blinded", "")
 
-    elif "Blinded" not in to_region:
-        h_pass = hists_templates[to_region]
+    if "Blinded" not in from_region:
+        assert "Blinded" not in to_region
+        h_fail = hists_templates.copy()
+        h_pass = hists_templates.copy()
 
-    failChName = f"{from_region}{category}"
-    passChName = f"{to_region}{category}"
+        failChName = f"{from_region}"
+        passChName = f"{to_region}"
 
     failCh = model[failChName]
 
@@ -242,13 +243,13 @@ def rhalphabet(
 
     # get the transfer factor
     num = (
-        h_pass[{"Category": category, "Sample": "QCD", "Systematic": "nominal"}].sum().value
-        + h_pass[{"Category": category, "Sample": "WJetsLNu", "Systematic": "nominal"}].sum().value
+        h_pass[{"Region": to_region, "Sample": "QCD", "Systematic": "nominal"}].sum().value
+        + h_pass[{"Region": to_region, "Sample": "WJetsLNu", "Systematic": "nominal"}].sum().value
     )
 
     den = (
-        h_fail[{"Category": category, "Sample": "QCD", "Systematic": "nominal"}].sum().value
-        + h_fail[{"Category": category, "Sample": "WJetsLNu", "Systematic": "nominal"}].sum().value
+        h_fail[{"Region": from_region, "Sample": "QCD", "Systematic": "nominal"}].sum().value
+        + h_fail[{"Region": from_region, "Sample": "WJetsLNu", "Systematic": "nominal"}].sum().value
     )
 
     qcd_eff = num / den

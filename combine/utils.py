@@ -122,10 +122,10 @@ def shape_to_num(var, nom, clip=1.5):
     return var_rate / nom_rate
 
 
-def get_template(h, sample, category):
+def get_template(h, sample, region):
     # massbins = h.axes["mass_observable"].edges
     # return (h[{"Sample": sample, "Systematic": "nominal", "Category": category}].values(), massbins, "mass_observable")
-    return h[{"Sample": sample, "Systematic": "nominal", "Category": category}]
+    return h[{"Sample": sample, "Systematic": "nominal", "Region": region}]
 
 
 def blindBins(h: Hist, blind_region: List, blind_samples: List[str] = []):
