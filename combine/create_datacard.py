@@ -253,8 +253,8 @@ def rhalphabet(
     )
 
     den = (
-        h_fail[{"Region": "WjetsCR", "Sample": "QCD", "Systematic": "nominal"}].sum().value
-        + h_fail[{"Region": "WjetsCR", "Sample": "WJetsLNu", "Systematic": "nominal"}].sum().value
+        h_fail[{"Region": "WJetsCRforSR1VBF", "Sample": "QCD", "Systematic": "nominal"}].sum().value
+        + h_fail[{"Region": "WJetsCRforSR1VBF", "Sample": "WJetsLNu", "Systematic": "nominal"}].sum().value
     )
 
     qcd_eff = num / den
