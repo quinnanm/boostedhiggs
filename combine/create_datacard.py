@@ -351,7 +351,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--samples_to_blind", dest="samples_to_blind", default="", help="samples to blind separated by commas"
     )
-    parser.add_argument("--wjets-estimation", dest="--wjets-estimation", action="store_true")
+    parser.add_argument("--wjets-estimation", action="store_true")
 
     args = parser.parse_args()
 
