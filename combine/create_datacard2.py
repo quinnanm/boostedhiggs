@@ -93,9 +93,8 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
         "SR2Blinded",
     ]  # put the signal regions here
 
-    for region in regions.copy():
-        if wjets_estimation:
-            regions += [f"WJetsCRfor{region}"]
+    if wjets_estimation:
+        regions += ["WJetsCRforSR1VBF"]
 
     # fill datacard with systematics and rates
     for region in regions:
@@ -165,61 +164,73 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
         ch.setObservation(data_obs)
 
     if wjets_estimation:  # data-driven estimation per category
+        failChName = "WJetsCRforSR1VBF"
+        failCh = model[failChName]
+
+        initial_qcd = failCh.getObservation().astype(float)
+        if np.any(initial_qcd < 0.0):
+            # raise ValueError("initial_qcd negative for some bins..", initial_qcd)
+            logging.warning(f"initial_qcd negative for some bins... {initial_qcd}")
+            initial_qcd[initial_qcd < 0] = 0
+
+        for sample in failCh:
+            if sample.sampletype == rl.Sample.SIGNAL:
+                continue
+            # logging.info(f"subtracting {sample._name} from qcd")
+            initial_qcd -= sample.getExpectation(nominal=True)
+
+        # qcd params
+        qcd_params = np.array(
+            [rl.IndependentParameter(f"{CMS_PARAMS_LABEL}_tf_dataResidual_Bin{i}", 0) for i in range(m_obs.nbins)]
+        )
+
+        # idea here is that the error should be 1/sqrt(N), so parametrizing it as (1 + 1/sqrt(N))^qcdparams
+        # will result in qcdparams errors ~±1
+        # but because qcd is poorly modelled we're scaling sigma scale
+
+        sigmascale = 10  # to scale the deviation from initial
+        scaled_params = initial_qcd * (1 + sigmascale / np.maximum(1.0, np.sqrt(initial_qcd))) ** qcd_params
+
+        # add samples
+        fail_qcd = rl.ParametericSample(
+            f"{failChName}_{CMS_PARAMS_LABEL}_qcd_datadriven",
+            rl.Sample.BACKGROUND,
+            m_obs,
+            scaled_params,
+        )
+        failCh.addSample(fail_qcd)
+
         for region in regions:
             if not region.startswith("SR"):  # only do wjets estimation for SR
                 continue
 
-            cr = f"WJetsCRfor{region}"
-
-            logging.info(f"setting transfer factor for region {region}, from region {cr}")
+            logging.info(f"setting transfer factor for region {region}, from region {failChName}")
 
             rhalphabet(
                 model,
                 hists_templates,
-                m_obs,
+                fail_qcd,
                 shape_var,
                 blind_region,
                 blind_samples,
-                from_region=cr,
                 to_region=region,
             )
 
     return model
 
 
-def rhalphabet(model, hists_templates, m_obs, shape_var, blind_region, blind_samples, from_region="fail", to_region="pass"):
-    if "Blinded" not in from_region:
-        assert "Blinded" not in to_region
-        h_fail = hists_templates.copy()
-        h_pass = hists_templates.copy()
+def rhalphabet(model, hists_templates, fail_qcd, shape_var, blind_region, blind_samples, to_region="pass"):
+    h_fail = hists_templates.copy()
 
-        failChName = f"{from_region}"
+    if "Blinded" not in to_region:
+        h_pass = hists_templates.copy()
         passChName = f"{to_region}"
 
-    elif "Blinded" in from_region:
-        assert "Blinded" in to_region
-        h_fail = blindBins(hists_templates.copy(), blind_region, blind_samples)
+    elif "Blinded" in to_region:
         h_pass = blindBins(hists_templates.copy(), blind_region, blind_samples)
-
-        failChName = f"{from_region}"
         passChName = f"{to_region}"
 
         to_region = to_region.replace("Blinded", "")
-        from_region = from_region.replace("Blinded", "")
-
-    failCh = model[failChName]
-
-    initial_qcd = failCh.getObservation().astype(float)
-    if np.any(initial_qcd < 0.0):
-        # raise ValueError("initial_qcd negative for some bins..", initial_qcd)
-        logging.warning(f"initial_qcd negative for some bins... {initial_qcd}")
-        initial_qcd[initial_qcd < 0] = 0
-
-    for sample in failCh:
-        if sample.sampletype == rl.Sample.SIGNAL:
-            continue
-        # logging.info(f"subtracting {sample._name} from qcd")
-        initial_qcd -= sample.getExpectation(nominal=True)
 
     # get the transfer factor
     num = (
@@ -228,15 +239,15 @@ def rhalphabet(model, hists_templates, m_obs, shape_var, blind_region, blind_sam
     )
 
     den = (
-        h_fail[{"Region": from_region, "Sample": "QCD", "Systematic": "nominal"}].sum().value
-        + h_fail[{"Region": from_region, "Sample": "WJetsLNu", "Systematic": "nominal"}].sum().value
+        h_fail[{"Region": "WJetsCRforSR1VBF", "Sample": "QCD", "Systematic": "nominal"}].sum().value
+        + h_fail[{"Region": "WJetsCRforSR1VBF", "Sample": "WJetsLNu", "Systematic": "nominal"}].sum().value
     )
 
     qcd_eff = num / den
 
     # transfer factor
     tf_dataResidual = rl.BasisPoly(
-        f"{CMS_PARAMS_LABEL}_tf_dataResidual",
+        f"{CMS_PARAMS_LABEL}_tf_dataResidual_{passChName}",
         (shape_var.order,),
         [shape_var.name],
         basis="Bernstein",
@@ -245,27 +256,6 @@ def rhalphabet(model, hists_templates, m_obs, shape_var, blind_region, blind_sam
     )
     tf_dataResidual_params = tf_dataResidual(shape_var.scaled)
     tf_params_pass = qcd_eff * tf_dataResidual_params  # scale params initially by qcd eff
-
-    # qcd params
-    qcd_params = np.array(
-        [rl.IndependentParameter(f"{CMS_PARAMS_LABEL}_tf_dataResidual_Bin{i}", 0) for i in range(m_obs.nbins)]
-    )
-
-    # idea here is that the error should be 1/sqrt(N), so parametrizing it as (1 + 1/sqrt(N))^qcdparams
-    # will result in qcdparams errors ~±1
-    # but because qcd is poorly modelled we're scaling sigma scale
-
-    sigmascale = 10  # to scale the deviation from initial
-    scaled_params = initial_qcd * (1 + sigmascale / np.maximum(1.0, np.sqrt(initial_qcd))) ** qcd_params
-
-    # add samples
-    fail_qcd = rl.ParametericSample(
-        f"{failChName}_{CMS_PARAMS_LABEL}_qcd_datadriven",
-        rl.Sample.BACKGROUND,
-        m_obs,
-        scaled_params,
-    )
-    failCh.addSample(fail_qcd)
 
     passCh = model[passChName]
     pass_qcd = rl.TransferFactorSample(
