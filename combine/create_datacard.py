@@ -91,15 +91,14 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
     #     topfail[category], toppass[category] = {}, {}
 
     regions = ["SR1VBF", "SR1ggpt300to450", "SR1ggFpt450toInf", "SR2"]  # put the signal regions here
-    regions = ["SR1ggpt300to450"]  # put the signal regions here
     for region in regions:
-        regions += f"{region}Blinded"
+        regions += [f"{region}Blinded"]
 
     for region in regions:
         if wjets_estimation:
-            regions += f"WJetsCRfor{region}"
+            regions += [f"WJetsCRfor{region}"]
         if top_estimation:
-            regions += f"TopCRfor{region}"
+            regions += [f"TopCRfor{region}"]
 
     # fill datacard with systematics and rates
     for region in regions:
