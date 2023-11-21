@@ -94,10 +94,11 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
     for region in regions.copy():
         regions += [f"{region}Blinded"]
 
-    if wjets_estimation:
-        regions += ["WJetsCR"]
-    if top_estimation:
-        regions += ["TopCR"]
+    for region in regions.copy():
+        if wjets_estimation:
+            regions += [f"WJetsCRfor{region}"]
+        if top_estimation:
+            regions += ["TopCR"]
 
     # fill datacard with systematics and rates
     for region in regions:
@@ -182,7 +183,7 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
             if not region.startswith("SR"):  # only do wjets estimation for SR
                 continue
 
-            cr = "WJetsCR"
+            cr = f"WJetsCRfor{region}"
 
             logging.info(f"setting transfer factor for region {region}, from region {cr}")
 
