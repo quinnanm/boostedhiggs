@@ -219,7 +219,6 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
 def rhalphabet(model, hists_templates, m_obs, shape_var, blind_region, blind_samples, from_region="fail", to_region="pass"):
     if "Blinded" not in from_region:
         assert "Blinded" not in to_region
-        print("NOT BLINDED")
         h_fail = hists_templates.copy()
         h_pass = hists_templates.copy()
 
@@ -236,8 +235,6 @@ def rhalphabet(model, hists_templates, m_obs, shape_var, blind_region, blind_sam
 
         to_region = to_region.replace("Blinded", "")
         from_region = from_region.replace("Blinded", "")
-        print("BLINDED")
-        print("failChName", failChName)
 
     failCh = model[failChName]
 
