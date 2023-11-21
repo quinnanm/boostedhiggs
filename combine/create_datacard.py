@@ -186,10 +186,7 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
             if "Blinded" not in region:
                 continue
 
-            if "Blinded" in region:
-                cr = f"WJetsCRBlindedfor{region}"
-            else:
-                cr = f"WJetsCRfor{region}"
+            cr = f"WJetsCRfor{region}"
 
             logging.info(f"attempt transfer factor for region {region}, from region {cr}")
 
