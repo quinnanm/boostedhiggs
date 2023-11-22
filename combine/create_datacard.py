@@ -320,7 +320,7 @@ def main(args):
         years,
         channels,
         blind_samples=blind_samples,  # default is [] which means blind all samples
-        blind_region=[90, 150],
+        blind_region=[90, 160],
         wjets_estimation=args.wjets_estimation,
         top_estimation=False,
     )
