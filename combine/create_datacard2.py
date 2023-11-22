@@ -211,7 +211,7 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
             if not passChName.startswith("SR"):  # only do wjets estimation for SR
                 continue
 
-            if "Blinded" in failChName:
+            if "Blinded" in passChName:
                 to_region = passChName.replace("Blinded", "")
             else:
                 to_region = passChName
