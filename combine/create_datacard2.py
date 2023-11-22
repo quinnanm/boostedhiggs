@@ -114,7 +114,7 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
             region = region.replace("Blinded", "")  # region will be used to get the axes of the templates
         else:
             h = hists_templates.copy()
-            ChName = {region}
+            ChName = region
 
         ch = rl.Channel(ChName)
         model.addChannel(ch)
