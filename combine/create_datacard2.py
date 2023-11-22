@@ -94,10 +94,11 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
     ]  # put the signal regions here
 
     if wjets_estimation:
-        # regions += ["WJetsCR"]
+        regions += ["WJetsCR"]
         regions += ["WJetsCRBlinded"]
 
     # fill datacard with systematics and rates
+    # ChName may have "Blinded" in the string, but region does not
     for region in regions:
         if wjets_estimation and (region != "TopCR"):  # only use MC qcd and wjets for Top control region
             Samples = samples.copy()
@@ -108,12 +109,12 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
 
         if "Blinded" in region:
             h = blindBins(hists_templates.copy(), blind_region, blind_samples)
-            ChName = f"{region}"
+            ChName = region
 
-            region = region.replace("Blinded", "")
+            region = region.replace("Blinded", "")  # region will be used to get the axes of the templates
         else:
             h = hists_templates.copy()
-            ChName = f"{region}"
+            ChName = {region}
 
         ch = rl.Channel(ChName)
         model.addChannel(ch)
@@ -140,8 +141,6 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
             # SYSTEMATICS FROM PARQUETS
             for syst_on_sample in ["all_samples", sName]:  # apply common systs and per sample systs
                 for sys_name, sys_value in sys_from_parquets[syst_on_sample].items():
-                    # print(sName, sys_value, category, region)
-
                     syst_up = h[{"Sample": sName, "Region": region, "Systematic": sys_name + "Up"}].values()
                     syst_do = h[{"Sample": sName, "Region": region, "Systematic": sys_name + "Down"}].values()
                     nominal = h[{"Sample": sName, "Region": region, "Systematic": "nominal"}].values()
@@ -164,9 +163,10 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
         data_obs = get_template(h, "Data", region)
         ch.setObservation(data_obs)
 
-    if wjets_estimation:  # data-driven estimation per category
+    if wjets_estimation:  # data-driven estimation
         # failChName = "WJetsCR"
         failChName = "WJetsCRBlinded"
+
         if "Blinded" in failChName:
             from_region = failChName.replace("Blinded", "")
         else:
@@ -207,44 +207,54 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
         )
         failCh.addSample(fail_qcd)
 
-        for region in regions:
-            if not region.startswith("SR"):  # only do wjets estimation for SR
+        for passChName in regions:
+            if not passChName.startswith("SR"):  # only do wjets estimation for SR
                 continue
 
-            logging.info(f"setting transfer factor for region {region}, from region {failChName}")
+            if "Blinded" in failChName:
+                to_region = passChName.replace("Blinded", "")
+            else:
+                to_region = passChName
+
+            logging.info(f"setting transfer factor for region {passChName}, from region {failChName}")
 
             rhalphabet(
                 model,
                 hists_templates,
+                passChName,
                 failChName,
                 fail_qcd,
                 shape_var,
                 blind_region,
                 blind_samples,
                 from_region=from_region,
-                to_region=region,
+                to_region=to_region,
             )
 
     return model
 
 
 def rhalphabet(
-    model, hists_templates, failChName, fail_qcd, shape_var, blind_region, blind_samples, from_region, to_region="pass"
+    model,
+    hists_templates,
+    passChName,
+    failChName,
+    fail_qcd,
+    shape_var,
+    blind_region,
+    blind_samples,
+    from_region="fail",
+    to_region="pass",
 ):
     if "Blinded" in failChName:
         h_fail = blindBins(hists_templates.copy(), blind_region, blind_samples)
     else:
         h_fail = hists_templates.copy()
 
-    if "Blinded" not in to_region:
-        h_pass = hists_templates.copy()
-        passChName = f"{to_region}"
-
-    elif "Blinded" in to_region:
+    if "Blinded" in to_region:
         h_pass = blindBins(hists_templates.copy(), blind_region, blind_samples)
-        passChName = f"{to_region}"
-
-        to_region = to_region.replace("Blinded", "")
+    else:
+        h_pass = hists_templates.copy()
 
     # get the transfer factor
     num = (
