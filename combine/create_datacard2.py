@@ -94,8 +94,8 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
     ]  # put the signal regions here
 
     if wjets_estimation:
-        # regions += ["WJetsCR"]
-        regions += ["WJetsCRBlinded"]
+        regions += ["WJetsCR"]
+        # regions += ["WJetsCRBlinded"]
 
     # fill datacard with systematics and rates
     # ChName may have "Blinded" in the string, but region does not
@@ -164,8 +164,8 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
         ch.setObservation(data_obs)
 
     if wjets_estimation:  # data-driven estimation
-        # failChName = "WJetsCR"
-        failChName = "WJetsCRBlinded"
+        failChName = "WJetsCR"
+        # failChName = "WJetsCRBlinded"
 
         if "Blinded" in failChName:
             from_region = failChName.replace("Blinded", "")
@@ -251,7 +251,7 @@ def rhalphabet(
     else:
         h_fail = hists_templates.copy()
 
-    if "Blinded" in to_region:
+    if "Blinded" in passChName:
         h_pass = blindBins(hists_templates.copy(), blind_region, blind_samples)
     else:
         h_pass = hists_templates.copy()
