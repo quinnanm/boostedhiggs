@@ -94,7 +94,7 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
     ]  # put the signal regions here
 
     if wjets_estimation:
-        regions += ["WJetsCR"]
+        # regions += ["WJetsCR"]
         regions += ["WJetsCRBlinded"]
 
     # fill datacard with systematics and rates
