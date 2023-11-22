@@ -167,6 +167,10 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
     if wjets_estimation:  # data-driven estimation per category
         # failChName = "WJetsCR"
         failChName = "WJetsCRBlinded"
+        if "Blinded" in failChName:
+            from_region = failChName.replace("Blinded", "")
+        else:
+            from_region = failChName
 
         failCh = model[failChName]
 
@@ -217,14 +221,20 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
                 shape_var,
                 blind_region,
                 blind_samples,
+                from_region=from_region,
                 to_region=region,
             )
 
     return model
 
 
-def rhalphabet(model, hists_templates, failChName, fail_qcd, shape_var, blind_region, blind_samples, to_region="pass"):
-    h_fail = hists_templates.copy()
+def rhalphabet(
+    model, hists_templates, failChName, fail_qcd, shape_var, blind_region, blind_samples, from_region, to_region="pass"
+):
+    if "Blinded" in failChName:
+        h_fail = blindBins(hists_templates.copy(), blind_region, blind_samples)
+    else:
+        h_fail = hists_templates.copy()
 
     if "Blinded" not in to_region:
         h_pass = hists_templates.copy()
@@ -243,8 +253,8 @@ def rhalphabet(model, hists_templates, failChName, fail_qcd, shape_var, blind_re
     )
 
     den = (
-        h_fail[{"Region": failChName, "Sample": "QCD", "Systematic": "nominal"}].sum().value
-        + h_fail[{"Region": failChName, "Sample": "WJetsLNu", "Systematic": "nominal"}].sum().value
+        h_fail[{"Region": from_region, "Sample": "QCD", "Systematic": "nominal"}].sum().value
+        + h_fail[{"Region": from_region, "Sample": "WJetsLNu", "Systematic": "nominal"}].sum().value
     )
 
     qcd_eff = num / den
