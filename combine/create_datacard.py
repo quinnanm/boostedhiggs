@@ -87,6 +87,10 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
     model = rl.Model("testModel")
 
     regions = [
+        "SR1VBF",
+        "SR1ggFpt300to450",
+        "SR1ggFpt450toInf",
+        "SR2",
         "SR1VBFBlinded",
         "SR1ggFpt300to450Blinded",
         "SR1ggFpt450toInfBlinded",
