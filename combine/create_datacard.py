@@ -241,8 +241,8 @@ def rhalphabet(model, hists_templates, failChName, fail_qcd, shape_var, blind_re
     )
 
     den = (
-        h_fail[{"Region": failChName, "Sample": "QCD", "Systematic": "nominal"}].sum().value
-        + h_fail[{"Region": failChName, "Sample": "WJetsLNu", "Systematic": "nominal"}].sum().value
+        h_fail[{"Region": "WJetsCR", "Sample": "QCD", "Systematic": "nominal"}].sum().value
+        + h_fail[{"Region": "WJetsCR", "Sample": "WJetsLNu", "Systematic": "nominal"}].sum().value
     )
 
     qcd_eff = num / den
