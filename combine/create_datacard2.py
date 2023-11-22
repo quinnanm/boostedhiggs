@@ -94,7 +94,8 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
     ]  # put the signal regions here
 
     if wjets_estimation:
-        regions += ["WJetsCR"]
+        # regions += ["WJetsCR"]
+        regions += ["WJetsCBlinded"]
 
     # fill datacard with systematics and rates
     for region in regions:
@@ -164,7 +165,9 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
         ch.setObservation(data_obs)
 
     if wjets_estimation:  # data-driven estimation per category
-        failChName = "WJetsCR"
+        # failChName = "WJetsCR"
+        failChName = "WJetsCRBlinded"
+
         failCh = model[failChName]
 
         initial_qcd = failCh.getObservation().astype(float)
