@@ -93,12 +93,12 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
         "SR2Blinded",
     ]  # put the signal regions here
 
-    for region in regions.copy():
-        if wjets_estimation:
-            # regions += [f'WJetsCRfor{region.replace("Blinded", "")}']
-            regions += [f"WJetsCRfor{region}"]
+    if wjets_estimation:
+        regions += ["WJetsCR"]
+        regions += ["WJetsCRBlinded"]
 
     # fill datacard with systematics and rates
+    # ChName may have "Blinded" in the string, but region does not
     for region in regions:
         if wjets_estimation and (region != "TopCR"):  # only use MC qcd and wjets for Top control region
             Samples = samples.copy()
@@ -109,12 +109,12 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
 
         if "Blinded" in region:
             h = blindBins(hists_templates.copy(), blind_region, blind_samples)
-            ChName = f"{region}"
+            ChName = region
 
-            region = region.replace("Blinded", "")
+            region = region.replace("Blinded", "")  # region will be used to get the axes of the templates
         else:
             h = hists_templates.copy()
-            ChName = f"{region}"
+            ChName = region
 
         ch = rl.Channel(ChName)
         model.addChannel(ch)
@@ -141,8 +141,6 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
             # SYSTEMATICS FROM PARQUETS
             for syst_on_sample in ["all_samples", sName]:  # apply common systs and per sample systs
                 for sys_name, sys_value in sys_from_parquets[syst_on_sample].items():
-                    # print(sName, sys_value, category, region)
-
                     syst_up = h[{"Sample": sName, "Region": region, "Systematic": sys_name + "Up"}].values()
                     syst_do = h[{"Sample": sName, "Region": region, "Systematic": sys_name + "Down"}].values()
                     nominal = h[{"Sample": sName, "Region": region, "Systematic": "nominal"}].values()
@@ -165,77 +163,98 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
         data_obs = get_template(h, "Data", region)
         ch.setObservation(data_obs)
 
-    if wjets_estimation:  # data-driven estimation per category
-        for region in regions:
-            if not region.startswith("SR"):  # only do wjets estimation for SR
+    if wjets_estimation:  # data-driven estimation
+        # failChName = "WJetsCR"
+        failChName = "WJetsCRBlinded"
+
+        if "Blinded" in failChName:
+            from_region = failChName.replace("Blinded", "")
+        else:
+            from_region = failChName
+
+        failCh = model[failChName]
+
+        initial_qcd = failCh.getObservation().astype(float)
+        if np.any(initial_qcd < 0.0):
+            # raise ValueError("initial_qcd negative for some bins..", initial_qcd)
+            logging.warning(f"initial_qcd negative for some bins... {initial_qcd}")
+            initial_qcd[initial_qcd < 0] = 0
+
+        for sample in failCh:
+            if sample.sampletype == rl.Sample.SIGNAL:
+                continue
+            # logging.info(f"subtracting {sample._name} from qcd")
+            initial_qcd -= sample.getExpectation(nominal=True)
+
+        # qcd params
+        qcd_params = np.array(
+            [rl.IndependentParameter(f"{CMS_PARAMS_LABEL}_tf_dataResidual_Bin{i}", 0) for i in range(m_obs.nbins)]
+        )
+
+        # idea here is that the error should be 1/sqrt(N), so parametrizing it as (1 + 1/sqrt(N))^qcdparams
+        # will result in qcdparams errors ~±1
+        # but because qcd is poorly modelled we're scaling sigma scale
+
+        sigmascale = 10  # to scale the deviation from initial
+        scaled_params = initial_qcd * (1 + sigmascale / np.maximum(1.0, np.sqrt(initial_qcd))) ** qcd_params
+
+        # add samples
+        fail_qcd = rl.ParametericSample(
+            f"{failChName}_{CMS_PARAMS_LABEL}_qcd_datadriven",
+            rl.Sample.BACKGROUND,
+            m_obs,
+            scaled_params,
+        )
+        failCh.addSample(fail_qcd)
+
+        for passChName in regions:
+            if not passChName.startswith("SR"):  # only do wjets estimation for SR
                 continue
 
-            # failChName = f'WJetsCRfor{region.replace("Blinded", "")}'
-            failChName = f"WJetsCRfor{region}"
+            if "Blinded" in passChName:
+                to_region = passChName.replace("Blinded", "")
+            else:
+                to_region = passChName
 
-            failCh = model[failChName]
-
-            initial_qcd = failCh.getObservation().astype(float)
-            if np.any(initial_qcd < 0.0):
-                # raise ValueError("initial_qcd negative for some bins..", initial_qcd)
-                logging.warning(f"initial_qcd negative for some bins... {initial_qcd}")
-                initial_qcd[initial_qcd < 0] = 0
-
-            for sample in failCh:
-                if sample.sampletype == rl.Sample.SIGNAL:
-                    continue
-                # logging.info(f"subtracting {sample._name} from qcd")
-                initial_qcd -= sample.getExpectation(nominal=True)
-
-            # qcd params
-            qcd_params = np.array(
-                [rl.IndependentParameter(f"{CMS_PARAMS_LABEL}_tf_dataResidual_Bin{i}", 0) for i in range(m_obs.nbins)]
-            )
-
-            # idea here is that the error should be 1/sqrt(N), so parametrizing it as (1 + 1/sqrt(N))^qcdparams
-            # will result in qcdparams errors ~±1
-            # but because qcd is poorly modelled we're scaling sigma scale
-
-            sigmascale = 10  # to scale the deviation from initial
-            scaled_params = initial_qcd * (1 + sigmascale / np.maximum(1.0, np.sqrt(initial_qcd))) ** qcd_params
-
-            # add samples
-            fail_qcd = rl.ParametericSample(
-                f"{failChName}_{CMS_PARAMS_LABEL}_qcd_datadriven",
-                rl.Sample.BACKGROUND,
-                m_obs,
-                scaled_params,
-            )
-            failCh.addSample(fail_qcd)
-
-            logging.info(f"setting transfer factor for region {region}, from region {failChName}")
+            logging.info(f"setting transfer factor for region {passChName}, from region {failChName}")
 
             rhalphabet(
                 model,
                 hists_templates,
+                passChName,
                 failChName,
                 fail_qcd,
                 shape_var,
                 blind_region,
                 blind_samples,
-                to_region=region,
+                from_region=from_region,
+                to_region=to_region,
             )
 
     return model
 
 
-def rhalphabet(model, hists_templates, failChName, fail_qcd, shape_var, blind_region, blind_samples, to_region="pass"):
-    h_fail = hists_templates.copy()
+def rhalphabet(
+    model,
+    hists_templates,
+    passChName,
+    failChName,
+    fail_qcd,
+    shape_var,
+    blind_region,
+    blind_samples,
+    from_region="fail",
+    to_region="pass",
+):
+    if "Blinded" in failChName:
+        h_fail = blindBins(hists_templates.copy(), blind_region, blind_samples)
+    else:
+        h_fail = hists_templates.copy()
 
-    if "Blinded" not in to_region:
-        h_pass = hists_templates.copy()
-        passChName = f"{to_region}"
-
-    elif "Blinded" in to_region:
+    if "Blinded" in passChName:
         h_pass = blindBins(hists_templates.copy(), blind_region, blind_samples)
-        passChName = f"{to_region}"
-
-        to_region = to_region.replace("Blinded", "")
+    else:
+        h_pass = hists_templates.copy()
 
     # get the transfer factor
     num = (
@@ -244,8 +263,8 @@ def rhalphabet(model, hists_templates, failChName, fail_qcd, shape_var, blind_re
     )
 
     den = (
-        h_fail[{"Region": "WJetsCR", "Sample": "QCD", "Systematic": "nominal"}].sum().value
-        + h_fail[{"Region": "WJetsCR", "Sample": "WJetsLNu", "Systematic": "nominal"}].sum().value
+        h_fail[{"Region": from_region, "Sample": "QCD", "Systematic": "nominal"}].sum().value
+        + h_fail[{"Region": from_region, "Sample": "WJetsLNu", "Systematic": "nominal"}].sum().value
     )
 
     qcd_eff = num / den
