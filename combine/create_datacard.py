@@ -95,7 +95,7 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
 
     for region in regions.copy():
         if wjets_estimation:
-            regions += [f"WJetsCRfor{region}"]
+            regions += [f'WJetsCRfor{region.replace("Blinded", "")}']
 
     # fill datacard with systematics and rates
     for region in regions:
@@ -169,7 +169,7 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
             if not region.startswith("SR"):  # only do wjets estimation for SR
                 continue
 
-            failChName = f"WJetsCRfor{region}"
+            failChName = f'WJetsCRfor{region.replace("Blinded", "")}'
             failCh = model[failChName]
 
             initial_qcd = failCh.getObservation().astype(float)
