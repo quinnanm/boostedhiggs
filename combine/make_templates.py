@@ -114,157 +114,161 @@ def get_templates(years, channels, samples, samples_dir, lepiso_sel, regions_sel
         },
     }
 
-    hists = {}
-    for region, region_sel in regions_sel.items():  # e.g. pass, fail, top control region, etc.
-        hists[region] = hist2.Hist(
-            hist2.axis.StrCategory([], name="Sample", growth=True),
-            hist2.axis.StrCategory([], name="Systematic", growth=True),
-            hist2.axis.StrCategory([], name="Category", growth=True),
-            hist2.axis.Variable(
-                list(range(50, 240, 20)), name="mass_observable", label=r"Higgs reconstructed mass [GeV]", overflow=True
-            ),
-            storage=hist2.storage.Weight(),
-        )
+    # mass_binning = {}
 
-        for year in years:  # e.g. 2018, 2017, 2016APV, 2016
-            for ch in channels:  # e.g. mu, ele
-                logging.info(f"Processing year {year} and {ch} channel for region {region}")
+    # for region in region_sel:
+    hists = hist2.Hist(
+        hist2.axis.StrCategory([], name="Sample", growth=True),
+        hist2.axis.StrCategory([], name="Systematic", growth=True),
+        hist2.axis.StrCategory([], name="Region", growth=True),
+        hist2.axis.Variable(
+            list(range(50, 240, 20)), name="mass_observable", label=r"Higgs reconstructed mass [GeV]", overflow=True
+        ),
+        storage=hist2.storage.Weight(),
+    )
 
-                with open("../fileset/luminosity.json") as f:
-                    luminosity = json.load(f)[ch][year]
+    for year in years:  # e.g. 2018, 2017, 2016APV, 2016
+        for ch in channels:  # e.g. mu, ele
+            logging.info(f"Processing year {year} and {ch} channel")
 
-                for sample in os.listdir(samples_dir[year]):
-                    if sample == "QCD_Pt_170to300":
-                        print(f"Skipping sample {sample} for region {region}")
-                        continue
+            with open("../fileset/luminosity.json") as f:
+                luminosity = json.load(f)[ch][year]
 
-                    for key in utils.combine_samples:  # get a combined label to combine samples of the same process
-                        if key in sample:
-                            sample_to_use = utils.combine_samples[key]
-                            break
-                        else:
-                            sample_to_use = sample
+            for sample in os.listdir(samples_dir[year]):
+                if sample == "QCD_Pt_170to300":
+                    print(f"Skipping sample {sample}")
+                    continue
 
-                    if sample_to_use not in samples:
-                        continue
+                if "DYJetsToLL_M-50_HT" in sample:
+                    print(f"Skipping sample {sample}")
+                    continue
 
-                    logging.info(f"Finding {sample} samples and should combine them under {sample_to_use}")
-
-                    out_files = f"{samples_dir[year]}/{sample}/outfiles/"
-                    if "postprocess" in samples_dir[year]:
-                        parquet_files = glob.glob(f"{out_files}/{ch}.parquet")
+                for key in utils.combine_samples:
+                    if key in sample:
+                        sample_to_use = utils.combine_samples[key]
+                        break
                     else:
-                        parquet_files = glob.glob(f"{out_files}/*_{ch}.parquet")
-                    pkl_files = glob.glob(f"{out_files}/*.pkl")
+                        sample_to_use = sample
 
-                    if not parquet_files:
-                        logging.info(f"No parquet file for {sample}")
-                        continue
+                if sample_to_use not in samples:
+                    continue
 
-                    try:
-                        data = pd.read_parquet(parquet_files, filters=lepiso_filter[lepiso_sel[region]][ch])
-                    except pyarrow.lib.ArrowInvalid:  # empty parquet because no event passed selection
-                        continue
+                logging.info(f"Finding {sample} samples and should combine them under {sample_to_use}")
 
-                    if len(data) == 0:
-                        continue
+                out_files = f"{samples_dir[year]}/{sample}/outfiles/"
+                if "postprocess" in samples_dir[year]:
+                    parquet_files = glob.glob(f"{out_files}/{ch}.parquet")
+                else:
+                    parquet_files = glob.glob(f"{out_files}/*_{ch}.parquet")
+                pkl_files = glob.glob(f"{out_files}/*.pkl")
 
-                    # use hidNeurons to get the finetuned scores
-                    data["fj_ParT_score_finetuned"] = utils.get_finetuned_score(data, model_path)
+                if not parquet_files:
+                    logging.info(f"No parquet file for {sample}")
+                    continue
 
-                    # drop hidNeurons which are not needed anymore
-                    data = data[data.columns.drop(list(data.filter(regex="hidNeuron")))]
+                try:
+                    data = pd.read_parquet(parquet_files, filters=lepiso_filter["lepiso"][ch])
+                except pyarrow.lib.ArrowInvalid:  # empty parquet because no event passed selection
+                    continue
 
-                    data["abs_met_fj_dphi"] = np.abs(data["met_fj_dphi"])
+                if len(data) == 0:
+                    continue
 
-                    # apply selection
-                    for selection in presel[ch]:
-                        logging.info(f"Applying {selection} selection on {len(data)} events")
-                        data = data.query(presel[ch][selection])
+                # use hidNeurons to get the finetuned scores
+                data["fj_ParT_score_finetuned"] = utils.get_finetuned_score(data, model_path)
 
-                    # apply pass/fail selections
+                # drop hidNeurons which are not needed anymore
+                data = data[data.columns.drop(list(data.filter(regex="hidNeuron")))]
+
+                data["abs_met_fj_dphi"] = np.abs(data["met_fj_dphi"])
+
+                # apply selection
+                for selection in presel[ch]:
+                    logging.info(f"Applying {selection} selection on {len(data)} events")
+                    data = data.query(presel[ch][selection])
+
+                # get event_weight
+                if sample_to_use != "Data":
+                    event_weight = utils.get_xsecweight(pkl_files, year, sample, False, luminosity)
+
+                for region, region_sel in regions_sel.items():  # e.g. pass, fail, top control region, etc.
+                    df = data.copy()
+
                     logging.info(f"Applying {region} selection on {len(data)} events")
-                    data = data.query(region_sel)
+
+                    if ("SR" in region) and ("QCD" in sample):  # literally two qcd events in SR2 and one qcd event in SR1
+                        threshold = 10
+                        df = df[(event_weight * df[f"weight_{ch}"]) < threshold]
+
+                    df = df.query(region_sel)
                     logging.info(f"Will fill the histograms with the remaining {len(data)} events")
 
-                    # get event_weight
-                    if sample_to_use != "Data":
-                        event_weight = utils.get_xsecweight(pkl_files, year, sample, False, luminosity)
+                    # nominal weight
+                    if sample_to_use == "Data":  # for data (fill as 1)
+                        hists.fill(
+                            Sample=sample_to_use,
+                            Systematic="nominal",
+                            Region=region,
+                            mass_observable=df["rec_higgs_m"],
+                            weight=np.ones_like(df["fj_pt"]),
+                        )
+                    else:
+                        nominal = df[f"weight_{ch}"] * event_weight
+                        hists.fill(
+                            Sample=sample_to_use,
+                            Systematic="nominal",
+                            Region=region,
+                            mass_observable=df["rec_higgs_m"],
+                            weight=nominal,
+                        )
 
-                    if ("SR2" in region) and (sample == "DYJets"):  # literally two events out of 25k
-                        threshold = 100
-                        data = data[data["event_weight"] < threshold]
-
-                    for category, category_sel in categories_sel.items():  # vbf, ggF, etc.
-                        if "CR" in region:
-                            df = data.copy()  # don't apply category selections for CR
-                        else:
-                            df = data.copy().query(category_sel)
-
-                        # nominal weight
+                    # to get expected significance i just comment the next blocks to make the templates quicker
+                    # remvoing these nuissances from the datacards don't really affect the expected signifcance
+                    for weight in weights:
+                        # up and down weights
                         if sample_to_use == "Data":  # for data (fill as 1)
-                            hists[region].fill(
+                            hists.fill(
                                 Sample=sample_to_use,
-                                Systematic="nominal",
-                                Category=category,
+                                Systematic=f"{weight}Up",
+                                Region=region,
+                                mass_observable=df["rec_higgs_m"],
+                                weight=np.ones_like(df["fj_pt"]),
+                            )
+                            hists.fill(
+                                Sample=sample_to_use,
+                                Systematic=f"{weight}Down",
+                                Region=region,
                                 mass_observable=df["rec_higgs_m"],
                                 weight=np.ones_like(df["fj_pt"]),
                             )
                         else:
-                            nominal = df[f"weight_{ch}"] * event_weight
-                            hists[region].fill(
+                            # up weight for MC
+                            try:
+                                syst = df[f"{weights[weight][ch]}Up"] * event_weight
+                            except KeyError:
+                                syst = nominal
+
+                            hists.fill(
                                 Sample=sample_to_use,
-                                Systematic="nominal",
-                                Category=category,
+                                Systematic=f"{weight}Up",
+                                Region=region,
                                 mass_observable=df["rec_higgs_m"],
-                                weight=nominal,
+                                weight=syst,
                             )
 
-                        for weight in weights:
-                            # up and down weights
-                            if sample_to_use == "Data":  # for data (fill as 1)
-                                hists[region].fill(
-                                    Sample=sample_to_use,
-                                    Systematic=f"{weight}Up",
-                                    Category=category,
-                                    mass_observable=df["rec_higgs_m"],
-                                    weight=np.ones_like(df["fj_pt"]),
-                                )
-                                hists[region].fill(
-                                    Sample=sample_to_use,
-                                    Systematic=f"{weight}Down",
-                                    Category=category,
-                                    mass_observable=df["rec_higgs_m"],
-                                    weight=np.ones_like(df["fj_pt"]),
-                                )
-                            else:
-                                # up weight for MC
-                                try:
-                                    syst = df[f"{weights[weight][ch]}Up"] * event_weight
-                                except KeyError:
-                                    syst = nominal
+                            # down weight for MC
+                            try:
+                                syst = df[f"{weights[weight][ch]}Down"] * event_weight
+                            except KeyError:
+                                syst = nominal
 
-                                hists[region].fill(
-                                    Sample=sample_to_use,
-                                    Systematic=f"{weight}Up",
-                                    Category=category,
-                                    mass_observable=df["rec_higgs_m"],
-                                    weight=syst,
-                                )
-
-                                # down weight for MC
-                                try:
-                                    syst = df[f"{weights[weight][ch]}Down"] * event_weight
-                                except KeyError:
-                                    syst = nominal
-
-                                hists[region].fill(
-                                    Sample=sample_to_use,
-                                    Systematic=f"{weight}Down",
-                                    Category=category,
-                                    mass_observable=df["rec_higgs_m"],
-                                    weight=syst,
-                                )
+                            hists.fill(
+                                Sample=sample_to_use,
+                                Systematic=f"{weight}Down",
+                                Region=region,
+                                mass_observable=df["rec_higgs_m"],
+                                weight=syst,
+                            )
 
     logging.info(hists)
 
