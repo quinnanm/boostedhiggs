@@ -78,14 +78,14 @@ def create_datacard(hists_templates, years, lep_channels, wjets_estimation):
     model = rl.Model("testModel")
 
     regions = [
-        # "SR1VBF",
+        "SR1VBF",
         "SR1ggFpt300to450",
-        # "SR1ggFpt450toInf",
-        # "SR2",
-        # "SR1VBFBlinded",
+        "SR1ggFpt450toInf",
+        "SR2",
+        "SR1VBFBlinded",
         "SR1ggFpt300to450Blinded",
-        # "SR1ggFpt450toInfBlinded",
-        # "SR2Blinded",
+        "SR1ggFpt450toInfBlinded",
+        "SR2Blinded",
     ]  # put the signal regions here
 
     regions += ["WJetsCR"]
@@ -130,24 +130,24 @@ def create_datacard(hists_templates, years, lep_channels, wjets_estimation):
                             systs_dict_values[syst_on_sample][sys_name][1],
                         )
 
-            # # SYSTEMATICS FROM PARQUETS
-            # for syst_on_sample in ["all_samples", sName]:  # apply common systs and per sample systs
-            #     for sys_name, sys_value in sys_from_parquets[syst_on_sample].items():
-            #         syst_up = h[{"Sample": sName, "Region": region, "Systematic": sys_name + "Up"}].values()
-            #         syst_do = h[{"Sample": sName, "Region": region, "Systematic": sys_name + "Down"}].values()
-            #         nominal = h[{"Sample": sName, "Region": region, "Systematic": "nominal"}].values()
+            # SYSTEMATICS FROM PARQUETS
+            for syst_on_sample in ["all_samples", sName]:  # apply common systs and per sample systs
+                for sys_name, sys_value in sys_from_parquets[syst_on_sample].items():
+                    syst_up = h[{"Sample": sName, "Region": region, "Systematic": sys_name + "Up"}].values()
+                    syst_do = h[{"Sample": sName, "Region": region, "Systematic": sys_name + "Down"}].values()
+                    nominal = h[{"Sample": sName, "Region": region, "Systematic": "nominal"}].values()
 
-            #         if sys_value.combinePrior == "lnN":
-            #             eff_up = shape_to_num(syst_up, nominal)
-            #             eff_do = shape_to_num(syst_do, nominal)
+                    if sys_value.combinePrior == "lnN":
+                        eff_up = shape_to_num(syst_up, nominal)
+                        eff_do = shape_to_num(syst_do, nominal)
 
-            #             if math.isclose(eff_up, eff_do, rel_tol=1e-2):  # if up and down are the same
-            #                 sample.setParamEffect(sys_value, max(eff_up, eff_do))
-            #             else:
-            #                 sample.setParamEffect(sys_value, max(eff_up, eff_do), min(eff_up, eff_do))
+                        if math.isclose(eff_up, eff_do, rel_tol=1e-2):  # if up and down are the same
+                            sample.setParamEffect(sys_value, max(eff_up, eff_do))
+                        else:
+                            sample.setParamEffect(sys_value, max(eff_up, eff_do), min(eff_up, eff_do))
 
-            #         else:
-            #             sample.setParamEffect(sys_value, (syst_up / nominal), (syst_do / nominal))
+                    else:
+                        sample.setParamEffect(sys_value, (syst_up / nominal), (syst_do / nominal))
 
             ch.addSample(sample)
 
@@ -157,8 +157,8 @@ def create_datacard(hists_templates, years, lep_channels, wjets_estimation):
 
     if wjets_estimation:  # data-driven estimation
         failChName = "WJetsCR"
-        # passChNames = ["SR1VBF", "SR1ggFpt300to450", "SR1ggFpt450toInf", "SR2"]
-        passChNames = ["SR1ggFpt300to450"]
+        passChNames = ["SR1VBF", "SR1ggFpt300to450", "SR1ggFpt450toInf", "SR2"]
+        # passChNames = ["SR1ggFpt300to450"]
         rhalphabet(
             model,
             hists_templates,
@@ -167,8 +167,8 @@ def create_datacard(hists_templates, years, lep_channels, wjets_estimation):
         )
 
         failChName = "WJetsCRBlinded"
-        # passChNames = ["SR1VBFBlinded", "SR1ggFpt300to450Blinded", "SR1ggFpt450toInfBlinded", "SR2Blinded"]
-        passChNames = ["SR1ggFpt300to450Blinded"]
+        passChNames = ["SR1VBFBlinded", "SR1ggFpt300to450Blinded", "SR1ggFpt450toInfBlinded", "SR2Blinded"]
+        # passChNames = ["SR1ggFpt300to450Blinded"]
         rhalphabet(
             model,
             hists_templates,
@@ -183,7 +183,7 @@ def rhalphabet(model, hists_templates, passChNames, failChName):
     shape_var = ShapeVar(
         name=hists_templates.axes["mass_observable"].name,
         bins=hists_templates.axes["mass_observable"].edges,
-        order=2,  # TODO: make the order of the polynomial configurable
+        order=1,  # TODO: make the order of the polynomial configurable
     )
     m_obs = rl.Observable(shape_var.name, shape_var.bins)
 
