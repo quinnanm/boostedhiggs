@@ -18,10 +18,12 @@ import math
 import os
 import pickle as pkl
 import warnings
+from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
 import rhalphalib as rl
+from systematics import systs_from_parquets, systs_not_from_parquets
 from utils import blindBins, get_template, labels, samples, shape_to_num, sigs
 
 rl.ParametericSample.PreferRooParametricHist = True
@@ -31,10 +33,6 @@ warnings.filterwarnings("ignore", message="Found duplicate branch ")
 pd.set_option("mode.chained_assignment", None)
 
 CMS_PARAMS_LABEL = "CMS_HWW_boosted"
-
-from dataclasses import dataclass
-
-from systematics import systs_from_parquets, systs_not_from_parquets
 
 
 @dataclass
@@ -53,15 +51,15 @@ class ShapeVar:
         self.scaled = (self.pts - self.bins[0]) / (self.bins[-1] - self.bins[0])
 
 
-def create_datacard(hists_templates, years, channels, blind_samples, blind_region, wjets_estimation, top_estimation):
+def create_datacard(hists_templates, years, lep_channels, wjets_estimation):
     # get the LUMI (must average lumi over the lepton channels provided)
     LUMI = {}
     for year in years:
         LUMI[year] = 0.0
-        for lep_ch in channels:
+        for lep_ch in lep_channels:
             with open("../fileset/luminosity.json") as f:
                 LUMI[year] += json.load(f)[lep_ch][year]
-        LUMI[year] /= len(channels)
+        LUMI[year] /= len(lep_channels)
 
     if len(years) == 4:
         year = "Run2"
@@ -80,38 +78,35 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
     model = rl.Model("testModel")
 
     regions = [
-        "SR1VBF",
+        # "SR1VBF",
         "SR1ggFpt300to450",
-        "SR1ggFpt450toInf",
-        "SR2",
-        "SR1VBFBlinded",
+        # "SR1ggFpt450toInf",
+        # "SR2",
+        # "SR1VBFBlinded",
         "SR1ggFpt300to450Blinded",
-        "SR1ggFpt450toInfBlinded",
-        "SR2Blinded",
+        # "SR1ggFpt450toInfBlinded",
+        # "SR2Blinded",
     ]  # put the signal regions here
 
-    # if wjets_estimation:
     regions += ["WJetsCR"]
     regions += ["WJetsCRBlinded"]
 
     # fill datacard with systematics and rates
     # ChName may have "Blinded" in the string, but region does not
-    for region in regions:
-        if wjets_estimation and (region != "TopCR"):  # only use MC qcd and wjets for Top control region
+    for ChName in regions:
+        if wjets_estimation:  # only use MC qcd and wjets for Top control region
             Samples = samples.copy()
             Samples.remove("WJetsLNu")
             Samples.remove("QCD")
         else:
             Samples = samples.copy()
 
-        if "Blinded" in region:
-            h = blindBins(hists_templates.copy(), blind_region, blind_samples)
-            ChName = region
-
-            region = region.replace("Blinded", "")  # region will be used to get the axes of the templates
+        if "Blinded" in ChName:
+            h = blindBins(hists_templates.copy())
+            region = ChName.replace("Blinded", "")  # region will be used to get the axes of the templates
         else:
             h = hists_templates.copy()
-            ChName = region
+            region = ChName
 
         ch = rl.Channel(ChName)
         model.addChannel(ch)
@@ -135,24 +130,24 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
                             systs_dict_values[syst_on_sample][sys_name][1],
                         )
 
-            # SYSTEMATICS FROM PARQUETS
-            for syst_on_sample in ["all_samples", sName]:  # apply common systs and per sample systs
-                for sys_name, sys_value in sys_from_parquets[syst_on_sample].items():
-                    syst_up = h[{"Sample": sName, "Region": region, "Systematic": sys_name + "Up"}].values()
-                    syst_do = h[{"Sample": sName, "Region": region, "Systematic": sys_name + "Down"}].values()
-                    nominal = h[{"Sample": sName, "Region": region, "Systematic": "nominal"}].values()
+            # # SYSTEMATICS FROM PARQUETS
+            # for syst_on_sample in ["all_samples", sName]:  # apply common systs and per sample systs
+            #     for sys_name, sys_value in sys_from_parquets[syst_on_sample].items():
+            #         syst_up = h[{"Sample": sName, "Region": region, "Systematic": sys_name + "Up"}].values()
+            #         syst_do = h[{"Sample": sName, "Region": region, "Systematic": sys_name + "Down"}].values()
+            #         nominal = h[{"Sample": sName, "Region": region, "Systematic": "nominal"}].values()
 
-                    if sys_value.combinePrior == "lnN":
-                        eff_up = shape_to_num(syst_up, nominal)
-                        eff_do = shape_to_num(syst_do, nominal)
+            #         if sys_value.combinePrior == "lnN":
+            #             eff_up = shape_to_num(syst_up, nominal)
+            #             eff_do = shape_to_num(syst_do, nominal)
 
-                        if math.isclose(eff_up, eff_do, rel_tol=1e-2):  # if up and down are the same
-                            sample.setParamEffect(sys_value, max(eff_up, eff_do))
-                        else:
-                            sample.setParamEffect(sys_value, max(eff_up, eff_do), min(eff_up, eff_do))
+            #             if math.isclose(eff_up, eff_do, rel_tol=1e-2):  # if up and down are the same
+            #                 sample.setParamEffect(sys_value, max(eff_up, eff_do))
+            #             else:
+            #                 sample.setParamEffect(sys_value, max(eff_up, eff_do), min(eff_up, eff_do))
 
-                    else:
-                        sample.setParamEffect(sys_value, (syst_up / nominal), (syst_do / nominal))
+            #         else:
+            #             sample.setParamEffect(sys_value, (syst_up / nominal), (syst_do / nominal))
 
             ch.addSample(sample)
 
@@ -162,44 +157,40 @@ def create_datacard(hists_templates, years, channels, blind_samples, blind_regio
 
     if wjets_estimation:  # data-driven estimation
         failChName = "WJetsCR"
-        passChNames = ["SR1VBF", "SR1ggFpt300to450", "SR1ggFpt450toInf", "SR2"]
+        # passChNames = ["SR1VBF", "SR1ggFpt300to450", "SR1ggFpt450toInf", "SR2"]
+        passChNames = ["SR1ggFpt300to450"]
         rhalphabet(
             model,
             hists_templates,
             passChNames,
             failChName,
-            blind_region,
-            blind_samples,
         )
 
         failChName = "WJetsCRBlinded"
-        passChNames = ["SR1VBFBlinded", "SR1ggFpt300to450Blinded", "SR1ggFpt450toInfBlinded", "SR2Blinded"]
+        # passChNames = ["SR1VBFBlinded", "SR1ggFpt300to450Blinded", "SR1ggFpt450toInfBlinded", "SR2Blinded"]
+        passChNames = ["SR1ggFpt300to450Blinded"]
         rhalphabet(
             model,
             hists_templates,
             passChNames,
             failChName,
-            blind_region,
-            blind_samples,
         )
 
     return model
 
 
-def rhalphabet(
-    model,
-    hists_templates,
-    passChNames,
-    failChName,
-    blind_region,
-    blind_samples,
-):
+def rhalphabet(model, hists_templates, passChNames, failChName):
     shape_var = ShapeVar(
         name=hists_templates.axes["mass_observable"].name,
         bins=hists_templates.axes["mass_observable"].edges,
         order=2,  # TODO: make the order of the polynomial configurable
     )
     m_obs = rl.Observable(shape_var.name, shape_var.bins)
+
+    # qcd params
+    qcd_params = np.array(
+        [rl.IndependentParameter(f"{CMS_PARAMS_LABEL}_tf_dataResidual_Bin{i}", 0) for i in range(m_obs.nbins)]
+    )
 
     failCh = model[failChName]
 
@@ -214,11 +205,6 @@ def rhalphabet(
             continue
         # logging.info(f"subtracting {sample._name} from qcd")
         initial_qcd -= sample.getExpectation(nominal=True)
-
-    # qcd params
-    qcd_params = np.array(
-        [rl.IndependentParameter(f"{CMS_PARAMS_LABEL}_tf_dataResidual_Bin{i}", 0) for i in range(m_obs.nbins)]
-    )
 
     # idea here is that the error should be 1/sqrt(N), so parametrizing it as (1 + 1/sqrt(N))^qcdparams
     # will result in qcdparams errors ~±1
@@ -241,31 +227,25 @@ def rhalphabet(
 
         if "Blinded" in failChName:
             assert "Blinded" in passChName
-            h = blindBins(hists_templates.copy(), blind_region, blind_samples)
+            h = blindBins(hists_templates.copy())
 
             den = (
-                h[{"Region": failChName.replace("Blinded", ""), "Sample": "QCD", "Systematic": "nominal"}].sum().value
-                + h[{"Region": failChName.replace("Blinded", ""), "Sample": "WJetsLNu", "Systematic": "nominal"}].sum().value
+                h[{"Region": failChName.replace("Blinded", ""), "Sample": ["WJetsLNu", "QCD"], "Systematic": "nominal"}]
+                .sum()
+                .value
             )
-
             num = (
-                h[{"Region": passChName.replace("Blinded", ""), "Sample": "QCD", "Systematic": "nominal"}].sum().value
-                + h[{"Region": passChName.replace("Blinded", ""), "Sample": "WJetsLNu", "Systematic": "nominal"}].sum().value
+                h[{"Region": passChName.replace("Blinded", ""), "Sample": ["WJetsLNu", "QCD"], "Systematic": "nominal"}]
+                .sum()
+                .value
             )
 
         else:
             assert "Blinded" not in passChName
             h = hists_templates.copy()
 
-            den = (
-                h[{"Region": failChName, "Sample": "QCD", "Systematic": "nominal"}].sum().value
-                + h[{"Region": failChName, "Sample": "WJetsLNu", "Systematic": "nominal"}].sum().value
-            )
-
-            num = (
-                h[{"Region": passChName, "Sample": "QCD", "Systematic": "nominal"}].sum().value
-                + h[{"Region": passChName, "Sample": "WJetsLNu", "Systematic": "nominal"}].sum().value
-            )
+            den = h[{"Region": failChName, "Sample": ["WJetsLNu", "QCD"], "Systematic": "nominal"}].sum().value
+            num = h[{"Region": passChName, "Sample": ["WJetsLNu", "QCD"], "Systematic": "nominal"}].sum().value
 
         # get the transfer factor
         qcd_eff = num / den
@@ -277,7 +257,7 @@ def rhalphabet(
             [shape_var.name],
             basis="Bernstein",
             limits=(-20, 20),
-            # square_params=True,
+            # square_params=True,   # TODO: figure why this can't be uncommented
         )
         tf_dataResidual_params = tf_dataResidual(shape_var.scaled)
         tf_params_pass = qcd_eff * tf_dataResidual_params  # scale params initially by qcd eff
@@ -292,38 +272,29 @@ def rhalphabet(
         passCh.addSample(pass_qcd)
 
 
-def main(args):
-    years = args.years.split(",")
-    channels = args.channels.split(",")
-
-    if len(args.samples_to_blind) >= 1:
-        blind_samples = args.samples_to_blind.split(",")
-    else:
-        blind_samples = []
-
+def load_templates(years, lep_channels, outdir):
+    # load templates
     if len(years) == 4:
         save_as = "Run2"
     else:
         save_as = "_".join(years)
 
-    if len(channels) == 1:
-        save_as += f"_{channels[0]}_"
+    if len(lep_channels) == 1:
+        save_as += f"_{lep_channels[0]}_"
 
-    with open(f"{args.outdir}/hists_templates_{save_as}.pkl", "rb") as f:
+    with open(f"{outdir}/hists_templates_{save_as}.pkl", "rb") as f:
         hists_templates = pkl.load(f)
 
-    model = create_datacard(
-        hists_templates,
-        years,
-        channels,
-        blind_samples=blind_samples,  # default is [] which means blind all samples
-        blind_region=[90, 160],
-        wjets_estimation=args.wjets_estimation,
-        top_estimation=False,
-    )
+    return hists_templates
 
-    with open(f"{args.outdir}/model_{save_as}.pkl", "wb") as fout:
-        pkl.dump(model, fout, protocol=2)
+
+def main(args):
+    years = args.years.split(",")
+    lep_channels = args.channels.split(",")
+
+    hists_templates = load_templates(years, lep_channels, args.outdir)
+
+    model = create_datacard(hists_templates, years, lep_channels, wjets_estimation=args.wjets_estimation)
 
     model.renderCombine(os.path.join(str("{}".format(args.outdir)), "datacards"))
 
@@ -336,9 +307,6 @@ if __name__ == "__main__":
     parser.add_argument("--years", dest="years", default="2017", help="years separated by commas")
     parser.add_argument("--channels", dest="channels", default="mu", help="channels separated by commas (e.g. mu,ele)")
     parser.add_argument("--outdir", dest="outdir", default="templates/test", type=str, help="name of template directory")
-    parser.add_argument(
-        "--samples_to_blind", dest="samples_to_blind", default="", help="samples to blind separated by commas"
-    )
     parser.add_argument("--wjets-estimation", action="store_true")
 
     args = parser.parse_args()
