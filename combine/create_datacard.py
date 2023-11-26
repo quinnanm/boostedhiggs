@@ -82,14 +82,14 @@ def create_datacard(hists_templates, years, lep_channels, wjets_estimation):
         "SR1ggFpt300to450",
         "SR1ggFpt450toInf",
         "SR2",
-        "SR1VBFBlinded",
-        "SR1ggFpt300to450Blinded",
-        "SR1ggFpt450toInfBlinded",
-        "SR2Blinded",
+        # "SR1VBFBlinded",
+        # "SR1ggFpt300to450Blinded",
+        # "SR1ggFpt450toInfBlinded",
+        # "SR2Blinded",
     ]  # put the signal regions here
 
     regions += ["WJetsCR"]
-    regions += ["WJetsCRBlinded"]
+    # regions += ["WJetsCRBlinded"]
 
     # fill datacard with systematics and rates
     # ChName may have "Blinded" in the string, but region does not
@@ -166,15 +166,15 @@ def create_datacard(hists_templates, years, lep_channels, wjets_estimation):
             failChName,
         )
 
-        failChName = "WJetsCRBlinded"
-        passChNames = ["SR1VBFBlinded", "SR1ggFpt300to450Blinded", "SR1ggFpt450toInfBlinded", "SR2Blinded"]
-        # passChNames = ["SR1ggFpt300to450Blinded"]
-        rhalphabet(
-            model,
-            hists_templates,
-            passChNames,
-            failChName,
-        )
+        # failChName = "WJetsCRBlinded"
+        # passChNames = ["SR1VBFBlinded", "SR1ggFpt300to450Blinded", "SR1ggFpt450toInfBlinded", "SR2Blinded"]
+        # # passChNames = ["SR1ggFpt300to450Blinded"]
+        # rhalphabet(
+        #     model,
+        #     hists_templates,
+        #     passChNames,
+        #     failChName,
+        # )
 
     return model
 
@@ -183,7 +183,7 @@ def rhalphabet(model, hists_templates, passChNames, failChName):
     shape_var = ShapeVar(
         name=hists_templates.axes["mass_observable"].name,
         bins=hists_templates.axes["mass_observable"].edges,
-        order=1,  # TODO: make the order of the polynomial configurable
+        order=2,  # TODO: make the order of the polynomial configurable
     )
     m_obs = rl.Observable(shape_var.name, shape_var.bins)
 
