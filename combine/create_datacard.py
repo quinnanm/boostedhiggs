@@ -49,7 +49,7 @@ class ShapeVar:
         self.scaled = (self.pts - self.bins[0]) / (self.bins[-1] - self.bins[0])
 
 
-def create_datacard(hists_templates, years, lep_channels, do_rhalphabet):
+def create_datacard(hists_templates, years, lep_channels, do_rhalphabet, order):
     # define the systematics
     systs_dict, systs_dict_values = systs_not_from_parquets(years, lep_channels)
     sys_from_parquets = systs_from_parquets(years)
@@ -118,16 +118,14 @@ def create_datacard(hists_templates, years, lep_channels, do_rhalphabet):
         ch.setObservation(data_obs)
 
     if do_rhalphabet:  # data-driven estimation
-        rhalphabet(model, hists_templates, passChNames=sig_regions, failChName="WJetsCR")
+        rhalphabet(model, hists_templates, order, passChNames=sig_regions, failChName="WJetsCR")
 
     return model
 
 
-def rhalphabet(model, hists_templates, passChNames, failChName):
+def rhalphabet(model, hists_templates, order, passChNames, failChName):
     shape_var = ShapeVar(
-        name=hists_templates.axes["mass_observable"].name,
-        bins=hists_templates.axes["mass_observable"].edges,
-        order=2,  # TODO: make the order of the polynomial configurable
+        name=hists_templates.axes["mass_observable"].name, bins=hists_templates.axes["mass_observable"].edges, order=order
     )
     m_obs = rl.Observable(shape_var.name, shape_var.bins)
 
@@ -203,7 +201,7 @@ def main(args):
 
     hists_templates = load_templates(years, lep_channels, args.outdir)
 
-    model = create_datacard(hists_templates, years, lep_channels, do_rhalphabet=args.rhalphabet)
+    model = create_datacard(hists_templates, years, lep_channels, do_rhalphabet=args.rhalphabet, order=args.order)
 
     model.renderCombine(os.path.join(str("{}".format(args.outdir)), "datacards"))
 
