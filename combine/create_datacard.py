@@ -154,12 +154,8 @@ def rhalphabet(model, hists_templates, order, passChNames, failChName):
     sigmascale = 10  # to scale the deviation from initial
     scaled_params = initial_wjets * (1 + sigmascale / np.maximum(1.0, np.sqrt(initial_wjets))) ** wjets_params
 
-    # add samples
     fail_wjets = rl.ParametericSample(
-        f"{failChName}_{CMS_PARAMS_LABEL}_wjets_datadriven",
-        rl.Sample.BACKGROUND,
-        m_obs,
-        scaled_params,
+        f"{failChName}_{CMS_PARAMS_LABEL}_wjets_datadriven", rl.Sample.BACKGROUND, m_obs, scaled_params
     )
     failCh.addSample(fail_wjets)
 
@@ -187,10 +183,7 @@ def rhalphabet(model, hists_templates, order, passChNames, failChName):
 
         passCh = model[passChName]
         pass_wjets = rl.TransferFactorSample(
-            f"{passChName}_{CMS_PARAMS_LABEL}_wjets_datadriven",
-            rl.Sample.BACKGROUND,
-            tf_params_pass,
-            fail_wjets,
+            f"{passChName}_{CMS_PARAMS_LABEL}_wjets_datadriven", rl.Sample.BACKGROUND, tf_params_pass, fail_wjets
         )
         passCh.addSample(pass_wjets)
 
