@@ -128,6 +128,23 @@ def get_template(h, sample, region):
     return h[{"Sample": sample, "Systematic": "nominal", "Region": region}]
 
 
+def load_templates(years, lep_channels, outdir):
+    """Loads the hist templates that were created using ```make_templates.py```."""
+
+    if len(years) == 4:
+        save_as = "Run2"
+    else:
+        save_as = "_".join(years)
+
+    if len(lep_channels) == 1:
+        save_as += f"_{lep_channels[0]}_"
+
+    with open(f"{outdir}/hists_templates_{save_as}.pkl", "rb") as f:
+        hists_templates = pkl.load(f)
+
+    return hists_templates
+
+
 def blindBins(h: Hist, blind_region: List = [90, 160], blind_samples: List[str] = []):
     """
     Blind (i.e. zero) bins in histogram ``h``.

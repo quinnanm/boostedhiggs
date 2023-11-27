@@ -12,11 +12,9 @@ Adapted from
 from __future__ import division, print_function
 
 import argparse
-import json
 import logging
 import math
 import os
-import pickle as pkl
 import warnings
 from dataclasses import dataclass
 
@@ -24,7 +22,7 @@ import numpy as np
 import pandas as pd
 import rhalphalib as rl
 from systematics import systs_from_parquets, systs_not_from_parquets
-from utils import blindBins, get_template, labels, samples, shape_to_num, sigs
+from utils import get_template, labels, load_templates, samples, shape_to_num, sigs
 
 rl.ParametericSample.PreferRooParametricHist = True
 logging.basicConfig(level=logging.INFO)
@@ -51,68 +49,32 @@ class ShapeVar:
         self.scaled = (self.pts - self.bins[0]) / (self.bins[-1] - self.bins[0])
 
 
-def create_datacard(hists_templates, years, lep_channels, wjets_estimation):
-    # get the LUMI (must average lumi over the lepton channels provided)
-    LUMI = {}
-    for year in years:
-        LUMI[year] = 0.0
-        for lep_ch in lep_channels:
-            with open("../fileset/luminosity.json") as f:
-                LUMI[year] += json.load(f)[lep_ch][year]
-        LUMI[year] /= len(lep_channels)
-
-    if len(years) == 4:
-        year = "Run2"
-    else:
-        year = years[0]
-
-    # get the LUMI covered in the templates
-    full_lumi = 0
-    for year_ in years:
-        full_lumi += LUMI[year_]
-
+def create_datacard(hists_templates, years, lep_channels, do_rhalphabet):
     # define the systematics
-    systs_dict, systs_dict_values = systs_not_from_parquets(years, LUMI, full_lumi)
+    systs_dict, systs_dict_values = systs_not_from_parquets(years, lep_channels)
     sys_from_parquets = systs_from_parquets(years)
 
+    # define the model
     model = rl.Model("testModel")
 
-    regions = [
-        "SR1VBF",
-        "SR1ggFpt300to450",
-        "SR1ggFpt450toInf",
-        "SR2",
-        # "SR1VBFBlinded",
-        # "SR1ggFpt300to450Blinded",
-        # "SR1ggFpt450toInfBlinded",
-        # "SR2Blinded",
-    ]  # put the signal regions here
-
-    regions += ["WJetsCR"]
-    # regions += ["WJetsCRBlinded"]
+    # define the signal and control regions
+    sig_regions = ["SR1VBF", "SR1ggFpt300to450", "SR1ggFpt450toInf", "SR2"]
+    regions = sig_regions + ["WJetsCR"]
 
     # fill datacard with systematics and rates
-    # ChName may have "Blinded" in the string, but region does not
     for ChName in regions:
-        if wjets_estimation:  # only use MC qcd and wjets for Top control region
+        if do_rhalphabet:  # use MC qcd and wjets if wjets_estimation=False
             Samples = samples.copy()
             Samples.remove("WJetsLNu")
             Samples.remove("QCD")
         else:
             Samples = samples.copy()
 
-        if "Blinded" in ChName:
-            h = blindBins(hists_templates.copy())
-            region = ChName.replace("Blinded", "")  # region will be used to get the axes of the templates
-        else:
-            h = hists_templates.copy()
-            region = ChName
-
         ch = rl.Channel(ChName)
         model.addChannel(ch)
 
         for sName in Samples:
-            templ = get_template(h, sName, region)
+            templ = get_template(hists_templates, sName, ChName)
             stype = rl.Sample.SIGNAL if sName in sigs else rl.Sample.BACKGROUND
             sample = rl.TemplateSample(ch.name + "_" + labels[sName], stype, templ)
 
@@ -133,9 +95,9 @@ def create_datacard(hists_templates, years, lep_channels, wjets_estimation):
             # SYSTEMATICS FROM PARQUETS
             for syst_on_sample in ["all_samples", sName]:  # apply common systs and per sample systs
                 for sys_name, sys_value in sys_from_parquets[syst_on_sample].items():
-                    syst_up = h[{"Sample": sName, "Region": region, "Systematic": sys_name + "Up"}].values()
-                    syst_do = h[{"Sample": sName, "Region": region, "Systematic": sys_name + "Down"}].values()
-                    nominal = h[{"Sample": sName, "Region": region, "Systematic": "nominal"}].values()
+                    syst_up = hists_templates[{"Sample": sName, "Region": ChName, "Systematic": sys_name + "Up"}].values()
+                    syst_do = hists_templates[{"Sample": sName, "Region": ChName, "Systematic": sys_name + "Down"}].values()
+                    nominal = hists_templates[{"Sample": sName, "Region": ChName, "Systematic": "nominal"}].values()
 
                     if sys_value.combinePrior == "lnN":
                         eff_up = shape_to_num(syst_up, nominal)
@@ -152,29 +114,11 @@ def create_datacard(hists_templates, years, lep_channels, wjets_estimation):
             ch.addSample(sample)
 
         # add data
-        data_obs = get_template(h, "Data", region)
+        data_obs = get_template(hists_templates, "Data", ChName)
         ch.setObservation(data_obs)
 
-    if wjets_estimation:  # data-driven estimation
-        failChName = "WJetsCR"
-        passChNames = ["SR1VBF", "SR1ggFpt300to450", "SR1ggFpt450toInf", "SR2"]
-        # passChNames = ["SR1ggFpt300to450"]
-        rhalphabet(
-            model,
-            hists_templates,
-            passChNames,
-            failChName,
-        )
-
-        # failChName = "WJetsCRBlinded"
-        # passChNames = ["SR1VBFBlinded", "SR1ggFpt300to450Blinded", "SR1ggFpt450toInfBlinded", "SR2Blinded"]
-        # # passChNames = ["SR1ggFpt300to450Blinded"]
-        # rhalphabet(
-        #     model,
-        #     hists_templates,
-        #     passChNames,
-        #     failChName,
-        # )
+    if do_rhalphabet:  # data-driven estimation
+        rhalphabet(model, hists_templates, passChNames=sig_regions, failChName="WJetsCR")
 
     return model
 
@@ -225,27 +169,8 @@ def rhalphabet(model, hists_templates, passChNames, failChName):
     for passChName in passChNames:
         logging.info(f"setting transfer factor for region {passChName}, from region {failChName}")
 
-        if "Blinded" in failChName:
-            assert "Blinded" in passChName
-            h = blindBins(hists_templates.copy())
-
-            den = (
-                h[{"Region": failChName.replace("Blinded", ""), "Sample": ["WJetsLNu", "QCD"], "Systematic": "nominal"}]
-                .sum()
-                .value
-            )
-            num = (
-                h[{"Region": passChName.replace("Blinded", ""), "Sample": ["WJetsLNu", "QCD"], "Systematic": "nominal"}]
-                .sum()
-                .value
-            )
-
-        else:
-            assert "Blinded" not in passChName
-            h = hists_templates.copy()
-
-            den = h[{"Region": failChName, "Sample": ["WJetsLNu", "QCD"], "Systematic": "nominal"}].sum().value
-            num = h[{"Region": passChName, "Sample": ["WJetsLNu", "QCD"], "Systematic": "nominal"}].sum().value
+        den = hists_templates[{"Region": failChName, "Sample": ["WJetsLNu", "QCD"], "Systematic": "nominal"}].sum().value
+        num = hists_templates[{"Region": passChName, "Sample": ["WJetsLNu", "QCD"], "Systematic": "nominal"}].sum().value
 
         # get the transfer factor
         qcd_eff = num / den
@@ -272,42 +197,27 @@ def rhalphabet(model, hists_templates, passChNames, failChName):
         passCh.addSample(pass_qcd)
 
 
-def load_templates(years, lep_channels, outdir):
-    # load templates
-    if len(years) == 4:
-        save_as = "Run2"
-    else:
-        save_as = "_".join(years)
-
-    if len(lep_channels) == 1:
-        save_as += f"_{lep_channels[0]}_"
-
-    with open(f"{outdir}/hists_templates_{save_as}.pkl", "rb") as f:
-        hists_templates = pkl.load(f)
-
-    return hists_templates
-
-
 def main(args):
     years = args.years.split(",")
     lep_channels = args.channels.split(",")
 
     hists_templates = load_templates(years, lep_channels, args.outdir)
 
-    model = create_datacard(hists_templates, years, lep_channels, wjets_estimation=args.wjets_estimation)
+    model = create_datacard(hists_templates, years, lep_channels, do_rhalphabet=args.rhalphabet)
 
     model.renderCombine(os.path.join(str("{}".format(args.outdir)), "datacards"))
 
 
 if __name__ == "__main__":
     # e.g.
-    # python create_datacard.py --years 2016,2016APV,2017,2018 --channels mu,ele --outdir templates/v1
+    # python create_datacard.py --years 2016,2016APV,2017,2018 --channels mu,ele --outdir templates/v1 --rhalphabet --order 2
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--years", dest="years", default="2017", help="years separated by commas")
-    parser.add_argument("--channels", dest="channels", default="mu", help="channels separated by commas (e.g. mu,ele)")
-    parser.add_argument("--outdir", dest="outdir", default="templates/test", type=str, help="name of template directory")
-    parser.add_argument("--wjets-estimation", action="store_true")
+    parser.add_argument("--years", default="2017", help="years separated by commas")
+    parser.add_argument("--channels", default="mu", help="channels separated by commas (e.g. mu,ele)")
+    parser.add_argument("--rhalphabet", action="store_true", help="if provided will run rhalphabet with default order=2")
+    parser.add_argument("--order", default=2, type=int, help="bernstein polynomial order when running with --rhalphabet")
+    parser.add_argument("--outdir", default="templates/test", type=str, help="name of template directory")
 
     args = parser.parse_args()
 

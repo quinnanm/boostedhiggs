@@ -1,7 +1,9 @@
 from __future__ import division, print_function
 
+import json
 import logging
 import warnings
+from typing import List
 
 import pandas as pd
 import rhalphalib as rl
@@ -16,14 +18,31 @@ pd.set_option("mode.chained_assignment", None)
 CMS_PARAMS_LABEL = "CMS_HWW_boosted"
 
 
-def systs_not_from_parquets(years, LUMI, full_lumi):
+def systs_not_from_parquets(years: List[str], lep_channels: List[str]):
     """
-    Define systematics that are NOT stored in the parquets
+    Define systematics that are NOT stored in the parquets.
+
+    Args
+        years: e.g. ["2018", "2017", "2016APV", "2016"]
+        lep_channels: e.g. ["mu", "ele"]
 
     Returns
         systs_dict [dict]:        keys are systematics; values are rl.NuisanceParameters
         systs_dict_values [dict]: keys are same as above; values are tuples (up, down) and if (up, None) then down=up
     """
+    # get the LUMI (must average lumi over the lepton channels provided)
+    LUMI = {}
+    for year in years:
+        LUMI[year] = 0.0
+        for lep_ch in lep_channels:
+            with open("../fileset/luminosity.json") as f:
+                LUMI[year] += json.load(f)[lep_ch][year]
+        LUMI[year] /= len(lep_channels)
+
+    # get the LUMI covered in the templates
+    full_lumi = 0
+    for year in years:
+        full_lumi += LUMI[year]
 
     systs_dict, systs_dict_values = {}, {}
 
