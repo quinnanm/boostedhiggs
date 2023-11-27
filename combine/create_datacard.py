@@ -1,6 +1,6 @@
 """
 Creates "combine datacards" using hist.Hist templates, and
-sets up data-driven QCD background estimate ('rhalphabet' method)
+sets up data-driven WJets+QCD background estimate ('rhalphabet' method)
 
 Adapted from
     https://github.com/rkansal47/HHbbVV/blob/main/src/HHbbVV/postprocessing/CreateDatacard.py
@@ -63,7 +63,7 @@ def create_datacard(hists_templates, years, lep_channels, do_rhalphabet, order):
 
     # fill datacard with systematics and rates
     for ChName in regions:
-        if do_rhalphabet:  # use MC qcd and wjets if wjets_estimation=False
+        if do_rhalphabet:  # use MC wjets+qcd if do_rhalphabet=False
             Samples = samples.copy()
             Samples.remove("WJetsLNu")
             Samples.remove("QCD")
@@ -129,51 +129,44 @@ def rhalphabet(model, hists_templates, order, passChNames, failChName):
     )
     m_obs = rl.Observable(shape_var.name, shape_var.bins)
 
-    # qcd params
-    qcd_params = np.array(
+    # wjets params
+    wjets_params = np.array(
         [rl.IndependentParameter(f"{CMS_PARAMS_LABEL}_tf_dataResidual_Bin{i}", 0) for i in range(m_obs.nbins)]
     )
 
     failCh = model[failChName]
 
-    initial_qcd = failCh.getObservation().astype(float)
-    if np.any(initial_qcd < 0.0):
-        # raise ValueError("initial_qcd negative for some bins..", initial_qcd)
-        logging.warning(f"initial_qcd negative for some bins... {initial_qcd}")
-        initial_qcd[initial_qcd < 0] = 0
+    initial_wjets = failCh.getObservation().astype(float)
+    if np.any(initial_wjets < 0.0):
+        logging.warning(f"initial_wjets negative for some bins... {initial_wjets}")
+        initial_wjets[initial_wjets < 0] = 0
 
     for sample in failCh:
         if sample.sampletype == rl.Sample.SIGNAL:
             continue
-        # logging.info(f"subtracting {sample._name} from qcd")
-        initial_qcd -= sample.getExpectation(nominal=True)
+        # logging.info(f"subtracting {sample._name} from wjets+qcd")
+        initial_wjets -= sample.getExpectation(nominal=True)
 
-    # idea here is that the error should be 1/sqrt(N), so parametrizing it as (1 + 1/sqrt(N))^qcdparams
-    # will result in qcdparams errors ~±1
-    # but because qcd is poorly modelled we're scaling sigma scale
+    # idea here is that the error should be 1/sqrt(N), so parametrizing it as (1 + 1/sqrt(N))^wjetsparams
+    # will result in wjetsparams errors ~±1
+    # but because wjets is poorly modelled we're scaling sigma scale
 
     sigmascale = 10  # to scale the deviation from initial
-    scaled_params = initial_qcd * (1 + sigmascale / np.maximum(1.0, np.sqrt(initial_qcd))) ** qcd_params
+    scaled_params = initial_wjets * (1 + sigmascale / np.maximum(1.0, np.sqrt(initial_wjets))) ** wjets_params
 
     # add samples
-    fail_qcd = rl.ParametericSample(
-        f"{failChName}_{CMS_PARAMS_LABEL}_qcd_datadriven",
+    fail_wjets = rl.ParametericSample(
+        f"{failChName}_{CMS_PARAMS_LABEL}_wjets_datadriven",
         rl.Sample.BACKGROUND,
         m_obs,
         scaled_params,
     )
-    failCh.addSample(fail_qcd)
+    failCh.addSample(fail_wjets)
 
     for passChName in passChNames:
         logging.info(f"setting transfer factor for region {passChName}, from region {failChName}")
 
-        den = hists_templates[{"Region": failChName, "Sample": ["WJetsLNu", "QCD"], "Systematic": "nominal"}].sum().value
-        num = hists_templates[{"Region": passChName, "Sample": ["WJetsLNu", "QCD"], "Systematic": "nominal"}].sum().value
-
-        # get the transfer factor
-        qcd_eff = num / den
-
-        # transfer factor
+        # define a seperate transfer factor per passChName
         tf_dataResidual = rl.BasisPoly(
             f"{CMS_PARAMS_LABEL}_tf_dataResidual_{passChName}",
             (shape_var.order,),
@@ -182,17 +175,24 @@ def rhalphabet(model, hists_templates, order, passChNames, failChName):
             limits=(-20, 20),
             # square_params=True,   # TODO: figure why this can't be uncommented
         )
+
+        den = hists_templates[{"Region": failChName, "Sample": ["WJetsLNu", "QCD"], "Systematic": "nominal"}].sum().value
+        num = hists_templates[{"Region": passChName, "Sample": ["WJetsLNu", "QCD"], "Systematic": "nominal"}].sum().value
+
+        # get the transfer factor
+        wjets_eff = num / den
+
         tf_dataResidual_params = tf_dataResidual(shape_var.scaled)
-        tf_params_pass = qcd_eff * tf_dataResidual_params  # scale params initially by qcd eff
+        tf_params_pass = wjets_eff * tf_dataResidual_params  # scale params initially by wjets eff
 
         passCh = model[passChName]
-        pass_qcd = rl.TransferFactorSample(
-            f"{passChName}_{CMS_PARAMS_LABEL}_qcd_datadriven",
+        pass_wjets = rl.TransferFactorSample(
+            f"{passChName}_{CMS_PARAMS_LABEL}_wjets_datadriven",
             rl.Sample.BACKGROUND,
             tf_params_pass,
-            fail_qcd,
+            fail_wjets,
         )
-        passCh.addSample(pass_qcd)
+        passCh.addSample(pass_wjets)
 
 
 def main(args):
