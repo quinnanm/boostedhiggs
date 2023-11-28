@@ -58,7 +58,7 @@ def create_datacard(hists_templates, years, lep_channels, do_rhalphabet, order):
     model = rl.Model("testModel")
 
     # define the signal and control regions
-    sig_regions = ["SR1VBF", "SR1ggFpt250to300", "SR1ggFpt300to450", "SR1ggFpt450toInf", "SR2ggFpt250to300"]
+    sig_regions = ["SR1VBF", "SR1ggFpt250to300", "SR1ggFpt300to450", "SR1ggFpt450toInf", "SR2ggFpt250toInf"]
     regions = sig_regions + ["WJetsCR"]
 
     # fill datacard with systematics and rates
