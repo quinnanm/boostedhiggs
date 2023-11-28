@@ -135,7 +135,7 @@ def create_datacard(hists_templates, years, lep_channels, do_rhalphabet, order):
             ch.addSample(sample)
 
         # add data
-        data_obs = get_template(h, "Data", ChName)
+        data_obs = get_template(h, "Data", region)
         ch.setObservation(data_obs)
 
     if do_rhalphabet:  # data-driven estimation
