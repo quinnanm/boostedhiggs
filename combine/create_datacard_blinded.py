@@ -95,7 +95,7 @@ def create_datacard(hists_templates, years, lep_channels, do_rhalphabet, order):
         model.addChannel(ch)
 
         for sName in Samples:
-            templ = get_template(h, sName, ChName)
+            templ = get_template(h, sName, region)
             stype = rl.Sample.SIGNAL if sName in sigs else rl.Sample.BACKGROUND
             sample = rl.TemplateSample(ch.name + "_" + labels[sName], stype, templ)
 
