@@ -13,7 +13,7 @@ samples:
     - Data
     - WJetsQCD
 
-mass_binning: 
+mass_binning:
     SR1VBF: 40
     SR1ggFpt300to450: 15
     SR1ggFpt450toInf: 15
@@ -28,7 +28,7 @@ regions_sel:
     # "SR1ggFpt450toInf": (fj_ParT_score_finetuned>0.98) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450) & (n_bjets_T==0)
     # "SR2ggFpt250toInf": (fj_ParT_score_finetuned<0.98) & (fj_ParT_score_finetuned>0.97) & (n_bjets_T==0)
     ########################################
-    
+
     # "SR199": (fj_ParT_score_finetuned>0.99) & (n_bjets_T==0)
     # "SR1985": (fj_ParT_score_finetuned>0.985) & (n_bjets_T==0)
     # "SR198": (fj_ParT_score_finetuned>0.98) & (n_bjets_T==0)
@@ -64,7 +64,7 @@ regions_sel:
     # "SR2ggF965and98": (fj_ParT_score_finetuned>0.965) & (fj_ParT_score_finetuned<0.98) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
     # "SR2ggF96and98": (fj_ParT_score_finetuned>0.96) & (fj_ParT_score_finetuned<0.98) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
 
-    
+
     "VBF97": (fj_ParT_score_finetuned>0.97) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
     "SR1ggFpt250to300": (fj_ParT_score_finetuned>0.985) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>250) & (fj_pt<300)
     "SR1ggFpt300to450": (fj_ParT_score_finetuned>0.985) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
@@ -106,10 +106,10 @@ regions_sel:
     # "SR1ggFpt300to450": (fj_ParT_score_finetuned>0.98) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<450) & (n_bjets_T==0)
     # "SR1ggFpt450toInf": (fj_ParT_score_finetuned>0.98) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450) & (n_bjets_T==0)
     # "SR2": (fj_ParT_score_finetuned<0.98) & (fj_ParT_score_finetuned>0.97) & (n_bjets_T==0)
-    
+
 
     # "VBFtagger>0.95": (fj_ParT_score_finetuned>0.95) & ( (mjj>1000) & (deta>3.5) )
-    # "VBFtagger>0.955": (fj_ParT_score_finetuned>0.955) & ( (mjj>1000) & (deta>3.5) )    
+    # "VBFtagger>0.955": (fj_ParT_score_finetuned>0.955) & ( (mjj>1000) & (deta>3.5) )
     # "VBFtagger>0.96": (fj_ParT_score_finetuned>0.96) & ( (mjj>1000) & (deta>3.5) )
     # "VBFtagger>0.965": (fj_ParT_score_finetuned>0.965) & ( (mjj>1000) & (deta>3.5) )
     # "VBFtagger>0.97": (fj_ParT_score_finetuned>0.97) & ( (mjj>1000) & (deta>3.5) )
@@ -118,24 +118,24 @@ regions_sel:
     # "VBFtagger>0.985": (fj_ParT_score_finetuned>0.985) & ( (mjj>1000) & (deta>3.5) )
 
     # "ggFtagger>0.98": (fj_ParT_score_finetuned>0.98) & ( (mjj<1000) | (deta<3.5) )
-    # "ggFtagger>0.985": (fj_ParT_score_finetuned>0.985) & ( (mjj<1000) | (deta<3.5) )        
+    # "ggFtagger>0.985": (fj_ParT_score_finetuned>0.985) & ( (mjj<1000) | (deta<3.5) )
 
     # "ggF0.985>tagger>0.95": (fj_ParT_score_finetuned>0.95) & (fj_ParT_score_finetuned<0.985) & ( (mjj<1000) | (deta<3.5) )
     # "ggF0.985>tagger>0.955": (fj_ParT_score_finetuned>0.955) & (fj_ParT_score_finetuned<0.985) & ( (mjj<1000) | (deta<3.5) )
-    # "ggF0.985>tagger>0.96": (fj_ParT_score_finetuned>0.96) & (fj_ParT_score_finetuned<0.985) & ( (mjj<1000) | (deta<3.5) )    
-    # "ggF0.985>tagger>0.965": (fj_ParT_score_finetuned>0.965) & (fj_ParT_score_finetuned<0.985) & ( (mjj<1000) | (deta<3.5) )    
+    # "ggF0.985>tagger>0.96": (fj_ParT_score_finetuned>0.96) & (fj_ParT_score_finetuned<0.985) & ( (mjj<1000) | (deta<3.5) )
+    # "ggF0.985>tagger>0.965": (fj_ParT_score_finetuned>0.965) & (fj_ParT_score_finetuned<0.985) & ( (mjj<1000) | (deta<3.5) )
     # "ggF0.985>tagger>0.97": (fj_ParT_score_finetuned>0.97) & (fj_ParT_score_finetuned<0.985) & ( (mjj<1000) | (deta<3.5) )
     # "ggF0.985>tagger>0.975": (fj_ParT_score_finetuned>0.975) & (fj_ParT_score_finetuned<0.985) & ( (mjj<1000) | (deta<3.5) )
     # "ggF0.985>tagger>0.98": (fj_ParT_score_finetuned>0.98) & (fj_ParT_score_finetuned<0.985) & ( (mjj<1000) | (deta<3.5) )
 
     # "ggF0.98>tagger>0.95": (fj_ParT_score_finetuned>0.95) & (fj_ParT_score_finetuned<0.98) & ( (mjj<1000) | (deta<3.5) )
     # "ggF0.98>tagger>0.955": (fj_ParT_score_finetuned>0.955) & (fj_ParT_score_finetuned<0.98) & ( (mjj<1000) | (deta<3.5) )
-    # "ggF0.98>tagger>0.96": (fj_ParT_score_finetuned>0.96) & (fj_ParT_score_finetuned<0.98) & ( (mjj<1000) | (deta<3.5) )    
-    # "ggF0.98>tagger>0.965": (fj_ParT_score_finetuned>0.965) & (fj_ParT_score_finetuned<0.98) & ( (mjj<1000) | (deta<3.5) )    
+    # "ggF0.98>tagger>0.96": (fj_ParT_score_finetuned>0.96) & (fj_ParT_score_finetuned<0.98) & ( (mjj<1000) | (deta<3.5) )
+    # "ggF0.98>tagger>0.965": (fj_ParT_score_finetuned>0.965) & (fj_ParT_score_finetuned<0.98) & ( (mjj<1000) | (deta<3.5) )
     # "ggF0.98>tagger>0.97": (fj_ParT_score_finetuned>0.97) & (fj_ParT_score_finetuned<0.98) & ( (mjj<1000) | (deta<3.5) )
     # "ggF0.98>tagger>0.975": (fj_ParT_score_finetuned>0.975) & (fj_ParT_score_finetuned<0.98) & ( (mjj<1000) | (deta<3.5) )
 
-    
+
 lepiso_sel: # keys must match keys in regions_sel above; values are either [lepiso, lepisoinv]
     SR1: lepiso
     SR2: lepiso
@@ -157,11 +157,11 @@ categories_sel:
     # ############# v7,8,9: START
     # "tagger>0.995": (fj_ParT_score_finetuned>0.995)
     # "tagger>0.99": (fj_ParT_score_finetuned>0.99)
-    # "tagger>0.985": (fj_ParT_score_finetuned>0.985)    
+    # "tagger>0.985": (fj_ParT_score_finetuned>0.985)
     # "tagger>0.98": (fj_ParT_score_finetuned>0.98)
-    # "tagger>0.975": (fj_ParT_score_finetuned>0.975)    
+    # "tagger>0.975": (fj_ParT_score_finetuned>0.975)
     # "tagger>0.97": (fj_ParT_score_finetuned>0.97)
-    # "tagger>0.965": (fj_ParT_score_finetuned>0.965)    
+    # "tagger>0.965": (fj_ParT_score_finetuned>0.965)
     # "tagger>0.96": (fj_ParT_score_finetuned>0.96)
     # # "tagger>0.955": (fj_ParT_score_finetuned>0.955)
     # # "tagger>0.95": (fj_ParT_score_finetuned>0.95)
@@ -179,33 +179,33 @@ categories_sel:
 
 
     # ############# v10: START
-    # "tagger>0.985": (fj_ParT_score_finetuned>0.985)    
+    # "tagger>0.985": (fj_ParT_score_finetuned>0.985)
     # "tagger>0.97": (fj_ParT_score_finetuned>0.97)
 
-    # "0.985>tagger>0.80":  (fj_ParT_score_finetuned>0.80) & (fj_ParT_score_finetuned<0.985)    
-    # "0.985>tagger>0.81":  (fj_ParT_score_finetuned>0.81) & (fj_ParT_score_finetuned<0.985)    
-    # "0.985>tagger>0.82":  (fj_ParT_score_finetuned>0.82) & (fj_ParT_score_finetuned<0.985)    
-    # "0.985>tagger>0.83":  (fj_ParT_score_finetuned>0.83) & (fj_ParT_score_finetuned<0.985)    
-    # "0.985>tagger>0.84":  (fj_ParT_score_finetuned>0.84) & (fj_ParT_score_finetuned<0.985)   
-    # "0.985>tagger>0.85":  (fj_ParT_score_finetuned>0.85) & (fj_ParT_score_finetuned<0.985)    
-    # "0.985>tagger>0.86":  (fj_ParT_score_finetuned>0.86) & (fj_ParT_score_finetuned<0.985)    
-    # "0.985>tagger>0.87":  (fj_ParT_score_finetuned>0.87) & (fj_ParT_score_finetuned<0.985)    
-    # "0.985>tagger>0.88":  (fj_ParT_score_finetuned>0.88) & (fj_ParT_score_finetuned<0.985)    
+    # "0.985>tagger>0.80":  (fj_ParT_score_finetuned>0.80) & (fj_ParT_score_finetuned<0.985)
+    # "0.985>tagger>0.81":  (fj_ParT_score_finetuned>0.81) & (fj_ParT_score_finetuned<0.985)
+    # "0.985>tagger>0.82":  (fj_ParT_score_finetuned>0.82) & (fj_ParT_score_finetuned<0.985)
+    # "0.985>tagger>0.83":  (fj_ParT_score_finetuned>0.83) & (fj_ParT_score_finetuned<0.985)
+    # "0.985>tagger>0.84":  (fj_ParT_score_finetuned>0.84) & (fj_ParT_score_finetuned<0.985)
+    # "0.985>tagger>0.85":  (fj_ParT_score_finetuned>0.85) & (fj_ParT_score_finetuned<0.985)
+    # "0.985>tagger>0.86":  (fj_ParT_score_finetuned>0.86) & (fj_ParT_score_finetuned<0.985)
+    # "0.985>tagger>0.87":  (fj_ParT_score_finetuned>0.87) & (fj_ParT_score_finetuned<0.985)
+    # "0.985>tagger>0.88":  (fj_ParT_score_finetuned>0.88) & (fj_ParT_score_finetuned<0.985)
     # "0.985>tagger>0.89":  (fj_ParT_score_finetuned>0.89) & (fj_ParT_score_finetuned<0.985)
-    # "0.985>tagger>0.90":  (fj_ParT_score_finetuned>0.90) & (fj_ParT_score_finetuned<0.985)    
-    # "0.985>tagger>0.91":  (fj_ParT_score_finetuned>0.91) & (fj_ParT_score_finetuned<0.985)    
-    # "0.985>tagger>0.92":  (fj_ParT_score_finetuned>0.92) & (fj_ParT_score_finetuned<0.985)    
-    # "0.985>tagger>0.93":  (fj_ParT_score_finetuned>0.93) & (fj_ParT_score_finetuned<0.985)    
-    # "0.985>tagger>0.94":  (fj_ParT_score_finetuned>0.94) & (fj_ParT_score_finetuned<0.985)    
-    # "0.985>tagger>0.95":  (fj_ParT_score_finetuned>0.95) & (fj_ParT_score_finetuned<0.985)            
-    # "0.985>tagger>0.96":  (fj_ParT_score_finetuned>0.96) & (fj_ParT_score_finetuned<0.985)            
+    # "0.985>tagger>0.90":  (fj_ParT_score_finetuned>0.90) & (fj_ParT_score_finetuned<0.985)
+    # "0.985>tagger>0.91":  (fj_ParT_score_finetuned>0.91) & (fj_ParT_score_finetuned<0.985)
+    # "0.985>tagger>0.92":  (fj_ParT_score_finetuned>0.92) & (fj_ParT_score_finetuned<0.985)
+    # "0.985>tagger>0.93":  (fj_ParT_score_finetuned>0.93) & (fj_ParT_score_finetuned<0.985)
+    # "0.985>tagger>0.94":  (fj_ParT_score_finetuned>0.94) & (fj_ParT_score_finetuned<0.985)
+    # "0.985>tagger>0.95":  (fj_ParT_score_finetuned>0.95) & (fj_ParT_score_finetuned<0.985)
+    # "0.985>tagger>0.96":  (fj_ParT_score_finetuned>0.96) & (fj_ParT_score_finetuned<0.985)
 
-    # "0.97>tagger>0.80":  (fj_ParT_score_finetuned>0.80) & (fj_ParT_score_finetuned<0.97)    
-    # "0.97>tagger>0.81":  (fj_ParT_score_finetuned>0.81) & (fj_ParT_score_finetuned<0.97)    
-    # "0.97>tagger>0.82":  (fj_ParT_score_finetuned>0.82) & (fj_ParT_score_finetuned<0.97)    
-    # "0.97>tagger>0.83":  (fj_ParT_score_finetuned>0.83) & (fj_ParT_score_finetuned<0.97)    
-    # "0.97>tagger>0.84":  (fj_ParT_score_finetuned>0.84) & (fj_ParT_score_finetuned<0.97)    
-    # "0.97>tagger>0.85":  (fj_ParT_score_finetuned>0.85) & (fj_ParT_score_finetuned<0.97)    
+    # "0.97>tagger>0.80":  (fj_ParT_score_finetuned>0.80) & (fj_ParT_score_finetuned<0.97)
+    # "0.97>tagger>0.81":  (fj_ParT_score_finetuned>0.81) & (fj_ParT_score_finetuned<0.97)
+    # "0.97>tagger>0.82":  (fj_ParT_score_finetuned>0.82) & (fj_ParT_score_finetuned<0.97)
+    # "0.97>tagger>0.83":  (fj_ParT_score_finetuned>0.83) & (fj_ParT_score_finetuned<0.97)
+    # "0.97>tagger>0.84":  (fj_ParT_score_finetuned>0.84) & (fj_ParT_score_finetuned<0.97)
+    # "0.97>tagger>0.85":  (fj_ParT_score_finetuned>0.85) & (fj_ParT_score_finetuned<0.97)
     # "0.97>tagger>0.86":  (fj_ParT_score_finetuned>0.86) & (fj_ParT_score_finetuned<0.97)
     # "0.97>tagger>0.87":  (fj_ParT_score_finetuned>0.87) & (fj_ParT_score_finetuned<0.97)
     # "0.97>tagger>0.88":  (fj_ParT_score_finetuned>0.88) & (fj_ParT_score_finetuned<0.97)
@@ -220,14 +220,14 @@ categories_sel:
     # ############# v10: END
 
     # ############# v11: START
-    # "tagger>0.985": (fj_ParT_score_finetuned>0.985)    
+    # "tagger>0.985": (fj_ParT_score_finetuned>0.985)
     # "tagger>0.97": (fj_ParT_score_finetuned>0.97)
 
-    # "0.985>tagger>0.965":  (fj_ParT_score_finetuned>0.965) & (fj_ParT_score_finetuned<0.985)            
-    # "0.985>tagger>0.97":  (fj_ParT_score_finetuned>0.97) & (fj_ParT_score_finetuned<0.985)            
-    # "0.985>tagger>0.975":  (fj_ParT_score_finetuned>0.975) & (fj_ParT_score_finetuned<0.985)            
-    # "0.985>tagger>0.98":  (fj_ParT_score_finetuned>0.98) & (fj_ParT_score_finetuned<0.985)            
-    # "0.985>tagger>0.9825":  (fj_ParT_score_finetuned>0.9825) & (fj_ParT_score_finetuned<0.985)            
+    # "0.985>tagger>0.965":  (fj_ParT_score_finetuned>0.965) & (fj_ParT_score_finetuned<0.985)
+    # "0.985>tagger>0.97":  (fj_ParT_score_finetuned>0.97) & (fj_ParT_score_finetuned<0.985)
+    # "0.985>tagger>0.975":  (fj_ParT_score_finetuned>0.975) & (fj_ParT_score_finetuned<0.985)
+    # "0.985>tagger>0.98":  (fj_ParT_score_finetuned>0.98) & (fj_ParT_score_finetuned<0.985)
+    # "0.985>tagger>0.9825":  (fj_ParT_score_finetuned>0.9825) & (fj_ParT_score_finetuned<0.985)
 
     # "0.97>tagger>0.965":  (fj_ParT_score_finetuned>0.965) & (fj_ParT_score_finetuned<0.97)
     # "0.97>tagger>0.9675":  (fj_ParT_score_finetuned>0.9675) & (fj_ParT_score_finetuned<0.97)
@@ -235,10 +235,10 @@ categories_sel:
 
 
     # ############# v12: START
-    # "0.97>tagger>0.95":  (fj_ParT_score_finetuned>0.95) & (fj_ParT_score_finetuned<0.97) 
-    # "0.97>tagger>0.955":  (fj_ParT_score_finetuned>0.955) & (fj_ParT_score_finetuned<0.97)  
-    # "0.97>tagger>0.96":  (fj_ParT_score_finetuned>0.96) & (fj_ParT_score_finetuned<0.97)  
-    # "0.97>tagger>0.965":  (fj_ParT_score_finetuned>0.965) & (fj_ParT_score_finetuned<0.97)     
+    # "0.97>tagger>0.95":  (fj_ParT_score_finetuned>0.95) & (fj_ParT_score_finetuned<0.97)
+    # "0.97>tagger>0.955":  (fj_ParT_score_finetuned>0.955) & (fj_ParT_score_finetuned<0.97)
+    # "0.97>tagger>0.96":  (fj_ParT_score_finetuned>0.96) & (fj_ParT_score_finetuned<0.97)
+    # "0.97>tagger>0.965":  (fj_ParT_score_finetuned>0.965) & (fj_ParT_score_finetuned<0.97)
 
     # "0.975>tagger>0.95":  (fj_ParT_score_finetuned>0.95) & (fj_ParT_score_finetuned<0.975)
     # "0.975>tagger>0.955":  (fj_ParT_score_finetuned>0.955) & (fj_ParT_score_finetuned<0.975)
@@ -246,24 +246,24 @@ categories_sel:
     # "0.975>tagger>0.965":  (fj_ParT_score_finetuned>0.965) & (fj_ParT_score_finetuned<0.975)
     # "0.975>tagger>0.97":  (fj_ParT_score_finetuned>0.97) & (fj_ParT_score_finetuned<0.975)
 
-    # "0.98>tagger>0.95":  (fj_ParT_score_finetuned>0.95) & (fj_ParT_score_finetuned<0.98)            
-    # "0.98>tagger>0.955":  (fj_ParT_score_finetuned>0.955) & (fj_ParT_score_finetuned<0.98)            
-    # "0.98>tagger>0.96":  (fj_ParT_score_finetuned>0.96) & (fj_ParT_score_finetuned<0.98)            
-    # "0.98>tagger>0.965":  (fj_ParT_score_finetuned>0.965) & (fj_ParT_score_finetuned<0.98)            
-    # "0.98>tagger>0.97":  (fj_ParT_score_finetuned>0.97) & (fj_ParT_score_finetuned<0.98)            
-    # "0.98>tagger>0.975":  (fj_ParT_score_finetuned>0.975) & (fj_ParT_score_finetuned<0.98)            
+    # "0.98>tagger>0.95":  (fj_ParT_score_finetuned>0.95) & (fj_ParT_score_finetuned<0.98)
+    # "0.98>tagger>0.955":  (fj_ParT_score_finetuned>0.955) & (fj_ParT_score_finetuned<0.98)
+    # "0.98>tagger>0.96":  (fj_ParT_score_finetuned>0.96) & (fj_ParT_score_finetuned<0.98)
+    # "0.98>tagger>0.965":  (fj_ParT_score_finetuned>0.965) & (fj_ParT_score_finetuned<0.98)
+    # "0.98>tagger>0.97":  (fj_ParT_score_finetuned>0.97) & (fj_ParT_score_finetuned<0.98)
+    # "0.98>tagger>0.975":  (fj_ParT_score_finetuned>0.975) & (fj_ParT_score_finetuned<0.98)
 
-    # "0.985>tagger>0.95":  (fj_ParT_score_finetuned>0.95) & (fj_ParT_score_finetuned<0.985)            
-    # "0.985>tagger>0.955":  (fj_ParT_score_finetuned>0.955) & (fj_ParT_score_finetuned<0.985)            
-    # "0.985>tagger>0.96":  (fj_ParT_score_finetuned>0.96) & (fj_ParT_score_finetuned<0.985)            
-    # "0.985>tagger>0.965":  (fj_ParT_score_finetuned>0.965) & (fj_ParT_score_finetuned<0.985)            
-    # "0.985>tagger>0.97":  (fj_ParT_score_finetuned>0.97) & (fj_ParT_score_finetuned<0.985)            
-    # "0.985>tagger>0.975":  (fj_ParT_score_finetuned>0.975) & (fj_ParT_score_finetuned<0.985)            
-    # "0.985>tagger>0.98":  (fj_ParT_score_finetuned>0.98) & (fj_ParT_score_finetuned<0.985)                
-    
-    
+    # "0.985>tagger>0.95":  (fj_ParT_score_finetuned>0.95) & (fj_ParT_score_finetuned<0.985)
+    # "0.985>tagger>0.955":  (fj_ParT_score_finetuned>0.955) & (fj_ParT_score_finetuned<0.985)
+    # "0.985>tagger>0.96":  (fj_ParT_score_finetuned>0.96) & (fj_ParT_score_finetuned<0.985)
+    # "0.985>tagger>0.965":  (fj_ParT_score_finetuned>0.965) & (fj_ParT_score_finetuned<0.985)
+    # "0.985>tagger>0.97":  (fj_ParT_score_finetuned>0.97) & (fj_ParT_score_finetuned<0.985)
+    # "0.985>tagger>0.975":  (fj_ParT_score_finetuned>0.975) & (fj_ParT_score_finetuned<0.985)
+    # "0.985>tagger>0.98":  (fj_ParT_score_finetuned>0.98) & (fj_ParT_score_finetuned<0.985)
+
+
     # "VBFtagger>0.95": (fj_ParT_score_finetuned>0.95) & ( (mjj>1000) & (deta>3.5) )
-    # "VBFtagger>0.955": (fj_ParT_score_finetuned>0.955) & ( (mjj>1000) & (deta>3.5) )    
+    # "VBFtagger>0.955": (fj_ParT_score_finetuned>0.955) & ( (mjj>1000) & (deta>3.5) )
     # "VBFtagger>0.96": (fj_ParT_score_finetuned>0.96) & ( (mjj>1000) & (deta>3.5) )
     # "VBFtagger>0.965": (fj_ParT_score_finetuned>0.965) & ( (mjj>1000) & (deta>3.5) )
     # "VBFtagger>0.97": (fj_ParT_score_finetuned>0.97) & ( (mjj>1000) & (deta>3.5) )
@@ -271,26 +271,26 @@ categories_sel:
     # "VBFtagger>0.98": (fj_ParT_score_finetuned>0.98) & ( (mjj>1000) & (deta>3.5) )
     # "VBFtagger>0.985": (fj_ParT_score_finetuned>0.985) & ( (mjj>1000) & (deta>3.5) )
 
-    # "VBF0.98>tagger>0.95": (fj_ParT_score_finetuned>0.95) & (fj_ParT_score_finetuned<0.98) & ( (mjj>1000) & (deta>3.5) )    
-    # "VBF0.98>tagger>0.955": (fj_ParT_score_finetuned>0.955) & (fj_ParT_score_finetuned<0.98) & ( (mjj>1000) & (deta>3.5) )    
-    # "VBF0.98>tagger>0.96": (fj_ParT_score_finetuned>0.96) & (fj_ParT_score_finetuned<0.98) & ( (mjj>1000) & (deta>3.5) )    
-    # "VBF0.98>tagger>0.965": (fj_ParT_score_finetuned>0.965) & (fj_ParT_score_finetuned<0.98) & ( (mjj>1000) & (deta>3.5) )    
-    # "VBF0.98>tagger>0.97": (fj_ParT_score_finetuned>0.97) & (fj_ParT_score_finetuned<0.98) & ( (mjj>1000) & (deta>3.5) )    
-    # "VBF0.98>tagger>0.975": (fj_ParT_score_finetuned>0.975) & (fj_ParT_score_finetuned<0.98) & ( (mjj>1000) & (deta>3.5) )        
+    # "VBF0.98>tagger>0.95": (fj_ParT_score_finetuned>0.95) & (fj_ParT_score_finetuned<0.98) & ( (mjj>1000) & (deta>3.5) )
+    # "VBF0.98>tagger>0.955": (fj_ParT_score_finetuned>0.955) & (fj_ParT_score_finetuned<0.98) & ( (mjj>1000) & (deta>3.5) )
+    # "VBF0.98>tagger>0.96": (fj_ParT_score_finetuned>0.96) & (fj_ParT_score_finetuned<0.98) & ( (mjj>1000) & (deta>3.5) )
+    # "VBF0.98>tagger>0.965": (fj_ParT_score_finetuned>0.965) & (fj_ParT_score_finetuned<0.98) & ( (mjj>1000) & (deta>3.5) )
+    # "VBF0.98>tagger>0.97": (fj_ParT_score_finetuned>0.97) & (fj_ParT_score_finetuned<0.98) & ( (mjj>1000) & (deta>3.5) )
+    # "VBF0.98>tagger>0.975": (fj_ParT_score_finetuned>0.975) & (fj_ParT_score_finetuned<0.98) & ( (mjj>1000) & (deta>3.5) )
 
-    # "VBF0.975>tagger>0.95": (fj_ParT_score_finetuned>0.95) & (fj_ParT_score_finetuned<0.975) & ( (mjj>1000) & (deta>3.5) )    
-    # "VBF0.975>tagger>0.955": (fj_ParT_score_finetuned>0.955) & (fj_ParT_score_finetuned<0.975) & ( (mjj>1000) & (deta>3.5) )    
-    # "VBF0.975>tagger>0.96": (fj_ParT_score_finetuned>0.96) & (fj_ParT_score_finetuned<0.975) & ( (mjj>1000) & (deta>3.5) )    
-    # "VBF0.975>tagger>0.965": (fj_ParT_score_finetuned>0.965) & (fj_ParT_score_finetuned<0.975) & ( (mjj>1000) & (deta>3.5) )    
-    # "VBF0.975>tagger>0.97": (fj_ParT_score_finetuned>0.97) & (fj_ParT_score_finetuned<0.975) & ( (mjj>1000) & (deta>3.5) )    
-    # "VBF0.975>tagger>0.975": (fj_ParT_score_finetuned>0.975) & (fj_ParT_score_finetuned<0.975) & ( (mjj>1000) & (deta>3.5) )        
+    # "VBF0.975>tagger>0.95": (fj_ParT_score_finetuned>0.95) & (fj_ParT_score_finetuned<0.975) & ( (mjj>1000) & (deta>3.5) )
+    # "VBF0.975>tagger>0.955": (fj_ParT_score_finetuned>0.955) & (fj_ParT_score_finetuned<0.975) & ( (mjj>1000) & (deta>3.5) )
+    # "VBF0.975>tagger>0.96": (fj_ParT_score_finetuned>0.96) & (fj_ParT_score_finetuned<0.975) & ( (mjj>1000) & (deta>3.5) )
+    # "VBF0.975>tagger>0.965": (fj_ParT_score_finetuned>0.965) & (fj_ParT_score_finetuned<0.975) & ( (mjj>1000) & (deta>3.5) )
+    # "VBF0.975>tagger>0.97": (fj_ParT_score_finetuned>0.97) & (fj_ParT_score_finetuned<0.975) & ( (mjj>1000) & (deta>3.5) )
+    # "VBF0.975>tagger>0.975": (fj_ParT_score_finetuned>0.975) & (fj_ParT_score_finetuned<0.975) & ( (mjj>1000) & (deta>3.5) )
 
-    # "VBF0.970>tagger>0.95": (fj_ParT_score_finetuned>0.95) & (fj_ParT_score_finetuned<0.970) & ( (mjj>1000) & (deta>3.5) )    
-    # "VBF0.970>tagger>0.955": (fj_ParT_score_finetuned>0.955) & (fj_ParT_score_finetuned<0.970) & ( (mjj>1000) & (deta>3.5) )    
-    # "VBF0.970>tagger>0.96": (fj_ParT_score_finetuned>0.96) & (fj_ParT_score_finetuned<0.970) & ( (mjj>1000) & (deta>3.5) )    
-    # "VBF0.970>tagger>0.965": (fj_ParT_score_finetuned>0.965) & (fj_ParT_score_finetuned<0.970) & ( (mjj>1000) & (deta>3.5) )    
-    # "VBF0.970>tagger>0.97": (fj_ParT_score_finetuned>0.97) & (fj_ParT_score_finetuned<0.970) & ( (mjj>1000) & (deta>3.5) )    
-    # "VBF0.970>tagger>0.975": (fj_ParT_score_finetuned>0.975) & (fj_ParT_score_finetuned<0.970) & ( (mjj>1000) & (deta>3.5) )        
+    # "VBF0.970>tagger>0.95": (fj_ParT_score_finetuned>0.95) & (fj_ParT_score_finetuned<0.970) & ( (mjj>1000) & (deta>3.5) )
+    # "VBF0.970>tagger>0.955": (fj_ParT_score_finetuned>0.955) & (fj_ParT_score_finetuned<0.970) & ( (mjj>1000) & (deta>3.5) )
+    # "VBF0.970>tagger>0.96": (fj_ParT_score_finetuned>0.96) & (fj_ParT_score_finetuned<0.970) & ( (mjj>1000) & (deta>3.5) )
+    # "VBF0.970>tagger>0.965": (fj_ParT_score_finetuned>0.965) & (fj_ParT_score_finetuned<0.970) & ( (mjj>1000) & (deta>3.5) )
+    # "VBF0.970>tagger>0.97": (fj_ParT_score_finetuned>0.97) & (fj_ParT_score_finetuned<0.970) & ( (mjj>1000) & (deta>3.5) )
+    # "VBF0.970>tagger>0.975": (fj_ParT_score_finetuned>0.975) & (fj_ParT_score_finetuned<0.970) & ( (mjj>1000) & (deta>3.5) )
 
     # "ggFtagger>0.95": (fj_ParT_score_finetuned>0.95) &  ( (mjj<1000) | (deta<3.5) )
     # "ggFtagger>0.955": (fj_ParT_score_finetuned>0.95) &  ( (mjj<1000) | (deta<3.5) )
@@ -299,34 +299,34 @@ categories_sel:
     # "ggFtagger>0.97": (fj_ParT_score_finetuned>0.97) &  ( (mjj<1000) | (deta<3.5) )
     # "ggFtagger>0.975": (fj_ParT_score_finetuned>0.975) &  ( (mjj<1000) | (deta<3.5) )
     # "ggFtagger>0.98": (fj_ParT_score_finetuned>0.98) &  ( (mjj<1000) | (deta<3.5) )
-    # "ggFtagger>0.985": (fj_ParT_score_finetuned>0.985) &  ( (mjj<1000) | (deta<3.5) )        
+    # "ggFtagger>0.985": (fj_ParT_score_finetuned>0.985) &  ( (mjj<1000) | (deta<3.5) )
 
     # "ggF0.985>tagger>0.95": (fj_ParT_score_finetuned>0.95) & (fj_ParT_score_finetuned<0.985) & ( (mjj<1000) | (deta<3.5) )
     # "ggF0.985>tagger>0.955": (fj_ParT_score_finetuned>0.955) & (fj_ParT_score_finetuned<0.985) & ( (mjj<1000) | (deta<3.5) )
-    # "ggF0.985>tagger>0.96": (fj_ParT_score_finetuned>0.96) & (fj_ParT_score_finetuned<0.985) & ( (mjj<1000) | (deta<3.5) )    
-    # "ggF0.985>tagger>0.965": (fj_ParT_score_finetuned>0.965) & (fj_ParT_score_finetuned<0.985) & ( (mjj<1000) | (deta<3.5) )    
+    # "ggF0.985>tagger>0.96": (fj_ParT_score_finetuned>0.96) & (fj_ParT_score_finetuned<0.985) & ( (mjj<1000) | (deta<3.5) )
+    # "ggF0.985>tagger>0.965": (fj_ParT_score_finetuned>0.965) & (fj_ParT_score_finetuned<0.985) & ( (mjj<1000) | (deta<3.5) )
     # "ggF0.985>tagger>0.97": (fj_ParT_score_finetuned>0.97) & (fj_ParT_score_finetuned<0.985) & ( (mjj<1000) | (deta<3.5) )
     # "ggF0.985>tagger>0.975": (fj_ParT_score_finetuned>0.975) & (fj_ParT_score_finetuned<0.985) & ( (mjj<1000) | (deta<3.5) )
     # "ggF0.985>tagger>0.98": (fj_ParT_score_finetuned>0.98) & (fj_ParT_score_finetuned<0.985) & ( (mjj<1000) | (deta<3.5) )
 
     # "ggF0.98>tagger>0.95": (fj_ParT_score_finetuned>0.95) & (fj_ParT_score_finetuned<0.98) & ( (mjj<1000) | (deta<3.5) )
     # "ggF0.98>tagger>0.955": (fj_ParT_score_finetuned>0.955) & (fj_ParT_score_finetuned<0.98) & ( (mjj<1000) | (deta<3.5) )
-    # "ggF0.98>tagger>0.96": (fj_ParT_score_finetuned>0.96) & (fj_ParT_score_finetuned<0.98) & ( (mjj<1000) | (deta<3.5) )    
-    # "ggF0.98>tagger>0.965": (fj_ParT_score_finetuned>0.965) & (fj_ParT_score_finetuned<0.98) & ( (mjj<1000) | (deta<3.5) )    
+    # "ggF0.98>tagger>0.96": (fj_ParT_score_finetuned>0.96) & (fj_ParT_score_finetuned<0.98) & ( (mjj<1000) | (deta<3.5) )
+    # "ggF0.98>tagger>0.965": (fj_ParT_score_finetuned>0.965) & (fj_ParT_score_finetuned<0.98) & ( (mjj<1000) | (deta<3.5) )
     # "ggF0.98>tagger>0.97": (fj_ParT_score_finetuned>0.97) & (fj_ParT_score_finetuned<0.98) & ( (mjj<1000) | (deta<3.5) )
     # "ggF0.98>tagger>0.975": (fj_ParT_score_finetuned>0.975) & (fj_ParT_score_finetuned<0.98) & ( (mjj<1000) | (deta<3.5) )
 
     # "ggF0.975>tagger>0.95": (fj_ParT_score_finetuned>0.95) & (fj_ParT_score_finetuned<0.975) & ( (mjj<1000) | (deta<3.5) )
     # "ggF0.975>tagger>0.955": (fj_ParT_score_finetuned>0.955) & (fj_ParT_score_finetuned<0.975) & ( (mjj<1000) | (deta<3.5) )
-    # "ggF0.975>tagger>0.96": (fj_ParT_score_finetuned>0.96) & (fj_ParT_score_finetuned<0.975) & ( (mjj<1000) | (deta<3.5) )    
-    # "ggF0.975>tagger>0.965": (fj_ParT_score_finetuned>0.965) & (fj_ParT_score_finetuned<0.975) & ( (mjj<1000) | (deta<3.5) )    
+    # "ggF0.975>tagger>0.96": (fj_ParT_score_finetuned>0.96) & (fj_ParT_score_finetuned<0.975) & ( (mjj<1000) | (deta<3.5) )
+    # "ggF0.975>tagger>0.965": (fj_ParT_score_finetuned>0.965) & (fj_ParT_score_finetuned<0.975) & ( (mjj<1000) | (deta<3.5) )
     # "ggF0.975>tagger>0.97": (fj_ParT_score_finetuned>0.97) & (fj_ParT_score_finetuned<0.975) & ( (mjj<1000) | (deta<3.5) )
 
     # "ggF0.97>tagger>0.95": (fj_ParT_score_finetuned>0.95) & (fj_ParT_score_finetuned<0.97) & ( (mjj<1000) | (deta<3.5) )
     # "ggF0.97>tagger>0.955": (fj_ParT_score_finetuned>0.955) & (fj_ParT_score_finetuned<0.97) & ( (mjj<1000) | (deta<3.5) )
-    # "ggF0.97>tagger>0.96": (fj_ParT_score_finetuned>0.96) & (fj_ParT_score_finetuned<0.97) & ( (mjj<1000) | (deta<3.5) )    
-    # "ggF0.97>tagger>0.965": (fj_ParT_score_finetuned>0.965) & (fj_ParT_score_finetuned<0.97) & ( (mjj<1000) | (deta<3.5) )    
-    # ############# v12: END        
+    # "ggF0.97>tagger>0.96": (fj_ParT_score_finetuned>0.96) & (fj_ParT_score_finetuned<0.97) & ( (mjj<1000) | (deta<3.5) )
+    # "ggF0.97>tagger>0.965": (fj_ParT_score_finetuned>0.965) & (fj_ParT_score_finetuned<0.97) & ( (mjj<1000) | (deta<3.5) )
+    # ############# v12: END
 
 
     # # ############# v13: START
@@ -334,19 +334,19 @@ categories_sel:
     # "0.98>tagger>0.97": (fj_ParT_score_finetuned>0.97) & (fj_ParT_score_finetuned<0.98)
 
     # "ggF0.98>tagger>0.97": (fj_ParT_score_finetuned>0.97) & (fj_ParT_score_finetuned<0.98) & ( (mjj<1000) | (deta<3.5) )
-    
+
     # "ggFtagger>0.98": (fj_ParT_score_finetuned>0.98) &  ( (mjj<1000) | (deta<3.5) )
     # "ggFtagger>0.98pt300to450": (fj_ParT_score_finetuned>0.98) &  ( (mjj<1000) | (deta<3.5) ) & (fj_pt<450)
     # "ggFtagger>0.98pt450toInf": (fj_ParT_score_finetuned>0.98) &  ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
     # "ggF0.98>tagger>0.97pt300to450": (fj_ParT_score_finetuned>0.97) & (fj_ParT_score_finetuned<0.98) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<450)
     # "ggF0.98>tagger>0.97pt450toInf": (fj_ParT_score_finetuned>0.97) & (fj_ParT_score_finetuned<0.98) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
 
-    # "ggFtagger>0.985": (fj_ParT_score_finetuned>0.985) &  ( (mjj<1000) | (deta<3.5) )        
+    # "ggFtagger>0.985": (fj_ParT_score_finetuned>0.985) &  ( (mjj<1000) | (deta<3.5) )
     # "ggFtagger>0.985pt300to450": (fj_ParT_score_finetuned>0.985) &  ( (mjj<1000) | (deta<3.5) ) & (fj_pt<450)
     # "ggFtagger>0.985pt450toInf": (fj_ParT_score_finetuned>0.985) &  ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
     # "ggF0.985>tagger>0.97pt300to450": (fj_ParT_score_finetuned>0.97) & (fj_ParT_score_finetuned<0.985) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<450)
     # "ggF0.985>tagger>0.97pt450toInf": (fj_ParT_score_finetuned>0.97) & (fj_ParT_score_finetuned<0.985) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
-    # # ############# v13: END  
+    # # ############# v13: END
 
 
     # ############# v14: START
@@ -356,11 +356,11 @@ categories_sel:
     # "ftagger>0.999": (fj_ParT_score_finetuned>0.999)
     # "ftagger>0.995": (fj_ParT_score_finetuned>0.995)
     # "ftagger>0.99": (fj_ParT_score_finetuned>0.99)
-    # "ftagger>0.985": (fj_ParT_score_finetuned>0.985)    
+    # "ftagger>0.985": (fj_ParT_score_finetuned>0.985)
     # "ftagger>0.98": (fj_ParT_score_finetuned>0.98)
-    # "ftagger>0.975": (fj_ParT_score_finetuned>0.975)    
+    # "ftagger>0.975": (fj_ParT_score_finetuned>0.975)
     # "ftagger>0.97": (fj_ParT_score_finetuned>0.97)
-    # "ftagger>0.965": (fj_ParT_score_finetuned>0.965)    
+    # "ftagger>0.965": (fj_ParT_score_finetuned>0.965)
     # "ftagger>0.96": (fj_ParT_score_finetuned>0.96)
     # "ftagger>0.955": (fj_ParT_score_finetuned>0.955)
     # "ftagger>0.95": (fj_ParT_score_finetuned>0.95)
@@ -376,11 +376,11 @@ categories_sel:
     # "tagger>0.999": (fj_ParT_score>0.999)
     # "tagger>0.995": (fj_ParT_score>0.995)
     # "tagger>0.99": (fj_ParT_score>0.99)
-    # "tagger>0.985": (fj_ParT_score>0.985)    
+    # "tagger>0.985": (fj_ParT_score>0.985)
     # "tagger>0.98": (fj_ParT_score>0.98)
-    # "tagger>0.975": (fj_ParT_score>0.975)    
+    # "tagger>0.975": (fj_ParT_score>0.975)
     # "tagger>0.97": (fj_ParT_score>0.97)
-    # "tagger>0.965": (fj_ParT_score>0.965)    
+    # "tagger>0.965": (fj_ParT_score>0.965)
     # "tagger>0.96": (fj_ParT_score>0.96)
     # "tagger>0.955": (fj_ParT_score>0.955)
     # "tagger>0.95": (fj_ParT_score>0.95)
@@ -388,16 +388,16 @@ categories_sel:
     # "tagger>0.93": (fj_ParT_score>0.93)
     # "tagger>0.92": (fj_ParT_score>0.92)
     # "tagger>0.91": (fj_ParT_score>0.91)
-    # "tagger>0.90": (fj_ParT_score>0.90)    
+    # "tagger>0.90": (fj_ParT_score>0.90)
     # ############# v14: END
 
 
     ############# v15: START
-    
+
     # "VBFtagger>0.98": (fj_ParT_score_finetuned>0.98) & ( (mjj>1000) & (deta>3.5) )
     # "ggFtagger>0.98": (fj_ParT_score_finetuned>0.98) &  ( (mjj<1000) | (deta<3.5) )
     # "0.98>tagger>0.97":  (fj_ParT_score_finetuned>0.97) & (fj_ParT_score_finetuned<0.98)
-    
+
     # "0.97>tagger>0.96":  (fj_ParT_score_finetuned>0.96) & (fj_ParT_score_finetuned<0.97)
     # "0.97>tagger>0.95":  (fj_ParT_score_finetuned>0.95) & (fj_ParT_score_finetuned<0.97)
     # "0.97>tagger>0.94":  (fj_ParT_score_finetuned>0.94) & (fj_ParT_score_finetuned<0.97)
@@ -415,14 +415,14 @@ categories_sel:
 
 
     # ############# v16: START
-    
+
     # "VBFtagger>0.98": (fj_ParT_score_finetuned>0.98) & ( (mjj>1000) & (deta>3.5) )
     # "ggFtagger>0.98pt300to450": (fj_ParT_score_finetuned>0.98) &  ( (mjj<1000) | (deta<3.5) ) & (fj_pt<450)
     # "ggFtagger>0.98pt450toInf": (fj_ParT_score_finetuned>0.98) &  ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
 
     # "0.98>tagger>0.97": (fj_ParT_score_finetuned>0.97) & (fj_ParT_score_finetuned<0.98)
 
-    # ############# v16: END    
+    # ############# v16: END
 
 
 samples_dir:

@@ -65,7 +65,7 @@ while true; do
             ;;
         --dfitasimov)
             dfit_asimov=1
-            ;;            
+            ;;
         -g|--gofdata)
             gofdata=1
             ;;
