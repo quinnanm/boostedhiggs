@@ -25,8 +25,10 @@ combine_samples = {
     "ttHToNonbb_M125": "ttH",
     # bkg
     "QCD_Pt": "QCD",
+    # "QCD_Pt": "WJetsQCD",
     "DYJets": "DYJets",
     "WJetsToLNu_": "WJetsLNu",
+    # "WJetsToLNu_": "WJetsQCD",
     "JetsToQQ": "WZQQ",
     "TT": "TTbar",
     "ST_": "SingleTop",
@@ -47,6 +49,7 @@ labels = {
     "QCD": "qcd",
     "TTbar": "ttbar",
     "WJetsLNu": "wjets",
+    # "WJetsQCD": "wjetsqcd",
     "SingleTop": "singletop",
     "DYJets": "zjets",
 }
