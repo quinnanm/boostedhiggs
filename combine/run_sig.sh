@@ -1,11 +1,10 @@
-dataset=data_obs
-cards_dir="/uscms/home/fmokhtar/nobackup/boostedhiggs/combine/templates/v39/datacards"
-cp ${cards_dir}/testModel.root testModel.root # TODO: avoid this
-CMS_PARAMS_LABEL="CMS_HWW_boosted"
+######## Script to combine datacards and run asimov significance to study optimal working points.
 
-# ####################################################################################################
-# # Combine cards, significances
-# ####################################################################################################
+cards_dir="/uscms/home/fmokhtar/nobackup/boostedhiggs/combine/templates/v1/datacards"
+
+####################################################################################################
+# Combine cards
+####################################################################################################
 
 # outdir is the combined directory with the combine.txt datafile
 outdir=${cards_dir}/combined
@@ -15,23 +14,23 @@ chmod +x ${outdir}
 combined_datacard=${outdir}/combined.txt
 ws=${outdir}/workspace.root
 
-cat0=VBF99
-ccargs="${cat0}=${cards_dir}/${cat0}.txt"
-
-cat1=ggF985
-cat2=VBF97
-cat3=SR2ggF96and985
-
 cat0=VBF97
-cat1=SR1ggFpt250to300
-cat2=SR1ggFpt300to450
-cat3=SR1ggFpt450toInf
-cat4=SR2ggF
+# ccargs="${cat0}=${cards_dir}/${cat0}.txt"
 
-# ccargs="${cat1}=${cards_dir}/${cat1}.txt ${cat2}=${cards_dir}/${cat2}.txt"
+cat1=SR1ggF98pt250to300
+cat2=SR1ggF98pt300to450
+cat3=SR1ggF98pt450toInf
 # ccargs="${cat1}=${cards_dir}/${cat1}.txt ${cat2}=${cards_dir}/${cat2}.txt ${cat3}=${cards_dir}/${cat3}.txt"
 
+cat4=SR2ggF96and98
+# ccargs="${cat1}=${cards_dir}/${cat1}.txt ${cat2}=${cards_dir}/${cat2}.txt ${cat3}=${cards_dir}/${cat3}.txt ${cat4}=${cards_dir}/${cat4}.txt"
+
+
 ccargs="${cat0}=${cards_dir}/${cat0}.txt ${cat1}=${cards_dir}/${cat1}.txt ${cat2}=${cards_dir}/${cat2}.txt ${cat3}=${cards_dir}/${cat3}.txt ${cat4}=${cards_dir}/${cat4}.txt"
+
+# ccargs="${cat1}=${cards_dir}/${cat1}.txt ${cat2}=${cards_dir}/${cat2}.txt ${cat3}=${cards_dir}/${cat3}.txt"
+
+# ccargs="${cat0}=${cards_dir}/${cat0}.txt ${cat1}=${cards_dir}/${cat1}.txt ${cat2}=${cards_dir}/${cat2}.txt ${cat3}=${cards_dir}/${cat3}.txt ${cat4}=${cards_dir}/${cat4}.txt"
 # ccargs="${cat0}=${cards_dir}/${cat0}.txt ${cat2}=${cards_dir}/${cat2}.txt ${cat3}=${cards_dir}/${cat3}.txt ${cat4}=${cards_dir}/${cat4}.txt"
 
 # ccargs="${cat2}=${cards_dir}/${cat2}.txt"
@@ -51,6 +50,10 @@ for file in $ccargs; do
 done
 echo "-------------------------"
 combineCards.py $ccargs > $combined_datacard
+
+####################################################################################################
+# Run asimov significance
+####################################################################################################
 
 echo "Running text2workspace"
 text2workspace.py $combined_datacard --channel-masks -o $ws 2>&1
