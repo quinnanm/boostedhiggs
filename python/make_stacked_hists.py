@@ -110,9 +110,9 @@ def make_events_dict(
             for sample in os.listdir(samples_dir):
                 # get a combined label to combine samples of the same process
 
-                if sample == "QCD_Pt_170to300":
-                    print(f"Skipping sample {sample}")
-                    continue
+                # if sample == "QCD_Pt_170to300":
+                #     print(f"Skipping sample {sample}")
+                #     continue
 
                 if "DYJetsToLL_M-50_HT" in sample:
                     print(f"Skipping sample {sample}")

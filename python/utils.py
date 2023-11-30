@@ -166,7 +166,7 @@ axis_dict = {
     "mu_mvaId": hist2.axis.Variable([0, 1, 2, 3, 4, 5], name="var", label="Muon MVAID", overflow=True),
     "ele_highPtId": hist2.axis.Regular(5, 0, 5, name="var", label="Electron high pT ID", overflow=True),
     "mu_highPtId": hist2.axis.Regular(5, 0, 5, name="var", label="Muon high pT ID", overflow=True),
-    "fj_pt": hist2.axis.Regular(30, 300, 600, name="var", label=r"Jet $p_T$ [GeV]", overflow=True),
+    "fj_pt": hist2.axis.Regular(30, 200, 600, name="var", label=r"Jet $p_T$ [GeV]", overflow=True),
     "fj_msoftdrop": hist2.axis.Regular(35, 20, 250, name="var", label=r"Jet $m_{sd}$ [GeV]", overflow=True),
     "rec_higgs_m": hist2.axis.Variable(
         list(range(50, 240, 20)), name="var", label=r"Higgs reconstructed mass [GeV]", overflow=True
@@ -473,8 +473,17 @@ def plot_hists(
 
                     soverb_integrated = round((s / b).item(), 2)
                     # sax.legend(title=f"S/sqrt(B) (in {range_min}-{range_max})={soverb_integrated:.2f}")
-                sax.set_ylim(0, 1.2)
-                sax.set_yticks([0, 0.5, 1.0])
+
+                if "SR1" in text_:
+                    sax.set_ylim(0, 1.7)
+                    sax.set_yticks([0, 0.5, 1.0, 1.5])
+                elif "SR2" in text_:
+                    sax.set_ylim(0, 0.7)
+                    sax.set_yticks([0, 0.2, 0.4, 0.6])
+
+                # sax.set_ylim(0, 1.2)
+                # sax.set_yticks([0, 0.5, 1.0])
+
                 # sax.set_ylim(0, 0.5)
                 # sax.set_yticks([0, 0.3])
                 # sax.set_ylim(0, 0.5)
@@ -546,6 +555,8 @@ def plot_hists(
         if logy:
             ax.set_yscale("log")
             ax.set_ylim(1e-1)
+        else:
+            ax.set_ylim(0)
 
         hep.cms.lumitext("%.1f " % luminosity + r"fb$^{-1}$ (13 TeV)", ax=ax, fontsize=20)
         hep.cms.text("Work in Progress", ax=ax, fontsize=15)
