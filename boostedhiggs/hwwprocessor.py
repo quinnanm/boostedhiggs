@@ -383,9 +383,16 @@ class HwwProcessor(processor.ProcessorABC):
             rec_W_qq = candidatefj - candidatelep_p4
             rec_higgs = rec_W_qq + rec_W_lnu
 
-            variables[f"fj_minus_lep_m{shift}"] = (candidatefj - candidatelep_p4).mass
             variables[f"fj_pt{shift}"] = candidatefj.pt
+
             variables[f"rec_higgs_m{shift}"] = rec_higgs.mass
+            variables[f"rec_higgs_pt{shift}"] = rec_higgs.pt
+
+            variables[f"rec_W_qq_m{shift}"] = rec_W_qq.mass
+            variables[f"rec_W_qq_pt{shift}"] = rec_W_qq.pt
+
+            variables[f"rec_W_lnu_m{shift}"] = rec_W_lnu.mass
+            variables[f"rec_W_lnu_pt{shift}"] = rec_W_lnu.pt
             return variables
 
         # add variables affected by JECs/MET
