@@ -266,13 +266,8 @@ class HwwProcessor(processor.ProcessorABC):
         fatjets["msdcorr"] = corrected_msoftdrop(fatjets)
 
         good_fatjets = (fatjets.pt > 200) & (abs(fatjets.eta) < 2.5) & fatjets.isTight
-
         good_fatjets = fatjets[good_fatjets]  # select good fatjets
         good_fatjets = good_fatjets[ak.argsort(good_fatjets.pt, ascending=False)]  # sort them by pt
-
-        NumFatjets = ak.num(good_fatjets)
-        FirstFatjet = ak.firsts(good_fatjets)
-        SecondFatjet = good_fatjets[:, 1:2]
 
         good_fatjets, jec_shifted_fatjetvars = get_jec_jets(
             events, good_fatjets, self._year, not self.isMC, self.jecs, fatjets=True
@@ -294,15 +289,14 @@ class HwwProcessor(processor.ProcessorABC):
         # b-jets
         # dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj))
         dr_jet_lepfj = goodjets.delta_r(candidatefj)
-        ak4_outside_ak8 = ak.singletons(goodjets[dr_jet_lepfj > 0.8])
-        NumOtherJets = ak.num(ak4_outside_ak8)
+        ak4_outside_ak8 = goodjets[dr_jet_lepfj > 0.8]
 
-        n_bjets_L = ak.num(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["L"])
-        n_bjets_M = ak.num(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["M"])
-        n_bjets_T = ak.num(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["T"])
-        n_bjetsDeepCSV_L = ak.num(ak4_outside_ak8.btagDeepB > btagWPs["deepCSV"][self._year]["L"])
-        n_bjetsDeepCSV_M = ak.num(ak4_outside_ak8.btagDeepB > btagWPs["deepCSV"][self._year]["M"])
-        n_bjetsDeepCSV_T = ak.num(ak4_outside_ak8.btagDeepB > btagWPs["deepCSV"][self._year]["T"])
+        n_bjets_L = ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["L"], axis=1)
+        n_bjets_M = ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["M"], axis=1)
+        n_bjets_T = ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["T"], axis=1)
+        n_bjetsDeepCSV_L = ak.sum(ak4_outside_ak8.btagDeepB > btagWPs["deepCSV"][self._year]["L"], axis=1)
+        n_bjetsDeepCSV_M = ak.sum(ak4_outside_ak8.btagDeepB > btagWPs["deepCSV"][self._year]["M"], axis=1)
+        n_bjetsDeepCSV_T = ak.sum(ak4_outside_ak8.btagDeepB > btagWPs["deepCSV"][self._year]["T"], axis=1)
 
         # delta R between AK8 jet and lepton
         lep_fj_dr = candidatefj.delta_r(candidatelep_p4)
@@ -324,9 +318,6 @@ class HwwProcessor(processor.ProcessorABC):
             "met_pt": met.pt,
             "deta": deta,
             "mjj": mjj,
-            "ht": ht,
-            "NumFatjets": NumFatjets,
-            "NumOtherJets": NumOtherJets,
             "n_bjets_L": n_bjets_L,
             "n_bjets_M": n_bjets_M,
             "n_bjets_T": n_bjets_T,
@@ -334,10 +325,6 @@ class HwwProcessor(processor.ProcessorABC):
             "n_bjetsDeepCSV_M": n_bjetsDeepCSV_M,
             "n_bjetsDeepCSV_T": n_bjetsDeepCSV_T,
             "fj_lsf3": candidatefj.lsf3,
-            "FirstFatjet_pt": FirstFatjet.pt,
-            "FirstFatjet_m": FirstFatjet.mass,
-            "SecondFatjet_pt": SecondFatjet.pt,
-            "SecondFatjet_m": SecondFatjet.mass,
         }
 
         fatjetvars = {
@@ -450,48 +437,45 @@ class HwwProcessor(processor.ProcessorABC):
             )
             self.add_selection(name="HEMCleaning", sel=~hem_cleaning)
 
-        # apply selections
+        # apply trigger
         for ch in self._channels:
             self.add_selection(name="Trigger", sel=trigger[ch], channel=ch)
 
+        # apply selections
         self.add_selection(name="METFilters", sel=metfilters)
+        self.add_selection(name="LepKin", sel=(candidatelep.pt > 30), channel="mu")
+        self.add_selection(name="LepKin", sel=(candidatelep.pt > 40), channel="ele")
+        self.add_selection(name="FatJetKin", sel=(candidatefj.pt > 200) & (ht > 200))
+        self.add_selection(name="dRFatJetLepOverlap", sel=(lep_fj_dr > 0.03))
 
-        self.add_selection(
-            name="OneLep",
-            sel=(n_good_muons == 1)
-            & (n_good_electrons == 0)
-            & (n_loose_electrons == 0)
-            & ~ak.any(loose_muons & ~good_muons, 1),
-            # & (n_loose_taus_mu == 0),
-            channel="mu",
-        )
-        self.add_selection(
-            name="OneLep",
-            sel=(n_good_muons == 0)
-            & (n_loose_muons == 0)
-            & (n_good_electrons == 1)
-            & ~ak.any(loose_electrons & ~good_electrons, 1),
-            # & (n_loose_taus_ele == 0),
-            channel="ele",
-        )
-        # self.add_selection(name="NoTaus", sel=(n_loose_taus_mu == 0), channel="mu")
-        # self.add_selection(name="NoTaus", sel=(n_loose_taus_ele == 0), channel="ele")
+        if self._region == "zll":
+            secondlep_p4 = build_p4(ak.firsts(goodleptons[:, 1:2]))
+            variables["secondlep_pt"] = secondlep_p4.pt
+            variables["mll"] = (candidatelep_p4 + secondlep_p4).mass
 
-        # self.add_selection(
-        #     name="LepIso", sel=((candidatelep.pt < 55) & (lep_reliso < 0.15)) | (candidatelep.pt >= 55), channel="mu"
-        # )
-        # self.add_selection(
-        #     name="LepIso", sel=((candidatelep.pt < 120) & (lep_reliso < 0.15)) | (candidatelep.pt >= 120), channel="ele"
-        # )
-        # self.add_selection(
-        #     name="LepMiniIso", sel=(candidatelep.pt < 55) | ((candidatelep.pt >= 55) & (lep_miso < 0.2)), channel="mu"
-        # )
-        # self.add_selection(name="ht", sel=(ht > 200))
-        # self.add_selection(name="OneCandidateJet", sel=(candidatefj.pt > 0))
-        self.add_selection(name="CandidateJetpT", sel=(candidatefj.pt > 250))
-        self.add_selection(name="LepInJet", sel=(lep_fj_dr < 0.8))
-        self.add_selection(name="JetLepOverlap", sel=(lep_fj_dr > 0.03))
-        # self.add_selection(name="dPhiJetMETCut", sel=(np.abs(met_fj_dphi) < 1.57))
+            self.add_selection(name="TwoLepSameFlavor", sel=(n_good_muons == 2), channel="mu")
+            self.add_selection(name="TwoLepSameFlavor", sel=(n_good_electrons == 2), channel="ele")
+            self.add_selection(name="TwoLepOppositeCharge", sel=(candidatelep_p4.charge * secondlep_p4.charge < 0))
+        else:
+            self.add_selection(
+                name="OneLep",
+                sel=(n_good_muons == 1)
+                & (n_good_electrons == 0)
+                & (n_loose_electrons == 0)
+                & ~ak.any(loose_muons & ~good_muons, 1)
+                & (n_loose_taus_mu == 0),
+                channel="mu",
+            )
+            self.add_selection(
+                name="OneLep",
+                sel=(n_good_muons == 0)
+                & (n_loose_muons == 0)
+                & (n_good_electrons == 1)
+                & ~ak.any(loose_electrons & ~good_electrons, 1)
+                & (n_loose_taus_ele == 0),
+                channel="ele",
+            )
+        self.add_selection(name="dRFatJetLep08", sel=(lep_fj_dr < 0.8))
 
         # gen-level matching
         signal_mask = None
