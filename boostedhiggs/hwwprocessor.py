@@ -316,19 +316,20 @@ class HwwProcessor(processor.ProcessorABC):
             "met_pt": met.pt,
             "deta": deta,
             "mjj": mjj,
-            "NumFatjets": NumFatjets,
-            "NumOtherJets": NumOtherJets,
-            "n_bjets_L": n_bjets_L,
-            "n_bjets_M": n_bjets_M,
-            "n_bjets_T": n_bjets_T,
-            "n_bjetsDeepCSV_L": n_bjetsDeepCSV_L,
-            "n_bjetsDeepCSV_M": n_bjetsDeepCSV_M,
-            "n_bjetsDeepCSV_T": n_bjetsDeepCSV_T,
+            # "ht": ht,
+            # "NumFatjets": NumFatjets,
+            # "NumOtherJets": NumOtherJets,
+            # "n_bjets_L": n_bjets_L,
+            # "n_bjets_M": n_bjets_M,
+            # "n_bjets_T": n_bjets_T,
+            # "n_bjetsDeepCSV_L": n_bjetsDeepCSV_L,
+            # "n_bjetsDeepCSV_M": n_bjetsDeepCSV_M,
+            # "n_bjetsDeepCSV_T": n_bjetsDeepCSV_T,
             "fj_lsf3": candidatefj.lsf3,
-            "FirstFatjet_pt": FirstFatjet.pt,
-            "FirstFatjet_m": FirstFatjet.mass,
-            "SecondFatjet_pt": SecondFatjet.pt,
-            "SecondFatjet_m": SecondFatjet.mass,
+            # "FirstFatjet_pt": FirstFatjet.pt,
+            # "FirstFatjet_m": FirstFatjet.mass,
+            # "SecondFatjet_pt": SecondFatjet.pt,
+            # "SecondFatjet_m": SecondFatjet.mass,
         }
 
         fatjetvars = {
@@ -401,11 +402,11 @@ class HwwProcessor(processor.ProcessorABC):
             variables[f"rec_higgs_m{shift}"] = rec_higgs.mass
             variables[f"rec_higgs_pt{shift}"] = rec_higgs.pt
 
-            variables[f"rec_W_qq_m{shift}"] = rec_W_qq.mass
-            variables[f"rec_W_qq_pt{shift}"] = rec_W_qq.pt
+            # variables[f"rec_W_qq_m{shift}"] = rec_W_qq.mass
+            # variables[f"rec_W_qq_pt{shift}"] = rec_W_qq.pt
 
-            variables[f"rec_W_lnu_m{shift}"] = rec_W_lnu.mass
-            variables[f"rec_W_lnu_pt{shift}"] = rec_W_lnu.pt
+            # variables[f"rec_W_lnu_m{shift}"] = rec_W_lnu.mass
+            # variables[f"rec_W_lnu_pt{shift}"] = rec_W_lnu.pt
 
             return variables
 
