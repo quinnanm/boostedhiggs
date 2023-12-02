@@ -478,15 +478,15 @@ class HwwProcessor(processor.ProcessorABC):
         self.add_selection(name="NoTaus", sel=(n_loose_taus_mu == 0), channel="mu")
         self.add_selection(name="NoTaus", sel=(n_loose_taus_ele == 0), channel="ele")
 
-        self.add_selection(
-            name="LepIso", sel=((candidatelep.pt < 55) & (lep_reliso < 0.15)) | (candidatelep.pt >= 55), channel="mu"
-        )
-        self.add_selection(
-            name="LepIso", sel=((candidatelep.pt < 120) & (lep_reliso < 0.15)) | (candidatelep.pt >= 120), channel="ele"
-        )
-        self.add_selection(
-            name="LepMiniIso", sel=(candidatelep.pt < 55) | ((candidatelep.pt >= 55) & (lep_miso < 0.2)), channel="mu"
-        )
+        # self.add_selection(
+        #     name="LepIso", sel=((candidatelep.pt < 55) & (lep_reliso < 0.15)) | (candidatelep.pt >= 55), channel="mu"
+        # )
+        # self.add_selection(
+        #     name="LepIso", sel=((candidatelep.pt < 120) & (lep_reliso < 0.15)) | (candidatelep.pt >= 120), channel="ele"
+        # )
+        # self.add_selection(
+        #     name="LepMiniIso", sel=(candidatelep.pt < 55) | ((candidatelep.pt >= 55) & (lep_miso < 0.2)), channel="mu"
+        # )
         self.add_selection(name="ht", sel=(ht > 200))
         self.add_selection(name="OneCandidateJet", sel=(candidatefj.pt > 0))
         self.add_selection(name="CandidateJetpT", sel=(candidatefj.pt > 250))
@@ -614,8 +614,9 @@ class HwwProcessor(processor.ProcessorABC):
             if not isinstance(output[ch], pd.DataFrame):
                 output[ch] = self.ak_to_pandas(output[ch])
 
-            if "rec_higgs_m" in output[ch].keys():
-                output[ch]["rec_higgs_m"] = np.nan_to_num(output[ch]["rec_higgs_m"], nan=-1)
+            for var_ in ["rec_higgs_m", "rec_higgs_pt", "rec_W_qq_m", "rec_W_qq_pt", "rec_W_lnu_m", "rec_W_lnu_pt"]:
+                if var_ in output[ch].keys():
+                    output[ch][var_] = np.nan_to_num(output[ch][var_], nan=-1)
 
         # now save pandas dataframes
         fname = events.behavior["__events_factory__"]._partition_key.replace("/", "_")
