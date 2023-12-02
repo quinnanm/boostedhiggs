@@ -285,14 +285,21 @@ class HwwProcessor(processor.ProcessorABC):
         # b-jets
         # dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj))
         dr_jet_lepfj = goodjets.delta_r(candidatefj)
-        ak4_outside_ak8 = goodjets[dr_jet_lepfj > 0.8]
+        # ak4_outside_ak8 = goodjets[dr_jet_lepfj > 0.8]
+        ak4_outside_ak8 = ak.singletons(goodjets[dr_jet_lepfj > 0.8])
 
-        n_bjets_L = ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["L"], axis=1)
-        n_bjets_M = ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["M"], axis=1)
-        n_bjets_T = ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["T"], axis=1)
-        n_bjetsDeepCSV_L = ak.sum(ak4_outside_ak8.btagDeepB > btagWPs["deepCSV"][self._year]["L"], axis=1)
-        n_bjetsDeepCSV_M = ak.sum(ak4_outside_ak8.btagDeepB > btagWPs["deepCSV"][self._year]["M"], axis=1)
-        n_bjetsDeepCSV_T = ak.sum(ak4_outside_ak8.btagDeepB > btagWPs["deepCSV"][self._year]["T"], axis=1)
+        # n_bjets_L = ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["L"], axis=1)
+        # n_bjets_M = ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["M"], axis=1)
+        # n_bjets_T = ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["T"], axis=1)
+        # n_bjetsDeepCSV_L = ak.sum(ak4_outside_ak8.btagDeepB > btagWPs["deepCSV"][self._year]["L"], axis=1)
+        # n_bjetsDeepCSV_M = ak.sum(ak4_outside_ak8.btagDeepB > btagWPs["deepCSV"][self._year]["M"], axis=1)
+        # n_bjetsDeepCSV_T = ak.sum(ak4_outside_ak8.btagDeepB > btagWPs["deepCSV"][self._year]["T"], axis=1)
+        n_bjets_L = ak.num(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["L"])
+        n_bjets_M = ak.num(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["M"])
+        n_bjets_T = ak.num(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["T"])
+        n_bjetsDeepCSV_L = ak.num(ak4_outside_ak8.btagDeepB > btagWPs["deepCSV"][self._year]["L"])
+        n_bjetsDeepCSV_M = ak.num(ak4_outside_ak8.btagDeepB > btagWPs["deepCSV"][self._year]["M"])
+        n_bjetsDeepCSV_T = ak.num(ak4_outside_ak8.btagDeepB > btagWPs["deepCSV"][self._year]["T"])
 
         # delta R between AK8 jet and lepton
         lep_fj_dr = candidatefj.delta_r(candidatelep_p4)
