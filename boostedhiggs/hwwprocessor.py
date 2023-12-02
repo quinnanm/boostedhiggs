@@ -310,13 +310,20 @@ class HwwProcessor(processor.ProcessorABC):
             "met_pt": met.pt,
             "deta": deta,
             "mjj": mjj,
-            "n_bjets_L": n_bjets_L,
-            "n_bjets_M": n_bjets_M,
-            "n_bjets_T": n_bjets_T,
-            "n_bjetsDeepCSV_L": n_bjetsDeepCSV_L,
-            "n_bjetsDeepCSV_M": n_bjetsDeepCSV_M,
-            "n_bjetsDeepCSV_T": n_bjetsDeepCSV_T,
+            # "ht": ht,
+            # "NumFatjets": NumFatjets,
+            # "NumOtherJets": NumOtherJets,
+            # "n_bjets_L": n_bjets_L,
+            # "n_bjets_M": n_bjets_M,
+            # "n_bjets_T": n_bjets_T,
+            # "n_bjetsDeepCSV_L": n_bjetsDeepCSV_L,
+            # "n_bjetsDeepCSV_M": n_bjetsDeepCSV_M,
+            # "n_bjetsDeepCSV_T": n_bjetsDeepCSV_T,
             "fj_lsf3": candidatefj.lsf3,
+            # "FirstFatjet_pt": FirstFatjet.pt,
+            # "FirstFatjet_m": FirstFatjet.mass,
+            # "SecondFatjet_pt": SecondFatjet.pt,
+            # "SecondFatjet_m": SecondFatjet.mass,
         }
 
         fatjetvars = {
@@ -602,9 +609,6 @@ class HwwProcessor(processor.ProcessorABC):
             # convert arrays to pandas
             if not isinstance(output[ch], pd.DataFrame):
                 output[ch] = self.ak_to_pandas(output[ch])
-
-            # if "rec_higgs_m" in output[ch].keys():
-            #     output[ch]["rec_higgs_m"] = np.nan_to_num(output[ch]["rec_higgs_m"], nan=-1)
 
             for var_ in ["rec_higgs_m", "rec_higgs_pt", "rec_W_qq_m", "rec_W_qq_pt", "rec_W_lnu_m", "rec_W_lnu_pt"]:
                 if var_ in output[ch].keys():
