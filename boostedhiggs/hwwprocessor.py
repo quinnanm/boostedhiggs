@@ -257,11 +257,11 @@ class HwwProcessor(processor.ProcessorABC):
         fatjets["msdcorr"] = corrected_msoftdrop(fatjets)
 
         good_fatjets = (fatjets.pt > 200) & (abs(fatjets.eta) < 2.5) & fatjets.isTight
+        NumFatjets = ak.sum(good_fatjets, axis=1)
 
         good_fatjets = fatjets[good_fatjets]  # select good fatjets
         good_fatjets = good_fatjets[ak.argsort(good_fatjets.pt, ascending=False)]  # sort them by pt
 
-        NumFatjets = ak.sum(good_fatjets, axis=1)
         FirstFatjet = ak.firsts(good_fatjets)
         SecondFatjet = good_fatjets[:, 1:2]
 
