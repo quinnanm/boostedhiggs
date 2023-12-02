@@ -284,7 +284,7 @@ class HwwProcessor(processor.ProcessorABC):
             2.0 * candidatelep_p4.pt * met.pt * (ak.ones_like(met.pt) - np.cos(candidatelep_p4.delta_phi(met)))
         )
         # delta phi MET and higgs candidate
-        met_fjlep_dphi = candidatefj.delta_phi(met)
+        met_fj_dphi = candidatefj.delta_phi(met)
 
         # b-jets
         # dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj))
@@ -314,7 +314,7 @@ class HwwProcessor(processor.ProcessorABC):
             "lep_misolation": lep_miso,
             "lep_fj_dr": lep_fj_dr,
             "lep_met_mt": mt_lep_met,
-            "met_fj_dphi": met_fjlep_dphi,
+            "met_fj_dphi": met_fj_dphi,
             "met_pt": met.pt,
             "deta": deta,
             "mjj": mjj,
@@ -478,7 +478,7 @@ class HwwProcessor(processor.ProcessorABC):
         self.add_selection(name="CandidateJetpT", sel=(candidatefj.pt > 250))
         self.add_selection(name="LepInJet", sel=(lep_fj_dr < 0.8))
         self.add_selection(name="JetLepOverlap", sel=(lep_fj_dr > 0.03))
-        # self.add_selection(name="dPhiJetMETCut", sel=(np.abs(met_fj_dphi) < 1.57))
+        self.add_selection(name="dPhiJetMETCut", sel=(np.abs(met_fj_dphi) < 1.57))
 
         # gen-level matching
         signal_mask = None
