@@ -261,6 +261,10 @@ class HwwProcessor(processor.ProcessorABC):
         good_fatjets = fatjets[good_fatjets]  # select good fatjets
         good_fatjets = good_fatjets[ak.argsort(good_fatjets.pt, ascending=False)]  # sort them by pt
 
+        NumFatjets = ak.num(good_fatjets)
+        FirstFatjet = ak.firsts(good_fatjets)
+        SecondFatjet = good_fatjets[:, 1:2]
+
         good_fatjets, jec_shifted_fatjetvars = get_jec_jets(
             events, good_fatjets, self._year, not self.isMC, self.jecs, fatjets=True
         )
@@ -311,7 +315,7 @@ class HwwProcessor(processor.ProcessorABC):
             "deta": deta,
             "mjj": mjj,
             "ht": ht,
-            # "NumFatjets": NumFatjets,
+            "NumFatjets": NumFatjets,
             # "NumOtherJets": NumOtherJets,
             "n_bjets_L": n_bjets_L,
             "n_bjets_M": n_bjets_M,
@@ -320,10 +324,10 @@ class HwwProcessor(processor.ProcessorABC):
             "n_bjetsDeepCSV_M": n_bjetsDeepCSV_M,
             "n_bjetsDeepCSV_T": n_bjetsDeepCSV_T,
             "fj_lsf3": candidatefj.lsf3,
-            # "FirstFatjet_pt": FirstFatjet.pt,
-            # "FirstFatjet_m": FirstFatjet.mass,
-            # "SecondFatjet_pt": SecondFatjet.pt,
-            # "SecondFatjet_m": SecondFatjet.mass,
+            "FirstFatjet_pt": FirstFatjet.pt,
+            "FirstFatjet_m": FirstFatjet.mass,
+            "SecondFatjet_pt": SecondFatjet.pt,
+            "SecondFatjet_m": SecondFatjet.mass,
         }
 
         fatjetvars = {
