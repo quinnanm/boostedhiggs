@@ -603,8 +603,12 @@ class HwwProcessor(processor.ProcessorABC):
             if not isinstance(output[ch], pd.DataFrame):
                 output[ch] = self.ak_to_pandas(output[ch])
 
-            if "rec_higgs_m" in output[ch].keys():
-                output[ch]["rec_higgs_m"] = np.nan_to_num(output[ch]["rec_higgs_m"], nan=-1)
+            # if "rec_higgs_m" in output[ch].keys():
+            #     output[ch]["rec_higgs_m"] = np.nan_to_num(output[ch]["rec_higgs_m"], nan=-1)
+
+            for var_ in ["rec_higgs_m", "rec_higgs_pt", "rec_W_qq_m", "rec_W_qq_pt", "rec_W_lnu_m", "rec_W_lnu_pt"]:
+                if var_ in output[ch].keys():
+                    output[ch][var_] = np.nan_to_num(output[ch][var_], nan=-1)
 
         # now save pandas dataframes
         fname = events.behavior["__events_factory__"]._partition_key.replace("/", "_")
