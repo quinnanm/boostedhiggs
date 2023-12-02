@@ -266,8 +266,13 @@ class HwwProcessor(processor.ProcessorABC):
         fatjets["msdcorr"] = corrected_msoftdrop(fatjets)
 
         good_fatjets = (fatjets.pt > 200) & (abs(fatjets.eta) < 2.5) & fatjets.isTight
+
         good_fatjets = fatjets[good_fatjets]  # select good fatjets
         good_fatjets = good_fatjets[ak.argsort(good_fatjets.pt, ascending=False)]  # sort them by pt
+
+        NumFatjets = ak.num(good_fatjets)
+        FirstFatjet = ak.firsts(good_fatjets)
+        SecondFatjet = good_fatjets[:, 1:2]
 
         good_fatjets, jec_shifted_fatjetvars = get_jec_jets(
             events, good_fatjets, self._year, not self.isMC, self.jecs, fatjets=True
@@ -289,14 +294,15 @@ class HwwProcessor(processor.ProcessorABC):
         # b-jets
         # dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj))
         dr_jet_lepfj = goodjets.delta_r(candidatefj)
-        ak4_outside_ak8 = goodjets[dr_jet_lepfj > 0.8]
+        ak4_outside_ak8 = ak.singletons(goodjets[dr_jet_lepfj > 0.8])
+        NumOtherJets = ak.num(ak4_outside_ak8)
 
-        n_bjets_L = ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["L"], axis=1)
-        n_bjets_M = ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["M"], axis=1)
-        n_bjets_T = ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["T"], axis=1)
-        n_bjetsDeepCSV_L = ak.sum(ak4_outside_ak8.btagDeepB > btagWPs["deepCSV"][self._year]["L"], axis=1)
-        n_bjetsDeepCSV_M = ak.sum(ak4_outside_ak8.btagDeepB > btagWPs["deepCSV"][self._year]["M"], axis=1)
-        n_bjetsDeepCSV_T = ak.sum(ak4_outside_ak8.btagDeepB > btagWPs["deepCSV"][self._year]["T"], axis=1)
+        n_bjets_L = ak.num(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["L"])
+        n_bjets_M = ak.num(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["M"])
+        n_bjets_T = ak.num(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["T"])
+        n_bjetsDeepCSV_L = ak.num(ak4_outside_ak8.btagDeepB > btagWPs["deepCSV"][self._year]["L"])
+        n_bjetsDeepCSV_M = ak.num(ak4_outside_ak8.btagDeepB > btagWPs["deepCSV"][self._year]["M"])
+        n_bjetsDeepCSV_T = ak.num(ak4_outside_ak8.btagDeepB > btagWPs["deepCSV"][self._year]["T"])
 
         # delta R between AK8 jet and lepton
         lep_fj_dr = candidatefj.delta_r(candidatelep_p4)
@@ -318,6 +324,9 @@ class HwwProcessor(processor.ProcessorABC):
             "met_pt": met.pt,
             "deta": deta,
             "mjj": mjj,
+            "ht": ht,
+            "NumFatjets": NumFatjets,
+            "NumOtherJets": NumOtherJets,
             "n_bjets_L": n_bjets_L,
             "n_bjets_M": n_bjets_M,
             "n_bjets_T": n_bjets_T,
@@ -325,6 +334,10 @@ class HwwProcessor(processor.ProcessorABC):
             "n_bjetsDeepCSV_M": n_bjetsDeepCSV_M,
             "n_bjetsDeepCSV_T": n_bjetsDeepCSV_T,
             "fj_lsf3": candidatefj.lsf3,
+            "FirstFatjet_pt": FirstFatjet.pt,
+            "FirstFatjet_m": FirstFatjet.mass,
+            "SecondFatjet_pt": SecondFatjet.pt,
+            "SecondFatjet_m": SecondFatjet.mass,
         }
 
         fatjetvars = {
