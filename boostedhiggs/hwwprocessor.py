@@ -257,16 +257,17 @@ class HwwProcessor(processor.ProcessorABC):
         fatjets["msdcorr"] = corrected_msoftdrop(fatjets)
 
         good_fatjets = (fatjets.pt > 200) & (abs(fatjets.eta) < 2.5) & fatjets.isTight
+
         good_fatjets = fatjets[good_fatjets]  # select good fatjets
         good_fatjets = good_fatjets[ak.argsort(good_fatjets.pt, ascending=False)]  # sort them by pt
+
+        NumFatjets = ak.sum(good_fatjets, axis=1)
+        FirstFatjet = ak.firsts(good_fatjets)
+        SecondFatjet = good_fatjets[:, 1:2]
 
         good_fatjets, jec_shifted_fatjetvars = get_jec_jets(
             events, good_fatjets, self._year, not self.isMC, self.jecs, fatjets=True
         )
-        NumFatjets = ak.sum(good_fatjets, axis=1)
-
-        FirstFatjet = ak.firsts(good_fatjets)
-        SecondFatjet = good_fatjets[:, 1:2]
 
         # choose candidate fatjet
         fj_idx_lep = ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)
