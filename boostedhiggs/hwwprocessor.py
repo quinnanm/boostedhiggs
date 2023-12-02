@@ -28,7 +28,7 @@ from boostedhiggs.corrections import (
     get_jec_jets,
     met_factory,
 )
-from boostedhiggs.utils import match_H, match_Top, match_V
+from boostedhiggs.utils import match_H, match_Top, match_V, sigs
 
 from .run_tagger_inference import runInferenceTriton
 
@@ -578,42 +578,11 @@ class HwwProcessor(processor.ProcessorABC):
 
                 # fill inference
                 if self.inference:
-                    for model_name in [
-                        # "particlenet_hww_inclv2_pre2",
-                        # "ak8_MD_vminclv2ParT_manual_fixwrap",
-                        "ak8_MD_vminclv2ParT_manual_fixwrap_all_nodes",
-                    ]:
+                    for model_name in ["ak8_MD_vminclv2ParT_manual_fixwrap_all_nodes"]:
                         pnet_vars = runInferenceTriton(
-                            self.tagger_resources_path,
-                            events[selection_ch],
-                            fj_idx_lep[selection_ch],
-                            model_name=model_name,
+                            self.tagger_resources_path, events[selection_ch], fj_idx_lep[selection_ch], model_name=model_name
                         )
                         pnet_df = self.ak_to_pandas(pnet_vars)
-
-                        hwwev = [
-                            "fj_ParT_probHWqqWev0c",
-                            "fj_ParT_probHWqqWev1c",
-                            "fj_ParT_probHWqqWtauev0c",
-                            "fj_ParT_probHWqqWtauev1c",
-                        ]
-                        hwwmv = [
-                            "fj_ParT_probHWqqWmv0c",
-                            "fj_ParT_probHWqqWmv1c",
-                            "fj_ParT_probHWqqWtaumv0c",
-                            "fj_ParT_probHWqqWtaumv1c",
-                        ]
-                        hwwhad = [
-                            "fj_ParT_probHWqqWqq0c",
-                            "fj_ParT_probHWqqWqq1c",
-                            "fj_ParT_probHWqqWqq2c",
-                            "fj_ParT_probHWqqWq0c",
-                            "fj_ParT_probHWqqWq1c",
-                            "fj_ParT_probHWqqWq2c",
-                            "fj_ParT_probHWqqWtauhv0c",
-                            "fj_ParT_probHWqqWtauhv1c",
-                        ]
-                        sigs = hwwev + hwwmv + hwwhad
 
                         scores = {"fj_ParT_score": pnet_df[sigs].sum(axis=1).values}
 
