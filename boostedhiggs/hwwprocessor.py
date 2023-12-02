@@ -478,7 +478,7 @@ class HwwProcessor(processor.ProcessorABC):
         self.add_selection(name="CandidateJetpT", sel=(candidatefj.pt > 250))
         self.add_selection(name="LepInJet", sel=(lep_fj_dr < 0.8))
         self.add_selection(name="JetLepOverlap", sel=(lep_fj_dr > 0.03))
-        self.add_selection(name="dPhiJetMETCut", sel=(np.abs(met_fj_dphi) < 1.57))
+        # self.add_selection(name="dPhiJetMETCut", sel=(np.abs(met_fj_dphi) < 1.57))
 
         # gen-level matching
         signal_mask = None
