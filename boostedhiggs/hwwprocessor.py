@@ -67,17 +67,11 @@ class HwwProcessor(processor.ProcessorABC):
         output_location="./outfiles/",
         inference=False,
         systematics=False,
-        region="signal",
     ):
-        """
-        region can take ["signal", "zll", "qcd", "wjets"].
-        """
         self._year = year
         self._yearmod = yearmod
         self._channels = channels
-        self._region = region
         self._systematics = systematics
-        # print(f"Will apply selections applicable to {region} region")
 
         self._output_location = output_location
 
@@ -160,9 +154,7 @@ class HwwProcessor(processor.ProcessorABC):
         sumgenweight = ak.sum(events.genWeight) if self.isMC else 0
 
         # trigger
-        trigger = {}
-        trigger_noiso = {}
-        trigger_iso = {}
+        trigger, trigger_noiso, trigger_iso = {}, {}, {}
         for ch in self._channels:
             trigger[ch] = np.zeros(nevents, dtype="bool")
             trigger_noiso[ch] = np.zeros(nevents, dtype="bool")
@@ -533,14 +525,14 @@ class HwwProcessor(processor.ProcessorABC):
 
                 add_VJets_kFactors(self.weights[ch], events.GenPart, dataset, events)
 
-                if "HToWW" in dataset and self._region == "signal":
+                if "HToWW" in dataset:
                     add_HiggsEW_kFactors(self.weights[ch], events.GenPart, dataset)
                     add_scalevar_7pt(self.weights[ch], events.LHEScaleWeight if "LHEScaleWeight" in events.fields else [])
                     add_scalevar_3pt(self.weights[ch], events.LHEScaleWeight if "LHEScaleWeight" in events.fields else [])
                     add_ps_weight(self.weights[ch], events.PSWeight if "PSWeight" in events.fields else [])
                     add_pdf_weight(self.weights[ch], events.LHEPdfWeight if "LHEPdfWeight" in events.fields else [])
 
-                if "EWK" in dataset and self._region == "signal":
+                if "EWK" in dataset:
                     add_pdf_weight(self.weights[ch], events.LHEPdfWeight if "LHEPdfWeight" in events.fields else [])
 
                 # store the final weight per ch
