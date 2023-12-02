@@ -94,7 +94,6 @@ def main(args):
             inference=args.inference,
             systematics=args.systematics,
             output_location="./outfiles" + job_name,
-            region=args.region,
         )
 
     elif args.processor == "vh":
@@ -235,7 +234,6 @@ if __name__ == "__main__":
     parser.add_argument("--processor", dest="processor", required=True, help="processor", type=str)
     parser.add_argument("--chunksize", dest="chunksize", default=10000, help="chunk size in processor", type=int)
     parser.add_argument("--channels", dest="channels", default=None, help="channels separated by commas")
-    parser.add_argument("--region", dest="region", default="signal", help="specify region for selections", type=str)
 
     parser.add_argument(
         "--executor",
