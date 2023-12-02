@@ -437,45 +437,48 @@ class HwwProcessor(processor.ProcessorABC):
             )
             self.add_selection(name="HEMCleaning", sel=~hem_cleaning)
 
-        # apply trigger
+        # apply selections
         for ch in self._channels:
             self.add_selection(name="Trigger", sel=trigger[ch], channel=ch)
 
-        # apply selections
         self.add_selection(name="METFilters", sel=metfilters)
-        self.add_selection(name="LepKin", sel=(candidatelep.pt > 30), channel="mu")
-        self.add_selection(name="LepKin", sel=(candidatelep.pt > 40), channel="ele")
-        self.add_selection(name="FatJetKin", sel=(candidatefj.pt > 200) & (ht > 200))
-        self.add_selection(name="dRFatJetLepOverlap", sel=(lep_fj_dr > 0.03))
 
-        if self._region == "zll":
-            secondlep_p4 = build_p4(ak.firsts(goodleptons[:, 1:2]))
-            variables["secondlep_pt"] = secondlep_p4.pt
-            variables["mll"] = (candidatelep_p4 + secondlep_p4).mass
+        self.add_selection(
+            name="OneLep",
+            sel=(n_good_muons == 1)
+            & (n_good_electrons == 0)
+            & (n_loose_electrons == 0)
+            & ~ak.any(loose_muons & ~good_muons, 1),
+            # & (n_loose_taus_mu == 0),
+            channel="mu",
+        )
+        self.add_selection(
+            name="OneLep",
+            sel=(n_good_muons == 0)
+            & (n_loose_muons == 0)
+            & (n_good_electrons == 1)
+            & ~ak.any(loose_electrons & ~good_electrons, 1),
+            # & (n_loose_taus_ele == 0),
+            channel="ele",
+        )
+        self.add_selection(name="NoTaus", sel=(n_loose_taus_mu == 0), channel="mu")
+        self.add_selection(name="NoTaus", sel=(n_loose_taus_ele == 0), channel="ele")
 
-            self.add_selection(name="TwoLepSameFlavor", sel=(n_good_muons == 2), channel="mu")
-            self.add_selection(name="TwoLepSameFlavor", sel=(n_good_electrons == 2), channel="ele")
-            self.add_selection(name="TwoLepOppositeCharge", sel=(candidatelep_p4.charge * secondlep_p4.charge < 0))
-        else:
-            self.add_selection(
-                name="OneLep",
-                sel=(n_good_muons == 1)
-                & (n_good_electrons == 0)
-                & (n_loose_electrons == 0)
-                & ~ak.any(loose_muons & ~good_muons, 1)
-                & (n_loose_taus_mu == 0),
-                channel="mu",
-            )
-            self.add_selection(
-                name="OneLep",
-                sel=(n_good_muons == 0)
-                & (n_loose_muons == 0)
-                & (n_good_electrons == 1)
-                & ~ak.any(loose_electrons & ~good_electrons, 1)
-                & (n_loose_taus_ele == 0),
-                channel="ele",
-            )
-        self.add_selection(name="dRFatJetLep08", sel=(lep_fj_dr < 0.8))
+        self.add_selection(
+            name="LepIso", sel=((candidatelep.pt < 55) & (lep_reliso < 0.15)) | (candidatelep.pt >= 55), channel="mu"
+        )
+        self.add_selection(
+            name="LepIso", sel=((candidatelep.pt < 120) & (lep_reliso < 0.15)) | (candidatelep.pt >= 120), channel="ele"
+        )
+        self.add_selection(
+            name="LepMiniIso", sel=(candidatelep.pt < 55) | ((candidatelep.pt >= 55) & (lep_miso < 0.2)), channel="mu"
+        )
+        self.add_selection(name="ht", sel=(ht > 200))
+        self.add_selection(name="OneCandidateJet", sel=(candidatefj.pt > 0))
+        self.add_selection(name="CandidateJetpT", sel=(candidatefj.pt > 250))
+        self.add_selection(name="LepInJet", sel=(lep_fj_dr < 0.8))
+        self.add_selection(name="JetLepOverlap", sel=(lep_fj_dr > 0.03))
+        self.add_selection(name="dPhiJetMETCut", sel=(np.abs(met_fj_dphi) < 1.57))
 
         # gen-level matching
         signal_mask = None
