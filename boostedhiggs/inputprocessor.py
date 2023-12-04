@@ -325,7 +325,7 @@ class InputProcessor(ProcessorABC):
                 continue
 
         # combine all the input variables
-        skimmed_vars = {**FatJetVars, **{"matched_mask": matched_mask}, **GenVars, **METVars, **LepVars, **Others}
+        skimmed_vars = {**FatJetVars, **GenVars, **METVars, **LepVars, **Others}
 
         # apply selections
         selection = PackedSelection()
