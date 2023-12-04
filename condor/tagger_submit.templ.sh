@@ -8,7 +8,7 @@ mkdir outfiles
 
 # run code
 # pip install --user onnxruntime
-python SCRIPTNAME --year YEAR --processor input --pfnano --pfnano v2_2 --inference --n NUMJOBS --starti STARTI --sample SAMPLE --config METADATAFILE
+python SCRIPTNAME --year YEAR --processor input --pfnano v2_2 --inference --n NUMJOBS --starti STARTI --sample SAMPLE
 
 # remove incomplete jobs
 rm -rf outfiles/*mu
