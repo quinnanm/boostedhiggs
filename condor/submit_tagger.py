@@ -34,7 +34,7 @@ def main(args):
     os.system(f"mkdir -p /eos/uscms/{outdir}/{sample}")
 
     # make executable file
-    sh_templ_file = open("condor/submit.jdl")
+    sh_templ_file = open("condor/submit.templ.jdl")
     eosoutput_dir = f"root://cmseos.fnal.gov/{outdir}/{sample}/"
     eosoutput_pkl = f"{eosoutput_dir}/"
 
