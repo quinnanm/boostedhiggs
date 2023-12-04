@@ -69,8 +69,6 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray):
     matched_higgs_children = matched_higgs.children
     higgs_children = higgs.children
 
-    genVars = {"fj_genH_pt": ak.fill_none(higgs.pt, FILL_NONE_VALUE)}
-
     children_mask = get_pid_mask(matched_higgs_children, [W_PDGID], byall=False)
     is_hww = ak.any(children_mask, axis=1)
 
@@ -79,13 +77,6 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray):
     children_mass = matched_higgs_children.mass
     v_star = ak.firsts(matched_higgs_children[ak.argmin(children_mass, axis=1, keepdims=True)])
     v = ak.firsts(matched_higgs_children[ak.argmax(children_mass, axis=1, keepdims=True)])
-
-    genVVars = {
-        "fj_genH_jet": fatjet.delta_r(higgs[:, 0]),
-        "fj_genV_dR": fatjet.delta_r(v),
-        "fj_genVstar": fatjet.delta_r(v_star),
-        "genV_genVstar_dR": v.delta_r(v_star),
-    }
 
     # VV daughters
     # requires coffea-0.7.21
@@ -123,23 +114,28 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray):
     iswlepton = parent.mass == v.mass
     iswstarlepton = parent.mass == v_star.mass
 
-    gen_lepton = ak.firsts(lep_daughters)
+    genVars = {"fj_genH_pt": ak.fill_none(higgs.pt, FILL_NONE_VALUE)}
+
+    genVVars = {
+        "fj_genH_jet": fatjet.delta_r(higgs[:, 0]),
+        "fj_genV_dR": fatjet.delta_r(v),
+        "fj_genVstar": fatjet.delta_r(v_star),
+        "genV_genVstar_dR": v.delta_r(v_star),
+    }
 
     genHVVVars = {
+        "fj_isHVV": is_hww,
+        "fj_isHVV_Matched": matched_higgs_mask,
+        "fj_isHVV_4q": to_label((num_quarks == 4) & (num_leptons == 0)),
+        "fj_isHVV_elenuqq": to_label((num_electrons == 1) & (num_quarks == 2) & (num_leptons == 1)),
+        "fj_isHVV_munuqq": to_label((num_muons == 1) & (num_quarks == 2) & (num_leptons == 1)),
+        "fj_isHVV_taunuqq": to_label((num_taus == 1) & (num_quarks == 2) & (num_leptons == 1)),
+        "fj_isHVV_Vlepton": iswlepton,
+        "fj_isHVV_Vstarlepton": iswstarlepton,
+        "fj_genRes_mass": matched_higgs.mass,
         "fj_nquarks": num_m_quarks,
         "fj_ncquarks": num_m_cquarks,
         "fj_lepinprongs": num_m_leptons,
-        "fj_H_VV_4q": to_label((num_quarks == 4) & (num_leptons == 0)),
-        "fj_H_VV_elenuqq": to_label((num_electrons == 1) & (num_quarks == 2) & (num_leptons == 1)),
-        "fj_H_VV_munuqq": to_label((num_muons == 1) & (num_quarks == 2) & (num_leptons == 1)),
-        "fj_H_VV_taunuqq": to_label((num_taus == 1) & (num_quarks == 2) & (num_leptons == 1)),
-        "fj_H_VV_isVlepton": iswlepton,
-        "fj_H_VV_isVstarlepton": iswstarlepton,
-        "fj_H_VV": is_hww,
-        "fj_H_VV_isMatched": matched_higgs_mask,
-        "gen_Vlep_pt": gen_lepton.pt,
-        # "genlep_dR_lep": lepton.delta_r(gen_lepton)
-        "fj_genRes_mass": matched_higgs.mass,
     }
 
     genVars = {**genVars, **genVVars, **genHVVVars}
@@ -186,14 +182,14 @@ def match_V(genparts: GenParticleArray, fatjet: FatJetArray):
     matched_mask = matched_vs_mask & matched_vdaus_mask
     genVars = {
         "fj_isV": np.ones(len(genparts), dtype="bool"),
-        "fj_nprongs": nprongs,
-        "fj_lepinprongs": lepinprongs,
-        "fj_ncquarks": ncquarks,
-        "fj_V_isMatched": matched_mask,
+        "fj_isV_Matched": matched_mask,
         "fj_isV_2q": to_label(decay == 1),
         "fj_isV_elenu": to_label(decay == 3),
         "fj_isV_munu": to_label(decay == 5),
         "fj_isV_taunu": to_label(decay == 7),
+        "fj_nprongs": nprongs,
+        "fj_lepinprongs": lepinprongs,
+        "fj_ncquarks": ncquarks,
     }
 
     genVars["fj_isV_lep"] = (genVars["fj_isV_elenu"] == 1) | (genVars["fj_isV_munu"] == 1) | (genVars["fj_isV_taunu"] == 1)
@@ -267,17 +263,8 @@ def match_Top(genparts: GenParticleArray, fatjet: FatJetArray):
 
     genVars = {
         "fj_isTop": np.ones(len(genparts), dtype="bool"),
-        "fj_isTop_matched": matched_mask,  # at least one top and one daughter matched..
+        "fj_isTop_Matched": matched_mask,  # at least one top and one daughter matched..
         "fj_Top_numMatched": num_matched_tops,  # number of tops matched
-        "fj_Top_nquarksnob": num_m_quarks_nob,  # number of quarks from W decay (not b) matched in dR
-        "fj_Top_nbquarks": num_m_bquarks,  # number of b quarks ..
-        "fj_Top_ncquarks": num_m_cquarks,  # number of c quarks ..
-        "fj_Top_nleptons": num_m_leptons,  # number of leptons ..
-        "fj_Top_nele": num_m_electrons,  # number of electrons...
-        "fj_Top_nmu": num_m_muons,  # number of muons...
-        "fj_Top_ntau": num_m_taus,  # number of taus...
-        "fj_Top_taudecay": taudecay,  # taudecay (1: hadronic, 3: electron, 5: muon)
-        # added recently
         "fj_isTop_W_lep_b": to_label((num_m_leptons == 1) & (num_m_bquarks == 1)),
         "fj_isTop_W_lep": to_label(num_m_leptons == 1),
         "fj_isTop_W_ele_b": to_label((num_m_electrons == 1) & (num_m_leptons == 1) & (num_m_bquarks == 1)),
@@ -286,6 +273,14 @@ def match_Top(genparts: GenParticleArray, fatjet: FatJetArray):
         "fj_isTop_W_mu": to_label((num_m_muons == 1) & (num_m_leptons == 1)),
         "fj_isTop_W_tau_b": to_label((num_m_taus == 1) & (num_m_leptons == 1) & (num_m_bquarks == 1)),
         "fj_isTop_W_tau": to_label((num_m_taus == 1) & (num_m_leptons == 1)),
+        "fj_Top_nquarksnob": num_m_quarks_nob,  # number of quarks from W decay (not b) matched in dR
+        "fj_Top_nbquarks": num_m_bquarks,  # number of b quarks ..
+        "fj_Top_ncquarks": num_m_cquarks,  # number of c quarks ..
+        "fj_Top_nleptons": num_m_leptons,  # number of leptons ..
+        "fj_Top_nele": num_m_electrons,  # number of electrons...
+        "fj_Top_nmu": num_m_muons,  # number of muons...
+        "fj_Top_ntau": num_m_taus,  # number of taus...
+        "fj_Top_taudecay": taudecay,  # taudecay (1: hadronic, 3: electron, 5: muon)
     }
 
     return genVars, matched_mask
@@ -299,7 +294,7 @@ def match_QCD(genparts: GenParticleArray, fatjets: FatJetArray) -> Tuple[np.arra
 
     genVars = {
         "fj_isQCD": np.ones(len(genparts), dtype="bool"),
-        "fj_isQCD_matched": matched_mask,
+        "fj_isQCD_Matched": matched_mask,
         "fj_isQCDb": (fatjets.nBHadrons == 1),
         "fj_isQCDbb": (fatjets.nBHadrons > 1),
         "fj_isQCDc": (fatjets.nCHadrons == 1) * (fatjets.nBHadrons == 0),

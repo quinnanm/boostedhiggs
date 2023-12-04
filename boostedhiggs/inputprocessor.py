@@ -322,7 +322,6 @@ class InputProcessor(ProcessorABC):
 
         # combine all the input variables
         skimmed_vars = {**FatJetVars, **GenVars, **METVars, **LepVars, **Others}
-        # skimmed_vars = {**FatJetVars, **METVars, **LepVars, **Others}
 
         # apply selections
         selection = PackedSelection()
@@ -334,26 +333,26 @@ class InputProcessor(ProcessorABC):
         skimmed_vars = {
             key: np.squeeze(np.array(value[selection.all(*selection.names)])) for (key, value) in skimmed_vars.items()
         }
-        # for model_name in ["ak8_MD_vminclv2ParT_manual_fixwrap_all_nodes"]:
-        #     pnet_vars = runInferenceTriton(
-        #         self.tagger_resources_path,
-        #         events[selection.all(*selection.names)],
-        #         fj_idx_lep[selection.all(*selection.names)],
-        #         model_name=model_name,
-        #     )
+        for model_name in ["ak8_MD_vminclv2ParT_manual_fixwrap_all_nodes"]:
+            pnet_vars = runInferenceTriton(
+                self.tagger_resources_path,
+                events[selection.all(*selection.names)],
+                fj_idx_lep[selection.all(*selection.names)],
+                model_name=model_name,
+            )
 
-        #     # pnet_df = self.ak_to_pandas(pnet_vars)
-        #     pnet_df = pd.DataFrame(pnet_vars)
+            # pnet_df = self.ak_to_pandas(pnet_vars)
+            pnet_df = pd.DataFrame(pnet_vars)
 
-        #     scores = {"fj_ParT_score": (pnet_df[sigs].sum(axis=1)).values}
-        #     reg_mass = {"fj_ParT_mass": pnet_vars["fj_ParT_mass"]}
+            scores = {"fj_ParT_score": (pnet_df[sigs].sum(axis=1)).values}
+            reg_mass = {"fj_ParT_mass": pnet_vars["fj_ParT_mass"]}
 
-        #     hidNeurons = {}
-        #     for key in pnet_vars:
-        #         if "hidNeuron" in key:
-        #             hidNeurons[key] = pnet_vars[key]
+            hidNeurons = {}
+            for key in pnet_vars:
+                if "hidNeuron" in key:
+                    hidNeurons[key] = pnet_vars[key]
 
-        #     skimmed_vars = {**skimmed_vars, **scores, **reg_mass, **hidNeurons}
+            skimmed_vars = {**skimmed_vars, **scores, **reg_mass, **hidNeurons}
 
         for key in skimmed_vars:
             skimmed_vars[key] = skimmed_vars[key].squeeze()
