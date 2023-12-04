@@ -257,16 +257,17 @@ class HwwProcessor(processor.ProcessorABC):
         fatjets["msdcorr"] = corrected_msoftdrop(fatjets)
 
         good_fatjets = (fatjets.pt > 200) & (abs(fatjets.eta) < 2.5) & fatjets.isTight
+
         good_fatjets = fatjets[good_fatjets]  # select good fatjets
         good_fatjets = good_fatjets[ak.argsort(good_fatjets.pt, ascending=False)]  # sort them by pt
+
+        NumFatjets = ak.num(good_fatjets)
+        FirstFatjet = ak.firsts(good_fatjets[:, 0:1])
+        SecondFatjet = ak.firsts(good_fatjets[:, 1:2])
 
         good_fatjets, jec_shifted_fatjetvars = get_jec_jets(
             events, good_fatjets, self._year, not self.isMC, self.jecs, fatjets=True
         )
-        NumFatjets = ak.sum(good_fatjets, axis=1)
-
-        FirstFatjet = ak.firsts(good_fatjets)
-        SecondFatjet = good_fatjets[:, 1:2]
 
         # choose candidate fatjet
         fj_idx_lep = ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)
@@ -283,10 +284,9 @@ class HwwProcessor(processor.ProcessorABC):
         met_fj_dphi = candidatefj.delta_phi(met)
 
         # b-jets
-        # dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj))
         dr_jet_lepfj = goodjets.delta_r(candidatefj)
         ak4_outside_ak8 = goodjets[dr_jet_lepfj > 0.8]
-        NumOtherJets = ak.sum(ak4_outside_ak8, axis=1)
+        NumOtherJets = ak.num(ak4_outside_ak8)
 
         n_bjets_L = ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["L"], axis=1)
         n_bjets_M = ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["M"], axis=1)
@@ -315,6 +315,7 @@ class HwwProcessor(processor.ProcessorABC):
             "met_pt": met.pt,
             "deta": deta,
             "mjj": mjj,
+            "ht": ht,
             "NumFatjets": NumFatjets,
             "NumOtherJets": NumOtherJets,
             "n_bjets_L": n_bjets_L,
@@ -612,8 +613,9 @@ class HwwProcessor(processor.ProcessorABC):
             if not isinstance(output[ch], pd.DataFrame):
                 output[ch] = self.ak_to_pandas(output[ch])
 
-            if "rec_higgs_m" in output[ch].keys():
-                output[ch]["rec_higgs_m"] = np.nan_to_num(output[ch]["rec_higgs_m"], nan=-1)
+            for var_ in ["rec_higgs_m", "rec_higgs_pt", "rec_W_qq_m", "rec_W_qq_pt", "rec_W_lnu_m", "rec_W_lnu_pt"]:
+                if var_ in output[ch].keys():
+                    output[ch][var_] = np.nan_to_num(output[ch][var_], nan=-1)
 
         # now save pandas dataframes
         fname = events.behavior["__events_factory__"]._partition_key.replace("/", "_")

@@ -94,7 +94,6 @@ def main(args):
             inference=args.inference,
             systematics=args.systematics,
             output_location="./outfiles" + job_name,
-            region=args.region,
         )
 
     elif args.processor == "vh":
@@ -127,9 +126,8 @@ def main(args):
         # define processor
         from boostedhiggs.inputprocessor import InputProcessor
 
-        p = InputProcessor(
-            year=args.year, label=args.label, inference=args.inference, output_location=f"./outfiles/{job_name}"
-        )
+        assert args.inference is True, "enable --inference to run skimmer"
+        p = InputProcessor(year=args.year, output_location=f"./outfiles/{job_name}")
     else:
         from boostedhiggs.trigger_efficiencies_processor import (
             TriggerEfficienciesProcessor,
@@ -222,8 +220,8 @@ if __name__ == "__main__":
     # noqa: run locally on single file (hww): python run.py --year 2017 --processor hww --pfnano v2_2 --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele --config samples_inclusive.yaml --key mc
     # noqa: run locally on on single file (zll): python run.py --year 2017 --processor zll --pfnano v2_2 --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele --config samples_inclusive.yaml --key mc
 
-    # python run.py --processor input --macos --sample GluGluHToWW_Pt-200ToInf_M-125 --n 1 --starti 0 --label H --inference
-    # python run.py --processor input --local --sample GluGluHToWW_Pt-200ToInf_M-125 --n 1 --starti 0 --label H --inference
+    # python run.py --processor input --macos --sample GluGluHToWW_Pt-200ToInf_M-125 --n 1 --starti 0 --inference
+    # python run.py --processor input --local --sample GluGluHToWW_Pt-200ToInf_M-125 --n 1 --starti 0 --inference
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--year", dest="year", default="2017", help="year", type=str)
@@ -235,7 +233,6 @@ if __name__ == "__main__":
     parser.add_argument("--processor", dest="processor", required=True, help="processor", type=str)
     parser.add_argument("--chunksize", dest="chunksize", default=10000, help="chunk size in processor", type=int)
     parser.add_argument("--channels", dest="channels", default=None, help="channels separated by commas")
-    parser.add_argument("--region", dest="region", default="signal", help="specify region for selections", type=str)
 
     parser.add_argument(
         "--executor",
@@ -257,7 +254,6 @@ if __name__ == "__main__":
     parser.add_argument("--no-inference", dest="inference", action="store_false")
     parser.add_argument("--systematics", dest="systematics", action="store_true")
     parser.add_argument("--no-systematics", dest="systematics", action="store_false")
-    parser.add_argument("--label", dest="label", default="H", help="jet label for inputskimmer", type=str)
 
     parser.set_defaults(inference=False)
     args = parser.parse_args()
