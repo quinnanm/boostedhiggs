@@ -91,7 +91,7 @@ if __name__ == "__main__":
     parser.add_argument("--tag", dest="tag", default="Test", help="process tag", type=str)
     parser.add_argument("--test", dest="test", action="store_true", help="only 2 jobs per sample will be created")
     parser.add_argument("--submit", dest="submit", action="store_true", help="submit jobs when created")
-    parser.add_argument("--starti", dest="starti", default=0, help="start index of files", type=int)
+    parser.add_argument("--starti", dest="starti", default=0, help="start index of files", type=str)
     parser.add_argument("--n", dest="n", default=-1, help="number of files to process", type=str)
     parser.add_argument("--sample", dest="sample", default=None, help="specify sample", type=str)
 
