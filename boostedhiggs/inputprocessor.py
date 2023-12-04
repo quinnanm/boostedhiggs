@@ -274,10 +274,10 @@ class InputProcessor(ProcessorABC):
         Others["mjj"] = mjj.to_numpy().filled(fill_value=0)
         Others["jj_pt"] = jj_pt.to_numpy().filled(fill_value=0)
         Others["deta"] = deta.to_numpy().filled(fill_value=0)
-        Others["j1_pt"] = jet1.pt.to_numpy().filled(fill_value=0)
-        Others["j2_pt"] = jet2.pt.to_numpy().filled(fill_value=0)
-        Others["j1_m"] = jet1.mass.to_numpy().filled(fill_value=0)
-        Others["j2_m"] = jet2.mass.to_numpy().filled(fill_value=0)
+        Others["j1_pt"] = ak.firsts(jet1).pt.to_numpy().filled(fill_value=0)
+        Others["j2_pt"] = ak.firsts(jet2).pt.to_numpy().filled(fill_value=0)
+        Others["j1_m"] = ak.firsts(jet1).mass.to_numpy().filled(fill_value=0)
+        Others["j2_m"] = ak.firsts(jet2).mass.to_numpy().filled(fill_value=0)
 
         # ggF & VBF
         Others["ht"] = ht.to_numpy().filled(fill_value=0)
