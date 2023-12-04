@@ -9,7 +9,6 @@ mkdir outfiles
 # run code
 # pip install --user onnxruntime
 python SCRIPTNAME --processor input --local --sample SAMPLE --n NUMJOBS --starti STARTI --inference --year YEAR
-python run.py --processor input --sample VBFHToWWToLNuQQ_M-125_withDipoleRecoil --n 4 --starti 0 --inference --year 2016APV
 
 
 # remove incomplete jobs
