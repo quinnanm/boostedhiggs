@@ -395,37 +395,6 @@ class InputProcessor(ProcessorABC):
 
         print(f"dump parquet: {time.time() - start:.1f}s")
 
-        # # TODO: drop NaNs from rootfiles
-        # self.dump_root(skimmed_vars, fname)
-        # print(f"dump rootfile: {time.time() - start:.1f}s")
-
-        # for now do something like this to dump the parquets in root
-        # OUTPATH = "../datafiles/ntuples/"
-
-        # for sample in samples:
-        #     print(sample)
-
-        #     for file in os.listdir(f"{OUTPATH}/{sample}/train/"):
-        #         if "parquet" not in file:
-        #             continue
-
-        #         d = pd.read_parquet(f"{OUTPATH}/{sample}/train/{file}")
-
-        #         with uproot.recreate(f"{OUTPATH}/{sample}/train/out.root", compression=uproot.LZ4(4)) as rfile:
-        #             rfile["Events"] = ak.Array(d.to_dict(orient="list", index=True))
-        #             rfile["Events"].show()
-
-        #     for file in os.listdir(f"{OUTPATH}/{sample}/test/"):
-        #         if "parquet" not in file:
-        #             continue
-
-        #         d = pd.read_parquet(f"{OUTPATH}/{sample}/test/{file}")
-
-        #         with uproot.recreate(f"{OUTPATH}/{sample}/test/out.root", compression=uproot.LZ4(4)) as rfile:
-        #             rfile["Events"] = ak.Array(d.to_dict(orient="list", index=True))
-        #             rfile["Events"].show()
-        #     print("--------------------------")
-
         return {}
 
     def postprocess(self, accumulator):
