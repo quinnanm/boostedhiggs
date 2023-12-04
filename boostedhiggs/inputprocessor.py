@@ -278,9 +278,9 @@ class InputProcessor(ProcessorABC):
         Others["j2_m"] = ak.firsts(jet2).mass.to_numpy().filled(fill_value=0)
 
         # ggF & VBF
-        # Others["ht"] = ht.to_numpy()
-        # Others["NumFatjets"] = NumFatjets.to_numpy()
-        # Others["NumOtherJets"] = NumOtherJets.to_numpy()
+        Others["ht"] = ht.to_numpy()
+        Others["NumFatjets"] = NumFatjets.to_numpy()
+        Others["NumOtherJets"] = NumOtherJets.to_numpy()
         Others["FirstFatjet_pt"] = FirstFatjet.pt.to_numpy().filled(fill_value=0)
         Others["FirstFatjet_m"] = FirstFatjet.mass.to_numpy().filled(fill_value=0)
         Others["SecondFatjet_pt"] = SecondFatjet.pt.to_numpy().filled(fill_value=0)
@@ -334,7 +334,6 @@ class InputProcessor(ProcessorABC):
         skimmed_vars = {
             key: np.squeeze(np.array(value[selection.all(*selection.names)])) for (key, value) in skimmed_vars.items()
         }
-
         for model_name in ["ak8_MD_vminclv2ParT_manual_fixwrap_all_nodes"]:
             pnet_vars = runInferenceTriton(
                 self.tagger_resources_path,
