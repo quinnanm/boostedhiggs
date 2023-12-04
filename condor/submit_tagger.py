@@ -46,6 +46,19 @@ def main(args):
         os.remove(f"{locdir}/*.log")
     except Exception:
         pass
+
+        # make condor file
+        condor_templ_file = open("condor/submit.templ_tagger.jdl")
+        condor_file = open(localcondor, "w")
+        for line in condor_templ_file:
+            line = line.replace("DIRECTORY", locdir)
+            line = line.replace("PREFIX", sample)
+            line = line.replace("JOBIDS_FILE", args.starti)
+            line = line.replace("PROXY", proxy)
+            condor_file.write(line)
+        condor_file.close()
+        condor_templ_file.close()
+
     sh_file = open(localsh, "w")
     for line in sh_templ_file:
         line = line.replace("SCRIPTNAME", args.script)
