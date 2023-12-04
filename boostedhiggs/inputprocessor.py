@@ -1,7 +1,7 @@
 """
 Skimmer for ParticleNet tagger inputs.
 
-Author(s): Cristina Mantilla Suarez, Raghav Kansal
+Author(s): Cristina Mantilla Suarez, Raghav Kansal, Farouk Mokhtar.
 """
 import os
 import pathlib
@@ -17,12 +17,11 @@ import uproot
 from coffea.analysis_tools import PackedSelection
 from coffea.nanoevents.methods import candidate
 from coffea.processor import ProcessorABC, dict_accumulator
+from tagger_gen_matching import match_H, match_QCD, match_Top, match_V
 
 from .corrections import btagWPs
 from .run_tagger_inference import runInferenceTriton
-
-# from .run_tagger_inference import runInferenceTriton
-from .utils import FILL_NONE_VALUE, add_selection_no_cutflow, sigs, tagger_gen_matching
+from .utils import FILL_NONE_VALUE, add_selection_no_cutflow, sigs
 
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -36,65 +35,55 @@ class InputProcessor(ProcessorABC):
     Produces a flat training ntuple from PFNano.
     """
 
-    def __init__(self, year, label, inference, output_location="./outfiles/"):
+    def __init__(self, year, output_location="./outfiles/"):
         self._year = year
-        self.label = label
-        self.inference = inference
         self._output_location = output_location
-
-        self.skim_vars = {
-            "GenPart": [
-                "fj_genjetmass",
-                "fj_genRes_pt",
-                "fj_genRes_eta",
-                "fj_genRes_phi",
-                "fj_genRes_mass",
-                "fj_nprongs",
-                "fj_ncquarks",
-                "fj_lepinprongs",
-                "fj_nquarks",
-                "fj_H_VV",
-                "fj_H_VV_isMatched",
-                "fj_H_VV_4q",
-                "fj_H_VV_elenuqq",
-                "fj_H_VV_munuqq",
-                "fj_H_VV_leptauelvqq",
-                "fj_H_VV_leptaumuvqq",
-                "fj_H_VV_hadtauvqq",
-                "fj_QCDb",
-                "fj_QCDbb",
-                "fj_QCDc",
-                "fj_QCDcc",
-                "fj_QCDothers",
-                "fj_V_2q",
-                "fj_V_elenu",
-                "fj_V_munu",
-                "fj_V_taunu",
-                "fj_Top_nquarksnob",
-                "fj_Top_nbquarks",
-                "fj_Top_ncquarks",
-                "fj_Top_nleptons",
-                "fj_Top_nele",
-                "fj_Top_nmu",
-                "fj_Top_ntau",
-                "fj_Top_taudecay",
-            ],
-            "FatJet": [
-                "eta",
-                "phi",
-                "mass",
-                "pt",
-                "msoftdrop",
-            ],
-        }
 
         self.tagger_resources_path = str(pathlib.Path(__file__).parent.resolve()) + "/tagger_resources/"
 
-        self.fatjet_label = "FatJet"
-        self.pfcands_label = "FatJetPFCands"
-        self.svs_label = "FatJetSVs"
-
         self._accumulator = dict_accumulator({})
+
+        self.GenPartvars = [
+            "fj_genjetmass",
+            "fj_genRes_pt",
+            "fj_genRes_eta",
+            "fj_genRes_phi",
+            "fj_genRes_mass",
+            "fj_nprongs",
+            "fj_ncquarks",
+            "fj_lepinprongs",
+            "fj_nquarks",
+            "fj_isggF",
+            "fj_isVBF",
+            "fj_H_VV",
+            "fj_H_VV_isMatched",
+            "fj_H_VV_4q",
+            "fj_H_VV_elenuqq",
+            "fj_H_VV_munuqq",
+            "fj_H_VV_leptauelvqq",
+            "fj_H_VV_leptaumuvqq",
+            "fj_H_VV_hadtauvqq",
+            "fj_isQCD",
+            "fj_isQCDb",
+            "fj_isQCDbb",
+            "fj_isQCDc",
+            "fj_isQCDcc",
+            "fj_isQCDothers",
+            "fj_isV_2q",
+            "fj_isV_elenu",
+            "fj_isV_munu",
+            "fj_isV_taunu",
+            "fj_isTop",
+            "fj_isTop_Matched",
+            "fj_isTop_nquarksnob",
+            "fj_isTop_nbquarks",
+            "fj_isTop_ncquarks",
+            "fj_isTop_nleptons",
+            "fj_isTop_nele",
+            "fj_isTop_nmu",
+            "fj_isTop_ntau",
+            "fj_isTop_taudecay",
+        ]
 
     @property
     def accumulator(self):
@@ -132,6 +121,9 @@ class InputProcessor(ProcessorABC):
 
         start = time.time()
 
+        genparts = events.GenPart
+        dataset = events.metadata["dataset"]
+
         def build_p4(cand):
             return ak.zip(
                 {
@@ -160,11 +152,20 @@ class InputProcessor(ProcessorABC):
         )  # reliso for candidate lepton
         lep_miso = candidatelep.miniPFRelIso_all  # miniso for candidate lepton
 
+        mt_lep_met = np.sqrt(
+            2.0 * candidatelep_p4.pt * met.pt * (ak.ones_like(met.pt) - np.cos(candidatelep_p4.delta_phi(met)))
+        )
+
         # fatjet
-        fatjets = events[self.fatjet_label]
+        fatjets = events["FatJet"]
         good_fatjets = (fatjets.pt > 200) & (abs(fatjets.eta) < 2.5) & fatjets.isTight
+
         good_fatjets = fatjets[good_fatjets]  # select good fatjets
         good_fatjets = good_fatjets[ak.argsort(good_fatjets.pt, ascending=False)]  # sort them by pt
+
+        NumFatjets = ak.num(good_fatjets)
+        FirstFatjet = ak.firsts(good_fatjets[:, 0:1])
+        SecondFatjet = ak.firsts(good_fatjets[:, 1:2])
 
         # candidatefj
         fj_idx_lep = ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)
@@ -181,15 +182,18 @@ class InputProcessor(ProcessorABC):
             )
 
         goodjets = events.Jet[ak4_jet_selector_no_btag]
+        ht = ak.sum(goodjets.pt, axis=1)
 
         dr_jet_lepfj = goodjets.delta_r(candidatefj)
         ak4_outside_ak8 = goodjets[dr_jet_lepfj > 0.8]
+        NumOtherJets = ak.num(ak4_outside_ak8)
 
         # VBF variables
         jet1 = ak4_outside_ak8[:, 0:1]
         jet2 = ak4_outside_ak8[:, 1:2]
         deta = abs(ak.firsts(jet1).eta - ak.firsts(jet2).eta)
         mjj = (ak.firsts(jet1) + ak.firsts(jet2)).mass
+        jj_pt = (ak.firsts(jet1) + ak.firsts(jet2)).pt
 
         # rec_higgs
         candidateNeutrino = ak.zip(
@@ -207,25 +211,22 @@ class InputProcessor(ProcessorABC):
         rec_W_qq = candidatefj - candidatelep_p4
         rec_higgs = rec_W_qq + rec_W_lnu
 
-        # selection
-        selection = PackedSelection()
-        add_selection_no_cutflow("fjselection", (candidatefj.pt > 200), selection)
-
-        if np.sum(selection.all(*selection.names)) == 0:
-            return {}
-
-        # variables
-        genparts = events.GenPart
-        matched_mask, genVars = tagger_gen_matching(
-            events,
-            genparts,
-            candidatefj,
-            self.skim_vars["GenPart"],
-            label=self.label,
+        # INPUT VARIABLES
+        # CANDIDATE JET
+        fj_vars = (
+            [
+                "eta",
+                "phi",
+                "mass",
+                "pt",
+                "msoftdrop",
+                "lsf3",
+            ],
         )
 
-        FatJetVars = {f"fj_{var}": ak.fill_none(candidatefj[var], FILL_NONE_VALUE) for var in self.skim_vars["FatJet"]}
+        FatJetVars = {f"fj_{var}": ak.fill_none(candidatefj[var], FILL_NONE_VALUE) for var in fj_vars}
 
+        # CANDIDATE LEPTON
         LepVars = {}
         LepVars["lep_dR_fj"] = candidatelep_p4.delta_r(candidatefj).to_numpy().filled(fill_value=0)
         LepVars["lep_pt"] = (candidatelep_p4.pt).to_numpy().filled(fill_value=0)
@@ -233,6 +234,17 @@ class InputProcessor(ProcessorABC):
         LepVars["lep_reliso"] = lep_reliso.to_numpy().filled(fill_value=0)
         LepVars["lep_miso"] = lep_miso.to_numpy().filled(fill_value=0)
 
+        # MET
+        METVars = {}
+        METVars["met_pt"] = met.pt
+        METVars["met_relpt"] = met.pt / candidatefj.pt
+        METVars["met_fj_dphi"] = met.delta_phi(candidatefj)
+        METVars["abs_met_fj_dphi"] = np.abs(met.delta_phi(candidatefj))
+        METVars["mt_lep_met"] = mt_lep_met.to_numpy().filled(fill_value=0)
+
+        # OTHERS
+
+        # bjet
         Others = {}
         Others["n_bjets_L"] = (
             ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["L"], axis=1)
@@ -250,6 +262,7 @@ class InputProcessor(ProcessorABC):
             .filled(fill_value=0)
         )
 
+        # RECONSTRUCTED MASS
         Others["rec_W_lnu_pt"] = rec_W_lnu.pt.to_numpy().filled(fill_value=0)
         Others["rec_W_lnu_m"] = rec_W_lnu.mass.to_numpy().filled(fill_value=0)
         Others["rec_W_qq_pt"] = rec_W_qq.pt.to_numpy().filled(fill_value=0)
@@ -257,23 +270,69 @@ class InputProcessor(ProcessorABC):
         Others["rec_higgs_pt"] = rec_higgs.pt.to_numpy().filled(fill_value=0)
         Others["rec_higgs_m"] = rec_higgs.mass.to_numpy().filled(fill_value=0)
 
+        # ggF & VBF
         Others["mjj"] = mjj.to_numpy().filled(fill_value=0)
+        Others["jj_pt"] = jj_pt.to_numpy().filled(fill_value=0)
         Others["deta"] = deta.to_numpy().filled(fill_value=0)
+        Others["j1_pt"] = jet1.pt.to_numpy().filled(fill_value=0)
+        Others["j2_pt"] = jet2.pt.to_numpy().filled(fill_value=0)
+        Others["j1_m"] = jet1.mass.to_numpy().filled(fill_value=0)
+        Others["j2_m"] = jet2.mass.to_numpy().filled(fill_value=0)
 
-        METVars = {}
-        METVars["met_pt"] = met.pt
-        METVars["met_relpt"] = met.pt / candidatefj.pt
-        METVars["met_fj_dphi"] = met.delta_phi(candidatefj)
+        # ggF & VBF
+        Others["ht"] = ht.to_numpy().filled(fill_value=0)
+        Others["NumFatjets"] = NumFatjets.to_numpy().filled(fill_value=0)
+        Others["NumOtherJets"] = NumOtherJets.to_numpy().filled(fill_value=0)
+        Others["FirstFatjet_pt"] = FirstFatjet.pt.to_numpy().filled(fill_value=0)
+        Others["FirstFatjet_m"] = FirstFatjet.mass.to_numpy().filled(fill_value=0)
+        Others["SecondFatjet_pt"] = SecondFatjet.pt.to_numpy().filled(fill_value=0)
+        Others["SecondFatjet_m"] = SecondFatjet.mass.to_numpy().filled(fill_value=0)
 
-        skimmed_vars = {**FatJetVars, **{"matched_mask": matched_mask}, **genVars, **METVars, **LepVars, **Others}
+        # last but not least, gen info
+        if "HToWW" in dataset:
+            print("match_H")
+            GenVars, matched_mask = match_H(genparts, candidatefj)
+            if "VBF" in dataset:
+                GenVars["fj_isVBF"] = np.ones(len(genparts), dtype="bool")
+            elif "GluGluHToWW" in dataset:
+                GenVars["fj_isggF"] = np.ones(len(genparts), dtype="bool")
+        elif "TTToSemiLeptonic" in dataset:
+            print("match_Top")
+            GenVars, matched_mask = match_Top(genparts, candidatefj)
+        elif "WJets" in dataset:
+            print("match_V")
+            GenVars, matched_mask = match_V(genparts, candidatefj)
+        elif "QCD" in dataset:
+            print("match_QCD")
+            GenVars, matched_mask = match_QCD(genparts, candidatefj)
+
+        # genjet_vars, matched_gen_jet_mask = get_genjet_vars(events, fatjets)
+        # AllGenVars = {**GenVars, **genjet_vars}
+
+        AllGenVars = {**GenVars, **{"fj_genjetmass": candidatefj.matched_gen.mass}}  # add gen jet mass
+
+        # loop to keep only the specified variables in `self.GenPartvars`
+        # if `GenVars` doesn't contain a variable, that variable is not applicable to this sample so fill with 0s
+        GenVars = {key: AllGenVars[key] if key in AllGenVars.keys() else np.zeros(len(genparts)) for key in self.GenPartvars}
+        for key, item in GenVars.items():
+            try:
+                GenVars[key] = GenVars[key].to_numpy()
+            except Exception:
+                continue
+
+        # combine all the input variables
+        skimmed_vars = {**FatJetVars, **{"matched_mask": matched_mask}, **GenVars, **METVars, **LepVars, **Others}
 
         # apply selections
+        selection = PackedSelection()
+        add_selection_no_cutflow("fjselection", (candidatefj.pt > 250), selection)
+
+        if np.sum(selection.all(*selection.names)) == 0:
+            return {}
+
         skimmed_vars = {
             key: np.squeeze(np.array(value[selection.all(*selection.names)])) for (key, value) in skimmed_vars.items()
         }
-
-        # fill inference
-        assert self.inference is True, "enable --inference to run skimmer"
 
         for model_name in ["ak8_MD_vminclv2ParT_manual_fixwrap_all_nodes"]:
             pnet_vars = runInferenceTriton(
@@ -301,12 +360,6 @@ class InputProcessor(ProcessorABC):
 
         # convert output to pandas
         df = pd.DataFrame(skimmed_vars)
-
-        # for key in self.skim_vars:
-        #     for keykey in self.skim_vars[key]:
-        #         assert (
-        #             keykey in df.keys()
-        #         ), f"make sure you are computing and storing {keykey} in the skimmed_vars dictionnary"
 
         df = df.dropna()  # very few events would have genjetmass NaN for some reason
 

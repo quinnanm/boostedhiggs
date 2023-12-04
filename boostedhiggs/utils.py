@@ -34,20 +34,8 @@ FILL_NONE_VALUE = -99999
 
 JET_DR = 0.8
 
-P4 = {
-    "eta": "Eta",
-    "phi": "Phi",
-    "mass": "Mass",
-    "pt": "Pt",
-}
 
-
-def get_pid_mask(
-    genparts: GenParticleArray,
-    pdgids: Union[int, list],
-    ax: int = 2,
-    byall: bool = True,
-) -> ak.Array:
+def get_pid_mask(genparts: GenParticleArray, pdgids: Union[int, list], ax: int = 2, byall: bool = True) -> ak.Array:
     """
     Get selection mask for gen particles matching any of the pdgIds in ``pdgids``.
     If ``byall``, checks all particles along axis ``ax`` match.
@@ -68,7 +56,7 @@ def to_label(array: ak.Array) -> ak.Array:
     return ak.values_astype(array, np.int32)
 
 
-def match_H(genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID):
+def match_H(genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID, signature="ggF"):
     """Gen matching for Higgs samples"""
     higgs = genparts[get_pid_mask(genparts, HIGGS_PDGID, byall=False) * genparts.hasFlags(GEN_FLAGS)]
 
@@ -155,6 +143,11 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID):
             # "genlep_dR_lep": lepton.delta_r(gen_lepton)
             "fj_genRes_mass": matched_higgs.mass,
         }
+
+        if signature == "ggF":
+            genHVVVars["fj_isggF"] = np.ones(len(genparts), dtype="bool")
+        else:
+            genHVVVars["fj_isVBF"] = np.ones(len(genparts), dtype="bool")
 
         genVars = {**genVars, **genVVars, **genHVVVars}
 
@@ -257,15 +250,19 @@ def match_V(genparts: GenParticleArray, fatjet: FatJetArray):
     matched_vdaus_mask = ak.any(fatjet.delta_r(daughters) < 0.8, axis=1)
     matched_mask = matched_vs_mask & matched_vdaus_mask
     genVars = {
+        "fj_isV": np.ones(len(genparts), dtype="bool"),
         "fj_nprongs": nprongs,
         "fj_lepinprongs": lepinprongs,
         "fj_ncquarks": ncquarks,
         "fj_V_isMatched": matched_mask,
-        "fj_V_2q": to_label(decay == 1),
-        "fj_V_elenu": to_label(decay == 3),
-        "fj_V_munu": to_label(decay == 5),
-        "fj_V_taunu": to_label(decay == 7),
+        "fj_isV_2q": to_label(decay == 1),
+        "fj_isV_elenu": to_label(decay == 3),
+        "fj_isV_munu": to_label(decay == 5),
+        "fj_isV_taunu": to_label(decay == 7),
     }
+
+    genVars["fj_isV_lep"] = (genVars["fj_isV_elenu"] == 1) | (genVars["fj_isV_munu"] == 1) | (genVars["fj_isV_taunu"] == 1)
+
     return genVars, matched_mask
 
 
@@ -334,7 +331,8 @@ def match_Top(genparts: GenParticleArray, fatjet: FatJetArray):
     matched_mask = matched_tops_mask & matched_topdaus_mask
 
     genVars = {
-        "fj_Top_isMatched": matched_mask,  # at least one top and one daugther matched..
+        "fj_isTop": np.ones(len(genparts), dtype="bool"),
+        "fj_isTop_matched": matched_mask,  # at least one top and one daughter matched..
         "fj_Top_numMatched": num_matched_tops,  # number of tops matched
         "fj_Top_nquarksnob": num_m_quarks_nob,  # number of quarks from W decay (not b) matched in dR
         "fj_Top_nbquarks": num_m_bquarks,  # number of b quarks ..
@@ -344,28 +342,43 @@ def match_Top(genparts: GenParticleArray, fatjet: FatJetArray):
         "fj_Top_nmu": num_m_muons,  # number of muons...
         "fj_Top_ntau": num_m_taus,  # number of taus...
         "fj_Top_taudecay": taudecay,  # taudecay (1: hadronic, 3: electron, 5: muon)
+        # added recently
+        "fj_isTop_W_lep_b": to_label((num_m_leptons == 1) & (num_m_bquarks == 1)),
+        "fj_isTop_W_lep": to_label(num_m_leptons == 1),
+        "fj_isTop_W_ele_b": to_label((num_m_electrons == 1) & (num_m_leptons == 1) & (num_m_bquarks == 1)),
+        "fj_isTop_W_ele": to_label((num_m_electrons == 1) & (num_m_leptons == 1)),
+        "fj_isTop_W_mu_b": to_label((num_m_muons == 1) & (num_m_leptons == 1) & (num_m_bquarks == 1)),
+        "fj_isTop_W_mu": to_label((num_m_muons == 1) & (num_m_leptons == 1)),
+        "fj_isTop_W_tau_b": to_label((num_m_taus == 1) & (num_m_leptons == 1) & (num_m_bquarks == 1)),
+        "fj_isTop_W_tau": to_label((num_m_taus == 1) & (num_m_leptons == 1)),
     }
 
     return genVars, matched_mask
 
 
-def match_QCD(
-    genparts: GenParticleArray,
-    fatjets: FatJetArray,
-    # genlabels: List[str],
-) -> Tuple[np.array, Dict[str, np.array]]:
-    """Gen matching for QCD samples, arguments as defined in ``tagger_gen_matching``"""
+def match_QCD(genparts: GenParticleArray, fatjets: FatJetArray) -> Tuple[np.array, Dict[str, np.array]]:
+    """Gen matching for QCD samples, arguments as defined in `tagger_gen_matching`."""
 
     partons = genparts[get_pid_mask(genparts, [g_PDGID] + list(range(1, b_PDGID + 1)), ax=1, byall=False)]
     matched_mask = ak.any(fatjets.delta_r(partons) < JET_DR, axis=1)
 
     genVars = {
-        "fj_QCDb": (fatjets.nBHadrons == 1),
-        "fj_QCDbb": (fatjets.nBHadrons > 1),
-        "fj_QCDc": (fatjets.nCHadrons == 1) * (fatjets.nBHadrons == 0),
-        "fj_QCDcc": (fatjets.nCHadrons > 1) * (fatjets.nBHadrons == 0),
-        "fj_QCDothers": (fatjets.nBHadrons == 0) & (fatjets.nCHadrons == 0),
+        "fj_isQCD": np.ones(len(genparts), dtype="bool"),
+        "fj_isQCD_matched": matched_mask,
+        "fj_isQCDb": (fatjets.nBHadrons == 1),
+        "fj_isQCDbb": (fatjets.nBHadrons > 1),
+        "fj_isQCDc": (fatjets.nCHadrons == 1) * (fatjets.nBHadrons == 0),
+        "fj_isQCDcc": (fatjets.nCHadrons > 1) * (fatjets.nBHadrons == 0),
+        "fj_isQCDothers": (fatjets.nBHadrons == 0) & (fatjets.nCHadrons == 0),
     }
+
+    # genVars["fj_isQCD"] = (
+    #     (genVars["fj_isQCDb"] == 1)
+    #     | (genVars["fj_isQCDbb"] == 1)
+    #     | (genVars["fj_isQCDc"] == 1)
+    #     | (genVars["fj_isQCDcc"] == 1)
+    #     | (genVars["fj_isQCDothers"] == 1)
+    # )
 
     genVars = {key: to_label(var) for key, var in genVars.items()}
 
@@ -385,12 +398,7 @@ def get_genjet_vars(events: NanoEventsArray, fatjets: FatJetArray):
 
 
 def tagger_gen_matching(
-    events: NanoEventsArray,
-    genparts: GenParticleArray,
-    fatjets: FatJetArray,
-    # candidatelep_p4,
-    genlabels: List[str],
-    label: str,
+    dataset, events: NanoEventsArray, genparts: GenParticleArray, fatjets: FatJetArray, genlabels: List[str], label: str
 ) -> Tuple[np.array, Dict[str, np.array]]:
     """Does fatjet -> gen-level matching and derives gen-level variables.
 
@@ -412,8 +420,12 @@ def tagger_gen_matching(
 
     if "H" in label:
         print("match_H")
-        GenVars, matched_mask = match_H(genparts, fatjets)
+        if "VBF" in dataset:
+            GenVars, matched_mask = match_H(genparts, fatjets, signature="VBF")
+        else:
+            GenVars, matched_mask = match_H(genparts, fatjets)
         # GenVars["fj_genRes_mass"] = 125 * np.ones(len(events))
+
     elif "QCD" in label:
         print("match_QCD")
         GenVars, matched_mask = match_QCD(genparts, fatjets)
@@ -443,35 +455,10 @@ def tagger_gen_matching(
             continue
 
     return matched_mask, GenVars
-    # return matched_mask * matched_gen_jet_mask, GenVars
-
-
-# def FILL_NONE_VALUE(
-#     arr: ak.Array,
-#     value: float,
-#     target: int = None,
-#     axis: int = 0,
-#     to_numpy: bool = False,
-#     clip: bool = True,
-# ):
-#     """
-#     pads awkward array up to ``target`` index along axis ``axis`` with value ``value``,
-#     optionally converts to numpy array
-#     """
-#     if target:
-#         ret = ak.fill_none(ak.pad_none(arr, target, axis=axis, clip=clip), value, axis=None)
-#     else:
-#         ret = ak.fill_none(arr, value, axis=None)
-#     return ret.to_numpy() if to_numpy else ret
 
 
 def add_selection(
-    name: str,
-    sel: np.ndarray,
-    selection: PackedSelection,
-    cutflow: dict,
-    isData: bool,
-    signGenWeights: ak.Array,
+    name: str, sel: np.ndarray, selection: PackedSelection, cutflow: dict, isData: bool, signGenWeights: ak.Array
 ):
     """adds selection to PackedSelection object and the cutflow dictionary"""
     selection.add(name, sel)
@@ -483,11 +470,7 @@ def add_selection(
     )
 
 
-def add_selection_no_cutflow(
-    name: str,
-    sel: np.ndarray,
-    selection: PackedSelection,
-):
+def add_selection_no_cutflow(name: str, sel: np.ndarray, selection: PackedSelection):
     """adds selection to PackedSelection object"""
     selection.add(name, ak.fill_none(sel, False))
 
