@@ -122,9 +122,6 @@ if __name__ == "__main__":
     parser.add_argument("--script", dest="script", default="run.py", help="script to run", type=str)
     parser.add_argument("--year", dest="year", default="2017", help="year", type=str)
     parser.add_argument("--tag", dest="tag", default="Test", help="process tag", type=str)
-
-    parser.add_argument("--config", dest="config", required=True, help="path to config yaml", type=str)
-    parser.add_argument("--key", dest="configkey", required=True, help="config key: [data, mc, ... ]", type=str)
     parser.add_argument("--test", dest="test", action="store_true", help="only 2 jobs per sample will be created")
     parser.add_argument("--submit", dest="submit", action="store_true", help="submit jobs when created")
 
