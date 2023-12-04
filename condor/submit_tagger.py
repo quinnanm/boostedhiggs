@@ -5,10 +5,7 @@ Splits the total fileset and creates condor job submission files for the specifi
 Author(s): Cristina Mantilla, Raghav Kansal, Farouk Mokhtar
 """
 import argparse
-import json
 import os
-
-from file_utils import loadFiles
 
 
 def main(args):
@@ -27,21 +24,9 @@ def main(args):
     logdir = locdir + "/logs"
     os.system(f"mkdir -p {logdir}")
 
-    # copy the splitting file to the locdir
-    os.system(f"cp pfnano_splitting.yaml {locdir}")
-    os.system(f"cp {args.config} {locdir}")
-
     # and condor directory
     print("CONDOR work dir: " + outdir)
     os.system(f"mkdir -p /eos/uscms/{outdir}")
-
-    # build metadata.json with samples
-    slist = args.slist.split(",") if args.slist is not None else None
-    files, nfiles_per_job = loadFiles(args.config, args.configkey, args.year, args.pfnano, slist)
-    metadata_file = f"metadata_{args.configkey}.json"
-    with open(f"{locdir}/{metadata_file}", "w") as f:
-        json.dump(files, f, sort_keys=True, indent=2)
-    print(files.keys())
 
     # submit a cluster of jobs per sample
     sample = args.sample
