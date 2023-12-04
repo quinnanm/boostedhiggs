@@ -17,10 +17,10 @@ import uproot
 from coffea.analysis_tools import PackedSelection
 from coffea.nanoevents.methods import candidate
 from coffea.processor import ProcessorABC, dict_accumulator
-from tagger_gen_matching import match_H, match_QCD, match_Top, match_V
 
 from .corrections import btagWPs
 from .run_tagger_inference import runInferenceTriton
+from .tagger_gen_matching import match_H, match_QCD, match_Top, match_V
 from .utils import FILL_NONE_VALUE, add_selection_no_cutflow, sigs
 
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
