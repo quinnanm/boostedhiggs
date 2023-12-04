@@ -213,16 +213,14 @@ class InputProcessor(ProcessorABC):
 
         # INPUT VARIABLES
         # CANDIDATE JET
-        fj_vars = (
-            [
-                "eta",
-                "phi",
-                "mass",
-                "pt",
-                "msoftdrop",
-                "lsf3",
-            ],
-        )
+        fj_vars = [
+            "eta",
+            "phi",
+            "mass",
+            "pt",
+            "msoftdrop",
+            "lsf3",
+        ]
 
         FatJetVars = {f"fj_{var}": ak.fill_none(candidatefj[var], FILL_NONE_VALUE) for var in fj_vars}
 
