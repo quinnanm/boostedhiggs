@@ -48,7 +48,6 @@ def main(args):
     for line in condor_templ_file:
         line = line.replace("DIRECTORY", locdir)
         line = line.replace("PREFIX", sample)
-        line = line.replace("METADATAFILE", metadata_file)
         line = line.replace("PROXY", proxy)
         condor_file.write(line)
     condor_file.close()
@@ -62,7 +61,6 @@ def main(args):
     for line in sh_templ_file:
         line = line.replace("SCRIPTNAME", args.script)
         line = line.replace("YEAR", args.year)
-        line = line.replace("METADATAFILE", metadata_file)
         line = line.replace("NUMJOBS", args.n)
         line = line.replace("STARTI", args.starti)
         line = line.replace("SAMPLE", sample)
