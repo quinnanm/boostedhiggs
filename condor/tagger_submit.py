@@ -54,7 +54,7 @@ def main(args):
         f.write("\n".join(jobids))
 
     # make condor file
-    condor_templ_file = open("condor/submit.templ.jdl")
+    condor_templ_file = open("condor/tagger_submit.templ.jdl")
     condor_file = open(localcondor, "w")
     for line in condor_templ_file:
         line = line.replace("DIRECTORY", locdir)
@@ -67,7 +67,7 @@ def main(args):
     condor_templ_file.close()
 
     # make executable file
-    sh_templ_file = open("condor/submit.templ.sh")
+    sh_templ_file = open("condor/tagger_submit.templ.sh")
     eosoutput_dir = f"root://cmseos.fnal.gov/{outdir}/{sample}/"
     eosoutput_pkl = f"{eosoutput_dir}/"
     sh_file = open(localsh, "w")
