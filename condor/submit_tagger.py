@@ -38,6 +38,7 @@ def main(args):
     eosoutput_dir = f"root://cmseos.fnal.gov/{outdir}/{sample}/"
     eosoutput_pkl = f"{eosoutput_dir}/"
 
+    localcondor = f"{locdir}/{sample}.jdl"
     localsh = f"{locdir}/{sample}.sh"
     try:
         os.remove(localcondor)
