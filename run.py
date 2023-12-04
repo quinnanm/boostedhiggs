@@ -77,6 +77,7 @@ def main(args):
         list(fileset.keys()),
     )
     print(fileset)
+    print(f"Number of files: {len(fileset)}")
 
     # define processor
     year = args.year.replace("APV", "")
