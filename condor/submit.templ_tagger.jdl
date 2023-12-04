@@ -3,15 +3,14 @@
 executable              = DIRECTORY/PREFIX.sh
 should_transfer_files   = YES
 transfer_input_files    = boostedhiggs,run.py
-arguments               = $(jobid)
 when_to_transfer_output = ON_EXIT_OR_EVICT
 transfer_output_files   = ""
 use_x509userproxy       = true
 x509userproxy           = PROXY
 
-output                  = DIRECTORY/logs/PREFIX_$(jobid).out
-error                   = DIRECTORY/logs/PREFIX_$(jobid).err
-log                     = DIRECTORY/logs/PREFIX_$(jobid).log
+output                  = DIRECTORY/logs/PREFIX.out
+error                   = DIRECTORY/logs/PREFIX.err
+log                     = DIRECTORY/logs/PREFIX.log
 
 +SingularityImage = "/cvmfs/unpacked.cern.ch/registry.hub.docker.com/coffeateam/coffea-dask:0.7.21-fastjet-3.4.0.1-g6238ea8"
 
