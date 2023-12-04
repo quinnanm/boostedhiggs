@@ -34,9 +34,17 @@ def main(args):
     os.system(f"mkdir -p /eos/uscms/{outdir}/{sample}")
 
     # make executable file
-    sh_templ_file = open("condor/submit.templ_tagger.jdl")
+    sh_templ_file = open("condor/submit.jdl")
     eosoutput_dir = f"root://cmseos.fnal.gov/{outdir}/{sample}/"
     eosoutput_pkl = f"{eosoutput_dir}/"
+
+    localsh = f"{locdir}/{sample}.sh"
+    try:
+        os.remove(localcondor)
+        os.remove(localsh)
+        os.remove(f"{locdir}/*.log")
+    except Exception:
+        pass
     sh_file = open(localsh, "w")
     for line in sh_templ_file:
         line = line.replace("SCRIPTNAME", args.script)
