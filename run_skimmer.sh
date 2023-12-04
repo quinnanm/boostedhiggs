@@ -67,9 +67,9 @@ mv outfiles ntuples/VBFHToWWToLNuQQ_M-125_withDipoleRecoil/2016/test
 
 # run over TTbar samples
 mkdir -p ntuples/TTToSemiLeptonic/2018/
-python run.py --processor input --local --sample TTToSemiLeptonic --n 10 --starti 0 --inference --year 2018
+python run.py --processor input --local --sample TTToSemiLeptonic --n 50 --starti 0 --inference --year 2018
 mv outfiles ntuples/TTToSemiLeptonic/2018/train
-python run.py --processor input --local --sample TTToSemiLeptonic --n 10 --starti 1 --inference --year 2018
+python run.py --processor input --local --sample TTToSemiLeptonic --n 50 --starti 1 --inference --year 2018
 mv outfiles ntuples/TTToSemiLeptonic/2018/test
 
 # run over WJetsLNu samples
