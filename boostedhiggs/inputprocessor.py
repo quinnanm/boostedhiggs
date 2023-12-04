@@ -280,13 +280,9 @@ class InputProcessor(ProcessorABC):
         Others["j2_m"] = ak.firsts(jet2).mass.to_numpy().filled(fill_value=0)
 
         # ggF & VBF
-        # Others["ht"] = ht.to_numpy().filled(fill_value=0)
-        Others["ht"] = ht.to_numpy()
-        # Others["NumFatjets"] = NumFatjets.to_numpy().filled(fill_value=0)
-        Others["NumFatjets"] = NumFatjets.to_numpy()
-
-        # Others["NumOtherJets"] = NumOtherJets.to_numpy().filled(fill_value=0)
-        Others["NumOtherJets"] = NumOtherJets.to_numpy()
+        # Others["ht"] = ht.to_numpy()
+        # Others["NumFatjets"] = NumFatjets.to_numpy()
+        # Others["NumOtherJets"] = NumOtherJets.to_numpy()
         Others["FirstFatjet_pt"] = FirstFatjet.pt.to_numpy().filled(fill_value=0)
         Others["FirstFatjet_m"] = FirstFatjet.mass.to_numpy().filled(fill_value=0)
         Others["SecondFatjet_pt"] = SecondFatjet.pt.to_numpy().filled(fill_value=0)
