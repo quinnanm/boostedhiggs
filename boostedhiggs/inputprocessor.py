@@ -289,20 +289,22 @@ class InputProcessor(ProcessorABC):
         # last but not least, gen info
         if "HToWW" in dataset:
             print("match_H")
-            GenVars, matched_mask = match_H(genparts, candidatefj)
+            GenVars, _ = match_H(genparts, candidatefj)
             if "VBF" in dataset:
+                print("VBF")
                 GenVars["fj_isVBF"] = np.ones(len(genparts), dtype="bool")
             elif "GluGluHToWW" in dataset:
+                print("ggF")
                 GenVars["fj_isggF"] = np.ones(len(genparts), dtype="bool")
         elif "TTToSemiLeptonic" in dataset:
             print("match_Top")
-            GenVars, matched_mask = match_Top(genparts, candidatefj)
+            GenVars, _ = match_Top(genparts, candidatefj)
         elif "WJets" in dataset:
             print("match_V")
-            GenVars, matched_mask = match_V(genparts, candidatefj)
+            GenVars, _ = match_V(genparts, candidatefj)
         elif "QCD" in dataset:
             print("match_QCD")
-            GenVars, matched_mask = match_QCD(genparts, candidatefj)
+            GenVars, _ = match_QCD(genparts, candidatefj)
 
         # genjet_vars, matched_gen_jet_mask = get_genjet_vars(events, fatjets)
         # AllGenVars = {**GenVars, **genjet_vars}
