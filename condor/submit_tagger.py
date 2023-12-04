@@ -33,28 +33,8 @@ def main(args):
     print(f"Making directory /eos/uscms/{outdir}/{sample}")
     os.system(f"mkdir -p /eos/uscms/{outdir}/{sample}")
 
-    localcondor = f"{locdir}/{sample}.jdl"
-    localsh = f"{locdir}/{sample}.sh"
-    try:
-        os.remove(localcondor)
-        os.remove(localsh)
-        os.remove(f"{locdir}/*.log")
-    except Exception:
-        pass
-
-    # make condor file
-    condor_templ_file = open("condor/submit.templ.jdl")
-    condor_file = open(localcondor, "w")
-    for line in condor_templ_file:
-        line = line.replace("DIRECTORY", locdir)
-        line = line.replace("PREFIX", sample)
-        line = line.replace("PROXY", proxy)
-        condor_file.write(line)
-    condor_file.close()
-    condor_templ_file.close()
-
     # make executable file
-    sh_templ_file = open("condor/submit.templ.sh")
+    sh_templ_file = open("condor/submit.templ_tagger.jdl")
     eosoutput_dir = f"root://cmseos.fnal.gov/{outdir}/{sample}/"
     eosoutput_pkl = f"{eosoutput_dir}/"
     sh_file = open(localsh, "w")
