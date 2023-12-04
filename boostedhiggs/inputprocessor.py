@@ -45,44 +45,65 @@ class InputProcessor(ProcessorABC):
 
         self.GenPartvars = [
             "fj_genjetmass",
+            # higgs
             "fj_genRes_pt",
             "fj_genRes_eta",
             "fj_genRes_phi",
             "fj_genRes_mass",
-            "fj_nprongs",
-            "fj_ncquarks",
-            "fj_lepinprongs",
+            "fj_genH_pt",
+            "fj_genH_jet",
+            "fj_genV_dR",
+            "fj_genVstar",
+            "genV_genVstar_dR",
+            "fj_isHVV",
+            "fj_isHVV_Matched",
+            "fj_isHVV_4q",
+            "fj_isHVV_elenuqq",
+            "fj_isHVV_munuqq",
+            "fj_isHVV_taunuqq",
+            "fj_isHVV_Vlepton",
+            "fj_isHVV_Vstarlepton",
             "fj_nquarks",
-            "fj_isggF",
-            "fj_isVBF",
-            "fj_H_VV",
-            "fj_H_VV_isMatched",
-            "fj_H_VV_4q",
-            "fj_H_VV_elenuqq",
-            "fj_H_VV_munuqq",
-            "fj_H_VV_leptauelvqq",
-            "fj_H_VV_leptaumuvqq",
-            "fj_H_VV_hadtauvqq",
+            "fj_lepinprongs",
+            # wjets
+            "fj_isV",
+            "fj_isV_Matched",
+            "fj_isV_2q",
+            "fj_isV_elenu",
+            "fj_isV_munu",
+            "fj_isV_taunu",
+            "fj_nprongs",
+            "fj_lepinprongs",
+            "fj_ncquarks",
+            "fj_isV_lep",
+            # ttbar
+            "fj_isTop",
+            "fj_isTop_Matched",
+            "fj_Top_numMatched",
+            "fj_isTop_W_lep_b",
+            "fj_isTop_W_lep",
+            "fj_isTop_W_ele_b",
+            "fj_isTop_W_ele",
+            "fj_isTop_W_mu_b",
+            "fj_isTop_W_mu",
+            "fj_isTop_W_tau_b",
+            "fj_isTop_W_tau",
+            "fj_Top_nquarksnob",
+            "fj_Top_nbquarks",
+            "fj_Top_ncquarks",
+            "fj_Top_nleptons",
+            "fj_Top_nele",
+            "fj_Top_nmu",
+            "fj_Top_ntau",
+            "fj_Top_taudecay",
+            # qcd
             "fj_isQCD",
+            "fj_isQCD_Matched",
             "fj_isQCDb",
             "fj_isQCDbb",
             "fj_isQCDc",
             "fj_isQCDcc",
             "fj_isQCDothers",
-            "fj_isV_2q",
-            "fj_isV_elenu",
-            "fj_isV_munu",
-            "fj_isV_taunu",
-            "fj_isTop",
-            "fj_isTop_Matched",
-            "fj_isTop_nquarksnob",
-            "fj_isTop_nbquarks",
-            "fj_isTop_ncquarks",
-            "fj_isTop_nleptons",
-            "fj_isTop_nele",
-            "fj_isTop_nmu",
-            "fj_isTop_ntau",
-            "fj_isTop_taudecay",
         ]
 
     @property
@@ -322,7 +343,6 @@ class InputProcessor(ProcessorABC):
 
         # combine all the input variables
         skimmed_vars = {**FatJetVars, **GenVars, **METVars, **LepVars, **Others}
-        # skimmed_vars = {**FatJetVars, **METVars, **LepVars, **Others}
 
         # apply selections
         selection = PackedSelection()
@@ -334,26 +354,26 @@ class InputProcessor(ProcessorABC):
         skimmed_vars = {
             key: np.squeeze(np.array(value[selection.all(*selection.names)])) for (key, value) in skimmed_vars.items()
         }
-        # for model_name in ["ak8_MD_vminclv2ParT_manual_fixwrap_all_nodes"]:
-        #     pnet_vars = runInferenceTriton(
-        #         self.tagger_resources_path,
-        #         events[selection.all(*selection.names)],
-        #         fj_idx_lep[selection.all(*selection.names)],
-        #         model_name=model_name,
-        #     )
+        for model_name in ["ak8_MD_vminclv2ParT_manual_fixwrap_all_nodes"]:
+            pnet_vars = runInferenceTriton(
+                self.tagger_resources_path,
+                events[selection.all(*selection.names)],
+                fj_idx_lep[selection.all(*selection.names)],
+                model_name=model_name,
+            )
 
-        #     # pnet_df = self.ak_to_pandas(pnet_vars)
-        #     pnet_df = pd.DataFrame(pnet_vars)
+            # pnet_df = self.ak_to_pandas(pnet_vars)
+            pnet_df = pd.DataFrame(pnet_vars)
 
-        #     scores = {"fj_ParT_score": (pnet_df[sigs].sum(axis=1)).values}
-        #     reg_mass = {"fj_ParT_mass": pnet_vars["fj_ParT_mass"]}
+            scores = {"fj_ParT_score": (pnet_df[sigs].sum(axis=1)).values}
+            reg_mass = {"fj_ParT_mass": pnet_vars["fj_ParT_mass"]}
 
-        #     hidNeurons = {}
-        #     for key in pnet_vars:
-        #         if "hidNeuron" in key:
-        #             hidNeurons[key] = pnet_vars[key]
+            hidNeurons = {}
+            for key in pnet_vars:
+                if "hidNeuron" in key:
+                    hidNeurons[key] = pnet_vars[key]
 
-        #     skimmed_vars = {**skimmed_vars, **scores, **reg_mass, **hidNeurons}
+            skimmed_vars = {**skimmed_vars, **scores, **reg_mass, **hidNeurons}
 
         for key in skimmed_vars:
             skimmed_vars[key] = skimmed_vars[key].squeeze()
