@@ -1,7 +1,5 @@
 #!/bin/bash
 
-jobid=$1
-
 python3 -m pip install correctionlib==2.1.0
 pip install --upgrade numpy==1.21.5
 
@@ -10,7 +8,7 @@ mkdir outfiles
 
 # run code
 # pip install --user onnxruntime
-python SCRIPTNAME --year YEAR --processor PROCESSOR PFNANO INFERENCE SYSTEMATICS --n NUMJOBS --starti ${jobid} --sample SAMPLE --config METADATAFILE --channels CHANNELS
+python run.py --year YEAR --processor input --pfnano v2_2 --n NUMJOBS --starti STARTI --sample SAMPLE --inference
 
 # remove incomplete jobs
 rm -rf outfiles/*mu
