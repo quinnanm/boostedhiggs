@@ -346,7 +346,7 @@ class InputProcessor(ProcessorABC):
 
         # apply selections
         selection = PackedSelection()
-        add_selection_no_cutflow("fjselection", (candidatefj.pt > 250), selection)
+        add_selection_no_cutflow("fjselection", (candidatefj.pt > 200), selection)
 
         if np.sum(selection.all(*selection.names)) == 0:
             return {}
