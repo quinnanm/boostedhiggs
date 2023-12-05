@@ -58,10 +58,9 @@ def main(args):
         except Exception:
             pass
 
-        if args.maxfiles != -1:
+        tot_files = len(files[sample])
+        if (args.maxfiles != -1) & (args.maxfiles < tot_files):
             tot_files = args.maxfiles
-        else:
-            tot_files = len(files[sample])
 
         if args.files_per_job:
             njobs = ceil(tot_files / args.files_per_job)
