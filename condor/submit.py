@@ -58,7 +58,11 @@ def main(args):
         except Exception:
             pass
 
-        tot_files = len(files[sample])
+        if args.maxfiles != -1:
+            tot_files = args.maxfiles
+        else:
+            tot_files = len(files[sample])
+
         if args.files_per_job:
             njobs = ceil(tot_files / args.files_per_job)
             files_per_job = str(args.files_per_job)
@@ -158,6 +162,7 @@ if __name__ == "__main__":
     parser.add_argument("--no-systematics", dest="systematics", action="store_false")
     parser.add_argument("--label", dest="label", default="H", help="jet label for inputskimmer", type=str)
     parser.add_argument("--region", dest="region", default="signal", help="specify region for selections", type=str)
+    parser.add_argument("--maxfiles", default=-1, help="max number of files to run on", type=int)
 
     parser.set_defaults(inference=True)
     args = parser.parse_args()
