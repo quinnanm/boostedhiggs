@@ -169,15 +169,17 @@ qcd:
   - QCD_Pt_300to470
   - QCD_Pt_470to600
   - QCD_Pt_600to800
-finetuning_bkg:
+finetuning_top:
   - TTToSemiLeptonic
-  - WJetsToLNu_HT-200To400
-  - WJetsToLNu_HT-400To600
-  - WJetsToLNu_HT-600To800  
+finetuning_qcd:
   - QCD_Pt_170to300
   - QCD_Pt_300to470
   - QCD_Pt_470to600
   - QCD_Pt_600to800
+finetuning_wjets:
+  - WJetsToLNu_HT-200To400
+  - WJetsToLNu_HT-400To600
+  - WJetsToLNu_HT-600To800  
 finetuning_sig:
   - GluGluHToWW_Pt-200ToInf_M-125
   - VBFHToWWToLNuQQ_M-125_withDipoleRecoil
