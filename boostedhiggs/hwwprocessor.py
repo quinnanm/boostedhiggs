@@ -329,6 +329,8 @@ class HwwProcessor(processor.ProcessorABC):
             "FirstFatjet_m": FirstFatjet.mass,
             "SecondFatjet_pt": SecondFatjet.pt,
             "SecondFatjet_m": SecondFatjet.mass,
+            # TODO: deltaR between first fat jet and lepton
+            # TODO: deltaR between second fat jet and lepton
         }
 
         fatjetvars = {
@@ -486,8 +488,7 @@ class HwwProcessor(processor.ProcessorABC):
         self.add_selection(
             name="LepMiniIso", sel=(candidatelep.pt < 55) | ((candidatelep.pt >= 55) & (lep_miso < 0.2)), channel="mu"
         )
-        self.add_selection(name="ht", sel=(ht > 200))
-        self.add_selection(name="OneCandidateJet", sel=(candidatefj.pt > 0))
+        self.add_selection(name="OneCandidateJet", sel=(NumFatjets >= 1))
         self.add_selection(name="CandidateJetpT", sel=(candidatefj.pt > 250))
         self.add_selection(name="LepInJet", sel=(lep_fj_dr < 0.8))
         self.add_selection(name="JetLepOverlap", sel=(lep_fj_dr > 0.03))
