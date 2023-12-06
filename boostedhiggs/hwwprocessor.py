@@ -152,6 +152,9 @@ class HwwProcessor(processor.ProcessorABC):
         self.cutflows = {ch: {} for ch in self._channels}
 
         sumgenweight = ak.sum(events.genWeight) if self.isMC else 0
+        if self.isMC:
+            for ch in self._channels:
+                self.weights[ch].add("genweight", events.genWeight)
 
         # trigger
         trigger, trigger_noiso, trigger_iso = {}, {}, {}
@@ -174,7 +177,7 @@ class HwwProcessor(processor.ProcessorABC):
             if mf in events.Flag.fields:
                 metfilters = metfilters & events.Flag[mf]
 
-        # OBJCT: taus
+        # OBJECT: taus
         loose_taus_mu = (events.Tau.pt > 20) & (abs(events.Tau.eta) < 2.3) & (events.Tau.idAntiMu >= 1)  # loose antiMu ID
         loose_taus_ele = (
             (events.Tau.pt > 20)
@@ -187,7 +190,7 @@ class HwwProcessor(processor.ProcessorABC):
         muons = ak.with_field(events.Muon, 0, "flavor")
         electrons = ak.with_field(events.Electron, 1, "flavor")
 
-        # OBJCT: muons
+        # OBJECT: muons
         loose_muons = (
             (((muons.pt > 30) & (muons.pfRelIso04_all < 0.25)) | (muons.pt > 55))
             & (np.abs(muons.eta) < 2.4)
@@ -205,7 +208,7 @@ class HwwProcessor(processor.ProcessorABC):
         )
         n_good_muons = ak.sum(good_muons, axis=1)
 
-        # OBJCT: electrons
+        # OBJECT: electrons
         loose_electrons = (
             (((electrons.pt > 38) & (electrons.pfRelIso03_all < 0.25)) | (electrons.pt > 120))
             & (np.abs(electrons.eta) < 2.4)
@@ -327,10 +330,10 @@ class HwwProcessor(processor.ProcessorABC):
             "fj_lsf3": candidatefj.lsf3,
             "FirstFatjet_pt": FirstFatjet.pt,
             "FirstFatjet_m": FirstFatjet.mass,
+            "FirstFatjet_lep_dr": candidatelep_p4.delta_r(FirstFatjet),
             "SecondFatjet_pt": SecondFatjet.pt,
             "SecondFatjet_m": SecondFatjet.mass,
-            # TODO: deltaR between first fat jet and lepton
-            # TODO: deltaR between second fat jet and lepton
+            "SecondFatjet_lep_dr": candidatelep_p4.delta_r(SecondFatjet),
         }
 
         fatjetvars = {
@@ -397,7 +400,6 @@ class HwwProcessor(processor.ProcessorABC):
             rec_W_qq = candidatefj - candidatelep_p4
             rec_higgs = rec_W_qq + rec_W_lnu
 
-            # variables[f"fj_minus_lep_m{shift}"] = (candidatefj - candidatelep_p4).mass
             variables[f"fj_pt{shift}"] = candidatefj.pt
 
             variables[f"rec_higgs_m{shift}"] = rec_higgs.mass
@@ -433,23 +435,23 @@ class HwwProcessor(processor.ProcessorABC):
         Let's add this as a cut to check first.
         """
         if self._year == "2018":
+            hem_veto = ak.any(
+                (
+                    (events.Jet.pt > 30.0)
+                    & (events.Jet.eta > -3.2)
+                    & (events.Jet.eta < -1.3)
+                    & (events.Jet.phi > -1.57)
+                    & (events.Jet.phi < -0.87)
+                ),
+                -1,
+            ) | ((events.MET.phi > -1.62) & (events.MET.pt < 470.0) & (events.MET.phi < -0.62))
+
             hem_cleaning = (
                 ((events.run >= 319077) & (not self.isMC))  # if data check if in Runs C or D
                 # else for MC randomly cut based on lumi fraction of C&D
                 | ((np.random.rand(len(events)) < 0.632) & self.isMC)
-            ) & (
-                ak.any(
-                    (
-                        (events.Jet.pt > 30.0)
-                        & (events.Jet.eta > -3.2)
-                        & (events.Jet.eta < -1.3)
-                        & (events.Jet.phi > -1.57)
-                        & (events.Jet.phi < -0.87)
-                    ),
-                    -1,
-                )
-                | ((events.MET.phi > -1.62) & (events.MET.pt < 470.0) & (events.MET.phi < -0.62))
-            )
+            ) & (hem_veto)
+
             self.add_selection(name="HEMCleaning", sel=~hem_cleaning)
 
         # apply selections
@@ -464,7 +466,6 @@ class HwwProcessor(processor.ProcessorABC):
             & (n_good_electrons == 0)
             & (n_loose_electrons == 0)
             & ~ak.any(loose_muons & ~good_muons, 1),
-            # & (n_loose_taus_mu == 0),
             channel="mu",
         )
         self.add_selection(
@@ -473,7 +474,6 @@ class HwwProcessor(processor.ProcessorABC):
             & (n_loose_muons == 0)
             & (n_good_electrons == 1)
             & ~ak.any(loose_electrons & ~good_electrons, 1),
-            # & (n_loose_taus_ele == 0),
             channel="ele",
         )
         self.add_selection(name="NoTaus", sel=(n_loose_taus_mu == 0), channel="mu")
@@ -488,11 +488,12 @@ class HwwProcessor(processor.ProcessorABC):
         self.add_selection(
             name="LepMiniIso", sel=(candidatelep.pt < 55) | ((candidatelep.pt >= 55) & (lep_miso < 0.2)), channel="mu"
         )
-        self.add_selection(name="OneCandidateJet", sel=(NumFatjets >= 1))
+        self.add_selection(name="OneFatJet", sel=(NumFatjets >= 1))
         self.add_selection(name="CandidateJetpT", sel=(candidatefj.pt > 250))
         self.add_selection(name="LepInJet", sel=(lep_fj_dr < 0.8))
         self.add_selection(name="JetLepOverlap", sel=(lep_fj_dr > 0.03))
         self.add_selection(name="dPhiJetMETCut", sel=(np.abs(met_fj_dphi) < 1.57))
+        self.add_selection(name="METCut", sel=(met.pt) > 20)
 
         # gen-level matching
         signal_mask = None
@@ -516,7 +517,6 @@ class HwwProcessor(processor.ProcessorABC):
 
         if self.isMC:
             for ch in self._channels:
-                self.weights[ch].add("genweight", events.genWeight)
                 if self._year in ("2016", "2017"):
                     self.weights[ch].add(
                         "L1Prefiring", events.L1PreFiringWeight.Nom, events.L1PreFiringWeight.Up, events.L1PreFiringWeight.Dn
