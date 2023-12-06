@@ -18,6 +18,7 @@ def main(args):
     if not os.path.exists("./outfiles"):
         os.makedirs("./outfiles")
 
+    channels = ["ele", "mu"]
     if args.channels:
         channels = args.channels.split(",")
 
