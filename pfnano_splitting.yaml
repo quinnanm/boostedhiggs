@@ -134,14 +134,14 @@ v2_2:
     ST_tW_top_5f_inclusiveDecays: 15
     ST_s-channel_4f_hadronicDecays: 15
     ST_s-channel_4f_leptonDecays: 15
-    WJetsToLNu_HT-70To100: 10
-    WJetsToLNu_HT-100To200: 10
-    WJetsToLNu_HT-200To400: 12
-    WJetsToLNu_HT-400To600: 12
-    WJetsToLNu_HT-600To800: 12
-    WJetsToLNu_HT-800To1200: 12
-    WJetsToLNu_HT-1200To2500: 12
-    WJetsToLNu_HT-2500ToInf: 12
+    WJetsToLNu_HT-70To100: 2
+    WJetsToLNu_HT-100To200: 2
+    WJetsToLNu_HT-200To400: 2
+    WJetsToLNu_HT-400To600: 2
+    WJetsToLNu_HT-600To800: 2
+    WJetsToLNu_HT-800To1200: 2
+    WJetsToLNu_HT-1200To2500: 2
+    WJetsToLNu_HT-2500ToInf: 2
     WJetsToQQ_HT-200to400: 12
     WJetsToQQ_HT-400to600: 12
     WJetsToQQ_HT-600to800: 12
