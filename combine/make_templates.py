@@ -56,7 +56,7 @@ weights = {
 }
 
 
-def get_templates(years, channels, samples, samples_dir, lepiso_sel, regions_sel, categories_sel, model_path):
+def get_templates(years, channels, samples, samples_dir, regions_sel, model_path):
     """
     Postprocesses the parquets by applying preselections, and fills templates for different regions.
 
@@ -65,9 +65,7 @@ def get_templates(years, channels, samples, samples_dir, lepiso_sel, regions_sel
         ch [list]: channels to postprocess (e.g. ["ele", "mu"])
         samples [list]: samples to postprocess (e.g. ["ggF", "QCD", "Data"])
         samples_dir [dict]: points to the path of the parquets for each region
-        lepiso_sel [dict]: key is the name of the region; value is either [lepiso, lepisoinv]
         regions_sel [dict]: key is the name of the region; value is the selection (e.g. `{"pass": (fj_ParT_score>0.97)}`)
-        categories_sel [dict]: key is the name of the category; value is the selection (e.g. `{"VBF": (mjj>1000)}`)
         model_path [str]: path to the ParT finetuned model.onnx
 
     Returns
@@ -75,7 +73,7 @@ def get_templates(years, channels, samples, samples_dir, lepiso_sel, regions_sel
 
     """
 
-    # add filter to load parquets faster  (only if needed)
+    # add filter to load parquets faster  (only if needed)... we only apply lepiso anyway
     lepiso_filter = {
         "lepiso": {
             "mu": [
@@ -313,14 +311,7 @@ def main(args):
     os.system(f"mkdir -p {args.outdir}")
 
     hists = get_templates(
-        years,
-        channels,
-        config["samples"],
-        config["samples_dir"],
-        config["lepiso_sel"],
-        config["regions_sel"],
-        config["categories_sel"],
-        config["model_path"],
+        years, channels, config["samples"], config["samples_dir"], config["regions_sel"], config["model_path"]
     )
 
     fix_neg_yields(hists)
