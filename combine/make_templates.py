@@ -74,6 +74,8 @@ def get_templates(years, channels, samples, samples_dir, lepiso_sel, regions_sel
         a dict() object hists[region] that contains histograms with 4 axes (samples, systematic, ptbin, mass_observable)
 
     """
+
+    # add filter to load parquets faster  (only if needed)
     lepiso_filter = {
         "lepiso": {
             "mu": [
@@ -97,6 +99,7 @@ def get_templates(years, channels, samples, samples_dir, lepiso_sel, regions_sel
         },
     }
 
+    # add extra selections to preselection
     presel = {
         "mu": {
             "lep_fj_dr003": "( ( lep_fj_dr>0.03) )",
@@ -116,15 +119,17 @@ def get_templates(years, channels, samples, samples_dir, lepiso_sel, regions_sel
         },
     }
 
-    # mass_binning = {}
+    mass_binning = 20
 
-    # for region in region_sel:
     hists = hist2.Hist(
         hist2.axis.StrCategory([], name="Sample", growth=True),
         hist2.axis.StrCategory([], name="Systematic", growth=True),
         hist2.axis.StrCategory([], name="Region", growth=True),
         hist2.axis.Variable(
-            list(range(50, 240, 20)), name="mass_observable", label=r"Higgs reconstructed mass [GeV]", overflow=True
+            list(range(50, 240, mass_binning)),
+            name="mass_observable",
+            label=r"Higgs reconstructed mass [GeV]",
+            overflow=True,
         ),
         storage=hist2.storage.Weight(),
     )
@@ -182,7 +187,7 @@ def get_templates(years, channels, samples, samples_dir, lepiso_sel, regions_sel
                 # drop hidNeurons which are not needed anymore
                 data = data[data.columns.drop(list(data.filter(regex="hidNeuron")))]
 
-                data["abs_met_fj_dphi"] = np.abs(data["met_fj_dphi"])
+                data["abs_met_fj_dphi"] = np.abs(data["met_fj_dphi"])  # relevant variable
 
                 # apply selection
                 for selection in presel[ch]:
@@ -197,14 +202,6 @@ def get_templates(years, channels, samples, samples_dir, lepiso_sel, regions_sel
                     df = data.copy()
 
                     logging.info(f"Applying {region} selection on {len(data)} events")
-
-                    if ("SR" in region) and ("QCD" in sample):  # literally two qcd events in SR2 and one qcd event in SR1
-                        threshold = 10
-                        df = df[(event_weight * df[f"weight_{ch}"]) < threshold]
-
-                    if ("WJetsCR" in region) and ("QCD" in sample):  # literally 5 qcd events
-                        threshold = 100
-                        df = df[(event_weight * df[f"weight_{ch}"]) < threshold]
 
                     df = df.query(region_sel)
                     logging.info(f"Will fill the histograms with the remaining {len(data)} events")
@@ -228,8 +225,6 @@ def get_templates(years, channels, samples, samples_dir, lepiso_sel, regions_sel
                             weight=nominal,
                         )
 
-                    # to get expected significance i just comment the next blocks to make the templates quicker
-                    # remvoing these nuissances from the datacards don't really affect the expected signifcance
                     for weight in weights:
                         # up and down weights
                         if sample_to_use == "Data":  # for data (fill as 1)
@@ -333,23 +328,10 @@ def main(args):
     with open(f"{args.outdir}/hists_templates_{save_as}.pkl", "wb") as fp:
         pkl.dump(hists, fp)
 
-    # # dump the templates of each region in a rootfile
-    # if not os.path.exists(f"{args.outpath}/hists_templates"):
-    #     os.makedirs(f"{args.outpath}/hists_templates")
-
-    # for region in hists.keys():
-    #     file = uproot.recreate(f"{args.outpath}/hists_templates/{region}.root")
-
-    #     for sample in hists[region].axes["samples"]:
-    #         if sample == "Data":
-    #             file[f"{region}/data_obs"] = hists[region][{"fj_pt": sum, "samples": sample}]
-    #             continue
-    #         file[f"{region}/{sample}"] = hists[region][{"fj_pt": sum, "samples": sample}]
-
 
 if __name__ == "__main__":
     # e.g.
-    # python make_templates.py --years 2016,2016APV,2017,2018 --channels mu,ele --outdir templates/v11
+    # python make_templates.py --years 2016,2016APV,2017,2018 --channels mu,ele --outdir templates/v1
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--years", dest="years", default="2017", help="years separated by commas")
