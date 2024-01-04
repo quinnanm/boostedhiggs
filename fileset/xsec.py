@@ -5,6 +5,10 @@ Cross Sections
 
 Jennet has a nice notebook on x-sections:
 https://github.com/jennetd/hbb-coffea/blob/master/xsec-json.ipynb
+
+Other references:
+- Latinos: https://github.com/latinos/LatinoAnalysis/blob/master/NanoGardener/python/framework/samples/samplesCrossSections2018.py
+- XSDB: https://xsdb-temp.app.cern.ch/xsdb
 """
 
 # Branching ratio of H to WW (LHC-XS-WG)
@@ -24,9 +28,9 @@ xs = {}
 
 # VH - this needs to be checked for qqZH, also need to add ggZH
 # pp->ZH 8.839E-01
-##From GenXsecAnalyzer: 7.891e-01 +/- 3.047e-03	
+##From GenXsecAnalyzer: 7.891e-01 +/- 3.047e-03
 ##cmsRun ana.py inputFiles="file:root://cmsxrootd.fnal.gov//store/mc/RunIIAutumn18MiniAOD/HZJ_HToWW_M125_13TeV_powheg_jhugen714_pythia8_TuneCP5/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/280000/B18DBE21-109B-6F4C-9920-A797AAC1D1CE.root" maxEvents=-1
-#xs["HZJ_HToWW_M-125"] = 0.7891 * BR_HWW
+# xs["HZJ_HToWW_M-125"] = 0.7891 * BR_HWW
 
 
 # GluGluToHToWWPt200
@@ -61,10 +65,10 @@ xs["ttHToNonbb_M125"] = 5.013e-01 * (1 - BR_HBB)
 # Cross xcheck the following numbers
 xs["HWminusJ_HToWW_M-125"] = 0.5445 * BR_HWW
 xs["HWplusJ_HToWW_M-125"] = 0.8720 * BR_HWW
-#xs["HZJ_HToWW_M-125"] = 0.9595 * BR_HWW
-xs["HZJ_HToWW_M-125"] = 0.7891 * BR_HWW  #this was replaced with above GenXSecAnalyzer Number
+# xs["HZJ_HToWW_M-125"] = 0.9595 * BR_HWW
+xs["HZJ_HToWW_M-125"] = 0.7891 * BR_HWW  # this was replaced with above GenXSecAnalyzer Number
 # cross check -  this in xsdb is 0.006185
-xs["GluGluZH_HToWW_ZTo2L_M-125"] = 0.1223 * 3 * 0.033658 * BR_HWW
+xs["GluGluZH_HToWW_ZTo2L_M-125"] = 0.1223 * 3 * 0.033658 * BR_HWW  # 0.002639
 
 # QCD
 xs["QCD_HT500to700"] = 3.033e04
@@ -120,6 +124,14 @@ xs["WJetsToLNu_HT-800To1200"] = 4.933
 xs["WJetsToLNu_HT-1200To2500"] = 1.16
 xs["WJetsToLNu_HT-2500ToInf"] = 0.02646
 
+xs["WJetsToLNu_TuneCP5_13TeV-madgraphMLM"] = 52940.0
+
+# W+jets W(lv) NLO (xsdb)
+# WJetsToLNu_*J_TuneCP5_13TeV-amcatnloFXFX-pythia8
+xs["WJetsToLNu_0J"] = 52780.0
+xs["WJetsToLNu_1J"] = 8832.0
+xs["WJetsToLNu_2J"] = 3276.0
+
 # Z+jets Z(qq)
 xs["ZJetsToQQ_HT-200to400"] = 1012.0
 xs["ZJetsToQQ_HT-400to600"] = 1.145e02
@@ -140,11 +152,20 @@ xs["DYJetsToLL_M-50_HT-800to1200"] = 0.8094 * 0.93
 xs["DYJetsToLL_M-50_HT-1200to2500"] = 0.1931 * 0.93
 xs["DYJetsToLL_M-50_HT-2500toInf"] = 0.003513 * 0.93
 
-xs["DYJetsToLL_Pt-50To100"] = 3.941e02
-xs["DYJetsToLL_Pt-100To250"] = 9.442e01
-xs["DYJetsToLL_Pt-250To400"] = 3.651e00
-xs["DYJetsToLL_Pt-400To650"] = 4.986e-01
-xs["DYJetsToLL_Pt-650ToInf"] = 4.678e-02
+# Old NLO samples (invalid)
+# xs["DYJetsToLL_Pt-50To100"] = 3.941e02
+# xs["DYJetsToLL_Pt-100To250"] = 9.442e01
+# xs["DYJetsToLL_Pt-250To400"] = 3.651e00
+# xs["DYJetsToLL_Pt-400To650"] = 4.986e-01
+# xs["DYJetsToLL_Pt-650ToInf"] = 4.678e-02
+
+# NLO samples (xsdb)
+xs["DYJetsToLL_LHEFilterPtZ-0To50"] = 1485.0
+xs["DYJetsToLL_LHEFilterPtZ-50To100"] = 397.4
+xs["DYJetsToLL_LHEFilterPtZ-100To250"] = 97.2
+xs["DYJetsToLL_LHEFilterPtZ-250To400"] = 3.701
+xs["DYJetsToLL_LHEFilterPtZ-400To650"] = 0.5086
+xs["DYJetsToLL_LHEFilterPtZ-650ToInf"] = 0.04728
 
 # VV
 # NLO prediction from papers
