@@ -264,3 +264,21 @@ and use `plot_1dhists.py` to create 1D hists for specific variables. Use `sample
 ```
 python plot_1dhists.py --year 2017 --odir ${CUSTOM_TAG} --var gen_Hpt --samples GluGluHToWW_Pt-200ToInf_M-125,VH,VBFHToWWToLNuQQ_M-125_withDipoleRecoil --tag signal --logy
 ```
+
+
+# Weaver ParT-Finetuning
+
+To produce the ntuples, use the `inputprocessor.py` by runing the commands in `run_skimmer.sh` (you may also use `condor/tagger_submit.py` to submit jobs to produce the ntuples faster).
+
+For the weaver setup:
+```
+conda create -n weaver python=3.8
+
+conda activate weaver
+
+pip install torch==1.10
+pip install numba
+pip install weaver-core
+pip install tensorboard
+pip install setuptools==59.5.0
+```
