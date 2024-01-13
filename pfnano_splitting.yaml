@@ -177,10 +177,10 @@ finetuning:
     QCD_HT2000toInf_SUS: 15
     WJetsToLNu_1J:
     WJetsToLNu_2J:
-    BulkGravitonToHHTo4W_JHUGen_MX-600to6000_MH-15to250: 1
-    BulkGravitonToHHTo4W_JHUGen_MX-600to6000_MH-15to250_ext1: 1
-    BulkGravitonToHHTo4W_JHUGen_MX-600to6000_MH-15to250_v2: 1
-    BulkGravitonToHHTo4W_JHUGen_MX-600to6000_MH-15to250_v2_ext1: 1
-    JHUVariableWMass_part1: 1
-    JHUVariableWMass_part2: 1
-    JHUVariableWMass_part3: 1
+    BulkGravitonToHHTo4W_JHUGen_MX-600to6000_MH-15to250: 10
+    BulkGravitonToHHTo4W_JHUGen_MX-600to6000_MH-15to250_ext1: 10
+    BulkGravitonToHHTo4W_JHUGen_MX-600to6000_MH-15to250_v2: 10
+    BulkGravitonToHHTo4W_JHUGen_MX-600to6000_MH-15to250_v2_ext1: 10
+    JHUVariableWMass_part1: 10
+    JHUVariableWMass_part2: 10
+    JHUVariableWMass_part3: 10
