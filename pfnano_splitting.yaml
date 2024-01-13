@@ -155,3 +155,32 @@ v2_2:
     WZ: 12
 v2_4:
     TTToSemiLeptonic_test: 10
+finetuning:
+    TTToSemiLeptonic_test: 10
+    QCD_HT50to100_JME: 15
+    QCD_HT100to200_JME: 15
+    QCD_HT200to300_JME: 15
+    QCD_HT300to500_JME: 15
+    QCD_HT500to700_JME: 15
+    QCD_HT700to1000_JME: 15
+    QCD_HT1000to1500_JME: 15
+    QCD_HT1500to2000_JME: 15
+    QCD_HT2000toInf_JME: 15
+    QCD_HT50to100_SUS: 15
+    QCD_HT100to200_SUS: 15
+    QCD_HT200to300_SUS: 15
+    QCD_HT300to500_SUS: 15
+    QCD_HT500to700_SUS: 15
+    QCD_HT700to1000_SUS: 15
+    QCD_HT1000to1500_SUS: 15
+    QCD_HT1500to2000_SUS: 15
+    QCD_HT2000toInf_SUS: 15
+    WJetsToLNu_1J:
+    WJetsToLNu_2J:
+    BulkGravitonToHHTo4W_JHUGen_MX-600to6000_MH-15to250: 1
+    BulkGravitonToHHTo4W_JHUGen_MX-600to6000_MH-15to250_ext1: 1
+    BulkGravitonToHHTo4W_JHUGen_MX-600to6000_MH-15to250_v2: 1
+    BulkGravitonToHHTo4W_JHUGen_MX-600to6000_MH-15to250_v2_ext1: 1
+    JHUVariableWMass_part1: 1
+    JHUVariableWMass_part2: 1
+    JHUVariableWMass_part3: 1
