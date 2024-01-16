@@ -13,7 +13,7 @@ Other references:
 
 # Branching ratio of H to WW (LHC-XS-WG)
 BR_HWW = 0.2137
-# Branching ratio of WW to LNuQQ (0.21664272)
+# Branching ratio of WW to LNuQQ (0.43328544)
 BR_WW_lnuqq = (0.1046 + 0.1050 + 0.1075) * (0.6832) * 2
 # Branching ratio of WW to 4Q (0.46676224)
 BR_WW_qqqq = 0.6832**2
@@ -115,14 +115,14 @@ xs["WJetsToQQ_HT-800toInf"] = 2.875e01
 
 # W+jets W(lv)
 # from XSDB
-xs["WJetsToLNu_HT-70To100"] = 1264.0
-xs["WJetsToLNu_HT-100To200"] = 1256.0
-xs["WJetsToLNu_HT-200To400"] = 335.5
-xs["WJetsToLNu_HT-400To600"] = 45.25
-xs["WJetsToLNu_HT-600To800"] = 10.97
-xs["WJetsToLNu_HT-800To1200"] = 4.933
-xs["WJetsToLNu_HT-1200To2500"] = 1.16
-xs["WJetsToLNu_HT-2500ToInf"] = 0.02646
+xs["WJetsToLNu_HT-70To100"] = 1292.0
+xs["WJetsToLNu_HT-100To200"] = 1395.0
+xs["WJetsToLNu_HT-200To400"] = 407.9
+xs["WJetsToLNu_HT-400To600"] = 57.48
+xs["WJetsToLNu_HT-600To800"] = 12.87
+xs["WJetsToLNu_HT-800To1200"] = 5.366
+xs["WJetsToLNu_HT-1200To2500"] = 1.074
+xs["WJetsToLNu_HT-2500ToInf"] = 0.008001
 
 xs["WJetsToLNu_TuneCP5_13TeV-madgraphMLM"] = 52940.0
 
@@ -142,15 +142,16 @@ xs["ZJetsToQQ_HT-800toInf"] = 1.291e01
 # ref: https://cms.cern.ch/iCMS/jsp/db_notes/noteInfo.jsp?cmsnoteid=CMS%20AN-2021/205 (v11)
 # they still need a k-factor depending on flavor composition?
 # k-factor of 0.93 is NNLO correction
-xs["DYJetsToLL_M-10to50"] = 15810.0 * 0.93
-xs["DYJetsToLL_M-50_HT-70to100"] = 146.5 * 0.93
-xs["DYJetsToLL_M-50_HT-100to200"] = 160.8 * 0.93
-xs["DYJetsToLL_M-50_HT-200to400"] = 48.63 * 0.93
-xs["DYJetsToLL_M-50_HT-400to600"] = 6.982 * 0.93
-xs["DYJetsToLL_M-50_HT-600to800"] = 1.756 * 0.93
-xs["DYJetsToLL_M-50_HT-800to1200"] = 0.8094 * 0.93
-xs["DYJetsToLL_M-50_HT-1200to2500"] = 0.1931 * 0.93
-xs["DYJetsToLL_M-50_HT-2500toInf"] = 0.003513 * 0.93
+xs["DYJetsToLL_M-10to50"] = 15810.0
+xs["DYJetsToLL_M-50"] = 5343.0
+xs["DYJetsToLL_M-50_HT-70to100"] = 146.5
+xs["DYJetsToLL_M-50_HT-100to200"] = 160.8
+xs["DYJetsToLL_M-50_HT-200to400"] = 48.63
+xs["DYJetsToLL_M-50_HT-400to600"] = 6.982
+xs["DYJetsToLL_M-50_HT-600to800"] = 1.756
+xs["DYJetsToLL_M-50_HT-800to1200"] = 0.8094
+xs["DYJetsToLL_M-50_HT-1200to2500"] = 0.1931
+xs["DYJetsToLL_M-50_HT-2500toInf"] = 0.003513
 
 # Old NLO samples (invalid)
 # xs["DYJetsToLL_Pt-50To100"] = 3.941e02
