@@ -86,11 +86,10 @@ folders_to_index = {
         "/store/user/lpcpfnano/drankin/v2_2/2017/SingleTop/",
         "/store/user/lpcpfnano/drankin/v2_2/2018/SingleTop/",
         ##
-        ## could switch to v2_3 but missing 70to100 HT bin
-        "/store/user/lpcpfnano/drankin/v2_2/2016/WJetsToLNu",
-        "/store/user/lpcpfnano/drankin/v2_2/2016APV/WJetsToLNu",
-        "/store/user/lpcpfnano/drankin/v2_2/2017/WJetsToLNu",
-        "/store/user/lpcpfnano/drankin/v2_2/2018/WJetsToLNu",
+        "/store/user/lpcpfnano/jdickins/v2_3/2016/WJetsToLNu",
+        "/store/user/lpcpfnano/jdickins/v2_3/2016APV/WJetsToLNu",
+        "/store/user/lpcpfnano/jdickins/v2_3/2017/WJetsToLNu",
+        "/store/user/lpcpfnano/jdickins/v2_3/2018/WJetsToLNu",
         "/store/user/lpcpfnano/jiyoo/v2_3/2016/WJetsToLNu",
         "/store/user/lpcpfnano/jiyoo/v2_3/2016APV/WJetsToLNu",
         # "/store/user/lpcpfnano/jiyoo/v2_3/2017/WJetsToLNu",
@@ -102,6 +101,7 @@ folders_to_index = {
         "/store/user/lpcpfnano/cmantill/v2_3/2016APV/DYJetsToLL",
         "/store/user/lpcpfnano/cmantill/v2_3/2017/DYJetsToLL",
         "/store/user/lpcpfnano/cmantill/v2_3/2018/DYJetsToLL",
+        "/store/user/lpcpfnano/jiyoo/v2_3/2018/DYJetsToLL/",
         ##
         "/store/user/lpcpfnano/rkansal/v2_3/2016/Diboson/",
         "/store/user/lpcpfnano/rkansal/v2_3/2016APV/Diboson/",

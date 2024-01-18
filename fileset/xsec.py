@@ -114,17 +114,17 @@ xs["WJetsToQQ_HT-600to800"] = 5.906e01
 xs["WJetsToQQ_HT-800toInf"] = 2.875e01
 
 # W+jets W(lv)
-# from XSDB
-xs["WJetsToLNu_HT-70To100"] = 1292.0
-xs["WJetsToLNu_HT-100To200"] = 1395.0
-xs["WJetsToLNu_HT-200To400"] = 407.9
-xs["WJetsToLNu_HT-400To600"] = 57.48
-xs["WJetsToLNu_HT-600To800"] = 12.87
-xs["WJetsToLNu_HT-800To1200"] = 5.366
-xs["WJetsToLNu_HT-1200To2500"] = 1.074
-xs["WJetsToLNu_HT-2500ToInf"] = 0.008001
+# from XSDB (miniaodv2) - numbers after # correspond to miniaodv1/preUL?
+xs["WJetsToLNu_HT-70To100"] = 1264.0 #1292.0
+xs["WJetsToLNu_HT-100To200"] = 1256.0 # 1395.0
+xs["WJetsToLNu_HT-200To400"] = 335.5 # 407.9
+xs["WJetsToLNu_HT-400To600"] = 45.25 # 57.48
+xs["WJetsToLNu_HT-600To800"] = 11.19 # 12.87
+xs["WJetsToLNu_HT-800To1200"] = 4.933 #5.366
+xs["WJetsToLNu_HT-1200To2500"] = 1.16 #1.074
+xs["WJetsToLNu_HT-2500ToInf"] = 0.008001 # 0.026 #0.008001
 
-xs["WJetsToLNu_TuneCP5_13TeV-madgraphMLM"] = 52940.0
+xs["WJetsToLNu_TuneCP5_13TeV-madgraphMLM"] = 53940.0 #52940.0
 
 # W+jets W(lv) NLO (xsdb)
 # WJetsToLNu_*J_TuneCP5_13TeV-amcatnloFXFX-pythia8
