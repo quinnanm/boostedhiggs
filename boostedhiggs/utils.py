@@ -56,17 +56,17 @@ def to_label(array: ak.Array) -> ak.Array:
     return ak.values_astype(array, np.int32)
 
 
-def match_H(genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID, signature="ggF"):
+def match_H(genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID, signature="ggF", fatjet_pt: FatJetArray=None):
     """Gen matching for Higgs samples"""
     higgs = genparts[get_pid_mask(genparts, HIGGS_PDGID, byall=False) * genparts.hasFlags(GEN_FLAGS)]
 
-    # only select events that match an specific decay
-    # matched_higgs = higgs[ak.argmin(fatjet.delta_r(higgs), axis=1, keepdims=True)][:, 0]
+    # pick higgs closest to jet (no requirement of matching yet)
     matched_higgs = higgs[ak.argmin(fatjet.delta_r(higgs), axis=1, keepdims=True)]
+    # make a mask
     matched_higgs_mask = ak.any(fatjet.delta_r(matched_higgs) < 0.8, axis=1)
 
+    # get the higgs closest to jet
     matched_higgs = ak.firsts(matched_higgs)
-
     matched_higgs_children = matched_higgs.children
     higgs_children = higgs.children
 
@@ -74,7 +74,9 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID, 
 
     if dau_pdgid == W_PDGID:
         children_mask = get_pid_mask(matched_higgs_children, [W_PDGID], byall=False)
-        is_hww = ak.any(children_mask, axis=1)
+
+        children_all_mask = get_pid_mask(ak.firsts(higgs).children, [W_PDGID], byall=False)
+        is_decay = ak.any(children_all_mask, axis=1)
 
         # order by mass, select lower mass child as V* and higher as V
         matched_higgs_children = matched_higgs_children[children_mask]
@@ -135,14 +137,18 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID, 
             "fj_H_VV_elenuqq": to_label((num_electrons == 1) & (num_quarks == 2) & (num_leptons == 1)),
             "fj_H_VV_munuqq": to_label((num_muons == 1) & (num_quarks == 2) & (num_leptons == 1)),
             "fj_H_VV_taunuqq": to_label((num_taus == 1) & (num_quarks == 2) & (num_leptons == 1)),
+            "fj_H_VV_lep": to_label((num_quarks == 0)),
             "fj_H_VV_isVlepton": iswlepton,
             "fj_H_VV_isVstarlepton": iswstarlepton,
-            "fj_H_VV": is_hww,
+            "fj_H_VV": is_decay,
             "fj_H_VV_isMatched": matched_higgs_mask,
             "gen_Vlep_pt": gen_lepton.pt,
-            # "genlep_dR_lep": lepton.delta_r(gen_lepton)
+            "genlep_dR_fj": fatjet.delta_r(gen_lepton),
             "fj_genRes_mass": matched_higgs.mass,
         }
+
+        if fatjet_pt is not None:
+            genHVVVars["genlep_dR_fjpt"] = fatjet_pt.delta_r(gen_lepton)
 
         if signature == "ggF":
             genHVVVars["fj_isggF"] = np.ones(len(genparts), dtype="bool")
@@ -155,7 +161,7 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID, 
         children_mask = get_pid_mask(matched_higgs_children, [TAU_PDGID], byall=False)
         daughters = matched_higgs_children[children_mask]
 
-        is_htt_matched = ak.any(children_mask, axis=1)
+        is_decay = ak.any(children_mask, axis=1)
 
         # taudaughters = daughters[(abs(daughters.pdgId) == TAU_PDGID)].children
         taudaughters = daughters[(abs(daughters.pdgId) == TAU_PDGID)].distinctChildrenDeep
@@ -204,12 +210,12 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID, 
             "fj_H_tt_elehad": to_label(elehad),
             "fj_H_tt_muhad": to_label(muhad),
             "fj_H_tt_leplep": to_label(leplep),
-            "fj_H_tt_isMatched": is_htt_matched,
+            "fj_H_tt_isMatched": matched_higgs_mask,
         }
 
         genVars = {**genVars, **genHTTVars}
 
-    return genVars, is_hww
+    return genVars, is_decay
 
 
 def match_V(genparts: GenParticleArray, fatjet: FatJetArray):
@@ -250,6 +256,8 @@ def match_V(genparts: GenParticleArray, fatjet: FatJetArray):
     matched_vdaus_mask = ak.any(fatjet.delta_r(daughters) < 0.8, axis=1)
     matched_mask = matched_vs_mask & matched_vdaus_mask
     genVars = {
+        "gen_V_pt": ak.firsts(vs.pt),
+        "fj_V_pt": ak.firsts(matched_vs.pt),
         "fj_isV": np.ones(len(genparts), dtype="bool"),
         "fj_nprongs": nprongs,
         "fj_lepinprongs": lepinprongs,

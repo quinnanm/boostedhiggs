@@ -54,10 +54,10 @@ btagWPs = {
 
 # single TT files to derive efficiency
 tt_files = {
-    "2016preVFP_UL": "/store/user/lpcpfnano/drankin/v2_2/2016APV/TTbar/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/TTToSemiLeptonic_ext1/211112_131727/0000/nano_mc2016pre_1-10.root",  # noqa
-    "2016postVFP_UL": "/store/user/lpcpfnano/drankin/v2_2/2016/TTbar/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/TTToSemiLeptonic_ext1/211112_131315/0000/nano_mc2016post_18.root",  # noqa
-    "2017_UL": "/store/user/lpcpfnano/drankin/v2_2/2017/TTbar/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/TTToSemiLeptonic_ext1/211112_132937/0000/nano_mc2017_1-32.root",  # noqa
-    "2018_UL": "/store/user/lpcpfnano/drankin/v2_2/2018/TTbar/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/TTToSemiLeptonic_ext1/211112_133130/0000/nano_mc2018_2-57.root",  # noqa
+    "2016preVFP_UL": "/store/user/lpcpfnano/cmantill/v2_3/2016APV/TTbar/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/TTToSemiLeptonic/220808_173625/0000/nano_mc2016pre_3-146.root",
+    "2016postVFP_UL": "/store/user/lpcpfnano/cmantill/v2_3/2016/TTbar/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/TTToSemiLeptonic/220808_181840/0000/nano_mc2016post_3-30.root",
+    "2017_UL": "/store/user/lpcpfnano/rkansal/v2_3/2017/TTbar/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/TTToSemiLeptonic/220705_160227/0000/nano_mc2017_227.root",
+    "2018_UL": "/store/user/lpcpfnano/cmantill/v2_3/2018/TTbar/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/TTToSemiLeptonic/220808_151244/0000/nano_mc2018_2-15.root",
 }
 
 taggerBranch = {"deepJet": "btagDeepFlavB", "deepCSV": "btagDeepB"}
@@ -68,12 +68,9 @@ for year, fname in tt_files.items():
         entry_stop=100_000,
         schemaclass=NanoAODSchema,
     ).events()
-    phasespace_cuts = (events.Jet.pt > 30) & (abs(events.Jet.eta) < 5.0)
-    if year == "2017_UL":
-        phasespace_cuts = phasespace_cuts & (
-            (events.Jet.pt > 50) | (abs(events.Jet.eta) < 2.65) | (abs(events.Jet.eta) > 3.139)
-        )
 
+    # b-tagging only applied for jets with |eta| < 2.5
+    phasespace_cuts = (events.Jet.pt > 30) & (abs(events.Jet.eta) < 2.5)
     jets = ak.flatten(events.Jet[phasespace_cuts])
 
     for tag in ["deepJet", "deepCSV"]:

@@ -21,13 +21,14 @@ from boostedhiggs.corrections import (
     add_lepton_weight,
     add_pdf_weight,
     add_pileup_weight,
+    add_pileupid_weights,
     add_ps_weight,
     add_scalevar_3pt,
     add_scalevar_7pt,
     add_VJets_kFactors,
     btagWPs,
     corrected_msoftdrop,
-    get_btag_weights_farouk,
+    get_btag_weights,
     get_jec_jets,
     met_factory,
 )
@@ -151,7 +152,7 @@ class HwwProcessor(processor.ProcessorABC):
         self.selections = {ch: PackedSelection() for ch in self._channels}
         self.cutflows = {ch: {} for ch in self._channels}
 
-        sumgenweight = ak.sum(events.genWeight) if self.isMC else 0
+        sumgenweight = ak.sum(events.genWeight) if self.isMC else nevents
         if self.isMC:
             for ch in self._channels:
                 self.weights[ch].add("genweight", events.genWeight)
@@ -205,6 +206,7 @@ class HwwProcessor(processor.ProcessorABC):
             & (np.abs(muons.dxy) < 0.05)
             & (muons.sip3d <= 4.0)
             & muons.mediumId
+            & ( ((muons.pfRelIso04_all < 0.15) & (muons.pt < 55)) | (muons.pt >=55 ) )
         )
         n_good_muons = ak.sum(good_muons, axis=1)
 
@@ -225,6 +227,7 @@ class HwwProcessor(processor.ProcessorABC):
             & (np.abs(electrons.dxy) < 0.05)
             & (electrons.sip3d <= 4.0)
             & (electrons.mvaFall17V2noIso_WP90)
+            & ( ((electrons.pfRelIso03_all < 0.15) & (electrons.pt < 120)) | (electrons.pt >=120 ) )
         )
         n_good_electrons = ak.sum(good_electrons, axis=1)
 
@@ -240,33 +243,12 @@ class HwwProcessor(processor.ProcessorABC):
         )  # reliso for candidate lepton
         lep_miso = candidatelep.miniPFRelIso_all  # miniso for candidate lepton
 
-        # ak4 jets
-        ak4_jet_selector_no_btag = (
-            (events.Jet.pt > 30) & (abs(events.Jet.eta) < 5.0) & events.Jet.isTight & (events.Jet.puId > 0)
-        )
-        # reject EE noisy jets for 2017
-        if self._year == "2017":
-            ak4_jet_selector_no_btag = ak4_jet_selector_no_btag & (
-                (events.Jet.pt > 50) | (abs(events.Jet.eta) < 2.65) | (abs(events.Jet.eta) > 3.139)
-            )
-
-        goodjets = events.Jet[ak4_jet_selector_no_btag]
-        goodjets, jec_shifted_jetvars = get_jec_jets(events, goodjets, self._year, not self.isMC, self.jecs, fatjets=False)
-
-        ht = ak.sum(goodjets.pt, axis=1)
-
-        # fatjets
+        # AK8 fatjets
         fatjets = events.FatJet
         fatjets["msdcorr"] = corrected_msoftdrop(fatjets)
-
-        good_fatjets = (fatjets.pt > 200) & (abs(fatjets.eta) < 2.5) & fatjets.isTight
-
-        good_fatjets = fatjets[good_fatjets]  # select good fatjets
+        fatjet_selector = (fatjets.pt > 200) & (abs(fatjets.eta) < 2.5) & fatjets.isTight
+        good_fatjets = fatjets[fatjet_selector]
         good_fatjets = good_fatjets[ak.argsort(good_fatjets.pt, ascending=False)]  # sort them by pt
-
-        NumFatjets = ak.num(good_fatjets)
-        FirstFatjet = ak.firsts(good_fatjets[:, 0:1])
-        SecondFatjet = ak.firsts(good_fatjets[:, 1:2])
 
         good_fatjets, jec_shifted_fatjetvars = get_jec_jets(
             events, good_fatjets, self._year, not self.isMC, self.jecs, fatjets=True
@@ -275,6 +257,46 @@ class HwwProcessor(processor.ProcessorABC):
         # choose candidate fatjet
         fj_idx_lep = ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)
         candidatefj = ak.firsts(good_fatjets[fj_idx_lep])
+
+        # AK4 jets
+        jet_selector = (
+            (events.Jet.pt > 30) & (abs(events.Jet.eta) < 5.0) & events.Jet.isTight
+            & ((events.Jet.pt > 50) | ((events.Jet.puId & 2) == 2))
+        )
+        # reject EE noisy jets for 2017  ( not applicable for UL )
+        #if self._year == "2017":
+        #    noise_jets = (events.Jet.pt < 50) & ( (abs(events.Jet.eta) > 2.65) | (abs(events.Jet.eta) < 3.139) )
+        #    jet_selector = jet_selector & ~noise_jets
+
+        ht = ak.sum(events.Jet[jet_selector].pt, axis=1)
+
+        goodjets = events.Jet[jet_selector]
+        goodjets, jec_shifted_jetvars = get_jec_jets(events, goodjets, self._year, not self.isMC, self.jecs, fatjets=False)
+
+        # AK4 jets outside AK8 jet
+        ak4_outside_ak8 = goodjets[(goodjets.delta_r(candidatefj) > 0.8)]
+
+        # b-jets (only for jets with abs(eta)<2.5)
+        bjet_selector = (jet_selector) & (events.Jet.delta_r(candidatefj) > 0.8) & (abs(events.Jet.eta) < 2.5)
+        ak4_bjet_candidate = events.Jet[bjet_selector]
+
+        NumFatjets = ak.num(good_fatjets)
+        FirstFatjet = ak.firsts(good_fatjets[:, 0:1])
+        SecondFatjet = ak.firsts(good_fatjets[:, 1:2])
+        NumOtherJets = ak.num(ak4_outside_ak8)
+
+        n_bjets_L = ak.sum(ak4_bjet_candidate.btagDeepFlavB > btagWPs["deepJet"][self._year]["L"], axis=1)
+        n_bjets_M = ak.sum(ak4_bjet_candidate.btagDeepFlavB > btagWPs["deepJet"][self._year]["M"], axis=1)
+        n_bjets_T = ak.sum(ak4_bjet_candidate.btagDeepFlavB > btagWPs["deepJet"][self._year]["T"], axis=1)
+
+        # delta R between AK8 jet and lepton
+        lep_fj_dr = candidatefj.delta_r(candidatelep_p4)
+
+        # VBF variables
+        jet1 = ak4_outside_ak8[:, 0:1]
+        jet2 = ak4_outside_ak8[:, 1:2]
+        deta = abs(ak.firsts(jet1).eta - ak.firsts(jet2).eta)
+        mjj = (ak.firsts(jet1) + ak.firsts(jet2)).mass
 
         # MET
         met = met_factory.build(events.MET, goodjets, {}) if self.isMC else events.MET
@@ -286,30 +308,9 @@ class HwwProcessor(processor.ProcessorABC):
         # delta phi MET and higgs candidate
         met_fj_dphi = candidatefj.delta_phi(met)
 
-        # b-jets
-        dr_jet_lepfj = goodjets.delta_r(candidatefj)
-        ak4_outside_ak8 = goodjets[dr_jet_lepfj > 0.8]
-        NumOtherJets = ak.num(ak4_outside_ak8)
-
-        n_bjets_L = ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["L"], axis=1)
-        n_bjets_M = ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["M"], axis=1)
-        n_bjets_T = ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["T"], axis=1)
-        n_bjetsDeepCSV_L = ak.sum(ak4_outside_ak8.btagDeepB > btagWPs["deepCSV"][self._year]["L"], axis=1)
-        n_bjetsDeepCSV_M = ak.sum(ak4_outside_ak8.btagDeepB > btagWPs["deepCSV"][self._year]["M"], axis=1)
-        n_bjetsDeepCSV_T = ak.sum(ak4_outside_ak8.btagDeepB > btagWPs["deepCSV"][self._year]["T"], axis=1)
-
-        # delta R between AK8 jet and lepton
-        lep_fj_dr = candidatefj.delta_r(candidatelep_p4)
-
-        # VBF variables
-        jet1 = ak4_outside_ak8[:, 0:1]
-        jet2 = ak4_outside_ak8[:, 1:2]
-        deta = abs(ak.firsts(jet1).eta - ak.firsts(jet2).eta)
-        mjj = (ak.firsts(jet1) + ak.firsts(jet2)).mass
-
         variables = {
-            "fj_msoftdrop": candidatefj.msdcorr,
             "lep_pt": candidatelep.pt,
+            "lep_eta": candidatelep.eta,
             "lep_isolation": lep_reliso,
             "lep_misolation": lep_miso,
             "lep_fj_dr": lep_fj_dr,
@@ -319,32 +320,32 @@ class HwwProcessor(processor.ProcessorABC):
             "deta": deta,
             "mjj": mjj,
             "ht": ht,
-            "NumFatjets": NumFatjets,
-            "NumOtherJets": NumOtherJets,
             "n_bjets_L": n_bjets_L,
             "n_bjets_M": n_bjets_M,
             "n_bjets_T": n_bjets_T,
-            "n_bjetsDeepCSV_L": n_bjetsDeepCSV_L,
-            "n_bjetsDeepCSV_M": n_bjetsDeepCSV_M,
-            "n_bjetsDeepCSV_T": n_bjetsDeepCSV_T,
             "fj_lsf3": candidatefj.lsf3,
+            "NumFatjets": NumFatjets,
+            "NumOtherJets": NumOtherJets,
             "FirstFatjet_pt": FirstFatjet.pt,
-            "FirstFatjet_m": FirstFatjet.mass,
+            "FirstFatjet_eta": FirstFatjet.eta,
+            "FirstFatjet_phi": FirstFatjet.phi,
+            "FirstFatjet_msd": FirstFatjet.msdcorr,
             "SecondFatjet_pt": SecondFatjet.pt,
-            "SecondFatjet_m": SecondFatjet.mass,
-            # TODO: deltaR between first fat jet and lepton
-            # TODO: deltaR between second fat jet and lepton
+            "SecondFatjet_eta": SecondFatjet.eta,
+            "SecondFatjet_phi": SecondFatjet.phi,
+            "SecondFatjet_msd": SecondFatjet.msdcorr,
         }
 
         fatjetvars = {
-            "fatjetPt": candidatefj.pt,
-            "fatjetEta": candidatefj.eta,
-            "fatjetPhi": candidatefj.phi,
-            "fatjetMass": candidatefj.msdcorr,
+            "fj_pt": candidatefj.pt,
+            "fj_eta": candidatefj.eta,
+            "fj_phi": candidatefj.phi,
+            "fj_mass": candidatefj.msdcorr,
         }
         for shift, vals in jec_shifted_fatjetvars["pt"].items():
             if shift != "":
-                fatjetvars[f"fatjetPt{shift}"] = ak.firsts(vals[fj_idx_lep])
+                fatjetvars[f"fj_pt{shift}"] = ak.firsts(vals[fj_idx_lep])
+        variables = {**variables, **fatjetvars}
 
         def getJECVariables(fatjetvars, candidatelep_p4, met, pt_shift=None, met_shift=None):
             """
@@ -377,10 +378,10 @@ class HwwProcessor(processor.ProcessorABC):
 
             candidatefj = ak.zip(
                 {
-                    "pt": fatjetvars[f"fatjetPt{ptlabel}"],
-                    "eta": fatjetvars["fatjetEta"],
-                    "phi": fatjetvars["fatjetPhi"],
-                    "mass": fatjetvars["fatjetMass"],
+                    "pt": fatjetvars[f"fj_pt{ptlabel}"],
+                    "eta": fatjetvars["fj_eta"],
+                    "phi": fatjetvars["fj_phi"],
+                    "mass": fatjetvars["fj_mass"],
                 },
                 with_name="PtEtaPhiMCandidate",
                 behavior=candidate.behavior,
@@ -400,8 +401,6 @@ class HwwProcessor(processor.ProcessorABC):
             rec_W_qq = candidatefj - candidatelep_p4
             rec_higgs = rec_W_qq + rec_W_lnu
 
-            variables[f"fj_pt{shift}"] = candidatefj.pt
-
             variables[f"rec_higgs_m{shift}"] = rec_higgs.mass
             variables[f"rec_higgs_pt{shift}"] = rec_higgs.pt
 
@@ -410,6 +409,24 @@ class HwwProcessor(processor.ProcessorABC):
 
             variables[f"rec_W_lnu_m{shift}"] = rec_W_lnu.mass
             variables[f"rec_W_lnu_pt{shift}"] = rec_W_lnu.pt
+
+            candidateNeutrinoJet = ak.zip(
+                {
+                    "pt": metvar.pt,
+                    "eta": candidatefj.eta,
+                    "phi": met.phi,
+                    "mass": 0,
+                    "charge": 0,
+                },
+                with_name="PtEtaPhiMCandidate",
+                behavior=candidate.behavior,
+            )
+            rec_W_lnu = candidatelep_p4 + candidateNeutrinoJet
+            rec_higgs = rec_W_qq + rec_W_lnu
+            variables[f"rec_higgs_etajet_m{shift}"] = rec_higgs.mass
+            variables[f"rec_higgs_etajet_pt{shift}"] = rec_higgs.pt
+            variables[f"rec_W_lnu_etajet_m{shift}"] = rec_W_lnu.mass
+            variables[f"rec_W_lnu_etajet_pt{shift}"] = rec_W_lnu.pt
 
             return variables
 
@@ -424,42 +441,10 @@ class HwwProcessor(processor.ProcessorABC):
                 jecvariables = getJECVariables(fatjetvars, candidatelep_p4, met, pt_shift=None, met_shift=met_shift)
                 variables = {**variables, **jecvariables}
 
-        """
-        HEM issue: Hadronic calorimeter Endcaps Minus (HEM) issue.
-        The endcaps of the hadron calorimeter failed to cover the phase space at -3 < eta < -1.3 and -1.57 < phi < -0.87
-        during the 2018 data C and D.
-        The transverse momentum of the jets in this region is typically under-measured, this results in over-measured MET.
-        It could also result on new electrons.
-        We must veto the jets and met in this region.
-        Should we veto on AK8 jets or electrons too?
-        Let's add this as a cut to check first.
-        """
-        if self._year == "2018":
-            hem_veto = ak.any(
-                (
-                    (events.Jet.pt > 30.0)
-                    & (events.Jet.eta > -3.2)
-                    & (events.Jet.eta < -1.3)
-                    & (events.Jet.phi > -1.57)
-                    & (events.Jet.phi < -0.87)
-                ),
-                -1,
-            ) | ((events.MET.phi > -1.62) & (events.MET.pt < 470.0) & (events.MET.phi < -0.62))
-
-            hem_cleaning = (
-                ((events.run >= 319077) & (not self.isMC))  # if data check if in Runs C or D
-                # else for MC randomly cut based on lumi fraction of C&D
-                | ((np.random.rand(len(events)) < 0.632) & self.isMC)
-            ) & (hem_veto)
-
-            self.add_selection(name="HEMCleaning", sel=~hem_cleaning)
-
         # apply selections
         for ch in self._channels:
             self.add_selection(name="Trigger", sel=trigger[ch], channel=ch)
-
         self.add_selection(name="METFilters", sel=metfilters)
-
         self.add_selection(
             name="OneLep",
             sel=(n_good_muons == 1)
@@ -476,35 +461,33 @@ class HwwProcessor(processor.ProcessorABC):
             & ~ak.any(loose_electrons & ~good_electrons, 1),
             channel="ele",
         )
-        self.add_selection(name="NoTaus", sel=(n_loose_taus_mu == 0), channel="mu")
-        self.add_selection(name="NoTaus", sel=(n_loose_taus_ele == 0), channel="ele")
-
-        self.add_selection(
-            name="LepIso", sel=((candidatelep.pt < 55) & (lep_reliso < 0.15)) | (candidatelep.pt >= 55), channel="mu"
-        )
-        self.add_selection(
-            name="LepIso", sel=((candidatelep.pt < 120) & (lep_reliso < 0.15)) | (candidatelep.pt >= 120), channel="ele"
-        )
         self.add_selection(
             name="LepMiniIso", sel=(candidatelep.pt < 55) | ((candidatelep.pt >= 55) & (lep_miso < 0.2)), channel="mu"
         )
+        self.add_selection(name="NoTaus", sel=(n_loose_taus_mu == 0), channel="mu")
+        self.add_selection(name="NoTaus", sel=(n_loose_taus_ele == 0), channel="ele")
         self.add_selection(name="OneCandidateJet", sel=(NumFatjets >= 1))
         self.add_selection(name="CandidateJetpT", sel=(candidatefj.pt > 250))
         self.add_selection(name="LepInJet", sel=(lep_fj_dr < 0.8))
         self.add_selection(name="JetLepOverlap", sel=(lep_fj_dr > 0.03))
         self.add_selection(name="dPhiJetMETCut", sel=(np.abs(met_fj_dphi) < 1.57))
+        self.add_selection(name="MET", sel=(met.pt > 20))
 
         # gen-level matching
         signal_mask = None
         if self.isMC:
             if ("HToWW" in dataset) or ("HWW" in dataset) or ("ttHToNonbb" in dataset):
-                genVars, signal_mask = match_H(events.GenPart, candidatefj)
+                genVars, signal_mask = match_H(events.GenPart, candidatefj, fatjet_pt = FirstFatjet)
+                # add signal mask and modify sum of genweights to only consider those events that pass the mask
                 self.add_selection(name="Signal", sel=signal_mask)
+                #sumgenweight = ak.sum(events.genWeight[signal_mask])
             elif "HToTauTau" in dataset:
                 genVars, signal_mask = match_H(events.GenPart, candidatefj, dau_pdgid=15)
                 self.add_selection(name="Signal", sel=signal_mask)
             elif ("WJets" in dataset) or ("ZJets" in dataset) or ("DYJets" in dataset):
                 genVars, _ = match_V(events.GenPart, candidatefj)
+                genVars["LHE_HT"] = events.LHE.HT
+                genVars["LHE_Vpt"] = events.LHE.Vpt
             elif "TT" in dataset:
                 genVars, _ = match_Top(events.GenPart, candidatefj)
             else:
@@ -513,6 +496,27 @@ class HwwProcessor(processor.ProcessorABC):
             genVars["fj_genjetmass"] = candidatefj.matched_gen.mass
             genVars["fj_genjetpt"] = candidatefj.matched_gen.pt
             variables = {**variables, **genVars}
+
+        # hem-cleaning selection
+        if self._year == "2018":
+            hem_veto = ak.any(
+                (
+                    (events.Jet.pt > 30.0)
+                    & (events.Jet.eta > -3.2)
+                    & (events.Jet.eta < -1.3)
+                    & (events.Jet.phi > -1.57)
+                    & (events.Jet.phi < -0.87)
+                ),
+                -1,
+            ) | ((events.MET.phi > -1.62) & (events.MET.pt < 470.0) & (events.MET.phi < -0.62))
+            
+            hem_cleaning = (
+                ((events.run >= 319077) & (not self.isMC))  # if data check if in Runs C or D
+                # else for MC randomly cut based on lumi fraction of C&D
+                | ((np.random.rand(len(events)) < 0.632) & self.isMC)
+            ) & (hem_veto)
+
+            self.add_selection(name="HEMCleaning", sel=~hem_cleaning)
 
         if self.isMC:
             for ch in self._channels:
@@ -526,22 +530,17 @@ class HwwProcessor(processor.ProcessorABC):
                     self._yearmod,
                     nPU=ak.to_numpy(events.Pileup.nPU),
                 )
+                # add_pileupid_weights(self.weights[ch], self._year, self._yearmod, goodjets, events.GenJet, wp="L")
+
                 if ch == "mu":
                     add_lepton_weight(self.weights[ch], candidatelep, self._year + self._yearmod, "muon")
                 elif ch == "ele":
                     add_lepton_weight(self.weights[ch], candidatelep, self._year + self._yearmod, "electron")
 
-                # # TODO: fix btag weights
-                # add_btag_weights(self.weights[ch], self._year, events.Jet, ak4_jet_selector_no_btag)
-
-                for veto_ in [True, False]:
-                    for wp_ in ["T", "M", "L"]:
-                        variables = {
-                            **variables,
-                            **get_btag_weights_farouk(self._year, events.Jet, ak4_jet_selector_no_btag, veto=veto_, wp=wp_),
-                        }
-
-                add_VJets_kFactors(self.weights[ch], events.GenPart, dataset, events)
+                ewk_corr, oldqcd_corr, qcd_corr = add_VJets_kFactors(self.weights[ch], events.GenPart, dataset, events)
+                variables["ewk_corr"] = ewk_corr
+                variables["oldqcd_corr"] = oldqcd_corr
+                variables["qcd_corr"] = qcd_corr
 
                 if "HToWW" in dataset:
                     add_HiggsEW_kFactors(self.weights[ch], events.GenPart, dataset)
@@ -559,10 +558,12 @@ class HwwProcessor(processor.ProcessorABC):
                     for systematic in self.weights[ch].variations:
                         variables[f"weight_{ch}_{systematic}"] = self.weights[ch].weight(modifier=systematic)
 
-                # store the individual weights (for DEBUG)
-                # for key in self.weights[ch]._weights.keys():
-                #    if f"weight_{key}" not in variables.keys():
-                #        variables[f"weight_{key}"] = self.weights[ch].partial_weight([key])
+                # store b-tag weight 
+                for wp_ in ["T"]:
+                    variables = {
+                        **variables,
+                        **get_btag_weights(self._year, events.Jet, bjet_selector, wp=wp_, algo="deepJet"),
+                    }
 
         # initialize pandas dataframe
         output = {}
@@ -575,7 +576,7 @@ class HwwProcessor(processor.ProcessorABC):
                 fill_output = False
             # only fill output for that channel if the selections yield any events
             if np.sum(selection_ch) <= 0:
-                fill_output = False
+               fill_output = False
 
             if fill_output:
                 out = {}
@@ -590,12 +591,12 @@ class HwwProcessor(processor.ProcessorABC):
 
                 # fill inference
                 if self.inference:
+
                     for model_name in ["ak8_MD_vminclv2ParT_manual_fixwrap_all_nodes"]:
                         pnet_vars = runInferenceTriton(
                             self.tagger_resources_path, events[selection_ch], fj_idx_lep[selection_ch], model_name=model_name
                         )
                         pnet_df = self.ak_to_pandas(pnet_vars)
-
                         scores = {"fj_ParT_score": pnet_df[sigs].sum(axis=1).values}
 
                         hidNeurons = {}
