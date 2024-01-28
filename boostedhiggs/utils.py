@@ -35,7 +35,12 @@ FILL_NONE_VALUE = -99999
 JET_DR = 0.8
 
 
-def get_pid_mask(genparts: GenParticleArray, pdgids: Union[int, list], ax: int = 2, byall: bool = True) -> ak.Array:
+def get_pid_mask(
+    genparts: GenParticleArray,
+    pdgids: Union[int, list],
+    ax: int = 2,
+    byall: bool = True,
+) -> ak.Array:
     """
     Get selection mask for gen particles matching any of the pdgIds in ``pdgids``.
     If ``byall``, checks all particles along axis ``ax`` match.
@@ -56,7 +61,13 @@ def to_label(array: ak.Array) -> ak.Array:
     return ak.values_astype(array, np.int32)
 
 
-def match_H(genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID, signature="ggF", fatjet_pt: FatJetArray=None):
+def match_H(
+    genparts: GenParticleArray,
+    fatjet: FatJetArray,
+    dau_pdgid=W_PDGID,
+    signature="ggF",
+    fatjet_pt: FatJetArray = None,
+):
     """Gen matching for Higgs samples"""
     higgs = genparts[get_pid_mask(genparts, HIGGS_PDGID, byall=False) * genparts.hasFlags(GEN_FLAGS)]
 
@@ -119,7 +130,10 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray, dau_pdgid=W_PDGID, 
         # number of quarks excludes neutrino and leptons
         num_m_quarks = ak.sum(fatjet.delta_r(all_daus_flat[~neutrinos & ~leptons]) < JET_DR, axis=1)
         num_m_leptons = ak.sum(fatjet.delta_r(all_daus_flat[leptons]) < JET_DR, axis=1)
-        num_m_cquarks = ak.sum(fatjet.delta_r(all_daus_flat[all_daus_flat.pdgId == b_PDGID]) < JET_DR, axis=1)
+        num_m_cquarks = ak.sum(
+            fatjet.delta_r(all_daus_flat[all_daus_flat.pdgId == b_PDGID]) < JET_DR,
+            axis=1,
+        )
 
         lep_daughters = all_daus_flat[leptons]
         # parent = ak.firsts(lep_daughters[fatjet.delta_r(lep_daughters) < JET_DR].distinctParent)
@@ -406,7 +420,12 @@ def get_genjet_vars(events: NanoEventsArray, fatjets: FatJetArray):
 
 
 def tagger_gen_matching(
-    dataset, events: NanoEventsArray, genparts: GenParticleArray, fatjets: FatJetArray, genlabels: List[str], label: str
+    dataset,
+    events: NanoEventsArray,
+    genparts: GenParticleArray,
+    fatjets: FatJetArray,
+    genlabels: List[str],
+    label: str,
 ) -> Tuple[np.array, Dict[str, np.array]]:
     """Does fatjet -> gen-level matching and derives gen-level variables.
 
@@ -451,7 +470,10 @@ def tagger_gen_matching(
     # genjet_vars, matched_gen_jet_mask = get_genjet_vars(events, fatjets)
     # AllGenVars = {**GenVars, **genjet_vars}
 
-    AllGenVars = {**GenVars, **{"fj_genjetmass": fatjets.matched_gen.mass}}  # add gen jet mass
+    AllGenVars = {
+        **GenVars,
+        **{"fj_genjetmass": fatjets.matched_gen.mass},
+    }  # add gen jet mass
 
     # loop to keep only the specified variables in `genlabels`
     # if ``GenVars`` doesn't contain a variable, that variable is not applicable to this sample so fill with 0s
@@ -466,7 +488,12 @@ def tagger_gen_matching(
 
 
 def add_selection(
-    name: str, sel: np.ndarray, selection: PackedSelection, cutflow: dict, isData: bool, signGenWeights: ak.Array
+    name: str,
+    sel: np.ndarray,
+    selection: PackedSelection,
+    cutflow: dict,
+    isData: bool,
+    signGenWeights: ak.Array,
 ):
     """adds selection to PackedSelection object and the cutflow dictionary"""
     selection.add(name, sel)

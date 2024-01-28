@@ -385,7 +385,13 @@ def get_pog_json(obj, year):
     return f"{pog_correction_path}POG/{pog_json[0]}/{year}/{pog_json[1]}"
 
 
-def get_btag_weights(year: str, jets: JetArray, jet_selector: ak.Array, wp: str = "M", algo: str = "deepJet"):
+def get_btag_weights(
+    year: str,
+    jets: JetArray,
+    jet_selector: ak.Array,
+    wp: str = "M",
+    algo: str = "deepJet",
+):
     """
     Following https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods#1b_Event_reweighting_using_scale
 
@@ -430,36 +436,36 @@ def get_btag_weights(year: str, jets: JetArray, jet_selector: ak.Array, wp: str 
             weight = ak.prod(1 - SF * eff, axis=-1) / ak.prod(1 - eff, axis=-1)
         else:
             # >=1 btag
-            weight = (1 - ak.prod(1 - SF * eff, axis=-1) ) / (1 - ak.prod(1 - eff, axis=-1) )
-        return np.nan_to_num(ak.fill_none(weight, 1.), nan=1)
-            
+            weight = (1 - ak.prod(1 - SF * eff, axis=-1)) / (1 - ak.prod(1 - eff, axis=-1))
+        return np.nan_to_num(ak.fill_none(weight, 1.0), nan=1)
+
     # 1a method
     # https://btv-wiki.docs.cern.ch/PerformanceCalibration/fixedWPSFRecommendations/
     def _combine(eff, sf, passbtag):
         # tagged SF = SF*eff / eff = SF
         tagged_sf = ak.prod(sf[passbtag], axis=-1)
         # untagged SF = (1 - SF*eff) / (1 - eff)
-        untagged_sf = ak.prod(((1 - sf*eff) / (1 - eff))[~passbtag], axis=-1)
-        return ak.fill_none(tagged_sf * untagged_sf, 1.)
+        untagged_sf = ak.prod(((1 - sf * eff) / (1 - eff))[~passbtag], axis=-1)
+        return ak.fill_none(tagged_sf * untagged_sf, 1.0)
 
     ret_weights = {}
 
     # one common multiplicative SF is to be applied to the nominal prediction
-    bc_0btag = _get_weight(True, bcEff, bcSF) 
+    bc_0btag = _get_weight(True, bcEff, bcSF)
     light_0btag = _get_weight(True, lightEff, lightSF)
     ret_weights["0btag_1b"] = bc_0btag * light_0btag
 
-    bc_1pbtag = _get_weight(False, bcEff, bcSF) 
+    bc_1pbtag = _get_weight(False, bcEff, bcSF)
     light_1pbtag = _get_weight(False, lightEff, lightSF)
     ret_weights["1pbtag_1b"] = bc_1pbtag * light_1pbtag
 
     bc = _combine(bcEff, bcSF, bcJets.btagDeepB > btagWPs[algo][year][wp])
-    light = _combine(lightEff, lightEff, lightJets.btagDeepB > btagWPs[algo][year][wp]) 
+    light = _combine(lightEff, lightEff, lightJets.btagDeepB > btagWPs[algo][year][wp])
     ret_weights["btag_1a"] = bc * light
 
-    print("0btag_1b ",ret_weights["0btag_1b"])
-    print("1pbtag_1b ",ret_weights["1pbtag_1b"])
-    print("btag_1a ",ret_weights["btag_1a"])
+    print("0btag_1b ", ret_weights["0btag_1b"])
+    print("1pbtag_1b ", ret_weights["1pbtag_1b"])
+    print("btag_1a ", ret_weights["btag_1a"])
 
     # Separate uncertainties are applied for b/c jets and light jets
     """
@@ -473,7 +479,7 @@ def get_btag_weights(year: str, jets: JetArray, jet_selector: ak.Array, wp: str 
     bcSFUpCorr = _btagSF(bcJets, "bc", syst="up_correlated")
     bcSFDownCorr = _btagSF(bcJets, "bc", syst="down_correlated")
 
-    ret_weights[app + f"btagSFlight_{year}Up"] = _get_weight(veto, lightEff, lightSFUp, bcEff, bcSF) 
+    ret_weights[app + f"btagSFlight_{year}Up"] = _get_weight(veto, lightEff, lightSFUp, bcEff, bcSF)
     ret_weights[app + f"btagSFlight_{year}Down"] = _get_weight(veto, lightEff, lightSFDown, bcEff, bcSF)
 
     ret_weights[app + f"btagSFbc_{year}Up"] = _get_weight(veto, lightEff, lightSF, bcEff, bcSFUp)
@@ -685,6 +691,7 @@ def add_pileup_weight(weights, year, mod, nPU):
     # add weights
     weights.add("pileup", values["nominal"], values["up"], values["down"])
 
+
 def add_pileupid_weights(weights: Weights, year: str, mod: str, jets: JetArray, genjets, wp: str = "L"):
     """Pileup ID scale factors
     https://twiki.cern.ch/twiki/bin/view/CMS/PileupJetIDUL#Data_MC_Efficiency_Scale_Factors
@@ -698,7 +705,7 @@ def add_pileupid_weights(weights: Weights, year: str, mod: str, jets: JetArray, 
     # check that there's a geometrically matched genjet (99.9% are, so not really necessary...)
     jets = jets[ak.any(jets.metric_table(genjets) < 0.4, axis=-1)]
 
-    sf_cset = correctionlib.CorrectionSet.from_file(get_pog_json("jmar", year+mod))["PUJetID_eff"]
+    sf_cset = correctionlib.CorrectionSet.from_file(get_pog_json("jmar", year + mod))["PUJetID_eff"]
 
     # save offsets to reconstruct jagged shape
     offsets = jets.pt.layout.offsets

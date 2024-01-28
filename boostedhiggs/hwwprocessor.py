@@ -206,7 +206,7 @@ class HwwProcessor(processor.ProcessorABC):
             & (np.abs(muons.dxy) < 0.05)
             & (muons.sip3d <= 4.0)
             & muons.mediumId
-            & ( ((muons.pfRelIso04_all < 0.15) & (muons.pt < 55)) | (muons.pt >=55 ) )
+            & (((muons.pfRelIso04_all < 0.15) & (muons.pt < 55)) | (muons.pt >= 55))
         )
         n_good_muons = ak.sum(good_muons, axis=1)
 
@@ -227,7 +227,7 @@ class HwwProcessor(processor.ProcessorABC):
             & (np.abs(electrons.dxy) < 0.05)
             & (electrons.sip3d <= 4.0)
             & (electrons.mvaFall17V2noIso_WP90)
-            & ( ((electrons.pfRelIso03_all < 0.15) & (electrons.pt < 120)) | (electrons.pt >=120 ) )
+            & (((electrons.pfRelIso03_all < 0.15) & (electrons.pt < 120)) | (electrons.pt >= 120))
         )
         n_good_electrons = ak.sum(good_electrons, axis=1)
 
@@ -260,11 +260,13 @@ class HwwProcessor(processor.ProcessorABC):
 
         # AK4 jets
         jet_selector = (
-            (events.Jet.pt > 30) & (abs(events.Jet.eta) < 5.0) & events.Jet.isTight
+            (events.Jet.pt > 30)
+            & (abs(events.Jet.eta) < 5.0)
+            & events.Jet.isTight
             & ((events.Jet.pt > 50) | ((events.Jet.puId & 2) == 2))
         )
         # reject EE noisy jets for 2017  ( not applicable for UL )
-        #if self._year == "2017":
+        # if self._year == "2017":
         #    noise_jets = (events.Jet.pt < 50) & ( (abs(events.Jet.eta) > 2.65) | (abs(events.Jet.eta) < 3.139) )
         #    jet_selector = jet_selector & ~noise_jets
 
@@ -285,9 +287,18 @@ class HwwProcessor(processor.ProcessorABC):
         SecondFatjet = ak.firsts(good_fatjets[:, 1:2])
         NumOtherJets = ak.num(ak4_outside_ak8)
 
-        n_bjets_L = ak.sum(ak4_bjet_candidate.btagDeepFlavB > btagWPs["deepJet"][self._year]["L"], axis=1)
-        n_bjets_M = ak.sum(ak4_bjet_candidate.btagDeepFlavB > btagWPs["deepJet"][self._year]["M"], axis=1)
-        n_bjets_T = ak.sum(ak4_bjet_candidate.btagDeepFlavB > btagWPs["deepJet"][self._year]["T"], axis=1)
+        n_bjets_L = ak.sum(
+            ak4_bjet_candidate.btagDeepFlavB > btagWPs["deepJet"][self._year]["L"],
+            axis=1,
+        )
+        n_bjets_M = ak.sum(
+            ak4_bjet_candidate.btagDeepFlavB > btagWPs["deepJet"][self._year]["M"],
+            axis=1,
+        )
+        n_bjets_T = ak.sum(
+            ak4_bjet_candidate.btagDeepFlavB > btagWPs["deepJet"][self._year]["T"],
+            axis=1,
+        )
 
         # delta R between AK8 jet and lepton
         lep_fj_dr = candidatefj.delta_r(candidatelep_p4)
@@ -462,7 +473,9 @@ class HwwProcessor(processor.ProcessorABC):
             channel="ele",
         )
         self.add_selection(
-            name="LepMiniIso", sel=(candidatelep.pt < 55) | ((candidatelep.pt >= 55) & (lep_miso < 0.2)), channel="mu"
+            name="LepMiniIso",
+            sel=(candidatelep.pt < 55) | ((candidatelep.pt >= 55) & (lep_miso < 0.2)),
+            channel="mu",
         )
         self.add_selection(name="NoTaus", sel=(n_loose_taus_mu == 0), channel="mu")
         self.add_selection(name="NoTaus", sel=(n_loose_taus_ele == 0), channel="ele")
@@ -477,10 +490,10 @@ class HwwProcessor(processor.ProcessorABC):
         signal_mask = None
         if self.isMC:
             if ("HToWW" in dataset) or ("HWW" in dataset) or ("ttHToNonbb" in dataset):
-                genVars, signal_mask = match_H(events.GenPart, candidatefj, fatjet_pt = FirstFatjet)
+                genVars, signal_mask = match_H(events.GenPart, candidatefj, fatjet_pt=FirstFatjet)
                 # add signal mask and modify sum of genweights to only consider those events that pass the mask
                 self.add_selection(name="Signal", sel=signal_mask)
-                #sumgenweight = ak.sum(events.genWeight[signal_mask])
+                # sumgenweight = ak.sum(events.genWeight[signal_mask])
             elif "HToTauTau" in dataset:
                 genVars, signal_mask = match_H(events.GenPart, candidatefj, dau_pdgid=15)
                 self.add_selection(name="Signal", sel=signal_mask)
@@ -509,7 +522,7 @@ class HwwProcessor(processor.ProcessorABC):
                 ),
                 -1,
             ) | ((events.MET.phi > -1.62) & (events.MET.pt < 470.0) & (events.MET.phi < -0.62))
-            
+
             hem_cleaning = (
                 ((events.run >= 319077) & (not self.isMC))  # if data check if in Runs C or D
                 # else for MC randomly cut based on lumi fraction of C&D
@@ -522,7 +535,10 @@ class HwwProcessor(processor.ProcessorABC):
             for ch in self._channels:
                 if self._year in ("2016", "2017"):
                     self.weights[ch].add(
-                        "L1Prefiring", events.L1PreFiringWeight.Nom, events.L1PreFiringWeight.Up, events.L1PreFiringWeight.Dn
+                        "L1Prefiring",
+                        events.L1PreFiringWeight.Nom,
+                        events.L1PreFiringWeight.Up,
+                        events.L1PreFiringWeight.Dn,
                     )
                 add_pileup_weight(
                     self.weights[ch],
@@ -533,9 +549,19 @@ class HwwProcessor(processor.ProcessorABC):
                 # add_pileupid_weights(self.weights[ch], self._year, self._yearmod, goodjets, events.GenJet, wp="L")
 
                 if ch == "mu":
-                    add_lepton_weight(self.weights[ch], candidatelep, self._year + self._yearmod, "muon")
+                    add_lepton_weight(
+                        self.weights[ch],
+                        candidatelep,
+                        self._year + self._yearmod,
+                        "muon",
+                    )
                 elif ch == "ele":
-                    add_lepton_weight(self.weights[ch], candidatelep, self._year + self._yearmod, "electron")
+                    add_lepton_weight(
+                        self.weights[ch],
+                        candidatelep,
+                        self._year + self._yearmod,
+                        "electron",
+                    )
 
                 ewk_corr, oldqcd_corr, qcd_corr = add_VJets_kFactors(self.weights[ch], events.GenPart, dataset, events)
                 variables["ewk_corr"] = ewk_corr
@@ -544,13 +570,28 @@ class HwwProcessor(processor.ProcessorABC):
 
                 if "HToWW" in dataset:
                     add_HiggsEW_kFactors(self.weights[ch], events.GenPart, dataset)
-                    add_scalevar_7pt(self.weights[ch], events.LHEScaleWeight if "LHEScaleWeight" in events.fields else [])
-                    add_scalevar_3pt(self.weights[ch], events.LHEScaleWeight if "LHEScaleWeight" in events.fields else [])
-                    add_ps_weight(self.weights[ch], events.PSWeight if "PSWeight" in events.fields else [])
-                    add_pdf_weight(self.weights[ch], events.LHEPdfWeight if "LHEPdfWeight" in events.fields else [])
+                    add_scalevar_7pt(
+                        self.weights[ch],
+                        events.LHEScaleWeight if "LHEScaleWeight" in events.fields else [],
+                    )
+                    add_scalevar_3pt(
+                        self.weights[ch],
+                        events.LHEScaleWeight if "LHEScaleWeight" in events.fields else [],
+                    )
+                    add_ps_weight(
+                        self.weights[ch],
+                        events.PSWeight if "PSWeight" in events.fields else [],
+                    )
+                    add_pdf_weight(
+                        self.weights[ch],
+                        events.LHEPdfWeight if "LHEPdfWeight" in events.fields else [],
+                    )
 
                 if "EWK" in dataset:
-                    add_pdf_weight(self.weights[ch], events.LHEPdfWeight if "LHEPdfWeight" in events.fields else [])
+                    add_pdf_weight(
+                        self.weights[ch],
+                        events.LHEPdfWeight if "LHEPdfWeight" in events.fields else [],
+                    )
 
                 # store the final weight per ch
                 variables[f"weight_{ch}"] = self.weights[ch].weight()
@@ -558,11 +599,17 @@ class HwwProcessor(processor.ProcessorABC):
                     for systematic in self.weights[ch].variations:
                         variables[f"weight_{ch}_{systematic}"] = self.weights[ch].weight(modifier=systematic)
 
-                # store b-tag weight 
+                # store b-tag weight
                 for wp_ in ["T"]:
                     variables = {
                         **variables,
-                        **get_btag_weights(self._year, events.Jet, bjet_selector, wp=wp_, algo="deepJet"),
+                        **get_btag_weights(
+                            self._year,
+                            events.Jet,
+                            bjet_selector,
+                            wp=wp_,
+                            algo="deepJet",
+                        ),
                     }
 
         # initialize pandas dataframe
@@ -576,7 +623,7 @@ class HwwProcessor(processor.ProcessorABC):
                 fill_output = False
             # only fill output for that channel if the selections yield any events
             if np.sum(selection_ch) <= 0:
-               fill_output = False
+                fill_output = False
 
             if fill_output:
                 out = {}
@@ -591,10 +638,12 @@ class HwwProcessor(processor.ProcessorABC):
 
                 # fill inference
                 if self.inference:
-
                     for model_name in ["ak8_MD_vminclv2ParT_manual_fixwrap_all_nodes"]:
                         pnet_vars = runInferenceTriton(
-                            self.tagger_resources_path, events[selection_ch], fj_idx_lep[selection_ch], model_name=model_name
+                            self.tagger_resources_path,
+                            events[selection_ch],
+                            fj_idx_lep[selection_ch],
+                            model_name=model_name,
                         )
                         pnet_df = self.ak_to_pandas(pnet_vars)
                         scores = {"fj_ParT_score": pnet_df[sigs].sum(axis=1).values}
@@ -614,7 +663,14 @@ class HwwProcessor(processor.ProcessorABC):
             if not isinstance(output[ch], pd.DataFrame):
                 output[ch] = self.ak_to_pandas(output[ch])
 
-            for var_ in ["rec_higgs_m", "rec_higgs_pt", "rec_W_qq_m", "rec_W_qq_pt", "rec_W_lnu_m", "rec_W_lnu_pt"]:
+            for var_ in [
+                "rec_higgs_m",
+                "rec_higgs_pt",
+                "rec_W_qq_m",
+                "rec_W_qq_pt",
+                "rec_W_lnu_m",
+                "rec_W_lnu_pt",
+            ]:
                 if var_ in output[ch].keys():
                     output[ch][var_] = np.nan_to_num(output[ch][var_], nan=-1)
 

@@ -14,7 +14,12 @@ from coffea.analysis_tools import PackedSelection, Weights
 from coffea.nanoevents.methods import candidate
 
 from boostedhiggs.btag import btagWPs
-from boostedhiggs.corrections import add_lepton_weight, add_pileup_weight, add_VJets_kFactors, corrected_msoftdrop
+from boostedhiggs.corrections import (
+    add_lepton_weight,
+    add_pileup_weight,
+    add_VJets_kFactors,
+    corrected_msoftdrop,
+)
 
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -249,20 +254,32 @@ class ZllProcessor(processor.ProcessorABC):
         dphi_jet_lepfj = abs(goodjets.delta_phi(candidatefj))
         dr_jet_lepfj = goodjets.delta_r(candidatefj)
 
-        n_bjets_L = ak.sum(goodjets[dr_jet_lepfj > 0.8].btagDeepFlavB > btagWPs["deepJet"][self._year]["L"], axis=1)
-        n_bjets_M = ak.sum(goodjets[dr_jet_lepfj > 0.8].btagDeepFlavB > btagWPs["deepJet"][self._year]["M"], axis=1)
-        n_bjets_T = ak.sum(goodjets[dr_jet_lepfj > 0.8].btagDeepFlavB > btagWPs["deepJet"][self._year]["T"], axis=1)
+        n_bjets_L = ak.sum(
+            goodjets[dr_jet_lepfj > 0.8].btagDeepFlavB > btagWPs["deepJet"][self._year]["L"],
+            axis=1,
+        )
+        n_bjets_M = ak.sum(
+            goodjets[dr_jet_lepfj > 0.8].btagDeepFlavB > btagWPs["deepJet"][self._year]["M"],
+            axis=1,
+        )
+        n_bjets_T = ak.sum(
+            goodjets[dr_jet_lepfj > 0.8].btagDeepFlavB > btagWPs["deepJet"][self._year]["T"],
+            axis=1,
+        )
 
         # max b-jet score for jet in opposite hemisphere from AK8 jet
         bjets_away_lepfj = ak.max(goodjets[dphi_jet_lepfj > np.pi / 2].btagDeepFlavB, axis=1)
         n_bjets_ophem_L = ak.sum(
-            goodjets[dphi_jet_lepfj > np.pi / 2].btagDeepFlavB > btagWPs["deepJet"][self._year]["L"], axis=1
+            goodjets[dphi_jet_lepfj > np.pi / 2].btagDeepFlavB > btagWPs["deepJet"][self._year]["L"],
+            axis=1,
         )
         n_bjets_ophem_M = ak.sum(
-            goodjets[dphi_jet_lepfj > np.pi / 2].btagDeepFlavB > btagWPs["deepJet"][self._year]["M"], axis=1
+            goodjets[dphi_jet_lepfj > np.pi / 2].btagDeepFlavB > btagWPs["deepJet"][self._year]["M"],
+            axis=1,
         )
         n_bjets_ophem_T = ak.sum(
-            goodjets[dphi_jet_lepfj > np.pi / 2].btagDeepFlavB > btagWPs["deepJet"][self._year]["T"], axis=1
+            goodjets[dphi_jet_lepfj > np.pi / 2].btagDeepFlavB > btagWPs["deepJet"][self._year]["T"],
+            axis=1,
         )
 
         variables = {

@@ -6,7 +6,11 @@ from coffea.analysis_tools import PackedSelection, Weights
 from coffea.nanoevents.methods import candidate
 from coffea.processor import ProcessorABC, column_accumulator
 
-from boostedhiggs.corrections import add_lepton_weight, add_pileup_weight, add_VJets_kFactors
+from boostedhiggs.corrections import (
+    add_lepton_weight,
+    add_pileup_weight,
+    add_VJets_kFactors,
+)
 from boostedhiggs.utils import match_H
 
 # from boostedhiggs.utils import getParticles
@@ -264,7 +268,6 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             for dataset, output in datasets.items():
                 for channel in output["skimmed_events"].keys():
                     for key_ in output["skimmed_events"][channel].keys():
-
                         output["skimmed_events"][channel][key_] = {
                             key: value.value for (key, value) in output["skimmed_events"][channel][key_].items()
                         }
