@@ -69,6 +69,7 @@ xs["HWplusJ_HToWW_M-125"] = 0.8720 * BR_HWW
 xs["HZJ_HToWW_M-125"] = 0.7891 * BR_HWW  # this was replaced with above GenXSecAnalyzer Number
 # cross check -  this in xsdb is 0.006185
 xs["GluGluZH_HToWW_ZTo2L_M-125"] = 0.1223 * 3 * 0.033658 * BR_HWW  # 0.002639
+xs["GluGluZH_HToWW_M-125"] = 0.0616 * BR_HWW
 
 # QCD
 xs["QCD_HT500to700"] = 3.033e04
@@ -95,6 +96,12 @@ xs["TTTo2L2Nu"] = 87.314
 xs["TTToHadronic"] = 380.094
 xs["TTToSemiLeptonic"] = 364.351
 
+# TTV
+xs["TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8"] = 0.5113
+xs["TTWJetsToQQ_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8"] = 0.4377
+xs["TTWJetsToLNu_TuneCP5up_13TeV-amcatnloFXFX-madspin-pythia8"] = 0.2176
+xs["TTZToLLNuNu_M-10_TuneCP5_13TeV-amcatnlo-pythia8"] = 0.2439
+
 # Single Top
 xs["ST_s-channel_4f_hadronicDecays"] = 3.549e00 * BR_THadronic
 xs["ST_s-channel_4f_leptonDecays"] = 3.549e00 * BR_TLeptonic
@@ -115,16 +122,16 @@ xs["WJetsToQQ_HT-800toInf"] = 2.875e01
 
 # W+jets W(lv)
 # from XSDB (miniaodv2) - numbers after # correspond to miniaodv1/preUL?
-xs["WJetsToLNu_HT-70To100"] = 1264.0 #1292.0
-xs["WJetsToLNu_HT-100To200"] = 1256.0 # 1395.0
-xs["WJetsToLNu_HT-200To400"] = 335.5 # 407.9
-xs["WJetsToLNu_HT-400To600"] = 45.25 # 57.48
-xs["WJetsToLNu_HT-600To800"] = 11.19 # 12.87
-xs["WJetsToLNu_HT-800To1200"] = 4.933 #5.366
-xs["WJetsToLNu_HT-1200To2500"] = 1.16 #1.074
-xs["WJetsToLNu_HT-2500ToInf"] = 0.008001 # 0.026 #0.008001
+xs["WJetsToLNu_HT-70To100"] = 1264.0  # 1292.0
+xs["WJetsToLNu_HT-100To200"] = 1256.0  # 1395.0
+xs["WJetsToLNu_HT-200To400"] = 335.5  # 407.9
+xs["WJetsToLNu_HT-400To600"] = 45.25  # 57.48
+xs["WJetsToLNu_HT-600To800"] = 11.19  # 12.87
+xs["WJetsToLNu_HT-800To1200"] = 4.933  # 5.366
+xs["WJetsToLNu_HT-1200To2500"] = 1.16  # 1.074
+xs["WJetsToLNu_HT-2500ToInf"] = 0.008001  # 0.026 #0.008001
 
-xs["WJetsToLNu_TuneCP5_13TeV-madgraphMLM"] = 53940.0 #52940.0
+xs["WJetsToLNu_TuneCP5_13TeV-madgraphMLM"] = 53940.0  # 52940.0
 
 # W+jets W(lv) NLO (xsdb)
 # WJetsToLNu_*J_TuneCP5_13TeV-amcatnloFXFX-pythia8

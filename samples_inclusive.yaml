@@ -102,7 +102,7 @@ sig:
   - VBFHToWWToAny_M-125_TuneCP5_withDipoleRecoil
   - HWminusJ_HToWW_M-125
   - HWplusJ_HToWW_M-125
-  - HZJ_HToWW_M-125  
+  - HZJ_HToWW_M-125
   - ttHToNonbb_M125
 tthcheck:
   - GluGluHToWW_Pt-200ToInf_M-125
@@ -198,7 +198,9 @@ finetuning_qcd:
 finetuning_wjets:
   - WJetsToLNu_HT-200To400
   - WJetsToLNu_HT-400To600
-  - WJetsToLNu_HT-600To800  
+  - WJetsToLNu_HT-600To800
 finetuning_sig:
   - GluGluHToWW_Pt-200ToInf_M-125
   - VBFHToWWToLNuQQ_M-125_withDipoleRecoil
+sig_ggh:
+  - GluGluHToWW_Pt-200ToInf_M-125

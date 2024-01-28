@@ -35,30 +35,16 @@ folders_to_index = {
         "/store/user/lpcpfnano/drankin/v2_2/2017/SingleElectron2017",
         "/store/user/lpcpfnano/drankin/v2_2/2018/EGamma2018",
         ##
-        # "/store/user/lpcpfnano/jiyoo/v2_3/2016/DoubleEG2016",
-        # "/store/user/lpcpfnano/jiyoo/v2_3/2017/DoubleEG2017",
-        # "/store/user/lpcpfnano/jiyoo/v2_3/2018/DoubleEG2018",
-        # ##
-        # "/store/user/lpcpfnano/jiyoo/v2_3/2016/DoubleMu2016",
-        # "/store/user/lpcpfnano/jiyoo/v2_3/2017/DoubleMu2017",
-        # "/store/user/lpcpfnano/jiyoo/v2_3/2018/DoubleMu2018",
-        ##
         "/store/user/lpcpfnano/jiyoo/v2_3/2016/MuonEG2016",
         "/store/user/lpcpfnano/jiyoo/v2_3/2017/MuonEG2017",
         "/store/user/lpcpfnano/jiyoo/v2_3/2018/MuonEG2018",
-        ## switch to v2_3?
-        "/store/user/lpcpfnano/jekrupa/v2_2/2016APV/TTbar",
-        "/store/user/lpcpfnano/jekrupa/v2_2/2016/TTbar",
-        "/store/user/lpcpfnano/jekrupa/v2_2/2017/TTbar",
-        "/store/user/lpcpfnano/emoreno/v2_2/2018/TTbar",
-        "/store/user/lpcpfnano/drankin/v2_2/2016/TTbar",
-        "/store/user/lpcpfnano/drankin/v2_2/2016APV/TTbar",
-        "/store/user/lpcpfnano/drankin/v2_2/2017/TTbar",
-        "/store/user/lpcpfnano/drankin/v2_2/2018/TTbar",
-        "/store/user/lpcpfnano/yihan/v2_2/2016/TTbar",
-        "/store/user/lpcpfnano/yihan/v2_2/2016APV/TTbar",
-        "/store/user/lpcpfnano/yihan/v2_2/2017/TTbar",
-        "/store/user/lpcpfnano/yihan/v2_2/2018/TTbar",
+        ##
+        "/store/user/lpcpfnano/cmantill/v2_3/2016APV/TTbar/",
+        "/store/user/lpcpfnano/cmantill/v2_3/2016/TTbar/",
+        "/store/user/lpcpfnano/rkansal/v2_3/2017/TTbar/",
+        "/store/user/lpcpfnano/cmantill/v2_3/2018/TTbar/",
+        ##
+        "/store/user/lpcpfnano/cmantill/v2_3/2017/TTV",
         ##
         "/store/user/lpcpfnano/yihan/v2_2/2016/QCD",
         "/store/user/lpcpfnano/yihan/v2_2/2016APV/QCD",
