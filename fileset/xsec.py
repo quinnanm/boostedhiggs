@@ -97,10 +97,10 @@ xs["TTToHadronic"] = 380.094
 xs["TTToSemiLeptonic"] = 364.351
 
 # TTV
-xs["TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8"] = 0.5113
-xs["TTWJetsToQQ_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8"] = 0.4377
-xs["TTWJetsToLNu_TuneCP5up_13TeV-amcatnloFXFX-madspin-pythia8"] = 0.2176
-xs["TTZToLLNuNu_M-10_TuneCP5_13TeV-amcatnlo-pythia8"] = 0.2439
+xs["TTZToQQ"] = 0.5113
+xs["TTWJetsToQQ"] = 0.4377
+xs["TTWJetsToLNu"] = 0.2176  # TuneCP5up!!!
+xs["TTZToLLNuNu_M-10"] = 0.2439
 
 # Single Top
 xs["ST_s-channel_4f_hadronicDecays"] = 3.549e00 * BR_THadronic

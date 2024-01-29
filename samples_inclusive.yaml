@@ -6,13 +6,12 @@ mc:
   - HWminusJ_HToWW_M-125
   - HWplusJ_HToWW_M-125
   - HZJ_HToWW_M-125
+  - GluGluZH_HToWW_M-125
   - GluGluZH_HToWW_ZTo2L_M-125
   - ttHToNonbb_M125
   - GluGluHToTauTau
-  - WJetsToLNu_0J
   - WJetsToLNu_1J
   - WJetsToLNu_2J
-  - WJetsToLNu_TuneCP5_13TeV-madgraphMLM
   - WJetsToLNu_HT-70To100
   - WJetsToLNu_HT-100To200
   - WJetsToLNu_HT-200To400
@@ -65,6 +64,11 @@ mc:
   - EWKWplus_WToQQ
   - EWKWminus_WToLNu
   - EWKWplus_WToLNu
+ttv:
+  - TTZToQQ
+  - TTWJetsToQQ
+  - TTWJetsToLNu
+  - TTZToLLNuNu_M-10
 mc_s_over_b:
   - GluGluHToWW_Pt-200ToInf_M-125
   - VBFHToWWToAny_M-125_TuneCP5_withDipoleRecoil
@@ -89,14 +93,6 @@ mc_s_over_b:
   - QCD_Pt_1800to2400
   - QCD_Pt_2400to3200
   - QCD_Pt_3200toInf
-mc_quick:
-  - GluGluHToWW_Pt-200ToInf_M-125
-  - QCD_Pt_470to600
-  - QCD_Pt_600to800
-  - WJetsToLNu_HT-200To400
-  - WJetsToLNu_HT-400To600
-  - DYJetsToLL_Pt-250To400
-  - TTToSemiLeptonic
 sig:
   - GluGluHToWW_Pt-200ToInf_M-125
   - VBFHToWWToAny_M-125_TuneCP5_withDipoleRecoil

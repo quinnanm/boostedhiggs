@@ -15,6 +15,8 @@ from condor.file_utils import loadFiles
 def main(args):
     # username = os.environ["USER"]
 
+    # condordir = "/uscms/home/cmantill/nobackup/hww/boostedhiggs/condor/"
+    condordir = "condor/"
     homedir = f"/store/user/{args.username}/boostedhiggs/"
     outdir = "/eos/uscms/" + homedir + args.tag + "_" + args.year + "/"
 
@@ -22,11 +24,7 @@ def main(args):
     slist = args.slist.split(",") if args.slist is not None else None
     print(slist)
 
-    prepend = ""
-    metadata = (
-        prepend
-        + f"/uscms/home/cmantill/nobackup/hww/boostedhiggs/condor/{args.tag}_{args.year}/metadata_{args.configkey}.json"
-    )
+    metadata = f"{condordir}/{args.tag}_{args.year}/metadata_{args.configkey}.json"
 
     print(metadata)
 
@@ -36,10 +34,8 @@ def main(args):
     except KeyError:
         raise Exception(f"Could not open file {metadata}")
 
-    config = prepend + f"/uscms/home/cmantill/nobackup/hww/boostedhiggs/condor//{args.tag}_{args.year}/{args.config}"
-    splitname = (
-        prepend + f"/uscms/home/cmantill/nobackup/hww/boostedhiggs/condor//{args.tag}_{args.year}/pfnano_splitting.yaml"
-    )
+    config = f"{condordir}/{args.tag}_{args.year}/{args.config}"
+    splitname = f"{condordir}/{args.tag}_{args.year}/pfnano_splitting.yaml"
 
     print(f"Loading files from {splitname}")
     _, nfiles_per_job = loadFiles(config, args.configkey, args.year, args.pfnano, slist, splitname)
