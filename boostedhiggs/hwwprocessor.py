@@ -263,7 +263,7 @@ class HwwProcessor(processor.ProcessorABC):
             (events.Jet.pt > 30)
             & (abs(events.Jet.eta) < 5.0)
             & events.Jet.isTight
-            & ((events.Jet.pt > 50) | ((events.Jet.puId & 2) == 2))
+            & ((events.Jet.pt >= 50) | ((events.Jet.pt < 50) & (events.Jet.puId & 2) == 2))
         )
         # reject EE noisy jets for 2017  ( not applicable for UL )
         # if self._year == "2017":
@@ -546,7 +546,8 @@ class HwwProcessor(processor.ProcessorABC):
                     self._yearmod,
                     nPU=ak.to_numpy(events.Pileup.nPU),
                 )
-                # add_pileupid_weights(self.weights[ch], self._year, self._yearmod, goodjets, events.GenJet, wp="L")
+
+                add_pileupid_weights(self.weights[ch], self._year, self._yearmod, goodjets, events.GenJet, wp="L")
 
                 if ch == "mu":
                     add_lepton_weight(
@@ -563,10 +564,10 @@ class HwwProcessor(processor.ProcessorABC):
                         "electron",
                     )
 
-                ewk_corr, oldqcd_corr, qcd_corr = add_VJets_kFactors(self.weights[ch], events.GenPart, dataset, events)
+                ewk_corr, qcd_corr, alt_qcd_corr = add_VJets_kFactors(self.weights[ch], events.GenPart, dataset, events)
                 variables["ewk_corr"] = ewk_corr
-                variables["oldqcd_corr"] = oldqcd_corr
                 variables["qcd_corr"] = qcd_corr
+                variables["alt_qcd_corr"] = alt_qcd_corr
 
                 if "HToWW" in dataset:
                     add_HiggsEW_kFactors(self.weights[ch], events.GenPart, dataset)

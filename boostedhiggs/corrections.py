@@ -147,30 +147,32 @@ def add_VJets_kFactors(weights, genpart, dataset, events):
     vpt = get_vpt(genpart)
     qcdcorr = np.ones_like(vpt)
     ewcorr = np.ones_like(vpt)
-    old_qcdcorr = np.ones_like(vpt)
+
+    # alternative QCD NLO correction (for WJets)
+    # derived from https://cms.cern.ch/iCMS/jsp/db_notes/noteInfo.jsp?cmsnoteid=CMS%20AN-2019/229
+    alt_qcdcorr = np.ones_like(vpt)
 
     if "ZJetsToQQ_HT" in dataset or "DYJetsToLL_M-" in dataset:
         qcdcorr = vjets_kfactors["ULZ_MLMtoFXFX"].evaluate(vpt)
         ewkcorr = vjets_kfactors["Z_FixedOrderComponent"]
-        add_systs(zsysts, qcdcorr, ewkcorr, vpt)
-        old_qcdcorr = qcdcorr
         ewcorr = ewkcorr.evaluate("nominal", vpt)
+        add_systs(zsysts, qcdcorr, ewkcorr, vpt)
 
     elif "DYJetsToLL_Pt" in dataset or "DYJetsToLL_LHEFilterPtZ" in dataset:
-        qcdcorr = np.ones_like(vpt)
         ewkcorr = vjets_kfactors["Z_FixedOrderComponent"]
-        add_systs(znlosysts, qcdcorr, ewkcorr, vpt)
-        old_qcdcorr = old_qcdcorr
         ewcorr = ewkcorr.evaluate("nominal", vpt)
+        add_systs(znlosysts, qcdcorr, ewkcorr, vpt)
 
     elif "WJetsToLNu_1J" in dataset or "WJetsToLNu_0J" in dataset or "WJetsToLNu_2J" in dataset:
-        qcdcorr = np.ones_like(vpt)
         ewkcorr = vjets_kfactors["W_FixedOrderComponent"]
-        add_systs(wnlosysts, qcdcorr, ewkcorr, vpt)
         ewcorr = ewkcorr.evaluate("nominal", vpt)
+        add_systs(wnlosysts, qcdcorr, ewkcorr, vpt)
 
     elif "WJetsToQQ_HT" in dataset or "WJetsToLNu_HT" in dataset or "WJetsToLNu_TuneCP5" in dataset:
-        old_qcdcorr = vjets_kfactors["ULW_MLMtoFXFX"].evaluate(vpt)  # replace correction with below
+        qcdcorr = vjets_kfactors["ULW_MLMtoFXFX"].evaluate(vpt)
+        ewkcorr = vjets_kfactors["W_FixedOrderComponent"]
+        ewcorr = ewkcorr.evaluate("nominal", vpt)
+        add_systs(wsysts, qcdcorr, ewkcorr, vpt)
 
         # added by farouk
         """
@@ -186,18 +188,12 @@ def add_VJets_kFactors(weights, genpart, dataset, events):
         nB0 = (ak.sum(goodgenjets.hadronFlavour == 5, axis=1) == 0).to_numpy()
         nB1 = (ak.sum(goodgenjets.hadronFlavour == 5, axis=1) == 1).to_numpy()
         nB2 = (ak.sum(goodgenjets.hadronFlavour == 5, axis=1) == 2).to_numpy()
-        qcdcorr = np.ones_like(vpt)
 
-        qcdcorr[nB0] = 1.628 - (1.339 * 1e-3 * vpt[nB0])
-        qcdcorr[nB1] = 1.586 - (1.531 * 1e-3 * vpt[nB1])
-        qcdcorr[nB2] = 1.440 - (0.925 * 1e-3 * vpt[nB2])
+        alt_qcdcorr[nB0] = 1.628 - (1.339 * 1e-3 * vpt[nB0])
+        alt_qcdcorr[nB1] = 1.586 - (1.531 * 1e-3 * vpt[nB1])
+        alt_qcdcorr[nB2] = 1.440 - (0.925 * 1e-3 * vpt[nB2])
 
-        ewkcorr = vjets_kfactors["W_FixedOrderComponent"]  # keep EWK correction
-        add_systs(wsysts, qcdcorr, ewkcorr, vpt)
-
-        ewcorr = ewkcorr.evaluate("nominal", vpt)
-
-    return ewcorr, old_qcdcorr, qcdcorr
+    return ewcorr, qcdcorr, alt_qcdcorr
 
 
 def add_pdf_weight(weights, pdf_weights):
@@ -462,10 +458,6 @@ def get_btag_weights(
     bc = _combine(bcEff, bcSF, bcJets.btagDeepB > btagWPs[algo][year][wp])
     light = _combine(lightEff, lightEff, lightJets.btagDeepB > btagWPs[algo][year][wp])
     ret_weights["btag_1a"] = bc * light
-
-    print("0btag_1b ", ret_weights["0btag_1b"])
-    print("1pbtag_1b ", ret_weights["1pbtag_1b"])
-    print("btag_1a ", ret_weights["btag_1a"])
 
     # Separate uncertainties are applied for b/c jets and light jets
     """
