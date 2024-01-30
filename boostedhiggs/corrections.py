@@ -355,7 +355,7 @@ CorrectionLib files are available from: /cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jso
 """
 pog_correction_path = "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/"
 pog_jsons = {
-    "muon": ["MUO", "muon_Z.json.gz"],
+    "muon": ["MUO", "muon_Z_v2.json.gz"],
     "electron": ["EGM", "electron.json.gz"],
     "pileup": ["LUM", "puWeights.json.gz"],
     "jec": ["JME", "fatJet_jerc.json.gz"],
