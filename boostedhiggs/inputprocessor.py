@@ -45,7 +45,12 @@ class InputProcessor(ProcessorABC):
 
         self.GenPartvars = [
             "fj_genjetmass",
-            # higgs
+            # higgs classes
+            "fj_isggF",
+            "fj_isVBF",
+            "fj_isJHUVariableWMass",
+            "fj_isBulkGraviton",
+            # higgs properties
             "fj_genRes_pt",
             "fj_genRes_eta",
             "fj_genRes_phi",
@@ -173,7 +178,7 @@ class InputProcessor(ProcessorABC):
         )  # reliso for candidate lepton
         lep_miso = candidatelep.miniPFRelIso_all  # miniso for candidate lepton
 
-        mt_lep_met = np.sqrt(
+        lep_met_mt = np.sqrt(
             2.0 * candidatelep_p4.pt * met.pt * (ak.ones_like(met.pt) - np.cos(candidatelep_p4.delta_phi(met)))
         )
 
@@ -247,7 +252,7 @@ class InputProcessor(ProcessorABC):
 
         # CANDIDATE LEPTON
         LepVars = {}
-        LepVars["lep_dR_fj"] = candidatelep_p4.delta_r(candidatefj).to_numpy().filled(fill_value=0)
+        LepVars["lep_fj_dr"] = candidatelep_p4.delta_r(candidatefj).to_numpy().filled(fill_value=0)
         LepVars["lep_pt"] = (candidatelep_p4.pt).to_numpy().filled(fill_value=0)
         LepVars["lep_pt_ratio"] = (candidatelep_p4.pt / candidatefj.pt).to_numpy().filled(fill_value=0)
         LepVars["lep_reliso"] = lep_reliso.to_numpy().filled(fill_value=0)
@@ -259,7 +264,7 @@ class InputProcessor(ProcessorABC):
         METVars["met_relpt"] = met.pt / candidatefj.pt
         METVars["met_fj_dphi"] = met.delta_phi(candidatefj)
         METVars["abs_met_fj_dphi"] = np.abs(met.delta_phi(candidatefj))
-        METVars["mt_lep_met"] = mt_lep_met.to_numpy().filled(fill_value=0)
+        METVars["lep_met_mt"] = lep_met_mt.to_numpy().filled(fill_value=0)
 
         # OTHERS
 
@@ -317,15 +322,21 @@ class InputProcessor(ProcessorABC):
         Others["SecondFatjet_m"] = SecondFatjet.mass.to_numpy().filled(fill_value=0)
 
         # last but not least, gen info
-        if "HToWW" in dataset:
+        if ("HToWW" in dataset) | ("BulkGraviton" in dataset) | ("JHUVariableWMass" in dataset):
             print("match_H")
             GenVars, _ = match_H(genparts, candidatefj)
             if "VBF" in dataset:
                 print("VBF")
-                GenVars["fj_isVBF"] = np.ones(len(genparts), dtype="bool")
+                GenVars["fj_isVBF"] = np.ones(len(genparts))
             elif "GluGluHToWW" in dataset:
                 print("ggF")
-                GenVars["fj_isggF"] = np.ones(len(genparts), dtype="bool")
+                GenVars["fj_isggF"] = np.ones(len(genparts))
+            elif "JHUVariableWMass" in dataset:
+                print("JHUVariableWMass")
+                GenVars["fj_isJHUVariableWMass"] = np.ones(len(genparts))
+            elif "BulkGraviton" in dataset:
+                print("BulkGraviton")
+                GenVars["fj_isBulkGraviton"] = np.ones(len(genparts))
         elif "TTToSemiLeptonic" in dataset:
             print("match_Top")
             GenVars, _ = match_Top(genparts, candidatefj)
@@ -388,7 +399,7 @@ class InputProcessor(ProcessorABC):
             skimmed_vars = {**skimmed_vars, **scores, **reg_mass, **hidNeurons}
 
         for key in skimmed_vars:
-            skimmed_vars[key] = skimmed_vars[key].squeeze()
+            skimmed_vars[key] = skimmed_vars[key].squeeze().tolist()
 
         # convert output to pandas
         df = pd.DataFrame(skimmed_vars)

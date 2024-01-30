@@ -152,7 +152,8 @@ class HwwProcessor(processor.ProcessorABC):
         self.selections = {ch: PackedSelection() for ch in self._channels}
         self.cutflows = {ch: {} for ch in self._channels}
 
-        sumgenweight = ak.sum(events.genWeight) if self.isMC else nevents
+        sumgenweight = ak.sum(events.genWeight) if self.isMC else 0
+
         if self.isMC:
             for ch in self._channels:
                 self.weights[ch].add("genweight", events.genWeight)
@@ -341,10 +342,14 @@ class HwwProcessor(processor.ProcessorABC):
             "FirstFatjet_eta": FirstFatjet.eta,
             "FirstFatjet_phi": FirstFatjet.phi,
             "FirstFatjet_msd": FirstFatjet.msdcorr,
+            # "FirstFatjet_lep_dr": candidatelep_p4.delta_r(FirstFatjet),
             "SecondFatjet_pt": SecondFatjet.pt,
             "SecondFatjet_eta": SecondFatjet.eta,
             "SecondFatjet_phi": SecondFatjet.phi,
             "SecondFatjet_msd": SecondFatjet.msdcorr,
+            "SecondFatjet_pt": SecondFatjet.pt,
+            "SecondFatjet_m": SecondFatjet.mass,
+            # "SecondFatjet_lep_dr": candidatelep_p4.delta_r(SecondFatjet),
         }
 
         fatjetvars = {
@@ -412,6 +417,8 @@ class HwwProcessor(processor.ProcessorABC):
             rec_W_qq = candidatefj - candidatelep_p4
             rec_higgs = rec_W_qq + rec_W_lnu
 
+            variables[f"fj_pt{shift}"] = candidatefj.pt
+
             variables[f"rec_higgs_m{shift}"] = rec_higgs.mass
             variables[f"rec_higgs_pt{shift}"] = rec_higgs.pt
 
@@ -452,6 +459,7 @@ class HwwProcessor(processor.ProcessorABC):
                 jecvariables = getJECVariables(fatjetvars, candidatelep_p4, met, pt_shift=None, met_shift=met_shift)
                 variables = {**variables, **jecvariables}
 
+
         # apply selections
         for ch in self._channels:
             self.add_selection(name="Trigger", sel=trigger[ch], channel=ch)
@@ -479,11 +487,11 @@ class HwwProcessor(processor.ProcessorABC):
         )
         self.add_selection(name="NoTaus", sel=(n_loose_taus_mu == 0), channel="mu")
         self.add_selection(name="NoTaus", sel=(n_loose_taus_ele == 0), channel="ele")
-        self.add_selection(name="OneCandidateJet", sel=(NumFatjets >= 1))
+        self.add_selection(name="AtLeastOneFatJet", sel=(NumFatjets >= 1))
         self.add_selection(name="CandidateJetpT", sel=(candidatefj.pt > 250))
         self.add_selection(name="LepInJet", sel=(lep_fj_dr < 0.8))
         self.add_selection(name="JetLepOverlap", sel=(lep_fj_dr > 0.03))
-        self.add_selection(name="dPhiJetMETCut", sel=(np.abs(met_fj_dphi) < 1.57))
+        self.add_selection(name="dPhiJetMET", sel=(np.abs(met_fj_dphi) < 1.57))
         self.add_selection(name="MET", sel=(met.pt > 20))
 
         # gen-level matching
