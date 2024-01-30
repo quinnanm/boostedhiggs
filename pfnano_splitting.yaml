@@ -129,3 +129,20 @@ v2_2:
     TTWJetsToQQ: 12
     TTWJetsToLNu: 12
     TTZToLLNuNu_M-10: 12
+    JetHT_Run2016B_ver2_HIPM: 20
+    JetHT_Run2016C_HIPM: 20
+    JetHT_Run2016D_HIPM: 20
+    JetHT_Run2016E_HIPM: 20
+    JetHT_Run2016F_HIPM: 20
+    JetHT_Run2016F: 20
+    JetHT_Run2016G: 20
+    JetHT_Run2016H: 20
+    JetHT_Run2017B: 20
+    JetHT_Run2017C: 20
+    JetHT_Run2017D: 20
+    JetHT_Run2017E: 20
+    JetHT_Run2017F: 20
+    JetHT_Run2018A: 20
+    JetHT_Run2018B: 20
+    JetHT_Run2018C: 20
+    JetHT_Run2018D: 20

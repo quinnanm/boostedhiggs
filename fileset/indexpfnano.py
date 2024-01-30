@@ -23,6 +23,11 @@ def get_subfolders(parent):
 
 folders_to_index = {
     "v2_2": [
+        ##
+        "/store/user/lpcpfnano/cmantill/v2_3/2016/JetHT2016",
+        "/store/user/lpcpfnano/cmantill/v2_3/2017/JetHT2017",
+        "/store/user/lpcpfnano/cmantill/v2_3/2018/JetHT2018",
+        ##
         "/store/user/lpcpfnano/dryu/v2_2_1/2016/SingleMu2016",
         "/store/user/lpcpfnano/dryu/v2_2_1/2017/SingleMu2017",
         "/store/user/lpcpfnano/dryu/v2_2/2018/SingleMu2018",
