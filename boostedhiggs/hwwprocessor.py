@@ -347,8 +347,6 @@ class HwwProcessor(processor.ProcessorABC):
             "SecondFatjet_eta": SecondFatjet.eta,
             "SecondFatjet_phi": SecondFatjet.phi,
             "SecondFatjet_msd": SecondFatjet.msdcorr,
-            "SecondFatjet_pt": SecondFatjet.pt,
-            "SecondFatjet_m": SecondFatjet.mass,
             # "SecondFatjet_lep_dr": candidatelep_p4.delta_r(SecondFatjet),
         }
 
@@ -459,7 +457,6 @@ class HwwProcessor(processor.ProcessorABC):
                 jecvariables = getJECVariables(fatjetvars, candidatelep_p4, met, pt_shift=None, met_shift=met_shift)
                 variables = {**variables, **jecvariables}
 
-
         # apply selections
         for ch in self._channels:
             self.add_selection(name="Trigger", sel=trigger[ch], channel=ch)
@@ -555,6 +552,9 @@ class HwwProcessor(processor.ProcessorABC):
                     nPU=ak.to_numpy(events.Pileup.nPU),
                 )
 
+                single_weight_pileup = self.weights[ch].partial_weight(["single_weight_pileup"])
+                self.add_selection("single_weight_pileup", sel=(single_weight_pileup <= 4))
+
                 add_pileupid_weights(self.weights[ch], self._year, self._yearmod, goodjets, events.GenJet, wp="L")
 
                 if ch == "mu":
@@ -579,6 +579,7 @@ class HwwProcessor(processor.ProcessorABC):
 
                 if "HToWW" in dataset:
                     add_HiggsEW_kFactors(self.weights[ch], events.GenPart, dataset)
+
                     add_scalevar_7pt(
                         self.weights[ch],
                         events.LHEScaleWeight if "LHEScaleWeight" in events.fields else [],
@@ -587,6 +588,7 @@ class HwwProcessor(processor.ProcessorABC):
                         self.weights[ch],
                         events.LHEScaleWeight if "LHEScaleWeight" in events.fields else [],
                     )
+
                     add_ps_weight(
                         self.weights[ch],
                         events.PSWeight if "PSWeight" in events.fields else [],
