@@ -43,7 +43,7 @@ v2_2:
     HWminusJ_HToWW_M-125: 10
     HWplusJ_HToWW_M-125: 10
     GluGluZH_HToWW_ZTo2L_M-125: 10
-    GluGluZH_HToWW_M-125: 10
+    GluGluZH_HToWW_M-125_TuneCP5_13TeV-powheg-pythia8: 10
     HZJ_HToWWToLNuQQ_2LFilter_M-125: 5
     HZJ_HToWWToLNuQQ_M-125: 5
     HZJ_HToWW_M-125: 5

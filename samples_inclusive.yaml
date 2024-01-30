@@ -6,12 +6,9 @@ mc:
   - HWminusJ_HToWW_M-125
   - HWplusJ_HToWW_M-125
   - HZJ_HToWW_M-125
-  - GluGluZH_HToWW_M-125
-  - GluGluZH_HToWW_ZTo2L_M-125
+  - GluGluZH_HToWW_M-125_TuneCP5_13TeV-powheg-pythia8
   - ttHToNonbb_M125
   - GluGluHToTauTau
-  - WJetsToLNu_1J
-  - WJetsToLNu_2J
   - WJetsToLNu_HT-70To100
   - WJetsToLNu_HT-100To200
   - WJetsToLNu_HT-200To400
@@ -64,8 +61,11 @@ mc:
   - EWKWplus_WToQQ
   - EWKWminus_WToLNu
   - EWKWplus_WToLNu
+vjetsnlo:
+  - WJetsToLNu_1J
+  - WJetsToLNu_2J
 extra:
-  - GluGluZH_HToWW_M-125
+  - GluGluZH_HToWW_M-125_TuneCP5_13TeV-powheg-pythia8
   - TTZToQQ
   - TTWJetsToQQ
   - TTWJetsToLNu
