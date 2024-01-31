@@ -16,9 +16,7 @@ import logging
 import math
 import os
 import warnings
-from dataclasses import dataclass
 
-import numpy as np
 import pandas as pd
 import rhalphalib as rl
 from systematics import systs_from_parquets, systs_not_from_parquets
@@ -33,23 +31,7 @@ pd.set_option("mode.chained_assignment", None)
 CMS_PARAMS_LABEL = "CMS_HWW_boosted"
 
 
-@dataclass
-class ShapeVar:
-
-    """For storing and calculating info about variables used in fit"""
-
-    name: str = None
-    bins: np.ndarray = None  # bin edges
-    order: int = None  # TF order
-
-    def __post_init__(self):
-        # use bin centers for polynomial fit
-        self.pts = self.bins[:-1] + 0.5 * np.diff(self.bins)
-        # scale to be between [0, 1]
-        self.scaled = (self.pts - self.bins[0]) / (self.bins[-1] - self.bins[0])
-
-
-def create_datacard(hists_templates, years, lep_channels, do_rhalphabet, order):
+def create_datacard(hists_templates, years, lep_channels):
     # define the systematics
     systs_dict, systs_dict_values = systs_not_from_parquets(years, lep_channels)
     sys_from_parquets = systs_from_parquets(years)
@@ -58,17 +40,12 @@ def create_datacard(hists_templates, years, lep_channels, do_rhalphabet, order):
     model = rl.Model("testModel")
 
     # define the signal and control regions
-    sig_regions = ["SR1VBF", "SR1ggFpt250to300", "SR1ggFpt300to450", "SR1ggFpt450toInf", "SR2ggFpt250toInf"]
+    sig_regions = ["SRVBF97", "SRggFpt250to300", "SRggFpt300to450", "SRggFpt450toInf"]
     regions = sig_regions + ["WJetsCR"] + ["TopCR"]
 
     # fill datacard with systematics and rates
     for ChName in regions:
-        if do_rhalphabet:  # use MC wjets+qcd if do_rhalphabet=False
-            Samples = samples.copy()
-            Samples.remove("WJetsLNu")
-            Samples.remove("QCD")
-        else:
-            Samples = samples.copy()
+        Samples = samples.copy()
 
         ch = rl.Channel(ChName)
         model.addChannel(ch)
@@ -117,75 +94,7 @@ def create_datacard(hists_templates, years, lep_channels, do_rhalphabet, order):
         data_obs = get_template(hists_templates, "Data", ChName)
         ch.setObservation(data_obs)
 
-    if do_rhalphabet:  # data-driven estimation
-        rhalphabet(model, hists_templates, order, passChNames=sig_regions, failChName="WJetsCR")
-
     return model
-
-
-def rhalphabet(model, hists_templates, order, passChNames, failChName):
-    shape_var = ShapeVar(
-        name=hists_templates.axes["mass_observable"].name, bins=hists_templates.axes["mass_observable"].edges, order=order
-    )
-    m_obs = rl.Observable(shape_var.name, shape_var.bins)
-
-    # wjets params
-    wjets_params = np.array(
-        [rl.IndependentParameter(f"{CMS_PARAMS_LABEL}_tf_dataResidual_Bin{i}", 0) for i in range(m_obs.nbins)]
-    )
-
-    failCh = model[failChName]
-
-    initial_wjets = failCh.getObservation().astype(float)
-    if np.any(initial_wjets < 0.0):
-        logging.warning(f"initial_wjets negative for some bins... {initial_wjets}")
-        initial_wjets[initial_wjets < 0] = 0
-
-    for sample in failCh:
-        if sample.sampletype == rl.Sample.SIGNAL:
-            continue
-        # logging.info(f"subtracting {sample._name} from wjets+qcd")
-        initial_wjets -= sample.getExpectation(nominal=True)
-
-    # idea here is that the error should be 1/sqrt(N), so parametrizing it as (1 + 1/sqrt(N))^wjetsparams
-    # will result in wjetsparams errors ~±1
-    # but because wjets is poorly modelled we're scaling sigma scale
-
-    sigmascale = 10  # to scale the deviation from initial
-    scaled_params = initial_wjets * (1 + sigmascale / np.maximum(1.0, np.sqrt(initial_wjets))) ** wjets_params
-
-    fail_wjets = rl.ParametericSample(
-        f"{failChName}_{CMS_PARAMS_LABEL}_wjets_datadriven", rl.Sample.BACKGROUND, m_obs, scaled_params
-    )
-    failCh.addSample(fail_wjets)
-
-    for passChName in passChNames:
-        logging.info(f"setting transfer factor for region {passChName}, from region {failChName}")
-
-        # define a seperate transfer factor per passChName
-        tf_dataResidual = rl.BasisPoly(
-            f"{CMS_PARAMS_LABEL}_tf_dataResidual_{passChName}",
-            (shape_var.order,),
-            [shape_var.name],
-            basis="Bernstein",
-            limits=(-20, 20),
-            # square_params=True,   # TODO: figure why this can't be uncommented
-        )
-
-        den = hists_templates[{"Region": failChName, "Sample": ["WJetsLNu", "QCD"], "Systematic": "nominal"}].sum().value
-        num = hists_templates[{"Region": passChName, "Sample": ["WJetsLNu", "QCD"], "Systematic": "nominal"}].sum().value
-
-        # get the transfer factor
-        wjets_eff = num / den
-
-        tf_dataResidual_params = tf_dataResidual(shape_var.scaled)
-        tf_params_pass = wjets_eff * tf_dataResidual_params  # scale params initially by wjets eff
-
-        passCh = model[passChName]
-        pass_wjets = rl.TransferFactorSample(
-            f"{passChName}_{CMS_PARAMS_LABEL}_wjets_datadriven", rl.Sample.BACKGROUND, tf_params_pass, fail_wjets
-        )
-        passCh.addSample(pass_wjets)
 
 
 def main(args):
@@ -194,20 +103,18 @@ def main(args):
 
     hists_templates = load_templates(years, lep_channels, args.outdir)
 
-    model = create_datacard(hists_templates, years, lep_channels, do_rhalphabet=args.rhalphabet, order=args.order)
+    model = create_datacard(hists_templates, years, lep_channels)
 
     model.renderCombine(os.path.join(str("{}".format(args.outdir)), "datacards"))
 
 
 if __name__ == "__main__":
     # e.g.
-    # python create_datacard.py --years 2016,2016APV,2017,2018 --channels mu,ele --outdir templates/v1 --rhalphabet --order 2
+    # python create_datacard.py --years 2016,2016APV,2017,2018 --channels mu,ele --outdir templates/v1
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--years", default="2017", help="years separated by commas")
     parser.add_argument("--channels", default="mu", help="channels separated by commas (e.g. mu,ele)")
-    parser.add_argument("--rhalphabet", action="store_true", help="if provided will run rhalphabet with default order=2")
-    parser.add_argument("--order", default=2, type=int, help="bernstein polynomial order when running with --rhalphabet")
     parser.add_argument("--outdir", default="templates/test", type=str, help="name of template directory")
 
     args = parser.parse_args()
