@@ -174,7 +174,7 @@ axis_dict = {
     "fj_pt": hist2.axis.Regular(30, 200, 600, name="var", label=r"Jet $p_T$ [GeV]", overflow=True),
     "fj_msoftdrop": hist2.axis.Regular(35, 20, 250, name="var", label=r"Jet $m_{sd}$ [GeV]", overflow=True),
     "rec_higgs_m": hist2.axis.Variable(
-        list(range(50, 240, 20)), name="var", label=r"Higgs reconstructed mass [GeV]", overflow=True
+        list(range(50, 240, 10)), name="var", label=r"Higgs reconstructed mass [GeV]", overflow=True
     ),
     "rec_higgs_etajet_m": hist2.axis.Variable(
         list(range(50, 240, 20)), name="var", label=r"PKU definition Higgs reconstructed mass [GeV]", overflow=True
@@ -211,9 +211,9 @@ axis_dict = {
 
 
 def plot_hists(
+    hists,
     years,
     channels,
-    hists,
     vars_to_plot,
     add_data,
     logy,

@@ -245,9 +245,9 @@ axis_dict = {
 
 
 def plot_hists(
+    hists,
     years,
     channels,
-    hists,
     vars_to_plot,
     add_data,
     logy,

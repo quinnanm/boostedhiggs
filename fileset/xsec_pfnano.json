@@ -108,5 +108,10 @@
     "WminusHToTauTau": 0.032739120000000003,
     "WplusHToTauTau": 0.05173551,
     "ZHToTauTau": 0.04684824,
-    "ttHToTauTau": 0.03125493
+    "ttHToTauTau": 0.03125493,
+    "DYJetsToLL_Pt-50To100": 394.1,
+    "DYJetsToLL_Pt-100To250": 94.42,
+    "DYJetsToLL_Pt-250To400": 3.651,
+    "DYJetsToLL_Pt-400To650": 0.4986,
+    "DYJetsToLL_Pt-650ToInf": 0.04678
 }

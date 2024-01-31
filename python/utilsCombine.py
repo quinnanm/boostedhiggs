@@ -156,9 +156,9 @@ label_by_ch = {"mu": "Muon", "ele": "Electron"}
 
 
 def plot_hists(
+    hists,
     years,
     channels,
-    hists,
     add_data,
     logy,
     add_soverb,
