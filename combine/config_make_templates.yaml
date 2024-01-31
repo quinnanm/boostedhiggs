@@ -11,15 +11,13 @@ samples:
     - SingleTop
     - Diboson
     - Data
-    - WJetsQCD
 
 regions_sel:
     # put any "selection name: selection" here to store it in the templates
-    "VBF97": (fj_ParT_score_finetuned>0.97) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
-    "SR1ggFpt250to300": (fj_ParT_score_finetuned>0.985) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>250) & (fj_pt<300)
-    "SR1ggFpt300to450": (fj_ParT_score_finetuned>0.985) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    "SR1ggFpt450toInf": (fj_ParT_score_finetuned>0.985) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
-    "SR2ggF":  (fj_ParT_score_finetuned>0.97) & (fj_ParT_score_finetuned<0.985) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
+    "SRVBF97": (fj_ParT_score_finetuned>0.97) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
+    "SRggFpt250to300": (fj_ParT_score_finetuned>0.985) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>250) & (fj_pt<300)
+    "SRggFpt300to450": (fj_ParT_score_finetuned>0.985) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
+    "SRggFpt450toInf": (fj_ParT_score_finetuned>0.985) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
 
     "WJetsCR": (fj_ParT_score_finetuned>0.50) & (fj_ParT_score_finetuned<0.97) & (n_bjets_T==0)
     "TopCR": (fj_ParT_score_finetuned>0.50) & (n_bjets_T>0)

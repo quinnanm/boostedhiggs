@@ -105,7 +105,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
             "fj_pt300": "( ( fj_pt>200) )",
             "dphi<1.57": "(abs_met_fj_dphi<1.57)",
             "tagger>0.5": "fj_ParT_score_finetuned>0.5",
-            "MET>25": "met_pt>25",
+            "MET>25": "met_pt>20",
         },
         "ele": {
             "lep_fj_dr003": "( ( lep_fj_dr>0.03) )",
@@ -113,7 +113,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
             "fj_pt300": "( ( fj_pt>200) )",
             "dphi<1.57": "(abs_met_fj_dphi<1.57)",
             "tagger>0.5": "fj_ParT_score_finetuned>0.5",
-            "MET>30": "met_pt>30",
+            "MET>30": "met_pt>20",
         },
     }
 
