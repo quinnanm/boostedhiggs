@@ -1,0 +1,47 @@
+# Datacard for <Channel (SRggFpt450toInf) instance at 0x7fd8b5ef6700> generated on 2024-01-31 07:14:01.176393
+imax 1 # number of categories ('bins' but here we are using shape templates)
+jmax 8 # number of samples minus 1
+kmax 36 # number of nuisance parameters
+shapes * SRggFpt450toInf testModel.root testModel:SRggFpt450toInf_$PROCESS testModel:SRggFpt450toInf_$PROCESS_$SYSTEMATIC
+bin SRggFpt450toInf
+observation 37.000
+bin                                      SRggFpt450toInf  SRggFpt450toInf  SRggFpt450toInf  SRggFpt450toInf  SRggFpt450toInf  SRggFpt450toInf  SRggFpt450toInf  SRggFpt450toInf  SRggFpt450toInf
+process                                              ggF              VBF               VH              ttH            ttbar            wjets        singletop            zjets              qcd
+process                                               -3               -2               -1                0                1                2                3                4                5
+rate                                               2.078            0.224            0.620            0.049            4.889           15.394            1.535            0.930            0.393
+BR_hww lnN                                 0.9848/1.0153    0.9848/1.0153    0.9848/1.0153    0.9848/1.0153    0.9848/1.0153    0.9848/1.0153    0.9848/1.0153    0.9848/1.0153    0.9848/1.0153
+CMS_HWW_boosted_Z_d1kappa_EW_Run2 lnN                  -                -                -                -                -                -                -           1.0010                -
+CMS_HWW_boosted_Z_d2kappa_EW_Run2 lnN                  -                -                -                -                -                -                -    0.9944/1.0056                -
+CMS_HWW_boosted_Z_d3kappa_EW_Run2 lnN                  -                -                -                -                -                -                -           1.0025                -
+CMS_HWW_boosted_mu_trigger_Run2_mu lnN            1.0014           1.0019           1.0015           1.0018           1.0013                -           1.0005           1.0012           1.0024
+CMS_HWW_boosted_scale_pt_3_VBF_Run2 lnN                -    0.9381/1.0503                -                -                -                -                -                -                -
+CMS_HWW_boosted_scale_pt_3_ggF_Run2 lnN    0.8037/1.2107                -                -                -                -                -                -                -                -
+CMS_HWW_boosted_scale_pt_7_VBF_Run2 lnN                -    0.9264/1.0526                -                -                -                -                -                -                -
+CMS_HWW_boosted_scale_pt_7_ggF_Run2 lnN    0.8037/1.2133                -                -                -                -                -                -                -                -
+CMS_HWW_boosted_trigger_Run2_ele lnN              1.0015           1.0015           1.0013           1.0012           1.0016                -           1.0020           1.0025           1.0004
+CMS_L1Prefiring_Run2 lnN                   1.0029/1.0155    0.9904/1.0096           1.0056    0.9948/1.0105           1.0038                -    0.9902/1.0126           1.0114           1.0009
+CMS_id_Run2 lnN                                   1.0048           1.0026           1.0049    0.9934/1.0066           1.0031                -           1.0035           1.0042           1.0014
+CMS_iso_Run2 lnN                                  1.0002                -           1.0001           1.0003           1.0004                -           1.0000           1.0002                -
+CMS_lumi_13TeV_1718 lnN                           1.0027           1.0027           1.0027           1.0027           1.0027           1.0027           1.0027           1.0027           1.0027
+CMS_lumi_13TeV_2016 lnN                           1.0026           1.0026           1.0026           1.0026           1.0026           1.0026           1.0026           1.0026           1.0026
+CMS_lumi_13TeV_2017 lnN                           1.0060           1.0060           1.0060           1.0060           1.0060           1.0060           1.0060           1.0060           1.0060
+CMS_lumi_13TeV_2018 lnN                           1.0065           1.0065           1.0065           1.0065           1.0065           1.0065           1.0065           1.0065           1.0065
+CMS_lumi_13TeV_corelated lnN                      1.0130           1.0130           1.0130           1.0130           1.0130           1.0130           1.0130           1.0130           1.0130
+CMS_mu_trigger_iso_Run2_mu lnN                    1.0000                -           1.0000           1.0000           1.0000                -           1.0000           1.0000                -
+CMS_reconstruction_ele lnN                        1.0022           1.0010           1.0022           1.0023           1.0024                -           1.0028           1.0027           1.0009
+SRggFpt450toInf_VBF_mcstat lnN                         -           1.7695                -                -                -                -                -                -                -
+SRggFpt450toInf_VH_mcstat lnN                          -                -           1.1068                -                -                -                -                -                -
+SRggFpt450toInf_ggF_mcstat lnN                    1.1846                -                -                -                -                -                -                -                -
+SRggFpt450toInf_qcd_mcstat lnN                         -                -                -                -                -                -                -                -           1.8759
+SRggFpt450toInf_singletop_mcstat lnN                   -                -                -                -                -                -           1.8370                -                -
+SRggFpt450toInf_ttH_mcstat lnN                         -                -                -           1.6733                -                -                -                -                -
+SRggFpt450toInf_ttbar_mcstat lnN                       -                -                -                -           1.4004                -                -                -                -
+SRggFpt450toInf_wjets_mcstat lnN                       -                -                -                -                -           1.1820                -                -                -
+SRggFpt450toInf_zjets_mcstat lnN                       -                -                -                -                -                -                -           1.4990                -
+aS_Higgs_VBF lnN                                       -           1.0036                -                -                -                -                -                -                -
+aS_Higgs_ggF lnN                           0.9565/1.0456                -                -                -                -                -                -                -                -
+pdfAS_Higgs_VBF lnN                                    -    0.9795/1.0211                -                -                -                -                -                -                -
+pdfAS_Higgs_ggF lnN                        0.9548/1.0475                -                -                -                -                -                -                -                -
+pdf_Higgs_VBF lnN                                      -    0.9930/1.0071                -                -                -                -                -                -                -
+pdf_Higgs_ggF lnN                                 1.0044                -                -                -                -                -                -                -                -
+taggereff lnN                                     1.1000           1.1000           1.1000           1.1000                -                -                -                -                -

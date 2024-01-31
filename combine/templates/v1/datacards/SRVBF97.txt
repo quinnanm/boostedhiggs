@@ -1,0 +1,46 @@
+# Datacard for <Channel (SRVBF97) instance at 0x7fd8b5f37f40> generated on 2024-01-31 07:14:01.137420
+imax 1 # number of categories ('bins' but here we are using shape templates)
+jmax 8 # number of samples minus 1
+kmax 35 # number of nuisance parameters
+shapes * SRVBF97 testModel.root testModel:SRVBF97_$PROCESS testModel:SRVBF97_$PROCESS_$SYSTEMATIC
+bin SRVBF97
+observation 71.000
+bin                                            SRVBF97        SRVBF97        SRVBF97        SRVBF97        SRVBF97        SRVBF97        SRVBF97        SRVBF97  SRVBF97
+process                                            ggF            VBF             VH            ttH          ttbar          wjets      singletop          zjets      qcd
+process                                             -3             -2             -1              0              1              2              3              4        5
+rate                                             2.352          8.575          0.123          0.037         11.879         17.700          0.414          0.879    0.000
+BR_hww lnN                               0.9848/1.0153  0.9848/1.0153  0.9848/1.0153  0.9848/1.0153  0.9848/1.0153  0.9848/1.0153  0.9848/1.0153  0.9848/1.0153        -
+CMS_HWW_boosted_Z_d1kappa_EW_Run2 lnN                -              -              -              -              -              -              -         1.0004        -
+CMS_HWW_boosted_Z_d2kappa_EW_Run2 lnN                -              -              -              -              -              -              -         1.0041        -
+CMS_HWW_boosted_Z_d3kappa_EW_Run2 lnN                -              -              -              -              -              -              -         1.0012        -
+CMS_HWW_boosted_mu_trigger_Run2_mu lnN          1.0009         1.0010         1.0014         1.0013         1.0009              -              -         1.0004        -
+CMS_HWW_boosted_scale_pt_3_VBF_Run2 lnN              -  0.9282/1.0490              -              -              -              -              -              -        -
+CMS_HWW_boosted_scale_pt_3_ggF_Run2 lnN  0.8015/1.2287              -              -              -              -              -              -              -        -
+CMS_HWW_boosted_scale_pt_7_VBF_Run2 lnN              -  0.9280/1.0522              -              -              -              -              -              -        -
+CMS_HWW_boosted_scale_pt_7_ggF_Run2 lnN  0.8014/1.2307              -              -              -              -              -              -              -        -
+CMS_HWW_boosted_trigger_Run2_ele lnN            1.0021         1.0019         1.0017         1.0011         1.0023              -         1.0017         1.0034        -
+CMS_L1Prefiring_Run2 lnN                 1.0050/1.0383  1.0098/1.0517  1.0034/1.0264  1.0065/1.0240  1.0038/1.0403              -  1.0360/1.0663  1.0142/1.1211        -
+CMS_id_Run2 lnN                                 1.0027         1.0023         1.0031         1.0018         1.0017              -         1.0002         1.0022        -
+CMS_iso_Run2 lnN                                1.0009         1.0014         1.0006         1.0012         1.0023              -         1.0030         1.0022        -
+CMS_lumi_13TeV_1718 lnN                         1.0027         1.0027         1.0027         1.0027         1.0027         1.0027         1.0027         1.0027        -
+CMS_lumi_13TeV_2016 lnN                         1.0026         1.0026         1.0026         1.0026         1.0026         1.0026         1.0026         1.0026        -
+CMS_lumi_13TeV_2017 lnN                         1.0060         1.0060         1.0060         1.0060         1.0060         1.0060         1.0060         1.0060        -
+CMS_lumi_13TeV_2018 lnN                         1.0065         1.0065         1.0065         1.0065         1.0065         1.0065         1.0065         1.0065        -
+CMS_lumi_13TeV_corelated lnN                    1.0130         1.0130         1.0130         1.0130         1.0130         1.0130         1.0130         1.0130        -
+CMS_mu_trigger_iso_Run2_mu lnN                  1.0000         1.0000         1.0000              -         1.0000              -         1.0009         1.0000        -
+CMS_reconstruction_ele lnN                      1.0024         1.0024         1.0021         1.0017         1.0032              -         1.0022         1.0021        -
+SRVBF97_VBF_mcstat lnN                               -         1.2511              -              -              -              -              -              -        -
+SRVBF97_VH_mcstat lnN                                -              -         1.2388              -              -              -              -              -        -
+SRVBF97_ggF_mcstat lnN                          1.1793              -              -              -              -              -              -              -        -
+SRVBF97_singletop_mcstat lnN                         -              -              -              -              -              -         1.8968              -        -
+SRVBF97_ttH_mcstat lnN                               -              -              -         1.6044              -              -              -              -        -
+SRVBF97_ttbar_mcstat lnN                             -              -              -              -         1.3750              -              -              -        -
+SRVBF97_wjets_mcstat lnN                             -              -              -              -              -         1.3503              -              -        -
+SRVBF97_zjets_mcstat lnN                             -              -              -              -              -              -              -         1.9606        -
+aS_Higgs_VBF lnN                                     -         1.0054              -              -              -              -              -              -        -
+aS_Higgs_ggF lnN                         0.9563/1.0458              -              -              -              -              -              -              -        -
+pdfAS_Higgs_VBF lnN                                  -  0.9794/1.0224              -              -              -              -              -              -        -
+pdfAS_Higgs_ggF lnN                      0.9543/1.0480              -              -              -              -              -              -              -        -
+pdf_Higgs_VBF lnN                                    -  0.9891/1.0118              -              -              -              -              -              -        -
+pdf_Higgs_ggF lnN                               1.0047              -              -              -              -              -              -              -        -
+taggereff lnN                                   1.1000         1.1000         1.1000         1.1000              -              -              -              -        -

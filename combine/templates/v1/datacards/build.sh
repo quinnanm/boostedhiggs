@@ -1,0 +1,2 @@
+combineCards.py SRVBF97=SRVBF97.txt SRggFpt250to300=SRggFpt250to300.txt SRggFpt300to450=SRggFpt300to450.txt SRggFpt450toInf=SRggFpt450toInf.txt WJetsCR=WJetsCR.txt TopCR=TopCR.txt > model_combined.txt
+text2workspace.py model_combined.txt
