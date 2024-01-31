@@ -7,7 +7,8 @@ Jennet has a nice notebook on x-sections:
 https://github.com/jennetd/hbb-coffea/blob/master/xsec-json.ipynb
 
 Other references:
-- Latinos: https://github.com/latinos/LatinoAnalysis/blob/master/NanoGardener/python/framework/samples/samplesCrossSections2018.py
+- Latinos:
+  https://github.com/latinos/LatinoAnalysis/blob/master/NanoGardener/python/framework/samples/samplesCrossSections2018.py
 - XSDB: https://xsdb-temp.app.cern.ch/xsdb
 """
 
@@ -27,11 +28,14 @@ BR_Htt = 0.0621
 xs = {}
 
 # VH - this needs to be checked for qqZH, also need to add ggZH
-# pp->ZH 8.839E-01
-##From GenXsecAnalyzer: 7.891e-01 +/- 3.047e-03
-##cmsRun ana.py inputFiles="file:root://cmsxrootd.fnal.gov//store/mc/RunIIAutumn18MiniAOD/HZJ_HToWW_M125_13TeV_powheg_jhugen714_pythia8_TuneCP5/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/280000/B18DBE21-109B-6F4C-9920-A797AAC1D1CE.root" maxEvents=-1
-# xs["HZJ_HToWW_M-125"] = 0.7891 * BR_HWW
-
+"""
+pp->ZH 8.839E-01
+From GenXsecAnalyzer: 7.891e-01 +/- 3.047e-03
+cmsRun ana.py
+inputFiles="file:root://cmsxrootd.fnal.gov//store/mc/RunIIAutumn18MiniAOD/ \
+HZJ_HToWW_M125_13TeV_powheg_jhugen714_pythia8_TuneCP5/MINIAODSIM/ \
+102X_upgrade2018_realistic_v15-v1/280000/B18DBE21-109B-6F4C-9920-A797AAC1D1CE.root" maxEvents=-1
+"""
 
 # GluGluToHToWWPt200
 # - From powheg: 0.4716 pb
@@ -69,6 +73,7 @@ xs["HWplusJ_HToWW_M-125"] = 0.8720 * BR_HWW
 xs["HZJ_HToWW_M-125"] = 0.7891 * BR_HWW  # this was replaced with above GenXSecAnalyzer Number
 # cross check -  this in xsdb is 0.006185
 xs["GluGluZH_HToWW_ZTo2L_M-125"] = 0.1223 * 3 * 0.033658 * BR_HWW  # 0.002639
+xs["GluGluZH_HToWW_M-125_TuneCP5_13TeV-powheg-pythia8"] = xs["GluGluZH_HToWW_ZTo2L_M-125"]
 xs["GluGluZH_HToWW_M-125"] = 0.0616 * BR_HWW
 
 # QCD
