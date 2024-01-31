@@ -693,7 +693,7 @@ def add_pileupid_weights(weights: Weights, year: str, mod: str, jets: JetArray, 
     """
 
     # pileup ID should only be used for jets with pT < 50
-    jets = jets[jets.pt < 50]
+    jets = jets[(jets.pt < 50) & (jets.pt > 12.5)]
     # check that there's a geometrically matched genjet (99.9% are, so not really necessary...)
     jets = jets[ak.any(jets.metric_table(genjets) < 0.4, axis=-1)]
 
