@@ -26,7 +26,7 @@ combine_samples = {
     # signal
     "GluGluHToWW_Pt-200ToInf_M-125": "ggF",
     "HToWW_M-125": "VH",
-    "VBFHToWWToLNuQQ_M-125_withDipoleRecoil": "VBF",
+    "VBF": "VBF",
     "ttHToNonbb_M125": "ttH",
     # bkg
     "QCD_Pt": "QCD",
@@ -39,6 +39,7 @@ combine_samples = {
     "WZ": "Diboson",
     "ZZ": "Diboson",
     "GluGluHToTauTau": "HTauTau",
+    "EWK": "EWKvjets",
 }
 signals = ["ggF", "ttH", "VH", "VBF"]
 
@@ -116,30 +117,35 @@ color_by_sample = {
     #     "GluGluHToTauTau": "tab:cyan",
     #     "ZHToTauTau": "tab:cyan",
     #     "VBFHToTauTau": "tab:cyan",
+    # "WJetsLNu_unmatched": "tab:grey",
+    # "WJetsLNu_matched": "tab:green",
+    "EWKvjets": "tab:grey",
 }
 
 plot_labels = {
-    # "ggF": "ggH(WW)-Pt200",
-    "ggF": "ggH",
+    "ggF": "ggF",
     "VH": "VH",
     # "VH": "VH(WW)",
     # "VBF": r"VBFH(WW) $(qq\ell\nu)$",
     "VBF": r"VBF",
     # "ttH": "ttH(WW)",
-    "ttH": "ttH",
+    "ttH": r"$t\bar{t}$H",
     "DYJets": r"Z$(\ell\ell)$+jets",
     "QCD": "Multijet",
     "Diboson": "VV",
     "WJetsLNu": r"W$(\ell\nu)$+jets",
     "TTbar": r"$t\bar{t}$+jets",
-    "WZQQ": r"W/Z$(qq)$",
-    "SingleTop": r"Single Top",
+    "WZQQ": r"V$(qq)$",
+    "SingleTop": r"Single T",
     #     "WplusHToTauTau": "WplusHToTauTau",
     #     "WminusHToTauTau": "WminusHToTauTau",
     #     "ttHToTauTau": "ttHToTauTau",
     #     "GluGluHToTauTau": "GluGluHToTauTau",
     #     "ZHToTauTau": "ZHToTauTau",
     #     "VBFHToTauTau": "VBFHToTauTau"
+    "WJetsLNu_unmatched": r"W$(\ell\nu)$+jets unmatched",
+    "WJetsLNu_matched": r"W$(\ell\nu)$+jets matched",
+    "EWKvjets": "EWK VJets",
 }
 
 # sig_labels = {
@@ -153,22 +159,15 @@ label_by_ch = {"mu": "Muon", "ele": "Electron"}
 
 axis_dict = {
     "Zmass": hist2.axis.Regular(40, 30, 450, name="var", label=r"Zmass [GeV]", overflow=True),
-    "ht": hist2.axis.Regular(30, 200, 1200, name="var", label=r"ht [GeV]", overflow=True),
-    "lep_pt": hist2.axis.Regular(40, 30, 450, name="var", label=r"Lepton $p_T$ [GeV]", overflow=True),
-    "met": hist2.axis.Regular(40, 0, 450, name="var", label=r"MET", overflow=True),
     "fj_minus_lep_m": hist2.axis.Regular(35, 0, 280, name="var", label=r"Jet - Lepton mass [GeV]", overflow=True),
     "fj_minus_lep_pt": hist2.axis.Regular(40, 0, 450, name="var", label=r"Jet - Lepton $p_T$ [GeV]", overflow=True),
-    "lep_met_mt": hist2.axis.Regular(35, 0, 400, name="var", label=r"$m_T(lep, p_T^{miss})$ [GeV]", overflow=True),
     "fj_bjets_ophem": hist2.axis.Regular(35, 0, 1, name="var", label=r"max btagFlavB (opphem)", overflow=True),
     "fj_bjets": hist2.axis.Regular(35, 0, 1, name="var", label=r"max btagFlavB", overflow=True),
-    "lep_fj_dr": hist2.axis.Regular(35, 0.0, 0.8, name="var", label=r"$\Delta R(Jet, Lepton)$", overflow=True),
     "mu_mvaId": hist2.axis.Variable([0, 1, 2, 3, 4, 5], name="var", label="Muon MVAID", overflow=True),
     "ele_highPtId": hist2.axis.Regular(5, 0, 5, name="var", label="Electron high pT ID", overflow=True),
     "mu_highPtId": hist2.axis.Regular(5, 0, 5, name="var", label="Muon high pT ID", overflow=True),
-    "fj_pt": hist2.axis.Regular(30, 300, 600, name="var", label=r"Jet $p_T$ [GeV]", overflow=True),
-    "fj_msoftdrop": hist2.axis.Regular(35, 20, 250, name="var", label=r"Jet $m_{sd}$ [GeV]", overflow=True),
-    "rec_higgs_m": hist2.axis.Variable(
-        list(range(50, 240, 20)), name="var", label=r"Higgs reconstructed mass [GeV]", overflow=True
+    "rec_higgs_etajet_m": hist2.axis.Variable(
+        list(range(50, 240, 20)), name="var", label=r"PKU definition Higgs reconstructed mass [GeV]", overflow=True
     ),
     "rec_higgs_pt": hist2.axis.Regular(30, 0, 1000, name="var", label=r"Higgs reconstructed $p_T$ [GeV]", overflow=True),
     "fj_pt_over_lep_pt": hist2.axis.Regular(35, 1, 10, name="var", label=r"$p_T$(Jet) / $p_T$(Lepton)", overflow=True),
@@ -183,9 +182,6 @@ axis_dict = {
     "fj_ParticleNet_mass": hist2.axis.Regular(
         35, 0, 250, name="var", label=r"fj_ParticleNet regressed mass [GeV]", overflow=True
     ),
-    "met_fj_dphi": hist2.axis.Regular(
-        35, 0, 3.14, name="var", label=r"$\left| \Delta \phi(MET, Jet) \right|$", overflow=True
-    ),
     # VBF
     "deta": hist2.axis.Regular(35, 0, 7, name="var", label=r"$\left| \Delta \eta_{jj} \right|$", overflow=True),
     "mjj": hist2.axis.Regular(35, 0, 2000, name="var", label=r"$m_{jj}$", overflow=True),
@@ -195,9 +191,61 @@ axis_dict = {
     ),
     "nj": hist2.axis.Regular(40, 0, 10, name="var", label="number of jets outside candidate jet", overflow=True),
     "inclusive_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
-    "fj_ParT_score_finetuned": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
-    "fj_ParT_inclusive_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
+    "fj_ParT_score_finetuned": hist2.axis.Regular(25, 0.5, 1, name="var", label=r"$T_{HWW}$", overflow=True),
+    "fj_ParT_inclusive_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"ParT-Finetuned score", overflow=True),
     "fj_ParT_all_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
+    ############# AN
+    "FirstFatjet_pt": hist2.axis.Regular(30, 250, 600, name="var", label=r"Leading AK8 jet $p_T$ [GeV]", overflow=True),
+    "SecondFatjet_pt": hist2.axis.Regular(30, 250, 600, name="var", label=r"Sub-Leading AK8 jet $p_T$ [GeV]", overflow=True),
+    "fj_pt": hist2.axis.Regular(30, 250, 600, name="var", label=r"Higgs candidate jet $p_T$ [GeV]", overflow=True),
+    "lep_pt": hist2.axis.Regular(40, 30, 400, name="var", label=r"Lepton $p_T$ [GeV]", overflow=True),
+    "NumFatjets": hist2.axis.Regular(5, 0.5, 5.5, name="var", label="Number of AK8 jets", overflow=True),
+    "NumOtherJets": hist2.axis.Regular(
+        7, 0.5, 7.5, name="var", label="Number of AK4 jets (non-overlapping with AK8)", overflow=True
+    ),
+    "lep_fj_dr": hist2.axis.Regular(
+        35, 0.03, 0.8, name="var", label=r"$\Delta R(\ell, \mathrm{Higgs \ candidate \ jet})$", overflow=True
+    ),
+    "met_pt": hist2.axis.Regular(40, 20, 250, name="var", label=r"MET [GeV]", overflow=True),
+    "met_fj_dphi": hist2.axis.Regular(
+        35, 0, 1.57, name="var", label=r"$\left| \Delta \phi(MET, \mathrm{Higgs \ candidate \ jet}) \right|$", overflow=True
+    ),
+    "lep_met_mt": hist2.axis.Regular(35, 0, 160, name="var", label=r"$m_T(\ell, p_T^{miss})$ [GeV]", overflow=True),
+    "ht": hist2.axis.Regular(30, 400, 1400, name="var", label=r"ht [GeV]", overflow=True),
+    "rec_W_qq_m": hist2.axis.Regular(40, 0, 160, name="var", label=r"Reconstructed $W_{qq}$ mass [GeV]", overflow=True),
+    "rec_W_lnu_m": hist2.axis.Regular(
+        40, 0, 160, name="var", label=r"Reconstructed $W_{\ell \nu}$ mass [GeV]", overflow=True
+    ),
+    "fj_msoftdrop": hist2.axis.Regular(35, 20, 200, name="var", label=r"Jet $m_{sd}$ [GeV]", overflow=True),
+    "fj_lsf3": hist2.axis.Regular(35, 0, 1, name="var", label=r"Jet lsf3", overflow=True),
+    # lepton isolation
+    "lep_isolation": hist2.axis.Regular(35, 0, 0.5, name="var", label=r"Lepton PF isolation", overflow=True),
+    "lep_isolation_ele": hist2.axis.Regular(35, 0, 0.5, name="var", label=r"Electron PF isolation", overflow=True),
+    "lep_isolation_ele_highpt": hist2.axis.Regular(
+        35, 0, 0.5, name="var", label=r"Electron PF isolation (high $p_T$)", overflow=True
+    ),
+    "lep_isolation_ele_lowpt": hist2.axis.Regular(
+        35, 0, 0.15, name="var", label=r"Electron PF isolation (low $p_T$)", overflow=True
+    ),
+    "lep_isolation_mu": hist2.axis.Regular(35, 0, 0.5, name="var", label=r"Muon PF isolation", overflow=True),
+    "lep_isolation_mu_highpt": hist2.axis.Regular(
+        35, 0, 0.5, name="var", label=r"Muon PF isolation (high $p_T$)", overflow=True
+    ),
+    "lep_isolation_mu_lowpt": hist2.axis.Regular(
+        35, 0, 0.15, name="var", label=r"Muon PF isolation (low $p_T$)", overflow=True
+    ),
+    "lep_misolation": hist2.axis.Regular(35, 0, 0.2, name="var", label=r"Muon mini-isolation", overflow=True),
+    "lep_misolation_highpt": hist2.axis.Regular(
+        35, 0, 0.2, name="var", label=r"Muon mini-isolation (high $p_T$)", overflow=True
+    ),
+    "lep_misolation_lowpt": hist2.axis.Regular(
+        35, 0, 0.2, name="var", label=r"Muon mini-isolation (low $p_T$)", overflow=True
+    ),
+    "0btag_1b": hist2.axis.Regular(35, -0.5, 1.5, name="var", label=r"0btag_1b", overflow=True),
+    "1pbtag_1b": hist2.axis.Regular(35, -0.5, 1.5, name="var", label=r"1pbtag_1b", overflow=True),
+    "btag_1a": hist2.axis.Regular(35, 0.5, 1.5, name="var", label=r"btag_1a", overflow=True),
+    "T_btagSF": hist2.axis.Regular(35, -0.5, 1.5, name="var", label=r"T_btagSF", overflow=True),
+    "vetoT_btagSF": hist2.axis.Regular(35, 0.5, 1.5, name="var", label=r"vetoT_btagSF", overflow=True),
 }
 
 
@@ -337,7 +385,7 @@ def plot_hists(
                 "elinewidth": 1,
             }
 
-            if blind_region and (var == "rec_higgs_m"):
+            if blind_region and ("rec_higgs" in var):
                 massbins = data.axes[-1].edges
                 lv = int(np.searchsorted(massbins, blind_region[0], "right"))
                 rv = int(np.searchsorted(massbins, blind_region[1], "left") + 1)
@@ -503,8 +551,25 @@ def plot_hists(
                 sax.set_ylim(0, 0.013)
                 sax.set_yticks([0, 0.01])
 
-                dax.set_ylim(0, 6)
-                dax.set_yticks([0, 2, 4])
+                if len(years) > 1:
+                    # dax.set_ylim(0, 25)
+                    # dax.set_yticks([0, 10, 20])
+
+                    if "ParT" in var:
+                        sax.set_ylim(0, 0.08)
+                        sax.set_yticks([0, 0.03, 0.06])
+                        # dax.set_ylim(0, 38)
+                        # dax.set_yticks([0, 10, 20, 30])
+
+                else:
+                    # dax.set_ylim(0, 10)
+                    # dax.set_yticks([0, 4, 8])
+
+                    if "ParT" in var:
+                        sax.set_ylim(0, 0.08)
+                        sax.set_yticks([0, 0.03, 0.06])
+                        # dax.set_ylim(0, 18)
+                        # dax.set_yticks([0, 10])
 
                 # sax.set_ylim(0, 0.5)
                 # sax.set_yticks([0, 0.3])
@@ -518,13 +583,16 @@ def plot_hists(
                 rax.set_xlabel("")
                 rax.set_ylabel("Ratio", fontsize=20, labelpad=15)
             sax.set_ylabel(r"S/B", fontsize=20, y=0.4, labelpad=0)
-            sax.set_xlabel(f"{h.axes[-1].label}")  # assumes the variable to be plotted is at the last axis
+            # sax.set_xlabel(f"{h.axes[-1].label}")  # assumes the variable to be plotted is at the last axis
 
-            dax.set_ylabel(r"S", fontsize=20, y=0.4, labelpad=20)
+            dax.set_ylabel(r"S", fontsize=20, y=0.4, labelpad=8)
             dax.set_xlabel(f"{h.axes[-1].label}")  # assumes the variable to be plotted is at the last axis
 
         elif rax is not None:
             ax.set_xlabel("")
+            sax.set_xlabel("")
+            dax.set_xlabel("")
+
             rax.set_xlabel(f"{h.axes[-1].label}")  # assumes the variable to be plotted is at the last axis
 
             rax.set_ylabel("Ratio", fontsize=20, labelpad=15)
@@ -582,8 +650,39 @@ def plot_hists(
         if logy:
             ax.set_yscale("log")
             ax.set_ylim(1e-1)
+        else:
+            ax.set_ylim(0)
 
-        hep.cms.lumitext("%.1f " % luminosity + r"fb$^{-1}$ (13 TeV)", ax=ax, fontsize=20)
+        _, a = dax.get_ylim()
+        dax.set_ylim(0, a + 4)
+
+        if a > 100:
+            dax.set_yticks([90])
+        elif a > 40:
+            dax.set_yticks([40])
+        elif a > 20:
+            dax.set_yticks([20])
+        elif a > 10:
+            dax.set_yticks([10])
+        elif a > 5:
+            dax.set_ylim(0, a + 2)
+            dax.set_yticks([5])
+        elif a > 3:
+            dax.set_ylim(0, a + 1)
+            dax.set_yticks([3])
+        elif a > 2:
+            dax.set_ylim(0, a + 1)
+            dax.set_yticks([2])
+        else:
+            dax.set_ylim(0, a + 1)
+            dax.set_yticks([1])
+
+        if "Num" in var:
+            ax.set_xlim(h.axes["var"].edges[0], h.axes["var"].edges[-1])
+        else:
+            ax.set_xlim(h.axes["var"].edges[0], h.axes["var"].edges[-1])
+
+        hep.cms.lumitext("%.0f " % luminosity + r"fb$^{-1}$ (13 TeV)", ax=ax, fontsize=20)
         hep.cms.text("Work in Progress", ax=ax, fontsize=15)
 
         # save plot

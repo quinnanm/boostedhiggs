@@ -15,14 +15,18 @@ from condor.file_utils import loadFiles
 def main(args):
     # username = os.environ["USER"]
 
+    # condordir = "/uscms/home/cmantill/nobackup/hww/boostedhiggs/condor/"
+    condordir = "condor/"
     homedir = f"/store/user/{args.username}/boostedhiggs/"
     outdir = "/eos/uscms/" + homedir + args.tag + "_" + args.year + "/"
 
     # check only specific samples
     slist = args.slist.split(",") if args.slist is not None else None
+    print(slist)
 
-    prepend = ""
-    metadata = prepend + f"condor/{args.tag}_{args.year}/metadata_{args.configkey}.json"
+    metadata = f"{condordir}/{args.tag}_{args.year}/metadata_{args.configkey}.json"
+
+    print(metadata)
 
     try:
         with open(metadata, "r") as f:
@@ -30,16 +34,20 @@ def main(args):
     except KeyError:
         raise Exception(f"Could not open file {metadata}")
 
-    config = prepend + f"condor/{args.tag}_{args.year}/{args.config}"
-    splitname = prepend + f"condor/{args.tag}_{args.year}/pfnano_splitting.yaml"
+    config = f"{condordir}/{args.tag}_{args.year}/{args.config}"
+    splitname = f"{condordir}/{args.tag}_{args.year}/pfnano_splitting.yaml"
 
     print(f"Loading files from {splitname}")
     _, nfiles_per_job = loadFiles(config, args.configkey, args.year, args.pfnano, slist, splitname)
 
+    samples = slist if args.slist is not None else files.keys()
     nfailed = 0
     # submit a cluster of jobs per sample
-    for sample in files.keys():
+    for sample in samples:
         tot_files = len(files[sample])
+
+        if sample not in nfiles_per_job.keys():
+            continue
 
         njobs = ceil(tot_files / nfiles_per_job[sample])
 
@@ -50,6 +58,7 @@ def main(args):
             print(f"-----> SAMPLE {sample} HAS RAN INTO ERROR, #jobs produced: {njobs_produced}, # jobs {njobs}")
             for i, x in enumerate(range(0, njobs * nfiles_per_job[sample], nfiles_per_job[sample])):
                 fname = f"{x}-{x+nfiles_per_job[sample]}"
+                print(f"{outdir}/{sample}/outfiles/{fname}.pkl")
                 if not os.path.exists(f"{outdir}/{sample}/outfiles/{fname}.pkl"):
                     print(f"file {fname}.pkl wasn't produced which means job_idx {i} failed..")
                     id_failed.append(i)
@@ -77,7 +86,7 @@ def main(args):
             if iresub == 0:
                 f_fail = fname.replace(".jdl", "_resubmit.jdl")
             else:
-                f_fail = fname.replace(".jdl", "_resubmit_{iresub}.jdl")
+                f_fail = fname.replace(".jdl", f"_resubmit_{iresub}.jdl")
             condor_new = open(f_fail, "w")
             for line in condor_file:
                 if "queue" in line:
@@ -110,9 +119,19 @@ if __name__ == "__main__":
     )
     parser.add_argument("--tag", dest="tag", default="Test", help="process tag", type=str)
     parser.add_argument(
-        "--config", dest="config", required=True, help="path to datafiles, e.g. samples_inclusive.yaml", type=str
+        "--config",
+        dest="config",
+        required=True,
+        help="path to datafiles, e.g. samples_inclusive.yaml",
+        type=str,
     )
-    parser.add_argument("--key", dest="configkey", default=None, help="config key: [data, mc, ... ]", type=str)
+    parser.add_argument(
+        "--key",
+        dest="configkey",
+        default=None,
+        help="config key: [data, mc, ... ]",
+        type=str,
+    )
     parser.add_argument(
         "--slist",
         dest="slist",

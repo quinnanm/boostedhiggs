@@ -20,5 +20,3 @@ python condor/tagger_submit.py --year 2018 --tag test --sample QCD_Pt_170to300 -
 python condor/tagger_submit.py --year 2018 --tag test --sample QCD_Pt_300to470 --n 5 --starti 1 --submit
 python condor/tagger_submit.py --year 2018 --tag test --sample QCD_Pt_470to600 --n 5 --starti 1 --submit
 python condor/tagger_submit.py --year 2018 --tag test --sample QCD_Pt_600to800 --n 5 --starti 1 --submit
-
-

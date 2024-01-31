@@ -23,7 +23,21 @@ samples:
 
 regions_sel:
 
-    ### no VBF and ggF categorization
+    ### ParT vs ParT-Finetuned (no VBF and ggF categorization)
+    "SR1995ParT": (fj_ParT_score>0.995) & (n_bjets_T==0)
+    "SR1999ParT": (fj_ParT_score>0.999) & (n_bjets_T==0)
+    "SR199ParT": (fj_ParT_score>0.99) & (n_bjets_T==0)
+    "SR1985ParT": (fj_ParT_score>0.985) & (n_bjets_T==0)
+    "SR198ParT": (fj_ParT_score>0.98) & (n_bjets_T==0)
+    "SR1975ParT": (fj_ParT_score>0.975) & (n_bjets_T==0)
+    "SR197ParT": (fj_ParT_score>0.97) & (n_bjets_T==0)
+    "SR1965ParT": (fj_ParT_score>0.965) & (n_bjets_T==0)
+    "SR196ParT": (fj_ParT_score>0.96) & (n_bjets_T==0)
+    "SR1955ParT": (fj_ParT_score>0.955) & (n_bjets_T==0)
+    "SR195ParT": (fj_ParT_score>0.95) & (n_bjets_T==0)
+
+    "SR1995": (fj_ParT_score_finetuned>0.995) & (n_bjets_T==0)
+    "SR1999": (fj_ParT_score_finetuned>0.999) & (n_bjets_T==0)
     "SR199": (fj_ParT_score_finetuned>0.99) & (n_bjets_T==0)
     "SR1985": (fj_ParT_score_finetuned>0.985) & (n_bjets_T==0)
     "SR198": (fj_ParT_score_finetuned>0.98) & (n_bjets_T==0)
@@ -95,12 +109,18 @@ regions_sel:
     "SR2ggF97and985": (fj_ParT_score_finetuned>0.97) & (fj_ParT_score_finetuned<0.985) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
     "SR2ggF965and985": (fj_ParT_score_finetuned>0.965) & (fj_ParT_score_finetuned<0.985) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
     "SR2ggF96and985": (fj_ParT_score_finetuned>0.96) & (fj_ParT_score_finetuned<0.985) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
+    "SR2ggF955and985": (fj_ParT_score_finetuned>0.955) & (fj_ParT_score_finetuned<0.985) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
+    "SR2ggF95and985": (fj_ParT_score_finetuned>0.95) & (fj_ParT_score_finetuned<0.985) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
 
     "SR2ggF975and98": (fj_ParT_score_finetuned>0.975) & (fj_ParT_score_finetuned<0.98) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
     "SR2ggF97and98": (fj_ParT_score_finetuned>0.97) & (fj_ParT_score_finetuned<0.98) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
     "SR2ggF965and98": (fj_ParT_score_finetuned>0.965) & (fj_ParT_score_finetuned<0.98) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
     "SR2ggF96and98": (fj_ParT_score_finetuned>0.96) & (fj_ParT_score_finetuned<0.98) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
+    "SR2ggF955and98": (fj_ParT_score_finetuned>0.955) & (fj_ParT_score_finetuned<0.98) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
+    "SR2ggF95and98": (fj_ParT_score_finetuned>0.95) & (fj_ParT_score_finetuned<0.98) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
 
     "SR2ggF97and975": (fj_ParT_score_finetuned>0.97) & (fj_ParT_score_finetuned<0.975) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
     "SR2ggF965and975": (fj_ParT_score_finetuned>0.965) & (fj_ParT_score_finetuned<0.975) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
     "SR2ggF96and975": (fj_ParT_score_finetuned>0.96) & (fj_ParT_score_finetuned<0.975) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
+    "SR2ggF955and975": (fj_ParT_score_finetuned>0.955) & (fj_ParT_score_finetuned<0.975) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
+    "SR2ggF95and975": (fj_ParT_score_finetuned>0.95) & (fj_ParT_score_finetuned<0.975) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )

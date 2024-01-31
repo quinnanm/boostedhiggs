@@ -271,17 +271,26 @@ class InputProcessor(ProcessorABC):
         # bjet
         Others = {}
         Others["n_bjets_L"] = (
-            ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["L"], axis=1)
+            ak.sum(
+                ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["L"],
+                axis=1,
+            )
             .to_numpy()
             .filled(fill_value=0)
         )
         Others["n_bjets_M"] = (
-            ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["M"], axis=1)
+            ak.sum(
+                ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["M"],
+                axis=1,
+            )
             .to_numpy()
             .filled(fill_value=0)
         )
         Others["n_bjets_T"] = (
-            ak.sum(ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["T"], axis=1)
+            ak.sum(
+                ak4_outside_ak8.btagDeepFlavB > btagWPs["deepJet"][self._year]["T"],
+                axis=1,
+            )
             .to_numpy()
             .filled(fill_value=0)
         )
@@ -341,7 +350,10 @@ class InputProcessor(ProcessorABC):
         # genjet_vars, matched_gen_jet_mask = get_genjet_vars(events, fatjets)
         # AllGenVars = {**GenVars, **genjet_vars}
 
-        AllGenVars = {**GenVars, **{"fj_genjetmass": candidatefj.matched_gen.mass}}  # add gen jet mass
+        AllGenVars = {
+            **GenVars,
+            **{"fj_genjetmass": candidatefj.matched_gen.mass},
+        }  # add gen jet mass
 
         # loop to keep only the specified variables in `self.GenPartvars`
         # if `GenVars` doesn't contain a variable, that variable is not applicable to this sample so fill with 0s

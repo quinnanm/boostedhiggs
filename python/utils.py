@@ -17,7 +17,6 @@ plt.style.use(hep.style.CMS)
 
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
-
 combine_samples = {
     # data
     "SingleElectron_": "Data",
@@ -26,7 +25,7 @@ combine_samples = {
     # signal
     "GluGluHToWW_Pt-200ToInf_M-125": "ggF",
     "HToWW_M-125": "VH",
-    "VBFHToWWToLNuQQ_M-125_withDipoleRecoil": "VBF",
+    "VBF": "VBF",
     "ttHToNonbb_M125": "ttH",
     # bkg
     "QCD_Pt": "QCD",
@@ -39,6 +38,7 @@ combine_samples = {
     "WZ": "Diboson",
     "ZZ": "Diboson",
     "GluGluHToTauTau": "HTauTau",
+    "EWK": "EWKvjets",
 }
 signals = ["ggF", "ttH", "VH", "VBF"]
 
@@ -116,30 +116,35 @@ color_by_sample = {
     #     "GluGluHToTauTau": "tab:cyan",
     #     "ZHToTauTau": "tab:cyan",
     #     "VBFHToTauTau": "tab:cyan",
+    # "WJetsLNu_unmatched": "tab:grey",
+    # "WJetsLNu_matched": "tab:green",
+    "EWKvjets": "tab:grey",
 }
 
 plot_labels = {
-    # "ggF": "ggH(WW)-Pt200",
-    "ggF": "ggH",
+    "ggF": "ggF",
     "VH": "VH",
     # "VH": "VH(WW)",
     # "VBF": r"VBFH(WW) $(qq\ell\nu)$",
     "VBF": r"VBF",
     # "ttH": "ttH(WW)",
-    "ttH": "ttH",
+    "ttH": r"$t\bar{t}$H",
     "DYJets": r"Z$(\ell\ell)$+jets",
     "QCD": "Multijet",
     "Diboson": "VV",
     "WJetsLNu": r"W$(\ell\nu)$+jets",
     "TTbar": r"$t\bar{t}$+jets",
-    "WZQQ": r"W/Z$(qq)$",
-    "SingleTop": r"Single Top",
+    "WZQQ": r"V$(qq)$",
+    "SingleTop": r"Single T",
     #     "WplusHToTauTau": "WplusHToTauTau",
     #     "WminusHToTauTau": "WminusHToTauTau",
     #     "ttHToTauTau": "ttHToTauTau",
     #     "GluGluHToTauTau": "GluGluHToTauTau",
     #     "ZHToTauTau": "ZHToTauTau",
     #     "VBFHToTauTau": "VBFHToTauTau"
+    "WJetsLNu_unmatched": r"W$(\ell\nu)$+jets unmatched",
+    "WJetsLNu_matched": r"W$(\ell\nu)$+jets matched",
+    "EWKvjets": "EWK VJets",
 }
 
 # sig_labels = {
@@ -171,6 +176,9 @@ axis_dict = {
     "rec_higgs_m": hist2.axis.Variable(
         list(range(50, 240, 20)), name="var", label=r"Higgs reconstructed mass [GeV]", overflow=True
     ),
+    "rec_higgs_etajet_m": hist2.axis.Variable(
+        list(range(50, 240, 20)), name="var", label=r"PKU definition Higgs reconstructed mass [GeV]", overflow=True
+    ),
     "rec_higgs_pt": hist2.axis.Regular(30, 0, 1000, name="var", label=r"Higgs reconstructed $p_T$ [GeV]", overflow=True),
     "fj_pt_over_lep_pt": hist2.axis.Regular(35, 1, 10, name="var", label=r"$p_T$(Jet) / $p_T$(Lepton)", overflow=True),
     "rec_higgs_pt_over_lep_pt": hist2.axis.Regular(
@@ -197,7 +205,7 @@ axis_dict = {
     "nj": hist2.axis.Regular(40, 0, 10, name="var", label="number of jets outside candidate jet", overflow=True),
     "inclusive_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
     "fj_ParT_score_finetuned": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
-    "fj_ParT_inclusive_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
+    "fj_ParT_inclusive_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"$T_{HWW}$", overflow=True),
     "fj_ParT_all_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
 }
 
@@ -336,7 +344,7 @@ def plot_hists(
                 "elinewidth": 1,
             }
 
-            if blind_region and (var == "rec_higgs_m"):
+            if blind_region and ("rec_higgs" in var):
                 massbins = data.axes[-1].edges
                 lv = int(np.searchsorted(massbins, blind_region[0], "right"))
                 rv = int(np.searchsorted(massbins, blind_region[1], "left") + 1)
@@ -474,12 +482,12 @@ def plot_hists(
                     soverb_integrated = round((s / b).item(), 2)
                     # sax.legend(title=f"S/sqrt(B) (in {range_min}-{range_max})={soverb_integrated:.2f}")
 
-                if "SR1" in text_:
-                    sax.set_ylim(0, 1.7)
-                    sax.set_yticks([0, 0.5, 1.0, 1.5])
-                elif "SR2" in text_:
-                    sax.set_ylim(0, 0.7)
-                    sax.set_yticks([0, 0.2, 0.4, 0.6])
+                # if "SR1" in text_:
+                # sax.set_ylim(0, 1.7)
+                # sax.set_yticks([0, 0.5, 1.0, 1.5])
+                # elif "SR2" in text_:
+                #     sax.set_ylim(0, 0.7)
+                #     sax.set_yticks([0, 0.2, 0.4, 0.6])
 
                 # sax.set_ylim(0, 1.2)
                 # sax.set_yticks([0, 0.5, 1.0])
@@ -558,7 +566,7 @@ def plot_hists(
         else:
             ax.set_ylim(0)
 
-        hep.cms.lumitext("%.1f " % luminosity + r"fb$^{-1}$ (13 TeV)", ax=ax, fontsize=20)
+        hep.cms.lumitext("%.0f " % luminosity + r"fb$^{-1}$ (13 TeV)", ax=ax, fontsize=20)
         hep.cms.text("Work in Progress", ax=ax, fontsize=15)
 
         # save plot

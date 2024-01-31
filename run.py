@@ -18,6 +18,7 @@ def main(args):
     if not os.path.exists("./outfiles"):
         os.makedirs("./outfiles")
 
+    channels = ["ele", "mu"]
     if args.channels:
         channels = args.channels.split(",")
 
@@ -48,7 +49,13 @@ def main(args):
             # hopefully this step is avoided in condor jobs that have metadata.json
             from condor.file_utils import loadFiles
 
-            files, _ = loadFiles(args.config, args.configkey, args.year, args.pfnano, args.sample.split(","))
+            files, _ = loadFiles(
+                args.config,
+                args.configkey,
+                args.year,
+                args.pfnano,
+                args.sample.split(","),
+            )
 
             # print(files)
 
@@ -103,9 +110,12 @@ def main(args):
         p = vhProcessor(
             year=year,
             yearmod=yearmod,
-            channel=channels[0],
+            # channel=channels[0],
+            channels=channels,
             inference=args.inference,
+            systematics=args.systematics,
             output_location=f"./outfiles/{job_name}",
+            region=args.region,
         )
 
     elif args.processor == "lumi":
@@ -229,10 +239,22 @@ if __name__ == "__main__":
     parser.add_argument("--starti", dest="starti", default=0, help="start index of files", type=int)
     parser.add_argument("--n", dest="n", default=-1, help="number of files to process", type=int)
     parser.add_argument("--config", dest="config", default=None, help="path to datafiles", type=str)
-    parser.add_argument("--key", dest="configkey", default=None, help="config key: [data, mc, ... ]", type=str)
+    parser.add_argument(
+        "--key",
+        dest="configkey",
+        default=None,
+        help="config key: [data, mc, ... ]",
+        type=str,
+    )
     parser.add_argument("--sample", dest="sample", default=None, help="specify sample", type=str)
     parser.add_argument("--processor", dest="processor", required=True, help="processor", type=str)
-    parser.add_argument("--chunksize", dest="chunksize", default=10000, help="chunk size in processor", type=int)
+    parser.add_argument(
+        "--chunksize",
+        dest="chunksize",
+        default=10000,
+        help="chunk size in processor",
+        type=int,
+    )
     parser.add_argument("--channels", dest="channels", default=None, help="channels separated by commas")
 
     parser.add_argument(

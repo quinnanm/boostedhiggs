@@ -39,37 +39,81 @@ sel = {
         "mu": [[("lep_pt", "<", 55), (("lep_isolation", "<", 0.15))], [("lep_pt", ">=", 55)]],
         "ele": [[("lep_pt", "<", 120), (("lep_isolation", "<", 0.15))], [("lep_pt", ">=", 120)]],
     },
+    "nothing": {
+        "mu": [("lep_pt", ">", 0)],
+        "ele": [("lep_pt", ">", 0)],
+    },
 }
 
 input_feat = {
-    "v2-1111-10noMass1": [
-        "fj_pt",
-        "fj_msoftdrop",
-        "met_relpt",
-        # "met_fj_dphi",
-        "lep_fj_dr",
-        "n_bjets_L",
-        "n_bjets_M",
-        "n_bjets_T",
-        "lep_isolation",
-        "lep_misolation",
-    ],
-    "v2_1-12": [
-        "fj_pt",
-        "fj_msoftdrop",
-        "met_relpt",
-        # "met_fj_dphi",
-        "lep_fj_dr",
-        "n_bjets_L",
-        "n_bjets_M",
-        "n_bjets_T",
-        "lep_isolation",
-        "lep_misolation",
-    ],
+    # "v2-1111-10noMass1": [
+    #     "fj_pt",
+    #     "fj_msoftdrop",
+    #     "met_relpt",
+    #     # "met_fj_dphi",
+    #     "lep_fj_dr",
+    #     "n_bjets_L",
+    #     "n_bjets_M",
+    #     "n_bjets_T",
+    #     "lep_isolation",
+    #     "lep_misolation",
+    # ],
+    # "v2_1-12": [
+    #     "fj_pt",
+    #     "fj_msoftdrop",
+    #     "met_relpt",
+    #     # "met_fj_dphi",
+    #     "lep_fj_dr",
+    #     "n_bjets_L",
+    #     "n_bjets_M",
+    #     "n_bjets_T",
+    #     "lep_isolation",
+    #     "lep_misolation",
+    # ],
     # "v2_10_5": [],
     # "v2_10_12": [],
     # "v2_nor1": [],
     "v2_nor2": [],
+    # "v20_1": [],
+    # "v20_2": [],
+    # "v20_3": [],
+    # "v2_nor2_1": [],
+    # "v3_1": [],
+    # "v4_1": [
+    #     "mjj",
+    #     "deta",
+    # ],
+    # "v30_1": [],
+    # "v30_2": [],
+    # "v30_3": [],
+    # "v30_4": [],
+    # "v30_5": [],
+    # "v30_6": [],
+    # "v30_7": [],
+    # "v30_8": [],
+    # "v30_9": [],
+    # "v30_10": [],
+    # "v30_11": [],
+    # "v30_12": [],
+    # "v30_13": [],
+    "v30_15": [],
+    "v30_16": [],
+    "v30_17": [],
+    "v30_18": [],
+    "v32_18": [],
+    # "v31_1": [],
+    # "v31_2": [],
+    # "v31_3": [],
+    # "v31_4": [],
+    # "v31_5": [],
+    # "v31_6": [],
+    # "v32_1": [],
+    # "v32_2": [],
+    # "v30_even_1": [],
+    # "v31_1": [],
+    # "v32_1": [],
+    # "v33_1": [],
+    # "v34_1": [],
 }
 
 
@@ -160,12 +204,12 @@ def make_events_dict(
                     continue
 
                 if not keep_weights:
-                    data = data[data.columns.drop(list(data.filter(regex="weight_mu_")))]
-                    data = data[data.columns.drop(list(data.filter(regex="weight_ele_")))]
-                    data = data[data.columns.drop(list(data.filter(regex="L_btag")))]
-                    data = data[data.columns.drop(list(data.filter(regex="M_btag")))]
-                    data = data[data.columns.drop(list(data.filter(regex="T_btag")))]
-                    data = data[data.columns.drop(list(data.filter(regex="veto")))]
+                    # data = data[data.columns.drop(list(data.filter(regex="weight_mu_")))]
+                    # data = data[data.columns.drop(list(data.filter(regex="weight_ele_")))]
+                    # data = data[data.columns.drop(list(data.filter(regex="L_btag")))]
+                    # data = data[data.columns.drop(list(data.filter(regex="M_btag")))]
+                    # data = data[data.columns.drop(list(data.filter(regex="T_btag")))]
+                    # data = data[data.columns.drop(list(data.filter(regex="veto")))]
                     # data = data[data.columns.drop(list(data.filter(regex="fj_H_VV_")))]
                     data = data[data.columns.drop(list(data.filter(regex="_up")))]
                     data = data[data.columns.drop(list(data.filter(regex="_down")))]
@@ -190,11 +234,14 @@ def make_events_dict(
                     import onnxruntime as ort
                     import scipy
 
-                    PATH = f"../../weaver-core-dev/experiments_finetuning/{modelv}/model.onnx"
+                    if "v2_nor2" in modelv:
+                        PATH = "../../weaver-core-dev/experiments_finetuning/v2_nor2/model.onnx"
+                    else:
+                        PATH = f"../../weaver-core-dev/experiments_finetuning/{modelv}/model.onnx"
 
                     data["met_relpt"] = data["met_pt"] / data["fj_pt"]
 
-                    if modelv in ["v2-1111-10noMass1", "v2_1-12"]:
+                    if modelv in ["v2-1111-10noMass1", "v2_1-12", "v4_1"]:
                         input_dict = {
                             "basic": data.loc[:, inp].values.astype("float32"),
                             "highlevel": data.loc[:, "fj_ParT_hidNeuron000":"fj_ParT_hidNeuron127"].values.astype("float32"),
@@ -216,6 +263,13 @@ def make_events_dict(
 
                     if modelv == "v2_nor2":
                         data["fj_ParT_score_finetuned"] = scipy.special.softmax(outputs[0], axis=1)[:, 0]
+                    elif modelv == "v2_nor2_1":
+                        data["fj_ParT_score_finetuned2"] = scipy.special.softmax(outputs[0], axis=1)[:, 0] / (
+                            scipy.special.softmax(outputs[0], axis=1)[:, 0] + scipy.special.softmax(outputs[0], axis=1)[:, 1]
+                        )
+                    elif modelv == "v4_1":
+                        data["fj_ParT_score_finetuned_ggF"] = scipy.special.softmax(outputs[0], axis=1)[:, 0]
+                        data["fj_ParT_score_finetuned_VBF"] = scipy.special.softmax(outputs[0], axis=1)[:, 1]
                     else:
                         data[f"fj_ParT_score_finetuned_{modelv}"] = scipy.special.softmax(outputs[0], axis=1)[:, 0]
 
