@@ -46,6 +46,9 @@ def main(args):
     for sample in samples:
         tot_files = len(files[sample])
 
+        if sample not in nfiles_per_job.keys():
+            continue
+
         njobs = ceil(tot_files / nfiles_per_job[sample])
 
         njobs_produced = len(glob.glob1(f"{outdir}/{sample}/outfiles", "*.pkl"))
