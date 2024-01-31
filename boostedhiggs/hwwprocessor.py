@@ -260,28 +260,28 @@ class HwwProcessor(processor.ProcessorABC):
         candidatefj = ak.firsts(good_fatjets[fj_idx_lep])
 
         # AK4 jets
+        jets, jec_shifted_jetvars = get_jec_jets(events, events.Jet, self._year, not self.isMC, self.jecs, fatjets=False)
+
         jet_selector = (
-            (events.Jet.pt > 30)
-            & (abs(events.Jet.eta) < 5.0)
-            & events.Jet.isTight
-            & ((events.Jet.pt >= 50) | ((events.Jet.pt < 50) & (events.Jet.puId & 2) == 2))
+            (jets.pt > 30)
+            & (abs(jets.eta) < 5.0)
+            & jets.isTight
+            & ((jets.pt >= 50) | ((jets.pt < 50) & (jets.puId & 2) == 2))
         )
         # reject EE noisy jets for 2017  ( not applicable for UL )
         # if self._year == "2017":
-        #    noise_jets = (events.Jet.pt < 50) & ( (abs(events.Jet.eta) > 2.65) | (abs(events.Jet.eta) < 3.139) )
+        #    noise_jets = (jets.pt < 50) & ( (abs(jets.eta) > 2.65) | (abs(jets.eta) < 3.139) )
         #    jet_selector = jet_selector & ~noise_jets
+        goodjets = jets[jet_selector]
 
-        ht = ak.sum(events.Jet[jet_selector].pt, axis=1)
-
-        goodjets = events.Jet[jet_selector]
-        goodjets, jec_shifted_jetvars = get_jec_jets(events, goodjets, self._year, not self.isMC, self.jecs, fatjets=False)
+        ht = ak.sum(goodjets.pt, axis=1)
 
         # AK4 jets outside AK8 jet
         ak4_outside_ak8 = goodjets[(goodjets.delta_r(candidatefj) > 0.8)]
 
         # b-jets (only for jets with abs(eta)<2.5)
-        bjet_selector = (jet_selector) & (events.Jet.delta_r(candidatefj) > 0.8) & (abs(events.Jet.eta) < 2.5)
-        ak4_bjet_candidate = events.Jet[bjet_selector]
+        bjet_selector = (jet_selector) & (jets.delta_r(candidatefj) > 0.8) & (abs(jets.eta) < 2.5)
+        ak4_bjet_candidate = jets[bjet_selector]
 
         NumFatjets = ak.num(good_fatjets)
         FirstFatjet = ak.firsts(good_fatjets[:, 0:1])
