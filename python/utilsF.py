@@ -241,11 +241,6 @@ axis_dict = {
     "lep_misolation_lowpt": hist2.axis.Regular(
         35, 0, 0.2, name="var", label=r"Muon mini-isolation (low $p_T$)", overflow=True
     ),
-    "0btag_1b": hist2.axis.Regular(35, -0.5, 1.5, name="var", label=r"0btag_1b", overflow=True),
-    "1pbtag_1b": hist2.axis.Regular(35, -0.5, 1.5, name="var", label=r"1pbtag_1b", overflow=True),
-    "btag_1a": hist2.axis.Regular(35, 0.5, 1.5, name="var", label=r"btag_1a", overflow=True),
-    "T_btagSF": hist2.axis.Regular(35, -0.5, 1.5, name="var", label=r"T_btagSF", overflow=True),
-    "vetoT_btagSF": hist2.axis.Regular(35, 0.5, 1.5, name="var", label=r"vetoT_btagSF", overflow=True),
 }
 
 
@@ -318,40 +313,13 @@ def plot_hists(
         # background
         bkg = [h[{"samples": label}] for label in bkg_labels]
 
-        if add_data and data and len(bkg) > 0:
-            if add_soverb and len(signal) > 0:
-                fig, (ax, rax, sax, dax) = plt.subplots(
-                    nrows=4,
-                    ncols=1,
-                    figsize=(8, 8),
-                    gridspec_kw={"height_ratios": (4, 1, 1, 1), "hspace": 0.07},
-                    sharex=True,
-                )
-            else:
-                fig, (ax, rax) = plt.subplots(
-                    nrows=2,
-                    ncols=1,
-                    figsize=(8, 8),
-                    gridspec_kw={"height_ratios": (4, 1), "hspace": 0.07},
-                    sharex=True,
-                )
-                sax = None
-                dax = None
-        else:
-            if add_soverb and len(signal) > 0:
-                fig, (ax, sax, dax) = plt.subplots(
-                    nrows=3,
-                    ncols=1,
-                    figsize=(8, 8),
-                    gridspec_kw={"height_ratios": (4, 1, 1), "hspace": 0.07},
-                    sharex=True,
-                )
-                rax = None
-            else:
-                fig, ax = plt.subplots(figsize=(8, 8))
-                rax = None
-                sax = None
-                dax = None
+        fig, (ax, rax) = plt.subplots(
+            nrows=2,
+            ncols=1,
+            figsize=(8, 8),
+            gridspec_kw={"height_ratios": (4, 1), "hspace": 0.07},
+            sharex=True,
+        )
 
         errps = {
             "hatch": "////",
@@ -454,25 +422,21 @@ def plot_hists(
         if len(signal) > 0:
             tot_signal = None
             for i, sig in enumerate(signal_mult):
-                lab_sig_mult = f"{mult_factor} * {plot_labels[signal_labels[i]]}"
-                if mult_factor == 1:
-                    lab_sig_mult = f"{plot_labels[signal_labels[i]]}"
-                hep.histplot(
-                    sig,
-                    ax=ax,
-                    label=lab_sig_mult,
-                    linewidth=3,
-                    color=color_by_sample[signal_labels[i]],
-                    flow="none",
-                )
-
                 if tot_signal is None:
                     tot_signal = signal[i].copy()
                 else:
                     tot_signal = tot_signal + signal[i]
 
             # plot the total signal (w/o scaling)
-            hep.histplot(tot_signal, ax=ax, label="ggF+VBF+VH+ttH", linewidth=3, color="tab:red", flow="none")
+            tot_signal *= mult_factor
+            hep.histplot(
+                tot_signal,
+                ax=ax,
+                label=r"ggF+VBF+VH+ttH $\times$" + f"{mult_factor}",
+                linewidth=2,
+                color="tab:red",
+                flow="none",
+            )
             # add MC stat errors
             ax.stairs(
                 values=tot_signal.values() + np.sqrt(tot_signal.values()),
@@ -481,121 +445,11 @@ def plot_hists(
                 **errps,
             )
 
-            if sax is not None:
-                totsignal_val = tot_signal.values()
-                # replace values where bkg is 0
-                totsignal_val[tot_val == 0] = 0
-                soverb_val = totsignal_val / (tot_val)
-                hep.histplot(
-                    soverb_val,
-                    tot_signal.axes[0].edges,
-                    label="Total Signal",
-                    ax=sax,
-                    linewidth=3,
-                    color="tab:red",
-                    flow="none",
-                )
-
-                # totsignal_val = tot_signal.values()
-                # # replace values where bkg is 0
-                # totsignal_val[tot_val == 0] = 0
-                # hep.histplot(
-                #     totsignal_val,
-                #     tot_signal.axes[0].edges,
-                #     label="Total Signal",
-                #     ax=dax,
-                #     linewidth=3,
-                #     color="tab:red",
-                #     flow="none",
-                # )
-
-                for i, sig in enumerate(signal_mult):
-                    lab_sig_mult = f"{mult_factor} * {plot_labels[signal_labels[i]]}"
-                    if mult_factor == 1:
-                        lab_sig_mult = f"{plot_labels[signal_labels[i]]}"
-                    hep.histplot(
-                        sig,
-                        ax=dax,
-                        label=lab_sig_mult,
-                        linewidth=3,
-                        color=color_by_sample[signal_labels[i]],
-                        flow="none",
-                    )
-
-                # integrate soverb in a given range for fj_minus_lep_mass
-                if var == "fj_minus_lep_m":
-                    bin_array = tot_signal.axes[0].edges[:-1]  # remove last element since bins have one extra element
-                    range_max = 150
-                    range_min = 0
-
-                    condition = (bin_array >= range_min) & (bin_array <= range_max)
-
-                    s = totsignal_val[condition].sum()  # sum/integrate signal counts in the range
-                    b = np.sqrt(tot_val[condition].sum())  # sum/integrate bkg counts in the range and take sqrt
-
-                    soverb_integrated = round((s / b).item(), 2)
-                    # sax.legend(title=f"S/sqrt(B) (in 0-150)={soverb_integrated:.2f}")
-                # integrate soverb in a given range for rec_higgs_m
-                if var == "rec_higgs_m":
-                    bin_array = tot_signal.axes[0].edges[:-1]  # remove last element since bins have one extra element
-                    range_max = 160
-                    range_min = 80
-
-                    condition = (bin_array >= range_min) & (bin_array <= range_max)
-
-                    s = totsignal_val[condition].sum()  # sum/integrate signal counts in the range
-                    b = np.sqrt(tot_val[condition].sum())  # sum/integrate bkg counts in the range and take sqrt
-
-                    soverb_integrated = round((s / b).item(), 2)
-                    # sax.legend(title=f"S/sqrt(B) (in {range_min}-{range_max})={soverb_integrated:.2f}")
-                sax.set_ylim(0, 0.013)
-                sax.set_yticks([0, 0.01])
-
-                if len(years) > 1:
-                    # dax.set_ylim(0, 25)
-                    # dax.set_yticks([0, 10, 20])
-
-                    if "ParT" in var:
-                        sax.set_ylim(0, 0.08)
-                        sax.set_yticks([0, 0.03, 0.06])
-                        # dax.set_ylim(0, 38)
-                        # dax.set_yticks([0, 10, 20, 30])
-
-                else:
-                    # dax.set_ylim(0, 10)
-                    # dax.set_yticks([0, 4, 8])
-
-                    if "ParT" in var:
-                        sax.set_ylim(0, 0.08)
-                        sax.set_yticks([0, 0.03, 0.06])
-                        # dax.set_ylim(0, 18)
-                        # dax.set_yticks([0, 10])
-
-                # sax.set_ylim(0, 0.5)
-                # sax.set_yticks([0, 0.3])
-                # sax.set_ylim(0, 0.5)
-                # sax.set_yticks([0, 0.2, 0.4])
-
         ax.set_ylabel("Events")
-        if sax is not None:
-            ax.set_xlabel("")
-            if rax is not None:
-                rax.set_xlabel("")
-                rax.set_ylabel("Ratio", fontsize=20, labelpad=15)
-            sax.set_ylabel(r"S/B", fontsize=20, y=0.4, labelpad=0)
-            # sax.set_xlabel(f"{h.axes[-1].label}")  # assumes the variable to be plotted is at the last axis
 
-            dax.set_ylabel(r"S", fontsize=20, y=0.4, labelpad=8)
-            dax.set_xlabel(f"{h.axes[-1].label}")  # assumes the variable to be plotted is at the last axis
-
-        elif rax is not None:
-            ax.set_xlabel("")
-            sax.set_xlabel("")
-            dax.set_xlabel("")
-
-            rax.set_xlabel(f"{h.axes[-1].label}")  # assumes the variable to be plotted is at the last axis
-
-            rax.set_ylabel("Ratio", fontsize=20, labelpad=15)
+        ax.set_xlabel("")
+        rax.set_xlabel(f"{h.axes[-1].label}")  # assumes the variable to be plotted is at the last axis
+        rax.set_ylabel("Data/MC", fontsize=20, labelpad=10)
 
         # get handles and labels of legend
         handles, labels = ax.get_legend_handles_labels()
@@ -614,6 +468,18 @@ def plot_hists(
         hand = [handles[-1]] + [handles[i] for i in order] + handles[len(bkg) : -1]
         lab = [labels[-1]] + [labels[i] for i in order] + labels[len(bkg) : -1]
 
+        # plot bkg, then signal, then data
+        hand = [handles[i] for i in order] + handles[len(bkg) : -1] + [handles[-1]]
+        lab = [labels[i] for i in order] + labels[len(bkg) : -1] + [labels[-1]]
+
+        lab_new, hand_new = [], []
+        for i in range(len(lab)):
+            if "Stat" in lab[i]:
+                continue
+
+            lab_new.append(lab[i])
+            hand_new.append(hand[i])
+
         if len(channels) == 1:
             if channels[0] == "ele":
                 chlab = text_ + " electron"
@@ -623,59 +489,19 @@ def plot_hists(
             chlab = text_
 
         ax.legend(
-            [hand[idx] for idx in range(len(hand))],
-            [lab[idx] for idx in range(len(lab))],
-            bbox_to_anchor=(1.05, 1),
-            loc="upper left",
-            title=chlab,
+            [hand_new[idx] for idx in range(len(hand_new))],
+            [lab_new[idx] for idx in range(len(lab_new))],
+            ncol=2
+            #             bbox_to_anchor=(1.05, 1),
+            #             loc="upper left",
         )
 
-        # if len(channels) == 2:
-        #     ax.legend(
-        #         [hand[idx] for idx in range(len(hand))],
-        #         [lab[idx] for idx in range(len(lab))],
-        #         bbox_to_anchor=(1.05, 1),
-        #         loc="upper left",
-        #         title="Semi-Leptonic Channel",
-        #     )
-        # else:
-        #     ax.legend(
-        #         [hand[idx] for idx in range(len(hand))],
-        #         [lab[idx] for idx in range(len(lab))],
-        #         bbox_to_anchor=(1.05, 1),
-        #         loc="upper left",
-        #         title=f"{label_by_ch[ch]} Channel",
-        #     )
-
+        _, a = ax.get_ylim()
         if logy:
             ax.set_yscale("log")
-            ax.set_ylim(1e-1)
+            ax.set_ylim(1e-1, a * 1.5)
         else:
-            ax.set_ylim(0)
-
-        _, a = dax.get_ylim()
-        dax.set_ylim(0, a + 4)
-
-        if a > 100:
-            dax.set_yticks([90])
-        elif a > 40:
-            dax.set_yticks([40])
-        elif a > 20:
-            dax.set_yticks([20])
-        elif a > 10:
-            dax.set_yticks([10])
-        elif a > 5:
-            dax.set_ylim(0, a + 2)
-            dax.set_yticks([5])
-        elif a > 3:
-            dax.set_ylim(0, a + 1)
-            dax.set_yticks([3])
-        elif a > 2:
-            dax.set_ylim(0, a + 1)
-            dax.set_yticks([2])
-        else:
-            dax.set_ylim(0, a + 1)
-            dax.set_yticks([1])
+            ax.set_ylim(0, a * 1.5)
 
         if "Num" in var:
             ax.set_xlim(h.axes["var"].edges[0], h.axes["var"].edges[-1])

@@ -15,9 +15,9 @@
 # 8) Impacts: initial fit (--impactsi / -i), per-nuisance fits (--impactsf $nuisance), collect (--impactsc $nuisances)
 # 9) Bias test: run a bias test on toys (using post-fit nuisances) with expected signal strength
 #    given by --bias X.
-#
+
 # Specify seed with --seed (default 42) and number of toys with --numtoys (default 100)
-#
+
 # Usage ./run_blinded.sh [-wblsdgt] [--numtoys 100] [--seed 42]
 ####################################################################################################
 
