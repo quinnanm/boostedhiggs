@@ -34,7 +34,12 @@ FILL_NONE_VALUE = -99999
 JET_DR = 0.8
 
 
-def get_pid_mask(genparts: GenParticleArray, pdgids: Union[int, list], ax: int = 2, byall: bool = True) -> ak.Array:
+def get_pid_mask(
+    genparts: GenParticleArray,
+    pdgids: Union[int, list],
+    ax: int = 2,
+    byall: bool = True,
+) -> ak.Array:
     """
     Get selection mask for gen particles matching any of the pdgIds in ``pdgids``.
     If ``byall``, checks all particles along axis ``ax`` match.

@@ -126,10 +126,15 @@ def add_VJets_kFactors(weights, genpart, dataset, events):
         "W_d2kappa_EW",
         "W_d3kappa_EW",
     ]
+    wnlosysts = [
+        "d1kappa_EW",
+        "W_d2kappa_EW",
+        "W_d3kappa_EW",
+    ]
 
     def add_systs(systlist, qcdcorr, ewkcorr, vpt):
         ewknom = ewkcorr.evaluate("nominal", vpt)
-        weights.add("vjets_nominal", qcdcorr * ewknom if qcdcorr is not None else ewknom)  # you multiply
+        weights.add("vjets_nominal", qcdcorr * ewknom)
         ones = np.ones_like(vpt)
         for syst in systlist:
             weights.add(
@@ -139,21 +144,35 @@ def add_VJets_kFactors(weights, genpart, dataset, events):
                 ewkcorr.evaluate(syst + "_down", vpt) / ewknom,
             )
 
+    vpt = get_vpt(genpart)
+    qcdcorr = np.ones_like(vpt)
+    ewcorr = np.ones_like(vpt)
+
+    # alternative QCD NLO correction (for WJets)
+    # derived from https://cms.cern.ch/iCMS/jsp/db_notes/noteInfo.jsp?cmsnoteid=CMS%20AN-2019/229
+    alt_qcdcorr = np.ones_like(vpt)
+
     if "ZJetsToQQ_HT" in dataset or "DYJetsToLL_M-" in dataset:
-        vpt = get_vpt(genpart)
         qcdcorr = vjets_kfactors["ULZ_MLMtoFXFX"].evaluate(vpt)
         ewkcorr = vjets_kfactors["Z_FixedOrderComponent"]
+        ewcorr = ewkcorr.evaluate("nominal", vpt)
         add_systs(zsysts, qcdcorr, ewkcorr, vpt)
 
-    elif "DYJetsToLL_Pt" in dataset:
-        vpt = get_vpt(genpart)
-        qcdcorr = None
+    elif "DYJetsToLL_Pt" in dataset or "DYJetsToLL_LHEFilterPtZ" in dataset:
         ewkcorr = vjets_kfactors["Z_FixedOrderComponent"]
+        ewcorr = ewkcorr.evaluate("nominal", vpt)
         add_systs(znlosysts, qcdcorr, ewkcorr, vpt)
 
-    elif "WJetsToQQ_HT" in dataset or "WJetsToLNu" in dataset:
-        vpt = get_vpt(genpart)
-        # qcdcorr = vjets_kfactors["ULW_MLMtoFXFX"].evaluate(vpt)  # replace
+    elif "WJetsToLNu_1J" in dataset or "WJetsToLNu_0J" in dataset or "WJetsToLNu_2J" in dataset:
+        ewkcorr = vjets_kfactors["W_FixedOrderComponent"]
+        ewcorr = ewkcorr.evaluate("nominal", vpt)
+        add_systs(wnlosysts, qcdcorr, ewkcorr, vpt)
+
+    elif "WJetsToQQ_HT" in dataset or "WJetsToLNu_HT" in dataset or "WJetsToLNu_TuneCP5" in dataset:
+        qcdcorr = vjets_kfactors["ULW_MLMtoFXFX"].evaluate(vpt)
+        ewkcorr = vjets_kfactors["W_FixedOrderComponent"]
+        ewcorr = ewkcorr.evaluate("nominal", vpt)
+        add_systs(wsysts, qcdcorr, ewkcorr, vpt)
 
         # added by farouk
         """
@@ -169,14 +188,12 @@ def add_VJets_kFactors(weights, genpart, dataset, events):
         nB0 = (ak.sum(goodgenjets.hadronFlavour == 5, axis=1) == 0).to_numpy()
         nB1 = (ak.sum(goodgenjets.hadronFlavour == 5, axis=1) == 1).to_numpy()
         nB2 = (ak.sum(goodgenjets.hadronFlavour == 5, axis=1) == 2).to_numpy()
-        qcdcorr = np.zeros_like(vpt)
 
-        qcdcorr[nB0] = 1.628 - (1.339 * 1e-3 * vpt[nB0])
-        qcdcorr[nB1] = 1.586 - (1.531 * 1e-3 * vpt[nB1])
-        qcdcorr[nB2] = 1.440 - (0.925 * 1e-3 * vpt[nB2])
+        alt_qcdcorr[nB0] = 1.628 - (1.339 * 1e-3 * vpt[nB0])
+        alt_qcdcorr[nB1] = 1.586 - (1.531 * 1e-3 * vpt[nB1])
+        alt_qcdcorr[nB2] = 1.440 - (0.925 * 1e-3 * vpt[nB2])
 
-        ewkcorr = vjets_kfactors["W_FixedOrderComponent"]  # keep
-        add_systs(wsysts, qcdcorr, ewkcorr, vpt)
+    return ewcorr, qcdcorr, alt_qcdcorr
 
 
 def add_pdf_weight(weights, pdf_weights):
@@ -338,10 +355,11 @@ CorrectionLib files are available from: /cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jso
 """
 pog_correction_path = "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/"
 pog_jsons = {
-    "muon": ["MUO", "muon_Z.json.gz"],
+    "muon": ["MUO", "muon_Z_v2.json.gz"],
     "electron": ["EGM", "electron.json.gz"],
     "pileup": ["LUM", "puWeights.json.gz"],
     "jec": ["JME", "fatJet_jerc.json.gz"],
+    "jmar": ["JME", "jmar.json.gz"],
     "btagging": ["BTV", "btagging.json.gz"],
 }
 
@@ -363,16 +381,29 @@ def get_pog_json(obj, year):
     return f"{pog_correction_path}POG/{pog_json[0]}/{year}/{pog_json[1]}"
 
 
-def get_btag_weights_farouk(year: str, jets: JetArray, jet_selector: ak.Array, veto, wp: str = "M", algo: str = "deepJet"):
+def get_btag_weights(
+    year: str,
+    jets: JetArray,
+    jet_selector: ak.Array,
+    wp: str = "M",
+    algo: str = "deepJet",
+):
     """
     Following https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods#1b_Event_reweighting_using_scale
 
     Args:
-        veto: True means nbjets==0; and False means nbjets>0
+        veto: True means nbjets==0;
+        veto: False means nbjets>0
 
     """
 
-    def _btagSF(cset, jets, flavour, wp="M", algo="deepJet", syst="central"):
+    cset = correctionlib.CorrectionSet.from_file(get_pog_json("btagging", year))
+
+    ul_year = get_UL_year(year)
+    with importlib.resources.path("boostedhiggs.data", f"btageff_{algo}_{wp}_{ul_year}.coffea") as filename:
+        efflookup = cutil.load(filename)
+
+    def _btagSF(jets, flavour, syst="central"):
         j, nj = ak.flatten(jets), ak.num(jets)
         corrs = cset[f"{algo}_comb"] if flavour == "bc" else cset[f"{algo}_incl"]
         sf = corrs.evaluate(
@@ -384,50 +415,62 @@ def get_btag_weights_farouk(year: str, jets: JetArray, jet_selector: ak.Array, v
         )
         return ak.unflatten(sf, nj)
 
-    cset = correctionlib.CorrectionSet.from_file(get_pog_json("btagging", year))
-
-    ul_year = get_UL_year(year)
-    with importlib.resources.path("boostedhiggs.data", f"btageff_{algo}_{wp}_{ul_year}.coffea") as filename:
-        efflookup = cutil.load(filename)
-
-    lightJets = jets[jet_selector & (jets.hadronFlavour == 0) & (abs(jets.eta) < 2.5)]
-    bcJets = jets[jet_selector & (jets.hadronFlavour > 0) & (abs(jets.eta) < 2.5)]
+    lightJets = jets[jet_selector & (jets.hadronFlavour == 0)]
+    bcJets = jets[jet_selector & (jets.hadronFlavour > 0)]
 
     lightEff = efflookup(lightJets.pt, abs(lightJets.eta), lightJets.hadronFlavour)
     bcEff = efflookup(bcJets.pt, abs(bcJets.eta), bcJets.hadronFlavour)
 
-    lightSF = _btagSF(cset, lightJets, "light", wp, algo)
-    bcSF = _btagSF(cset, bcJets, "bc", wp, algo)
+    lightSF = _btagSF(lightJets, "light")
+    bcSF = _btagSF(bcJets, "bc")
 
-    lightSFUp = _btagSF(cset, lightJets, "light", wp, algo, syst="up")
-    lightSFDown = _btagSF(cset, lightJets, "light", wp, algo, syst="down")
-    lightSFUpCorr = _btagSF(cset, lightJets, "light", wp, algo, syst="up_correlated")
-    lightSFDownCorr = _btagSF(cset, lightJets, "light", wp, algo, syst="down_correlated")
-    bcSFUp = _btagSF(cset, bcJets, "bc", wp, algo, syst="up")
-    bcSFDown = _btagSF(cset, bcJets, "bc", wp, algo, syst="down")
-    bcSFUpCorr = _btagSF(cset, bcJets, "bc", wp, algo, syst="up_correlated")
-    bcSFDownCorr = _btagSF(cset, bcJets, "bc", wp, algo, syst="down_correlated")
-
-    def _get_weight(veto, lightEff, lightSF, bcEff, bcSF):
-        light_probs = ak.fill_none(ak.prod(1 - lightSF * lightEff, axis=-1), 1)
-        bc_probs = ak.fill_none(ak.prod(1 - bcSF * bcEff, axis=-1), 1)
-        weight = light_probs * bc_probs
-
+    # 1b method
+    # https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods#1b_Event_reweighting_using_scale
+    def _get_weight(veto, eff, SF):
         if veto:
-            return weight
+            # 0 btag
+            weight = ak.prod(1 - SF * eff, axis=-1) / ak.prod(1 - eff, axis=-1)
         else:
-            return 1 - weight
+            # >=1 btag
+            weight = (1 - ak.prod(1 - SF * eff, axis=-1)) / (1 - ak.prod(1 - eff, axis=-1))
+        return np.nan_to_num(ak.fill_none(weight, 1.0), nan=1)
 
-    weight = _get_weight(veto, lightEff, lightSF, bcEff, bcSF)
+    # 1a method
+    # https://btv-wiki.docs.cern.ch/PerformanceCalibration/fixedWPSFRecommendations/
+    def _combine(eff, sf, passbtag):
+        # tagged SF = SF*eff / eff = SF
+        tagged_sf = ak.prod(sf[passbtag], axis=-1)
+        # untagged SF = (1 - SF*eff) / (1 - eff)
+        untagged_sf = ak.prod(((1 - sf * eff) / (1 - eff))[~passbtag], axis=-1)
+        return ak.fill_none(tagged_sf * untagged_sf, 1.0)
 
     ret_weights = {}
 
-    if veto:
-        app = f"veto{wp}_"
-    else:
-        app = f"{wp}_"
+    # one common multiplicative SF is to be applied to the nominal prediction
+    bc_0btag = _get_weight(True, bcEff, bcSF)
+    light_0btag = _get_weight(True, lightEff, lightSF)
+    ret_weights["0btag_1b"] = bc_0btag * light_0btag
 
-    ret_weights[app + "btagSF"] = weight
+    bc_1pbtag = _get_weight(False, bcEff, bcSF)
+    light_1pbtag = _get_weight(False, lightEff, lightSF)
+    ret_weights["1pbtag_1b"] = bc_1pbtag * light_1pbtag
+
+    bc = _combine(bcEff, bcSF, bcJets.btagDeepB > btagWPs[algo][year][wp])
+    light = _combine(lightEff, lightEff, lightJets.btagDeepB > btagWPs[algo][year][wp])
+    ret_weights["btag_1a"] = bc * light
+
+    # Separate uncertainties are applied for b/c jets and light jets
+    """
+    lightSFUp = _btagSF(lightJets, "light", syst="up")
+    lightSFDown = _btagSF(lightJets, "light", syst="down")
+    lightSFUpCorr = _btagSF(lightJets, "light", syst="up_correlated")
+    lightSFDownCorr = _btagSF(lightJets, "light", syst="down_correlated")
+
+    bcSFUp = _btagSF(bcJets, "bc", syst="up")
+    bcSFDown = _btagSF(bcJets, "bc", syst="down")
+    bcSFUpCorr = _btagSF(bcJets, "bc", syst="up_correlated")
+    bcSFDownCorr = _btagSF(bcJets, "bc", syst="down_correlated")
+
     ret_weights[app + f"btagSFlight_{year}Up"] = _get_weight(veto, lightEff, lightSFUp, bcEff, bcSF)
     ret_weights[app + f"btagSFlight_{year}Down"] = _get_weight(veto, lightEff, lightSFDown, bcEff, bcSF)
 
@@ -439,94 +482,9 @@ def get_btag_weights_farouk(year: str, jets: JetArray, jet_selector: ak.Array, v
 
     ret_weights[app + "btagSFbc_correlatedUp"] = _get_weight(veto, lightEff, lightSF, bcEff, bcSFUpCorr)
     ret_weights[app + "btagSFbc_correlatedDown"] = _get_weight(veto, lightEff, lightSF, bcEff, bcSFDownCorr)
+    """
 
     return ret_weights
-
-
-def add_btag_weights(
-    weights: Weights,
-    year: str,
-    jets: JetArray,
-    jet_selector: ak.Array,
-    wp: str = "M",
-    algo: str = "deepJet",
-):
-    def _btagSF(cset, jets, flavour, wp="M", algo="deepJet", syst="central"):
-        j, nj = ak.flatten(jets), ak.num(jets)
-        corrs = cset[f"{algo}_comb"] if flavour == "bc" else cset[f"{algo}_incl"]
-        sf = corrs.evaluate(
-            syst,
-            wp,
-            np.array(j.hadronFlavour),
-            np.array(abs(j.eta)),
-            np.array(j.pt),
-        )
-        return ak.unflatten(sf, nj)
-
-    def _btag_prod(eff, sf):
-        num = ak.fill_none(ak.prod(1 - sf * eff, axis=-1), 1)
-        den = ak.fill_none(ak.prod(1 - eff, axis=-1), 1)
-        return num, den
-
-    cset = correctionlib.CorrectionSet.from_file(get_pog_json("btagging", year))
-
-    ul_year = get_UL_year(year)
-    with importlib.resources.path("boostedhiggs.data", f"btageff_{algo}_{wp}_{ul_year}.coffea") as filename:
-        efflookup = cutil.load(filename)
-
-    lightJets = jets[jet_selector & (jets.hadronFlavour == 0) & (abs(jets.eta) < 2.5)]
-    bcJets = jets[jet_selector & (jets.hadronFlavour > 0) & (abs(jets.eta) < 2.5)]
-
-    lightEff = efflookup(lightJets.pt, abs(lightJets.eta), lightJets.hadronFlavour)
-    bcEff = efflookup(bcJets.pt, abs(bcJets.eta), bcJets.hadronFlavour)
-
-    lightSF = _btagSF(cset, lightJets, "light", wp, algo)
-    bcSF = _btagSF(cset, bcJets, "bc", wp, algo)
-
-    lightSFUp = _btagSF(cset, lightJets, "light", wp, algo, syst="up")
-    lightSFDown = _btagSF(cset, lightJets, "light", wp, algo, syst="down")
-    lightSFUpCorr = _btagSF(cset, lightJets, "light", wp, algo, syst="up_correlated")
-    lightSFDownCorr = _btagSF(cset, lightJets, "light", wp, algo, syst="down_correlated")
-    bcSFUp = _btagSF(cset, bcJets, "bc", wp, algo, syst="up")
-    bcSFDown = _btagSF(cset, bcJets, "bc", wp, algo, syst="down")
-    bcSFUpCorr = _btagSF(cset, bcJets, "bc", wp, algo, syst="up_correlated")
-    bcSFDownCorr = _btagSF(cset, bcJets, "bc", wp, algo, syst="down_correlated")
-
-    def _get_weight(lightEff, lightSF, bcEff, bcSF):
-        lightnum, lightden = _btag_prod(lightEff, lightSF)
-        bcnum, bcden = _btag_prod(bcEff, bcSF)
-        weight = np.nan_to_num((1 - lightnum * bcnum) / (1 - lightden * bcden), nan=1)
-        return weight
-
-    weight = _get_weight(lightEff, lightSF, bcEff, bcSF)
-    weights.add("btagSF", weight)
-
-    # add systematics
-    nominal = np.ones(len(weight))
-    weights.add(
-        f"btagSFlight_{year}",
-        nominal,
-        weightUp=_get_weight(lightEff, lightSFUp, bcEff, bcSF),
-        weightDown=_get_weight(lightEff, lightSFDown, bcEff, bcSF),
-    )
-    weights.add(
-        f"btagSFbc_{year}",
-        nominal,
-        weightUp=_get_weight(lightEff, lightSF, bcEff, bcSFUp),
-        weightDown=_get_weight(lightEff, lightSF, bcEff, bcSFDown),
-    )
-    weights.add(
-        "btagSFlight_correlated",
-        nominal,
-        weightUp=_get_weight(lightEff, lightSFUpCorr, bcEff, bcSF),
-        weightDown=_get_weight(lightEff, lightSFDownCorr, bcEff, bcSF),
-    )
-    weights.add(
-        "btagSFbc_correlated",
-        nominal,
-        weightUp=_get_weight(lightEff, lightSF, bcEff, bcSFUpCorr),
-        weightDown=_get_weight(lightEff, lightSF, bcEff, bcSFDownCorr),
-    )
 
 
 """
@@ -724,6 +682,36 @@ def add_pileup_weight(weights, year, mod, nPU):
 
     # add weights
     weights.add("pileup", values["nominal"], values["up"], values["down"])
+
+
+def add_pileupid_weights(weights: Weights, year: str, mod: str, jets: JetArray, genjets, wp: str = "L"):
+    """Pileup ID scale factors
+    https://twiki.cern.ch/twiki/bin/view/CMS/PileupJetIDUL#Data_MC_Efficiency_Scale_Factors
+
+    Takes ak4 jets which already passed the pileup ID WP.
+    Only applies to jets with pT < 50 GeV and those geometrically matched to a gen jet.
+    """
+
+    # pileup ID should only be used for jets with pT < 50
+    jets = jets[(jets.pt < 50) & (jets.pt > 12.5)]
+    # check that there's a geometrically matched genjet (99.9% are, so not really necessary...)
+    jets = jets[ak.any(jets.metric_table(genjets) < 0.4, axis=-1)]
+
+    sf_cset = correctionlib.CorrectionSet.from_file(get_pog_json("jmar", year + mod))["PUJetID_eff"]
+
+    # save offsets to reconstruct jagged shape
+    offsets = jets.pt.layout.offsets
+
+    sfs_var = []
+    for var in ["nom", "up", "down"]:
+        # correctionlib < 2.3 doesn't accept jagged arrays (but >= 2.3 needs awkard v2)
+        sfs = sf_cset.evaluate(ak.flatten(jets.eta), ak.flatten(jets.pt), var, "L")
+        # reshape flat effs
+        sfs = ak.Array(ak.layout.ListOffsetArray64(offsets, ak.layout.NumpyArray(sfs)))
+        # product of SFs across arrays, automatically defaults empty lists to 1
+        sfs_var.append(ak.prod(sfs, axis=1))
+
+    weights.add("pileupIDSF", *sfs_var)
 
 
 # find corrections path using this file's path
