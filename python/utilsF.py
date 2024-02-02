@@ -117,8 +117,8 @@ color_by_sample = {
     #     "GluGluHToTauTau": "tab:cyan",
     #     "ZHToTauTau": "tab:cyan",
     #     "VBFHToTauTau": "tab:cyan",
-    # "WJetsLNu_unmatched": "tab:grey",
-    # "WJetsLNu_matched": "tab:green",
+    "WJetsLNu_unmatched": "tab:grey",
+    "WJetsLNu_matched": "tab:green",
     "EWKvjets": "tab:grey",
 }
 
@@ -137,12 +137,12 @@ plot_labels = {
     "TTbar": r"$t\bar{t}$+jets",
     "WZQQ": r"V$(qq)$",
     "SingleTop": r"Single T",
-    #     "WplusHToTauTau": "WplusHToTauTau",
-    #     "WminusHToTauTau": "WminusHToTauTau",
-    #     "ttHToTauTau": "ttHToTauTau",
-    #     "GluGluHToTauTau": "GluGluHToTauTau",
-    #     "ZHToTauTau": "ZHToTauTau",
-    #     "VBFHToTauTau": "VBFHToTauTau"
+    # "WplusHToTauTau": "WplusHToTauTau",
+    # "WminusHToTauTau": "WminusHToTauTau",
+    # "ttHToTauTau": "ttHToTauTau",
+    # "GluGluHToTauTau": "GluGluHToTauTau",
+    # "ZHToTauTau": "ZHToTauTau",
+    # "VBFHToTauTau": "VBFHToTauTau"
     "WJetsLNu_unmatched": r"W$(\ell\nu)$+jets unmatched",
     "WJetsLNu_matched": r"W$(\ell\nu)$+jets matched",
     "EWKvjets": "EWK VJets",
@@ -491,17 +491,16 @@ def plot_hists(
         ax.legend(
             [hand_new[idx] for idx in range(len(hand_new))],
             [lab_new[idx] for idx in range(len(lab_new))],
-            ncol=2
-            #             bbox_to_anchor=(1.05, 1),
-            #             loc="upper left",
+            ncol=2,
+            fontsize=14,
         )
 
         _, a = ax.get_ylim()
         if logy:
             ax.set_yscale("log")
-            ax.set_ylim(1e-1, a * 1.5)
+            ax.set_ylim(1e-1, a * 1.7)
         else:
-            ax.set_ylim(0, a * 1.5)
+            ax.set_ylim(0, a * 1.7)
 
         if "Num" in var:
             ax.set_xlim(h.axes["var"].edges[0], h.axes["var"].edges[-1])
