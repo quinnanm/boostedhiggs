@@ -230,3 +230,5 @@ mc_sf:
   - ZJetsToQQ_HT-400to600
   - ZJetsToQQ_HT-600to800
   - ZJetsToQQ_HT-800toInf
+GluGluZH:
+  - GluGluZH_HToWW_M-125_TuneCP5_13TeV-powheg-pythia8
