@@ -152,8 +152,9 @@ class HwwProcessor(processor.ProcessorABC):
         self.selections = {ch: PackedSelection() for ch in self._channels}
         self.cutflows = {ch: {} for ch in self._channels}
 
-        sumgenweight = ak.sum(events.genWeight) if self.isMC else 0
+        sumgenweight = ak.sum(events.genWeight) if self.isMC else nevents
 
+        # add genweight before filling cutflow
         if self.isMC:
             for ch in self._channels:
                 self.weights[ch].add("genweight", events.genWeight)
@@ -519,17 +520,24 @@ class HwwProcessor(processor.ProcessorABC):
         if self._year == "2018":
             hem_veto = ak.any(
                 (
-                    (events.Jet.pt > 30.0)
-                    & (events.Jet.eta > -3.2)
-                    & (events.Jet.eta < -1.3)
-                    & (events.Jet.phi > -1.57)
-                    & (events.Jet.phi < -0.87)
+                    (ak4_outside_ak8.eta > -3.2)
+                    & (ak4_outside_ak8.eta < -1.3)
+                    & (ak4_outside_ak8.phi > -1.57)
+                    & (ak4_outside_ak8.phi < -0.87)
+                ),
+                -1,
+            ) | ak.any(
+                (
+                    (candidatefj.eta > -3.2)
+                    & (candidatefj.eta < -1.3)
+                    & (candidatefj.phi > -1.57)
+                    & (candidatefj.phi < -0.87)
                 ),
                 -1,
             ) | ((events.MET.phi > -1.62) & (events.MET.pt < 470.0) & (events.MET.phi < -0.62))
 
             hem_cleaning = (
-                ((events.run >= 319077) & (not self.isMC))  # if data check if in Runs C or D
+                ((events.run >= 319077) & (~self.isMC))  # if data check if in Runs C or D
                 # else for MC randomly cut based on lumi fraction of C&D
                 | ((np.random.rand(len(events)) < 0.632) & self.isMC)
             ) & (hem_veto)
@@ -603,6 +611,9 @@ class HwwProcessor(processor.ProcessorABC):
                         self.weights[ch],
                         events.LHEPdfWeight if "LHEPdfWeight" in events.fields else [],
                     )
+
+                # store the gen-weight
+                variables[f"weight_{ch}"] = self.weights[ch].partial_weight(["genweight"])
 
                 # store the final weight per ch
                 variables[f"weight_{ch}"] = self.weights[ch].weight()
@@ -697,6 +708,8 @@ class HwwProcessor(processor.ProcessorABC):
             self.save_dfs_parquet(fname, output[ch], ch)
 
         # return dictionary with cutflows
+        print(sumgenweight)
+        print(self.cutflows)
         return {
             dataset: {
                 "mc": self.isMC,
