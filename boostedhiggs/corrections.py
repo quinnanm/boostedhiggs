@@ -382,20 +382,16 @@ def get_pog_json(obj, year):
 
 
 def get_btag_weights(
-    weights: Weights,
     year: str,
     jets: JetArray,
     jet_selector: ak.Array,
     wp: str = "M",
     algo: str = "deepJet",
+    systematics: bool = False,
 ):
     """
     Following https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods#1b_Event_reweighting_using_scale
-
-    Args:
-        veto: True means nbjets==0;
-        veto: False means nbjets>0
-
+    and 1a
     """
 
     cset = correctionlib.CorrectionSet.from_file(get_pog_json("btagging", year))
@@ -466,62 +462,18 @@ def get_btag_weights(
     nominal = ret_weights["btag_1a"]
 
     # Separate uncertainties are applied for b/c jets and light jets
-    weights.add(
-        f"btagSFlight_{year}",
-        np.ones(len(nominal)),
-        weightUp=_combine(
-            lightEff,
-            _btagSF(lightJets, "light", syst="up"),
-            lightPass
-        ),
-        weightDown=_combine(
-            lightEff,
-            _btagSF(lightJets, "light", syst="down"),
-            lightPass
-        )
-    )
-    weights.add(
-        f"btagSFbc_{year}",
-        np.ones(len(nominal)),
-        weightUp=_combine(
-            bcEff,
-            _btagSF(bcJets, "bc", syst="up"),
-            bcPass
-        ),
-        weightDown=_combine(
-            bcEff,
-            _btagSF(bcJets, "bc", syst="down"),
-            bcPass
-        )
-    )
-    weights.add(
-        "btagSFlight_correlated",
-        np.ones(len(nominal)),
-        weightUp=_combine(
-            lightEff,
-            _btagSF(lightJets, "light", syst="up_correlated"),
-            lightPass
-        ),
-        weightDown=_combine(
-            lightEff,
-            _btagSF(lightJets, "light", syst="down_correlated"),
-            lightPass
-        )
-    )
-    weights.add(
-        "btagSFbc_correlated",
-        np.ones(len(nominal)),
-        weightUp=_combine(
-            bcEff,
-            _btagSF(bcJets, "bc", syst="up_correlated"),
-            bcPass
-        ),
-        weightDown=_combine(
-            bcEff,
-            _btagSF(bcJets, "bc", syst="down_correlated"),
-            bcPass
-        )
-    )
+    if systematics:
+        ret_weights[f"btagSFlight_{year}_up"] = _combine(lightEff, _btagSF(lightJets, "light", syst="up"), lightPass)
+        ret_weights[f"btagSFlight_{year}_down"] = _combine(lightEff, _btagSF(lightJets, "light", syst="down"), lightPass)
+
+        ret_weights[f"btagSFbc_{year}_up"] = _combine(bcEff, _btagSF(bcJets, "bc", syst="up"), bcPass)
+        ret_weights[f"btagSFbc_{year}_down"] = _combine(bcEff, _btagSF(bcJets, "bc", syst="down"), bcPass)
+
+        ret_weights[f"btagSFlight_correlated_up"] = _combine(lightEff, _btagSF(lightJets, "light", syst="up_correlated"), lightPass)
+        ret_weights[f"btagSFlight_correlated_down"] =  _combine(lightEff, _btagSF(lightJets, "light", syst="down_correlated"), lightPass)
+
+        ret_weights[f"btagSFbc_correlated_up"] = _combine(bcEff, _btagSF(bcJets, "bc", syst="up_correlated"), bcPass)
+        ret_weights[f"btagSFbc_correlated_down"] = _combine(bcEff, _btagSF(bcJets, "bc", syst="down_correlated"), bcPass)
 
     return ret_weights
 

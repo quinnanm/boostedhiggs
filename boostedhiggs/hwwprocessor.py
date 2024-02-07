@@ -262,6 +262,9 @@ class HwwProcessor(processor.ProcessorABC):
 
         # AK4 jets
         jets, jec_shifted_jetvars = get_jec_jets(events, events.Jet, self._year, not self.isMC, self.jecs, fatjets=False)
+        met = met_factory.build(events.MET, jets, {}) if self.isMC else events.MET
+
+        ht = ak.sum(jets.pt, axis=1)
 
         jet_selector = (
             (jets.pt > 30)
@@ -269,16 +272,15 @@ class HwwProcessor(processor.ProcessorABC):
             & jets.isTight
             & ((jets.pt >= 50) | ((jets.pt < 50) & (jets.puId & 2) == 2))
         )
-        # reject EE noisy jets for 2017  ( not applicable for UL )
-        # if self._year == "2017":
-        #    noise_jets = (jets.pt < 50) & ( (abs(jets.eta) > 2.65) | (abs(jets.eta) < 3.139) )
-        #    jet_selector = jet_selector & ~noise_jets
         goodjets = jets[jet_selector]
+        ak4_outside_ak8_selector = (jets.delta_r(candidatefj) > 0.8)
+        ak4_outside_ak8 = jets[ak4_outside_ak8_selector]
 
-        ht = ak.sum(goodjets.pt, axis=1)
-
-        # AK4 jets outside AK8 jet
-        ak4_outside_ak8 = goodjets[(goodjets.delta_r(candidatefj) > 0.8)]
+        # VBF variables
+        jet1 = ak4_outside_ak8[:, 0:1]
+        jet2 = ak4_outside_ak8[:, 1:2]
+        deta = abs(ak.firsts(jet1).eta - ak.firsts(jet2).eta)
+        mjj = (ak.firsts(jet1) + ak.firsts(jet2)).mass
 
         # b-jets (only for jets with abs(eta)<2.5)
         bjet_selector = (jet_selector) & (jets.delta_r(candidatefj) > 0.8) & (abs(jets.eta) < 2.5)
@@ -304,15 +306,6 @@ class HwwProcessor(processor.ProcessorABC):
 
         # delta R between AK8 jet and lepton
         lep_fj_dr = candidatefj.delta_r(candidatelep_p4)
-
-        # VBF variables
-        jet1 = ak4_outside_ak8[:, 0:1]
-        jet2 = ak4_outside_ak8[:, 1:2]
-        deta = abs(ak.firsts(jet1).eta - ak.firsts(jet2).eta)
-        mjj = (ak.firsts(jet1) + ak.firsts(jet2)).mass
-
-        # MET
-        met = met_factory.build(events.MET, goodjets, {}) if self.isMC else events.MET
 
         mt_lep_met = np.sqrt(
             2.0 * candidatelep_p4.pt * met.pt * (ak.ones_like(met.pt) - np.cos(candidatelep_p4.delta_phi(met)))
@@ -359,7 +352,7 @@ class HwwProcessor(processor.ProcessorABC):
         }
         for shift, vals in jec_shifted_fatjetvars["pt"].items():
             if shift != "":
-                fatjetvars[f"fj_pt{shift}"] = ak.firsts(vals[fj_idx_lep])
+                fatjetvars[f"fj_pt_{shift}"] = ak.firsts(vals[fj_idx_lep])
         variables = {**variables, **fatjetvars}
 
         def getJECVariables(fatjetvars, candidatelep_p4, met, pt_shift=None, met_shift=None):
@@ -393,7 +386,7 @@ class HwwProcessor(processor.ProcessorABC):
 
             candidatefj = ak.zip(
                 {
-                    "pt": fatjetvars[f"fj_pt{ptlabel}"],
+                    "pt": fatjetvars[f"fj_pt_{ptlabel}"],
                     "eta": fatjetvars["fj_eta"],
                     "phi": fatjetvars["fj_phi"],
                     "mass": fatjetvars["fj_mass"],
@@ -401,10 +394,10 @@ class HwwProcessor(processor.ProcessorABC):
                 with_name="PtEtaPhiMCandidate",
                 behavior=candidate.behavior,
             )
-            candidateNeutrino = ak.zip(
+            candidateNeutrinoJet = ak.zip(
                 {
                     "pt": metvar.pt,
-                    "eta": candidatelep_p4.eta,
+                    "eta": candidatefj.eta,
                     "phi": met.phi,
                     "mass": 0,
                     "charge": 0,
@@ -412,52 +405,61 @@ class HwwProcessor(processor.ProcessorABC):
                 with_name="PtEtaPhiMCandidate",
                 behavior=candidate.behavior,
             )
-            rec_W_lnu = candidatelep_p4 + candidateNeutrino
+            rec_W_lnu = candidatelep_p4 + candidateNeutrinoJet
             rec_W_qq = candidatefj - candidatelep_p4
             rec_higgs = rec_W_qq + rec_W_lnu
 
-            variables[f"fj_pt{shift}"] = candidatefj.pt
-
-            variables[f"rec_higgs_m{shift}"] = rec_higgs.mass
-            variables[f"rec_higgs_pt{shift}"] = rec_higgs.pt
-
-            variables[f"rec_W_qq_m{shift}"] = rec_W_qq.mass
-            variables[f"rec_W_qq_pt{shift}"] = rec_W_qq.pt
-
-            variables[f"rec_W_lnu_m{shift}"] = rec_W_lnu.mass
-            variables[f"rec_W_lnu_pt{shift}"] = rec_W_lnu.pt
+            variables[f"rec_higgs_m_{shift}"] = rec_higgs.mass
+            variables[f"rec_higgs_pt_{shift}"] = rec_higgs.pt
 
             if shift == "":
-                candidateNeutrinoJet = ak.zip(
+                variables[f"rec_W_qq_m_{shift}"] = rec_W_qq.mass
+                variables[f"rec_W_qq_pt_{shift}"] = rec_W_qq.pt
+                
+                variables[f"rec_W_lnu_m_{shift}"] = rec_W_lnu.mass
+                variables[f"rec_W_lnu_pt_{shift}"] = rec_W_lnu.pt
+
+            return variables
+
+        # add variables affected by JECs/MET
+        if self._systematics and self.isMC:
+            mjj_shift = {}
+            for shift, vals in jec_shifted_jetvars["pt"].items():
+                if shift == "": continue
+                jet1_shift = ak.zip(
                     {
-                        "pt": metvar.pt,
-                        "eta": candidatefj.eta,
-                        "phi": met.phi,
-                        "mass": 0,
+                        "pt": vals[ak4_outside_ak8_selector][:, 0],
+                        "eta": jet1.eta,
+                        "phi": jet1.phi,
+                        "mass": jet1.mass,
                         "charge": 0,
                     },
                     with_name="PtEtaPhiMCandidate",
                     behavior=candidate.behavior,
                 )
-                rec_W_lnu = candidatelep_p4 + candidateNeutrinoJet
-                rec_higgs = rec_W_qq + rec_W_lnu
-                variables[f"rec_higgs_etajet_m{shift}"] = rec_higgs.mass
-                variables[f"rec_higgs_etajet_pt{shift}"] = rec_higgs.pt
-                variables[f"rec_W_lnu_etajet_m{shift}"] = rec_W_lnu.mass
-                variables[f"rec_W_lnu_etajet_pt{shift}"] = rec_W_lnu.pt
+                jet2_shift = ak.zip(
+                    {
+                        "pt": vals[ak4_outside_ak8_selector][:, 1],
+                        "eta": jet2.eta,
+                        "phi": jet2.phi,
+                        "mass": jet2.mass,
+                        "charge": 0,
+                    },
+                    with_name="PtEtaPhiMCandidate",
+                    behavior=candidate.behavior,
+                )
+                mjj_shift[f"mjj_{shift}"] = (ak.firsts(jet1_shift) + ak.firsts(jet2_shift)).mass
+            variables = {**variables, **mjj_shift}
 
-            return variables
-
-        # add variables affected by JECs/MET
-        for shift in jec_shifted_fatjetvars["pt"]:
-            if shift != "" and not self._systematics:
-                continue
-            jecvariables = getJECVariables(fatjetvars, candidatelep_p4, met, pt_shift=shift, met_shift=None)
-            variables = {**variables, **jecvariables}
-        if self._systematics and self.isMC:
             for met_shift in ["UES_up", "UES_down"]:
                 jecvariables = getJECVariables(fatjetvars, candidatelep_p4, met, pt_shift=None, met_shift=met_shift)
                 variables = {**variables, **jecvariables}
+
+        for shift in jec_shifted_fatjetvars["pt"]:
+            if shift != "" and not self._systematics:
+                continue            
+            jecvariables = getJECVariables(fatjetvars, candidatelep_p4, met, pt_shift=shift, met_shift=None)
+            variables = {**variables, **jecvariables}
 
         # apply selections
         for ch in self._channels:
@@ -625,12 +627,12 @@ class HwwProcessor(processor.ProcessorABC):
                     variables = {
                         **variables,
                         **get_btag_weights(
-                            self.weights[ch],
                             self._year,
                             events.Jet,
                             bjet_selector,
                             wp=wp_,
                             algo="deepJet",
+                            systematics=self._systematics,
                         ),
                     }
 
