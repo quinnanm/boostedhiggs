@@ -68,6 +68,11 @@ folders_to_index = {
         "/store/user/lpcpfnano/rkansal/v2_3/2017/ZJetsToQQ/",
         "/store/user/lpcpfnano/cmantill/v2_3/2018/ZJetsToQQ/",
         ##
+        "/store/user/lpcpfnano/cmantill/v2_3/2016/VJetsToQQ_NLO",
+        "/store/user/lpcpfnano/cmantill/v2_3/2016APV/VJetsToQQ_NLO",
+        "/store/user/lpcpfnano/cmantill/v2_3/2017/VJetsToQQ_NLO",
+        "/store/user/lpcpfnano/cmantill/v2_3/2018/VJetsToQQ_NLO",
+        ##
         "/store/user/lpcpfnano/pharris/v2_2/2016/SingleTop",
         "/store/user/lpcpfnano/pharris/v2_2/2016APV/SingleTop",
         "/store/user/lpcpfnano/pharris/v2_2/2017/SingleTop",
