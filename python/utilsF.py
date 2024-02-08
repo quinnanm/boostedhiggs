@@ -199,6 +199,7 @@ axis_dict = {
     "SecondFatjet_pt": hist2.axis.Regular(30, 250, 600, name="var", label=r"Sub-Leading AK8 jet $p_T$ [GeV]", overflow=True),
     "fj_pt": hist2.axis.Regular(30, 250, 600, name="var", label=r"Higgs candidate jet $p_T$ [GeV]", overflow=True),
     "lep_pt": hist2.axis.Regular(40, 30, 400, name="var", label=r"Lepton $p_T$ [GeV]", overflow=True),
+    "lep_eta": hist2.axis.Regular(25, 0, 2.5, name="var", label=r"|Lepton $\eta$|", overflow=True),
     "NumFatjets": hist2.axis.Regular(5, 0.5, 5.5, name="var", label="Number of AK8 jets", overflow=True),
     "NumOtherJets": hist2.axis.Regular(
         7, 0.5, 7.5, name="var", label="Number of AK4 jets (non-overlapping with AK8)", overflow=True
@@ -217,6 +218,7 @@ axis_dict = {
         40, 0, 160, name="var", label=r"Reconstructed $W_{\ell \nu}$ mass [GeV]", overflow=True
     ),
     "fj_msoftdrop": hist2.axis.Regular(35, 20, 200, name="var", label=r"Jet $m_{sd}$ [GeV]", overflow=True),
+    "fj_mass": hist2.axis.Regular(35, 20, 250, name="var", label=r"Jet $m_{sd}$ [GeV]", overflow=True),
     "fj_lsf3": hist2.axis.Regular(35, 0, 1, name="var", label=r"Jet lsf3", overflow=True),
     # lepton isolation
     "lep_isolation": hist2.axis.Regular(35, 0, 0.5, name="var", label=r"Lepton PF isolation", overflow=True),
@@ -353,7 +355,7 @@ def plot_hists(
                 "elinewidth": 1,
             }
 
-            if blind_region and ("rec_higgs" in var):
+            if blind_region and (("rec_higgs" in var) or ("ParT_mass" in var)):
                 massbins = data.axes[-1].edges
                 lv = int(np.searchsorted(massbins, blind_region[0], "right"))
                 rv = int(np.searchsorted(massbins, blind_region[1], "left") + 1)
@@ -429,10 +431,16 @@ def plot_hists(
 
             # plot the total signal (w/o scaling)
             tot_signal *= mult_factor
+
+            if mult_factor == 1:
+                siglabel = r"ggF+VBF+VH+ttH"
+            else:
+                siglabel = r"ggF+VBF+VH+ttH $\times$" + f"{mult_factor}"
+
             hep.histplot(
                 tot_signal,
                 ax=ax,
-                label=r"ggF+VBF+VH+ttH $\times$" + f"{mult_factor}",
+                label=siglabel,
                 linewidth=2,
                 color="tab:red",
                 flow="none",
@@ -498,7 +506,7 @@ def plot_hists(
         _, a = ax.get_ylim()
         if logy:
             ax.set_yscale("log")
-            ax.set_ylim(1e-1, a * 1.7)
+            ax.set_ylim(1e-1, a * 15.7)
         else:
             ax.set_ylim(0, a * 1.7)
 

@@ -96,11 +96,11 @@ input_feat = {
     # "v30_11": [],
     # "v30_12": [],
     # "v30_13": [],
-    "v30_15": [],
-    "v30_16": [],
-    "v30_17": [],
-    "v30_18": [],
-    "v32_18": [],
+    # "v30_15": [],
+    # "v30_16": [],
+    # "v30_17": [],
+    # "v30_18": [],
+    # "v32_18": [],
     # "v31_1": [],
     # "v31_2": [],
     # "v31_3": [],
@@ -154,13 +154,20 @@ def make_events_dict(
             for sample in os.listdir(samples_dir):
                 # get a combined label to combine samples of the same process
 
-                # if sample == "QCD_Pt_170to300":
+                if "WJetsToLNu_1J" in sample:
+                    print(f"Skipping sample {sample}")
+                    continue
+                if "WJetsToLNu_2J" in sample:
+                    print(f"Skipping sample {sample}")
+                    continue
+
+                # if "WJetsToLNu_HT" in sample:
                 #     print(f"Skipping sample {sample}")
                 #     continue
 
-                if "DYJetsToLL_M-50_HT" in sample:
-                    print(f"Skipping sample {sample}")
-                    continue
+                # if "EGamma_Run2018" in sample:
+                #     print(f"Skipping sample {sample}")
+                #     continue
 
                 for key in utils.combine_samples:
                     if key in sample:
@@ -206,13 +213,13 @@ def make_events_dict(
                 if not keep_weights:
                     # data = data[data.columns.drop(list(data.filter(regex="weight_mu_")))]
                     # data = data[data.columns.drop(list(data.filter(regex="weight_ele_")))]
-                    # data = data[data.columns.drop(list(data.filter(regex="L_btag")))]
-                    # data = data[data.columns.drop(list(data.filter(regex="M_btag")))]
-                    # data = data[data.columns.drop(list(data.filter(regex="T_btag")))]
+                    data = data[data.columns.drop(list(data.filter(regex="L_btag")))]
+                    data = data[data.columns.drop(list(data.filter(regex="M_btag")))]
+                    data = data[data.columns.drop(list(data.filter(regex="T_btag")))]
                     # data = data[data.columns.drop(list(data.filter(regex="veto")))]
                     # data = data[data.columns.drop(list(data.filter(regex="fj_H_VV_")))]
-                    data = data[data.columns.drop(list(data.filter(regex="_up")))]
-                    data = data[data.columns.drop(list(data.filter(regex="_down")))]
+                    # data = data[data.columns.drop(list(data.filter(regex="_up")))]
+                    # data = data[data.columns.drop(list(data.filter(regex="_down")))]
 
                 data["abs_met_fj_dphi"] = np.abs(data["met_fj_dphi"])
 
@@ -221,6 +228,7 @@ def make_events_dict(
                     event_weight = utils.get_xsecweight(pkl_files, year, sample, False, luminosity)
 
                     logging.info("---> Using already stored event weight")
+
                     event_weight *= data[f"weight_{ch}"]
 
                 else:
@@ -273,8 +281,8 @@ def make_events_dict(
                     else:
                         data[f"fj_ParT_score_finetuned_{modelv}"] = scipy.special.softmax(outputs[0], axis=1)[:, 0]
 
-                # # use hidNeurons to get the finetuned scores
-                # data["fj_ParT_score_finetuned"] = utils.get_finetuned_score(data, modelv="v2_nor2")
+                # use hidNeurons to get the finetuned scores
+                data["fj_ParT_score_finetuned"] = utils.get_finetuned_score(data, modelv="v2_nor2")
 
                 # drop hidNeuron columns for memory
                 data = data[data.columns.drop(list(data.filter(regex="hidNeuron")))]

@@ -194,11 +194,12 @@ axis_dict = {
     "fj_ParT_score_finetuned": hist2.axis.Regular(25, 0.5, 1, name="var", label=r"$T_{HWW}$", overflow=True),
     "fj_ParT_inclusive_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"ParT-Finetuned score", overflow=True),
     "fj_ParT_all_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
-    ############# AN
+    # AN
     "FirstFatjet_pt": hist2.axis.Regular(30, 250, 600, name="var", label=r"Leading AK8 jet $p_T$ [GeV]", overflow=True),
     "SecondFatjet_pt": hist2.axis.Regular(30, 250, 600, name="var", label=r"Sub-Leading AK8 jet $p_T$ [GeV]", overflow=True),
     "fj_pt": hist2.axis.Regular(30, 250, 600, name="var", label=r"Higgs candidate jet $p_T$ [GeV]", overflow=True),
     "lep_pt": hist2.axis.Regular(40, 30, 400, name="var", label=r"Lepton $p_T$ [GeV]", overflow=True),
+    "lep_eta": hist2.axis.Regular(25, 0, 2.5, name="var", label=r"|Lepton $\eta$|", overflow=True),
     "NumFatjets": hist2.axis.Regular(5, 0.5, 5.5, name="var", label="Number of AK8 jets", overflow=True),
     "NumOtherJets": hist2.axis.Regular(
         7, 0.5, 7.5, name="var", label="Number of AK4 jets (non-overlapping with AK8)", overflow=True
@@ -217,6 +218,7 @@ axis_dict = {
         40, 0, 160, name="var", label=r"Reconstructed $W_{\ell \nu}$ mass [GeV]", overflow=True
     ),
     "fj_msoftdrop": hist2.axis.Regular(35, 20, 200, name="var", label=r"Jet $m_{sd}$ [GeV]", overflow=True),
+    "fj_mass": hist2.axis.Regular(35, 20, 250, name="var", label=r"Jet $m_{sd}$ [GeV]", overflow=True),
     "fj_lsf3": hist2.axis.Regular(35, 0, 1, name="var", label=r"Jet lsf3", overflow=True),
     # lepton isolation
     "lep_isolation": hist2.axis.Regular(35, 0, 0.5, name="var", label=r"Lepton PF isolation", overflow=True),
@@ -385,7 +387,7 @@ def plot_hists(
                 "elinewidth": 1,
             }
 
-            if blind_region and ("rec_higgs" in var):
+            if blind_region and (("rec_higgs" in var) or ("ParT_mass" in var)):
                 massbins = data.axes[-1].edges
                 lv = int(np.searchsorted(massbins, blind_region[0], "right"))
                 rv = int(np.searchsorted(massbins, blind_region[1], "left") + 1)
@@ -530,10 +532,10 @@ def plot_hists(
 
                     condition = (bin_array >= range_min) & (bin_array <= range_max)
 
-                    s = totsignal_val[condition].sum()  # sum/integrate signal counts in the range
+                    # s = totsignal_val[condition].sum()  # sum/integrate signal counts in the range
                     b = np.sqrt(tot_val[condition].sum())  # sum/integrate bkg counts in the range and take sqrt
 
-                    soverb_integrated = round((s / b).item(), 2)
+                    # soverb_integrated = round((s / b).item(), 2)
                     # sax.legend(title=f"S/sqrt(B) (in 0-150)={soverb_integrated:.2f}")
                 # integrate soverb in a given range for rec_higgs_m
                 if var == "rec_higgs_m":
@@ -543,13 +545,13 @@ def plot_hists(
 
                     condition = (bin_array >= range_min) & (bin_array <= range_max)
 
-                    s = totsignal_val[condition].sum()  # sum/integrate signal counts in the range
+                    # s = totsignal_val[condition].sum()  # sum/integrate signal counts in the range
                     b = np.sqrt(tot_val[condition].sum())  # sum/integrate bkg counts in the range and take sqrt
 
-                    soverb_integrated = round((s / b).item(), 2)
+                    # soverb_integrated = round((s / b).item(), 2)
                     # sax.legend(title=f"S/sqrt(B) (in {range_min}-{range_max})={soverb_integrated:.2f}")
-                sax.set_ylim(0, 0.013)
-                sax.set_yticks([0, 0.01])
+                # sax.set_ylim(0, 0.013)
+                # sax.set_yticks([0, 0.01])
 
                 if len(years) > 1:
                     # dax.set_ylim(0, 25)
@@ -656,7 +658,23 @@ def plot_hists(
         _, a = dax.get_ylim()
         dax.set_ylim(0, a + 4)
 
-        if a > 100:
+        if a > 1000:
+            dax.set_yticks([800])
+        if a > 800:
+            dax.set_yticks([600])
+        elif a > 700:
+            dax.set_yticks([500])
+        elif a > 500:
+            dax.set_yticks([300])
+        elif a > 300:
+            dax.set_yticks([200])
+        elif a > 300:
+            dax.set_yticks([200])
+        elif a > 180:
+            dax.set_yticks([160])
+        elif a > 140:
+            dax.set_yticks([120])
+        elif a > 100:
             dax.set_yticks([90])
         elif a > 40:
             dax.set_yticks([40])

@@ -160,6 +160,7 @@ axis_dict = {
     "Zmass": hist2.axis.Regular(40, 30, 450, name="var", label=r"Zmass [GeV]", overflow=True),
     "ht": hist2.axis.Regular(30, 200, 1200, name="var", label=r"ht [GeV]", overflow=True),
     "lep_pt": hist2.axis.Regular(40, 30, 450, name="var", label=r"Lepton $p_T$ [GeV]", overflow=True),
+    "lep_eta": hist2.axis.Regular(25, 0, 2.5, name="var", label=r"|Lepton $\eta$|", overflow=True),
     "met": hist2.axis.Regular(40, 0, 450, name="var", label=r"MET", overflow=True),
     "fj_minus_lep_m": hist2.axis.Regular(35, 0, 280, name="var", label=r"Jet - Lepton mass [GeV]", overflow=True),
     "fj_minus_lep_pt": hist2.axis.Regular(40, 0, 450, name="var", label=r"Jet - Lepton $p_T$ [GeV]", overflow=True),
@@ -173,6 +174,7 @@ axis_dict = {
     "mu_highPtId": hist2.axis.Regular(5, 0, 5, name="var", label="Muon high pT ID", overflow=True),
     "fj_pt": hist2.axis.Regular(30, 200, 600, name="var", label=r"Jet $p_T$ [GeV]", overflow=True),
     "fj_msoftdrop": hist2.axis.Regular(35, 20, 250, name="var", label=r"Jet $m_{sd}$ [GeV]", overflow=True),
+    "fj_mass": hist2.axis.Regular(35, 20, 250, name="var", label=r"Jet $m_{sd}$ [GeV]", overflow=True),
     "rec_higgs_m": hist2.axis.Variable(
         list(range(50, 240, 10)), name="var", label=r"Higgs reconstructed mass [GeV]", overflow=True
     ),
@@ -344,7 +346,7 @@ def plot_hists(
                 "elinewidth": 1,
             }
 
-            if blind_region and ("rec_higgs" in var):
+            if blind_region and (("rec_higgs" in var) or ("ParT_mass" in var)):
                 massbins = data.axes[-1].edges
                 lv = int(np.searchsorted(massbins, blind_region[0], "right"))
                 rv = int(np.searchsorted(massbins, blind_region[1], "left") + 1)
