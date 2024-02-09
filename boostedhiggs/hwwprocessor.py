@@ -769,6 +769,7 @@ class HwwProcessor(processor.ProcessorABC):
                 + self._yearmod: {
                     "sumgenweight": sumgenweight,
                     "sumlheweight": sumlheweight,
+                    "sumpdfweight": sumpdfweight,
                     "cutflows": self.cutflows,
                 },
             }
