@@ -651,7 +651,10 @@ class HwwProcessor(processor.ProcessorABC):
                     nPU=ak.to_numpy(events.Pileup.nPU),
                 )
 
-                single_weight_pileup = self.weights[ch].partial_weight(["single_weight_pileup"])
+                # single_weight_pileup = self.weights[ch].partial_weight(["single_weight_pileup"])
+                # self.add_selection("single_weight_pileup", sel=(single_weight_pileup <= 4))
+
+                single_weight_pileup = self.weights[ch].partial_weight(["pileup"])
                 self.add_selection("single_weight_pileup", sel=(single_weight_pileup <= 4))
 
                 add_pileupid_weights(self.weights[ch], self._year, self._yearmod, goodjets, events.GenJet, wp="L")
