@@ -271,7 +271,7 @@ class HwwProcessor(processor.ProcessorABC):
         fj_idx_lep = ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)
         candidatefj = ak.firsts(good_fatjets[fj_idx_lep])
 
-        jmsr_shifted_vars = get_jmsr(candidatefj, 1, self._year, isData=False)
+        jmsr_shifted_fatjetvars = get_jmsr(good_fatjets[fj_idx_lep], num_jets=1, year=self._year, isData=not self.isMC)
 
         # AK4 jets
         jets, jec_shifted_jetvars = get_jec_jets(events, events.Jet, self._year, not self.isMC, self.jecs, fatjets=False)
@@ -357,17 +357,23 @@ class HwwProcessor(processor.ProcessorABC):
             # "SecondFatjet_lep_dr": candidatelep_p4.delta_r(SecondFatjet),
         }
 
-        variables = {**variables, **jmsr_shifted_vars}  # TODO
-
         fatjetvars = {
             "fj_pt": candidatefj.pt,
             "fj_eta": candidatefj.eta,
             "fj_phi": candidatefj.phi,
             "fj_mass": candidatefj.msdcorr,
         }
+
+        # JEC vars
         for shift, vals in jec_shifted_fatjetvars["pt"].items():
             if shift != "":
                 fatjetvars[f"fj_pt{shift}"] = ak.firsts(vals[fj_idx_lep])
+        # JMSR vars
+        for shift, vals in jmsr_shifted_fatjetvars["msoftdrop"].items():
+
+            if shift != "":
+                fatjetvars[f"fj_mass{shift}"] = ak.firsts(vals)
+
         variables = {**variables, **fatjetvars}
 
         def getJECVariables(fatjetvars, candidatelep_p4, met, pt_shift=None, met_shift=None):
@@ -436,6 +442,49 @@ class HwwProcessor(processor.ProcessorABC):
 
             return variables
 
+        def getJMSRVariables(fatjetvars, candidatelep_p4, met, mass_shift=None):
+            """
+            get variables affected by JMS_up, JMS_down, JMR_up, JMR_down
+            """
+            variables = {}
+
+            candidatefj = ak.zip(
+                {
+                    "pt": fatjetvars["fj_pt"],
+                    "eta": fatjetvars["fj_eta"],
+                    "phi": fatjetvars["fj_phi"],
+                    "mass": fatjetvars[f"fj_mass{mass_shift}"],
+                },
+                with_name="PtEtaPhiMCandidate",
+                behavior=candidate.behavior,
+            )
+            candidateNeutrinoJet = ak.zip(
+                {
+                    "pt": met.pt,
+                    "eta": candidatefj.eta,
+                    "phi": met.phi,
+                    "mass": 0,
+                    "charge": 0,
+                },
+                with_name="PtEtaPhiMCandidate",
+                behavior=candidate.behavior,
+            )
+            rec_W_lnu = candidatelep_p4 + candidateNeutrinoJet
+            rec_W_qq = candidatefj - candidatelep_p4
+            rec_higgs = rec_W_qq + rec_W_lnu
+
+            variables[f"rec_higgs_m{mass_shift}"] = rec_higgs.mass
+            variables[f"rec_higgs_pt{mass_shift}"] = rec_higgs.pt
+
+            if mass_shift == "":
+                variables[f"rec_W_qq_m{mass_shift}"] = rec_W_qq.mass
+                variables[f"rec_W_qq_pt{mass_shift}"] = rec_W_qq.pt
+
+                variables[f"rec_W_lnu_m{mass_shift}"] = rec_W_lnu.mass
+                variables[f"rec_W_lnu_pt{mass_shift}"] = rec_W_lnu.pt
+
+            return variables
+
         # add variables affected by JECs/MET
         if self._systematics and self.isMC:
             mjj_shift = {}
@@ -487,6 +536,12 @@ class HwwProcessor(processor.ProcessorABC):
                 continue
             jecvariables = getJECVariables(fatjetvars, candidatelep_p4, met, pt_shift=shift, met_shift=None)
             variables = {**variables, **jecvariables}
+
+        for shift in jmsr_shifted_fatjetvars["msoftdrop"]:
+            if shift != "" and not self._systematics:
+                continue
+            jmsrvariables = getJMSRVariables(fatjetvars, candidatelep_p4, met, mass_shift=shift)
+            variables = {**variables, **jmsrvariables}
 
         # apply selections
         for ch in self._channels:
