@@ -27,6 +27,7 @@ from boostedhiggs.corrections import (
     corrected_msoftdrop,
     get_btag_weights,
     get_jec_jets,
+    get_jmsr,
     met_factory,
 )
 from boostedhiggs.utils import match_H, match_Top, match_V, sigs
@@ -270,6 +271,8 @@ class HwwProcessor(processor.ProcessorABC):
         fj_idx_lep = ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)
         candidatefj = ak.firsts(good_fatjets[fj_idx_lep])
 
+        jmsr_shifted_vars = get_jmsr(candidatefj, 1, self._year, isData=False)
+
         # AK4 jets
         jets, jec_shifted_jetvars = get_jec_jets(events, events.Jet, self._year, not self.isMC, self.jecs, fatjets=False)
         met = met_factory.build(events.MET, jets, {}) if self.isMC else events.MET
@@ -353,6 +356,8 @@ class HwwProcessor(processor.ProcessorABC):
             "SecondFatjet_msd": SecondFatjet.msdcorr,
             # "SecondFatjet_lep_dr": candidatelep_p4.delta_r(SecondFatjet),
         }
+
+        variables = {**variables, **jmsr_shifted_vars}  # TODO
 
         fatjetvars = {
             "fj_pt": candidatefj.pt,

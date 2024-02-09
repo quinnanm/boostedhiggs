@@ -388,9 +388,7 @@ def get_btag_weights(
         )
 
         ret_weights["weight_btagSFbcCorrelatedUp"] = _combine(bcEff, _btagSF(bcJets, "bc", syst="up_correlated"), bcPass)
-        ret_weights["weight_btagSFbcCorrelatedDown"] = _combine(
-            bcEff, _btagSF(bcJets, "bc", syst="down_correlated"), bcPass
-        )
+        ret_weights["weight_btagSFbcCorrelatedDown"] = _combine(bcEff, _btagSF(bcJets, "bc", syst="down_correlated"), bcPass)
 
     return ret_weights
 
@@ -695,3 +693,82 @@ def get_jec_jets(
         jec_shifted_vars[jec_var] = tdict
 
     return jets, jec_shifted_vars
+
+
+"""
+The following are added on Feb9_2024 by Farouk.
+"""
+PAD_VAL = -99999
+
+
+def pad_val(
+    arr: ak.Array,
+    target: int,
+    value: float = PAD_VAL,
+    axis: int = 0,
+    to_numpy: bool = True,
+    clip: bool = True,
+):
+    """
+    pads awkward array up to ``target`` index along axis ``axis`` with value ``value``,
+    optionally converts to numpy array
+    """
+    ret = ak.fill_none(ak.pad_none(arr, target, axis=axis, clip=clip), value, axis=axis)
+    return ret.to_numpy() if to_numpy else ret
+
+
+jmsr_vars = ["msoftdrop"]
+
+jmsValues = {}
+jmrValues = {}
+
+# jet mass resolution: https://twiki.cern.ch/twiki/bin/view/CMS/JetWtagging
+# nominal, down, up (these are switched in the github!!!)
+jmrValues["msoftdrop"] = {
+    "2016": [1.0, 0.8, 1.2],
+    "2017": [1.09, 1.04, 1.14],
+    # Use 2017 values for 2018 until 2018 are released
+    "2018": [1.09, 1.04, 1.14],
+}
+
+# jet mass scale
+# W-tagging PUPPI softdrop JMS values: https://twiki.cern.ch/twiki/bin/view/CMS/JetWtagging
+# 2016 values
+jmsValues["msoftdrop"] = {
+    "2016": [1.00, 0.9906, 1.0094],  # nominal, down, up
+    "2017": [0.982, 0.978, 0.986],
+    # Use 2017 values for 2018 until 2018 are released
+    "2018": [0.982, 0.978, 0.986],
+}
+
+
+def get_jmsr(fatjets, num_jets: int, year: str, isData: bool = False, seed: int = 42) -> Dict:
+    """Calculates post JMS/R masses and shifts"""
+    jmsr_shifted_vars = {}
+
+    for mkey in jmsr_vars:
+        tdict = {}
+
+        mass = pad_val(fatjets[mkey], num_jets, axis=1)
+
+        if isData:
+            tdict[""] = mass
+        else:
+            np.random.seed(seed)
+            smearing = np.random.normal(size=mass.shape)
+            # scale to JMR nom, down, up (minimum at 0)
+            jmr_nom, jmr_down, jmr_up = [((smearing * max(jmrValues[mkey][year][i] - 1, 0)) + 1) for i in range(3)]
+            jms_nom, jms_down, jms_up = jmsValues[mkey][year]
+
+            mass_jms = mass * jms_nom
+            mass_jmr = mass * jmr_nom
+
+            tdict[""] = mass_jms * jmr_nom
+            tdict["JMS_down"] = mass_jmr * jms_down
+            tdict["JMS_up"] = mass_jmr * jms_up
+            tdict["JMR_down"] = mass_jms * jmr_down
+            tdict["JMR_up"] = mass_jms * jmr_up
+
+        jmsr_shifted_vars[mkey] = tdict
+
+    return jmsr_shifted_vars
