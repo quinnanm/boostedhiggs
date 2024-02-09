@@ -19,7 +19,6 @@ logger = logging.getLogger(__name__)
 from boostedhiggs.corrections import (
     add_HiggsEW_kFactors,
     add_lepton_weight,
-    add_pdf_weight,
     add_pileup_weight,
     add_pileupid_weights,
     add_ps_weight,
@@ -442,11 +441,11 @@ class HwwProcessor(processor.ProcessorABC):
                 pt_2 = jet2.pt
                 try:
                     pt_1 = vals[ak4_outside_ak8_selector][:, 0]
-                except:
+                except Exception:
                     pt_1 = jet1.pt
                 try:
                     pt_2 = vals[ak4_outside_ak8_selector][:, 1]
-                except:
+                except Exception:
                     pt_2 = jet2.pt
 
                 jet1_shift = ak.zip(
