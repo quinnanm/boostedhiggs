@@ -74,46 +74,24 @@ input_feat = {
     # "v2_10_12": [],
     # "v2_nor1": [],
     "v2_nor2": [],
-    # "v20_1": [],
-    # "v20_2": [],
-    # "v20_3": [],
-    # "v2_nor2_1": [],
-    # "v3_1": [],
-    # "v4_1": [
-    #     "mjj",
-    #     "deta",
-    # ],
-    # "v30_1": [],
-    # "v30_2": [],
-    # "v30_3": [],
-    # "v30_4": [],
-    # "v30_5": [],
-    # "v30_6": [],
-    # "v30_7": [],
-    # "v30_8": [],
-    # "v30_9": [],
-    # "v30_10": [],
-    # "v30_11": [],
-    # "v30_12": [],
-    # "v30_13": [],
-    # "v30_15": [],
-    # "v30_16": [],
-    # "v30_17": [],
-    # "v30_18": [],
-    # "v32_18": [],
-    # "v31_1": [],
-    # "v31_2": [],
-    # "v31_3": [],
-    # "v31_4": [],
-    # "v31_5": [],
-    # "v31_6": [],
-    # "v32_1": [],
-    # "v32_2": [],
-    # "v30_even_1": [],
-    # "v31_1": [],
-    # "v32_1": [],
-    # "v33_1": [],
-    # "v34_1": [],
+    "v32_1": [],
+    "v32_2": [],
+    "v32_3": [],
+    "v32_4": [],
+    "v32_5": [],
+    "v32_6": [],
+    "v32_7": [],
+    "v32_8": [],
+    "v32_9": [],
+    "v32_10": [],
+    "v32_11": [],
+    "v32_12": [],
+    "v32_13": [],
+    "v32_14": [],
+    "v33_1": [],
+    "v33_2": [],
+    "v33_3": [],
+    "v33_4": [],
 }
 
 
@@ -271,13 +249,6 @@ def make_events_dict(
 
                     if modelv == "v2_nor2":
                         data["fj_ParT_score_finetuned"] = scipy.special.softmax(outputs[0], axis=1)[:, 0]
-                    elif modelv == "v2_nor2_1":
-                        data["fj_ParT_score_finetuned2"] = scipy.special.softmax(outputs[0], axis=1)[:, 0] / (
-                            scipy.special.softmax(outputs[0], axis=1)[:, 0] + scipy.special.softmax(outputs[0], axis=1)[:, 1]
-                        )
-                    elif modelv == "v4_1":
-                        data["fj_ParT_score_finetuned_ggF"] = scipy.special.softmax(outputs[0], axis=1)[:, 0]
-                        data["fj_ParT_score_finetuned_VBF"] = scipy.special.softmax(outputs[0], axis=1)[:, 1]
                     else:
                         data[f"fj_ParT_score_finetuned_{modelv}"] = scipy.special.softmax(outputs[0], axis=1)[:, 0]
 
