@@ -23,8 +23,6 @@ from boostedhiggs.corrections import (
     add_pileup_weight,
     add_pileupid_weights,
     add_ps_weight,
-    add_scalevar_3pt,
-    add_scalevar_7pt,
     add_VJets_kFactors,
     btagWPs,
     corrected_msoftdrop,
@@ -154,6 +152,19 @@ class HwwProcessor(processor.ProcessorABC):
 
         sumgenweight = ak.sum(events.genWeight) if self.isMC else nevents
 
+        # sum LHE weight
+        sumlheweight = {}
+        if "LHEScaleWeight" in events.fields and self.isMC:
+            if len(events.LHEScaleWeight[0]) == 9:
+                for i in range(len(events.LHEScaleWeight[0])):
+                    sumlheweight[i] = ak.sum(events.LHEScaleWeight[:, i] * events.genWeight)
+
+        # sum PDF weight
+        sumpdfweight = {}
+        if "LHEPdfWeight" in events.fields and self.isMC and "HToWW" in dataset:
+            for i in range(len(events.LHEPdfWeight[0])):
+                sumpdfweight[i] = ak.sum(events.LHEPdfWeight[:, i] * events.genWeight)
+
         # add genweight before filling cutflow
         if self.isMC:
             for ch in self._channels:
@@ -273,7 +284,7 @@ class HwwProcessor(processor.ProcessorABC):
             & ((jets.pt >= 50) | ((jets.pt < 50) & (jets.puId & 2) == 2))
         )
         goodjets = jets[jet_selector]
-        ak4_outside_ak8_selector = (jets.delta_r(candidatefj) > 0.8)
+        ak4_outside_ak8_selector = jets.delta_r(candidatefj) > 0.8
         ak4_outside_ak8 = jets[ak4_outside_ak8_selector]
 
         # VBF variables
@@ -352,7 +363,7 @@ class HwwProcessor(processor.ProcessorABC):
         }
         for shift, vals in jec_shifted_fatjetvars["pt"].items():
             if shift != "":
-                fatjetvars[f"fj_pt_{shift}"] = ak.firsts(vals[fj_idx_lep])
+                fatjetvars[f"fj_pt{shift}"] = ak.firsts(vals[fj_idx_lep])
         variables = {**variables, **fatjetvars}
 
         def getJECVariables(fatjetvars, candidatelep_p4, met, pt_shift=None, met_shift=None):
@@ -386,7 +397,7 @@ class HwwProcessor(processor.ProcessorABC):
 
             candidatefj = ak.zip(
                 {
-                    "pt": fatjetvars[f"fj_pt_{ptlabel}"],
+                    "pt": fatjetvars[f"fj_pt{ptlabel}"],
                     "eta": fatjetvars["fj_eta"],
                     "phi": fatjetvars["fj_phi"],
                     "mass": fatjetvars["fj_mass"],
@@ -409,15 +420,15 @@ class HwwProcessor(processor.ProcessorABC):
             rec_W_qq = candidatefj - candidatelep_p4
             rec_higgs = rec_W_qq + rec_W_lnu
 
-            variables[f"rec_higgs_m_{shift}"] = rec_higgs.mass
-            variables[f"rec_higgs_pt_{shift}"] = rec_higgs.pt
+            variables[f"rec_higgs_m{shift}"] = rec_higgs.mass
+            variables[f"rec_higgs_pt{shift}"] = rec_higgs.pt
 
             if shift == "":
-                variables[f"rec_W_qq_m_{shift}"] = rec_W_qq.mass
-                variables[f"rec_W_qq_pt_{shift}"] = rec_W_qq.pt
-                
-                variables[f"rec_W_lnu_m_{shift}"] = rec_W_lnu.mass
-                variables[f"rec_W_lnu_pt_{shift}"] = rec_W_lnu.pt
+                variables[f"rec_W_qq_m{shift}"] = rec_W_qq.mass
+                variables[f"rec_W_qq_pt{shift}"] = rec_W_qq.pt
+
+                variables[f"rec_W_lnu_m{shift}"] = rec_W_lnu.mass
+                variables[f"rec_W_lnu_pt{shift}"] = rec_W_lnu.pt
 
             return variables
 
@@ -425,10 +436,22 @@ class HwwProcessor(processor.ProcessorABC):
         if self._systematics and self.isMC:
             mjj_shift = {}
             for shift, vals in jec_shifted_jetvars["pt"].items():
-                if shift == "": continue
+                if shift == "":
+                    continue
+                pt_1 = jet1.pt
+                pt_2 = jet2.pt
+                try:
+                    pt_1 = vals[ak4_outside_ak8_selector][:, 0]
+                except:
+                    pt_1 = jet1.pt
+                try:
+                    pt_2 = vals[ak4_outside_ak8_selector][:, 1]
+                except:
+                    pt_2 = jet2.pt
+
                 jet1_shift = ak.zip(
                     {
-                        "pt": vals[ak4_outside_ak8_selector][:, 0],
+                        "pt": pt_1,
                         "eta": jet1.eta,
                         "phi": jet1.phi,
                         "mass": jet1.mass,
@@ -439,7 +462,7 @@ class HwwProcessor(processor.ProcessorABC):
                 )
                 jet2_shift = ak.zip(
                     {
-                        "pt": vals[ak4_outside_ak8_selector][:, 1],
+                        "pt": pt_2,
                         "eta": jet2.eta,
                         "phi": jet2.phi,
                         "mass": jet2.mass,
@@ -448,7 +471,7 @@ class HwwProcessor(processor.ProcessorABC):
                     with_name="PtEtaPhiMCandidate",
                     behavior=candidate.behavior,
                 )
-                mjj_shift[f"mjj_{shift}"] = (ak.firsts(jet1_shift) + ak.firsts(jet2_shift)).mass
+                mjj_shift[f"mjj{shift}"] = (ak.firsts(jet1_shift) + ak.firsts(jet2_shift)).mass
             variables = {**variables, **mjj_shift}
 
             for met_shift in ["UES_up", "UES_down"]:
@@ -457,7 +480,7 @@ class HwwProcessor(processor.ProcessorABC):
 
         for shift in jec_shifted_fatjetvars["pt"]:
             if shift != "" and not self._systematics:
-                continue            
+                continue
             jecvariables = getJECVariables(fatjetvars, candidatelep_p4, met, pt_shift=shift, met_shift=None)
             variables = {**variables, **jecvariables}
 
@@ -521,33 +544,36 @@ class HwwProcessor(processor.ProcessorABC):
 
         # hem-cleaning selection
         if self._year == "2018":
-            check_fatjets = good_fatjets[:, :2]
+            # check_fatjets = good_fatjets[:, :2]
             hem_veto = ak.any(
-                (
-                    (ak4_outside_ak8.eta > -3.2)
-                    & (ak4_outside_ak8.eta < -1.3)
-                    & (ak4_outside_ak8.phi > -1.57)
-                    & (ak4_outside_ak8.phi < -0.87)
-                ),
+                ((goodjets.eta > -3.2) & (goodjets.eta < -1.3) & (goodjets.phi > -1.57) & (goodjets.phi < -0.87)),
                 -1,
-            ) | (
-                (events.MET.phi > -1.62) & (events.MET.pt < 470.0) & (events.MET.phi < -0.62)
             ) | ak.any(
                 (
-                    (check_fatjets.eta > -3.2)
-                    & (check_fatjets.eta < -1.3)
-                    & (check_fatjets.phi > -1.57)
-                    & (check_fatjets.phi < -0.87)
+                    (electrons.pt > 30)
+                    & (electrons.eta > -3.2)
+                    & (electrons.eta < -1.3)
+                    & (electrons.phi > -1.57)
+                    & (electrons.phi < -0.87)
                 ),
-                -1
-            ) 
+                -1,
+            )
+            # | ak.any(
+            #     (
+            #         (check_fatjets.eta > -3.2)
+            #         & (check_fatjets.eta < -1.3)
+            #         & (check_fatjets.phi > -1.57)
+            #         & (check_fatjets.phi < -0.87)
+            #     ),
+            #     -1
+            # )
 
             hem_cleaning = (
                 ((events.run >= 319077) & (not self.isMC))  # if data check if in Runs C or D
                 # else for MC randomly cut based on lumi fraction of C&D
                 | ((np.random.rand(len(events)) < 0.632) & self.isMC)
             ) & (hem_veto)
-            
+
             self.add_selection(name="HEMCleaning", sel=~hem_cleaning)
 
         if self.isMC:
@@ -587,31 +613,56 @@ class HwwProcessor(processor.ProcessorABC):
                     )
 
                 ewk_corr, qcd_corr, alt_qcd_corr = add_VJets_kFactors(self.weights[ch], events.GenPart, dataset, events)
-                variables["ewk_corr"] = ewk_corr
-                variables["qcd_corr"] = qcd_corr
-                variables["alt_qcd_corr"] = alt_qcd_corr
+                # add corrections for plotting
+                variables["weight_ewkcorr"] = ewk_corr
+                variables["weight_qcdcorr"] = qcd_corr
+                variables["weight_altqcdcorr"] = alt_qcd_corr
 
                 if "HToWW" in dataset:
                     add_HiggsEW_kFactors(self.weights[ch], events.GenPart, dataset)
 
-                add_scalevar_7pt(
-                    self.weights[ch],
-                    events.LHEScaleWeight if "LHEScaleWeight" in events.fields else [],
-                )
-                add_scalevar_3pt(
-                    self.weights[ch],
-                    events.LHEScaleWeight if "LHEScaleWeight" in events.fields else [],
-                )
+                if "HToWW" in dataset or "TT" in dataset or "WJets" in dataset:
+                    """
+                    For the QCD acceptance uncertainty:
+                    - we save the individual weights [0, 1, 3, 5, 7, 8]
+                    - postprocessing: we obtain sum_sumlheweight
+                    - postprocessing: we obtain LHEScaleSumw: sum_sumlheweight[i] / sum_sumgenweight
+                    - postprocessing:
+                      obtain histograms for 0, 1, 3, 5, 7, 8 and 4: h0, h1, ... respectively
+                       weighted by scale_0, scale_1, etc
+                      and normalize them by  (xsec * luminosity) / LHEScaleSumw[i]
+                    - then, take max/min of h0, h1, h3, h5, h7, h8 w.r.t h4: h_up and h_dn
+                    - the uncertainty is the nominal histogram * h_up / h4
+                    """
+                    scale_weights = {}
+                    if "LHEScaleWeight" in events.fields:
+                        # save individual weights
+                        if len(events.LHEScaleWeight[0]) == 9:
+                            for i in [0, 1, 3, 5, 7, 8, 4]:
+                                scale_weights[f"weight_scale{i}"] = events.LHEScaleWeight[:, i]
+                    variables = {**variables, **scale_weights}
 
-                add_ps_weight(
-                    self.weights[ch],
-                    events.PSWeight if "PSWeight" in events.fields else [],
-                )
+                if "HToWW" in dataset:
+                    """
+                    For the PDF acceptance uncertainty:
+                    - store 103 variations. 0-100 PDF values
+                    - The last two values: alpha_s variations.
+                    - you just sum the yield difference from the nominal in quadrature to get the total uncertainty.
+                    e.g. https://github.com/LPC-HH/HHLooper/blob/master/python/prepare_card_SR_final.py#L258
+                    and https://github.com/LPC-HH/HHLooper/blob/master/app/HHLooper.cc#L1488
+                    """
+                    pdf_weights = {}
+                    if "LHEPdfWeight" in events.fields:
+                        # save individual weights
+                        for i in range(len(events.LHEPdfWeight[0])):
+                            pdf_weights[f"weight_pdf{i}"] = events.LHEPdfWeight[:, i]
+                    variables = {**variables, **pdf_weights}
 
-                add_pdf_weight(
-                    self.weights[ch],
-                    events.LHEPdfWeight if "LHEPdfWeight" in events.fields else [],
-                )
+                if "HToWW" in dataset:
+                    add_ps_weight(
+                        self.weights[ch],
+                        events.PSWeight if "PSWeight" in events.fields else [],
+                    )
 
                 # store the gen-weight
                 variables[f"weight_{ch}"] = self.weights[ch].partial_weight(["genweight"])
@@ -645,6 +696,7 @@ class HwwProcessor(processor.ProcessorABC):
             # for data, only fill output for the dataset needed
             if not self.isMC and self.dataset_per_ch[ch] not in dataset:
                 fill_output = False
+
             # only fill output for that channel if the selections yield any events
             if np.sum(selection_ch) <= 0:
                 fill_output = False
@@ -710,14 +762,13 @@ class HwwProcessor(processor.ProcessorABC):
             self.save_dfs_parquet(fname, output[ch], ch)
 
         # return dictionary with cutflows
-        # print(sumgenweight, self.cutflows["mu"]["HEMCleaning"])
-
         return {
             dataset: {
                 "mc": self.isMC,
                 self._year
                 + self._yearmod: {
                     "sumgenweight": sumgenweight,
+                    "sumlheweight": sumlheweight,
                     "cutflows": self.cutflows,
                 },
             }
