@@ -196,96 +196,6 @@ def add_VJets_kFactors(weights, genpart, dataset, events):
     return ewcorr, qcdcorr, alt_qcdcorr
 
 
-def add_pdf_weight(weights, pdf_weights):
-    nweights = len(weights.weight())
-    nom = np.ones(nweights)
-    up = np.ones(nweights)
-    down = np.ones(nweights)
-    # docstring = pdf_weights.__doc__
-
-    # NNPDF31_nnlo_hessian_pdfas
-    # https://lhapdfsets.web.cern.ch/current/NNPDF31_nnlo_hessian_pdfas/NNPDF31_nnlo_hessian_pdfas.info
-    if True:
-        # Hessian PDF weights
-        # Eq. 21 of https://arxiv.org/pdf/1510.03865v1.pdf
-        arg = pdf_weights[:, 1:-2] - np.ones((nweights, 100))
-        summed = ak.sum(np.square(arg), axis=1)
-        pdf_unc = np.sqrt((1.0 / 99.0) * summed)
-        weights.add("PDF_weight", nom, pdf_unc + nom)
-
-        # alpha_S weights
-        # Eq. 27 of same ref
-        as_unc = 0.5 * (pdf_weights[:, 102] - pdf_weights[:, 101])
-        weights.add("aS_weight", nom, as_unc + nom)
-
-        # PDF + alpha_S weights
-        # Eq. 28 of same ref
-        pdfas_unc = np.sqrt(np.square(pdf_unc) + np.square(as_unc))
-        weights.add("PDFaS_weight", nom, pdfas_unc + nom)
-
-    else:
-        weights.add("aS_weight", nom, up, down)
-        weights.add("PDF_weight", nom, up, down)
-        weights.add("PDFaS_weight", nom, up, down)
-
-
-# 7-point scale variations
-def add_scalevar_7pt(weights, var_weights):
-    # docstring = var_weights.__doc__
-    nweights = len(weights.weight())
-
-    nom = np.ones(nweights)
-    up = np.ones(nweights)
-    down = np.ones(nweights)
-
-    if len(var_weights) > 0:
-        if len(var_weights[0]) == 9:
-            # you skip the extremes, where one (uR, uF) is multiplied by 2 and the other by 0.5
-            up = np.maximum.reduce(
-                [
-                    var_weights[:, 0],
-                    var_weights[:, 1],
-                    var_weights[:, 3],
-                    var_weights[:, 5],
-                    var_weights[:, 7],
-                    var_weights[:, 8],
-                ]
-            )
-            down = np.minimum.reduce(
-                [
-                    var_weights[:, 0],
-                    var_weights[:, 1],
-                    var_weights[:, 3],
-                    var_weights[:, 5],
-                    var_weights[:, 7],
-                    var_weights[:, 8],
-                ]
-            )
-        elif len(var_weights[0]) > 1:
-            print("Scale variation vector has length ", len(var_weights[0]))
-    weights.add("scalevar_7pt", nom, up, down)
-
-
-# 3-point scale variations
-def add_scalevar_3pt(weights, var_weights):
-    # docstring = var_weights.__doc__
-
-    nweights = len(weights.weight())
-
-    nom = np.ones(nweights)
-    up = np.ones(nweights)
-    down = np.ones(nweights)
-
-    if len(var_weights) > 0:
-        if len(var_weights[0]) == 9:
-            up = np.maximum(var_weights[:, 0], var_weights[:, 8])
-            down = np.minimum(var_weights[:, 0], var_weights[:, 8])
-        elif len(var_weights[0]) > 1:
-            print("Scale variation vector has length ", len(var_weights[0]))
-
-    weights.add("scalevar_3pt", nom, up, down)
-
-
 def add_ps_weight(weights, ps_weights):
     nweights = len(weights.weight())
     nom = np.ones(nweights)
@@ -302,8 +212,8 @@ def add_ps_weight(weights, ps_weights):
             down_fsr = ps_weights[:, 3]
         else:
             warnings.warn(f"PS weight vector has length {len(ps_weights[0])}")
-    weights.add("PS_ISR", nom, up_isr, down_isr)
-    weights.add("PS_FSR", nom, up_fsr, down_fsr)
+    weights.add("PSISR", nom, up_isr, down_isr)
+    weights.add("PSFSR", nom, up_fsr, down_fsr)
 
 
 with importlib.resources.path("boostedhiggs.data", "EWHiggsCorrections.json") as filename:
@@ -447,6 +357,7 @@ def get_btag_weights(
     ret_weights = {}
 
     # one common multiplicative SF is to be applied to the nominal prediction
+    """
     bc_0btag = _get_weight(True, bcEff, bcSF)
     light_0btag = _get_weight(True, lightEff, lightSF)
     ret_weights["0btag_1b"] = bc_0btag * light_0btag
@@ -454,26 +365,32 @@ def get_btag_weights(
     bc_1pbtag = _get_weight(False, bcEff, bcSF)
     light_1pbtag = _get_weight(False, lightEff, lightSF)
     ret_weights["1pbtag_1b"] = bc_1pbtag * light_1pbtag
-
+    """
     bc = _combine(bcEff, bcSF, bcPass)
-    light = _combine(lightEff, lightEff, lightPass)
-    ret_weights["btag_1a"] = bc * light
-
-    nominal = ret_weights["btag_1a"]
+    light = _combine(lightEff, lightSF, lightPass)
+    ret_weights["weight_btag"] = bc * light
 
     # Separate uncertainties are applied for b/c jets and light jets
     if systematics:
-        ret_weights[f"btagSFlight_{year}_up"] = _combine(lightEff, _btagSF(lightJets, "light", syst="up"), lightPass)
-        ret_weights[f"btagSFlight_{year}_down"] = _combine(lightEff, _btagSF(lightJets, "light", syst="down"), lightPass)
+        ret_weights[f"weight_btagSFlight{year}Up"] = _combine(lightEff, _btagSF(lightJets, "light", syst="up"), lightPass)
+        ret_weights[f"weight_btagSFlight{year}Down"] = _combine(
+            lightEff, _btagSF(lightJets, "light", syst="down"), lightPass
+        )
 
-        ret_weights[f"btagSFbc_{year}_up"] = _combine(bcEff, _btagSF(bcJets, "bc", syst="up"), bcPass)
-        ret_weights[f"btagSFbc_{year}_down"] = _combine(bcEff, _btagSF(bcJets, "bc", syst="down"), bcPass)
+        ret_weights[f"weight_btagSFbc{year}Up"] = _combine(bcEff, _btagSF(bcJets, "bc", syst="up"), bcPass)
+        ret_weights[f"weight_btagSFbc{year}Down"] = _combine(bcEff, _btagSF(bcJets, "bc", syst="down"), bcPass)
 
-        ret_weights[f"btagSFlight_correlated_up"] = _combine(lightEff, _btagSF(lightJets, "light", syst="up_correlated"), lightPass)
-        ret_weights[f"btagSFlight_correlated_down"] =  _combine(lightEff, _btagSF(lightJets, "light", syst="down_correlated"), lightPass)
+        ret_weights["weight_btagSFlightCorrelatedUp"] = _combine(
+            lightEff, _btagSF(lightJets, "light", syst="up_correlated"), lightPass
+        )
+        ret_weights["weight_btagSFlightCorrelatedDown"] = _combine(
+            lightEff, _btagSF(lightJets, "light", syst="down_correlated"), lightPass
+        )
 
-        ret_weights[f"btagSFbc_correlated_up"] = _combine(bcEff, _btagSF(bcJets, "bc", syst="up_correlated"), bcPass)
-        ret_weights[f"btagSFbc_correlated_down"] = _combine(bcEff, _btagSF(bcJets, "bc", syst="down_correlated"), bcPass)
+        ret_weights["weight_btagSFbcCorrelatedUp"] = _combine(bcEff, _btagSF(bcJets, "bc", syst="up_correlated"), bcPass)
+        ret_weights["weight_btagSFbcCorrelatedDown"] = _combine(
+            bcEff, _btagSF(bcJets, "bc", syst="down_correlated"), bcPass
+        )
 
     return ret_weights
 
