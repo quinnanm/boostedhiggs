@@ -57,7 +57,7 @@ labels = {
     "SingleTop": "singletop",
     "Diboson": "diboson",
     "WZQQ": "wzqq",
-    "EWK": "ewkvjets",
+    "EWKvjets": "ewkvjets",
 }
 
 bkgs = ["TTbar", "WJetsLNu", "SingleTop", "DYJets", "QCD", "Diboson", "WZQQ", "EWKvjets"]
