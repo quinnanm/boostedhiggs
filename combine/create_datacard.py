@@ -39,7 +39,7 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
     model = rl.Model("testModel")
 
     # define the signal and control regions
-    SIG_regions = ["SRVBF97", "SRggFpt250to300", "SRggFpt300to450", "SRggFpt450toInf"]
+    SIG_regions = ["SRVBF95", "SRggF97pt250to300", "SRggF97pt300to450", "SRggF97pt450toInf"]
     CONTROL_regions = []
     if add_ttbar_constraint:
         CONTROL_regions += ["TopCR"]
@@ -82,8 +82,8 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
             # SYSTEMATICS FROM PARQUETS
             for syst_on_sample in ["all_samples", sName]:  # apply common systs and per sample systs
                 for sys_name, sys_value in sys_from_parquets[syst_on_sample].items():
-                    syst_up = hists_templates[{"Sample": sName, "Region": ChName, "Systematic": sys_name + "Up"}].values()
-                    syst_do = hists_templates[{"Sample": sName, "Region": ChName, "Systematic": sys_name + "Down"}].values()
+                    syst_up = hists_templates[{"Sample": sName, "Region": ChName, "Systematic": sys_name + "_up"}].values()
+                    syst_do = hists_templates[{"Sample": sName, "Region": ChName, "Systematic": sys_name + "_down"}].values()
                     nominal = hists_templates[{"Sample": sName, "Region": ChName, "Systematic": "nominal"}].values()
 
                     if sys_value.combinePrior == "lnN":
