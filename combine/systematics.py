@@ -144,8 +144,8 @@ def systs_from_parquets(years):
             # "weight_mu_btagSFbc_correlated": rl.NuisanceParameter(
             #     f"{CMS_PARAMS_LABEL}_btagSFbc_correlated", "lnN"
             # ),
-            "weight_pileup": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_PU_{year}", "shape"),
-            "weight_pileupIDSF": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_PUIDSF_{year}", "shape"),
+            # "weight_pileup": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_PU_{year}", "shape"),
+            # "weight_pileupIDSF": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_PUIDSF_{year}", "shape"),
             "weight_isolation": rl.NuisanceParameter(f"CMS_iso_{year}", "lnN"),
             "weight_id": rl.NuisanceParameter(f"CMS_id_{year}", "lnN"),
             "weight_reco_ele": rl.NuisanceParameter("CMS_reconstruction_ele", "lnN"),
@@ -153,6 +153,23 @@ def systs_from_parquets(years):
             "weight_trigger_ele": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_trigger_{year}_ele", "lnN"),
             "weight_trigger_iso_mu": rl.NuisanceParameter(f"CMS_mu_trigger_iso_{year}_mu", "lnN"),
             "weight_trigger_noniso_mu": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_trigger_{year}_mu", "lnN"),
+            # shape weights
+            "fj_ptJES": rl.NuisanceParameter("AK8_Jet_pt_JES", "shape"),
+            "fj_ptJER": rl.NuisanceParameter("AK8_Jet_pt_JER", "shape"),
+            "fj_massJMS": rl.NuisanceParameter("AK8_Jet_mass_JMS", "shape"),
+            "fj_massJMR": rl.NuisanceParameter("AK8_Jet_mass_JMR", "shape"),
+            "mjjJES": rl.NuisanceParameter("mjj_JES", "shape"),
+            "mjjJER": rl.NuisanceParameter("mjj_JER", "shape"),
+            "rec_higgs_mUES": rl.NuisanceParameter("Higgs_candidate_mass_UES", "shape"),
+            "rec_higgs_mJES": rl.NuisanceParameter("Higgs_candidate_mass_JES", "shape"),
+            "rec_higgs_mJER": rl.NuisanceParameter("Higgs_candidate_mass_JER", "shape"),
+            "rec_higgs_mJMS": rl.NuisanceParameter("Higgs_candidate_mass_JMS", "shape"),
+            "rec_higgs_mJMR": rl.NuisanceParameter("Higgs_candidate_mass_JMR", "shape"),
+            "rec_higgs_ptUES": rl.NuisanceParameter("Higgs_candidate_pt_UES", "shape"),
+            "rec_higgs_ptJES": rl.NuisanceParameter("Higgs_candidate_pt_JES", "shape"),
+            "rec_higgs_ptJER": rl.NuisanceParameter("Higgs_candidate_pt_JER", "shape"),
+            "rec_higgs_ptJMS": rl.NuisanceParameter("Higgs_candidate_pt_JMS", "shape"),
+            "rec_higgs_ptJMR": rl.NuisanceParameter("Higgs_candidate_pt_JMR", "shape"),
         },
         # signal
         "ggF": {
