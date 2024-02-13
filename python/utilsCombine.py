@@ -18,6 +18,7 @@ plt.style.use(hep.style.CMS)
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
+# (name of sample, name in templates)
 combine_samples = {
     # data
     "SingleElectron_": "Data",
@@ -25,22 +26,28 @@ combine_samples = {
     "EGamma_": "Data",
     # signal
     "GluGluHToWW_Pt-200ToInf_M-125": "ggF",
-    "HToWW_M-125": "VH",
+    "VBFHToWWToAny_M-125_TuneCP5_withDipoleRecoil": "VBF",
     "VBFHToWWToLNuQQ_M-125_withDipoleRecoil": "VBF",
     "ttHToNonbb_M125": "ttH",
+    "HWminusJ_HToWW_M-125": "WH",
+    "HWplusJ_HToWW_M-125": "WH",
+    "HZJ_HToWW_M-125": "ZH",
+    "GluGluZH_HToWW_M-125_TuneCP5_13TeV-powheg-pythia8": "ZH",
     # bkg
     "QCD_Pt": "QCD",
     "DYJets": "DYJets",
     "WJetsToLNu_": "WJetsLNu",
-    "JetsToQQ": "WZQQ",
     "TT": "TTbar",
     "ST_": "SingleTop",
     "WW": "Diboson",
     "WZ": "Diboson",
     "ZZ": "Diboson",
-    "GluGluHToTauTau": "HTauTau",
+    "JetsToQQ": "WZQQ",
+    "EWK": "EWKvjets",
+    # "GluGluHToTauTau": "HTauTau",
 }
-signals = ["ggF", "ttH", "VH", "VBF"]
+
+signals = ["ggF", "VBF", "ttH", "WH", "ZH"]
 
 
 def get_sum_sumgenweight(pkl_files, year, sample):
@@ -99,19 +106,21 @@ def get_finetuned_score(data, modelv="v2_nor2"):
 
 # PLOTTING UTILS
 color_by_sample = {
+    # signal
     "ggF": "pink",
-    "VH": "tab:brown",
-    # "VBF": "tab:gray",
     "VBF": "tab:orange",
     "ttH": "tab:olive",
-    "DYJets": "tab:purple",
+    "WH": "tab:brown",
+    "ZH": "tab:grey",
+    # background
     "QCD": "tab:orange",
-    "Diboson": "orchid",
+    "DYJets": "tab:purple",
     "WJetsLNu": "tab:green",
-    "WJetsQCD": "tab:green",
     "TTbar": "tab:blue",
-    "WZQQ": "salmon",
     "SingleTop": "tab:cyan",
+    "Diboson": "orchid",
+    "WZQQ": "salmon",
+    "EWKvjets": "grey",
     #     "WplusHToTauTau": "tab:cyan",
     #     "WminusHToTauTau": "tab:cyan",
     #     "ttHToTauTau": "tab:cyan",
@@ -121,22 +130,21 @@ color_by_sample = {
 }
 
 plot_labels = {
-    # "ggF": "ggH(WW)-Pt200",
+    # signal
     "ggF": "ggH",
-    "VH": "VH",
-    # "VH": "VH(WW)",
-    # "VBF": r"VBFH(WW) $(qq\ell\nu)$",
-    "VBF": r"VBF",
-    # "ttH": "ttH(WW)",
+    "VBF": "VBF",
     "ttH": "ttH",
-    "DYJets": r"Z$(\ell\ell)$+jets",
+    "WH": "WH",
+    "ZH": "ZH",
+    # background
     "QCD": "Multijet",
-    "Diboson": "VV",
+    "DYJets": r"Z$(\ell\ell)$+jets",
     "WJetsLNu": r"W$(\ell\nu)$+jets",
-    "WJetsQCD": r"W$(\ell\nu)$+jets + Multijet",
     "TTbar": r"$t\bar{t}$+jets",
-    "WZQQ": r"W/Z$(qq)$",
     "SingleTop": r"Single Top",
+    "Diboson": "VV",
+    "WZQQ": r"W/Z$(qq)$",
+    "EWKvjets": r"EWKVJets$",
     #     "WplusHToTauTau": "WplusHToTauTau",
     #     "WminusHToTauTau": "WminusHToTauTau",
     #     "ttHToTauTau": "ttHToTauTau",
@@ -144,13 +152,6 @@ plot_labels = {
     #     "ZHToTauTau": "ZHToTauTau",
     #     "VBFHToTauTau": "VBFHToTauTau"
 }
-
-# sig_labels = {
-#     "HWW": "ggF",
-#     "VBF": "VBF",
-#     "VH": "VH",
-#     "ttH": "ttH",
-# }
 
 label_by_ch = {"mu": "Muon", "ele": "Electron"}
 

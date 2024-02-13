@@ -25,8 +25,11 @@ warnings.filterwarnings("ignore", message="Found duplicate branch ")
 pd.set_option("mode.chained_assignment", None)
 
 
+# ("key", "value"): the "key" is the common naming (to commonalize over both channels)
 weights = {
+    # common for all samples
     "weight_pileup": {"mu": "weight_mu_pileup", "ele": "weight_ele_pileup"},
+    "weight_pileupIDSF": {"mu": "weight_mu_pileupIDSFDown", "ele": "weight_ele_pileupIDSFDown"},
     "weight_isolation": {"mu": "weight_mu_isolation_muon", "ele": "weight_ele_isolation_electron"},
     "weight_id": {"mu": "weight_mu_id_muon", "ele": "weight_ele_id_electron"},
     "weight_reco_ele": {"mu": "", "ele": "weight_ele_reco_electron"},
@@ -35,13 +38,8 @@ weights = {
     "weight_trigger_iso_mu": {"mu": "weight_mu_trigger_iso_muon", "ele": ""},
     "weight_trigger_noniso_mu": {"mu": "weight_mu_trigger_noniso_muon", "ele": ""},
     # ggF & VBF
-    "weight_aS_weight": {"mu": "weight_mu_aS_weight", "ele": "weight_ele_aS_weight"},
-    "weight_UEPS_FSR": {"mu": "weight_mu_UEPS_FSR", "ele": "weight_ele_UEPS_FSR"},
-    "weight_UEPS_ISR": {"mu": "weight_mu_UEPS_ISR", "ele": "weight_ele_UEPS_ISR"},
-    "weight_PDF_weight": {"mu": "weight_mu_PDF_weight", "ele": "weight_ele_PDF_weight"},
-    "weight_PDFaS_weight": {"mu": "weight_mu_PDFaS_weight", "ele": "weight_ele_PDFaS_weight"},
-    "weight_scalevar_3pt": {"mu": "weight_mu_scalevar_3pt", "ele": "weight_ele_scalevar_3pt"},
-    "weight_scalevar_7pt": {"mu": "weight_mu_scalevar_7pt", "ele": "weight_ele_scalevar_7pt"},
+    "weight_PSFSR": {"mu": "weight_mu_PSFSR", "ele": "weight_ele_PSFSR_weight"},
+    "weight_PSISR": {"mu": "weight_mu_PSISR", "ele": "weight_ele_PSISR_weight"},
     # WJetsLNu & DY
     "weight_d1kappa_EW": {"mu": "weight_mu_d1kappa_EW", "ele": "weight_ele_d1kappa_EW"},
     # WJetsLNu
@@ -53,6 +51,57 @@ weights = {
     # DY
     "weight_Z_d2kappa_EW": {"mu": "weight_mu_Z_d2kappa_EW", "ele": "weight_ele_Z_d2kappa_EW"},
     "weight_Z_d3kappa_EW": {"mu": "weight_mu_Z_d3kappa_EW", "ele": "weight_ele_Z_d3kappa_EW"},
+    # new
+    # "weight_btag": {"mu": "weight_btag", "ele": "weight_btag"},
+    # "weight_ewkcorr": {"mu": "weight_ewkcorr", "ele": "weight_ewkcorr"},
+    # "weight_qcdcorr": {"mu": "weight_qcdcorr", "ele": "weight_qcdcorr"},
+    # put the scale
+}
+
+
+shape_weights = {
+    "fj_pt": [
+        "fj_ptJES_up",
+        "fj_ptJES_down",
+        "fj_ptJER_up",
+        "fj_ptJER_down",
+    ],
+    "fj_mass": [
+        "fj_massJMS_up",
+        "fj_massJMS_down",
+        "fj_massJMR_up",
+        "fj_massJMR_down",
+    ],
+    "mjj": [
+        "mjjJES_up",
+        "mjjJES_down",
+        "mjjJER_up",
+        "mjjJER_down",
+    ],
+    "rec_higgs_m": [
+        "rec_higgs_mUES_up",
+        "rec_higgs_mUES_down",
+        "rec_higgs_mJES_up",
+        "rec_higgs_mJES_down",
+        "rec_higgs_mJER_up",
+        "rec_higgs_mJER_down",
+        "rec_higgs_mJMS_up",
+        "rec_higgs_mJMS_down",
+        "rec_higgs_mJMR_up",
+        "rec_higgs_mJMR_down",
+    ],
+    "rec_higgs_pt": [
+        "rec_higgs_ptUES_up",
+        "rec_higgs_ptUES_down",
+        "rec_higgs_ptJES_up",
+        "rec_higgs_ptJES_down",
+        "rec_higgs_ptJER_up",
+        "rec_higgs_ptJER_down",
+        "rec_higgs_ptJMS_up",
+        "rec_higgs_ptJMS_down",
+        "rec_higgs_ptJMR_up",
+        "rec_higgs_ptJMR_down",
+    ],
 }
 
 
@@ -73,47 +122,13 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
 
     """
 
-    # add filter to load parquets faster  (only if needed)... we only apply lepiso anyway
-    lepiso_filter = {
-        "lepiso": {
-            "mu": [
-                [("lep_pt", "<", 55), (("lep_isolation", "<", 0.15))],
-                [("lep_misolation", "<", 0.2), ("lep_pt", ">=", 55)],
-            ],
-            "ele": [
-                [("lep_pt", "<", 120), (("lep_isolation", "<", 0.15))],
-                [("lep_pt", ">=", 120)],
-            ],
-        },
-        "lepisoinv": {
-            "mu": [
-                [("lep_pt", "<", 55), (("lep_isolation", ">", 0.15))],
-                [("lep_misolation", ">", 0.2), ("lep_pt", ">=", 55)],
-            ],
-            "ele": [
-                [("lep_pt", "<", 120), (("lep_isolation", ">", 0.15))],
-                [("lep_pt", ">=", 120)],
-            ],
-        },
-    }
-
     # add extra selections to preselection
     presel = {
         "mu": {
-            "lep_fj_dr003": "( ( lep_fj_dr>0.03) )",
-            "lep_fj_dr08": "( ( lep_fj_dr<0.8) )",
-            "fj_pt300": "( ( fj_pt>200) )",
-            "dphi<1.57": "(abs_met_fj_dphi<1.57)",
             "tagger>0.5": "fj_ParT_score_finetuned>0.5",
-            "MET>25": "met_pt>20",
         },
         "ele": {
-            "lep_fj_dr003": "( ( lep_fj_dr>0.03) )",
-            "lep_fj_dr08": "( ( lep_fj_dr<0.8) )",
-            "fj_pt300": "( ( fj_pt>200) )",
-            "dphi<1.57": "(abs_met_fj_dphi<1.57)",
             "tagger>0.5": "fj_ParT_score_finetuned>0.5",
-            "MET>30": "met_pt>20",
         },
     }
 
@@ -140,11 +155,10 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                 luminosity = json.load(f)[ch][year]
 
             for sample in os.listdir(samples_dir[year]):
-                # if sample == "QCD_Pt_170to300":
-                #     print(f"Skipping sample {sample}")
-                #     continue
-
-                if "DYJetsToLL_M-50_HT" in sample:
+                if "WJetsToLNu_1J" in sample:
+                    print(f"Skipping sample {sample}")
+                    continue
+                if "WJetsToLNu_2J" in sample:
                     print(f"Skipping sample {sample}")
                     continue
 
@@ -172,7 +186,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                     continue
 
                 try:
-                    data = pd.read_parquet(parquet_files, filters=lepiso_filter["lepiso"][ch])
+                    data = pd.read_parquet(parquet_files)
                 except pyarrow.lib.ArrowInvalid:  # empty parquet because no event passed selection
                     continue
 
@@ -228,14 +242,14 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                         if sample_to_use == "Data":  # for data (fill as 1)
                             hists.fill(
                                 Sample=sample_to_use,
-                                Systematic=f"{weight}Up",
+                                Systematic=f"{weight}_up",
                                 Region=region,
                                 mass_observable=df["rec_higgs_m"],
                                 weight=np.ones_like(df["fj_pt"]),
                             )
                             hists.fill(
                                 Sample=sample_to_use,
-                                Systematic=f"{weight}Down",
+                                Systematic=f"{weight}_down",
                                 Region=region,
                                 mass_observable=df["rec_higgs_m"],
                                 weight=np.ones_like(df["fj_pt"]),
@@ -249,7 +263,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
 
                             hists.fill(
                                 Sample=sample_to_use,
-                                Systematic=f"{weight}Up",
+                                Systematic=f"{weight}_up",
                                 Region=region,
                                 mass_observable=df["rec_higgs_m"],
                                 weight=syst,
@@ -257,17 +271,43 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
 
                             # down weight for MC
                             try:
-                                syst = df[f"{weights[weight][ch]}Down"] * event_weight
+                                syst = df[f"{weights[weight][ch]}_Down"] * event_weight
                             except KeyError:
                                 syst = nominal
 
                             hists.fill(
                                 Sample=sample_to_use,
-                                Systematic=f"{weight}Down",
+                                Systematic=f"{weight}_down",
                                 Region=region,
                                 mass_observable=df["rec_higgs_m"],
                                 weight=syst,
                             )
+
+                        for var in shape_weights:
+                            for weight in shape_weights[var]:
+
+                                if sample_to_use == "Data":  # for data (fill as 1)
+                                    hists.fill(
+                                        Sample=sample_to_use,
+                                        Systematic=f"{weight}",
+                                        Region=region,
+                                        mass_observable=df["rec_higgs_m"],
+                                        weight=np.ones_like(df["fj_pt"]),
+                                    )
+                                else:
+                                    # weight for MC
+                                    try:
+                                        syst = (df[var] / df[weight]) * event_weight
+                                    except KeyError:
+                                        syst = nominal
+
+                                    hists.fill(
+                                        Sample=sample_to_use,
+                                        Systematic=f"{weight}",
+                                        Region=region,
+                                        mass_observable=df["rec_higgs_m"],
+                                        weight=syst,
+                                    )
 
     logging.info(hists)
 

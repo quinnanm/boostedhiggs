@@ -20,22 +20,25 @@ combine_samples = {
     "EGamma_": "Data",
     # signal
     "GluGluHToWW_Pt-200ToInf_M-125": "ggF",
-    "HToWW_M-125": "VH",
+    "VBFHToWWToAny_M-125_TuneCP5_withDipoleRecoil": "VBF",
     "VBFHToWWToLNuQQ_M-125_withDipoleRecoil": "VBF",
     "ttHToNonbb_M125": "ttH",
+    "HWminusJ_HToWW_M-125": "WH",
+    "HWplusJ_HToWW_M-125": "WH",
+    "HZJ_HToWW_M-125": "ZH",
+    "GluGluZH_HToWW_M-125_TuneCP5_13TeV-powheg-pythia8": "ZH",
     # bkg
     "QCD_Pt": "QCD",
-    # "QCD_Pt": "WJetsQCD",
     "DYJets": "DYJets",
     "WJetsToLNu_": "WJetsLNu",
-    # "WJetsToLNu_": "WJetsQCD",
-    "JetsToQQ": "WZQQ",
     "TT": "TTbar",
     "ST_": "SingleTop",
     "WW": "Diboson",
     "WZ": "Diboson",
     "ZZ": "Diboson",
-    "GluGluHToTauTau": "HTauTau",
+    "JetsToQQ": "WZQQ",
+    "EWK": "EWKvjets",
+    # "GluGluHToTauTau": "HTauTau",
 }
 
 # (name in templates, name in cards)
@@ -43,30 +46,28 @@ labels = {
     # sigs
     "ggF": "ggF",
     "VBF": "VBF",
-    "VH": "VH",
     "ttH": "ttH",
+    "WH": "WH",
+    "ZH": "ZH",
     # BKGS
     "QCD": "qcd",
-    "TTbar": "ttbar",
-    "WJetsLNu": "wjets",
-    # "WJetsQCD": "wjetsqcd",
-    "SingleTop": "singletop",
     "DYJets": "zjets",
+    "WJetsLNu": "wjets",
+    "TTbar": "ttbar",
+    "SingleTop": "singletop",
+    "Diboson": "diboson",
+    "WZQQ": "wzqq",
+    "EWK": "ewkvjets",
 }
 
-bkgs = [
-    "TTbar",
-    "WJetsLNu",
-    "SingleTop",
-    "DYJets",
-    "QCD",
-]
+bkgs = ["TTbar", "WJetsLNu", "SingleTop", "DYJets", "QCD", "Diboson", "WZQQ", "EWKvjets"]
 
 sigs = [
     "ggF",
     "VBF",
-    "VH",
     "ttH",
+    "WH",
+    "ZH",
 ]
 samples = sigs + bkgs
 

@@ -1,31 +1,33 @@
 samples:
     - ggF
-    - VH
     - VBF
     - ttH
+    - WH
+    - ZH
     - QCD
     - DYJets
     - WJetsLNu
-    - WZQQ
     - TTbar
     - SingleTop
     - Diboson
+    - WZQQ
+    - EWKvjets
     - Data
 
 regions_sel:
     # put any "selection name: selection" here to store it in the templates
-    "SRVBF97": (fj_ParT_score_finetuned>0.97) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
-    "SRggFpt250to300": (fj_ParT_score_finetuned>0.985) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>250) & (fj_pt<300)
-    "SRggFpt300to450": (fj_ParT_score_finetuned>0.985) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    "SRggFpt450toInf": (fj_ParT_score_finetuned>0.985) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
+    "SRVBF95": (fj_ParT_score_finetuned>0.95) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
+    "SRggF97pt250to300": (fj_ParT_score_finetuned>0.97) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>250) & (fj_pt<300)
+    "SRggF97pt300to450": (fj_ParT_score_finetuned>0.97) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
+    "SRggF97pt450toInf": (fj_ParT_score_finetuned>0.97) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
 
-    "WJetsCR": (fj_ParT_score_finetuned>0.50) & (fj_ParT_score_finetuned<0.97) & (n_bjets_T==0)
+    "WJetsCR": (fj_ParT_score_finetuned>0.50) & (fj_ParT_score_finetuned<0.95) & (n_bjets_T==0)
     "TopCR": (fj_ParT_score_finetuned>0.50) & (n_bjets_T>0)
 
 samples_dir:
-    "2018": ../eos/postprocessNov12_2018
-    "2017": ../eos/postprocessNov12_2017
-    "2016APV": ../eos/postprocessNov12_2016APV
-    "2016": ../eos/postprocessNov12_2016
+    "2018": ../eos/Feb9_2018
+    "2017": ../eos/Feb9_2017
+    "2016APV": ../eos/Feb9_2016APV
+    "2016": ../eos/Feb9_2016
 
 model_path: ../eos/model.onnx

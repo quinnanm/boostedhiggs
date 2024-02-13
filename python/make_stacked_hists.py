@@ -26,25 +26,6 @@ warnings.filterwarnings("ignore", message="Found duplicate branch ")
 pd.set_option("mode.chained_assignment", None)
 
 
-sel = {
-    "signal_region": {
-        "mu": [[("lep_pt", "<", 55), (("lep_isolation", "<", 0.15))], [("lep_misolation", "<", 0.2), ("lep_pt", ">=", 55)]],
-        "ele": [[("lep_pt", "<", 120), (("lep_isolation", "<", 0.15))], [("lep_pt", ">=", 120)]],
-    },
-    "qcd_region": {
-        "mu": [[("lep_pt", "<", 55), (("lep_isolation", ">", 0.15))], [("lep_misolation", ">", 0.2), ("lep_pt", ">=", 55)]],
-        "ele": [[("lep_pt", "<", 120), (("lep_isolation", ">", 0.15))], [("lep_pt", ">=", 120)]],
-    },
-    "misoNO": {
-        "mu": [[("lep_pt", "<", 55), (("lep_isolation", "<", 0.15))], [("lep_pt", ">=", 55)]],
-        "ele": [[("lep_pt", "<", 120), (("lep_isolation", "<", 0.15))], [("lep_pt", ">=", 120)]],
-    },
-    "nothing": {
-        "mu": [("lep_pt", ">", 0)],
-        "ele": [("lep_pt", ">", 0)],
-    },
-}
-
 input_feat = {
     # "v2-1111-10noMass1": [
     #     "fj_pt",
@@ -74,24 +55,11 @@ input_feat = {
     # "v2_10_12": [],
     # "v2_nor1": [],
     "v2_nor2": [],
-    "v32_1": [],
-    "v32_2": [],
-    "v32_3": [],
-    "v32_4": [],
-    "v32_5": [],
-    "v32_6": [],
-    "v32_7": [],
-    "v32_8": [],
-    "v32_9": [],
-    "v32_10": [],
-    "v32_11": [],
-    "v32_12": [],
-    "v32_13": [],
-    "v32_14": [],
-    "v33_1": [],
-    "v33_2": [],
-    "v33_3": [],
-    "v33_4": [],
+    "v35_1": [],
+    "v35_2": [],
+    "v35_3": [],
+    "v35_4": [],
+    "v35_5": [],
 }
 
 
@@ -139,14 +107,6 @@ def make_events_dict(
                     print(f"Skipping sample {sample}")
                     continue
 
-                # if "WJetsToLNu_HT" in sample:
-                #     print(f"Skipping sample {sample}")
-                #     continue
-
-                # if "EGamma_Run2018" in sample:
-                #     print(f"Skipping sample {sample}")
-                #     continue
-
                 for key in utils.combine_samples:
                     if key in sample:
                         sample_to_use = utils.combine_samples[key]
@@ -156,10 +116,6 @@ def make_events_dict(
 
                 if sample_to_use not in samples:
                     continue
-
-                # sample_to_use = sample
-                # if "WJetsToLNu" not in sample:
-                #     continue
 
                 logging.info(f"Finding {sample} samples and should combine them under {sample_to_use}")
 
@@ -176,11 +132,7 @@ def make_events_dict(
                     continue
 
                 try:
-                    # if region in sel:
-                    data = pd.read_parquet(parquet_files, filters=sel[region][ch])
-                    # else:
-                    #     data = pd.read_parquet(parquet_files)
-
+                    data = pd.read_parquet(parquet_files)
                 except pyarrow.lib.ArrowInvalid:
                     # empty parquet because no event passed selection
                     continue
@@ -189,15 +141,15 @@ def make_events_dict(
                     continue
 
                 if not keep_weights:
-                    # data = data[data.columns.drop(list(data.filter(regex="weight_mu_")))]
-                    # data = data[data.columns.drop(list(data.filter(regex="weight_ele_")))]
+                    data = data[data.columns.drop(list(data.filter(regex="weight_mu_")))]
+                    data = data[data.columns.drop(list(data.filter(regex="weight_ele_")))]
                     data = data[data.columns.drop(list(data.filter(regex="L_btag")))]
                     data = data[data.columns.drop(list(data.filter(regex="M_btag")))]
                     data = data[data.columns.drop(list(data.filter(regex="T_btag")))]
-                    # data = data[data.columns.drop(list(data.filter(regex="veto")))]
-                    # data = data[data.columns.drop(list(data.filter(regex="fj_H_VV_")))]
-                    # data = data[data.columns.drop(list(data.filter(regex="_up")))]
-                    # data = data[data.columns.drop(list(data.filter(regex="_down")))]
+                    data = data[data.columns.drop(list(data.filter(regex="veto")))]
+                    data = data[data.columns.drop(list(data.filter(regex="fj_H_VV_")))]
+                    data = data[data.columns.drop(list(data.filter(regex="_up")))]
+                    data = data[data.columns.drop(list(data.filter(regex="_down")))]
 
                 data["abs_met_fj_dphi"] = np.abs(data["met_fj_dphi"])
 

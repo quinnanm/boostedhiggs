@@ -86,10 +86,39 @@ def systs_not_from_parquets(years: List[str], lep_channels: List[str]):
     for sample in samples:
         systs_dict[sample], systs_dict_values[sample] = {}, {}
 
+    # tagger eff
     n = rl.NuisanceParameter("taggereff", "lnN")
-    for sample in ["ggF", "VBF", "VH", "ttH"]:
+    for sample in ["ggF", "VBF", "ttH", "WH", "ZH"]:
         systs_dict[sample]["taggereff"] = n
-        systs_dict_values[sample]["taggereff"] = (1.10, None)
+        systs_dict_values[sample]["taggereff"] = (1.30, None)
+
+    # QCD scale
+    n = rl.NuisanceParameter("QCD_scale", "lnN")
+    systs_dict["ggF"]["QCD_scale"] = n
+    systs_dict_values["ggF"]["QCD_scale"] = (1.039, 0.961)
+    systs_dict["VBF"]["QCD_scale"] = n
+    systs_dict_values["VBF"]["QCD_scale"] = (1.004, 0.997)
+    systs_dict["ttH"]["QCD_scale"] = n
+    systs_dict_values["ttH"]["QCD_scale"] = (1.058, 0.908)
+
+    systs_dict["WH"]["QCD_scale"] = n
+    systs_dict_values["WH"]["QCD_scale"] = (1.005, 0.993)
+    systs_dict["ZH"]["QCD_scale"] = n
+    systs_dict_values["ZH"]["QCD_scale"] = (1.038, 0.97)
+
+    # PDF scale
+    n = rl.NuisanceParameter("PDF_scale", "lnN")
+    systs_dict["ggF"]["PDF_scale"] = n
+    systs_dict_values["ggF"]["PDF_scale"] = (1.019, 0.981)
+    systs_dict["VBF"]["PDF_scale"] = n
+    systs_dict_values["VBF"]["PDF_scale"] = (1.021, 0.979)
+    systs_dict["ttH"]["PDF_scale"] = n
+    systs_dict_values["ttH"]["PDF_scale"] = (1.03, 0.97)
+
+    systs_dict["WH"]["PDF_scale"] = n
+    systs_dict_values["WH"]["PDF_scale"] = (1.017, 0.983)
+    systs_dict["ZH"]["PDF_scale"] = n
+    systs_dict_values["ZH"]["PDF_scale"] = (1.013, 0.987)
 
     return systs_dict, systs_dict_values
 
@@ -115,7 +144,8 @@ def systs_from_parquets(years):
             # "weight_mu_btagSFbc_correlated": rl.NuisanceParameter(
             #     f"{CMS_PARAMS_LABEL}_btagSFbc_correlated", "lnN"
             # ),
-            # "weight_pileup": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_PU_{year}", "shape"),
+            "weight_pileup": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_PU_{year}", "shape"),
+            "weight_pileupIDSF": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_PUIDSF_{year}", "shape"),
             "weight_isolation": rl.NuisanceParameter(f"CMS_iso_{year}", "lnN"),
             "weight_id": rl.NuisanceParameter(f"CMS_id_{year}", "lnN"),
             "weight_reco_ele": rl.NuisanceParameter("CMS_reconstruction_ele", "lnN"),
@@ -126,25 +156,16 @@ def systs_from_parquets(years):
         },
         # signal
         "ggF": {
-            "weight_aS_weight": rl.NuisanceParameter("aS_Higgs_ggF", "lnN"),
-            # "weight_UEPS_FSR": rl.NuisanceParameter("UEPS_FSR_ggF", "shape"),
-            # "weight_UEPS_ISR": rl.NuisanceParameter("UEPS_ISR_ggF", "shape"),
-            "weight_PDF_weight": rl.NuisanceParameter("pdf_Higgs_ggF", "lnN"),
-            "weight_PDFaS_weight": rl.NuisanceParameter("pdfAS_Higgs_ggF", "lnN"),
-            "weight_scalevar_3pt": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_scale_pt_3_ggF_{year}", "lnN"),
-            "weight_scalevar_7pt": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_scale_pt_7_ggF_{year}", "lnN"),
+            "weight_PSFSR": rl.NuisanceParameter("PSFSR_ggF", "shape"),
+            "weight_PSISR": rl.NuisanceParameter("PSISR_ggF", "shape"),
         },
         "VBF": {
-            "weight_aS_weight": rl.NuisanceParameter("aS_Higgs_VBF", "lnN"),
-            # "weight_UEPS_FSR": rl.NuisanceParameter("UEPS_FSR_VBF", "shape"),
-            # "weight_UEPS_ISR": rl.NuisanceParameter("UEPS_ISR_VBF", "shape"),
-            "weight_PDF_weight": rl.NuisanceParameter("pdf_Higgs_VBF", "lnN"),
-            "weight_PDFaS_weight": rl.NuisanceParameter("pdfAS_Higgs_VBF", "lnN"),
-            "weight_scalevar_3pt": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_scale_pt_3_VBF_{year}", "lnN"),
-            "weight_scalevar_7pt": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_scale_pt_7_VBF_{year}", "lnN"),
+            "weight_PSFSR": rl.NuisanceParameter("PSFSR_VBF", "shape"),
+            "weight_PSISR": rl.NuisanceParameter("PSISR_VBF", "shape"),
         },
-        "VH": {},
         "ttH": {},
+        "WH": {},
+        "ZH": {},
         # bkgs
         "TTbar": {},
         "WJetsLNu": {
