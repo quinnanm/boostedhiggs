@@ -144,11 +144,11 @@ def systs_from_parquets(years):
             "weight_trigger_iso_mu": rl.NuisanceParameter(f"CMS_mu_trigger_iso_{year}_mu", "lnN"),
             "weight_trigger_noniso_mu": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_trigger_{year}_mu", "lnN"),
             # shape weights
-            "rec_higgs_mUES": rl.NuisanceParameter("Higgs_candidate_mass_UES", "shape"),
-            "rec_higgs_mJES": rl.NuisanceParameter("Higgs_candidate_mass_JES", "shape"),
-            "rec_higgs_mJER": rl.NuisanceParameter("Higgs_candidate_mass_JER", "shape"),
-            "rec_higgs_mJMS": rl.NuisanceParameter("Higgs_candidate_mass_JMS", "shape"),
-            "rec_higgs_mJMR": rl.NuisanceParameter("Higgs_candidate_mass_JMR", "shape"),
+            "rec_higgs_mUES": rl.NuisanceParameter("AK8_UES", "shape"),
+            "rec_higgs_mJES": rl.NuisanceParameter("AK8_JES", "shape"),
+            "rec_higgs_mJER": rl.NuisanceParameter("AK8_JER", "shape"),
+            "rec_higgs_mJMS": rl.NuisanceParameter("AK8_JMS", "shape"),
+            "rec_higgs_mJMR": rl.NuisanceParameter("AK8_JMR", "shape"),
         },
         # signal
         "ggF": {
