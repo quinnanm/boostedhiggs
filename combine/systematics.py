@@ -134,16 +134,6 @@ def systs_from_parquets(years):
 
     systs_from_parquets = {
         "all_samples": {
-            # "weight_mu_btagSFlight_2017": rl.NuisanceParameter(
-            #     f"{CMS_PARAMS_LABEL}_btagSFlight_{year}", "lnN"
-            #     ),
-            # "weight_mu_btagSFlight_correlated": rl.NuisanceParameter(
-            #     f"{CMS_PARAMS_LABEL}_btagSFlight_correlated", "lnN"
-            # ),
-            # "weight_mu_btagSFbc_2017": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_btagSFbc_{year}", "lnN"),
-            # "weight_mu_btagSFbc_correlated": rl.NuisanceParameter(
-            #     f"{CMS_PARAMS_LABEL}_btagSFbc_correlated", "lnN"
-            # ),
             # "weight_pileup": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_PU_{year}", "shape"),
             # "weight_pileupIDSF": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_PUIDSF_{year}", "shape"),
             "weight_isolation": rl.NuisanceParameter(f"CMS_iso_{year}", "lnN"),
@@ -154,22 +144,11 @@ def systs_from_parquets(years):
             "weight_trigger_iso_mu": rl.NuisanceParameter(f"CMS_mu_trigger_iso_{year}_mu", "lnN"),
             "weight_trigger_noniso_mu": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_trigger_{year}_mu", "lnN"),
             # shape weights
-            "fj_ptJES": rl.NuisanceParameter("AK8_Jet_pt_JES", "shape"),
-            "fj_ptJER": rl.NuisanceParameter("AK8_Jet_pt_JER", "shape"),
-            "fj_massJMS": rl.NuisanceParameter("AK8_Jet_mass_JMS", "shape"),
-            "fj_massJMR": rl.NuisanceParameter("AK8_Jet_mass_JMR", "shape"),
-            "mjjJES": rl.NuisanceParameter("mjj_JES", "shape"),
-            "mjjJER": rl.NuisanceParameter("mjj_JER", "shape"),
             "rec_higgs_mUES": rl.NuisanceParameter("Higgs_candidate_mass_UES", "shape"),
             "rec_higgs_mJES": rl.NuisanceParameter("Higgs_candidate_mass_JES", "shape"),
             "rec_higgs_mJER": rl.NuisanceParameter("Higgs_candidate_mass_JER", "shape"),
             "rec_higgs_mJMS": rl.NuisanceParameter("Higgs_candidate_mass_JMS", "shape"),
             "rec_higgs_mJMR": rl.NuisanceParameter("Higgs_candidate_mass_JMR", "shape"),
-            "rec_higgs_ptUES": rl.NuisanceParameter("Higgs_candidate_pt_UES", "shape"),
-            "rec_higgs_ptJES": rl.NuisanceParameter("Higgs_candidate_pt_JES", "shape"),
-            "rec_higgs_ptJER": rl.NuisanceParameter("Higgs_candidate_pt_JER", "shape"),
-            "rec_higgs_ptJMS": rl.NuisanceParameter("Higgs_candidate_pt_JMS", "shape"),
-            "rec_higgs_ptJMR": rl.NuisanceParameter("Higgs_candidate_pt_JMR", "shape"),
         },
         # signal
         "ggF": {
@@ -204,5 +183,21 @@ def systs_from_parquets(years):
         "WZQQ": {},
         "EWKvjets": {},
     }
+
+    # add btag SF
+    for year in years:
+        systs_from_parquets["all_samples"][f"weight_btagSFlight{year}"] = rl.NuisanceParameter(
+            f"{CMS_PARAMS_LABEL}_btagSFlight_{year}", "lnN"
+        )
+        systs_from_parquets["all_samples"][f"weight_btagSFbc{year}"] = rl.NuisanceParameter(
+            f"{CMS_PARAMS_LABEL}_btagSFbc_{year}", "lnN"
+        )
+
+    systs_from_parquets["all_samples"]["weight_btagSFlightCorrelated"] = rl.NuisanceParameter(
+        f"{CMS_PARAMS_LABEL}_btagSFlightCorrelated", "lnN"
+    )
+    systs_from_parquets["all_samples"]["weight_btagSFbcCorrelated"] = rl.NuisanceParameter(
+        f"{CMS_PARAMS_LABEL}_btagSFbcCorrelated", "lnN"
+    )
 
     return systs_from_parquets
