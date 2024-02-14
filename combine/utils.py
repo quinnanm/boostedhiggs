@@ -61,14 +61,8 @@ labels = {
 }
 
 bkgs = ["TTbar", "WJetsLNu", "SingleTop", "DYJets", "QCD", "Diboson", "WZQQ", "EWKvjets"]
-
-sigs = [
-    "ggF",
-    "VBF",
-    "ttH",
-    "WH",
-    "ZH",
-]
+bkgs += ["ttH", "WH", "ZH"]
+sigs = ["ggF", "VBF"]
 samples = sigs + bkgs
 
 
