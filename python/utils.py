@@ -25,7 +25,8 @@ combine_samples = {
     # signal
     "GluGluHToWW_Pt-200ToInf_M-125": "ggF",
     "HToWW_M-125": "VH",
-    "VBF": "VBF",
+    "VBFHToWWToAny_M-125_TuneCP5_withDipoleRecoil": "VBF",
+    # "VBFHToWWToLNuQQ_M-125_withDipoleRecoil": "VBF",
     "ttHToNonbb_M125": "ttH",
     # bkg
     "QCD_Pt": "QCD",

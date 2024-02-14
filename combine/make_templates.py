@@ -28,6 +28,16 @@ pd.set_option("mode.chained_assignment", None)
 # ("key", "value"): the "key" is the common naming (to commonalize over both channels)
 weights = {
     # common for all samples
+    "weight_btagSFlightCorrelated": {"mu": "weight_btagSFlightCorrelated", "ele": "weight_btagSFlightCorrelated"},
+    "weight_btagSFbcCorrelated": {"mu": "weight_btagSFbcCorrelated", "ele": "weight_btagSFbcCorrelated"},
+    "weight_btagSFlight2016": {"mu": "weight_btagSFlight2016", "ele": "weight_btagSFlight2016"},
+    "weight_btagSFbc2016": {"mu": "weight_btagSFbc2016", "ele": "weight_btagSFbc2016"},
+    "weight_btagSFlight2016APV": {"mu": "weight_btagSFlight2016APV", "ele": "weight_btagSFlight2016APV"},
+    "weight_btagSFbc2016APV": {"mu": "weight_btagSFbc2016APV", "ele": "weight_btagSFbc2016APV"},
+    "weight_btagSFlight2017": {"mu": "weight_btagSFlight2017", "ele": "weight_btagSFlight2017"},
+    "weight_btagSFbc2017": {"mu": "weight_btagSFbc2017", "ele": "weight_btagSFbc2017"},
+    "weight_btagSFlight2018": {"mu": "weight_btagSFlight2018", "ele": "weight_btagSFlight2018"},
+    "weight_btagSFbc2018": {"mu": "weight_btagSFbc2018", "ele": "weight_btagSFbc2018"},
     "weight_pileup": {"mu": "weight_mu_pileup", "ele": "weight_ele_pileup"},
     "weight_pileupIDSF": {"mu": "weight_mu_pileupIDSFDown", "ele": "weight_ele_pileupIDSFDown"},
     "weight_isolation": {"mu": "weight_mu_isolation_muon", "ele": "weight_ele_isolation_electron"},
@@ -51,58 +61,68 @@ weights = {
     # DY
     "weight_Z_d2kappa_EW": {"mu": "weight_mu_Z_d2kappa_EW", "ele": "weight_ele_Z_d2kappa_EW"},
     "weight_Z_d3kappa_EW": {"mu": "weight_mu_Z_d3kappa_EW", "ele": "weight_ele_Z_d3kappa_EW"},
-    # new
-    # "weight_btag": {"mu": "weight_btag", "ele": "weight_btag"},
-    # "weight_ewkcorr": {"mu": "weight_ewkcorr", "ele": "weight_ewkcorr"},
-    # "weight_qcdcorr": {"mu": "weight_qcdcorr", "ele": "weight_qcdcorr"},
-    # put the scale
 }
 
+AK8_systs = [
+    "rec_higgs_mUES_up",
+    "rec_higgs_mUES_down",
+    "rec_higgs_mJES_up",
+    "rec_higgs_mJES_down",
+    "rec_higgs_mJER_up",
+    "rec_higgs_mJER_down",
+    # these
+    "rec_higgs_mJMS_up",
+    "rec_higgs_mJMS_down",
+    "rec_higgs_mJMR_up",
+    "rec_higgs_mJMR_down",
+]
 
-shape_weights = {
-    "fj_pt": [
-        "fj_ptJES_up",
-        "fj_ptJES_down",
-        "fj_ptJER_up",
-        "fj_ptJER_down",
-    ],
-    "fj_mass": [
-        "fj_massJMS_up",
-        "fj_massJMS_down",
-        "fj_massJMR_up",
-        "fj_massJMR_down",
-    ],
-    "mjj": [
-        "mjjJES_up",
-        "mjjJES_down",
-        "mjjJER_up",
-        "mjjJER_down",
-    ],
-    "rec_higgs_m": [
-        "rec_higgs_mUES_up",
-        "rec_higgs_mUES_down",
-        "rec_higgs_mJES_up",
-        "rec_higgs_mJES_down",
-        "rec_higgs_mJER_up",
-        "rec_higgs_mJER_down",
-        "rec_higgs_mJMS_up",
-        "rec_higgs_mJMS_down",
-        "rec_higgs_mJMR_up",
-        "rec_higgs_mJMR_down",
-    ],
-    "rec_higgs_pt": [
-        "rec_higgs_ptUES_up",
-        "rec_higgs_ptUES_down",
-        "rec_higgs_ptJES_up",
-        "rec_higgs_ptJES_down",
-        "rec_higgs_ptJER_up",
-        "rec_higgs_ptJER_down",
-        "rec_higgs_ptJMS_up",
-        "rec_higgs_ptJMS_down",
-        "rec_higgs_ptJMR_up",
-        "rec_higgs_ptJMR_down",
-    ],
-}
+# shape_weights = {
+#     # "fj_pt": [
+#     #     "fj_ptJES_up",
+#     #     "fj_ptJES_down",
+#     #     "fj_ptJER_up",
+#     #     "fj_ptJER_down",
+#     # ],
+#     # "fj_mass": [
+#     #     "fj_massJMS_up",
+#     #     "fj_massJMS_down",
+#     #     "fj_massJMR_up",
+#     #     "fj_massJMR_down",
+#     # ],
+#     # "mjj": [
+#     #     "mjjJES_up",
+#     #     "mjjJES_down",
+#     #     "mjjJER_up",
+#     #     "mjjJER_down",
+#     # ],
+#     "rec_higgs_m": [
+#         "rec_higgs_mUES_up",
+#         "rec_higgs_mUES_down",
+#         "rec_higgs_mJES_up",
+#         "rec_higgs_mJES_down",
+#         "rec_higgs_mJER_up",
+#         "rec_higgs_mJER_down",
+
+
+#         "rec_higgs_mJMS_up",
+#         "rec_higgs_mJMS_down",
+#         "rec_higgs_mJMR_up",
+#         "rec_higgs_mJMR_down",
+#     ],
+#     # "rec_higgs_pt": [
+#     #     "rec_higgs_ptUES_up",
+#     #     "rec_higgs_ptUES_down",
+#     #     "rec_higgs_ptJES_up",
+#     #     "rec_higgs_ptJES_down",
+#     #     "rec_higgs_ptJER_up",
+#     #     "rec_higgs_ptJER_down",
+#     #     "rec_higgs_ptJMS_up",
+#     #     "rec_higgs_ptJMS_down",
+#     #     "rec_higgs_ptJMR_up",
+#     #     "rec_higgs_ptJMR_down",
+#     # ],
+# }
 
 
 def get_templates(years, channels, samples, samples_dir, regions_sel, model_path):
@@ -155,12 +175,6 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                 luminosity = json.load(f)[ch][year]
 
             for sample in os.listdir(samples_dir[year]):
-                if "WJetsToLNu_1J" in sample:
-                    print(f"Skipping sample {sample}")
-                    continue
-                if "WJetsToLNu_2J" in sample:
-                    print(f"Skipping sample {sample}")
-                    continue
 
                 for key in utils.combine_samples:
                     if key in sample:
@@ -175,10 +189,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                 logging.info(f"Finding {sample} samples and should combine them under {sample_to_use}")
 
                 out_files = f"{samples_dir[year]}/{sample}/outfiles/"
-                if "postprocess" in samples_dir[year]:
-                    parquet_files = glob.glob(f"{out_files}/{ch}.parquet")
-                else:
-                    parquet_files = glob.glob(f"{out_files}/*_{ch}.parquet")
+                parquet_files = glob.glob(f"{out_files}/*_{ch}.parquet")
                 pkl_files = glob.glob(f"{out_files}/*.pkl")
 
                 if not parquet_files:
@@ -199,16 +210,18 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                 # drop hidNeurons which are not needed anymore
                 data = data[data.columns.drop(list(data.filter(regex="hidNeuron")))]
 
-                data["abs_met_fj_dphi"] = np.abs(data["met_fj_dphi"])  # relevant variable
-
                 # apply selection
                 for selection in presel[ch]:
                     logging.info(f"Applying {selection} selection on {len(data)} events")
                     data = data.query(presel[ch][selection])
 
                 # get event_weight
-                if sample_to_use != "Data":
-                    event_weight = utils.get_xsecweight(pkl_files, year, sample, False, luminosity)
+                if sample_to_use == "Data":
+                    is_data = True
+                else:
+                    is_data = False
+
+                event_weight = utils.get_xsecweight(pkl_files, year, sample, is_data, luminosity)
 
                 for region, region_sel in regions_sel.items():  # e.g. pass, fail, top control region, etc.
                     df = data.copy()
@@ -216,98 +229,82 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                     logging.info(f"Applying {region} selection on {len(data)} events")
 
                     df = df.query(region_sel)
+
+                    if not is_data:
+                        W = df[f"weight_{ch}"]
+
+                        if "bjets" in region_sel:  # add btag SF
+                            W *= df["weight_btag"]
+
                     logging.info(f"Will fill the histograms with the remaining {len(data)} events")
 
-                    # nominal weight
-                    if sample_to_use == "Data":  # for data (fill as 1)
-                        hists.fill(
-                            Sample=sample_to_use,
-                            Systematic="nominal",
-                            Region=region,
-                            mass_observable=df["rec_higgs_m"],
-                            weight=np.ones_like(df["fj_pt"]),
-                        )
+                    # add nominal weight
+                    if is_data:  # for data (nominal is 1)
+                        nominal = np.ones_like(df["fj_pt"])
                     else:
-                        nominal = df[f"weight_{ch}"] * event_weight
+                        nominal = W * event_weight
+                    hists.fill(
+                        Sample=sample_to_use,
+                        Systematic="nominal",
+                        Region=region,
+                        mass_observable=df["rec_higgs_m"],
+                        weight=nominal,
+                    )
+
+                    # add up/down variations
+                    for weight in weights:
+
+                        if is_data:  # for data (fill as 1 for up and down variations)
+                            w = nominal
+
+                        # retrieve UP variations for MC
+                        if not is_data:
+                            try:
+                                w = df[f"{weights[weight][ch]}Up"] * event_weight
+                                if "btag" in weight:
+                                    w *= W
+                            except KeyError:
+                                w = nominal
+
                         hists.fill(
                             Sample=sample_to_use,
-                            Systematic="nominal",
+                            Systematic=f"{weight}_up",
                             Region=region,
                             mass_observable=df["rec_higgs_m"],
+                            weight=w,
+                        )
+
+                        # retrieve DOWN variations for MC
+                        if not is_data:
+                            try:
+                                w = df[f"{weights[weight][ch]}Down"] * event_weight
+                                if "btag" in weight:
+                                    w *= W
+                            except KeyError:
+                                w = nominal
+
+                        hists.fill(
+                            Sample=sample_to_use,
+                            Systematic=f"{weight}_down",
+                            Region=region,
+                            mass_observable=df["rec_higgs_m"],
+                            weight=w,
+                        )
+
+                    for rec_higgs_m_variation in AK8_systs:
+
+                        if is_data:
+                            x = "rec_higgs_m"
+                        else:
+                            x = rec_higgs_m_variation
+
+                        hists.fill(
+                            Sample=sample_to_use,
+                            Systematic=rec_higgs_m_variation,
+                            Region=region,
+                            mass_observable=df[x],
                             weight=nominal,
                         )
-
-                    for weight in weights:
-                        # up and down weights
-                        if sample_to_use == "Data":  # for data (fill as 1)
-                            hists.fill(
-                                Sample=sample_to_use,
-                                Systematic=f"{weight}_up",
-                                Region=region,
-                                mass_observable=df["rec_higgs_m"],
-                                weight=np.ones_like(df["fj_pt"]),
-                            )
-                            hists.fill(
-                                Sample=sample_to_use,
-                                Systematic=f"{weight}_down",
-                                Region=region,
-                                mass_observable=df["rec_higgs_m"],
-                                weight=np.ones_like(df["fj_pt"]),
-                            )
-                        else:
-                            # up weight for MC
-                            try:
-                                syst = df[f"{weights[weight][ch]}Up"] * event_weight
-                            except KeyError:
-                                syst = nominal
-
-                            hists.fill(
-                                Sample=sample_to_use,
-                                Systematic=f"{weight}_up",
-                                Region=region,
-                                mass_observable=df["rec_higgs_m"],
-                                weight=syst,
-                            )
-
-                            # down weight for MC
-                            try:
-                                syst = df[f"{weights[weight][ch]}_Down"] * event_weight
-                            except KeyError:
-                                syst = nominal
-
-                            hists.fill(
-                                Sample=sample_to_use,
-                                Systematic=f"{weight}_down",
-                                Region=region,
-                                mass_observable=df["rec_higgs_m"],
-                                weight=syst,
-                            )
-
-                        for var in shape_weights:
-                            for weight in shape_weights[var]:
-
-                                if sample_to_use == "Data":  # for data (fill as 1)
-                                    hists.fill(
-                                        Sample=sample_to_use,
-                                        Systematic=f"{weight}",
-                                        Region=region,
-                                        mass_observable=df["rec_higgs_m"],
-                                        weight=np.ones_like(df["fj_pt"]),
-                                    )
-                                else:
-                                    # weight for MC
-                                    try:
-                                        syst = (df[var] / df[weight]) * event_weight
-                                    except KeyError:
-                                        syst = nominal
-
-                                    hists.fill(
-                                        Sample=sample_to_use,
-                                        Systematic=f"{weight}",
-                                        Region=region,
-                                        mass_observable=df["rec_higgs_m"],
-                                        weight=syst,
-                                    )
 
     logging.info(hists)
 

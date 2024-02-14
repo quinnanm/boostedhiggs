@@ -21,7 +21,7 @@ combine_samples = {
     # signal
     "GluGluHToWW_Pt-200ToInf_M-125": "ggF",
     "VBFHToWWToAny_M-125_TuneCP5_withDipoleRecoil": "VBF",
-    "VBFHToWWToLNuQQ_M-125_withDipoleRecoil": "VBF",
+    # "VBFHToWWToLNuQQ_M-125_withDipoleRecoil": "VBF",
     "ttHToNonbb_M125": "ttH",
     "HWminusJ_HToWW_M-125": "WH",
     "HWplusJ_HToWW_M-125": "WH",
@@ -38,7 +38,7 @@ combine_samples = {
     "ZZ": "Diboson",
     "JetsToQQ": "WZQQ",
     "EWK": "EWKvjets",
-    # "GluGluHToTauTau": "HTauTau",
+    # "GluGluHToTauTau": "HTauTau",  # TODO: check how many events
 }
 
 # (name in templates, name in cards)

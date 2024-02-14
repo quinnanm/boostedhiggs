@@ -39,7 +39,9 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
     model = rl.Model("testModel")
 
     # define the signal and control regions
-    SIG_regions = ["SRVBF95", "SRggF97pt250to300", "SRggF97pt300to450", "SRggF97pt450toInf"]
+    # SIG_regions = ["SRVBF95", "SRggF97pt250to300", "SRggF97pt300to450", "SRggF97pt450toInf"]
+    SIG_regions = ["SRggF97pt250to300"]
+
     CONTROL_regions = []
     if add_ttbar_constraint:
         CONTROL_regions += ["TopCR"]
@@ -61,11 +63,12 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
         model.addChannel(ch)
 
         for sName in Samples:
+
             templ = get_template(hists_templates, sName, ChName)
             stype = rl.Sample.SIGNAL if sName in sigs else rl.Sample.BACKGROUND
             sample = rl.TemplateSample(ch.name + "_" + labels[sName], stype, templ)
 
-            sample.autoMCStats(lnN=True)
+            # sample.autoMCStats(lnN=False)
 
             # SYSTEMATICS NOT FROM PARQUETS
             for syst_on_sample in ["all_samples", sName]:  # apply common systs and per sample systs
@@ -96,6 +99,7 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
                             sample.setParamEffect(sys_value, max(eff_up, eff_do), min(eff_up, eff_do))
 
                     else:
+                        nominal[nominal == 0] = 1  # to avoid invalid value encountered in true_divide in "syst_up/nominal"
                         sample.setParamEffect(sys_value, (syst_up / nominal), (syst_do / nominal))
 
             ch.addSample(sample)
@@ -104,27 +108,29 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
         data_obs = get_template(hists_templates, "Data", ChName)
         ch.setObservation(data_obs)
 
+        ch.autoMCStats()
+
     if add_ttbar_constraint:
         for sig_region in SIG_regions:
             failCh = model["TopCR"]
             passCh = model[sig_region]
 
-            ttbarpass = passCh["TTbar"]
-            ttbarfail = failCh["TTbar"]
+            ttbarpass = passCh["ttbar"]
+            ttbarfail = failCh["ttbar"]
 
-            ttbarpass.setParamEffect(ttbarnormSF, 1 * ttbarnormSF)
-            ttbarfail.setParamEffect(ttbarnormSF, 1 * ttbarnormSF)
+            ttbarpass.setParamEffect(ttbarnormSF[sig_region], 1 * ttbarnormSF[sig_region])
+            ttbarfail.setParamEffect(ttbarnormSF[sig_region], 1 * ttbarnormSF[sig_region])
 
     if add_wjets_constraint:
         for sig_region in SIG_regions:
             failCh = model["WJetsCR"]
             passCh = model[sig_region]
 
-            wjetspass = passCh["WJetsLNu"]
-            wjetsfail = failCh["WJetsLNu"]
+            wjetspass = passCh["wjets"]
+            wjetsfail = failCh["wjets"]
 
-            wjetspass.setParamEffect(wjetsnormSF, 1 * wjetsnormSF)
-            wjetsfail.setParamEffect(wjetsnormSF, 1 * wjetsnormSF)
+            wjetspass.setParamEffect(wjetsnormSF[sig_region], 1 * wjetsnormSF[sig_region])
+            wjetsfail.setParamEffect(wjetsnormSF[sig_region], 1 * wjetsnormSF[sig_region])
 
     return model
 
@@ -142,7 +148,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # python create_datacard.py --years 2016,2016APV,2017,2018 --channels mu,ele --outdir templates/v1
+    # python create_datacard.py --years 2016,2016APV,2017,2018 --channels mu,ele --outdir templates/v3
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--years", default="2017", help="years separated by commas")
