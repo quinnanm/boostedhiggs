@@ -47,7 +47,7 @@ combine_samples = {
     # "GluGluHToTauTau": "HTauTau",
 }
 
-signals = ["ggF", "VBF", "ttH", "WH", "ZH"]
+signals = ["ggF", "VBF"]
 
 
 def get_sum_sumgenweight(pkl_files, year, sample):
@@ -109,9 +109,10 @@ color_by_sample = {
     # signal
     "ggF": "pink",
     "VBF": "tab:orange",
-    "ttH": "tab:olive",
+    # higgs background
     "WH": "tab:brown",
     "ZH": "tab:grey",
+    "ttH": "tab:olive",
     # background
     "QCD": "tab:orange",
     "DYJets": "tab:purple",
