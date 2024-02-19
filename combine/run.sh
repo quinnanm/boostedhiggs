@@ -1,5 +1,4 @@
 #!/bin/bash
-
 ### https://github.com/rkansal47/HHbbVV/blob/main/src/HHbbVV/combine/run_blinded.sh
 
 ####################################################################################################
@@ -25,6 +24,7 @@
 ####################################################################################################
 # Read options
 ####################################################################################################
+
 
 workspace=0
 bfit=0
@@ -128,7 +128,7 @@ seed=$seed numtoys=$numtoys"
 ####################################################################################################
 
 dataset=data_obs
-cards_dir="/uscms/home/fmokhtar/nobackup/boostedhiggs/combine/templates/v31/datacards"
+cards_dir="/uscms/home/fmokhtar/nobackup/boostedhiggs/combine/templates/v4/datacards"
 cp ${cards_dir}/testModel.root testModel.root # TODO: avoid this
 CMS_PARAMS_LABEL="CMS_HWW_boosted"
 
@@ -151,18 +151,70 @@ chmod +x ${logsdir}
 combined_datacard=${outdir}/combined.txt
 ws=${outdir}/workspace.root
 
-sr1="SR1VBF"
-sr2="SR1ggFpt250to300"
-sr3="SR1ggFpt300to450"
-sr4="SR1ggFpt450toInf"
-sr5="SR2ggFpt250toInf"
+# ADD REGIONS
+sr1="VBF97"
+sr2="ggF975pt250to300"
+sr3="ggF975pt300to450"
+sr4="ggF98pt450toInf"
+cr1="TopCR"
+cr2="WJetsCR"
 
-cr1="WJetsCR"
 
-# ccargs="SR1=${cards_dir}/${sr1}.txt SR2=${cards_dir}/${sr2}.txt SR3=${cards_dir}/${sr3}.txt SR4=${cards_dir}/${sr4}.txt SR5=${cards_dir}/${sr5}.txt"
-ccargs="SR2=${cards_dir}/${sr2}.txt SR3=${cards_dir}/${sr3}.txt SR4=${cards_dir}/${sr4}.txt SR5=${cards_dir}/${sr5}.txt"
 
-ccargs+=" CR=${cards_dir}/${cr1}.txt"
+
+
+########################### with no systematics (no rateparam, no mcstats) START
+# ccargs="SR1=${cards_dir}/${sr1}.txt"   # 1.5553
+# ccargs="SR1=${cards_dir}/${sr1}.txt CR1=${cards_dir}/${cr1}.txt"   # 1.57627
+# ccargs="SR1=${cards_dir}/${sr1}.txt CR2=${cards_dir}/${cr2}.txt"   # 1.57859
+# ccargs="SR1=${cards_dir}/${sr1}.txt CR1=${cards_dir}/${cr1}.txt CR2=${cards_dir}/${cr2}.txt"   # 1.57867
+
+# ccargs="SR2=${cards_dir}/${sr2}.txt"   # 0.777354
+# ccargs="SR2=${cards_dir}/${sr2}.txt CR1=${cards_dir}/${cr1}.txt"   # 0.835943
+# ccargs="SR2=${cards_dir}/${sr2}.txt CR2=${cards_dir}/${cr2}.txt"   # 0.84328
+# ccargs="SR2=${cards_dir}/${sr2}.txt CR1=${cards_dir}/${cr1}.txt CR2=${cards_dir}/${cr2}.txt"   # 0.843516
+
+# ccargs="SR3=${cards_dir}/${sr3}.txt"   # 1.03593
+# ccargs="SR3=${cards_dir}/${sr3}.txt CR1=${cards_dir}/${cr1}.txt"   # 1.12888
+# ccargs="SR3=${cards_dir}/${sr3}.txt CR2=${cards_dir}/${cr2}.txt"   # 1.14119
+# ccargs="SR3=${cards_dir}/${sr3}.txt CR1=${cards_dir}/${cr1}.txt CR2=${cards_dir}/${cr2}.txt"   # 1.14158
+
+# ccargs="SR1=${cards_dir}/${sr1}.txt SR2=${cards_dir}/${sr2}.txt"   # 1.69627
+# ccargs="SR2=${cards_dir}/${sr2}.txt SR3=${cards_dir}/${sr3}.txt"   # 1.21103
+
+# ccargs="SR1=${cards_dir}/${sr1}.txt SR2=${cards_dir}/${sr2}.txt SR3=${cards_dir}/${sr3}.txt"   # 1.89618
+# ccargs="SR1=${cards_dir}/${sr1}.txt SR2=${cards_dir}/${sr2}.txt SR3=${cards_dir}/${sr3}.txt CR1=${cards_dir}/${cr1}.txt CR2=${cards_dir}/${cr2}.txt"   # 2.11886
+########################### with no systematics (no rateparam, no mcstats) END
+
+
+########################### with no systematics but with mcstats (no rateparam) START
+# ccargs="SR1=${cards_dir}/${sr1}.txt"   # 1.43296
+# ccargs="SR1=${cards_dir}/${sr1}.txt CR1=${cards_dir}/${cr1}.txt"   # 1.44771
+# ccargs="SR1=${cards_dir}/${sr1}.txt CR2=${cards_dir}/${cr2}.txt"   # 1.44797
+# ccargs="SR1=${cards_dir}/${sr1}.txt CR1=${cards_dir}/${cr1}.txt CR2=${cards_dir}/${cr2}.txt"   # 1.44959
+
+# ccargs="SR2=${cards_dir}/${sr2}.txt"   # 0.683418
+# ccargs="SR2=${cards_dir}/${sr2}.txt CR1=${cards_dir}/${cr1}.txt"   # 0.718136
+# ccargs="SR2=${cards_dir}/${sr2}.txt CR2=${cards_dir}/${cr2}.txt"   # 0.71889
+# ccargs="SR2=${cards_dir}/${sr2}.txt CR1=${cards_dir}/${cr1}.txt CR2=${cards_dir}/${cr2}.txt"   # 0.722965
+
+# ccargs="SR3=${cards_dir}/${sr3}.txt"   # 0.933632
+# ccargs="SR3=${cards_dir}/${sr3}.txt CR1=${cards_dir}/${cr1}.txt"   # 0.993122
+# ccargs="SR3=${cards_dir}/${sr3}.txt CR2=${cards_dir}/${cr2}.txt"   # 0.994457
+# ccargs="SR3=${cards_dir}/${sr3}.txt CR1=${cards_dir}/${cr1}.txt CR2=${cards_dir}/${cr2}.txt"   # 1.00188
+
+# ccargs="SR1=${cards_dir}/${sr1}.txt SR2=${cards_dir}/${sr2}.txt SR3=${cards_dir}/${sr3}.txt"   # 1.74406
+ccargs="SR1=${cards_dir}/${sr1}.txt SR2=${cards_dir}/${sr2}.txt SR3=${cards_dir}/${sr3}.txt CR1=${cards_dir}/${cr1}.txt CR2=${cards_dir}/${cr2}.txt"   # 1.88838
+########################### with no systematics but with mcstats (no rateparam) END
+
+
+########################### with shape systematics and mcstats (no rateparam) START
+# ccargs="SR1=${cards_dir}/${sr1}.txt SR2=${cards_dir}/${sr2}.txt SR3=${cards_dir}/${sr3}.txt"   # 1.3869
+# ccargs="SR1=${cards_dir}/${sr1}.txt SR2=${cards_dir}/${sr2}.txt SR3=${cards_dir}/${sr3}.txt CR1=${cards_dir}/${cr1}.txt CR2=${cards_dir}/${cr2}.txt"   # 1.82951
+###########################with shape systematics and mcstats (no rateparam) START END
+
+# ccargs="SR2=${cards_dir}/${sr2}.txt"   
+# ccargs="SR2=${cards_dir}/${sr2}.txt CR1=${cards_dir}/${cr1}.txt CR2=${cards_dir}/${cr2}.txt"
 
 if [ $workspace = 1 ]; then
     echo "Combining cards:"
@@ -185,14 +237,40 @@ fi
 if [ $significance = 1 ]; then
     echo "Expected significance"
 
-    combine -M Significance -d $ws -m 125 -t -1 --expectSignal=1 --rMin -1 --rMax 5
+    # combine -M Significance -d $ws -m 125 -t -1 --expectSignal=1 --rMin -1 --rMax 5
+
+    combine -M Significance -d $ws -t -1 --expectSignal 1
+
 fi
 
 if [ $dfit_asimov = 1 ]; then
 
     echo "Fit Diagnostics"
     combine -M FitDiagnostics -m 125 -d $ws \
-    -t -1 --expectSignal=1 --saveWorkspace --saveToys  -n Asimov --ignoreCovWarning \
+    -t -1 --expectSignal=1 --saveWorkspace --saveToys -n Asimov --ignoreCovWarning \
     --saveShapes --saveNormalizations --saveWithUncertainties --saveOverallShapes 2>&1 | tee $logsdir/FitDiagnostics.txt
 
+    # python diffNuisances.py fitDiagnostfitDiagnosticsAsimov.root --abs
 fi
+
+
+if [ $limits = 1 ]; then
+    # echo "Expected limits"
+    # combine -M AsymptoticLimits -m 125 -n "" -d ${wsm_snapshot}.root --snapshotName MultiDimFit -v 1 \
+    # --saveWorkspace --saveToys --bypassFrequentistFit -s $seed \
+    # --floatParameters r --toysFrequentist --run blind 2>&1 | tee $logsdir/AsymptoticLimits.txt
+
+    combine -M AsymptoticLimits --run expected -d $ws -t -1  -v 1 --expectSignal 1
+fi
+
+
+if [ $impactsi = 1 ]; then
+
+    echo "Initial fit for impacts"
+    combineTool.py -M Impacts -d $ws -t -1 --rMin -1 --rMax 2 -m 125 --robustFit 1 --doInitialFit
+    combineTool.py -M Impacts -d $ws -t -1 --rMin -1 --rMax 2 -m 125 --robustFit 1 --doFits --expectSignal 1 --parallel 50
+    combineTool.py -M Impacts -d $ws -t -1 --rMin -1 --rMax 2 -m 125 --robustFit 1 --output impacts.json --expectSignal 1
+    plotImpacts.py -i impacts.json -o impacts
+
+fi
+

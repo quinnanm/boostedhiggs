@@ -1,7 +1,7 @@
-# Datacard for <Channel (ggF975pt250to300) instance at 0x7ff1c247b460> generated on 2024-02-15 08:38:24.903618
+# Datacard for <Channel (ggF975pt250to300) instance at 0x7f356d358400> generated on 2024-02-19 08:00:26.311542
 imax 1 # number of categories ('bins' but here we are using shape templates)
 jmax 12 # number of samples minus 1
-kmax 58 # number of nuisance parameters
+kmax 55 # number of nuisance parameters
 shapes * ggF975pt250to300 testModel.root testModel:ggF975pt250to300_$PROCESS testModel:ggF975pt250to300_$PROCESS_$SYSTEMATIC
 bin ggF975pt250to300
 observation 447.000
@@ -51,12 +51,10 @@ CMS_lumi_13TeV_2018 lnN                              1.0065            1.0065   
 CMS_lumi_13TeV_corelated lnN                         1.0130            1.0130            1.0130            1.0130            1.0130            1.0130            1.0130            1.0130            1.0130            1.0130            1.0130            1.0130            1.0130
 CMS_mu_trigger_iso_Run2_mu lnN                       0.9934            0.9946            0.9736            0.9926            0.9842            1.0022            0.9997            0.9913            1.0000            0.9986            0.9474            0.9786            0.9791
 CMS_reconstruction_ele lnN                           0.9979            0.9935            0.9768            0.9977            0.9777            0.9964                 -            1.0025            0.9918            0.9994            0.9562            0.9852            0.9866
-PDF_scale lnN                                 0.9810/1.0190     0.9790/1.0210                 -                 -                 -                 -                 -                 -                 -                 -     0.9700/1.0300     0.9830/1.0170     0.9870/1.0130
 PSFSR_VBF shape                                           -            1.0000                 -                 -                 -                 -                 -                 -                 -                 -                 -                 -                 -
 PSFSR_ggF shape                                      1.0000                 -                 -                 -                 -                 -                 -                 -                 -                 -                 -                 -                 -
 PSISR_VBF shape                                           -            1.0000                 -                 -                 -                 -                 -                 -                 -                 -                 -                 -                 -
 PSISR_ggF shape                                      1.0000                 -                 -                 -                 -                 -                 -                 -                 -                 -                 -                 -                 -
-QCD_scale lnN                                 0.9610/1.0390     0.9970/1.0040                 -                 -                 -                 -                 -                 -                 -                 -     0.9080/1.0580     0.9930/1.0050     0.9700/1.0380
 ggF975pt250to300_mcstat_bin0 shape                   1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000
 ggF975pt250to300_mcstat_bin1 shape                   1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000
 ggF975pt250to300_mcstat_bin2 shape                   1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000
@@ -66,4 +64,3 @@ ggF975pt250to300_mcstat_bin5 shape                   1.0000            1.0000   
 ggF975pt250to300_mcstat_bin6 shape                   1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000
 ggF975pt250to300_mcstat_bin7 shape                   1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000
 ggF975pt250to300_mcstat_bin8 shape                   1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000            1.0000
-taggereff lnN                                        1.3000            1.3000                 -                 -                 -                 -                 -                 -                 -                 -            1.3000            1.3000            1.3000

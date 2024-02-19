@@ -1,7 +1,7 @@
-# Datacard for <Channel (VBF97) instance at 0x7ff1c2466400> generated on 2024-02-15 08:38:24.899070
+# Datacard for <Channel (VBF97) instance at 0x7f356d3b2af0> generated on 2024-02-19 08:00:26.305075
 imax 1 # number of categories ('bins' but here we are using shape templates)
 jmax 12 # number of samples minus 1
-kmax 58 # number of nuisance parameters
+kmax 55 # number of nuisance parameters
 shapes * VBF97 testModel.root testModel:VBF97_$PROCESS testModel:VBF97_$PROCESS_$SYSTEMATIC
 bin VBF97
 observation 74.000
@@ -51,12 +51,10 @@ CMS_lumi_13TeV_2018 lnN                           1.0065         1.0065         
 CMS_lumi_13TeV_corelated lnN                      1.0130         1.0130         1.0130         1.0130         1.0130         1.0130      -         1.0130         1.0130         1.0130         1.0130         1.0130         1.0130
 CMS_mu_trigger_iso_Run2_mu lnN                    0.9966         0.9952         0.9869         0.9921         0.9516         1.0016      -         0.9978         0.9867         0.9965         0.9603         0.9790         0.9885
 CMS_reconstruction_ele lnN                        0.9993         1.0005         0.9835         0.9976         0.9928         1.0029      -         0.9944         1.0025         0.9929         0.9956         0.9865         0.9905
-PDF_scale lnN                              0.9810/1.0190  0.9790/1.0210              -              -              -              -      -              -              -              -  0.9700/1.0300  0.9830/1.0170  0.9870/1.0130
 PSFSR_VBF shape                                        -         1.0000              -              -              -              -      -              -              -              -              -              -              -
 PSFSR_ggF shape                                   1.0000              -              -              -              -              -      -              -              -              -              -              -              -
 PSISR_VBF shape                                        -         1.0000              -              -              -              -      -              -              -              -              -              -              -
 PSISR_ggF shape                                   1.0000              -              -              -              -              -      -              -              -              -              -              -              -
-QCD_scale lnN                              0.9610/1.0390  0.9970/1.0040              -              -              -              -      -              -              -              -  0.9080/1.0580  0.9930/1.0050  0.9700/1.0380
 VBF97_mcstat_bin0 shape                           1.0000         1.0000         1.0000         1.0000         1.0000         1.0000      -         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000
 VBF97_mcstat_bin1 shape                           1.0000         1.0000         1.0000         1.0000         1.0000         1.0000      -         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000
 VBF97_mcstat_bin2 shape                           1.0000         1.0000         1.0000         1.0000         1.0000         1.0000      -         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000
@@ -66,4 +64,3 @@ VBF97_mcstat_bin5 shape                           1.0000         1.0000         
 VBF97_mcstat_bin6 shape                           1.0000         1.0000         1.0000         1.0000         1.0000         1.0000      -         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000
 VBF97_mcstat_bin7 shape                           1.0000         1.0000         1.0000         1.0000         1.0000         1.0000      -         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000
 VBF97_mcstat_bin8 shape                           1.0000         1.0000         1.0000         1.0000         1.0000         1.0000      -         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000
-taggereff lnN                                     1.3000         1.3000              -              -              -              -      -              -              -              -         1.3000         1.3000         1.3000
