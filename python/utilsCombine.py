@@ -106,30 +106,30 @@ def get_finetuned_score(data, modelv="v2_nor2"):
 
 # PLOTTING UTILS
 color_by_sample = {
-    # signal
-    "ggF": "pink",
-    "VBF": "tab:orange",
-    # higgs background
+    "ggF": "lightsteelblue",
+    "VBF": "peru",
+    # signal that is background
     "WH": "tab:brown",
-    "ZH": "tab:grey",
+    "ZH": "yellowgreen",
     "ttH": "tab:olive",
     # background
     "QCD": "tab:orange",
     "DYJets": "tab:purple",
     "WJetsLNu": "tab:green",
     "TTbar": "tab:blue",
-    "SingleTop": "tab:cyan",
     "Diboson": "orchid",
-    "WZQQ": "salmon",
-    "EWKvjets": "grey",
+    "WZQQ": "khaki",
+    "SingleTop": "tab:cyan",
     #     "WplusHToTauTau": "tab:cyan",
     #     "WminusHToTauTau": "tab:cyan",
     #     "ttHToTauTau": "tab:cyan",
     #     "GluGluHToTauTau": "tab:cyan",
     #     "ZHToTauTau": "tab:cyan",
     #     "VBFHToTauTau": "tab:cyan",
+    # "WJetsLNu_unmatched": "tab:grey",
+    # "WJetsLNu_matched": "tab:green",
+    "EWKvjets": "tab:grey",
 }
-
 plot_labels = {
     # signal
     "ggF": "ggH",
@@ -368,7 +368,7 @@ def plot_hists(
                 tot_signal = tot_signal + signal[i]
 
         # plot the total signal (w/o scaling)
-        hep.histplot(tot_signal, ax=ax, label="ggF+VBF+VH+ttH", linewidth=3, color="tab:red", flow="none")
+        hep.histplot(tot_signal, ax=ax, label="ggF+VBF", linewidth=3, color="tab:red", flow="none")
         # add MC stat errors
         ax.stairs(
             values=tot_signal.values() + np.sqrt(tot_signal.values()),

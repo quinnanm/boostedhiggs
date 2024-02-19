@@ -15,11 +15,62 @@ samples:
     - Data
 
 regions_sel:
-    # put any "selection name: selection" here to store it in the templates
-    "SRVBF95": (fj_ParT_score_finetuned>0.95) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
-    "SRggF97pt250to300": (fj_ParT_score_finetuned>0.97) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>250) & (fj_pt<300)
-    "SRggF97pt300to450": (fj_ParT_score_finetuned>0.97) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    "SRggF97pt450toInf": (fj_ParT_score_finetuned>0.97) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
+
+    ### VBF all inclusive
+    "VBF985": (fj_ParT_score_finetuned>0.985) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
+    "VBF98": (fj_ParT_score_finetuned>0.98) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
+    "VBF975": (fj_ParT_score_finetuned>0.975) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
+    "VBF97": (fj_ParT_score_finetuned>0.97) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
+    "VBF965": (fj_ParT_score_finetuned>0.965) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
+    "VBF96": (fj_ParT_score_finetuned>0.96) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
+    "VBF955": (fj_ParT_score_finetuned>0.955) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
+    "VBF95": (fj_ParT_score_finetuned>0.95) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
+
+    ### ggF all inclusive
+    "ggF99": (fj_ParT_score_finetuned>0.99) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
+    "ggF985": (fj_ParT_score_finetuned>0.985) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
+    "ggF98": (fj_ParT_score_finetuned>0.98) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
+    "ggF975": (fj_ParT_score_finetuned>0.975) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
+    "ggF97": (fj_ParT_score_finetuned>0.97) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
+    "ggF965": (fj_ParT_score_finetuned>0.965) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
+    "ggF96": (fj_ParT_score_finetuned>0.96) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
+    "ggF955": (fj_ParT_score_finetuned>0.955) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
+    "ggF95": (fj_ParT_score_finetuned>0.95) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
+
+    ### ggF pt bins
+    "ggF985pt250to300": (fj_ParT_score_finetuned>0.985) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
+    "ggF985pt300to450": (fj_ParT_score_finetuned>0.985) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
+    "ggF985pt450toInf": (fj_ParT_score_finetuned>0.985) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
+
+    "ggF98pt250to300": (fj_ParT_score_finetuned>0.98) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
+    "ggF98pt300to450": (fj_ParT_score_finetuned>0.98) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
+    "ggF98pt450toInf": (fj_ParT_score_finetuned>0.98) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
+
+    "ggF975pt250to300": (fj_ParT_score_finetuned>0.975) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
+    "ggF975pt300to450": (fj_ParT_score_finetuned>0.975) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
+    "ggF975pt450toInf": (fj_ParT_score_finetuned>0.975) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
+
+    "ggF97pt250to300": (fj_ParT_score_finetuned>0.97) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
+    "ggF97pt300to450": (fj_ParT_score_finetuned>0.97) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
+    "ggF97pt450toInf": (fj_ParT_score_finetuned>0.97) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
+
+    "ggF965pt250to300": (fj_ParT_score_finetuned>0.965) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
+    "ggF965pt300to450": (fj_ParT_score_finetuned>0.965) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
+    "ggF965pt450toInf": (fj_ParT_score_finetuned>0.965) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
+
+    "ggF96pt250to300": (fj_ParT_score_finetuned>0.96) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
+    "ggF96pt300to450": (fj_ParT_score_finetuned>0.96) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
+    "ggF96pt450toInf": (fj_ParT_score_finetuned>0.96) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
+
+
+
+
+
+    # # put any "selection name: selection" here to store it in the templates
+    # "SRVBF95": (fj_ParT_score_finetuned>0.95) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
+    # "SRggF97pt250to300": (fj_ParT_score_finetuned>0.97) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>250) & (fj_pt<300)
+    # "SRggF97pt300to450": (fj_ParT_score_finetuned>0.97) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
+    # "SRggF97pt450toInf": (fj_ParT_score_finetuned>0.97) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
 
     "WJetsCR": (fj_ParT_score_finetuned>0.50) & (fj_ParT_score_finetuned<0.95) & (n_bjets_T==0)
     "TopCR": (fj_ParT_score_finetuned>0.50) & (n_bjets_T>0)

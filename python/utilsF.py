@@ -18,6 +18,7 @@ plt.style.use(hep.style.CMS)
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
+# (name of sample, name in templates)
 combine_samples = {
     # data
     "SingleElectron_": "Data",
@@ -25,23 +26,27 @@ combine_samples = {
     "EGamma_": "Data",
     # signal
     "GluGluHToWW_Pt-200ToInf_M-125": "ggF",
-    "HToWW_M-125": "VH",
-    "VBF": "VBF",
+    "VBFHToWWToAny_M-125_TuneCP5_withDipoleRecoil": "VBF",
+    # "VBFHToWWToLNuQQ_M-125_withDipoleRecoil": "VBF",
     "ttHToNonbb_M125": "ttH",
+    "HWminusJ_HToWW_M-125": "WH",
+    "HWplusJ_HToWW_M-125": "WH",
+    "HZJ_HToWW_M-125": "ZH",
+    "GluGluZH_HToWW_M-125_TuneCP5_13TeV-powheg-pythia8": "ZH",
     # bkg
     "QCD_Pt": "QCD",
     "DYJets": "DYJets",
     "WJetsToLNu_": "WJetsLNu",
-    "JetsToQQ": "WZQQ",
     "TT": "TTbar",
     "ST_": "SingleTop",
     "WW": "Diboson",
     "WZ": "Diboson",
     "ZZ": "Diboson",
-    "GluGluHToTauTau": "HTauTau",
+    "JetsToQQ": "WZQQ",
     "EWK": "EWKvjets",
+    # "GluGluHToTauTau": "HTauTau",
 }
-signals = ["ggF", "ttH", "VH", "VBF"]
+signals = ["VBF", "ggF"]
 
 
 def get_sum_sumgenweight(pkl_files, year, sample):
@@ -100,16 +105,19 @@ def get_finetuned_score(data, modelv="v2_nor2"):
 
 # PLOTTING UTILS
 color_by_sample = {
-    "ggF": "pink",
-    "VH": "tab:brown",
-    "VBF": "tab:gray",
+    "ggF": "lightsteelblue",
+    "VBF": "peru",
+    # signal that is background
+    "WH": "tab:brown",
+    "ZH": "yellowgreen",
     "ttH": "tab:olive",
-    "DYJets": "tab:purple",
+    # background
     "QCD": "tab:orange",
-    "Diboson": "orchid",
+    "DYJets": "tab:purple",
     "WJetsLNu": "tab:green",
     "TTbar": "tab:blue",
-    "WZQQ": "salmon",
+    "Diboson": "orchid",
+    "WZQQ": "khaki",
     "SingleTop": "tab:cyan",
     #     "WplusHToTauTau": "tab:cyan",
     #     "WminusHToTauTau": "tab:cyan",
@@ -117,7 +125,7 @@ color_by_sample = {
     #     "GluGluHToTauTau": "tab:cyan",
     #     "ZHToTauTau": "tab:cyan",
     #     "VBFHToTauTau": "tab:cyan",
-    "WJetsLNu_unmatched": "tab:grey",
+    "WJetsLNu_unmatched": "lightgreen",
     "WJetsLNu_matched": "tab:green",
     "EWKvjets": "tab:grey",
 }
@@ -125,6 +133,8 @@ color_by_sample = {
 plot_labels = {
     "ggF": "ggF",
     "VH": "VH",
+    "WH": "WH",
+    "ZH": "ZH",
     # "VH": "VH(WW)",
     # "VBF": r"VBFH(WW) $(qq\ell\nu)$",
     "VBF": r"VBF",
@@ -433,9 +443,9 @@ def plot_hists(
             tot_signal *= mult_factor
 
             if mult_factor == 1:
-                siglabel = r"ggF+VBF+VH+ttH"
+                siglabel = r"ggF+VBF"
             else:
-                siglabel = r"ggF+VBF+VH+ttH $\times$" + f"{mult_factor}"
+                siglabel = r"ggF+VBF $\times$" + f"{mult_factor}"
 
             hep.histplot(
                 tot_signal,
@@ -499,12 +509,12 @@ def plot_hists(
         ax.legend(
             [hand_new[idx] for idx in range(len(hand_new))],
             [lab_new[idx] for idx in range(len(lab_new))],
-            ncol=2,
+            ncol=3,
             fontsize=14,
         )
 
         _, a = ax.get_ylim()
-        if logy:
+        if logy or ("isolation" in var):
             ax.set_yscale("log")
             ax.set_ylim(1e-1, a * 15.7)
         else:

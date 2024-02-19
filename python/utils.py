@@ -17,6 +17,7 @@ plt.style.use(hep.style.CMS)
 
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
+# (name of sample, name in templates)
 combine_samples = {
     # data
     "SingleElectron_": "Data",
@@ -24,24 +25,27 @@ combine_samples = {
     "EGamma_": "Data",
     # signal
     "GluGluHToWW_Pt-200ToInf_M-125": "ggF",
-    "HToWW_M-125": "VH",
     "VBFHToWWToAny_M-125_TuneCP5_withDipoleRecoil": "VBF",
     # "VBFHToWWToLNuQQ_M-125_withDipoleRecoil": "VBF",
     "ttHToNonbb_M125": "ttH",
+    "HWminusJ_HToWW_M-125": "WH",
+    "HWplusJ_HToWW_M-125": "WH",
+    "HZJ_HToWW_M-125": "ZH",
+    "GluGluZH_HToWW_M-125_TuneCP5_13TeV-powheg-pythia8": "ZH",
     # bkg
     "QCD_Pt": "QCD",
     "DYJets": "DYJets",
     "WJetsToLNu_": "WJetsLNu",
-    "JetsToQQ": "WZQQ",
     "TT": "TTbar",
     "ST_": "SingleTop",
     "WW": "Diboson",
     "WZ": "Diboson",
     "ZZ": "Diboson",
-    "GluGluHToTauTau": "HTauTau",
+    "JetsToQQ": "WZQQ",
     "EWK": "EWKvjets",
+    # "GluGluHToTauTau": "HTauTau",
 }
-signals = ["ggF", "ttH", "VH", "VBF"]
+signals = ["VBF", "ggF"]
 
 
 def get_sum_sumgenweight(pkl_files, year, sample):
@@ -100,16 +104,19 @@ def get_finetuned_score(data, modelv="v2_nor2"):
 
 # PLOTTING UTILS
 color_by_sample = {
-    "ggF": "pink",
-    "VH": "tab:brown",
-    "VBF": "tab:gray",
+    "ggF": "lightsteelblue",
+    "VBF": "peru",
+    # signal that is background
+    "WH": "tab:brown",
+    "ZH": "yellowgreen",
     "ttH": "tab:olive",
-    "DYJets": "tab:purple",
+    # background
     "QCD": "tab:orange",
-    "Diboson": "orchid",
+    "DYJets": "tab:purple",
     "WJetsLNu": "tab:green",
     "TTbar": "tab:blue",
-    "WZQQ": "salmon",
+    "Diboson": "orchid",
+    "WZQQ": "khaki",
     "SingleTop": "tab:cyan",
     #     "WplusHToTauTau": "tab:cyan",
     #     "WminusHToTauTau": "tab:cyan",
@@ -124,6 +131,8 @@ color_by_sample = {
 
 plot_labels = {
     "ggF": "ggF",
+    "WH": "WH",
+    "ZH": "ZH",
     "VH": "VH",
     # "VH": "VH(WW)",
     # "VBF": r"VBFH(WW) $(qq\ell\nu)$",
@@ -434,7 +443,7 @@ def plot_hists(
                     tot_signal = tot_signal + signal[i]
 
             # plot the total signal (w/o scaling)
-            hep.histplot(tot_signal, ax=ax, label="ggF+VBF+VH+ttH", linewidth=3, color="tab:red", flow="none")
+            hep.histplot(tot_signal, ax=ax, label="ggF+VBF", linewidth=3, color="tab:red", flow="none")
             # add MC stat errors
             ax.stairs(
                 values=tot_signal.values() + np.sqrt(tot_signal.values()),
