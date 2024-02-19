@@ -74,6 +74,8 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=F
                     continue
 
             templ = get_template(hists_templates, sName, ChName)
+            if templ == 0:
+                continue
             stype = rl.Sample.SIGNAL if sName in sigs else rl.Sample.BACKGROUND
             sample = rl.TemplateSample(ch.name + "_" + labels[sName], stype, templ)
 

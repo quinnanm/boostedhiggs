@@ -129,6 +129,9 @@ def get_template(h, sample, region):
 def get_template_diffbins(h, sample):
     # massbins = h.axes["mass_observable"].edges
     # return (h[{"Sample": sample, "Systematic": "nominal", "Category": category}].values(), massbins, "mass_observable")
+    if sample not in h.axes["Sample"]:
+        return 0
+
     return h[{"Sample": sample, "Systematic": "nominal"}]
 
 
