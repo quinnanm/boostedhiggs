@@ -126,6 +126,12 @@ def get_template(h, sample, region):
     return h[{"Sample": sample, "Systematic": "nominal", "Region": region}]
 
 
+def get_template_diffbins(h, sample):
+    # massbins = h.axes["mass_observable"].edges
+    # return (h[{"Sample": sample, "Systematic": "nominal", "Category": category}].values(), massbins, "mass_observable")
+    return h[{"Sample": sample, "Systematic": "nominal"}]
+
+
 def load_templates(years, lep_channels, outdir):
     """Loads the hist templates that were created using ```make_templates.py```."""
 

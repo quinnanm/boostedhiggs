@@ -19,7 +19,14 @@ import warnings
 import pandas as pd
 import rhalphalib as rl
 from systematics import systs_from_parquets, systs_not_from_parquets
-from utils import get_template, labels, load_templates, samples, shape_to_num, sigs
+from utils import (
+    get_template_diffbins,
+    labels,
+    load_templates,
+    samples,
+    shape_to_num,
+    sigs,
+)
 
 rl.ParametericSample.PreferRooParametricHist = True
 logging.basicConfig(level=logging.INFO)
@@ -73,7 +80,7 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=F
                 if sName in sigs:
                     continue
 
-            templ = get_template(hists_templates[ChName], sName, ChName)
+            templ = get_template_diffbins(hists_templates[ChName], sName)
             stype = rl.Sample.SIGNAL if sName in sigs else rl.Sample.BACKGROUND
             sample = rl.TemplateSample(ch.name + "_" + labels[sName], stype, templ)
 
@@ -114,7 +121,7 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=F
             ch.addSample(sample)
 
         # add data
-        data_obs = get_template(hists_templates[ChName], "Data", ChName)
+        data_obs = get_template_diffbins(hists_templates[ChName], "Data")
         ch.setObservation(data_obs)
 
         ch.autoMCStats()
