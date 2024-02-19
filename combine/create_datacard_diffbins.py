@@ -40,7 +40,7 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=F
 
     # define the signal and control regions
     # SIG_regions = ["SRVBF95", "SRggF97pt250to300", "SRggF97pt300to450", "SRggF97pt450toInf"]
-    SIG_regions = list(hists_templates.axes["Region"])
+    SIG_regions = list(hists_templates.keys())
     SIG_regions.remove("TopCR")
     SIG_regions.remove("WJetsCR")
 
@@ -73,7 +73,7 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=F
                 if sName in sigs:
                     continue
 
-            templ = get_template(hists_templates, sName, ChName)
+            templ = get_template(hists_templates[ChName], sName, ChName)
             stype = rl.Sample.SIGNAL if sName in sigs else rl.Sample.BACKGROUND
             sample = rl.TemplateSample(ch.name + "_" + labels[sName], stype, templ)
 
@@ -94,9 +94,9 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=F
             # SYSTEMATICS FROM PARQUETS
             for syst_on_sample in ["all_samples", sName]:  # apply common systs and per sample systs
                 for sys_name, sys_value in sys_from_parquets[syst_on_sample].items():
-                    syst_up = hists_templates[{"Sample": sName, "Region": ChName, "Systematic": sys_name + "_up"}].values()
-                    syst_do = hists_templates[{"Sample": sName, "Region": ChName, "Systematic": sys_name + "_down"}].values()
-                    nominal = hists_templates[{"Sample": sName, "Region": ChName, "Systematic": "nominal"}].values()
+                    syst_up = hists_templates[ChName][{"Sample": sName, "Systematic": sys_name + "_up"}].values()
+                    syst_do = hists_templates[ChName][{"Sample": sName, "Systematic": sys_name + "_down"}].values()
+                    nominal = hists_templates[ChName][{"Sample": sName, "Systematic": "nominal"}].values()
 
                     if sys_value.combinePrior == "lnN":
                         eff_up = shape_to_num(syst_up, nominal)
@@ -114,7 +114,7 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=F
             ch.addSample(sample)
 
         # add data
-        data_obs = get_template(hists_templates, "Data", ChName)
+        data_obs = get_template(hists_templates[ChName], "Data", ChName)
         ch.setObservation(data_obs)
 
         ch.autoMCStats()
