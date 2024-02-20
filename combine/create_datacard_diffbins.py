@@ -47,9 +47,6 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=F
 
     # define the signal and control regions
     # SIG_regions = ["SRVBF95", "SRggF97pt250to300", "SRggF97pt300to450", "SRggF97pt450toInf"]
-    SIG_regions = list(hists_templates.axes["Region"])
-    SIG_regions.remove("TopCR")
-    SIG_regions.remove("WJetsCR")
 
     SIG_regions = ["VBF97", "ggF975pt250to300", "ggF975pt300to450", "ggF98pt450toInf"]
     # SIG_regions = ["VBF97", "ggF975pt250to300", "ggF975pt300to450"]
@@ -166,7 +163,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # python create_datacard.py --years 2016,2016APV,2017,2018 --channels mu,ele --outdir templates/v3
+    # python create_datacard_diffbins.py --years 2016,2016APV,2017,2018 --channels mu,ele --outdir templates/v5
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--years", default="2017", help="years separated by commas")
