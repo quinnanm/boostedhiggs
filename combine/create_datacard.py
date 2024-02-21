@@ -39,18 +39,9 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
     model = rl.Model("testModel")
 
     # define the signal and control regions
-    # SIG_regions = ["SRVBF95", "SRggF97pt250to300", "SRggF97pt300to450", "SRggF97pt450toInf"]
-    SIG_regions = list(hists_templates.axes["Region"])
-    SIG_regions.remove("TopCR")
-    SIG_regions.remove("WJetsCR")
+    SIG_regions = ["VBF97", "ggF975pt250to300", "ggF975pt300to450", "ggF975pt450toInf"]
+    CONTROL_regions = ["TopCR", "WJetsCR97"]
 
-    # SIG_regions = ["VBF97", "ggF975pt250to300", "ggF975pt300to450", "ggF98pt450toInf"]
-    SIG_regions = ["VBF97", "ggF975pt250to300", "ggF975pt300to450"]
-    # SIG_regions = ["VBF97", "ggF98"]
-
-    # SIG_regions = ["ggF975pt300to450"]
-
-    CONTROL_regions = ["TopCR", "WJetsCR"]
     if add_ttbar_constraint:
         ttbarnormSF = rl.IndependentParameter("ttbarnormSF", 1.0, 0, 10)
 
@@ -76,7 +67,8 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
             stype = rl.Sample.SIGNAL if sName in sigs else rl.Sample.BACKGROUND
             sample = rl.TemplateSample(ch.name + "_" + labels[sName], stype, templ)
 
-            # sample.autoMCStats(lnN=True)
+            if "CR" in ChName:
+                sample.autoMCStats(lnN=True)
 
             # SYSTEMATICS NOT FROM PARQUETS
             for syst_on_sample in ["all_samples", sName]:  # apply common systs and per sample systs
@@ -116,7 +108,8 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
         data_obs = get_template(hists_templates, "Data", ChName)
         ch.setObservation(data_obs)
 
-        ch.autoMCStats()
+        if "CR" not in ChName:
+            ch.autoMCStats()
 
     if add_ttbar_constraint:
         failCh = model["TopCR"]
@@ -132,7 +125,7 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
             ttbarpass.setParamEffect(ttbarnormSF, 1 * ttbarnormSF)
 
     if add_wjets_constraint:
-        failCh = model["WJetsCR"]
+        failCh = model["WJetsCR95"]
 
         wjetsfail = failCh["wjets"]
         wjetsfail.setParamEffect(wjetsnormSF, 1 * wjetsnormSF)
@@ -159,7 +152,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # python create_datacard.py --years 2016,2016APV,2017,2018 --channels mu,ele --outdir templates/v3
+    # python create_datacard.py --years 2016,2016APV,2017,2018 --channels mu,ele --outdir templates/v4
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--years", default="2017", help="years separated by commas")
