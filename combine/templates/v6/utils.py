@@ -30,15 +30,16 @@ combine_samples = {
     "EGamma_": "Data",
     # bkg
     "QCD_Pt": "QCD",
-    "DYJets": "DYJets",
-    "WJetsToLNu_": "WJetsLNu",
     "TT": "TTbar",
+    "WJetsToLNu_": "WJetsLNu",
     "ST_": "SingleTop",
     "WW": "Diboson",
     "WZ": "Diboson",
     "ZZ": "Diboson",
-    "JetsToQQ": "WZQQ",
     "EWK": "EWKvjets",
+    # TODO: make sure it's WZQQ is NLO in next iteration
+    "DYJets": "WZQQorDYJets",
+    "JetsToQQ": "WZQQorDYJets",
 }
 
 signals = ["VBF", "ggF"]
@@ -53,16 +54,19 @@ labels = {
     "ZH": "ZH",
     # BKGS
     "QCD": "qcd",
-    "DYJets": "zjets",
     "WJetsLNu": "wjets",
     "TTbar": "ttbar",
     "SingleTop": "singletop",
     "Diboson": "diboson",
-    "WZQQ": "wzqq",
     "EWKvjets": "ewkvjets",
+    # TODO: make sure it's WZQQ is NLO in next iteration
+    "DYJets": "zjets",
+    "WZQQ": "wzqq",
+    "WZQQorDYJets": "vjets",
 }
 
-bkgs = ["TTbar", "WJetsLNu", "SingleTop", "DYJets", "QCD", "Diboson", "WZQQ", "EWKvjets"]
+# bkgs = ["TTbar", "WJetsLNu", "SingleTop", "DYJets", "QCD", "Diboson", "WZQQ", "EWKvjets"]
+bkgs = ["TTbar", "WJetsLNu", "SingleTop", "WZQQorDYJets", "QCD", "Diboson", "EWKvjets"]
 bkgs += ["ttH", "WH", "ZH"]
 sigs = ["ggF", "VBF"]
 samples = sigs + bkgs
