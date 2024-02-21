@@ -125,8 +125,8 @@ color_by_sample = {
     #     "GluGluHToTauTau": "tab:cyan",
     #     "ZHToTauTau": "tab:cyan",
     #     "VBFHToTauTau": "tab:cyan",
-    # "WJetsLNu_unmatched": "tab:grey",
-    # "WJetsLNu_matched": "tab:green",
+    "WJetsLNu_unmatched": "lightgreen",
+    "WJetsLNu_matched": "tab:green",
     "EWKvjets": "tab:grey",
 }
 

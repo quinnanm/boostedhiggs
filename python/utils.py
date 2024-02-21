@@ -43,7 +43,7 @@ combine_samples = {
     "ZZ": "Diboson",
     "JetsToQQ": "WZQQ",
     "EWK": "EWKvjets",
-    # "GluGluHToTauTau": "HTauTau",
+    "GluGluHToTauTau": "HTauTau",
 }
 signals = ["VBF", "ggF"]
 

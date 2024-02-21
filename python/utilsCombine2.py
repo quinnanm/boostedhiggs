@@ -105,28 +105,29 @@ def get_finetuned_score(data, modelv="v2_nor2"):
 
 # PLOTTING UTILS
 color_by_sample = {
-    # signal
-    "ggF": "pink",
-    "VBF": "tab:orange",
-    # higgs background
+    "ggF": "lightsteelblue",
+    "VBF": "peru",
+    # signal that is background
     "WH": "tab:brown",
-    "ZH": "tab:grey",
+    "ZH": "yellowgreen",
     "ttH": "tab:olive",
     # background
     "QCD": "tab:orange",
     "DYJets": "tab:purple",
     "WJetsLNu": "tab:green",
     "TTbar": "tab:blue",
-    "SingleTop": "tab:cyan",
     "Diboson": "orchid",
-    "WZQQ": "salmon",
-    "EWKvjets": "grey",
+    "WZQQ": "khaki",
+    "SingleTop": "tab:cyan",
     #     "WplusHToTauTau": "tab:cyan",
     #     "WminusHToTauTau": "tab:cyan",
     #     "ttHToTauTau": "tab:cyan",
     #     "GluGluHToTauTau": "tab:cyan",
     #     "ZHToTauTau": "tab:cyan",
     #     "VBFHToTauTau": "tab:cyan",
+    "WJetsLNu_unmatched": "lightgreen",
+    "WJetsLNu_matched": "tab:green",
+    "EWKvjets": "tab:grey",
 }
 
 plot_labels = {
@@ -169,6 +170,7 @@ def plot_hists(
     text_="",
     blind_region=None,
     save_as=None,
+    remove_samples=[],
 ):
     # luminosity
     luminosity = 0
@@ -182,6 +184,11 @@ def plot_hists(
 
     # get samples existing in histogram
     samples = [h.axes[0].value(i) for i in range(len(h.axes[0].edges))]
+
+    for s in remove_samples:
+        if s in samples:
+            samples.remove(s)
+
     signal_labels = [label for label in samples if label in signals]
     bkg_labels = [label for label in samples if (label and label not in signal_labels and (label not in ["Data"]))]
 

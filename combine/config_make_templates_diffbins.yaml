@@ -18,7 +18,7 @@ regions_massbins:
     "VBF97": 20
     "ggF975pt250to300": 10
     "ggF975pt300to450": 10
-    "ggF98pt450toInf": 10
+    "ggF975pt450toInf": 10
 
     "WJetsCR": 10
     "TopCR": 10
@@ -27,9 +27,9 @@ regions_sel:
     "VBF97": (fj_ParT_score_finetuned>0.97) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
     "ggF975pt250to300": (fj_ParT_score_finetuned>0.975) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
     "ggF975pt300to450": (fj_ParT_score_finetuned>0.975) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    "ggF98pt450toInf": (fj_ParT_score_finetuned>0.98) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
+    "ggF975pt450toInf": (fj_ParT_score_finetuned>0.975) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
 
-    "WJetsCR": (fj_ParT_score_finetuned>0.50) & (fj_ParT_score_finetuned<0.95) & (n_bjets_T==0)
+    "WJetsCR": (fj_ParT_score_finetuned>0.50) & (fj_ParT_score_finetuned<0.97) & (n_bjets_T==0)
     "TopCR": (fj_ParT_score_finetuned>0.50) & (n_bjets_T>0)
 
 samples_dir:
