@@ -125,7 +125,7 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
             ttbarpass.setParamEffect(ttbarnormSF, 1 * ttbarnormSF)
 
     if add_wjets_constraint:
-        failCh = model["WJetsCR95"]
+        failCh = model["WJetsCR97"]
 
         wjetsfail = failCh["wjets"]
         wjetsfail.setParamEffect(wjetsnormSF, 1 * wjetsnormSF)
