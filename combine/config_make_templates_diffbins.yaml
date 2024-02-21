@@ -18,7 +18,7 @@ regions_massbins:
     "VBF97": 20
     "ggF975pt250to300": 10
     "ggF975pt300to450": 10
-    "ggF975pt450toInf": 10
+    "ggF975pt450toInf": 20
 
     "WJetsCR": 10
     "TopCR": 10

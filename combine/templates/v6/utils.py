@@ -12,21 +12,22 @@ from hist import Hist
 
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
-# (name of sample, name in templates)
-combine_samples = {
-    # data
-    "SingleElectron_": "Data",
-    "SingleMuon_": "Data",
-    "EGamma_": "Data",
-    # signal
+combine_samples_by_name = {
     "GluGluHToWW_Pt-200ToInf_M-125": "ggF",
     "VBFHToWWToAny_M-125_TuneCP5_withDipoleRecoil": "VBF",
-    # "VBFHToWWToLNuQQ_M-125_withDipoleRecoil": "VBF",
     "ttHToNonbb_M125": "ttH",
     "HWminusJ_HToWW_M-125": "WH",
     "HWplusJ_HToWW_M-125": "WH",
     "HZJ_HToWW_M-125": "ZH",
     "GluGluZH_HToWW_M-125_TuneCP5_13TeV-powheg-pythia8": "ZH",
+    "GluGluHToTauTau": "HTauTau",
+}
+
+combine_samples = {
+    # data
+    "SingleElectron_": "Data",
+    "SingleMuon_": "Data",
+    "EGamma_": "Data",
     # bkg
     "QCD_Pt": "QCD",
     "DYJets": "DYJets",
@@ -38,8 +39,9 @@ combine_samples = {
     "ZZ": "Diboson",
     "JetsToQQ": "WZQQ",
     "EWK": "EWKvjets",
-    # "GluGluHToTauTau": "HTauTau",  # TODO: check how many events
 }
+
+signals = ["VBF", "ggF"]
 
 # (name in templates, name in cards)
 labels = {
