@@ -5,14 +5,15 @@ samples:
     - WH
     - ZH
     - QCD
-    - DYJets
     - WJetsLNu
     - TTbar
     - SingleTop
     - Diboson
-    - WZQQ
     - EWKvjets
     - Data
+    # - DYJets
+    # - WZQQ
+    - WZQQorDYJets
 
 regions_sel:
 

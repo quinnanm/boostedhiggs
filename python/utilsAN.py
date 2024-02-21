@@ -36,15 +36,16 @@ combine_samples = {
     "EGamma_": "Data",
     # bkg
     "QCD_Pt": "QCD",
-    "DYJets": "DYJets",
-    "WJetsToLNu_": "WJetsLNu",
     "TT": "TTbar",
+    "WJetsToLNu_": "WJetsLNu",
     "ST_": "SingleTop",
     "WW": "Diboson",
     "WZ": "Diboson",
     "ZZ": "Diboson",
-    "JetsToQQ": "WZQQ",
     "EWK": "EWKvjets",
+    # TODO: make sure it's WZQQ is NLO in next iteration
+    "DYJets": "WZQQorDYJets",
+    "JetsToQQ": "WZQQorDYJets",
 }
 
 signals = ["VBF", "ggF"]
@@ -114,39 +115,33 @@ color_by_sample = {
     "ttH": "tab:olive",
     # background
     "QCD": "tab:orange",
-    "DYJets": "tab:purple",
     "WJetsLNu": "tab:green",
     "TTbar": "tab:blue",
     "Diboson": "orchid",
-    "WZQQ": "khaki",
     "SingleTop": "tab:cyan",
-    #     "WplusHToTauTau": "tab:cyan",
-    #     "WminusHToTauTau": "tab:cyan",
-    #     "ttHToTauTau": "tab:cyan",
-    #     "GluGluHToTauTau": "tab:cyan",
-    #     "ZHToTauTau": "tab:cyan",
-    #     "VBFHToTauTau": "tab:cyan",
     # "WJetsLNu_unmatched": "tab:grey",
     # "WJetsLNu_matched": "tab:green",
     "EWKvjets": "tab:grey",
+    # TODO: make sure it's WZQQ is NLO in next iteration
+    "DYJets": "tab:purple",
+    "WZQQ": "khaki",
+    "WZQQorDYJets": "khaki",
 }
 
 plot_labels = {
     "ggF": "ggF",
-    "VH": "VH",
     "WH": "WH",
     "ZH": "ZH",
+    "VH": "VH",
     # "VH": "VH(WW)",
     # "VBF": r"VBFH(WW) $(qq\ell\nu)$",
     "VBF": r"VBF",
     # "ttH": "ttH(WW)",
     "ttH": r"$t\bar{t}$H",
-    "DYJets": r"Z$(\ell\ell)$+jets",
     "QCD": "Multijet",
     "Diboson": "VV",
     "WJetsLNu": r"W$(\ell\nu)$+jets",
     "TTbar": r"$t\bar{t}$+jets",
-    "WZQQ": r"V$(qq)$",
     "SingleTop": r"Single T",
     #     "WplusHToTauTau": "WplusHToTauTau",
     #     "WminusHToTauTau": "WminusHToTauTau",
@@ -157,14 +152,11 @@ plot_labels = {
     "WJetsLNu_unmatched": r"W$(\ell\nu)$+jets unmatched",
     "WJetsLNu_matched": r"W$(\ell\nu)$+jets matched",
     "EWKvjets": "EWK VJets",
+    # TODO: make sure it's WZQQ is NLO in next iteration
+    "DYJets": r"Z$(\ell\ell)$+jets",
+    "WZQQ": r"V$(qq)$",
+    "WZQQorDYJets": r"W$(qq)$/Z(inc.)+jets",
 }
-
-# sig_labels = {
-#     "HWW": "ggF",
-#     "VBF": "VBF",
-#     "VH": "VH",
-#     "ttH": "ttH",
-# }
 
 label_by_ch = {"mu": "Muon", "ele": "Electron"}
 
