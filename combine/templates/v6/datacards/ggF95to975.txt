@@ -1,4 +1,4 @@
-# Datacard for <Channel (ggF95to975) instance at 0x7f9ea8f001c0> generated on 2024-02-21 05:49:46.434333
+# Datacard for <Channel (ggF95to975) instance at 0x7f4284180f10> generated on 2024-02-21 08:37:24.891954
 imax 1 # number of categories ('bins' but here we are using shape templates)
 jmax 12 # number of samples minus 1
 kmax 59 # number of nuisance parameters

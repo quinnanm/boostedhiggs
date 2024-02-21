@@ -1,4 +1,4 @@
-# Datacard for <Channel (ParTinclusive985) instance at 0x7f9ea939e7c0> generated on 2024-02-21 05:49:45.937193
+# Datacard for <Channel (ParTinclusive985) instance at 0x7f428466c670> generated on 2024-02-21 08:37:24.457987
 imax 1 # number of categories ('bins' but here we are using shape templates)
 jmax 12 # number of samples minus 1
 kmax 59 # number of nuisance parameters
