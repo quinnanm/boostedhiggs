@@ -16,6 +16,8 @@ samples:
 
 regions_sel:
 
+    "ParTinclusive9999": (fj_ParT_score>0.9999) & (n_bjets_T==0)
+    "ParTinclusive9995": (fj_ParT_score>0.9995) & (n_bjets_T==0)
     "ParTinclusive999": (fj_ParT_score>0.999) & (n_bjets_T==0)
     "ParTinclusive995": (fj_ParT_score>0.995) & (n_bjets_T==0)
     "ParTinclusive99": (fj_ParT_score>0.99) & (n_bjets_T==0)
@@ -29,6 +31,7 @@ regions_sel:
     "ParTinclusive95": (fj_ParT_score>0.95) & (n_bjets_T==0)
 
 
+    "inclusive99": (fj_ParT_score_finetuned>0.99) & (n_bjets_T==0)
     "inclusive985": (fj_ParT_score_finetuned>0.985) & (n_bjets_T==0)
     "inclusive98": (fj_ParT_score_finetuned>0.98) & (n_bjets_T==0)
     "inclusive975": (fj_ParT_score_finetuned>0.975) & (n_bjets_T==0)
