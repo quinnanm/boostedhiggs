@@ -37,7 +37,7 @@ pd.set_option("mode.chained_assignment", None)
 CMS_PARAMS_LABEL = "CMS_HWW_boosted"
 
 
-def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=False, add_wjets_constraint=False):
+def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=True, add_wjets_constraint=True):
     # define the systematics
     systs_dict, systs_dict_values = systs_not_from_parquets(years, lep_channels)
     sys_from_parquets = systs_from_parquets(years)
@@ -46,15 +46,9 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=F
     model = rl.Model("testModel")
 
     # define the signal and control regions
-    # SIG_regions = ["SRVBF95", "SRggF97pt250to300", "SRggF97pt300to450", "SRggF97pt450toInf"]
-
-    SIG_regions = ["VBF97", "ggF975pt250to300", "ggF975pt300to450", "ggF98pt450toInf"]
-    # SIG_regions = ["VBF97", "ggF975pt250to300", "ggF975pt300to450"]
-    # SIG_regions = ["VBF97", "ggF98"]
-
-    # SIG_regions = ["ggF975pt300to450"]
-
+    SIG_regions = ["VBF97", "ggF975pt250to300", "ggF975pt300to450", "ggF975pt450toInf"]
     CONTROL_regions = ["TopCR", "WJetsCR"]
+
     if add_ttbar_constraint:
         ttbarnormSF = rl.IndependentParameter("ttbarnormSF", 1.0, 0, 10)
 
@@ -70,7 +64,7 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=F
 
         for sName in Samples:
 
-            if "CR" in ChName:  # TODO: remove signal from control regions
+            if "CR" in ChName:  # remove signal from control regions
                 if sName in sigs:
                     continue
 
@@ -80,7 +74,8 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=F
             stype = rl.Sample.SIGNAL if sName in sigs else rl.Sample.BACKGROUND
             sample = rl.TemplateSample(ch.name + "_" + labels[sName], stype, templ)
 
-            # sample.autoMCStats(lnN=True)
+            if "CR" in ChName:
+                sample.autoMCStats(lnN=True)
 
             # SYSTEMATICS NOT FROM PARQUETS
             for syst_on_sample in ["all_samples", sName]:  # apply common systs and per sample systs
@@ -118,9 +113,11 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=F
 
         # add data
         data_obs = get_template_diffbins(hists_templates[ChName], "Data")
+
         ch.setObservation(data_obs)
 
-        ch.autoMCStats()
+        if "CR" not in ChName:
+            ch.autoMCStats()
 
     if add_ttbar_constraint:
         failCh = model["TopCR"]
@@ -163,7 +160,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # python create_datacard_diffbins.py --years 2016,2016APV,2017,2018 --channels mu,ele --outdir templates/v5
+    # python create_datacard_diffbins.py --years 2016,2016APV,2017,2018 --channels mu,ele --outdir templates/v7
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--years", default="2017", help="years separated by commas")
