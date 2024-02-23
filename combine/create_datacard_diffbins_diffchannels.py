@@ -133,7 +133,7 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
             ttbarfail.setParamEffect(ttbarnormSF, 1 * ttbarnormSF)
 
             for sig_region in SIG_regions:
-                sig_region += f"{ch}"
+                sig_region += f"{lepch}"
                 passCh = model[sig_region]
 
                 ttbarpass = passCh["ttbar"]
@@ -146,7 +146,7 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
             wjetsfail.setParamEffect(wjetsnormSF, 1 * wjetsnormSF)
 
             for sig_region in SIG_regions:
-                sig_region += f"{ch}"
+                sig_region += f"{lepch}"
                 passCh = model[sig_region]
 
                 wjetspass = passCh["wjets"]
