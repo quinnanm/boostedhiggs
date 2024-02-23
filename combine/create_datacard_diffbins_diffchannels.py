@@ -60,7 +60,7 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
         # fill datacard with systematics and rates
         for ChName in SIG_regions + CONTROL_regions:
 
-            ChName += f"_{lepch}"
+            ChName += f"{lepch}"
 
             Samples = samples.copy()
 
@@ -127,26 +127,26 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
                 ch.autoMCStats()
 
         if add_ttbar_constraint:
-            failCh = model[f"TopCR+{lepch}"]
+            failCh = model[f"TopCR{lepch}"]
 
             ttbarfail = failCh["ttbar"]
             ttbarfail.setParamEffect(ttbarnormSF, 1 * ttbarnormSF)
 
             for sig_region in SIG_regions:
-                sig_region += f"_{ch}"
+                sig_region += f"{ch}"
                 passCh = model[sig_region]
 
                 ttbarpass = passCh["ttbar"]
                 ttbarpass.setParamEffect(ttbarnormSF, 1 * ttbarnormSF)
 
         if add_wjets_constraint:
-            failCh = model[f"WJetsCR_{lepch}"]
+            failCh = model[f"WJetsCR{lepch}"]
 
             wjetsfail = failCh["wjets"]
             wjetsfail.setParamEffect(wjetsnormSF, 1 * wjetsnormSF)
 
             for sig_region in SIG_regions:
-                sig_region += f"_{ch}"
+                sig_region += f"{ch}"
                 passCh = model[sig_region]
 
                 wjetspass = passCh["wjets"]
