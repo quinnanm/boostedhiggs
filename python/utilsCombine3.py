@@ -408,7 +408,8 @@ def plot_hists(
     else:
         ax.set_ylim(0, a * 1.7)
 
-    ax.set_xlim(45, 210)
+    # ax.set_xlim(45, 210)
+    ax.set_xlim(45, 240)
 
     hep.cms.lumitext("%.0f " % luminosity + r"fb$^{-1}$ (13 TeV)", ax=ax, fontsize=20)
     hep.cms.text("Work in Progress", ax=ax, fontsize=15)
