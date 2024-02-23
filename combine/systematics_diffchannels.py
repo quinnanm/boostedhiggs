@@ -249,19 +249,20 @@ def systs_from_parquets(years):
     }
 
     # add btag SF
-    for year in years:
-        systs_from_parquets["all_samples"][f"weight_btagSFlight{year}"] = rl.NuisanceParameter(
-            f"{CMS_PARAMS_LABEL}_btagSFlight_{year}", "lnN"
-        )
-        systs_from_parquets["all_samples"][f"weight_btagSFbc{year}"] = rl.NuisanceParameter(
-            f"{CMS_PARAMS_LABEL}_btagSFbc_{year}", "lnN"
-        )
+    for lepch in ["ele", "mu"]:
+        for year in years:
+            systs_from_parquets[lepch]["all_samples"][f"weight_btagSFlight{year}"] = rl.NuisanceParameter(
+                f"{CMS_PARAMS_LABEL}_btagSFlight_{year}", "lnN"
+            )
+            systs_from_parquets[lepch]["all_samples"][f"weight_btagSFbc{year}"] = rl.NuisanceParameter(
+                f"{CMS_PARAMS_LABEL}_btagSFbc_{year}", "lnN"
+            )
 
-    systs_from_parquets["all_samples"]["weight_btagSFlightCorrelated"] = rl.NuisanceParameter(
-        f"{CMS_PARAMS_LABEL}_btagSFlightCorrelated", "lnN"
-    )
-    systs_from_parquets["all_samples"]["weight_btagSFbcCorrelated"] = rl.NuisanceParameter(
-        f"{CMS_PARAMS_LABEL}_btagSFbcCorrelated", "lnN"
-    )
+        systs_from_parquets[lepch]["all_samples"]["weight_btagSFlightCorrelated"] = rl.NuisanceParameter(
+            f"{CMS_PARAMS_LABEL}_btagSFlightCorrelated", "lnN"
+        )
+        systs_from_parquets[lepch]["all_samples"]["weight_btagSFbcCorrelated"] = rl.NuisanceParameter(
+            f"{CMS_PARAMS_LABEL}_btagSFbcCorrelated", "lnN"
+        )
 
     return systs_from_parquets
