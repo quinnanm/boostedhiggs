@@ -18,7 +18,7 @@ import warnings
 
 import pandas as pd
 import rhalphalib as rl
-from systematics import systs_from_parquets, systs_not_from_parquets
+from systematics_diffchannels import systs_from_parquets, systs_not_from_parquets
 from utils import (
     get_template_diffbins,
     labels,
@@ -168,7 +168,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # python create_datacard_diffbins.py --years 2016,2016APV,2017,2018 --channels mu,ele --outdir templates/v7
+    # python create_datacard_diffbins_diffchannels.py --years 2016,2016APV,2017,2018 --channels mu,ele --outdir templates/v11
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--years", default="2017", help="years separated by commas")
