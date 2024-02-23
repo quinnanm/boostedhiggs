@@ -129,7 +129,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, regions_ma
     hists = {}
     for ch in channels:  # e.g. mu, ele
         for region, region_sel in regions_sel.items():  # e.g. pass, fail, top control region, etc.
-            hists[f"{region}_{ch}"] = hist2.Hist(
+            hists[f"{region}{ch}"] = hist2.Hist(
                 hist2.axis.StrCategory([], name="Sample", growth=True),
                 hist2.axis.StrCategory([], name="Systematic", growth=True),
                 hist2.axis.Variable(
@@ -236,7 +236,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, regions_ma
                         nominal = np.ones_like(df["fj_pt"])
                     else:
                         nominal = W * event_weight
-                    hists[f"{region}_{ch}"].fill(
+                    hists[f"{region}{ch}"].fill(
                         Sample=sample_to_use,
                         Systematic="nominal",
                         mass_observable=df["rec_higgs_m"],
@@ -258,7 +258,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, regions_ma
                             except KeyError:
                                 w = nominal
 
-                        hists[f"{region}_{ch}"].fill(
+                        hists[f"{region}{ch}"].fill(
                             Sample=sample_to_use,
                             Systematic=f"{weight}_up",
                             mass_observable=df["rec_higgs_m"],
@@ -274,7 +274,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, regions_ma
                             except KeyError:
                                 w = nominal
 
-                        hists[f"{region}_{ch}"].fill(
+                        hists[f"{region}{ch}"].fill(
                             Sample=sample_to_use,
                             Systematic=f"{weight}_down",
                             mass_observable=df["rec_higgs_m"],
@@ -288,7 +288,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, regions_ma
                         else:
                             x = rec_higgs_m_variation
 
-                        hists[f"{region}_{ch}"].fill(
+                        hists[f"{region}{ch}"].fill(
                             Sample=sample_to_use,
                             Systematic=rec_higgs_m_variation,
                             mass_observable=df[x],
