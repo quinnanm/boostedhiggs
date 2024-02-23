@@ -486,7 +486,7 @@ def plot_hists(
     #         title=f"{label_by_ch[ch]} Channel",
     #     )
 
-    if logy:
+    if logy or ("isolation" in var):
         ax.set_yscale("log")
         ax.set_ylim(1e-1)
     else:

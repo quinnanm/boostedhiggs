@@ -168,6 +168,12 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, regions_ma
 
         for year in years:  # e.g. 2018, 2017, 2016APV, 2016
             for ch in channels:  # e.g. mu, ele
+
+                print(region)
+                if f"NOT{ch}" in region:
+                    print(f"WILL SKIP {ch} channel for {region} region")
+                    continue
+
                 logging.info(f"Processing year {year} and {ch} channel")
 
                 with open("../fileset/luminosity.json") as f:

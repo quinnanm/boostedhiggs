@@ -69,12 +69,25 @@ def make_events_dict(years, channels, samples_dir, samples, presel, taggers=["v2
                     print(f"Skipping sample {sample}")
                     continue
 
-                for key in utils.combine_samples:
+                if "VBFHToWWToLNuQQ_" in sample:
+                    print(f"Skipping sample {sample}")
+                    continue
+
+                # first: check if the sample is in one of combine_samples_by_name
+                sample_to_use = None
+                for key in utils.combine_samples_by_name:
                     if key in sample:
-                        sample_to_use = utils.combine_samples[key]
+                        sample_to_use = utils.combine_samples_by_name[key]
                         break
-                    else:
-                        sample_to_use = sample
+
+                # second: if not, combine under common label
+                if sample_to_use is None:
+                    for key in utils.combine_samples:
+                        if key in sample:
+                            sample_to_use = utils.combine_samples[key]
+                            break
+                        else:
+                            sample_to_use = sample
 
                 if sample_to_use not in samples:
                     continue

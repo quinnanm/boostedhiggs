@@ -16,22 +16,61 @@ samples:
     - WZQQorDYJets
 
 regions_massbins:
-    "VBF97": 20
-    "ggF975pt250to300": 10
-    "ggF975pt300to450": 10
-    "ggF975pt450toInf": 20
+    # "VBF97": 20
+    # "ggF975pt250to300": 20
+    # "ggF975pt300to450": 20
+    # "ggF975pt450toInf": 20
 
-    "WJetsCR": 10
-    "TopCR": 10
+    # "WJetsCR": 20
+    # "TopCR": 20
+
+
+    "NOTeleVBF97": 20
+    "NOTeleggF975pt250to300": 20
+    "NOTeleggF975pt300to450": 20
+    "NOTeleggF975pt450toInf": 20
+
+    "NOTeleWJetsCR": 20
+    "NOTeleTopCR": 20
+
+    "NOTmuVBF97": 20
+    "NOTmuggF975pt250to300": 20
+    "NOTmuggF975pt300to450": 20
+    "NOTmuggF975pt450toInf": 20
+
+    "NOTmuWJetsCR": 20
+    "NOTmuTopCR": 20
+
+
+
 
 regions_sel:
-    "VBF97": (fj_ParT_score_finetuned>0.97) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
-    "ggF975pt250to300": (fj_ParT_score_finetuned>0.975) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
-    "ggF975pt300to450": (fj_ParT_score_finetuned>0.975) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    "ggF975pt450toInf": (fj_ParT_score_finetuned>0.975) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
+    # "VBF97": (fj_ParT_score_finetuned>0.97) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
+    # "ggF975pt250to300": (fj_ParT_score_finetuned>0.975) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
+    # "ggF975pt300to450": (fj_ParT_score_finetuned>0.975) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
+    # "ggF975pt450toInf": (fj_ParT_score_finetuned>0.975) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
 
-    "WJetsCR": (fj_ParT_score_finetuned>0.50) & (fj_ParT_score_finetuned<0.97) & (n_bjets_T==0)
-    "TopCR": (fj_ParT_score_finetuned>0.50) & (n_bjets_T>0)
+    # "WJetsCR": (fj_ParT_score_finetuned>0.50) & (fj_ParT_score_finetuned<0.97) & (n_bjets_T==0) & (met_pt>100)
+    # "TopCR": (fj_ParT_score_finetuned>0.50) & (n_bjets_T>0)
+
+
+
+    "NOTeleVBF97": (fj_ParT_score_finetuned>0.97) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
+    "NOTeleggF975pt250to300": (fj_ParT_score_finetuned>0.975) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
+    "NOTeleggF975pt300to450": (fj_ParT_score_finetuned>0.975) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
+    "NOTeleggF975pt450toInf": (fj_ParT_score_finetuned>0.975) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
+
+    "NOTeleWJetsCR": (fj_ParT_score_finetuned>0.50) & (fj_ParT_score_finetuned<0.97) & (n_bjets_T==0) & (met_pt>100)
+    "NOTeleTopCR": (fj_ParT_score_finetuned>0.50) & (n_bjets_T>0)
+
+
+    "NOTmuVBF97": (fj_ParT_score_finetuned>0.97) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
+    "NOTmuggF975pt250to300": (fj_ParT_score_finetuned>0.975) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
+    "NOTmuggF975pt300to450": (fj_ParT_score_finetuned>0.975) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
+    "NOTmuggF975pt450toInf": (fj_ParT_score_finetuned>0.975) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
+
+    "NOTmuWJetsCR": (fj_ParT_score_finetuned>0.50) & (fj_ParT_score_finetuned<0.97) & (n_bjets_T==0) & (met_pt>100)
+    "NOTmuTopCR": (fj_ParT_score_finetuned>0.50) & (n_bjets_T>0)
 
 samples_dir:
     "2018": ../eos/Feb9_2018
