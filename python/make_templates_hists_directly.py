@@ -118,7 +118,7 @@ def get_templates(years, channels, samples, samples_dir, model_path):
                 # add nominal weight
 
                 """"
-                Make sure at least you're storing the GenWeight under "df[weight_{ch}]"  
+                Make sure at least you're storing the GenWeight under "df[weight_{ch}]"
                 """
 
                 if is_data:  # for data (nominal is 1)
@@ -135,26 +135,6 @@ def get_templates(years, channels, samples, samples_dir, model_path):
     logging.info(hists)
 
     return hists
-
-
-def fix_neg_yields(h):
-    """
-    Will set the bin yields of a process to 0 if the nominal yield is negative, and will
-    set the yield to 0 for the full Systematic axis.
-    """
-    for region in h.axes["Region"]:
-        for sample in h.axes["Sample"]:
-            neg_bins = np.where(h[{"Sample": sample, "Systematic": "nominal", "Region": region}].values() < 0)[0]
-
-            if len(neg_bins) > 0:
-                print(f"{region}, {sample}, has {len(neg_bins)} bins with negative yield.. will set them to 0")
-
-                sample_index = np.argmax(np.array(h.axes["Sample"]) == sample)
-                region_index = np.argmax(np.array(h.axes["Region"]) == region)
-
-                for neg_bin in neg_bins:
-                    h.view(flow=True)[sample_index, :, region_index, neg_bin + 1].value = 0
-                    h.view(flow=True)[sample_index, :, region_index, neg_bin + 1].variance = 0
 
 
 def main(args):
@@ -176,8 +156,6 @@ def main(args):
     hists = get_templates(
         years, channels, config["samples"], config["samples_dir"], config["regions_sel"], config["model_path"]
     )
-
-    fix_neg_yields(hists)
 
     with open(f"{args.outdir}/hists_templates_{save_as}.pkl", "wb") as fp:
         pkl.dump(hists, fp)
