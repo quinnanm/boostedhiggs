@@ -133,7 +133,8 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, regions_ma
                 hist2.axis.StrCategory([], name="Sample", growth=True),
                 hist2.axis.StrCategory([], name="Systematic", growth=True),
                 hist2.axis.Variable(
-                    list(range(50, 240, regions_massbins[region])),
+                    # list(range(50, 240, regions_massbins[region])),
+                    list(range(50, 240, 20)),
                     name="mass_observable",
                     label=r"Higgs reconstructed mass [GeV]",
                     overflow=True,
