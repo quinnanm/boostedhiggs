@@ -113,6 +113,11 @@ def main(args):
                 line = line.replace("SYSTEMATICS", "--systematics")
             else:
                 line = line.replace("SYSTEMATICS", "--no-systematics")
+            if args.getLPweights:
+                line = line.replace("GETLPWEIGHTS", "--getLPweights")
+            else:
+                line = line.replace("GETLPWEIGHTS", "--no-getLPweights")
+
             line = line.replace("LABEL", args.label)
             line = line.replace("REGION", args.region)
 
@@ -159,6 +164,7 @@ if __name__ == "__main__":
     parser.add_argument("--no-inference", dest="inference", action="store_false")
     parser.add_argument("--systematics", dest="systematics", action="store_true")
     parser.add_argument("--no-systematics", dest="systematics", action="store_false")
+    parser.add_argument("--getLPweights", dest="getLPweights", action="store_true")
     parser.add_argument("--label", dest="label", default="H", help="jet label for inputskimmer", type=str)
     parser.add_argument("--region", dest="region", default="signal", help="specify region for selections", type=str)
     parser.add_argument("--maxfiles", default=-1, help="max number of files to run on", type=int)

@@ -288,6 +288,7 @@ if __name__ == "__main__":
     parser.add_argument("--systematics", dest="systematics", action="store_true")
     parser.add_argument("--no-systematics", dest="systematics", action="store_false")
     parser.add_argument("--getLPweights", dest="getLPweights", action="store_true")
+    parser.add_argument("--no-getLPweights", dest="getLPweights", action="store_false")
 
     parser.set_defaults(inference=False)
     args = parser.parse_args()
