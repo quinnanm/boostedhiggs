@@ -12,6 +12,15 @@ from coffea import nanoevents, processor
 
 nanoevents.PFNanoAODSchema.warn_missing_crossrefs = False
 
+import sys
+
+sys.path.insert(0, "")
+sys.path.append("boostedhiggs/LundReweighting")
+sys.path.append("boostedhiggs/LundReweighting/utils")
+# # from utils.LundReweighter import *
+# # from utils.Utils import *
+# import LundReweighter
+
 
 def main(args):
     # make directory for output

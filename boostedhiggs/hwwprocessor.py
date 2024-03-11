@@ -604,13 +604,6 @@ class HwwProcessor(processor.ProcessorABC):
             genVars["fj_genjetpt"] = candidatefj.matched_gen.pt
             variables = {**variables, **genVars}
 
-        if self._getLPweights:
-            lunplaneVars = {}
-            lunplaneVars["LP_weights"], lunplaneVars["LP_weights_sys_up"], lunplaneVars["LP_weights_sys_down"] = (
-                getLPweights(events, candidatefj)
-            )
-            variables = {**variables, **lunplaneVars}
-
         # hem-cleaning selection
         if self._year == "2018":
             # check_fatjets = good_fatjets[:, :2]
@@ -783,6 +776,16 @@ class HwwProcessor(processor.ProcessorABC):
 
                 # fill the output dictionary after selections
                 output[ch] = {key: value[selection_ch] for (key, value) in out.items()}
+
+                if self._getLPweights:
+                    lunplaneVars = {}
+                    (
+                        lunplaneVars["LP_weights"],
+                        lunplaneVars["LP_weights_sys_up"],
+                        lunplaneVars["LP_weights_sys_down"],
+                        lunplaneVars["LPnumquarks"],
+                    ) = getLPweights(events[selection_ch], candidatefj[selection_ch])
+                    output[ch] = {**output[ch], **lunplaneVars}
 
                 # fill inference
                 if self.inference:

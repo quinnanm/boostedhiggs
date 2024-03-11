@@ -1,7 +1,6 @@
 from typing import Union
 
 import awkward as ak
-import fastjet
 import numpy as np
 from coffea.nanoevents.methods import candidate, vector
 from coffea.nanoevents.methods.nanoaod import FatJetArray, GenParticleArray
@@ -293,10 +292,15 @@ def dRcleanup(events_final, GenlepVars):
 import sys
 
 sys.path.insert(0, "")
-sys.path.append("corrections/LundReweighting")
-sys.path.append("corrections/LundReweighting/utils")
-from utils.LundReweighter import *
-from utils.Utils import *
+sys.path.append("LundReweighting")
+sys.path.append("LundReweighting/utils")
+import ROOT
+
+# # from utils.LundReweighter import *
+# # from utils.Utils import *
+from LundReweighter import LundReweighter
+
+# from LundReweighting.utils import LundReweighter
 
 
 def getLPweights(events, candidatefj):
@@ -307,7 +311,9 @@ def getLPweights(events, candidatefj):
         (3) pf_cands_pxpypzE_lvqq
     """
 
+    print("events", len(events))
     genVars = match_H(events.GenPart, candidatefj)
+
     higgs_jet_4vec_Hlvqq = np.array(
         np.stack(
             (np.array(candidatefj.pt), np.array(candidatefj.eta), np.array(candidatefj.phi), np.array(candidatefj.mass)),
@@ -353,19 +359,18 @@ def getLPweights(events, candidatefj):
     phi = np.concatenate([Gen2qVars["Gen2qPhi"], GenlepVars["GenlepPhi"]], axis=1)
 
     gen_parts_eta_phi_HWW = np.array(np.dstack((eta, phi)))
-    result_lvqq = count_quarks_in_jets(higgs_jet_4vec_Hlvqq, gen_parts_eta_phi_HWW)
-    Hlvqq_cut = result_lvqq >= 3
-    np.sum(Hlvqq_cut)
+    LPnumquarks = count_quarks_in_jets(higgs_jet_4vec_Hlvqq, gen_parts_eta_phi_HWW)
+    # Hlvqq_cut = LPnumquarks >= 3
 
     pf_cands_pxpypzE_lvqq = dRcleanup(events, GenlepVars)
 
-    gen_parts_eta_phi_Hlvqq_2q = gen_parts_eta_phi_Hlvqq_2q[Hlvqq_cut]
-    pf_cands_pxpypzE_lvqq = pf_cands_pxpypzE_lvqq[Hlvqq_cut]
-    higgs_jet_4vec_Hlvqq = higgs_jet_4vec_Hlvqq[Hlvqq_cut]
-    candidatefj = candidatefj[Hlvqq_cut]
+    # gen_parts_eta_phi_Hlvqq_2q = gen_parts_eta_phi_Hlvqq_2q[Hlvqq_cut]
+    # pf_cands_pxpypzE_lvqq = pf_cands_pxpypzE_lvqq[Hlvqq_cut]
+    # higgs_jet_4vec_Hlvqq = higgs_jet_4vec_Hlvqq[Hlvqq_cut]
+    # candidatefj = candidatefj[Hlvqq_cut]
 
     # Input file
-    f_ratio_name = "LundReweighting/data/ratio_2018.root"
+    f_ratio_name = "boostedhiggs/LundReweighting/data/ratio_2018.root"
     f_ratio = ROOT.TFile.Open(f_ratio_name)
 
     # nominal data/MC Lund plane ratio (3d histogram)
@@ -382,6 +387,7 @@ def getLPweights(events, candidatefj):
     LP_rw = LundReweighter(pt_extrap_dir=rdir)
 
     max_evts = len(pf_cands_pxpypzE_lvqq)
+    print("max_evts", max_evts)
 
     # Compute reweighting factors
 
@@ -446,4 +452,4 @@ def getLPweights(events, candidatefj):
     LP_weights_sys_down = LP_rw.normalize_weights(LP_weights_sys_down) * weights_nom
 
     f_ratio.Close()
-    return LP_weights, LP_weights_sys_up, LP_weights_sys_down
+    return LP_weights, LP_weights_sys_up, LP_weights_sys_down, LPnumquarks
