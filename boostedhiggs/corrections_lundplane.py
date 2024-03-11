@@ -7,7 +7,6 @@ from coffea.nanoevents.methods import candidate, vector
 from coffea.nanoevents.methods.nanoaod import FatJetArray, GenParticleArray
 
 ak.behavior.update(vector.behavior)
-vector.register_awkward()
 
 
 d_PDGID = 1
