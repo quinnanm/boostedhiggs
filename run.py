@@ -101,6 +101,7 @@ def main(args):
             channels=channels,
             inference=args.inference,
             systematics=args.systematics,
+            getLPweights=args.getLPweights,
             output_location="./outfiles" + job_name,
         )
 
@@ -277,6 +278,7 @@ if __name__ == "__main__":
     parser.add_argument("--no-inference", dest="inference", action="store_false")
     parser.add_argument("--systematics", dest="systematics", action="store_true")
     parser.add_argument("--no-systematics", dest="systematics", action="store_false")
+    parser.add_argument("--getLPweights", dest="getLPweights", action="store_true")
 
     parser.set_defaults(inference=False)
     args = parser.parse_args()

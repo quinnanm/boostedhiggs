@@ -55,7 +55,7 @@ input_feat = {
     # "v2_10_12": [],
     # "v2_nor1": [],
     "v2_nor2": [],
-    # "v35_1": [],
+    "v35_12_14": [],
     # "v35_2": [],
     # "v35_3": [],
     # "v35_4": [],
@@ -160,7 +160,7 @@ def make_events_dict(
                     data = data[data.columns.drop(list(data.filter(regex="M_btag")))]
                     data = data[data.columns.drop(list(data.filter(regex="T_btag")))]
                     data = data[data.columns.drop(list(data.filter(regex="veto")))]
-                    data = data[data.columns.drop(list(data.filter(regex="fj_H_VV_")))]
+                    # data = data[data.columns.drop(list(data.filter(regex="fj_H_VV_")))]
                     data = data[data.columns.drop(list(data.filter(regex="_up")))]
                     data = data[data.columns.drop(list(data.filter(regex="_down")))]
 

@@ -30,6 +30,7 @@ from boostedhiggs.corrections import (
     get_jmsr,
     met_factory,
 )
+from boostedhiggs.corrections_lundplane import getLPweights
 from boostedhiggs.utils import match_H, match_Top, match_V, sigs
 
 from .run_tagger_inference import runInferenceTriton
@@ -65,11 +66,13 @@ class HwwProcessor(processor.ProcessorABC):
         output_location="./outfiles/",
         inference=False,
         systematics=False,
+        getLPweights=False,
     ):
         self._year = year
         self._yearmod = yearmod
         self._channels = channels
         self._systematics = systematics
+        self._getLPweights = getLPweights
 
         self._output_location = output_location
 
@@ -600,6 +603,13 @@ class HwwProcessor(processor.ProcessorABC):
             genVars["fj_genjetmass"] = candidatefj.matched_gen.mass
             genVars["fj_genjetpt"] = candidatefj.matched_gen.pt
             variables = {**variables, **genVars}
+
+        if self._getLPweights:
+            lunplaneVars = {}
+            lunplaneVars["LP_weights"], lunplaneVars["LP_weights_sys_up"], lunplaneVars["LP_weights_sys_down"] = (
+                getLPweights(events, candidatefj)
+            )
+            variables = {**variables, **lunplaneVars}
 
         # hem-cleaning selection
         if self._year == "2018":

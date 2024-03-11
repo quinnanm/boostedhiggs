@@ -256,6 +256,11 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                         if "bjets" in region_sel:  # add btag SF
                             W *= df["weight_btag"]
 
+                    if sample_to_use == "QCD":
+                        if ("VBF" in region) or ("ggF" in region):
+                            print(f"Will remove {(W > 30).sum()} events with weight > 30")
+                            df = df[W < 30]
+
                     logging.info(f"Will fill the histograms with the remaining {len(data)} events")
 
                     # add nominal weight

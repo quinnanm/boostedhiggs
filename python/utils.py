@@ -126,6 +126,9 @@ color_by_sample = {
     "DYJets": "tab:purple",
     "WZQQ": "khaki",
     "WZQQorDYJets": "khaki",
+    ### top matched
+    "TTbar_allmatched": "tab:blue",
+    "TTbar_unmatched": "tab:cyan",
 }
 
 plot_labels = {
@@ -151,6 +154,8 @@ plot_labels = {
     #     "VBFHToTauTau": "VBFHToTauTau"
     "WJetsLNu_unmatched": r"W$(\ell\nu)$+jets unmatched",
     "WJetsLNu_matched": r"W$(\ell\nu)$+jets matched",
+    "TTbar_allmatched": r"$t\bar{t}$+jets matched",
+    "TTbar_unmatched": r"$t\bar{t}$+jets unmatched",
     "EWKvjets": "EWK VJets",
     # TODO: make sure it's WZQQ is NLO in next iteration
     "DYJets": r"Z$(\ell\ell)$+jets",
@@ -212,6 +217,7 @@ axis_dict = {
     "nj": hist2.axis.Regular(40, 0, 10, name="var", label="number of jets outside candidate jet", overflow=True),
     "inclusive_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
     "fj_ParT_score_finetuned": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
+    "fj_ParT_score_finetuned_v35_12_14": hist2.axis.Regular(25, 0.5, 1, name="var", label=r"$T_{HWW}$", overflow=True),
     "fj_ParT_inclusive_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"$T_{HWW}$", overflow=True),
     "fj_ParT_all_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
 }

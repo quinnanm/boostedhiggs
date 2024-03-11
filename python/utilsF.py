@@ -127,6 +127,8 @@ color_by_sample = {
     "DYJets": "tab:purple",
     "WZQQ": "khaki",
     "WZQQorDYJets": "khaki",
+    "TTbar_allmatched": "tab:blue",
+    "TTbar_unmatched": "lightskyblue",
 }
 
 plot_labels = {
@@ -157,6 +159,8 @@ plot_labels = {
     "DYJets": r"Z$(\ell\ell)$+jets",
     "WZQQ": r"V$(qq)$",
     "WZQQorDYJets": r"W$(qq)$/Z(inc.)+jets",
+    "TTbar_allmatched": r"$t\bar{t}$+jets matched",
+    "TTbar_unmatched": r"$t\bar{t}$+jets unmatched",
 }
 
 label_by_ch = {"mu": "Muon", "ele": "Electron"}
@@ -196,6 +200,7 @@ axis_dict = {
     "nj": hist2.axis.Regular(40, 0, 10, name="var", label="number of jets outside candidate jet", overflow=True),
     "inclusive_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
     "fj_ParT_score_finetuned": hist2.axis.Regular(25, 0.5, 1, name="var", label=r"$T_{HWW}$", overflow=True),
+    "fj_ParT_score_finetuned_v35_12_14": hist2.axis.Regular(25, 0, 1, name="var", label=r"$T_{HWW}$", overflow=True),
     "fj_ParT_inclusive_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"ParT-Finetuned score", overflow=True),
     "fj_ParT_all_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
     ############# AN
@@ -503,7 +508,7 @@ def plot_hists(
         ax.legend(
             [hand_new[idx] for idx in range(len(hand_new))],
             [lab_new[idx] for idx in range(len(lab_new))],
-            ncol=3,
+            ncol=2,
             fontsize=14,
         )
 
