@@ -165,6 +165,7 @@ if __name__ == "__main__":
     parser.add_argument("--systematics", dest="systematics", action="store_true")
     parser.add_argument("--no-systematics", dest="systematics", action="store_false")
     parser.add_argument("--getLPweights", dest="getLPweights", action="store_true")
+    parser.add_argument("--no-getLPweights", dest="getLPweights", action="store_false")
     parser.add_argument("--label", dest="label", default="H", help="jet label for inputskimmer", type=str)
     parser.add_argument("--region", dest="region", default="signal", help="specify region for selections", type=str)
     parser.add_argument("--maxfiles", default=-1, help="max number of files to run on", type=int)
