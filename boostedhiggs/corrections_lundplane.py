@@ -291,6 +291,15 @@ def dRcleanup(events_final, GenlepVars):
     return pf_cands_pxpypzE_lvqq
 
 
+import sys
+
+sys.path.insert(0, "")
+sys.path.append("corrections/LundReweighting")
+sys.path.append("corrections/LundReweighting/utils")
+from utils.LundReweighter import *
+from utils.Utils import *
+
+
 def getLPweights(events, candidatefj):
     """
     Relies on
@@ -298,14 +307,6 @@ def getLPweights(events, candidatefj):
         (2) gen_parts_eta_phi_Hlvqq_2q
         (3) pf_cands_pxpypzE_lvqq
     """
-
-    import sys
-
-    sys.path.insert(0, "")
-    sys.path.append("corrections/LundReweighting")
-    sys.path.append("corrections/LundReweighting/utils")
-    from utils.LundReweighter import *
-    from utils.Utils import *
 
     genVars = match_H(events.GenPart, candidatefj)
     higgs_jet_4vec_Hlvqq = np.array(
