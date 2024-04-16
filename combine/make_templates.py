@@ -40,8 +40,10 @@ weights = {
     "weight_btagSFbc2018": {"mu": "weight_btagSFbc2018", "ele": "weight_btagSFbc2018"},
     "weight_pileup": {"mu": "weight_mu_pileup", "ele": "weight_ele_pileup"},
     "weight_pileupIDSF": {"mu": "weight_mu_pileupIDSFDown", "ele": "weight_ele_pileupIDSFDown"},
-    "weight_isolation": {"mu": "weight_mu_isolation_muon", "ele": "weight_ele_isolation_electron"},
-    "weight_id": {"mu": "weight_mu_id_muon", "ele": "weight_ele_id_electron"},
+    "weight_isolation_mu": {"mu": "weight_mu_isolation_muon", "ele": ""},
+    "weight_isolation_ele": {"mu": "", "ele": "weight_ele_isolation_electron"},
+    "weight_id_mu": {"mu": "weight_mu_id_muon", "ele": ""},
+    "weight_id_ele": {"mu": "", "ele": "weight_ele_id_electron"},
     "weight_reco_ele": {"mu": "", "ele": "weight_ele_reco_electron"},
     "weight_L1Prefiring": {"mu": "weight_mu_L1Prefiring", "ele": "weight_ele_L1Prefiring"},
     "weight_trigger_ele": {"mu": "", "ele": "weight_ele_trigger_electron"},
@@ -145,21 +147,26 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
     # add extra selections to preselection
     presel = {
         "mu": {
-            "tagger>0.5": "fj_ParT_score_finetuned>0.5",
+            "tagger>0.80": "fj_ParT_score_finetuned>0.80",
+            # "msoftdrop": "fj_mass>40",
+            # "met": "met_pt>35",
         },
         "ele": {
-            "tagger>0.5": "fj_ParT_score_finetuned>0.5",
+            "tagger>0.80": "fj_ParT_score_finetuned>0.80",
+            # "msoftdrop": "fj_mass>40",
+            # "met": "met_pt>55",
+            "lepmiso": "(lep_pt<120) | ( (lep_pt>120) & (lep_misolation<0.025))",
         },
     }
 
-    mass_binning = 20
+    mass_binning = 10
 
     hists = hist2.Hist(
         hist2.axis.StrCategory([], name="Sample", growth=True),
         hist2.axis.StrCategory([], name="Systematic", growth=True),
         hist2.axis.StrCategory([], name="Region", growth=True),
         hist2.axis.Variable(
-            list(range(50, 240, mass_binning)),
+            list(range(55, 255, mass_binning)),
             name="mass_observable",
             label=r"Higgs reconstructed mass [GeV]",
             overflow=True,
@@ -253,13 +260,14 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                     if not is_data:
                         W = df[f"weight_{ch}"]
 
-                        if "bjets" in region_sel:  # add btag SF
-                            W *= df["weight_btag"]
+                        # if "bjets" in region_sel:  # add btag SF
+                        #     W *= df["weight_btag"]
 
-                    if sample_to_use == "QCD":
-                        if ("VBF" in region) or ("ggF" in region):
-                            print(f"Will remove {(W > 30).sum()} events with weight > 30")
-                            df = df[W < 30]
+                        # if sample_to_use == "QCD":
+                        #     threshold = 30
+                        #     avg_good_weight = df["event_weight"][df["event_weight"] < threshold].mean()
+
+                        #     df["event_weight"][df["event_weight"] > threshold] = avg_good_weight
 
                     logging.info(f"Will fill the histograms with the remaining {len(data)} events")
 

@@ -3,6 +3,7 @@ Skimmer for ParticleNet tagger inputs.
 
 Author(s): Cristina Mantilla Suarez, Raghav Kansal, Farouk Mokhtar.
 """
+
 import os
 import pathlib
 import warnings
@@ -41,7 +42,7 @@ class InputProcessor(ProcessorABC):
 
         self.tagger_resources_path = str(pathlib.Path(__file__).parent.resolve()) + "/tagger_resources/"
 
-        self._accumulator = dict_accumulator({})
+        # self._accumulator = dict_accumulator({})
 
         self.GenPartvars = [
             "fj_genjetmass",

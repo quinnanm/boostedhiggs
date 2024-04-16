@@ -16,95 +16,60 @@ samples:
     - WZQQorDYJets
 
 regions_sel:
-    "VBF94": (fj_ParT_score_finetuned>0.94) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
-    "VBF935": (fj_ParT_score_finetuned>0.935) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
-    "VBF93": (fj_ParT_score_finetuned>0.93) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
-    "VBF925": (fj_ParT_score_finetuned>0.925) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
-    "VBF92": (fj_ParT_score_finetuned>0.92) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
-    "VBF915": (fj_ParT_score_finetuned>0.915) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
-    "VBF91": (fj_ParT_score_finetuned>0.91) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
-    "VBF905": (fj_ParT_score_finetuned>0.905) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
-    "VBF90": (fj_ParT_score_finetuned>0.90) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
-    "VBF895": (fj_ParT_score_finetuned>0.895) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
-    "VBF89": (fj_ParT_score_finetuned>0.89) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
-    "VBF885": (fj_ParT_score_finetuned>0.885) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
-    "VBF88": (fj_ParT_score_finetuned>0.88) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
-    "VBF875": (fj_ParT_score_finetuned>0.875) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
-    "VBF87": (fj_ParT_score_finetuned>0.87) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
-    "VBF865": (fj_ParT_score_finetuned>0.865) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
-    "VBF86": (fj_ParT_score_finetuned>0.86) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
-    "VBF855": (fj_ParT_score_finetuned>0.855) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
-    "VBF85": (fj_ParT_score_finetuned>0.85) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
+    ##### v20
+    # "VBF": (fj_ParT_score_finetuned>0.925) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
+    
+    # "ggFpt250to300": (fj_ParT_score_finetuned>0.925) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
+    # "ggFpt300to450": (fj_ParT_score_finetuned>0.925) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
+    # "ggFpt450toInf": (fj_ParT_score_finetuned>0.925) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
+
+    # "WJetsCR": (fj_ParT_score_finetuned>0.750) & (fj_ParT_score_finetuned<0.925) & (n_bjets_T==0)
+    # "TopCR": (fj_ParT_score_finetuned>0.750) & (n_bjets_T>0)
 
 
-    "ggF97": (fj_ParT_score_finetuned>0.97) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
-    "ggF965": (fj_ParT_score_finetuned>0.965) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
-    "ggF96": (fj_ParT_score_finetuned>0.96) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
-    "ggF955": (fj_ParT_score_finetuned>0.955) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
-    "ggF95": (fj_ParT_score_finetuned>0.95) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
-    "ggF945": (fj_ParT_score_finetuned>0.945) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
-    "ggF94": (fj_ParT_score_finetuned>0.94) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
-    "ggF935": (fj_ParT_score_finetuned>0.935) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
-    "ggF93": (fj_ParT_score_finetuned>0.93) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
-    "ggF925": (fj_ParT_score_finetuned>0.925) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
-    "ggF92": (fj_ParT_score_finetuned>0.92) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
-    "ggF915": (fj_ParT_score_finetuned>0.915) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
-    "ggF91": (fj_ParT_score_finetuned>0.91) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
-    "ggF905": (fj_ParT_score_finetuned>0.905) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
-    "ggF90": (fj_ParT_score_finetuned>0.90) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
-    "ggF895": (fj_ParT_score_finetuned>0.895) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
-    "ggF89": (fj_ParT_score_finetuned>0.89) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
-    "ggF885": (fj_ParT_score_finetuned>0.885) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
-    "ggF88": (fj_ParT_score_finetuned>0.88) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )    
+    "ParT90": (fj_ParT_score>0.9)
+    "ParT905": (fj_ParT_score>0.905)
+    "ParT91": (fj_ParT_score>0.91)
+    "ParT915": (fj_ParT_score>0.915)
+    "ParT92": (fj_ParT_score>0.92)
+    "ParT925": (fj_ParT_score>0.925)
+    "ParT93": (fj_ParT_score>0.93)
+    "ParT935": (fj_ParT_score>0.935)
+    "ParT94": (fj_ParT_score>0.94)
+    "ParT945": (fj_ParT_score>0.945)
+    "ParT95": (fj_ParT_score>0.95)
+    "ParT955": (fj_ParT_score>0.955)
+    "ParT96": (fj_ParT_score>0.96)
+    "ParT965": (fj_ParT_score>0.965)
+    "ParT97": (fj_ParT_score>0.97)
+    "ParT975": (fj_ParT_score>0.975)
+    "ParT98": (fj_ParT_score>0.98)
+    "ParT985": (fj_ParT_score>0.985)
+    "ParT99": (fj_ParT_score>0.99)
+    "ParT995": (fj_ParT_score>0.995)
+    "ParT999": (fj_ParT_score>0.999)
 
-
-    "ggF95pt250to300": (fj_ParT_score_finetuned>0.95) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
-    "ggF95pt300to450": (fj_ParT_score_finetuned>0.95) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    "ggF95pt450toInf": (fj_ParT_score_finetuned>0.95) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
-
-    "ggF945pt250to300": (fj_ParT_score_finetuned>0.945) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
-    "ggF945pt300to450": (fj_ParT_score_finetuned>0.945) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    "ggF945pt450toInf": (fj_ParT_score_finetuned>0.945) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
-
-    "ggF94pt250to300": (fj_ParT_score_finetuned>0.94) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
-    "ggF94pt300to450": (fj_ParT_score_finetuned>0.94) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    "ggF94pt450toInf": (fj_ParT_score_finetuned>0.94) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
-
-    "ggF935pt250to300": (fj_ParT_score_finetuned>0.935) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
-    "ggF935pt300to450": (fj_ParT_score_finetuned>0.935) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    "ggF935pt450toInf": (fj_ParT_score_finetuned>0.935) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
-
-    "ggF93pt250to300": (fj_ParT_score_finetuned>0.93) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
-    "ggF93pt300to450": (fj_ParT_score_finetuned>0.93) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    "ggF93pt450toInf": (fj_ParT_score_finetuned>0.93) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
-
-    "ggF925pt250to300": (fj_ParT_score_finetuned>0.925) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
-    "ggF925pt300to450": (fj_ParT_score_finetuned>0.925) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    "ggF925pt450toInf": (fj_ParT_score_finetuned>0.925) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
-
-    "ggF92pt250to300": (fj_ParT_score_finetuned>0.92) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
-    "ggF92pt300to450": (fj_ParT_score_finetuned>0.92) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    "ggF92pt450toInf": (fj_ParT_score_finetuned>0.92) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
-
-    "ggF915pt250to300": (fj_ParT_score_finetuned>0.915) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
-    "ggF915pt300to450": (fj_ParT_score_finetuned>0.915) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    "ggF915pt450toInf": (fj_ParT_score_finetuned>0.915) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
-
-    "ggF91pt250to300": (fj_ParT_score_finetuned>0.91) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
-    "ggF91pt300to450": (fj_ParT_score_finetuned>0.91) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    "ggF91pt450toInf": (fj_ParT_score_finetuned>0.91) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
-
-    "ggF905pt250to300": (fj_ParT_score_finetuned>0.905) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
-    "ggF905pt300to450": (fj_ParT_score_finetuned>0.905) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    "ggF905pt450toInf": (fj_ParT_score_finetuned>0.905) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
-
-    "ggF90pt250to300": (fj_ParT_score_finetuned>0.90) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
-    "ggF90pt300to450": (fj_ParT_score_finetuned>0.90) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    "ggF90pt450toInf": (fj_ParT_score_finetuned>0.90) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
-
-
-    "WJetsCR": (fj_ParT_score_finetuned>0.50) & (fj_ParT_score_finetuned<0.85) & (n_bjets_T==0) & (met_pt>100)
-    "TopCR": (fj_ParT_score_finetuned>0.50) & (n_bjets_T>0)
+    "ParTFinetuned90": (fj_ParT_score_finetuned>0.9)
+    "ParTFinetuned905": (fj_ParT_score_finetuned>0.905)
+    "ParTFinetuned91": (fj_ParT_score_finetuned>0.91)
+    "ParTFinetuned915": (fj_ParT_score_finetuned>0.915)
+    "ParTFinetuned92": (fj_ParT_score_finetuned>0.92)
+    "ParTFinetuned925": (fj_ParT_score_finetuned>0.925)
+    "ParTFinetuned93": (fj_ParT_score_finetuned>0.93)
+    "ParTFinetuned935": (fj_ParT_score_finetuned>0.935)
+    "ParTFinetuned94": (fj_ParT_score_finetuned>0.94)
+    "ParTFinetuned945": (fj_ParT_score_finetuned>0.945)
+    "ParTFinetuned95": (fj_ParT_score_finetuned>0.95)
+    "ParTFinetuned955": (fj_ParT_score_finetuned>0.955)
+    "ParTFinetuned96": (fj_ParT_score_finetuned>0.96)
+    "ParTFinetuned965": (fj_ParT_score_finetuned>0.965)
+    "ParTFinetuned97": (fj_ParT_score_finetuned>0.97)
+    "ParTFinetuned975": (fj_ParT_score_finetuned>0.975)
+    "ParTFinetuned98": (fj_ParT_score_finetuned>0.98)
+    "ParTFinetuned985": (fj_ParT_score_finetuned>0.985)
+    "ParTFinetuned99": (fj_ParT_score_finetuned>0.99)
+    "ParTFinetuned995": (fj_ParT_score_finetuned>0.995)
+    "ParTFinetuned999": (fj_ParT_score_finetuned>0.999)
 
 
 samples_dir:
@@ -114,4 +79,4 @@ samples_dir:
     "2016": ../eos/Feb9_2016
 
 # model_path: ../eos/model.onnx
-model_path: ../eos/model_v35_12_14.onnx
+model_path: ../eos/model_v35_26.onnx

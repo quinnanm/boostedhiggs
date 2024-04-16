@@ -1,30 +1,31 @@
-import h5py
 import argparse
-import fastjet as fj
-import numpy as np
-import sys
-from .PlotUtils import *
-import ROOT
-from array import array
 import copy
+import sys
+from array import array
 
+import fastjet as fj
+import h5py
+import numpy as np
+import ROOT
 
-def cleanup_hist(h):
-    if type(h) == ROOT.TH3F:
-        for i in range(h.GetNbinsX() + 1):
-            for j in range(h.GetNbinsY() + 1):
-                for k in range(h.GetNbinsZ() + 1):
-                    c = h.GetBinContent(i, j, k)
-                    if c < 0:
-                        h.SetBinContent(i, j, k, 0.0)
-                        h.SetBinError(i, j, k, 0.0)
-    elif type(h) == ROOT.TH2F:
-        for i in range(h.GetNbinsX() + 1):
-            for j in range(h.GetNbinsY() + 1):
-                c = h.GetBinContent(i, j)
-                if c < 0:
-                    h.SetBinContent(i, j, 0.0)
-                    h.SetBinError(i, j, 0.0)
+from .PlotUtils import *
+
+# def cleanup_hist(h):
+#     if type(h) == ROOT.TH3F:
+#         for i in range(h.GetNbinsX() + 1):
+#             for j in range(h.GetNbinsY() + 1):
+#                 for k in range(h.GetNbinsZ() + 1):
+#                     c = h.GetBinContent(i, j, k)
+#                     if c < 0:
+#                         h.SetBinContent(i, j, k, 0.0)
+#                         h.SetBinError(i, j, k, 0.0)
+#     elif type(h) == ROOT.TH2F:
+#         for i in range(h.GetNbinsX() + 1):
+#             for j in range(h.GetNbinsY() + 1):
+#                 c = h.GetBinContent(i, j)
+#                 if c < 0:
+#                     h.SetBinContent(i, j, 0.0)
+#                     h.SetBinError(i, j, 0.0)
 
 
 def cleanup_ratio(h, h_min=0.0, h_max=2.0):
@@ -333,7 +334,7 @@ class LundReweighter:
     def reweight_pt_extrap(self, subjet_pt, lp_idxs, rw, smeared_rw, pt_smeared_rw, pt_rand_noise=None, sys_str=""):
         """Reweight based on pt extrapolated functions"""
 
-        for (i, j, k) in lp_idxs:
+        for i, j, k in lp_idxs:
 
             f_str = "func_%s%i_%i" % (sys_str, j, k)
             if f_str in self.func_dict.keys():
@@ -370,7 +371,7 @@ class LundReweighter:
     def reweight(self, h_rw, lp_idxs, rw, smeared_rw, pt_smeared_rw, rand_noise=None):
         """Reweight based on directly measured data/MC LP ratio"""
 
-        for (i, j, k) in lp_idxs:
+        for i, j, k in lp_idxs:
             # print("Rw %.3f, cont %.3f, i %i j %i k %i n %i" % (rw, h_rw.GetBinContent(i,j,k), i,j,k, n_cands))
             val = h_rw.GetBinContent(i, j, k)
             err = h_rw.GetBinError(i, j, k)
@@ -468,143 +469,143 @@ class LundReweighter:
 
         return rw, smeared_rw, pt_smeared_rw
 
-    def make_LP_ratio(
-        self,
-        h_data,
-        h_bkg,
-        h_mc,
-        h_data_subjet_pt=None,
-        h_bkg_subjet_pt=None,
-        h_mc_subjet_pt=None,
-        pt_bins=None,
-        outdir="",
-        save_plots=False,
-    ):
-        """Function to construct data/MC LP ratio"""
+    # def make_LP_ratio(
+    #     self,
+    #     h_data,
+    #     h_bkg,
+    #     h_mc,
+    #     h_data_subjet_pt=None,
+    #     h_bkg_subjet_pt=None,
+    #     h_mc_subjet_pt=None,
+    #     pt_bins=None,
+    #     outdir="",
+    #     save_plots=False,
+    # ):
+    #     """Function to construct data/MC LP ratio"""
 
-        h_data.Print()
-        h_bkg.Print()
-        h_mc.Print()
+    #     h_data.Print()
+    #     h_bkg.Print()
+    #     h_mc.Print()
 
-        do_jet_pt_norm = (h_data_subjet_pt is not None) and (h_mc_subjet_pt is not None) and (h_bkg_subjet_pt is not None)
+    #     do_jet_pt_norm = (h_data_subjet_pt is not None) and (h_mc_subjet_pt is not None) and (h_bkg_subjet_pt is not None)
 
-        cleanup_hist(h_mc)
-        cleanup_hist(h_bkg)
+    #     cleanup_hist(h_mc)
+    #     cleanup_hist(h_bkg)
 
-        h_bkg_clone = h_bkg.Clone(h_bkg.GetName() + "_clone")
-        h_mc_clone = h_mc.Clone(h_mc.GetName() + "_clone")
+    #     h_bkg_clone = h_bkg.Clone(h_bkg.GetName() + "_clone")
+    #     h_mc_clone = h_mc.Clone(h_mc.GetName() + "_clone")
 
-        h_ratio = h_data.Clone(h_mc_clone.GetName() + "_ratio")
-        h_ratio.SetTitle("(Data - Bkg ) / TTbar MC")
+    #     h_ratio = h_data.Clone(h_mc_clone.GetName() + "_ratio")
+    #     h_ratio.SetTitle("(Data - Bkg ) / TTbar MC")
 
-        data_norm = h_data.Integral()
-        est = h_bkg_clone.Integral() + h_mc_clone.Integral()
+    #     data_norm = h_data.Integral()
+    #     est = h_bkg_clone.Integral() + h_mc_clone.Integral()
 
-        if do_jet_pt_norm:
+    #     if do_jet_pt_norm:
 
-            h_data_subjet_pt.Print()
-            h_bkg_subjet_pt.Print()
-            h_mc_subjet_pt.Print()
+    #         h_data_subjet_pt.Print()
+    #         h_bkg_subjet_pt.Print()
+    #         h_mc_subjet_pt.Print()
 
-            h_data_subjet_pt_clone = h_data_subjet_pt.Clone(h_data_subjet_pt.GetName() + "_clone")
-            h_bkg_subjet_pt_clone = h_bkg_subjet_pt.Clone(h_bkg_subjet_pt.GetName() + "_clone")
-            h_mc_subjet_pt_clone = h_mc_subjet_pt.Clone(h_mc_subjet_pt.GetName() + "_clone")
+    #         h_data_subjet_pt_clone = h_data_subjet_pt.Clone(h_data_subjet_pt.GetName() + "_clone")
+    #         h_bkg_subjet_pt_clone = h_bkg_subjet_pt.Clone(h_bkg_subjet_pt.GetName() + "_clone")
+    #         h_mc_subjet_pt_clone = h_mc_subjet_pt.Clone(h_mc_subjet_pt.GetName() + "_clone")
 
-            data_norm = h_data_subjet_pt.Integral()
-            est = h_bkg_subjet_pt_clone.Integral() + h_mc_subjet_pt_clone.Integral()
+    #         data_norm = h_data_subjet_pt.Integral()
+    #         est = h_bkg_subjet_pt_clone.Integral() + h_mc_subjet_pt_clone.Integral()
 
-            h_mc_subjet_pt_clone.Scale(data_norm / est)
-            h_bkg_subjet_pt_clone.Scale(data_norm / est)
+    #         h_mc_subjet_pt_clone.Scale(data_norm / est)
+    #         h_bkg_subjet_pt_clone.Scale(data_norm / est)
 
-        h_bkg_clone.Scale(data_norm / est)
-        h_mc_clone.Scale(data_norm / est)
+    #     h_bkg_clone.Scale(data_norm / est)
+    #     h_mc_clone.Scale(data_norm / est)
 
-        h_data_sub = h_data.Clone("h_data_sub")
-        h_data_sub.Add(h_bkg_clone, -1.0)
-        h_data_sub.Print()
+    #     h_data_sub = h_data.Clone("h_data_sub")
+    #     h_data_sub.Add(h_bkg_clone, -1.0)
+    #     h_data_sub.Print()
 
-        cleanup_hist(h_data_sub)
+    #     cleanup_hist(h_data_sub)
 
-        for i in range(1, h_data.GetNbinsX() + 1):
-            h_bkg_clone1 = h_bkg_clone.Clone("h_bkg_clone%i" % i)
-            h_mc_clone1 = h_mc_clone.Clone("h_mc_clone%i" % i)
-            h_data_clone1 = h_data_sub.Clone("h_data_clone%i" % i)
+    #     for i in range(1, h_data.GetNbinsX() + 1):
+    #         h_bkg_clone1 = h_bkg_clone.Clone("h_bkg_clone%i" % i)
+    #         h_mc_clone1 = h_mc_clone.Clone("h_mc_clone%i" % i)
+    #         h_data_clone1 = h_data_sub.Clone("h_data_clone%i" % i)
 
-            h_mc_clone1.GetXaxis().SetRange(i, i)
-            h_bkg_clone1.GetXaxis().SetRange(i, i)
-            h_data_clone1.GetXaxis().SetRange(i, i)
+    #         h_mc_clone1.GetXaxis().SetRange(i, i)
+    #         h_bkg_clone1.GetXaxis().SetRange(i, i)
+    #         h_data_clone1.GetXaxis().SetRange(i, i)
 
-            h_mc_proj = h_mc_clone1.Project3D("zy")
-            h_bkg_proj = h_bkg_clone1.Project3D("zy")
-            h_data_proj = h_data_clone1.Project3D("zy")
+    #         h_mc_proj = h_mc_clone1.Project3D("zy")
+    #         h_bkg_proj = h_bkg_clone1.Project3D("zy")
+    #         h_data_proj = h_data_clone1.Project3D("zy")
 
-            # normalize by number of subjets rather than number of splittings
-            if do_jet_pt_norm:
-                mc_norm = h_mc_subjet_pt_clone.GetBinContent(i)
-                bkg_norm = h_bkg_subjet_pt_clone.GetBinContent(i)
-                data_norm = h_data_subjet_pt_clone.GetBinContent(i) - bkg_norm
-            else:
-                data_norm = h_data_proj.Integral()
-                bkg_norm = h_bkg_proj.Integral()
-                mc_norm = h_mc_proj.Integral()
+    #         # normalize by number of subjets rather than number of splittings
+    #         if do_jet_pt_norm:
+    #             mc_norm = h_mc_subjet_pt_clone.GetBinContent(i)
+    #             bkg_norm = h_bkg_subjet_pt_clone.GetBinContent(i)
+    #             data_norm = h_data_subjet_pt_clone.GetBinContent(i) - bkg_norm
+    #         else:
+    #             data_norm = h_data_proj.Integral()
+    #             bkg_norm = h_bkg_proj.Integral()
+    #             mc_norm = h_mc_proj.Integral()
 
-            print(mc_norm, bkg_norm, data_norm)
+    #         print(mc_norm, bkg_norm, data_norm)
 
-            h_bkg_proj.Scale(1.0 / bkg_norm)
+    #         h_bkg_proj.Scale(1.0 / bkg_norm)
 
-            h_data_proj.Scale(1.0 / data_norm)
-            h_mc_proj.Scale(1.0 / mc_norm)
+    #         h_data_proj.Scale(1.0 / data_norm)
+    #         h_mc_proj.Scale(1.0 / mc_norm)
 
-            h_ratio_proj = h_data_proj.Clone("h_ratio_proj%i" % i)
-            h_ratio_proj.Divide(h_mc_proj)
+    #         h_ratio_proj = h_data_proj.Clone("h_ratio_proj%i" % i)
+    #         h_ratio_proj.Divide(h_mc_proj)
 
-            # if(i == 1):
-            #    h_mc_proj.Print("range")
-            #    h_data_proj.Print("range")
-            #    h_ratio_proj.Print("range")
+    #         # if(i == 1):
+    #         #    h_mc_proj.Print("range")
+    #         #    h_data_proj.Print("range")
+    #         #    h_ratio_proj.Print("range")
 
-            copy_proj(i, h_ratio_proj, h_ratio)
+    #         copy_proj(i, h_ratio_proj, h_ratio)
 
-            if save_plots:
+    #         if save_plots:
 
-                h_bkg_proj.SetTitle("Bkg MC pT %.0f - %.0f" % (pt_bins[i - 1], pt_bins[i]))
-                h_mc_proj.SetTitle("TTbar MC pT %.0f - %.0f" % (pt_bins[i - 1], pt_bins[i]))
-                h_data_proj.SetTitle("Data - Bkg pT %.0f - %.0f (N = %.0f)" % (pt_bins[i - 1], pt_bins[i], data_norm))
-                h_ratio_proj.SetTitle("Ratio pT %.0f - %.0f (N = %.0f)" % (pt_bins[i - 1], pt_bins[i], data_norm))
+    #             h_bkg_proj.SetTitle("Bkg MC pT %.0f - %.0f" % (pt_bins[i - 1], pt_bins[i]))
+    #             h_mc_proj.SetTitle("TTbar MC pT %.0f - %.0f" % (pt_bins[i - 1], pt_bins[i]))
+    #             h_data_proj.SetTitle("Data - Bkg pT %.0f - %.0f (N = %.0f)" % (pt_bins[i - 1], pt_bins[i], data_norm))
+    #             h_ratio_proj.SetTitle("Ratio pT %.0f - %.0f (N = %.0f)" % (pt_bins[i - 1], pt_bins[i], data_norm))
 
-                c_mc = ROOT.TCanvas("c", "", 1000, 1000)
-                h_mc_proj.Draw("colz")
-                c_mc.SetRightMargin(0.2)
-                c_mc.Print(outdir + "lundPlane_bin%i_MC.png" % i)
+    #             c_mc = ROOT.TCanvas("c", "", 1000, 1000)
+    #             h_mc_proj.Draw("colz")
+    #             c_mc.SetRightMargin(0.2)
+    #             c_mc.Print(outdir + "lundPlane_bin%i_MC.png" % i)
 
-                c_bkg = ROOT.TCanvas("c", "", 1000, 800)
-                h_bkg_proj.Draw("colz")
-                c_bkg.SetRightMargin(0.2)
-                c_bkg.Print(outdir + "lundPlane_bin%i_bkg.png" % i)
+    #             c_bkg = ROOT.TCanvas("c", "", 1000, 800)
+    #             h_bkg_proj.Draw("colz")
+    #             c_bkg.SetRightMargin(0.2)
+    #             c_bkg.Print(outdir + "lundPlane_bin%i_bkg.png" % i)
 
-                c_data = ROOT.TCanvas("c", "", 1000, 800)
-                h_data_proj.Draw("colz")
-                c_data.SetRightMargin(0.2)
-                c_data.Print(outdir + "lundPlane_bin%i_data.png" % i)
+    #             c_data = ROOT.TCanvas("c", "", 1000, 800)
+    #             h_data_proj.Draw("colz")
+    #             c_data.SetRightMargin(0.2)
+    #             c_data.Print(outdir + "lundPlane_bin%i_data.png" % i)
 
-                c_ratio = ROOT.TCanvas("c", "", 1000, 800)
-                cleanup_ratio(h_ratio_proj, h_min=0.0, h_max=2.0)
-                h_ratio_proj.Draw("colz")
-                c_ratio.SetRightMargin(0.2)
-                c_ratio.Print(outdir + "lundPlane_bin%i_ratio.png" % i)
+    #             c_ratio = ROOT.TCanvas("c", "", 1000, 800)
+    #             cleanup_ratio(h_ratio_proj, h_min=0.0, h_max=2.0)
+    #             h_ratio_proj.Draw("colz")
+    #             c_ratio.SetRightMargin(0.2)
+    #             c_ratio.Print(outdir + "lundPlane_bin%i_ratio.png" % i)
 
-                h_ratio_unc = get_unc_hist(h_ratio_proj)
-                cleanup_ratio(h_ratio_unc, h_min=0.0, h_max=1.0)
-                c_ratio_unc = ROOT.TCanvas("c_unc", "", 800, 800)
-                h_ratio_unc.SetTitle(
-                    "Ratio pT %.0f - %.0f (N = %.0f) Relative Unc." % (pt_bins[i - 1], pt_bins[i], data_norm)
-                )
-                h_ratio_unc.Draw("colz")
-                c_ratio_unc.SetRightMargin(0.2)
-                c_ratio_unc.Print(outdir + "lundPlane_bin%i_ratio_unc.png" % i)
-                h_ratio_unc.Reset()
+    #             h_ratio_unc = get_unc_hist(h_ratio_proj)
+    #             cleanup_ratio(h_ratio_unc, h_min=0.0, h_max=1.0)
+    #             c_ratio_unc = ROOT.TCanvas("c_unc", "", 800, 800)
+    #             h_ratio_unc.SetTitle(
+    #                 "Ratio pT %.0f - %.0f (N = %.0f) Relative Unc." % (pt_bins[i - 1], pt_bins[i], data_norm)
+    #             )
+    #             h_ratio_unc.Draw("colz")
+    #             c_ratio_unc.SetRightMargin(0.2)
+    #             c_ratio_unc.Print(outdir + "lundPlane_bin%i_ratio_unc.png" % i)
+    #             h_ratio_unc.Reset()
 
-        return h_ratio
+    #     return h_ratio
 
     def normalize_weights(self, lund_weights, w_min=0.1, w_max=10.0):
         """Normalize lund plane weights so average weight is 1 (necessary to preserve normalization of MC.

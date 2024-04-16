@@ -26,46 +26,7 @@ warnings.filterwarnings("ignore", message="Found duplicate branch ")
 pd.set_option("mode.chained_assignment", None)
 
 
-input_feat = {
-    # "v2-1111-10noMass1": [
-    #     "fj_pt",
-    #     "fj_msoftdrop",
-    #     "met_relpt",
-    #     # "met_fj_dphi",
-    #     "lep_fj_dr",
-    #     "n_bjets_L",
-    #     "n_bjets_M",
-    #     "n_bjets_T",
-    #     "lep_isolation",
-    #     "lep_misolation",
-    # ],
-    # "v2_1-12": [
-    #     "fj_pt",
-    #     "fj_msoftdrop",
-    #     "met_relpt",
-    #     # "met_fj_dphi",
-    #     "lep_fj_dr",
-    #     "n_bjets_L",
-    #     "n_bjets_M",
-    #     "n_bjets_T",
-    #     "lep_isolation",
-    #     "lep_misolation",
-    # ],
-    # "v2_10_5": [],
-    # "v2_10_12": [],
-    # "v2_nor1": [],
-    "v2_nor2": [],
-    "v35_12_14": [],
-    # "v35_2": [],
-    # "v35_3": [],
-    # "v35_4": [],
-    # "v35_5": [],
-}
-
-
-def make_events_dict(
-    years, channels, samples_dir, samples, presel, logging_=True, region="signal_region", keep_weights=False
-):
+def make_events_dict(years, channels, samples_dir, samples, presel, logging_=True):
     """
     Postprocess the parquets by applying preselections, saving an `event_weight` column, and
     a tagger score column in a big concatenated dataframe.
@@ -153,17 +114,6 @@ def make_events_dict(
                 if len(data) == 0:
                     continue
 
-                if not keep_weights:
-                    data = data[data.columns.drop(list(data.filter(regex="weight_mu_")))]
-                    data = data[data.columns.drop(list(data.filter(regex="weight_ele_")))]
-                    data = data[data.columns.drop(list(data.filter(regex="L_btag")))]
-                    data = data[data.columns.drop(list(data.filter(regex="M_btag")))]
-                    data = data[data.columns.drop(list(data.filter(regex="T_btag")))]
-                    data = data[data.columns.drop(list(data.filter(regex="veto")))]
-                    # data = data[data.columns.drop(list(data.filter(regex="fj_H_VV_")))]
-                    data = data[data.columns.drop(list(data.filter(regex="_up")))]
-                    data = data[data.columns.drop(list(data.filter(regex="_down")))]
-
                 data["abs_met_fj_dphi"] = np.abs(data["met_fj_dphi"])
 
                 # get event_weight
@@ -179,46 +129,8 @@ def make_events_dict(
 
                 data["event_weight"] = event_weight
 
-                # add finetuned tagger score
-                for modelv, inp in input_feat.items():
-                    import onnx
-                    import onnxruntime as ort
-                    import scipy
-
-                    if "v2_nor2" in modelv:
-                        PATH = "../../weaver-core-dev/experiments_finetuning/v2_nor2/model.onnx"
-                    else:
-                        PATH = f"../../weaver-core-dev/experiments_finetuning/{modelv}/model.onnx"
-
-                    data["met_relpt"] = data["met_pt"] / data["fj_pt"]
-
-                    if modelv in ["v2-1111-10noMass1", "v2_1-12", "v4_1"]:
-                        input_dict = {
-                            "basic": data.loc[:, inp].values.astype("float32"),
-                            "highlevel": data.loc[:, "fj_ParT_hidNeuron000":"fj_ParT_hidNeuron127"].values.astype("float32"),
-                        }
-                    else:
-                        input_dict = {
-                            # "basic": 0,
-                            "highlevel": data.loc[:, "fj_ParT_hidNeuron000":"fj_ParT_hidNeuron127"].values.astype("float32"),
-                        }
-
-                    onnx_model = onnx.load(PATH)
-                    onnx.checker.check_model(onnx_model)
-
-                    ort_sess = ort.InferenceSession(
-                        PATH,
-                        providers=["AzureExecutionProvider"],
-                    )
-                    outputs = ort_sess.run(None, input_dict)
-
-                    if modelv == "v2_nor2":
-                        data["fj_ParT_score_finetuned"] = scipy.special.softmax(outputs[0], axis=1)[:, 0]
-                    else:
-                        data[f"fj_ParT_score_finetuned_{modelv}"] = scipy.special.softmax(outputs[0], axis=1)[:, 0]
-
                 # use hidNeurons to get the finetuned scores
-                data["fj_ParT_score_finetuned"] = utils.get_finetuned_score(data, modelv="v2_nor2")
+                data["THWW"] = utils.get_finetuned_score(data, modelv="v35_26")
 
                 # drop hidNeuron columns for memory
                 data = data[data.columns.drop(list(data.filter(regex="hidNeuron")))]
