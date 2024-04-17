@@ -250,12 +250,20 @@ axis_dict = {
     "lep_isolation_mu_lowpt": hist2.axis.Regular(
         35, 0, 0.15, name="var", label=r"Muon PF isolation (low $p_T$)", overflow=True
     ),
-    "lep_misolation": hist2.axis.Regular(35, 0, 0.2, name="var", label=r"Muon mini-isolation", overflow=True),
-    "lep_misolation_highpt": hist2.axis.Regular(
+    "lep_misolation": hist2.axis.Regular(35, 0, 0.2, name="var", label=r"Lepton mini-isolation", overflow=True),
+    "lep_misolation_mu": hist2.axis.Regular(35, 0, 0.2, name="var", label=r"Muon mini-isolation", overflow=True),
+    "lep_misolation_mu_highpt": hist2.axis.Regular(
         35, 0, 0.2, name="var", label=r"Muon mini-isolation (high $p_T$)", overflow=True
     ),
-    "lep_misolation_lowpt": hist2.axis.Regular(
+    "lep_misolation_mu_lowpt": hist2.axis.Regular(
         35, 0, 0.2, name="var", label=r"Muon mini-isolation (low $p_T$)", overflow=True
+    ),
+    "lep_misolation_ele": hist2.axis.Regular(35, 0, 0.2, name="var", label=r"Electron mini-isolation", overflow=True),
+    "lep_misolation_ele_highpt": hist2.axis.Regular(
+        35, 0, 0.2, name="var", label=r"Electron mini-isolation (high $p_T$)", overflow=True
+    ),
+    "lep_misolation_ele_lowpt": hist2.axis.Regular(
+        35, 0, 0.2, name="var", label=r"Electron mini-isolation (low $p_T$)", overflow=True
     ),
 }
 
@@ -672,17 +680,14 @@ def plot_hists(
             )
 
             if len(bkg) > 0:
-                # from hist.intervals import ratio_uncertainty
+                from hist.intervals import ratio_uncertainty
 
                 data_val = data.values()
                 data_val[tot_val_zero_mask] = 1
 
-                # yerr = ratio_uncertainty(data_val, tot_val, "poisson")
-                # yerr = (tot_err_data / data_val) + (tot_err_MC / tot_val)
-
-                # import numpy as np
-
-                yerr = (data_val / tot_val) * np.sqrt((tot_err_data / data_val) ** 2 + (tot_err_MC / tot_val) ** 2)
+                yerr = ratio_uncertainty(data_val, tot_val, "poisson")
+                # yerr = (tot_err_data / data_val) + (tot_err_MC / tot_val)    # add relative uncertainty (wrong)
+                # yerr = (data_val / tot_val) * np.sqrt((tot_err_data / data_val) ** 2 + (tot_err_MC / tot_val) ** 2)  # noqa: what ratio_uncertainty does
 
                 hep.histplot(
                     data_val / tot_val,
@@ -990,13 +995,14 @@ def plot_hists_sb(
             )
 
             if len(bkg) > 0:
-                # from hist.intervals import ratio_uncertainty
+                from hist.intervals import ratio_uncertainty
 
                 data_val = data.values()
                 data_val[tot_val_zero_mask] = 1
 
-                # yerr = ratio_uncertainty(data_val, tot_val, "poisson")
-                yerr = (tot_err_data / data_val) + (tot_err_MC / tot_val)
+                yerr = ratio_uncertainty(data_val, tot_val, "poisson")
+                # yerr = (tot_err_data / data_val) + (tot_err_MC / tot_val)    # add relative uncertainty (wrong)
+                # yerr = (data_val / tot_val) * np.sqrt((tot_err_data / data_val) ** 2 + (tot_err_MC / tot_val) ** 2)  # noqa: what ratio_uncertainty does
 
                 hep.histplot(
                     data_val / tot_val,
