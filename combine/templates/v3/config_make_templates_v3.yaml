@@ -78,5 +78,4 @@ samples_dir:
     "2016": ../eos/Feb9_2016
 
 # model_path: ../eos/model.onnx
-# model_path: ../eos/model_v35_26.onnx
-model_path: ../../weaver-core-dev/experiments_finetuning/v35_26/model.onnx
+model_path: ../eos/model_v35_26.onnx
