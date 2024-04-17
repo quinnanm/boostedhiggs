@@ -18,7 +18,7 @@ samples:
 regions_sel:
     ##### v20
     # "VBF": (fj_ParT_score_finetuned>0.925) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
-    
+
     # "ggFpt250to300": (fj_ParT_score_finetuned>0.925) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
     # "ggFpt300to450": (fj_ParT_score_finetuned>0.925) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
     # "ggFpt450toInf": (fj_ParT_score_finetuned>0.925) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
@@ -48,6 +48,8 @@ regions_sel:
     "ParT99": (fj_ParT_score>0.99)
     "ParT995": (fj_ParT_score>0.995)
     "ParT999": (fj_ParT_score>0.999)
+    "ParT9995": (fj_ParT_score>0.9995)
+    "ParT9999": (fj_ParT_score>0.9995)
 
     "ParTFinetuned90": (fj_ParT_score_finetuned>0.9)
     "ParTFinetuned905": (fj_ParT_score_finetuned>0.905)
@@ -68,8 +70,6 @@ regions_sel:
     "ParTFinetuned98": (fj_ParT_score_finetuned>0.98)
     "ParTFinetuned985": (fj_ParT_score_finetuned>0.985)
     "ParTFinetuned99": (fj_ParT_score_finetuned>0.99)
-    "ParTFinetuned995": (fj_ParT_score_finetuned>0.995)
-    "ParTFinetuned999": (fj_ParT_score_finetuned>0.999)
 
 
 samples_dir:
