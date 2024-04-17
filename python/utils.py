@@ -678,7 +678,11 @@ def plot_hists(
                 data_val[tot_val_zero_mask] = 1
 
                 # yerr = ratio_uncertainty(data_val, tot_val, "poisson")
-                yerr = (tot_err_data / data_val) + (tot_err_MC / tot_val)
+                # yerr = (tot_err_data / data_val) + (tot_err_MC / tot_val)
+
+                # import numpy as np
+
+                yerr = (data_val / tot_val) * np.sqrt((tot_err_data / data_val) ** 2 + (tot_err_MC / tot_val) ** 2)
 
                 hep.histplot(
                     data_val / tot_val,

@@ -1,2 +1,0 @@
-combineCards.py VBF97=VBF97.txt ggF975pt250to300=ggF975pt250to300.txt ggF975pt300to450=ggF975pt300to450.txt ggF975pt450toInf=ggF975pt450toInf.txt TopCR=TopCR.txt WJetsCR97=WJetsCR97.txt > model_combined.txt
-text2workspace.py model_combined.txt

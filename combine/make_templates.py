@@ -155,7 +155,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
             "tagger>0.80": "fj_ParT_score_finetuned>0.80",
             # "msoftdrop": "fj_mass>40",
             # "met": "met_pt>55",
-            "lepmiso": "(lep_pt<120) | ( (lep_pt>120) & (lep_misolation<0.025))",
+            "lepmiso": "(lep_pt<120) | ( (lep_pt>120) & (lep_misolation<0.2))",
         },
     }
 
