@@ -39,8 +39,11 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
     model = rl.Model("testModel")
 
     # define the signal and control regions
-    SIG_regions = ["VBF97", "ggF975pt250to300", "ggF975pt300to450", "ggF975pt450toInf"]
-    CONTROL_regions = ["TopCR", "WJetsCR97"]
+    SIG_regions = ["VBF", "ggFpt250to300", "ggFpt300to450", "ggFpt450toInf"]
+    CONTROL_regions = ["TopCR", "WJetsCR"]
+
+    # SIG_regions = list(hists_templates.axes["Region"])
+    # CONTROL_regions = []
 
     if add_ttbar_constraint:
         ttbarnormSF = rl.IndependentParameter("ttbarnormSF", 1.0, 0, 10)
@@ -125,7 +128,7 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
             ttbarpass.setParamEffect(ttbarnormSF, 1 * ttbarnormSF)
 
     if add_wjets_constraint:
-        failCh = model["WJetsCR97"]
+        failCh = model["WJetsCR"]
 
         wjetsfail = failCh["wjets"]
         wjetsfail.setParamEffect(wjetsnormSF, 1 * wjetsnormSF)
@@ -152,7 +155,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # python create_datacard.py --years 2016,2016APV,2017,2018 --channels mu,ele --outdir templates/v4
+    # python create_datacard.py --years 2016,2016APV,2017,2018 --channels mu,ele --outdir templates/v1
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--years", default="2017", help="years separated by commas")
