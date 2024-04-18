@@ -11,8 +11,6 @@ samples:
     - Diboson
     - EWKvjets
     - Data
-    # - DYJets
-    # - WZQQ
     - WZQQorDYJets
 
 regions_sel:
@@ -57,6 +55,14 @@ regions_sel:
     "VBF94": (fj_ParT_score_finetuned>0.94) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
     "VBF945": (fj_ParT_score_finetuned>0.945) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
     "VBF95": (fj_ParT_score_finetuned>0.95) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
+    "VBF955": (fj_ParT_score_finetuned>0.95) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
+    "VBF96": (fj_ParT_score_finetuned>0.96) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
+    "VBF965": (fj_ParT_score_finetuned>0.965) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
+    "VBF97": (fj_ParT_score_finetuned>0.97) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
+    "VBF975": (fj_ParT_score_finetuned>0.975) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
+    "VBF98": (fj_ParT_score_finetuned>0.98) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
+    "VBF985": (fj_ParT_score_finetuned>0.985) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
+    "VBF99": (fj_ParT_score_finetuned>0.99) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )    
 
     "ggF90": (fj_ParT_score_finetuned>0.9) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
     "ggF905": (fj_ParT_score_finetuned>0.905) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
@@ -69,6 +75,15 @@ regions_sel:
     "ggF94": (fj_ParT_score_finetuned>0.94) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
     "ggF945": (fj_ParT_score_finetuned>0.945) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
     "ggF95": (fj_ParT_score_finetuned>0.95) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
+    "ggF955": (fj_ParT_score_finetuned>0.955) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
+    "ggF96": (fj_ParT_score_finetuned>0.96) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
+    "ggF965": (fj_ParT_score_finetuned>0.965) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
+    "ggF97": (fj_ParT_score_finetuned>0.97) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
+    "ggF975": (fj_ParT_score_finetuned>0.975) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
+    "ggF98": (fj_ParT_score_finetuned>0.98) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
+    "ggF985": (fj_ParT_score_finetuned>0.985) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
+    "ggF99": (fj_ParT_score_finetuned>0.99) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) )
+
 
 
 samples_dir:
@@ -77,6 +92,5 @@ samples_dir:
     "2016APV": ../eos/Feb9_2016APV
     "2016": ../eos/Feb9_2016
 
-# model_path: ../eos/model.onnx
-# model_path: ../eos/model_v35_26.onnx
+
 model_path: ../../weaver-core-dev/experiments_finetuning/v35_26/model.onnx

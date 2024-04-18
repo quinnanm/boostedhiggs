@@ -159,7 +159,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
         },
     }
 
-    mass_binning = 10
+    mass_binning = 20
 
     hists = hist2.Hist(
         hist2.axis.StrCategory([], name="Sample", growth=True),
