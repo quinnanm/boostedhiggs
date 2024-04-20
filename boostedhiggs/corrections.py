@@ -567,15 +567,16 @@ def add_lepton_weight(weights, lepton, year, lepton_type="muon"):
             weights.add(f"{corr}_{lepton_type}", values["nominal"], values["up"], values["down"])
 
 
-def add_pileup_weight(weights, year, mod, nPU):
+def get_pileup_weight(year: str, nPU: np.ndarray):
     """
     Should be able to do something similar to lepton weight but w pileup
     e.g. see here: https://cms-nanoaod-integration.web.cern.ch/commonJSONSFs/LUMI_puWeights_Run2_UL/
     """
-    cset = correctionlib.CorrectionSet.from_file(get_pog_json("pileup", year + mod))
+    cset = correctionlib.CorrectionSet.from_file(get_pog_json("pileup", year))
 
     year_to_corr = {
         "2016": "Collisions16_UltraLegacy_goldenJSON",
+        "2016APV": "Collisions16_UltraLegacy_goldenJSON",
         "2017": "Collisions17_UltraLegacy_goldenJSON",
         "2018": "Collisions18_UltraLegacy_goldenJSON",
     }
@@ -586,7 +587,12 @@ def add_pileup_weight(weights, year, mod, nPU):
     values["up"] = cset[year_to_corr[year]].evaluate(nPU, "up")
     values["down"] = cset[year_to_corr[year]].evaluate(nPU, "down")
 
-    # add weights
+    return values
+
+
+def add_pileup_weight(weights: Weights, year: str, nPU: np.ndarray):
+    """Separate wrapper function in case we just want the values separately."""
+    values = get_pileup_weight(year, nPU)
     weights.add("pileup", values["nominal"], values["up"], values["down"])
 
 

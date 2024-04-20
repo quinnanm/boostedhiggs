@@ -28,6 +28,7 @@ from boostedhiggs.corrections import (
     get_btag_weights,
     get_jec_jets,
     get_jmsr,
+    get_pileup_weight,
     met_factory,
 )
 from boostedhiggs.corrections_lundplane import getLPweights
@@ -55,6 +56,14 @@ def build_p4(cand):
         with_name="PtEtaPhiMCandidate",
         behavior=candidate.behavior,
     )
+
+
+def pileup_cutoff(events, year, cutoff: float = 4):
+    pweights = get_pileup_weight(year, events.Pileup.nPU.to_numpy())
+    pw_pass = (pweights["nominal"] <= cutoff) * (pweights["up"] <= cutoff) * (pweights["down"] <= cutoff)
+    logging.info(f"Passing pileup weight cut: {np.sum(pw_pass)} out of {len(events)} events")
+    events = events[pw_pass]
+    return events
 
 
 class HwwProcessor(processor.ProcessorABC):
@@ -103,7 +112,7 @@ class HwwProcessor(processor.ProcessorABC):
         }
 
         # do inference
-        self.inference = inference
+        self._inference = inference
 
         # for tagger model and preprocessing dict
         self.tagger_resources_path = str(pathlib.Path(__file__).parent.resolve()) + "/tagger_resources/"
@@ -147,8 +156,13 @@ class HwwProcessor(processor.ProcessorABC):
         """Returns skimmed events which pass preselection cuts and with the branches listed in self._skimvars"""
 
         dataset = events.metadata["dataset"]
-        nevents = len(events)
         self.isMC = hasattr(events, "genWeight")
+
+        if self.isMC:
+            # remove events with pileup weights un-physically large
+            events = self.pileup_cutoff(events, self._year, cutoff=4)
+
+        nevents = len(events)
         self.weights = {ch: Weights(nevents, storeIndividual=True) for ch in self._channels}
         self.selections = {ch: PackedSelection() for ch in self._channels}
         self.cutflows = {ch: {} for ch in self._channels}
@@ -620,15 +634,6 @@ class HwwProcessor(processor.ProcessorABC):
                 ),
                 -1,
             )
-            # | ak.any(
-            #     (
-            #         (check_fatjets.eta > -3.2)
-            #         & (check_fatjets.eta < -1.3)
-            #         & (check_fatjets.phi > -1.57)
-            #         & (check_fatjets.phi < -0.87)
-            #     ),
-            #     -1
-            # )
 
             hem_cleaning = (
                 ((events.run >= 319077) & (not self.isMC))  # if data check if in Runs C or D
@@ -654,28 +659,12 @@ class HwwProcessor(processor.ProcessorABC):
                     nPU=ak.to_numpy(events.Pileup.nPU),
                 )
 
-                # single_weight_pileup = self.weights[ch].partial_weight(["single_weight_pileup"])
-                # self.add_selection("single_weight_pileup", sel=(single_weight_pileup <= 4))
-
-                single_weight_pileup = self.weights[ch].partial_weight(["pileup"])
-                self.add_selection("single_weight_pileup", sel=(single_weight_pileup <= 4))
-
                 add_pileupid_weights(self.weights[ch], self._year, self._yearmod, goodjets, events.GenJet, wp="L")
 
                 if ch == "mu":
-                    add_lepton_weight(
-                        self.weights[ch],
-                        candidatelep,
-                        self._year + self._yearmod,
-                        "muon",
-                    )
+                    add_lepton_weight(self.weights[ch], candidatelep, self._year + self._yearmod, "muon")
                 elif ch == "ele":
-                    add_lepton_weight(
-                        self.weights[ch],
-                        candidatelep,
-                        self._year + self._yearmod,
-                        "electron",
-                    )
+                    add_lepton_weight(self.weights[ch], candidatelep, self._year + self._yearmod, "electron")
 
                 ewk_corr, qcd_corr, alt_qcd_corr = add_VJets_kFactors(self.weights[ch], events.GenPart, dataset, events)
                 # add corrections for plotting
@@ -788,7 +777,7 @@ class HwwProcessor(processor.ProcessorABC):
                     output[ch] = {**output[ch], **lunplaneVars}
 
                 # fill inference
-                if self.inference:
+                if self._inference:
                     for model_name in ["ak8_MD_vminclv2ParT_manual_fixwrap_all_nodes"]:
                         pnet_vars = runInferenceTriton(
                             self.tagger_resources_path,
