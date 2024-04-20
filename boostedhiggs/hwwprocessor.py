@@ -158,9 +158,9 @@ class HwwProcessor(processor.ProcessorABC):
         dataset = events.metadata["dataset"]
         self.isMC = hasattr(events, "genWeight")
 
-        if self.isMC:
-            # remove events with pileup weights un-physically large
-            events = pileup_cutoff(events, self._year, cutoff=4)
+        # if self.isMC:
+        #     # remove events with pileup weights un-physically large
+        #     events = pileup_cutoff(events, self._year, cutoff=4)
 
         nevents = len(events)
         self.weights = {ch: Weights(nevents, storeIndividual=True) for ch in self._channels}
