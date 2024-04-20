@@ -59,7 +59,7 @@ def build_p4(cand):
 
 
 def pileup_cutoff(events, year, mod, cutoff: float = 4):
-    pweights = get_pileup_weight(year + mod, events.Pileup.nPU.to_numpy())
+    pweights = get_pileup_weight(year, mod, events.Pileup.nPU.to_numpy())
     pw_pass = (pweights["nominal"] <= cutoff) * (pweights["up"] <= cutoff) * (pweights["down"] <= cutoff)
     logging.info(f"Passing pileup weight cut: {np.sum(pw_pass)} out of {len(events)} events")
     events = events[pw_pass]

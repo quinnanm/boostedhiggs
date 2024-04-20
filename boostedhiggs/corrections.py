@@ -592,7 +592,7 @@ def get_pileup_weight(year: str, mod: str, nPU: np.ndarray):
 
 def add_pileup_weight(weights: Weights, year: str, mod: str, nPU: np.ndarray):
     """Separate wrapper function in case we just want the values separately."""
-    values = get_pileup_weight(year + mod, nPU)
+    values = get_pileup_weight(year, mod, nPU)
     weights.add("pileup", values["nominal"], values["up"], values["down"])
 
 
