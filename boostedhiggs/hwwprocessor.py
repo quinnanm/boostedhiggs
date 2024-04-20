@@ -58,8 +58,8 @@ def build_p4(cand):
     )
 
 
-def pileup_cutoff(events, year, cutoff: float = 4):
-    pweights = get_pileup_weight(year, events.Pileup.nPU.to_numpy())
+def pileup_cutoff(events, year, mod, cutoff: float = 4):
+    pweights = get_pileup_weight(year + mod, events.Pileup.nPU.to_numpy())
     pw_pass = (pweights["nominal"] <= cutoff) * (pweights["up"] <= cutoff) * (pweights["down"] <= cutoff)
     logging.info(f"Passing pileup weight cut: {np.sum(pw_pass)} out of {len(events)} events")
     events = events[pw_pass]
@@ -160,7 +160,7 @@ class HwwProcessor(processor.ProcessorABC):
 
         # if self.isMC:
         #     # remove events with pileup weights un-physically large
-        #     events = pileup_cutoff(events, self._year, cutoff=4)
+        #     events = pileup_cutoff(events, self._year, self._yearmod, cutoff=4)
 
         nevents = len(events)
         self.weights = {ch: Weights(nevents, storeIndividual=True) for ch in self._channels}
