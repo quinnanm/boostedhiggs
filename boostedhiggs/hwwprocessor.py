@@ -187,7 +187,10 @@ class HwwProcessor(processor.ProcessorABC):
             for ch in self._channels:
                 self.weights[ch].add("genweight", events.genWeight)
 
-        # trigger
+        ######################
+        # Trigger
+        ######################
+
         trigger, trigger_noiso, trigger_iso = {}, {}, {}
         for ch in self._channels:
             trigger[ch] = np.zeros(nevents, dtype="bool")
@@ -201,14 +204,20 @@ class HwwProcessor(processor.ProcessorABC):
                         trigger_noiso[ch] = trigger_noiso[ch] | events.HLT[t]
                     trigger[ch] = trigger[ch] | events.HLT[t]
 
-        # metfilters
+        ######################
+        # METFLITERS
+        ######################
+
         metfilters = np.ones(nevents, dtype="bool")
         metfilterkey = "mc" if self.isMC else "data"
         for mf in self._metfilters[metfilterkey]:
             if mf in events.Flag.fields:
                 metfilters = metfilters & events.Flag[mf]
 
-        # OBJECT: taus
+        ######################
+        # OBJECT DEFINITION
+        ######################
+
         loose_taus_mu = (events.Tau.pt > 20) & (abs(events.Tau.eta) < 2.3) & (events.Tau.idAntiMu >= 1)  # loose antiMu ID
         loose_taus_ele = (
             (events.Tau.pt > 20)
@@ -560,7 +569,10 @@ class HwwProcessor(processor.ProcessorABC):
             jmsrvariables = getJMSRVariables(fatjetvars, candidatelep_p4, met, mass_shift=shift)
             variables = {**variables, **jmsrvariables}
 
-        # apply selections
+        ######################
+        # Selection
+        ######################
+
         for ch in self._channels:
             self.add_selection(name="Trigger", sel=trigger[ch], channel=ch)
         self.add_selection(name="METFilters", sel=metfilters)
@@ -601,7 +613,6 @@ class HwwProcessor(processor.ProcessorABC):
                 genVars, signal_mask = match_H(events.GenPart, candidatefj, fatjet_pt=FirstFatjet)
                 # add signal mask and modify sum of genweights to only consider those events that pass the mask
                 self.add_selection(name="Signal", sel=signal_mask)
-                # sumgenweight = ak.sum(events.genWeight[signal_mask])
             elif "HToTauTau" in dataset:
                 genVars, signal_mask = match_H(events.GenPart, candidatefj, dau_pdgid=15)
                 self.add_selection(name="Signal", sel=signal_mask)
