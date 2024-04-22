@@ -296,11 +296,7 @@ sys.path.append("LundReweighting")
 sys.path.append("LundReweighting/utils")
 import ROOT
 
-from boostedhiggs.LundReweighting.utils import LundReweighter
-
-# # from utils.LundReweighter import *
-# # from utils.Utils import *
-# from LundReweighter import LundReweighter
+from boostedhiggs.LundReweighting.utils.LundReweighter import LundReweighter
 
 
 def getLPweights(events, candidatefj):
