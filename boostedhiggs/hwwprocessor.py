@@ -33,7 +33,6 @@ from boostedhiggs.corrections import (
     getJMSRVariables,
     met_factory,
 )
-from boostedhiggs.corrections_lundplane import getLPweights
 from boostedhiggs.utils import match_H, match_Top, match_V, sigs
 
 from .run_tagger_inference import runInferenceTriton
@@ -680,6 +679,8 @@ class HwwProcessor(processor.ProcessorABC):
                 output[ch] = {key: value[selection_ch] for (key, value) in out.items()}
 
                 if self._getLPweights:
+                    from boostedhiggs.corrections_lundplane import getLPweights
+
                     lunplaneVars = {}
                     (
                         lunplaneVars["LP_weights"],
