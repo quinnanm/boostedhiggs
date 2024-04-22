@@ -29,6 +29,8 @@ from boostedhiggs.corrections import (
     get_jec_jets,
     get_jmsr,
     get_pileup_weight,
+    getJECVariables,
+    getJMSRVariables,
     met_factory,
 )
 from boostedhiggs.corrections_lundplane import getLPweights
@@ -162,6 +164,13 @@ class HwwProcessor(processor.ProcessorABC):
         #     # remove events with pileup weights un-physically large
         #     events = pileup_cutoff(events, self._year, self._yearmod, cutoff=4)
 
+        # if self.isMC:
+        #     gen_weights = events["genWeight"].to_numpy()
+        # else:
+        #     gen_weights = None
+
+        # nevents = np.sum(gen_weights) if self.isMC else len(events)
+
         nevents = len(events)
         self.weights = {ch: Weights(nevents, storeIndividual=True) for ch in self._channels}
         self.selections = {ch: PackedSelection() for ch in self._channels}
@@ -218,6 +227,7 @@ class HwwProcessor(processor.ProcessorABC):
         # OBJECT DEFINITION
         ######################
 
+        # OBJECT: taus
         loose_taus_mu = (events.Tau.pt > 20) & (abs(events.Tau.eta) < 2.3) & (events.Tau.idAntiMu >= 1)  # loose antiMu ID
         loose_taus_ele = (
             (events.Tau.pt > 20)
@@ -227,10 +237,9 @@ class HwwProcessor(processor.ProcessorABC):
         n_loose_taus_mu = ak.sum(loose_taus_mu, axis=1)
         n_loose_taus_ele = ak.sum(loose_taus_ele, axis=1)
 
-        muons = ak.with_field(events.Muon, 0, "flavor")
-        electrons = ak.with_field(events.Electron, 1, "flavor")
-
         # OBJECT: muons
+        muons = ak.with_field(events.Muon, 0, "flavor")
+
         loose_muons = (
             (((muons.pt > 30) & (muons.pfRelIso04_all < 0.25)) | (muons.pt > 55))
             & (np.abs(muons.eta) < 2.4)
@@ -250,6 +259,8 @@ class HwwProcessor(processor.ProcessorABC):
         n_good_muons = ak.sum(good_muons, axis=1)
 
         # OBJECT: electrons
+        electrons = ak.with_field(events.Electron, 1, "flavor")
+
         loose_electrons = (
             (((electrons.pt > 38) & (electrons.pfRelIso03_all < 0.25)) | (electrons.pt > 120))
             & (np.abs(electrons.eta) < 2.4)
@@ -270,7 +281,7 @@ class HwwProcessor(processor.ProcessorABC):
         )
         n_good_electrons = ak.sum(good_electrons, axis=1)
 
-        # get candidate lepton
+        # OBJECT: candidate lepton
         goodleptons = ak.concatenate([muons[good_muons], electrons[good_electrons]], axis=1)  # concat muons and electrons
         goodleptons = goodleptons[ak.argsort(goodleptons.pt, ascending=False)]  # sort by pt
 
@@ -282,7 +293,7 @@ class HwwProcessor(processor.ProcessorABC):
         )  # reliso for candidate lepton
         lep_miso = candidatelep.miniPFRelIso_all  # miniso for candidate lepton
 
-        # AK8 fatjets
+        # OBJECT: AK8 fatjets
         fatjets = events.FatJet
         fatjets["msdcorr"] = corrected_msoftdrop(fatjets)
         fatjet_selector = (fatjets.pt > 200) & (abs(fatjets.eta) < 2.5) & fatjets.isTight
@@ -293,13 +304,13 @@ class HwwProcessor(processor.ProcessorABC):
             events, good_fatjets, self._year, not self.isMC, self.jecs, fatjets=True
         )
 
-        # choose candidate fatjet
+        # OBJECT: candidate fatjet
         fj_idx_lep = ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)
         candidatefj = ak.firsts(good_fatjets[fj_idx_lep])
 
         jmsr_shifted_fatjetvars = get_jmsr(good_fatjets[fj_idx_lep], num_jets=1, year=self._year, isData=not self.isMC)
 
-        # AK4 jets
+        # OBJECT: AK4 jets
         jets, jec_shifted_jetvars = get_jec_jets(events, events.Jet, self._year, not self.isMC, self.jecs, fatjets=False)
         met = met_factory.build(events.MET, jets, {}) if self.isMC else events.MET
 
@@ -315,13 +326,13 @@ class HwwProcessor(processor.ProcessorABC):
         ak4_outside_ak8_selector = jets.delta_r(candidatefj) > 0.8
         ak4_outside_ak8 = jets[ak4_outside_ak8_selector]
 
-        # VBF variables
+        # OBJECT: VBF variables
         jet1 = ak4_outside_ak8[:, 0:1]
         jet2 = ak4_outside_ak8[:, 1:2]
         deta = abs(ak.firsts(jet1).eta - ak.firsts(jet2).eta)
         mjj = (ak.firsts(jet1) + ak.firsts(jet2)).mass
 
-        # b-jets (only for jets with abs(eta)<2.5)
+        # OBJECT: b-jets (only for jets with abs(eta)<2.5)
         bjet_selector = (jet_selector) & (jets.delta_r(candidatefj) > 0.8) & (abs(jets.eta) < 2.5)
         ak4_bjet_candidate = jets[bjet_selector]
 
@@ -390,129 +401,21 @@ class HwwProcessor(processor.ProcessorABC):
             "fj_mass": candidatefj.msdcorr,
         }
 
-        # JEC vars
-        for shift, vals in jec_shifted_fatjetvars["pt"].items():
-            if shift != "":
-                fatjetvars[f"fj_pt{shift}"] = ak.firsts(vals[fj_idx_lep])
-        # JMSR vars
-        for shift, vals in jmsr_shifted_fatjetvars["msoftdrop"].items():
-
-            if shift != "":
-                fatjetvars[f"fj_mass{shift}"] = ak.firsts(vals)
-
-        variables = {**variables, **fatjetvars}
-
-        def getJECVariables(fatjetvars, candidatelep_p4, met, pt_shift=None, met_shift=None):
-            """
-            get variables affected by JES_up, JES_down, JER_up, JER_down, UES_up, UES_down
-            """
-            variables = {}
-
-            ptlabel = pt_shift if pt_shift is not None else ""
-            if met_shift is not None:
-                if met_shift == "UES_up":
-                    metvar = met.MET_UnclusteredEnergy.up
-                elif met_shift == "UES_down":
-                    metvar = met.MET_UnclusteredEnergy.down
-                metlabel = met_shift
-            else:
-                if ptlabel != "":
-                    metlabel = ""
-                    if ptlabel == "JES_up":
-                        metvar = met.JES_jes.up
-                    elif ptlabel == "JES_down":
-                        metvar = met.JES_jes.down
-                    elif ptlabel == "JER_up":
-                        metvar = met.JER.up
-                    elif ptlabel == "JER_down":
-                        metvar = met.JER.down
-                else:
-                    metvar = met
-                    metlabel = ""
-            shift = ptlabel + metlabel
-
-            candidatefj = ak.zip(
-                {
-                    "pt": fatjetvars[f"fj_pt{ptlabel}"],
-                    "eta": fatjetvars["fj_eta"],
-                    "phi": fatjetvars["fj_phi"],
-                    "mass": fatjetvars["fj_mass"],
-                },
-                with_name="PtEtaPhiMCandidate",
-                behavior=candidate.behavior,
-            )
-            candidateNeutrinoJet = ak.zip(
-                {
-                    "pt": metvar.pt,
-                    "eta": candidatefj.eta,
-                    "phi": met.phi,
-                    "mass": 0,
-                    "charge": 0,
-                },
-                with_name="PtEtaPhiMCandidate",
-                behavior=candidate.behavior,
-            )
-            rec_W_lnu = candidatelep_p4 + candidateNeutrinoJet
-            rec_W_qq = candidatefj - candidatelep_p4
-            rec_higgs = rec_W_qq + rec_W_lnu
-
-            variables[f"rec_higgs_m{shift}"] = rec_higgs.mass
-            variables[f"rec_higgs_pt{shift}"] = rec_higgs.pt
-
-            if shift == "":
-                variables[f"rec_W_qq_m{shift}"] = rec_W_qq.mass
-                variables[f"rec_W_qq_pt{shift}"] = rec_W_qq.pt
-
-                variables[f"rec_W_lnu_m{shift}"] = rec_W_lnu.mass
-                variables[f"rec_W_lnu_pt{shift}"] = rec_W_lnu.pt
-
-            return variables
-
-        def getJMSRVariables(fatjetvars, candidatelep_p4, met, mass_shift=None):
-            """
-            get variables affected by JMS_up, JMS_down, JMR_up, JMR_down
-            """
-            variables = {}
-
-            candidatefj = ak.zip(
-                {
-                    "pt": fatjetvars["fj_pt"],
-                    "eta": fatjetvars["fj_eta"],
-                    "phi": fatjetvars["fj_phi"],
-                    "mass": fatjetvars[f"fj_mass{mass_shift}"],
-                },
-                with_name="PtEtaPhiMCandidate",
-                behavior=candidate.behavior,
-            )
-            candidateNeutrinoJet = ak.zip(
-                {
-                    "pt": met.pt,
-                    "eta": candidatefj.eta,
-                    "phi": met.phi,
-                    "mass": 0,
-                    "charge": 0,
-                },
-                with_name="PtEtaPhiMCandidate",
-                behavior=candidate.behavior,
-            )
-            rec_W_lnu = candidatelep_p4 + candidateNeutrinoJet
-            rec_W_qq = candidatefj - candidatelep_p4
-            rec_higgs = rec_W_qq + rec_W_lnu
-
-            variables[f"rec_higgs_m{mass_shift}"] = rec_higgs.mass
-            variables[f"rec_higgs_pt{mass_shift}"] = rec_higgs.pt
-
-            if mass_shift == "":
-                variables[f"rec_W_qq_m{mass_shift}"] = rec_W_qq.mass
-                variables[f"rec_W_qq_pt{mass_shift}"] = rec_W_qq.pt
-
-                variables[f"rec_W_lnu_m{mass_shift}"] = rec_W_lnu.mass
-                variables[f"rec_W_lnu_pt{mass_shift}"] = rec_W_lnu.pt
-
-            return variables
-
-        # add variables affected by JECs/MET
         if self._systematics and self.isMC:
+
+            # JEC vars
+            for shift, vals in jec_shifted_fatjetvars["pt"].items():
+                if shift != "":
+                    fatjetvars[f"fj_pt{shift}"] = ak.firsts(vals[fj_idx_lep])
+
+            # JMSR vars
+            for shift, vals in jmsr_shifted_fatjetvars["msoftdrop"].items():
+                if shift != "":
+                    fatjetvars[f"fj_mass{shift}"] = ak.firsts(vals)
+
+            variables = {**variables, **fatjetvars}
+
+            # add variables affected by JECs/MET
             mjj_shift = {}
             for shift, vals in jec_shifted_jetvars["pt"].items():
                 if shift == "":
@@ -631,7 +534,6 @@ class HwwProcessor(processor.ProcessorABC):
 
         # hem-cleaning selection
         if self._year == "2018":
-            # check_fatjets = good_fatjets[:, :2]
             hem_veto = ak.any(
                 ((goodjets.eta > -3.2) & (goodjets.eta < -1.3) & (goodjets.phi > -1.57) & (goodjets.phi < -0.87)),
                 -1,

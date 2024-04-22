@@ -8,6 +8,7 @@ import correctionlib
 import numpy as np
 from coffea import util as cutil
 from coffea.analysis_tools import Weights
+from coffea.nanoevents.methods import candidate
 from coffea.nanoevents.methods.nanoaod import JetArray
 
 btagWPs = {
@@ -778,3 +779,114 @@ def get_jmsr(fatjets, num_jets: int, year: str, isData: bool = False, seed: int 
         jmsr_shifted_vars[mkey] = tdict
 
     return jmsr_shifted_vars
+
+
+def getJECVariables(fatjetvars, candidatelep_p4, met, pt_shift=None, met_shift=None):
+    """
+    get variables affected by JES_up, JES_down, JER_up, JER_down, UES_up, UES_down
+    """
+    variables = {}
+
+    ptlabel = pt_shift if pt_shift is not None else ""
+    if met_shift is not None:
+        if met_shift == "UES_up":
+            metvar = met.MET_UnclusteredEnergy.up
+        elif met_shift == "UES_down":
+            metvar = met.MET_UnclusteredEnergy.down
+        metlabel = met_shift
+    else:
+        if ptlabel != "":
+            metlabel = ""
+            if ptlabel == "JES_up":
+                metvar = met.JES_jes.up
+            elif ptlabel == "JES_down":
+                metvar = met.JES_jes.down
+            elif ptlabel == "JER_up":
+                metvar = met.JER.up
+            elif ptlabel == "JER_down":
+                metvar = met.JER.down
+        else:
+            metvar = met
+            metlabel = ""
+    shift = ptlabel + metlabel
+
+    candidatefj = ak.zip(
+        {
+            "pt": fatjetvars[f"fj_pt{ptlabel}"],
+            "eta": fatjetvars["fj_eta"],
+            "phi": fatjetvars["fj_phi"],
+            "mass": fatjetvars["fj_mass"],
+        },
+        with_name="PtEtaPhiMCandidate",
+        behavior=candidate.behavior,
+    )
+    candidateNeutrinoJet = ak.zip(
+        {
+            "pt": metvar.pt,
+            "eta": candidatefj.eta,
+            "phi": met.phi,
+            "mass": 0,
+            "charge": 0,
+        },
+        with_name="PtEtaPhiMCandidate",
+        behavior=candidate.behavior,
+    )
+    rec_W_lnu = candidatelep_p4 + candidateNeutrinoJet
+    rec_W_qq = candidatefj - candidatelep_p4
+    rec_higgs = rec_W_qq + rec_W_lnu
+
+    variables[f"rec_higgs_m{shift}"] = rec_higgs.mass
+    variables[f"rec_higgs_pt{shift}"] = rec_higgs.pt
+
+    if shift == "":
+        variables[f"rec_W_qq_m{shift}"] = rec_W_qq.mass
+        variables[f"rec_W_qq_pt{shift}"] = rec_W_qq.pt
+
+        variables[f"rec_W_lnu_m{shift}"] = rec_W_lnu.mass
+        variables[f"rec_W_lnu_pt{shift}"] = rec_W_lnu.pt
+
+    return variables
+
+
+def getJMSRVariables(fatjetvars, candidatelep_p4, met, mass_shift=None):
+    """
+    get variables affected by JMS_up, JMS_down, JMR_up, JMR_down
+    """
+    variables = {}
+
+    candidatefj = ak.zip(
+        {
+            "pt": fatjetvars["fj_pt"],
+            "eta": fatjetvars["fj_eta"],
+            "phi": fatjetvars["fj_phi"],
+            "mass": fatjetvars[f"fj_mass{mass_shift}"],
+        },
+        with_name="PtEtaPhiMCandidate",
+        behavior=candidate.behavior,
+    )
+    candidateNeutrinoJet = ak.zip(
+        {
+            "pt": met.pt,
+            "eta": candidatefj.eta,
+            "phi": met.phi,
+            "mass": 0,
+            "charge": 0,
+        },
+        with_name="PtEtaPhiMCandidate",
+        behavior=candidate.behavior,
+    )
+    rec_W_lnu = candidatelep_p4 + candidateNeutrinoJet
+    rec_W_qq = candidatefj - candidatelep_p4
+    rec_higgs = rec_W_qq + rec_W_lnu
+
+    variables[f"rec_higgs_m{mass_shift}"] = rec_higgs.mass
+    variables[f"rec_higgs_pt{mass_shift}"] = rec_higgs.pt
+
+    if mass_shift == "":
+        variables[f"rec_W_qq_m{mass_shift}"] = rec_W_qq.mass
+        variables[f"rec_W_qq_pt{mass_shift}"] = rec_W_qq.pt
+
+        variables[f"rec_W_lnu_m{mass_shift}"] = rec_W_lnu.mass
+        variables[f"rec_W_lnu_pt{mass_shift}"] = rec_W_lnu.pt
+
+    return variables
