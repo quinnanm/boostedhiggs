@@ -342,9 +342,6 @@ class FakesProcessor(processor.ProcessorABC):
 
                 # store the final weight per ch
                 variables[f"weight_{ch}"] = self.weights[ch].weight()
-                if self._systematics:
-                    for systematic in self.weights[ch].variations:
-                        variables[f"weight_{ch}_{systematic}"] = self.weights[ch].weight(modifier=systematic)
 
         # initialize pandas dataframe
         output = {}
