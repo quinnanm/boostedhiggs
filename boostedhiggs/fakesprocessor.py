@@ -177,40 +177,34 @@ class FakesProcessor(processor.ProcessorABC):
         muons = ak.with_field(events.Muon, 0, "flavor")
         electrons = ak.with_field(events.Electron, 1, "flavor")
 
-        # OBJECT: loose lepton
+        # OBJECT: loose & tight muons
         loose_muons = (
             (((muons.pt > 30) & (muons.pfRelIso04_all < 0.25)) | (muons.pt > 55))
             & (np.abs(muons.eta) < 2.4)
             & (muons.looseId)
         )
-        n_loose_muons = ak.sum(loose_muons, axis=1)
 
-        loose_electrons = (
-            (((electrons.pt > 38) & (electrons.pfRelIso03_all < 0.25)) | (electrons.pt > 120))
-            & (np.abs(electrons.eta) < 2.4)
-            & ((np.abs(electrons.eta) < 1.44) | (np.abs(electrons.eta) > 1.57))
-            & (electrons.cutBased >= electrons.LOOSE)
-        )
-        n_loose_electrons = ak.sum(loose_electrons, axis=1)
-
-        looseleptons = ak.concatenate([muons[loose_muons], electrons[loose_electrons]], axis=1)  # concat muons and electrons
-        looseleptons = looseleptons[ak.argsort(looseleptons.pt, ascending=False)]  # sort by pt
-
-        candidatelep_loose = ak.firsts(looseleptons)  # pick highest pt
-        N_loose = ak.num(looseleptons)
-
-        # OBJECT: tight lepton
-        good_muons = (
+        tight_muons = (
             (muons.pt > 30)
             & (np.abs(muons.eta) < 2.4)
             & (np.abs(muons.dz) < 0.1)
             & (np.abs(muons.dxy) < 0.05)
             & (muons.sip3d <= 4.0)
             & muons.mediumId
-            & (((muons.pfRelIso04_all < 0.15) & (muons.pt < 55)) | (muons.pt >= 55))
+            & (((muons.pt < 55)) & (muons.pfRelIso04_all < 0.15) | (muons.pt >= 55))
         )
 
-        good_electrons = (
+        n_loose_muons = ak.sum(loose_muons, axis=1)
+
+        # OBJECT: loose & tight electrons
+        loose_electrons = (
+            (((electrons.pt > 38) & (electrons.pfRelIso03_all < 0.25)) | (electrons.pt > 120))
+            & (np.abs(electrons.eta) < 2.4)
+            & ((np.abs(electrons.eta) < 1.44) | (np.abs(electrons.eta) > 1.57))
+            & (electrons.cutBased >= electrons.LOOSE)
+        )
+
+        tight_electrons = (
             (electrons.pt > 38)
             & (np.abs(electrons.eta) < 2.4)
             & ((np.abs(electrons.eta) < 1.44) | (np.abs(electrons.eta) > 1.57))
@@ -221,14 +215,24 @@ class FakesProcessor(processor.ProcessorABC):
             & (((electrons.pfRelIso03_all < 0.15) & (electrons.pt < 120)) | (electrons.pt >= 120))
         )
 
-        goodleptons = ak.concatenate([muons[good_muons], electrons[good_electrons]], axis=1)  # concat muons and electrons
-        goodleptons = goodleptons[ak.argsort(goodleptons.pt, ascending=False)]  # sort by pt
+        n_loose_electrons = ak.sum(loose_electrons, axis=1)
 
-        candidatelep_tight = ak.firsts(goodleptons)  # pick highest pt
-        N_tight = ak.num(goodleptons)
+        # OBJECT: candidate loose lepton
+        loose_leptons = ak.concatenate([muons[loose_muons], electrons[loose_electrons]], axis=1)
+        loose_leptons = loose_leptons[ak.argsort(loose_leptons.pt, ascending=False)]  # sort by pt
+
+        candidatelep_loose = ak.firsts(loose_leptons)  # pick highest pt
+        N_loose_lep = ak.num(loose_leptons)
+
+        # OBJECT: candidate tight lepton
+        tight_leptons = ak.concatenate([muons[tight_muons], electrons[tight_electrons]], axis=1)
+        tight_leptons = tight_leptons[ak.argsort(tight_leptons.pt, ascending=False)]  # sort by pt
+
+        candidatelep_tight = ak.firsts(tight_leptons)  # pick highest pt
+        N_tight_lep = ak.num(tight_leptons)
 
         # OBJECT: AK4 jets
-        jets, jec_shifted_jetvars = get_jec_jets(events, events.Jet, self._year, not self.isMC, self.jecs, fatjets=False)
+        jets, _ = get_jec_jets(events, events.Jet, self._year, not self.isMC, self.jecs, fatjets=False)
         met = met_factory.build(events.MET, jets, {}) if self.isMC else events.MET
 
         jet_selector = (
@@ -240,17 +244,15 @@ class FakesProcessor(processor.ProcessorABC):
         goodjets = jets[jet_selector]
 
         # OBJECT: b-jets (only for jets with abs(eta)<2.5)
-        n_bjets_L = ak.sum(
-            jets.btagDeepFlavB > btagWPs["deepJet"][self._year]["L"],
-            axis=1,
-        )
+        n_bjets_L = ak.sum(jets.btagDeepFlavB > btagWPs["deepJet"][self._year]["L"], axis=1)
+
         variables = {
             "lep_tight_pt": candidatelep_tight.pt,
             "lep_tight_eta": candidatelep_tight.eta,
             "lep_loose_pt": candidatelep_loose.pt,
             "lep_loose_eta": candidatelep_loose.eta,
-            "N_tight": N_tight,
-            "N_loose": N_loose,
+            "N_tight_lep": N_tight_lep,
+            "N_loose_lep": N_loose_lep,
             "met_pt": met.pt,
         }
 
@@ -298,17 +300,9 @@ class FakesProcessor(processor.ProcessorABC):
             for ch in self._channels:
                 if self._year in ("2016", "2017"):
                     self.weights[ch].add(
-                        "L1Prefiring",
-                        events.L1PreFiringWeight.Nom,
-                        events.L1PreFiringWeight.Up,
-                        events.L1PreFiringWeight.Dn,
+                        "L1Prefiring", events.L1PreFiringWeight.Nom, events.L1PreFiringWeight.Up, events.L1PreFiringWeight.Dn
                     )
-                add_pileup_weight(
-                    self.weights[ch],
-                    self._year,
-                    self._yearmod,
-                    nPU=ak.to_numpy(events.Pileup.nPU),
-                )
+                add_pileup_weight(self.weights[ch], self._year, self._yearmod, nPU=ak.to_numpy(events.Pileup.nPU))
 
                 add_pileupid_weights(self.weights[ch], self._year, self._yearmod, goodjets, events.GenJet, wp="L")
 
