@@ -131,6 +131,11 @@ def systs_not_from_parquets(years: List[str], lep_channels: List[str]):
     # systs_dict["ZH"]["PDF_scale"] = n
     # systs_dict_values["ZH"]["PDF_scale"] = (1.013, 0.987)
 
+    # QCD MC rate
+    n = rl.NuisanceParameter("QCD_rate", "lnN")
+    systs_dict["QCD"]["QCD_rate"] = n
+    systs_dict_values["QCD"]["QCD_rate"] = (2, None)
+
     return systs_dict, systs_dict_values
 
 
@@ -145,15 +150,17 @@ def systs_from_parquets(years):
 
     systs_from_parquets = {
         "all_samples": {
-            "weight_pileup": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_PU_{year}", "shape"),
+            # "weight_pileup": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_PU_{year}", "shape"),
             "weight_pileupIDSF": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_PUIDSF_{year}", "shape"),
-            "weight_isolation": rl.NuisanceParameter(f"CMS_iso_{year}", "lnN"),
-            "weight_id": rl.NuisanceParameter(f"CMS_id_{year}", "lnN"),
-            "weight_reco_ele": rl.NuisanceParameter("CMS_reconstruction_ele", "lnN"),
-            "weight_L1Prefiring": rl.NuisanceParameter(f"CMS_L1Prefiring_{year}", "lnN"),
-            "weight_trigger_ele": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_trigger_{year}_ele", "lnN"),
-            "weight_trigger_iso_mu": rl.NuisanceParameter(f"CMS_mu_trigger_iso_{year}_mu", "lnN"),
-            "weight_trigger_noniso_mu": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_trigger_{year}_mu", "lnN"),
+            "weight_isolation_mu": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_isolation_{year}", "lnN"),
+            "weight_isolation_ele": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_isolation_{year}", "lnN"),
+            "weight_id_mu": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_identification_{year}", "lnN"),
+            "weight_id_ele": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_identification_{year}", "lnN"),
+            "weight_reco_ele": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_reconstruction_{year}", "lnN"),
+            "weight_L1Prefiring": rl.NuisanceParameter(f"C{CMS_PARAMS_LABEL}L1Prefiring_{year}", "lnN"),
+            "weight_trigger_ele": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_trigger_{year}", "lnN"),
+            "weight_trigger_iso_mu": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_trigger_iso_{year}", "lnN"),
+            "weight_trigger_noniso_mu": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_trigger_{year}", "lnN"),
         },
         # signal
         "ggF": {
