@@ -209,7 +209,6 @@ class FakesProcessor(processor.ProcessorABC):
             & muons.mediumId
             & (((muons.pfRelIso04_all < 0.15) & (muons.pt < 55)) | (muons.pt >= 55))
         )
-        n_good_muons = ak.sum(good_muons, axis=1)
 
         good_electrons = (
             (electrons.pt > 38)
@@ -221,7 +220,6 @@ class FakesProcessor(processor.ProcessorABC):
             & (electrons.mvaFall17V2noIso_WP90)
             & (((electrons.pfRelIso03_all < 0.15) & (electrons.pt < 120)) | (electrons.pt >= 120))
         )
-        n_good_electrons = ak.sum(good_electrons, axis=1)
 
         goodleptons = ak.concatenate([muons[good_muons], electrons[good_electrons]], axis=1)  # concat muons and electrons
         goodleptons = goodleptons[ak.argsort(goodleptons.pt, ascending=False)]  # sort by pt
@@ -246,15 +244,6 @@ class FakesProcessor(processor.ProcessorABC):
             jets.btagDeepFlavB > btagWPs["deepJet"][self._year]["L"],
             axis=1,
         )
-        n_bjets_M = ak.sum(
-            jets.btagDeepFlavB > btagWPs["deepJet"][self._year]["M"],
-            axis=1,
-        )
-        n_bjets_T = ak.sum(
-            jets.btagDeepFlavB > btagWPs["deepJet"][self._year]["T"],
-            axis=1,
-        )
-
         variables = {
             "lep_tight_pt": candidatelep_tight.pt,
             "lep_tight_eta": candidatelep_tight.eta,
@@ -263,9 +252,6 @@ class FakesProcessor(processor.ProcessorABC):
             "N_tight": N_tight,
             "N_loose": N_loose,
             "met_pt": met.pt,
-            "n_bjets_L": n_bjets_L,
-            "n_bjets_M": n_bjets_M,
-            "n_bjets_T": n_bjets_T,
         }
 
         for ch in self._channels:
@@ -273,18 +259,12 @@ class FakesProcessor(processor.ProcessorABC):
         self.add_selection(name="METFilters", sel=metfilters)
         self.add_selection(
             name="OneLep",
-            sel=(n_good_muons == 1)
-            & (n_good_electrons == 0)
-            & (n_loose_electrons == 0)
-            & ~ak.any(loose_muons & ~good_muons, 1),
+            sel=(n_loose_muons == 1) & (n_loose_electrons == 0),
             channel="mu",
         )
         self.add_selection(
             name="OneLep",
-            sel=(n_good_muons == 0)
-            & (n_loose_muons == 0)
-            & (n_good_electrons == 1)
-            & ~ak.any(loose_electrons & ~good_electrons, 1),
+            sel=(n_loose_muons == 0) & (n_loose_electrons == 1),
             channel="ele",
         )
         self.add_selection(name="MET", sel=(met.pt < 20))
