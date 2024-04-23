@@ -206,7 +206,15 @@ def main(args):
     print(f"Metrics: {metrics}")
     print(f"Finished in {elapsed:.1f}s")
 
-    if args.processor == "hww" or args.processor == "vh" or args.processor == "zll":
+    if args.processor == "input":
+        # merge parquet
+        data = pd.read_parquet(f"./outfiles/{job_name}/parquet")
+        data.to_parquet(f"./outfiles/{job_name}.parquet")
+
+        # remove unmerged parquet files
+        os.system("rm -rf ./outfiles/" + job_name)
+
+    else:
         # dump to pickle
         filehandler = open("./outfiles/" + job_name + ".pkl", "wb")
         pkl.dump(out, filehandler)
@@ -218,24 +226,6 @@ def main(args):
             data.to_parquet("./outfiles/" + job_name + "_" + ch + ".parquet")
             # remove old parquet files
             os.system("rm -rf ./outfiles/" + job_name + ch)
-
-    elif args.processor == "input":
-        # merge parquet
-        data = pd.read_parquet(f"./outfiles/{job_name}/parquet")
-        data.to_parquet(f"./outfiles/{job_name}.parquet")
-
-        # # make directory for output rootfiles
-        # if not os.path.exists("./outfiles/outroot"):
-        #     os.makedirs("./outfiles/outroot")
-
-        # os.system(f"mv ./outfiles/{job_name}/outroot ./outfiles/outroot/{job_name}")
-
-        # remove unmerged parquet files
-        os.system("rm -rf ./outfiles/" + job_name)
-
-        # in cmsenv
-        # hadd -fk outfiles/job_name.root outfiles/outroot/job_name/*
-        # rm -r outfiles/outroot
 
 
 if __name__ == "__main__":
