@@ -149,6 +149,12 @@ def main(args):
 
         assert args.inference is True, "enable --inference to run skimmer"
         p = InputProcessor(year=args.year, output_location=f"./outfiles/{job_name}")
+
+    elif args.processor == "fakes":
+        # define processor
+        from boostedhiggs.fakesprocessor import FakesProcessor
+
+        p = FakesProcessor(year=args.year, yearmod=yearmod, output_location=f"./outfiles/{job_name}")
     else:
         from boostedhiggs.trigger_efficiencies_processor import (
             TriggerEfficienciesProcessor,
