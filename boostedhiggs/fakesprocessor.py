@@ -2,7 +2,6 @@ import importlib.resources
 import json
 import logging
 import os
-import pathlib
 import warnings
 
 import awkward as ak
@@ -17,7 +16,6 @@ from coffea.nanoevents.methods import candidate
 logger = logging.getLogger(__name__)
 
 from boostedhiggs.corrections import (
-    add_lepton_weight,
     add_pileup_weight,
     add_pileupid_weights,
     btagWPs,
@@ -54,6 +52,7 @@ class FakesProcessor(processor.ProcessorABC):
         yearmod="",
         channels=["ele", "mu"],
         output_location="./outfiles/",
+        apply_PR_sel=False,
     ):
         self._year = year
         self._yearmod = yearmod
@@ -87,8 +86,7 @@ class FakesProcessor(processor.ProcessorABC):
             "JER": "JER",
         }
 
-        # for tagger model and preprocessing dict
-        self.tagger_resources_path = str(pathlib.Path(__file__).parent.resolve()) + "/tagger_resources/"
+        self._apply_PR_sel = apply_PR_sel
 
     @property
     def accumulator(self):
@@ -215,19 +213,27 @@ class FakesProcessor(processor.ProcessorABC):
 
         n_loose_electrons = ak.sum(loose_electrons, axis=1)
 
-        # OBJECT: candidate loose lepton
+        # OBJECT: loose leptons
         loose_leptons = ak.concatenate([muons[loose_muons], electrons[loose_electrons]], axis=1)
         loose_leptons = loose_leptons[ak.argsort(loose_leptons.pt, ascending=False)]  # sort by pt
 
-        candidatelep_loose = ak.firsts(loose_leptons)  # pick highest pt
         N_loose_lep = ak.num(loose_leptons)
 
-        # OBJECT: candidate tight lepton
+        loose_lep1 = ak.firsts(loose_leptons[:, 0:1])  # pick highest pt (equivalent to ak.firsts())
+        loose_lep2 = ak.firsts(loose_leptons[:, 1:2])  # pick second highest pt
+
+        mll_loose = (loose_lep1 + loose_lep2).mass
+
+        # OBJECT: tight leptons
         tight_leptons = ak.concatenate([muons[tight_muons], electrons[tight_electrons]], axis=1)
         tight_leptons = tight_leptons[ak.argsort(tight_leptons.pt, ascending=False)]  # sort by pt
 
-        candidatelep_tight = ak.firsts(tight_leptons)  # pick highest pt
         N_tight_lep = ak.num(tight_leptons)
+
+        tight_lep1 = ak.firsts(tight_leptons[:, 0:1])  # pick highest pt (equivalent to ak.firsts())
+        tight_lep2 = ak.firsts(tight_leptons[:, 1:2])  # pick second highest pt
+
+        mll_tight = (tight_lep1 + tight_lep2).mass
 
         # OBJECT: AK4 jets
         jets, _ = get_jec_jets(events, events.Jet, self._year, not self.isMC, self.jecs, fatjets=False)
@@ -241,26 +247,40 @@ class FakesProcessor(processor.ProcessorABC):
         )
         goodjets = jets[jet_selector]
 
-        # OBJECT: b-jets (only for jets with abs(eta)<2.5)
+        # OBJECT: b-jets
         n_bjets_L = ak.sum(jets.btagDeepFlavB > btagWPs["deepJet"][self._year]["L"], axis=1)
 
         variables = {
-            "lep_tight_pt": candidatelep_tight.pt,
-            "lep_tight_eta": candidatelep_tight.eta,
-            "lep_loose_pt": candidatelep_loose.pt,
-            "lep_loose_eta": candidatelep_loose.eta,
-            "N_tight_lep": N_tight_lep,
-            "N_loose_lep": N_loose_lep,
             "met_pt": met.pt,
+            # tight
+            "tight_lep1_pt": tight_lep1.pt,
+            "tight_lep1_eta": tight_lep1.eta,
+            "tight_lep2_pt": tight_lep2.pt,
+            "tight_lep2_eta": tight_lep2.eta,
+            "mll_tight": mll_tight,
+            "N_tight_lep": N_tight_lep,
+            # loose
+            "loose_lep1_pt": loose_lep1.pt,
+            "loose_lep1_eta": loose_lep1.eta,
+            "loose_lep2_pt": loose_lep2.pt,
+            "loose_lep2_eta": loose_lep2.eta,
+            "mll_loose": mll_loose,
+            "N_loose_lep": N_loose_lep,
         }
 
         for ch in self._channels:
             self.add_selection(name="Trigger", sel=trigger[ch], channel=ch)
         self.add_selection(name="METFilters", sel=metfilters)
-        self.add_selection(name="OneLep", sel=(n_loose_muons == 1) & (n_loose_electrons == 0), channel="mu")
-        self.add_selection(name="OneLep", sel=(n_loose_muons == 0) & (n_loose_electrons == 1), channel="ele")
         self.add_selection(name="MET", sel=(met.pt < 20))
         self.add_selection(name="bveto", sel=(n_bjets_L == 0))
+
+        if self._apply_PR_sel:  # apply PR selection
+            self.add_selection(name="TwoLep", sel=(n_loose_muons > 1) & (n_loose_electrons == 0), channel="mu")
+            self.add_selection(name="TwoLep", sel=(n_loose_muons == 0) & (n_loose_electrons > 1), channel="ele")
+            self.add_selection(name="oppositeCharge", sel=(loose_lep1.charge * loose_lep2.charge < 0))
+        else:  # apply FR selection
+            self.add_selection(name="OneLep", sel=(n_loose_muons == 1) & (n_loose_electrons == 0), channel="mu")
+            self.add_selection(name="OneLep", sel=(n_loose_muons == 0) & (n_loose_electrons == 1), channel="ele")
 
         # hem-cleaning selection
         if self._year == "2018":
@@ -295,11 +315,6 @@ class FakesProcessor(processor.ProcessorABC):
                 add_pileup_weight(self.weights[ch], self._year, self._yearmod, nPU=ak.to_numpy(events.Pileup.nPU))
 
                 add_pileupid_weights(self.weights[ch], self._year, self._yearmod, goodjets, events.GenJet, wp="L")
-
-                if ch == "mu":
-                    add_lepton_weight(self.weights[ch], candidatelep_tight, self._year + self._yearmod, "muon")
-                elif ch == "ele":
-                    add_lepton_weight(self.weights[ch], candidatelep_tight, self._year + self._yearmod, "electron")
 
                 # store the gen-weight
                 variables[f"weight_{ch}"] = self.weights[ch].partial_weight(["genweight"])
