@@ -251,21 +251,22 @@ class FakesProcessor(processor.ProcessorABC):
         n_bjets_L = ak.sum(jets.btagDeepFlavB > btagWPs["deepJet"][self._year]["L"], axis=1)
 
         variables = {
-            "met_pt": met.pt,
+            "N_tight_lep": N_tight_lep,
+            "N_loose_lep": N_loose_lep,
             # tight
             "tight_lep1_pt": tight_lep1.pt,
             "tight_lep1_eta": tight_lep1.eta,
             "tight_lep2_pt": tight_lep2.pt,
             "tight_lep2_eta": tight_lep2.eta,
             "mll_tight": mll_tight,
-            "N_tight_lep": N_tight_lep,
             # loose
             "loose_lep1_pt": loose_lep1.pt,
             "loose_lep1_eta": loose_lep1.eta,
             "loose_lep2_pt": loose_lep2.pt,
             "loose_lep2_eta": loose_lep2.eta,
             "mll_loose": mll_loose,
-            "N_loose_lep": N_loose_lep,
+            # others
+            "met_pt": met.pt,
         }
 
         for ch in self._channels:
