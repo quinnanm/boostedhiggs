@@ -623,7 +623,10 @@ class HwwProcessor(processor.ProcessorABC):
                         # clipping to avoid negative / too large weights
                         return np.clip(variations, 0.0, 4.0)
 
-                    variables = {**variables, **get_scale_weights(events)}
+                    scale_weights = get_scale_weights(events)
+                    print("scale_weights", scale_weights.shape)
+                    # weights_dict["scale_weights"] = scale_weights * weights_dict["weight"][:, np.newaxis]
+                    # variables = {**variables, **get_scale_weights(events)}
 
                     # """
                     # For the QCD acceptance uncertainty:
