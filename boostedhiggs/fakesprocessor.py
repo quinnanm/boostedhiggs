@@ -252,6 +252,22 @@ class FakesProcessor(processor.ProcessorABC):
         # OBJECT: b-jets
         n_bjets_L = ak.sum(jets.btagDeepFlavB > btagWPs["deepJet"][self._year]["L"], axis=1)
 
+        # OBJECT: AK8 fatjets
+        fatjets = events.FatJet
+        fatjet_selector = (fatjets.pt > 200) & (abs(fatjets.eta) < 2.5) & fatjets.isTight
+        good_fatjets = fatjets[fatjet_selector]
+        good_fatjets = good_fatjets[ak.argsort(good_fatjets.pt, ascending=False)]  # sort them by pt
+
+        good_fatjets, _ = get_jec_jets(events, good_fatjets, self._year, not self.isMC, self.jecs, fatjets=True)
+        NumFatjets = ak.num(good_fatjets)
+
+        candidatelep_p4 = build_p4(loose_lep1)  # build p4 for candidate lepton
+
+        fj_idx_lep = ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)
+        candidatefj = ak.firsts(good_fatjets[fj_idx_lep])
+
+        lep_fj_dr = candidatefj.delta_r(candidatelep_p4)
+
         variables = {
             "N_tight_lep": N_tight_lep,
             "N_loose_lep": N_loose_lep,
@@ -269,6 +285,11 @@ class FakesProcessor(processor.ProcessorABC):
             "mll_loose": mll_loose,
             # others
             "met_pt": met.pt,
+            "NumFatjets": NumFatjets,
+            "lep_fj_dr": lep_fj_dr,
+            "fj_pt": candidatefj.pt,
+            "fj_eta": candidatefj.eta,
+            "fj_phi": candidatefj.phi,
         }
 
         for ch in self._channels:
@@ -289,9 +310,14 @@ class FakesProcessor(processor.ProcessorABC):
             self.add_selection(name="Zpeak", sel=(mll_loose > 76) & (mll_loose < 106))
 
         else:  # apply FR selection
-            self.add_selection(name="MET", sel=(met.pt < 20))
+            self.add_selection(name="MET", sel=(met.pt < 30))
             self.add_selection(name="OneLep", sel=(n_loose_muons == 1) & (n_loose_electrons == 0), channel="mu")
             self.add_selection(name="OneLep", sel=(n_loose_muons == 0) & (n_loose_electrons == 1), channel="ele")
+
+            self.add_selection(name="AtLeastOneFatJet", sel=(NumFatjets >= 1))
+            self.add_selection(name="CandidateJetpT", sel=(candidatefj.pt > 250))
+            self.add_selection(name="LepInJet", sel=(lep_fj_dr < 0.8))
+            self.add_selection(name="JetLepOverlap", sel=(lep_fj_dr > 0.03))
 
         # hem-cleaning selection
         if self._year == "2018":
