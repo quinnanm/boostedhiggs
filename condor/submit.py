@@ -118,6 +118,11 @@ def main(args):
             else:
                 line = line.replace("GETLPWEIGHTS", "--no-getLPweights")
 
+            if args.apply_PR_sel:
+                line = line.replace("PROMPTRATESEL", "--apply-PR-sel")
+            else:
+                line = line.replace("PROMPTRATESEL", "--no-apply-PR-sel")
+
             line = line.replace("LABEL", args.label)
             line = line.replace("REGION", args.region)
 
@@ -150,7 +155,7 @@ if __name__ == "__main__":
         default="hww",
         help="which processor",
         type=str,
-        choices=["hww", "trigger", "lumi", "vh", "zll", "input"],
+        choices=["hww", "trigger", "lumi", "vh", "zll", "input", "fakes"],
     )
     parser.add_argument("--config", dest="config", required=True, help="path to config yaml", type=str)
     parser.add_argument("--key", dest="configkey", required=True, help="config key: [data, mc, ... ]", type=str)
@@ -169,6 +174,8 @@ if __name__ == "__main__":
     parser.add_argument("--label", dest="label", default="H", help="jet label for inputskimmer", type=str)
     parser.add_argument("--region", dest="region", default="signal", help="specify region for selections", type=str)
     parser.add_argument("--maxfiles", default=-1, help="max number of files to run on", type=int)
+    parser.add_argument("--apply-PR-sel", dest="apply_PR_sel", action="store_true")
+    parser.add_argument("--no-apply-PR-sel", dest="apply_PR_sel", action="store_false")
 
     parser.set_defaults(inference=True)
     args = parser.parse_args()

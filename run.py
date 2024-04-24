@@ -289,8 +289,8 @@ if __name__ == "__main__":
     parser.add_argument("--no-getLPweights", dest="getLPweights", action="store_false")
 
     # fakes
-    parser.add_argument("--apply_PR_sel", dest="apply_PR_sel", action="store_true")
-    parser.add_argument("--apply_FR_sel", dest="apply_PR_sel", action="store_false")
+    parser.add_argument("--apply-PR-sel", dest="apply_PR_sel", action="store_true")
+    parser.add_argument("--no-apply-PR-sel", dest="apply_PR_sel", action="store_false")
 
     parser.set_defaults(inference=False)
     args = parser.parse_args()
