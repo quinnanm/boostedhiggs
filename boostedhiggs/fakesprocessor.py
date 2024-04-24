@@ -190,6 +190,7 @@ class FakesProcessor(processor.ProcessorABC):
         )
 
         n_loose_muons = ak.sum(loose_muons, axis=1)
+        n_tight_muons = ak.sum(tight_muons, axis=1)
 
         # OBJECT: loose & tight electrons
         loose_electrons = (
@@ -212,6 +213,7 @@ class FakesProcessor(processor.ProcessorABC):
         )
 
         n_loose_electrons = ak.sum(loose_electrons, axis=1)
+        n_tight_electrons = ak.sum(tight_electrons, axis=1)
 
         # OBJECT: loose leptons
         loose_leptons = ak.concatenate([muons[loose_muons], electrons[loose_electrons]], axis=1)
@@ -272,14 +274,22 @@ class FakesProcessor(processor.ProcessorABC):
         for ch in self._channels:
             self.add_selection(name="Trigger", sel=trigger[ch], channel=ch)
         self.add_selection(name="METFilters", sel=metfilters)
-        self.add_selection(name="MET", sel=(met.pt < 20))
         self.add_selection(name="bveto", sel=(n_bjets_L == 0))
 
         if self._apply_PR_sel:  # apply PR selection
-            self.add_selection(name="TwoLep", sel=(n_loose_muons > 1) & (n_loose_electrons == 0), channel="mu")
-            self.add_selection(name="TwoLep", sel=(n_loose_muons == 0) & (n_loose_electrons > 1), channel="ele")
+            # noqa: https://github.com/latinos/PlotsConfigurations/blob/5aca6c9e2f4ecee3ebcb60bf4d867578b07ae701/Configurations/monoHWW/SemiLep/Full2017_v7/PR/cuts.py
+
+            self.add_selection(
+                name="TwoLep", sel=(n_tight_muons > 0) & (n_loose_muons > 1) & (n_loose_electrons == 0), channel="mu"
+            )
+            self.add_selection(
+                name="TwoLep", sel=(n_tight_electrons > 0) & (n_loose_electrons > 1) & (n_loose_muons == 0), channel="ele"
+            )
             self.add_selection(name="oppositeCharge", sel=(loose_lep1.charge * loose_lep2.charge < 0))
+            self.add_selection(name="Zpeak", sel=(mll_loose > 76) & (mll_loose < 106))
+
         else:  # apply FR selection
+            self.add_selection(name="MET", sel=(met.pt < 20))
             self.add_selection(name="OneLep", sel=(n_loose_muons == 1) & (n_loose_electrons == 0), channel="mu")
             self.add_selection(name="OneLep", sel=(n_loose_muons == 0) & (n_loose_electrons == 1), channel="ele")
 
