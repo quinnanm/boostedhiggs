@@ -257,16 +257,8 @@ class FakesProcessor(processor.ProcessorABC):
         for ch in self._channels:
             self.add_selection(name="Trigger", sel=trigger[ch], channel=ch)
         self.add_selection(name="METFilters", sel=metfilters)
-        self.add_selection(
-            name="OneLep",
-            sel=(n_loose_muons == 1) & (n_loose_electrons == 0),
-            channel="mu",
-        )
-        self.add_selection(
-            name="OneLep",
-            sel=(n_loose_muons == 0) & (n_loose_electrons == 1),
-            channel="ele",
-        )
+        self.add_selection(name="OneLep", sel=(n_loose_muons == 1) & (n_loose_electrons == 0), channel="mu")
+        self.add_selection(name="OneLep", sel=(n_loose_muons == 0) & (n_loose_electrons == 1), channel="ele")
         self.add_selection(name="MET", sel=(met.pt < 20))
         self.add_selection(name="bveto", sel=(n_bjets_L == 0))
 
@@ -346,17 +338,6 @@ class FakesProcessor(processor.ProcessorABC):
             # convert arrays to pandas
             if not isinstance(output[ch], pd.DataFrame):
                 output[ch] = self.ak_to_pandas(output[ch])
-
-            for var_ in [
-                "rec_higgs_m",
-                "rec_higgs_pt",
-                "rec_W_qq_m",
-                "rec_W_qq_pt",
-                "rec_W_lnu_m",
-                "rec_W_lnu_pt",
-            ]:
-                if var_ in output[ch].keys():
-                    output[ch][var_] = np.nan_to_num(output[ch][var_], nan=-1)
 
         # now save pandas dataframes
         fname = events.behavior["__events_factory__"]._partition_key.replace("/", "_")
