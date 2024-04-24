@@ -178,19 +178,16 @@ class FakesProcessor(processor.ProcessorABC):
         electrons = ak.with_field(events.Electron, 1, "flavor")
 
         # OBJECT: loose & tight muons
-        loose_muons = (
-            (((muons.pt > 30) & (muons.pfRelIso04_all < 0.25)) | (muons.pt > 55))
-            & (np.abs(muons.eta) < 2.4)
-            & (muons.looseId)
-        )
+        loose_muons = (muons.pt > 30) & (np.abs(muons.eta) < 2.4) & (muons.looseId)
 
         tight_muons = (
             (muons.pt > 30)
             & (np.abs(muons.eta) < 2.4)
+            & muons.mediumId
+            # additional cuts
             & (np.abs(muons.dz) < 0.1)
             & (np.abs(muons.dxy) < 0.05)
             & (muons.sip3d <= 4.0)
-            & muons.mediumId
             & (((muons.pt < 55)) & (muons.pfRelIso04_all < 0.15) | (muons.pt >= 55))
         )
 
@@ -198,20 +195,21 @@ class FakesProcessor(processor.ProcessorABC):
 
         # OBJECT: loose & tight electrons
         loose_electrons = (
-            (((electrons.pt > 38) & (electrons.pfRelIso03_all < 0.25)) | (electrons.pt > 120))
+            (electrons.pt > 38)
             & (np.abs(electrons.eta) < 2.4)
             & ((np.abs(electrons.eta) < 1.44) | (np.abs(electrons.eta) > 1.57))
-            & (electrons.cutBased >= electrons.LOOSE)
+            & (electrons.mvaFall17V2noIso_WPL)
         )
 
         tight_electrons = (
             (electrons.pt > 38)
             & (np.abs(electrons.eta) < 2.4)
             & ((np.abs(electrons.eta) < 1.44) | (np.abs(electrons.eta) > 1.57))
+            & (electrons.mvaFall17V2noIso_WP90)
+            # additional cuts
             & (np.abs(electrons.dz) < 0.1)
             & (np.abs(electrons.dxy) < 0.05)
             & (electrons.sip3d <= 4.0)
-            & (electrons.mvaFall17V2noIso_WP90)
             & (((electrons.pfRelIso03_all < 0.15) & (electrons.pt < 120)) | (electrons.pt >= 120))
         )
 
