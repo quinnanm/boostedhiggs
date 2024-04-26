@@ -105,14 +105,10 @@ def systs_not_from_parquets(years: List[str], lep_channels: List[str]):
     systs_dict_values["VBF"]["QCD_scale"] = (1.004, 0.997)
     systs_dict["ttH"]["QCD_scale"] = n
     systs_dict_values["ttH"]["QCD_scale"] = (1.058, 0.908)
-
-    systs_dict["VH"]["QCD_scale"] = n
-    systs_dict_values["VH"]["QCD_scale"] = (1.005, 0.993)
-
-    # systs_dict["WH"]["QCD_scale"] = n
-    # systs_dict_values["WH"]["QCD_scale"] = (1.005, 0.993)
-    # systs_dict["ZH"]["QCD_scale"] = n
-    # systs_dict_values["ZH"]["QCD_scale"] = (1.038, 0.97)
+    systs_dict["WH"]["QCD_scale"] = n
+    systs_dict_values["WH"]["QCD_scale"] = (1.005, 0.993)
+    systs_dict["ZH"]["QCD_scale"] = n
+    systs_dict_values["ZH"]["QCD_scale"] = (1.038, 0.97)
 
     # PDF scale
     n = rl.NuisanceParameter("PDF_scale", "lnN")
@@ -122,14 +118,10 @@ def systs_not_from_parquets(years: List[str], lep_channels: List[str]):
     systs_dict_values["VBF"]["PDF_scale"] = (1.021, 0.979)
     systs_dict["ttH"]["PDF_scale"] = n
     systs_dict_values["ttH"]["PDF_scale"] = (1.03, 0.97)
-
-    systs_dict["VH"]["PDF_scale"] = n
-    systs_dict_values["VH"]["PDF_scale"] = (1.013, 0.987)
-
-    # systs_dict["WH"]["PDF_scale"] = n
-    # systs_dict_values["WH"]["PDF_scale"] = (1.017, 0.983)
-    # systs_dict["ZH"]["PDF_scale"] = n
-    # systs_dict_values["ZH"]["PDF_scale"] = (1.013, 0.987)
+    systs_dict["WH"]["PDF_scale"] = n
+    systs_dict_values["WH"]["PDF_scale"] = (1.017, 0.983)
+    systs_dict["ZH"]["PDF_scale"] = n
+    systs_dict_values["ZH"]["PDF_scale"] = (1.013, 0.987)
 
     # QCD MC rate
     n = rl.NuisanceParameter("QCD_rate", "lnN")
@@ -182,9 +174,8 @@ def systs_from_parquets(years):
             "rec_higgs_mJMR": rl.NuisanceParameter("AK8_JMR", "shape"),
         },
         "ttH": {},
-        # "WH": {},
-        # "ZH": {},
-        "VH": {},
+        "WH": {},
+        "ZH": {},
         # bkgs
         "QCD": {},
         "WJetsLNu": {

@@ -2,9 +2,8 @@ samples:
     - ggF
     - VBF
     - ttH
-    # - WH
-    # - ZH
-    - VH
+    - WH
+    - ZH
     - QCD
     - WJetsLNu
     - TTbar

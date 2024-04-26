@@ -16,14 +16,10 @@ combine_samples_by_name = {
     "GluGluHToWW_Pt-200ToInf_M-125": "ggF",
     "VBFHToWWToAny_M-125_TuneCP5_withDipoleRecoil": "VBF",
     "ttHToNonbb_M125": "ttH",
-    # "HWminusJ_HToWW_M-125": "WH",
-    # "HWplusJ_HToWW_M-125": "WH",
-    # "HZJ_HToWW_M-125": "ZH",
-    # "GluGluZH_HToWW_M-125_TuneCP5_13TeV-powheg-pythia8": "ZH",
-    "HWminusJ_HToWW_M-125": "VH",
-    "HWplusJ_HToWW_M-125": "VH",
-    "HZJ_HToWW_M-125": "VH",
-    "GluGluZH_HToWW_M-125_TuneCP5_13TeV-powheg-pythia8": "VH",
+    "HWminusJ_HToWW_M-125": "WH",
+    "HWplusJ_HToWW_M-125": "WH",
+    "HZJ_HToWW_M-125": "ZH",
+    "GluGluZH_HToWW_M-125_TuneCP5_13TeV-powheg-pythia8": "ZH",
     "GluGluHToTauTau": "HTauTau",
 }
 
@@ -52,9 +48,8 @@ labels = {
     "ggF": "ggF",
     "VBF": "VBF",
     "ttH": "ttH",
-    # "WH": "WH",
-    # "ZH": "ZH",
-    "VH": "VH",
+    "WH": "WH",
+    "ZH": "ZH",
     # BKGS
     "QCD": "qcd",
     "WJetsLNu": "wjets",
@@ -70,8 +65,7 @@ labels = {
 
 # bkgs = ["TTbar", "WJetsLNu", "SingleTop", "DYJets", "QCD", "Diboson", "WZQQ", "EWKvjets"]
 bkgs = ["TTbar", "WJetsLNu", "SingleTop", "WZQQorDYJets", "QCD", "Diboson", "EWKvjets"]
-# bkgs += ["ttH", "WH", "ZH"]
-sigs = ["ggF", "VBF", "VH", "ttH"]
+sigs = ["ggF", "VBF", "WH", "ZH", "ttH"]
 samples = sigs + bkgs
 
 

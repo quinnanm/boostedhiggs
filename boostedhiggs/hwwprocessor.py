@@ -623,30 +623,33 @@ class HwwProcessor(processor.ProcessorABC):
                         # clipping to avoid negative / too large weights
                         return np.clip(variations, 0.0, 4.0)
 
-                    scale_weights = get_scale_weights(events)
-                    print("scale_weights", scale_weights.shape)
-                    # weights_dict["scale_weights"] = scale_weights * weights_dict["weight"][:, np.newaxis]
-                    # variables = {**variables, **get_scale_weights(events)}
-
-                    # """
-                    # For the QCD acceptance uncertainty:
-                    # - we save the individual weights [0, 1, 3, 5, 7, 8]
-                    # - postprocessing: we obtain sum_sumlheweight
-                    # - postprocessing: we obtain LHEScaleSumw: sum_sumlheweight[i] / sum_sumgenweight
-                    # - postprocessing:
-                    #   obtain histograms for 0, 1, 3, 5, 7, 8 and 4: h0, h1, ... respectively
-                    #    weighted by scale_0, scale_1, etc
-                    #   and normalize them by  (xsec * luminosity) / LHEScaleSumw[i]
-                    # - then, take max/min of h0, h1, h3, h5, h7, h8 w.r.t h4: h_up and h_dn
-                    # - the uncertainty is the nominal histogram * h_up / h4
-                    # """
                     # scale_weights = {}
-                    # if "LHEScaleWeight" in events.fields:
-                    #     # save individual weights
-                    #     if len(events.LHEScaleWeight[0]) == 9:
-                    #         for i in [0, 1, 3, 5, 7, 8, 4]:
-                    #             scale_weights[f"weight_scale{i}"] = events.LHEScaleWeight[:, i]
+                    # w = get_scale_weights(events)
+                    # for i in range(w.shape[1]):
+                    #     scale_weights[f"weight_{i}"] = w[:, i]
+
+                    # # weights_dict["scale_weights"] = scale_weights * weights_dict["weight"][:, np.newaxis]
                     # variables = {**variables, **scale_weights}
+
+                    """
+                    For the QCD acceptance uncertainty:
+                    - we save the individual weights [0, 1, 3, 5, 7, 8]
+                    - postprocessing: we obtain sum_sumlheweight
+                    - postprocessing: we obtain LHEScaleSumw: sum_sumlheweight[i] / sum_sumgenweight
+                    - postprocessing:
+                      obtain histograms for 0, 1, 3, 5, 7, 8 and 4: h0, h1, ... respectively
+                       weighted by scale_0, scale_1, etc
+                      and normalize them by  (xsec * luminosity) / LHEScaleSumw[i]
+                    - then, take max/min of h0, h1, h3, h5, h7, h8 w.r.t h4: h_up and h_dn
+                    - the uncertainty is the nominal histogram * h_up / h4
+                    """
+                    scale_weights = {}
+                    if "LHEScaleWeight" in events.fields:
+                        # save individual weights
+                        if len(events.LHEScaleWeight[0]) == 9:
+                            for i in [0, 1, 3, 5, 7, 8, 4]:
+                                scale_weights[f"weight_scale{i}"] = events.LHEScaleWeight[:, i]
+                    variables = {**variables, **scale_weights}
 
                 if "HToWW" in dataset:
                     """
