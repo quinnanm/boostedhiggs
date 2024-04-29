@@ -26,6 +26,17 @@ warnings.filterwarnings("ignore", message="Found duplicate branch ")
 pd.set_option("mode.chained_assignment", None)
 
 
+combine_samples = {
+    # data
+    "SingleElectron_": "Data",
+    "SingleMuon_": "Data",
+    "EGamma_": "Data",
+    # bkg
+    "QCD_Pt": "QCD",
+    "DYJets": "DYJets",
+}
+
+
 def make_events_dict(years, channels, samples_dir, samples, logging_=True):
     """
     Postprocess the parquets by applying preselections, saving an `event_weight` column, and
@@ -60,21 +71,13 @@ def make_events_dict(years, channels, samples_dir, samples, logging_=True):
             for sample in os.listdir(samples_dir):
                 # get a combined label to combine samples of the same process
 
-                # first: check if the sample is in one of combine_samples_by_name
-                sample_to_use = None
-                for key in utils.combine_samples_by_name:
-                    if key in sample:
-                        sample_to_use = utils.combine_samples_by_name[key]
-                        break
-
                 # second: if not, combine under common label
-                if sample_to_use is None:
-                    for key in utils.combine_samples:
-                        if key in sample:
-                            sample_to_use = utils.combine_samples[key]
-                            break
-                        else:
-                            sample_to_use = sample
+                for key in combine_samples:
+                    if key in sample:
+                        sample_to_use = combine_samples[key]
+                        break
+                    else:
+                        sample_to_use = sample
 
                 if sample_to_use not in samples:
                     continue

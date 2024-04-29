@@ -268,284 +268,6 @@ axis_dict = {
 }
 
 
-# def plot_hists(
-#     hists,
-#     years,
-#     channels,
-#     vars_to_plot,
-#     add_data,
-#     logy,
-#     add_soverb,
-#     only_sig,
-#     mult,
-#     outpath,
-#     text_="",
-#     blind_region=None,
-#     save_as=None,
-# ):
-#     # luminosity
-#     luminosity = 0
-#     for year in years:
-#         lum = 0
-#         for ch in channels:
-#             with open("../fileset/luminosity.json") as f:
-#                 lum += json.load(f)[ch][year] / 1000.0
-
-#         luminosity += lum / len(channels)
-
-#     for var in vars_to_plot:
-#         if var not in hists.keys():
-#             print(f"{var} not stored in hists")
-#             continue
-
-#         print(f"Will plot {var} histogram")
-
-#         # get histograms
-#         h = hists[var]
-
-#         if h.shape[0] == 0:  # skip empty histograms (such as lepton_pt for hadronic channel)
-#             print("Empty histogram ", var)
-#             continue
-
-#         # get samples existing in histogram
-#         samples = [h.axes[0].value(i) for i in range(len(h.axes[0].edges))]
-#         signal_labels = [label for label in samples if label in signals]
-#         bkg_labels = [label for label in samples if (label and label not in signal_labels and (label not in ["Data"]))]
-
-#         # get total yield of backgrounds per label
-#         # (sort by yield in fixed fj_pt histogram after pre-sel)
-#         order_dic = {}
-#         for bkg_label in bkg_labels:
-#             if "fj_pt" in hists.keys():
-#                 order_dic[plot_labels[bkg_label]] = hists["fj_pt"][{"samples": bkg_label}].sum()
-#             else:
-#                 order_dic[plot_labels[bkg_label]] = hists[var][{"samples": bkg_label}].sum()
-
-#         # data
-#         if add_data:
-#             data = h[{"samples": "Data"}]
-
-#         # signal
-#         signal = [h[{"samples": label}] for label in signal_labels]
-#         # scale signal for non-log plots
-#         if logy:
-#             mult_factor = 1
-#         else:
-#             mult_factor = mult
-#         signal_mult = [s * mult_factor for s in signal]
-
-#         # background
-#         bkg = [h[{"samples": label}] for label in bkg_labels]
-
-#         fig, (ax, rax) = plt.subplots(
-#             nrows=2,
-#             ncols=1,
-#             figsize=(8, 8),
-#             gridspec_kw={"height_ratios": (4, 1), "hspace": 0.07},
-#             sharex=True,
-#         )
-
-#         errps = {
-#             "hatch": "////",
-#             "facecolor": "none",
-#             "lw": 0,
-#             "color": "k",
-#             "edgecolor": (0, 0, 0, 0.5),
-#             "linewidth": 0,
-#             "alpha": 0.4,
-#         }
-
-#         # sum all of the background
-#         if len(bkg) > 0:
-#             tot = bkg[0].copy()
-#             for i, b in enumerate(bkg):
-#                 if i > 0:
-#                     tot = tot + b
-
-#             tot_val = tot.values()
-#             tot_val_zero_mask = tot_val == 0  # check if this is for the ratio or not
-#             tot_val[tot_val_zero_mask] = 1
-
-#             tot_err = np.sqrt(tot.variances())
-
-#         if add_data and data:
-#             data_err_opts = {
-#                 "linestyle": "none",
-#                 "marker": ".",
-#                 "markersize": 10.0,
-#                 "elinewidth": 1,
-#             }
-
-#             if blind_region and (("rec_higgs" in var) or ("ParT_mass" in var) or ("fj_mass" in var)):
-#                 if var == "fj_mass":
-#                     blind_region = [50, 130]
-#                 else:
-#                     blind_region = [90, 160]
-#                 massbins = data.axes[-1].edges
-#                 lv = int(np.searchsorted(massbins, blind_region[0], "right"))
-#                 rv = int(np.searchsorted(massbins, blind_region[1], "left") + 1)
-
-#                 data.view(flow=True)[lv:rv].value = 0
-#                 data.view(flow=True)[lv:rv].variance = 0
-
-#             hep.histplot(
-#                 data,
-#                 ax=ax,
-#                 histtype="errorbar",
-#                 color="k",
-#                 capsize=4,
-#                 yerr=True,
-#                 label="Data",
-#                 **data_err_opts,
-#                 flow="none",
-#             )
-
-#             if len(bkg) > 0:
-#                 from hist.intervals import ratio_uncertainty
-
-#                 data_val = data.values()
-#                 data_val[tot_val_zero_mask] = 1
-
-#                 yerr = ratio_uncertainty(data_val, tot_val, "poisson")
-
-#                 hep.histplot(
-#                     data_val / tot_val,
-#                     tot.axes[0].edges,
-#                     yerr=yerr,
-#                     ax=rax,
-#                     histtype="errorbar",
-#                     color="k",
-#                     capsize=4,
-#                     flow="none",
-#                 )
-
-#                 rax.axhline(1, ls="--", color="k")
-#                 rax.set_ylim(0.2, 1.8)
-
-#         # plot the background
-#         if len(bkg) > 0 and not only_sig:
-#             hep.histplot(
-#                 bkg,
-#                 ax=ax,
-#                 stack=True,
-#                 sort="yield",
-#                 edgecolor="black",
-#                 linewidth=1,
-#                 histtype="fill",
-#                 label=[plot_labels[bkg_label] for bkg_label in bkg_labels],
-#                 color=[color_by_sample[bkg_label] for bkg_label in bkg_labels],
-#                 flow="none",
-#             )
-#             ax.stairs(
-#                 values=tot.values() + tot_err,
-#                 baseline=tot.values() - tot_err,
-#                 edges=tot.axes[0].edges,
-#                 **errps,
-#                 label="Stat. unc.",
-#             )
-
-#         # ax.text(0.5, 0.9, text_, fontsize=14, transform=ax.transAxes, weight="bold")
-
-#         # plot the signal (times 10)
-#         if len(signal) > 0:
-#             tot_signal = None
-#             for i, sig in enumerate(signal_mult):
-#                 if tot_signal is None:
-#                     tot_signal = signal[i].copy()
-#                 else:
-#                     tot_signal = tot_signal + signal[i]
-
-#             # plot the total signal (w/o scaling)
-#             tot_signal *= mult_factor
-
-#             if mult_factor == 1:
-#                 siglabel = r"ggF+VBF"
-#             else:
-#                 siglabel = r"ggF+VBF $\times$" + f"{mult_factor}"
-
-#             hep.histplot(
-#                 tot_signal,
-#                 ax=ax,
-#                 label=siglabel,
-#                 linewidth=2,
-#                 color="tab:red",
-#                 flow="none",
-#             )
-#             # add MC stat errors
-#             ax.stairs(
-#                 values=tot_signal.values() + np.sqrt(tot_signal.values()),
-#                 baseline=tot_signal.values() - np.sqrt(tot_signal.values()),
-#                 edges=sig.axes[0].edges,
-#                 **errps,
-#             )
-
-#         ax.set_ylabel("Events")
-
-#         ax.set_xlabel("")
-#         rax.set_xlabel(f"{h.axes[-1].label}")  # assumes the variable to be plotted is at the last axis
-#         rax.set_ylabel("Data/MC", fontsize=20, labelpad=10)
-
-#         # get handles and labels of legend
-#         handles, labels = ax.get_legend_handles_labels()
-
-#         # append legend labels in order to a list
-#         summ = []
-#         for label in labels[: len(bkg_labels)]:
-#             summ.append(order_dic[label].value)
-#         # get indices of labels arranged by yield
-#         order = []
-#         for i in range(len(summ)):
-#             order.append(np.argmax(np.array(summ)))
-#             summ[np.argmax(np.array(summ))] = -100
-
-#         # plot data first, then bkg, then signal
-#         hand = [handles[-1]] + [handles[i] for i in order] + handles[len(bkg) : -1]
-#         lab = [labels[-1]] + [labels[i] for i in order] + labels[len(bkg) : -1]
-
-#         # plot bkg, then signal, then data
-#         hand = [handles[i] for i in order] + handles[len(bkg) : -1] + [handles[-1]]
-#         lab = [labels[i] for i in order] + labels[len(bkg) : -1] + [labels[-1]]
-
-#         lab_new, hand_new = [], []
-#         for i in range(len(lab)):
-#             # if "Stat" in lab[i]:
-#             #     continue
-
-#             lab_new.append(lab[i])
-#             hand_new.append(hand[i])
-
-#         ax.legend(
-#             [hand_new[idx] for idx in range(len(hand_new))],
-#             [lab_new[idx] for idx in range(len(lab_new))],
-#             ncol=2,
-#             fontsize=14,
-#         )
-
-#         _, a = ax.get_ylim()
-#         if logy or ("isolation" in var):
-#             ax.set_yscale("log")
-#             ax.set_ylim(1e-1, a * 15.7)
-#         else:
-#             ax.set_ylim(0, a * 1.7)
-
-#         if "Num" in var:
-#             ax.set_xlim(h.axes["var"].edges[0], h.axes["var"].edges[-1])
-#         else:
-#             ax.set_xlim(h.axes["var"].edges[0], h.axes["var"].edges[-1])
-
-#         hep.cms.lumitext("%.0f " % luminosity + r"fb$^{-1}$ (13 TeV)", ax=ax, fontsize=20)
-#         hep.cms.text("Work in Progress", ax=ax, fontsize=15)
-
-#         # save plot
-#         if not os.path.exists(outpath):
-#             os.makedirs(outpath)
-
-#         if save_as:
-#             plt.savefig(f"{outpath}/{save_as}_stacked_hists_{var}.pdf", bbox_inches="tight")
-#         else:
-#             plt.savefig(f"{outpath}/stacked_hists_{var}.pdf", bbox_inches="tight")
-
-
 def plot_hists(
     hists,
     years,
@@ -680,14 +402,13 @@ def plot_hists(
             )
 
             if len(bkg) > 0:
-                from hist.intervals import ratio_uncertainty
 
                 data_val = data.values()
                 data_val[tot_val_zero_mask] = 1
 
-                yerr = ratio_uncertainty(data_val, tot_val, "poisson")
-                # yerr = (tot_err_data / data_val) + (tot_err_MC / tot_val)    # add relative uncertainty (wrong)
-                # yerr = (data_val / tot_val) * np.sqrt((tot_err_data / data_val) ** 2 + (tot_err_MC / tot_val) ** 2)  # noqa: what ratio_uncertainty does
+                # from hist.intervals import ratio_uncertainty
+                # yerr = ratio_uncertainty(data_val, tot_val, "poisson")
+                yerr = np.sqrt(data_val) / tot_val
 
                 hep.histplot(
                     data_val / tot_val,
@@ -698,6 +419,13 @@ def plot_hists(
                     color="k",
                     capsize=4,
                     flow="none",
+                )
+                rax.stairs(
+                    values=1 + tot_err_MC / tot_val,
+                    baseline=1 - tot_err_MC / tot_val,
+                    edges=tot.axes[0].edges,
+                    **errps,
+                    label="Stat. unc.",
                 )
 
                 rax.axhline(1, ls="--", color="k")
@@ -740,9 +468,9 @@ def plot_hists(
             tot_signal *= mult_factor
 
             if mult_factor == 1:
-                siglabel = r"ggF+VBF"
+                siglabel = r"ggF+VBF+WH+ZH+ttH"
             else:
-                siglabel = r"ggF+VBF $\times$" + f"{mult_factor}"
+                siglabel = r"ggF+VBF+WH+ZH+ttH $\times$" + f"{mult_factor}"
 
             hep.histplot(
                 tot_signal,
@@ -798,6 +526,7 @@ def plot_hists(
         ax.legend(
             [hand_new[idx] for idx in range(len(hand_new))],
             [lab_new[idx] for idx in range(len(lab_new))],
+            title=text_,
             ncol=2,
             fontsize=14,
         )
@@ -995,14 +724,13 @@ def plot_hists_sb(
             )
 
             if len(bkg) > 0:
-                from hist.intervals import ratio_uncertainty
 
                 data_val = data.values()
                 data_val[tot_val_zero_mask] = 1
 
-                yerr = ratio_uncertainty(data_val, tot_val, "poisson")
-                # yerr = (tot_err_data / data_val) + (tot_err_MC / tot_val)    # add relative uncertainty (wrong)
-                # yerr = (data_val / tot_val) * np.sqrt((tot_err_data / data_val) ** 2 + (tot_err_MC / tot_val) ** 2)  # noqa: what ratio_uncertainty does
+                # from hist.intervals import ratio_uncertainty
+                # yerr = ratio_uncertainty(data_val, tot_val, "poisson")
+                yerr = np.sqrt(data_val) / tot_val
 
                 hep.histplot(
                     data_val / tot_val,
@@ -1013,6 +741,13 @@ def plot_hists_sb(
                     color="k",
                     capsize=4,
                     flow="none",
+                )
+                rax.stairs(
+                    values=1 + tot_err_MC / tot_val,
+                    baseline=1 - tot_err_MC / tot_val,
+                    edges=tot.axes[0].edges,
+                    **errps,
+                    label="Stat. unc.",
                 )
 
                 rax.axhline(1, ls="--", color="k")
@@ -1064,7 +799,7 @@ def plot_hists_sb(
                     tot_signal = tot_signal + signal[i]
 
             # plot the total signal (w/o scaling)
-            hep.histplot(tot_signal, ax=ax, label="ggF+VBF", linewidth=3, color="tab:red", flow="none")
+            hep.histplot(tot_signal, ax=ax, label="ggF+VBF+VH+ZH+ttH", linewidth=3, color="tab:red", flow="none")
             # add MC stat errors
             ax.stairs(
                 values=tot_signal.values() + np.sqrt(tot_signal.values()),

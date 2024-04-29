@@ -27,42 +27,45 @@ pd.set_option("mode.chained_assignment", None)
 
 # ("key", "value"): the "key" is the common naming (to commonalize over both channels)
 weights = {
+    # for signal
+    "weight_pdf_acceptance": {},
+    "weight_qcd_scale": {},
     # common for all samples
-    "weight_btagSFlightCorrelated": {"mu": "weight_btagSFlightCorrelated", "ele": "weight_btagSFlightCorrelated"},
-    "weight_btagSFbcCorrelated": {"mu": "weight_btagSFbcCorrelated", "ele": "weight_btagSFbcCorrelated"},
-    "weight_btagSFlight2016": {"mu": "weight_btagSFlight2016", "ele": "weight_btagSFlight2016"},
-    "weight_btagSFbc2016": {"mu": "weight_btagSFbc2016", "ele": "weight_btagSFbc2016"},
-    "weight_btagSFlight2016APV": {"mu": "weight_btagSFlight2016APV", "ele": "weight_btagSFlight2016APV"},
-    "weight_btagSFbc2016APV": {"mu": "weight_btagSFbc2016APV", "ele": "weight_btagSFbc2016APV"},
-    "weight_btagSFlight2017": {"mu": "weight_btagSFlight2017", "ele": "weight_btagSFlight2017"},
-    "weight_btagSFbc2017": {"mu": "weight_btagSFbc2017", "ele": "weight_btagSFbc2017"},
-    "weight_btagSFlight2018": {"mu": "weight_btagSFlight2018", "ele": "weight_btagSFlight2018"},
-    "weight_btagSFbc2018": {"mu": "weight_btagSFbc2018", "ele": "weight_btagSFbc2018"},
-    "weight_pileup": {"mu": "weight_mu_pileup", "ele": "weight_ele_pileup"},
-    "weight_pileupIDSF": {"mu": "weight_mu_pileupIDSFDown", "ele": "weight_ele_pileupIDSFDown"},
-    "weight_isolation_mu": {"mu": "weight_mu_isolation_muon", "ele": ""},
-    "weight_isolation_ele": {"mu": "", "ele": "weight_ele_isolation_electron"},
-    "weight_id_mu": {"mu": "weight_mu_id_muon", "ele": ""},
-    "weight_id_ele": {"mu": "", "ele": "weight_ele_id_electron"},
-    "weight_reco_ele": {"mu": "", "ele": "weight_ele_reco_electron"},
-    "weight_L1Prefiring": {"mu": "weight_mu_L1Prefiring", "ele": "weight_ele_L1Prefiring"},
-    "weight_trigger_ele": {"mu": "", "ele": "weight_ele_trigger_electron"},
-    "weight_trigger_iso_mu": {"mu": "weight_mu_trigger_iso_muon", "ele": ""},
-    "weight_trigger_noniso_mu": {"mu": "weight_mu_trigger_noniso_muon", "ele": ""},
-    # ggF & VBF
-    "weight_PSFSR": {"mu": "weight_mu_PSFSR", "ele": "weight_ele_PSFSR_weight"},
-    "weight_PSISR": {"mu": "weight_mu_PSISR", "ele": "weight_ele_PSISR_weight"},
-    # WJetsLNu & DY
-    "weight_d1kappa_EW": {"mu": "weight_mu_d1kappa_EW", "ele": "weight_ele_d1kappa_EW"},
-    # WJetsLNu
-    "weight_d1K_NLO": {"mu": "weight_mu_d1K_NLO", "ele": "weight_ele_d1K_NLO"},
-    "weight_d2K_NLO": {"mu": "weight_mu_d2K_NLO", "ele": "weight_ele_d2K_NLO"},
-    "weight_d3K_NLO": {"mu": "weight_mu_d3K_NLO", "ele": "weight_ele_d3K_NLO"},
-    "weight_W_d2kappa_EW": {"mu": "weight_mu_W_d2kappa_EW", "ele": "weight_ele_W_d2kappa_EW"},
-    "weight_W_d3kappa_EW": {"mu": "weight_mu_W_d3kappa_EW", "ele": "weight_ele_W_d3kappa_EW"},
-    # DY
-    "weight_Z_d2kappa_EW": {"mu": "weight_mu_Z_d2kappa_EW", "ele": "weight_ele_Z_d2kappa_EW"},
-    "weight_Z_d3kappa_EW": {"mu": "weight_mu_Z_d3kappa_EW", "ele": "weight_ele_Z_d3kappa_EW"},
+    # "weight_btagSFlightCorrelated": {"mu": "weight_btagSFlightCorrelated", "ele": "weight_btagSFlightCorrelated"},
+    # "weight_btagSFbcCorrelated": {"mu": "weight_btagSFbcCorrelated", "ele": "weight_btagSFbcCorrelated"},
+    # "weight_btagSFlight2016": {"mu": "weight_btagSFlight2016", "ele": "weight_btagSFlight2016"},
+    # "weight_btagSFbc2016": {"mu": "weight_btagSFbc2016", "ele": "weight_btagSFbc2016"},
+    # "weight_btagSFlight2016APV": {"mu": "weight_btagSFlight2016APV", "ele": "weight_btagSFlight2016APV"},
+    # "weight_btagSFbc2016APV": {"mu": "weight_btagSFbc2016APV", "ele": "weight_btagSFbc2016APV"},
+    # "weight_btagSFlight2017": {"mu": "weight_btagSFlight2017", "ele": "weight_btagSFlight2017"},
+    # "weight_btagSFbc2017": {"mu": "weight_btagSFbc2017", "ele": "weight_btagSFbc2017"},
+    # "weight_btagSFlight2018": {"mu": "weight_btagSFlight2018", "ele": "weight_btagSFlight2018"},
+    # "weight_btagSFbc2018": {"mu": "weight_btagSFbc2018", "ele": "weight_btagSFbc2018"},
+    # "weight_pileup": {"mu": "weight_mu_pileup", "ele": "weight_ele_pileup"},
+    # "weight_pileupIDSF": {"mu": "weight_mu_pileupIDSFDown", "ele": "weight_ele_pileupIDSFDown"},
+    # "weight_isolation_mu": {"mu": "weight_mu_isolation_muon", "ele": ""},
+    # "weight_isolation_ele": {"mu": "", "ele": "weight_ele_isolation_electron"},
+    # "weight_id_mu": {"mu": "weight_mu_id_muon", "ele": ""},
+    # "weight_id_ele": {"mu": "", "ele": "weight_ele_id_electron"},
+    # "weight_reco_ele": {"mu": "", "ele": "weight_ele_reco_electron"},
+    # "weight_L1Prefiring": {"mu": "weight_mu_L1Prefiring", "ele": "weight_ele_L1Prefiring"},
+    # "weight_trigger_ele": {"mu": "", "ele": "weight_ele_trigger_electron"},
+    # "weight_trigger_iso_mu": {"mu": "weight_mu_trigger_iso_muon", "ele": ""},
+    # "weight_trigger_noniso_mu": {"mu": "weight_mu_trigger_noniso_muon", "ele": ""},
+    # # ggF & VBF
+    # "weight_PSFSR": {"mu": "weight_mu_PSFSR", "ele": "weight_ele_PSFSR_weight"},
+    # "weight_PSISR": {"mu": "weight_mu_PSISR", "ele": "weight_ele_PSISR_weight"},
+    # # WJetsLNu & DY
+    # "weight_d1kappa_EW": {"mu": "weight_mu_d1kappa_EW", "ele": "weight_ele_d1kappa_EW"},
+    # # WJetsLNu
+    # "weight_d1K_NLO": {"mu": "weight_mu_d1K_NLO", "ele": "weight_ele_d1K_NLO"},
+    # "weight_d2K_NLO": {"mu": "weight_mu_d2K_NLO", "ele": "weight_ele_d2K_NLO"},
+    # "weight_d3K_NLO": {"mu": "weight_mu_d3K_NLO", "ele": "weight_ele_d3K_NLO"},
+    # "weight_W_d2kappa_EW": {"mu": "weight_mu_W_d2kappa_EW", "ele": "weight_ele_W_d2kappa_EW"},
+    # "weight_W_d3kappa_EW": {"mu": "weight_mu_W_d3kappa_EW", "ele": "weight_ele_W_d3kappa_EW"},
+    # # DY
+    # "weight_Z_d2kappa_EW": {"mu": "weight_mu_Z_d2kappa_EW", "ele": "weight_ele_Z_d2kappa_EW"},
+    # "weight_Z_d3kappa_EW": {"mu": "weight_mu_Z_d3kappa_EW", "ele": "weight_ele_Z_d3kappa_EW"},
 }
 
 AK8_systs = [
@@ -292,52 +295,110 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
 
                         # retrieve UP variations for MC
                         if not is_data:
-                            try:
-                                w = df[f"{weights[weight][ch]}Up"] * event_weight
-                                if "btag" in weight:
-                                    w *= W
-                            except KeyError:
-                                w = nominal
 
-                        hists.fill(
-                            Sample=sample_to_use,
-                            Systematic=f"{weight}_up",
-                            Region=region,
-                            mass_observable=df["rec_higgs_m"],
-                            weight=w,
-                        )
+                            if weight == "weight_pdf_acceptance":
+                                if sample_to_use in utils.sigs:
+                                    pdfweights = df.loc[:, df.columns.str.contains("pdf")] * event_weight
 
-                        # retrieve DOWN variations for MC
-                        if not is_data:
-                            try:
-                                w = df[f"{weights[weight][ch]}Down"] * event_weight
-                                if "btag" in weight:
-                                    w *= W
-                            except KeyError:
-                                w = nominal
+                                    abs_unc = np.linalg.norm((pdfweights.values - np.array(nominal).reshape(-1, 1)), axis=1)
+                                    # cap at 100% uncertainty
+                                    rel_unc = np.clip(abs_unc / nominal, 0, 1)
+                                    shape_up = nominal * (1 + rel_unc)
+                                    shape_down = nominal * (1 - rel_unc)
+                                else:
+                                    shape_up = nominal
+                                    shape_down = nominal
 
-                        hists.fill(
-                            Sample=sample_to_use,
-                            Systematic=f"{weight}_down",
-                            Region=region,
-                            mass_observable=df["rec_higgs_m"],
-                            weight=w,
-                        )
+                                hists.fill(
+                                    Sample=sample_to_use,
+                                    Systematic="weight_pdfUp",
+                                    Region=region,
+                                    mass_observable=df["rec_higgs_m"],
+                                    weight=shape_up,
+                                )
 
-                    for rec_higgs_m_variation in AK8_systs:
+                                hists.fill(
+                                    Sample=sample_to_use,
+                                    Systematic="weight_pdfDown",
+                                    Region=region,
+                                    mass_observable=df["rec_higgs_m"],
+                                    weight=shape_down,
+                                )
 
-                        if is_data:
-                            x = "rec_higgs_m"
-                        else:
-                            x = rec_higgs_m_variation
+                            elif weight == "weight_qcd_scale":
+                                if sample_to_use in utils.sigs:
+                                    scaleweights = df.loc[:, df.columns.str.contains("weight_scale")] * event_weight
 
-                        hists.fill(
-                            Sample=sample_to_use,
-                            Systematic=rec_higgs_m_variation,
-                            Region=region,
-                            mass_observable=df[x],
-                            weight=nominal,
-                        )
+                                    shape_up = np.max(scaleweights.values, axis=1)
+                                    shape_down = np.min(scaleweights.values, axis=1)
+                                else:
+                                    shape_up = nominal
+                                    shape_down = nominal
+
+                                hists.fill(
+                                    Sample=sample_to_use,
+                                    Systematic="weight_scaleUp",
+                                    Region=region,
+                                    mass_observable=df["rec_higgs_m"],
+                                    weight=shape_up,
+                                )
+
+                                hists.fill(
+                                    Sample=sample_to_use,
+                                    Systematic="weight_scaleDown",
+                                    Region=region,
+                                    mass_observable=df["rec_higgs_m"],
+                                    weight=shape_down,
+                                )
+
+                            else:
+
+                                try:
+                                    w = df[f"{weights[weight][ch]}Up"] * event_weight
+                                    if "btag" in weight:
+                                        w *= W
+                                except KeyError:
+                                    w = nominal
+
+                                hists.fill(
+                                    Sample=sample_to_use,
+                                    Systematic=f"{weight}_up",
+                                    Region=region,
+                                    mass_observable=df["rec_higgs_m"],
+                                    weight=w,
+                                )
+
+                                # retrieve DOWN variations for MC
+                                if not is_data:
+                                    try:
+                                        w = df[f"{weights[weight][ch]}Down"] * event_weight
+                                        if "btag" in weight:
+                                            w *= W
+                                    except KeyError:
+                                        w = nominal
+
+                                hists.fill(
+                                    Sample=sample_to_use,
+                                    Systematic=f"{weight}_down",
+                                    Region=region,
+                                    mass_observable=df["rec_higgs_m"],
+                                    weight=w,
+                                )
+
+                            for rec_higgs_m_variation in AK8_systs:
+
+                                if is_data:
+                                    x = "rec_higgs_m"
+                                else:
+                                    x = rec_higgs_m_variation
+
+                                hists.fill(
+                                    Sample=sample_to_use,
+                                    Systematic=rec_higgs_m_variation,
+                                    Region=region,
+                                    mass_observable=df[x],
+                                    weight=nominal,
+                                )
 
     logging.info(hists)
 
