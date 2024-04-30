@@ -128,7 +128,7 @@ seed=$seed numtoys=$numtoys"
 ####################################################################################################
 
 dataset=data_obs
-cards_dir="/uscms/home/fmokhtar/nobackup/boostedhiggs/combine/templates/v4/datacards"
+cards_dir="/uscms/home/fmokhtar/nobackup/boostedhiggs/combine/templates/v5/datacards"
 cp ${cards_dir}/testModel.root testModel.root # TODO: avoid this
 CMS_PARAMS_LABEL="CMS_HWW_boosted"
 
@@ -151,70 +151,19 @@ chmod +x ${logsdir}
 combined_datacard=${outdir}/combined.txt
 ws=${outdir}/workspace.root
 
-# ADD REGIONS
-sr1="VBF97"
-sr2="ggF975pt250to300"
-sr3="ggF975pt300to450"
-sr4="ggF98pt450toInf"
+# # ADD REGIONS
+sr1="VBF"
+sr2="ggFpt250to300"
+sr3="ggFpt300to450"
+sr4="ggFpt450toInf"
+# ccargs="SR1=${cards_dir}/${sr1}.txt"
+# ccargs="SR1=${cards_dir}/${sr1}.txt SR2=${cards_dir}/${sr2}.txt"
+ccargs="SR1=${cards_dir}/${sr1}.txt SR2=${cards_dir}/${sr2}.txt SR3=${cards_dir}/${sr3}.txt SR4=${cards_dir}/${sr4}.txt"
+
 cr1="TopCR"
 cr2="WJetsCR"
+ccargs+=" CR1=${cards_dir}/${cr1}.txt CR2=${cards_dir}/${cr2}.txt"
 
-
-
-
-
-########################### with no systematics (no rateparam, no mcstats) START
-# ccargs="SR1=${cards_dir}/${sr1}.txt"   # 1.5553
-# ccargs="SR1=${cards_dir}/${sr1}.txt CR1=${cards_dir}/${cr1}.txt"   # 1.57627
-# ccargs="SR1=${cards_dir}/${sr1}.txt CR2=${cards_dir}/${cr2}.txt"   # 1.57859
-# ccargs="SR1=${cards_dir}/${sr1}.txt CR1=${cards_dir}/${cr1}.txt CR2=${cards_dir}/${cr2}.txt"   # 1.57867
-
-# ccargs="SR2=${cards_dir}/${sr2}.txt"   # 0.777354
-# ccargs="SR2=${cards_dir}/${sr2}.txt CR1=${cards_dir}/${cr1}.txt"   # 0.835943
-# ccargs="SR2=${cards_dir}/${sr2}.txt CR2=${cards_dir}/${cr2}.txt"   # 0.84328
-# ccargs="SR2=${cards_dir}/${sr2}.txt CR1=${cards_dir}/${cr1}.txt CR2=${cards_dir}/${cr2}.txt"   # 0.843516
-
-# ccargs="SR3=${cards_dir}/${sr3}.txt"   # 1.03593
-# ccargs="SR3=${cards_dir}/${sr3}.txt CR1=${cards_dir}/${cr1}.txt"   # 1.12888
-# ccargs="SR3=${cards_dir}/${sr3}.txt CR2=${cards_dir}/${cr2}.txt"   # 1.14119
-# ccargs="SR3=${cards_dir}/${sr3}.txt CR1=${cards_dir}/${cr1}.txt CR2=${cards_dir}/${cr2}.txt"   # 1.14158
-
-# ccargs="SR1=${cards_dir}/${sr1}.txt SR2=${cards_dir}/${sr2}.txt"   # 1.69627
-# ccargs="SR2=${cards_dir}/${sr2}.txt SR3=${cards_dir}/${sr3}.txt"   # 1.21103
-
-# ccargs="SR1=${cards_dir}/${sr1}.txt SR2=${cards_dir}/${sr2}.txt SR3=${cards_dir}/${sr3}.txt"   # 1.89618
-# ccargs="SR1=${cards_dir}/${sr1}.txt SR2=${cards_dir}/${sr2}.txt SR3=${cards_dir}/${sr3}.txt CR1=${cards_dir}/${cr1}.txt CR2=${cards_dir}/${cr2}.txt"   # 2.11886
-########################### with no systematics (no rateparam, no mcstats) END
-
-
-########################### with no systematics but with mcstats (no rateparam) START
-# ccargs="SR1=${cards_dir}/${sr1}.txt"   # 1.43296
-# ccargs="SR1=${cards_dir}/${sr1}.txt CR1=${cards_dir}/${cr1}.txt"   # 1.44771
-# ccargs="SR1=${cards_dir}/${sr1}.txt CR2=${cards_dir}/${cr2}.txt"   # 1.44797
-# ccargs="SR1=${cards_dir}/${sr1}.txt CR1=${cards_dir}/${cr1}.txt CR2=${cards_dir}/${cr2}.txt"   # 1.44959
-
-# ccargs="SR2=${cards_dir}/${sr2}.txt"   # 0.683418
-# ccargs="SR2=${cards_dir}/${sr2}.txt CR1=${cards_dir}/${cr1}.txt"   # 0.718136
-# ccargs="SR2=${cards_dir}/${sr2}.txt CR2=${cards_dir}/${cr2}.txt"   # 0.71889
-# ccargs="SR2=${cards_dir}/${sr2}.txt CR1=${cards_dir}/${cr1}.txt CR2=${cards_dir}/${cr2}.txt"   # 0.722965
-
-# ccargs="SR3=${cards_dir}/${sr3}.txt"   # 0.933632
-# ccargs="SR3=${cards_dir}/${sr3}.txt CR1=${cards_dir}/${cr1}.txt"   # 0.993122
-# ccargs="SR3=${cards_dir}/${sr3}.txt CR2=${cards_dir}/${cr2}.txt"   # 0.994457
-# ccargs="SR3=${cards_dir}/${sr3}.txt CR1=${cards_dir}/${cr1}.txt CR2=${cards_dir}/${cr2}.txt"   # 1.00188
-
-# ccargs="SR1=${cards_dir}/${sr1}.txt SR2=${cards_dir}/${sr2}.txt SR3=${cards_dir}/${sr3}.txt"   # 1.74406
-ccargs="SR1=${cards_dir}/${sr1}.txt SR2=${cards_dir}/${sr2}.txt SR3=${cards_dir}/${sr3}.txt CR1=${cards_dir}/${cr1}.txt CR2=${cards_dir}/${cr2}.txt"   # 1.88838
-########################### with no systematics but with mcstats (no rateparam) END
-
-
-########################### with shape systematics and mcstats (no rateparam) START
-# ccargs="SR1=${cards_dir}/${sr1}.txt SR2=${cards_dir}/${sr2}.txt SR3=${cards_dir}/${sr3}.txt"   # 1.3869
-# ccargs="SR1=${cards_dir}/${sr1}.txt SR2=${cards_dir}/${sr2}.txt SR3=${cards_dir}/${sr3}.txt CR1=${cards_dir}/${cr1}.txt CR2=${cards_dir}/${cr2}.txt"   # 1.82951
-###########################with shape systematics and mcstats (no rateparam) START END
-
-# ccargs="SR2=${cards_dir}/${sr2}.txt"   
-# ccargs="SR2=${cards_dir}/${sr2}.txt CR1=${cards_dir}/${cr1}.txt CR2=${cards_dir}/${cr2}.txt"
 
 if [ $workspace = 1 ]; then
     echo "Combining cards:"
@@ -225,7 +174,13 @@ if [ $workspace = 1 ]; then
     combineCards.py $ccargs > $combined_datacard
 
     echo "Running text2workspace"
-    text2workspace.py $combined_datacard --channel-masks -o $ws 2>&1 | tee $logsdir/text2workspace.txt
+    
+    # single POI
+    text2workspace.py $combined_datacard -o $ws 2>&1 | tee $logsdir/text2workspace.txt
+
+    # seperate POIs
+    # text2workspace.py $combined_datacard -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel --PO verbose --PO 'map=.*/ggF:r_ggF[1,0,10]' --PO 'map=.*/VBF:r_VBF[1,0,10]' --PO 'map=.*/WH:r_WH[1,0,10]' --PO 'map=.*/ZH:r_ZH[1,0,10]' --PO 'map=.*/ttH:r_ttH[1,0,10]' -o $ws 2>&1 | tee $logsdir/text2workspace.txt
+
 else
     if [ ! -f "$ws" ]; then
         echo "Workspace doesn't exist! Use the -w|--workspace option to make workspace first"
@@ -237,20 +192,47 @@ fi
 if [ $significance = 1 ]; then
     echo "Expected significance"
 
-    # combine -M Significance -d $ws -m 125 -t -1 --expectSignal=1 --rMin -1 --rMax 5
+    # single POI
+    combine -M Significance -d $ws -t -1 --setParameters r=1
 
-    combine -M Significance -d $ws -t -1 --expectSignal 1
+    # seperate POIs
+    # ggF
+    # combine -M Significance -d $ws -t -1 --setParameters r_ggF=1,r_VBF=1,r_WH=1,r_ZH=1,r_ttH=1 --redefineSignalPOIs r_ggF --freezeParameters r_VBF,r_WH,r_ZH,r_ttH
+
+    # VBF
+    # combine -M Significance -d $ws -t -1 --setParameters r_ggF=1,r_VBF=1,r_WH=1,r_ZH=1,r_ttH=1 --redefineSignalPOIs r_VBF --freezeParameters r_ggF,r_WH,r_ZH,r_ttH
+
+
+fi
+
+if [ $dfit = 1 ]; then
+    echo "Fit Diagnostics"
+    combine -M FitDiagnostics -m 125 -d $ws \
+    --expectSignal=1 --saveWorkspace --saveToys -n Blinded --ignoreCovWarning \
+    --saveShapes --saveNormalizations --saveWithUncertainties --saveOverallShapes 2>&1 | tee $logsdir/FitDiagnosticsBlinded.txt
 
 fi
 
 if [ $dfit_asimov = 1 ]; then
 
-    echo "Fit Diagnostics"
-    combine -M FitDiagnostics -m 125 -d $ws \
-    -t -1 --expectSignal=1 --saveWorkspace --saveToys -n Asimov --ignoreCovWarning \
-    --saveShapes --saveNormalizations --saveWithUncertainties --saveOverallShapes 2>&1 | tee $logsdir/FitDiagnostics.txt
+    # echo "Fit Diagnostics Asimov"
+    # combine -M FitDiagnostics -m 125 -d $ws \
+    # -t -1 --expectSignal=1 --saveWorkspace --saveToys -n Asimov --ignoreCovWarning \
+    # --saveShapes --saveNormalizations --saveWithUncertainties --saveOverallShapes 2>&1 | tee $logsdir/FitDiagnosticsAsimov.txt
 
-    # python diffNuisances.py fitDiagnostfitDiagnosticsAsimov.root --abs
+
+
+    echo "Fit Diagnostics Asimov"
+    combine -M FitDiagnostics -m 125 -d $ws \
+    -t -1 --setParameters r_ggF=1,r_VBF=1,r_VH=1,r_ttH=1 --saveWorkspace --saveToys -n Asimov --ignoreCovWarning \
+    --saveShapes --saveNormalizations --saveWithUncertainties --saveOverallShapes 2>&1 | tee $logsdir/FitDiagnosticsAsimov.txt
+
+
+
+
+
+
+    # python diffNuisances.py fitDiagnosticsAsimov.root --abs
 fi
 
 
@@ -267,6 +249,8 @@ fi
 if [ $impactsi = 1 ]; then
 
     echo "Initial fit for impacts"
+    # combineTool.py -M Impacts -d $ws -t -1 --rMin -1 --rMax 2 -m 125 --robustFit 1 --doInitialFit   # old
+
     combineTool.py -M Impacts -d $ws -t -1 --rMin -1 --rMax 2 -m 125 --robustFit 1 --doInitialFit --expectSignal 1
     combineTool.py -M Impacts -d $ws -t -1 --rMin -1 --rMax 2 -m 125 --robustFit 1 --doFits --expectSignal 1 --parallel 50
     combineTool.py -M Impacts -d $ws -t -1 --rMin -1 --rMax 2 -m 125 --robustFit 1 --output impacts.json --expectSignal 1
@@ -274,3 +258,13 @@ if [ $impactsi = 1 ]; then
 
 fi
 
+
+if [ $goftoys = 1 ]; then
+    echo "GoF on toys"
+    combine -M GoodnessOfFit -d $ws --algo=saturated -t 100 -s 1 -m 125 -n Toys
+fi
+
+if [ $gofdata = 1 ]; then
+    echo "GoF on data"
+    combine -M GoodnessOfFit -d $ws --algo=saturated -s 1 -m 125 -n Observed
+fi

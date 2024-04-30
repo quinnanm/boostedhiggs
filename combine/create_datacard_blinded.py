@@ -20,8 +20,8 @@ import pandas as pd
 import rhalphalib as rl
 from systematics import systs_from_parquets, systs_not_from_parquets
 from utils import (
-    blindBins,
-    get_template,
+    blindBins_diffbins,
+    get_template_diffbins,
     labels,
     load_templates,
     samples,
@@ -48,7 +48,7 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
 
     # define the signal and control regions
     SIG_regions = ["VBF97", "ggF975pt250to300", "ggF975pt300to450", "ggF975pt450toInf"]
-    CONTROL_regions = ["TopCR", "WJetsCR97"]
+    CONTROL_regions = ["TopCR", "WJetsCR"]
 
     if add_ttbar_constraint:
         ttbarnormSF = rl.IndependentParameter("ttbarnormSF", 1.0, 0, 10)
@@ -57,8 +57,15 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
         wjetsnormSF = rl.IndependentParameter("wjetsnormSF", 1.0, 0, 10)
 
     # fill datacard with systematics and rates
-    h = blindBins(hists_templates.copy())
     for ChName in SIG_regions + CONTROL_regions:
+
+        if ChName in SIG_regions:
+            h = blindBins_diffbins(hists_templates[ChName].copy())
+        else:
+            h = hists_templates[ChName].copy()
+        # h = blindBins_diffbins(hists_templates[ChName].copy())
+        # h = hists_templates[ChName].copy()
+
         Samples = samples.copy()
 
         ch = rl.Channel(ChName)
@@ -66,11 +73,11 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
 
         for sName in Samples:
 
-            if "CR" in ChName:  # TODO: remove signal from control regions
+            if "CR" in ChName:  # remove signal from control regions
                 if sName in sigs:
                     continue
 
-            templ = get_template(h, sName, ChName)
+            templ = get_template_diffbins(h, sName)
             if templ == 0:
                 continue
             stype = rl.Sample.SIGNAL if sName in sigs else rl.Sample.BACKGROUND
@@ -94,9 +101,9 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
             # SYSTEMATICS FROM PARQUETS
             for syst_on_sample in ["all_samples", sName]:  # apply common systs and per sample systs
                 for sys_name, sys_value in sys_from_parquets[syst_on_sample].items():
-                    syst_up = h[{"Sample": sName, "Region": ChName, "Systematic": sys_name + "_up"}].values()
-                    syst_do = h[{"Sample": sName, "Region": ChName, "Systematic": sys_name + "_down"}].values()
-                    nominal = h[{"Sample": sName, "Region": ChName, "Systematic": "nominal"}].values()
+                    syst_up = h[{"Sample": sName, "Systematic": sys_name + "_up"}].values()
+                    syst_do = h[{"Sample": sName, "Systematic": sys_name + "_down"}].values()
+                    nominal = h[{"Sample": sName, "Systematic": "nominal"}].values()
 
                     if sys_value.combinePrior == "lnN":
                         eff_up = shape_to_num(syst_up, nominal)
@@ -114,7 +121,8 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
             ch.addSample(sample)
 
         # add data
-        data_obs = get_template(h, "Data", ChName)
+        data_obs = get_template_diffbins(h, "Data")
+
         ch.setObservation(data_obs)
 
         if "CR" not in ChName:
@@ -134,7 +142,7 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
             ttbarpass.setParamEffect(ttbarnormSF, 1 * ttbarnormSF)
 
     if add_wjets_constraint:
-        failCh = model["WJetsCR97"]
+        failCh = model["WJetsCR"]
 
         wjetsfail = failCh["wjets"]
         wjetsfail.setParamEffect(wjetsnormSF, 1 * wjetsnormSF)
@@ -161,7 +169,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # python create_datacard.py --years 2016,2016APV,2017,2018 --channels mu,ele --outdir templates/v4
+    # python create_datacard_diffbins.py --years 2016,2016APV,2017,2018 --channels mu,ele --outdir templates/v7
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--years", default="2017", help="years separated by commas")

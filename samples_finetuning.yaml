@@ -28,10 +28,11 @@ wjets:
   - WJetsToLNu_1J
   - WJetsToLNu_2J
 signal:
-  - BulkGravitonToHHTo4W_JHUGen_MX-600to6000_MH-15to250
-  - BulkGravitonToHHTo4W_JHUGen_MX-600to6000_MH-15to250_ext1
-  - BulkGravitonToHHTo4W_JHUGen_MX-600to6000_MH-15to250_v2
-  - BulkGravitonToHHTo4W_JHUGen_MX-600to6000_MH-15to250_v2_ext1
-  - JHUVariableWMass_part1
-  - JHUVariableWMass_part2
-  - JHUVariableWMass_part3
+  # - BulkGravitonToHHTo4W_JHUGen_MX-600to6000_MH-15to250
+  # - BulkGravitonToHHTo4W_JHUGen_MX-600to6000_MH-15to250_ext1
+  # - BulkGravitonToHHTo4W_JHUGen_MX-600to6000_MH-15to250_v2
+  # - BulkGravitonToHHTo4W_JHUGen_MX-600to6000_MH-15to250_v2_ext1
+  # - JHUVariableWMass_part1
+  # - JHUVariableWMass_part2
+  # - JHUVariableWMass_part3
+  - GluGluHToWW_Pt-200ToInf_M-125

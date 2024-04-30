@@ -175,3 +175,5 @@ finetuning:
     JHUVariableWMass_part1: 10
     JHUVariableWMass_part2: 10
     JHUVariableWMass_part3: 10
+v2_3:
+    GluGluHToWW_Pt-200ToInf_M-125: 20

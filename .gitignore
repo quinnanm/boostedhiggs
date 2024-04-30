@@ -15,7 +15,7 @@ binder/DY*
 
 eos/
 
-*.root
+# *.root
 *.parquet
 # *.pkl
 *.pdf

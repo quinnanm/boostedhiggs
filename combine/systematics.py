@@ -230,10 +230,12 @@ def systs_from_parquets(years):
             ["WJetsLNu"],
         ),
         # acceptance unc.
-        "weight_pdf_acceptance": (rl.NuisanceParameter("PDFscale_acc", "shape"), ["ggF", "VBF", "WH", "ZH"]),
+        # "weight_pdf_acceptance": (rl.NuisanceParameter("PDFscale_acc", "shape"), ["ggF", "VBF", "WH", "ZH"]),
         "weight_qcd_scale": (
             rl.NuisanceParameter("QCDscale_acc", "shape"),
-            ["ggF", "VBF", "WH", "ZH", "WJetsLNu", "TTbar"],
+            # ["ggF", "VBF", "WH", "ZH", "WJetsLNu", "TTbar"],
+            ["ggF", "VBF", "WH", "ZH", "WJetsLNu"],
+
         ),
         # "weight_d1kappa_EW": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d1kappa_EW_{yearlabel}", "lnN"), ["DYJets"]), # noqa
         # "weight_Z_d2kappa_EW": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d2kappa_EW_{yearlabel}", "lnN"), ["DYJets"]), # noqa
