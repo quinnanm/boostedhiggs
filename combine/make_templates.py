@@ -303,7 +303,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                                     shape_up = nominal * (1 + rel_unc)
                                     shape_down = nominal * (1 - rel_unc)
 
-                                    shape_down[shape_down < 0] = 1e-5
+                                    shape_down[shape_down < 0] = 1e-3
                                 else:
                                     shape_up = nominal
                                     shape_down = nominal
@@ -387,8 +387,8 @@ def fix_neg_yields(h):
                 region_index = np.argmax(np.array(h.axes["Region"]) == region)
 
                 for neg_bin in neg_bins:
-                    h.view(flow=True)[sample_index, :, region_index, neg_bin + 1].value = 1e-5
-                    h.view(flow=True)[sample_index, :, region_index, neg_bin + 1].variance = 1e-5
+                    h.view(flow=True)[sample_index, :, region_index, neg_bin + 1].value = 1e-3
+                    h.view(flow=True)[sample_index, :, region_index, neg_bin + 1].variance = 1e-3
 
 
 def main(args):
