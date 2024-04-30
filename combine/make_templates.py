@@ -27,8 +27,8 @@ pd.set_option("mode.chained_assignment", None)
 
 # ("key", "value"): the "key" is the common naming (to commonalize over both channels)
 weights = {
-    # "weight_pdf_acceptance": {},
-    # "weight_qcd_scale": {},
+    "weight_pdf_acceptance": {},
+    "weight_qcd_scale": {},
     # common for all samples
     "weight_btagSFlightCorrelated": {"mu": "weight_btagSFlightCorrelated", "ele": "weight_btagSFlightCorrelated"},
     "weight_btagSFbcCorrelated": {"mu": "weight_btagSFbcCorrelated", "ele": "weight_btagSFbcCorrelated"},
@@ -286,101 +286,70 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                     # add Up/Down variations
                     for weight in weights:
 
-                        if weight == "weight_pdf_acceptance":
-                            if sample_to_use in ["ggF", "VBF", "VH", "ZH"]:
+                        if is_data:  # for data (fill as 1 for Up and Down variations)
+                            shape_up = nominal
+                            shape_down = nominal
 
-                                pdfweights = df.loc[:, df.columns.str.contains("pdf")]
+                        else:  # retrieve Up/Down variations for MC
 
-                                abs_unc = np.linalg.norm((pdfweights.values - np.array(nominal).reshape(-1, 1)), axis=1)
-                                # cap at 100% uncertainty
-                                rel_unc = np.clip(abs_unc / nominal, 0, 1)
-                                shape_up = nominal * (1 + rel_unc)
-                                shape_down = nominal * (1 - rel_unc)
+                            if weight == "weight_pdf_acceptance":
+                                if sample_to_use in ["ggF", "VBF", "VH", "ZH"]:
 
-                                shape_down[shape_down < 0] = 0.0001
-                            else:
-                                shape_up = nominal
-                                shape_down = nominal
+                                    pdfweights = df.loc[:, df.columns.str.contains("pdf")]
 
-                            hists.fill(
-                                Sample=sample_to_use,
-                                Systematic="weight_pdf_up",
-                                Region=region,
-                                mass_observable=df["rec_higgs_m"],
-                                weight=shape_up,
-                            )
+                                    abs_unc = np.linalg.norm((pdfweights.values - np.array(nominal).reshape(-1, 1)), axis=1)
+                                    # cap at 100% uncertainty
+                                    rel_unc = np.clip(abs_unc / nominal, 0, 1)
+                                    shape_up = nominal * (1 + rel_unc)
+                                    shape_down = nominal * (1 - rel_unc)
 
-                            hists.fill(
-                                Sample=sample_to_use,
-                                Systematic="weight_pdf_down",
-                                Region=region,
-                                mass_observable=df["rec_higgs_m"],
-                                weight=shape_down,
-                            )
+                                    shape_down[shape_down < 0] = 0.0001
+                                else:
+                                    shape_up = nominal
+                                    shape_down = nominal
 
-                        elif weight == "weight_qcd_scale":
-                            if sample_to_use in ["ggF", "VBF", "VH", "ZH", "WJetsLNu", "TTbar"]:
-                                scaleweights = df.loc[:, df.columns.str.contains("weight_scale")]
+                            elif weight == "weight_qcd_scale":
+                                if sample_to_use in ["ggF", "VBF", "VH", "ZH", "WJetsLNu", "TTbar"]:
+                                    scaleweights = df.loc[:, df.columns.str.contains("weight_scale")]
 
-                                shape_up = np.max(scaleweights.values, axis=1) * nominal
-                                shape_down = np.min(scaleweights.values, axis=1) * nominal
+                                    shape_up = np.max(scaleweights.values, axis=1) * nominal
+                                    shape_down = np.min(scaleweights.values, axis=1) * nominal
 
-                            else:
-                                shape_up = nominal
-                                shape_down = nominal
+                                else:
+                                    shape_up = nominal
+                                    shape_down = nominal
 
-                            hists.fill(
-                                Sample=sample_to_use,
-                                Systematic="weight_scale_up",
-                                Region=region,
-                                mass_observable=df["rec_higgs_m"],
-                                weight=shape_up,
-                            )
+                            elif "btag" in weight:
+                                try:
+                                    shape_up = df[f"{weights[weight][ch]}Up"] * nominal
+                                    shape_down = df[f"{weights[weight][ch]}Down"] * nominal
+                                except KeyError:
+                                    shape_up = nominal
+                                    shape_down = nominal
 
-                            hists.fill(
-                                Sample=sample_to_use,
-                                Systematic="weight_scale_down",
-                                Region=region,
-                                mass_observable=df["rec_higgs_m"],
-                                weight=shape_down,
-                            )
-
-                        else:  # all the other weights
-                            if is_data:  # for data (fill as 1 for up and down variations)
-                                shape_up = nominal
-                                shape_down = nominal
-
-                            # retrieve Up variations for MC
                             else:
                                 try:
                                     shape_up = df[f"{weights[weight][ch]}Up"] * event_weight
-                                    if "btag" in weight:
-                                        shape_up *= df["weight_btag"]
+                                    shape_down = df[f"{weights[weight][ch]}Down"] * event_weight
                                 except KeyError:
                                     shape_up = nominal
-
-                                try:
-                                    shape_down = df[f"{weights[weight][ch]}Down"] * event_weight
-                                    if "btag" in weight:
-                                        shape_down *= df["weight_btag"]
-                                except KeyError:
                                     shape_down = nominal
 
-                            hists.fill(
-                                Sample=sample_to_use,
-                                Systematic=f"{weight}_up",
-                                Region=region,
-                                mass_observable=df["rec_higgs_m"],
-                                weight=shape_up,
-                            )
+                        hists.fill(
+                            Sample=sample_to_use,
+                            Systematic=f"{weight}_up",
+                            Region=region,
+                            mass_observable=df["rec_higgs_m"],
+                            weight=shape_up,
+                        )
 
-                            hists.fill(
-                                Sample=sample_to_use,
-                                Systematic=f"{weight}_down",
-                                Region=region,
-                                mass_observable=df["rec_higgs_m"],
-                                weight=shape_down,
-                            )
+                        hists.fill(
+                            Sample=sample_to_use,
+                            Systematic=f"{weight}_down",
+                            Region=region,
+                            mass_observable=df["rec_higgs_m"],
+                            weight=shape_down,
+                        )
 
                     for rec_higgs_m_variation in AK8_systs:
 
