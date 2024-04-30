@@ -47,3 +47,7 @@ Oct9*
 ak8_MD_vminclv2ParT_manual_fixwrap*
 
 combine/CMSSW*
+
+rootfiles/
+
+binder/*.root
