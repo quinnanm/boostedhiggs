@@ -289,6 +289,8 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                                 rel_unc = np.clip(abs_unc / nominal, 0, 1)
                                 shape_up = nominal * (1 + rel_unc)
                                 shape_down = nominal * (1 - rel_unc)
+
+                                shape_down[shape_down < 0] = 0
                             else:
                                 shape_up = nominal
                                 shape_down = nominal
