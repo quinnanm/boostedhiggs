@@ -53,11 +53,6 @@ def systs_not_from_parquets(years: List[str], lep_channels: List[str]):
     systs_dict["all_samples"]["BR_hww"] = rl.NuisanceParameter("BR_hww", "lnN")
     systs_dict_values["all_samples"]["BR_hww"] = (1.0153, 0.9848)
 
-    systs_dict["all_samples"]["muon_mini-isolation_SF"] = rl.NuisanceParameter(
-        "muon_mini-isolation_SF", "lnN"
-    )  # TODO: apply only for muon channel
-    systs_dict_values["all_samples"]["muon_mini-isolation_SF"] = (1.02, 0.98)
-
     # lumi systematics
     if "2016" in years:
         systs_dict["all_samples"]["lumi_13TeV_2016"] = rl.NuisanceParameter("CMS_lumi_13TeV_2016", "lnN")
@@ -91,42 +86,76 @@ def systs_not_from_parquets(years: List[str], lep_channels: List[str]):
     for sample in samples:
         systs_dict[sample], systs_dict_values[sample] = {}, {}
 
+    # mini-isolation
+    systs_dict["all_samples"]["mini-isolation_SF"] = rl.NuisanceParameter("mini-isolation_SF", "lnN")
+    systs_dict_values["all_samples"]["muon_mini-isolation_SF"] = (1.02, 0.98)
+
     # tagger eff
     n = rl.NuisanceParameter("taggereff", "lnN")
     for sample in sigs:
         systs_dict[sample]["taggereff"] = n
         systs_dict_values[sample]["taggereff"] = (1.30, None)
 
-    # QCD scale
-    n = rl.NuisanceParameter("QCD_scale", "lnN")
-    systs_dict["ggF"]["QCD_scale"] = n
-    systs_dict_values["ggF"]["QCD_scale"] = (1.039, 0.961)
-    systs_dict["VBF"]["QCD_scale"] = n
-    systs_dict_values["VBF"]["QCD_scale"] = (1.004, 0.997)
-    systs_dict["ttH"]["QCD_scale"] = n
-    systs_dict_values["ttH"]["QCD_scale"] = (1.058, 0.908)
-    systs_dict["WH"]["QCD_scale"] = n
-    systs_dict_values["WH"]["QCD_scale"] = (1.005, 0.993)
-    systs_dict["ZH"]["QCD_scale"] = n
-    systs_dict_values["ZH"]["QCD_scale"] = (1.038, 0.97)
-
-    # PDF scale
-    n = rl.NuisanceParameter("PDF_scale", "lnN")
-    systs_dict["ggF"]["PDF_scale"] = n
-    systs_dict_values["ggF"]["PDF_scale"] = (1.019, 0.981)
-    systs_dict["VBF"]["PDF_scale"] = n
-    systs_dict_values["VBF"]["PDF_scale"] = (1.021, 0.979)
-    systs_dict["ttH"]["PDF_scale"] = n
-    systs_dict_values["ttH"]["PDF_scale"] = (1.03, 0.97)
-    systs_dict["WH"]["PDF_scale"] = n
-    systs_dict_values["WH"]["PDF_scale"] = (1.017, 0.983)
-    systs_dict["ZH"]["PDF_scale"] = n
-    systs_dict_values["ZH"]["PDF_scale"] = (1.013, 0.987)
-
     # QCD MC rate
     n = rl.NuisanceParameter("QCD_rate", "lnN")
     systs_dict["QCD"]["QCD_rate"] = n
     systs_dict_values["QCD"]["QCD_rate"] = (2, None)
+
+    ############################################
+    ############################################
+    ############################################
+    # Theory Systematics. (convention: https://gitlab.cern.ch/hh/naming-conventions#theory-uncertainties)
+
+    # PDF
+    n = rl.NuisanceParameter("pdf_Higgs_gg", "lnN")
+    systs_dict["ggF"]["pdf_Higgs_gg"] = n
+    systs_dict_values["ggF"]["pdf_Higgs_gg"] = (1.019, None)
+
+    n = rl.NuisanceParameter("pdf_Higgs_qqHH", "lnN")
+    systs_dict["VBF"]["pdf_Higgs_qqHH"] = n
+    systs_dict_values["VBF"]["pdf_Higgs_qqHH"] = (1.021, 0.979)
+
+    n = rl.NuisanceParameter("pdf_Higgs_ttH", "lnN")
+    systs_dict["ttH"]["pdf_Higgs_ttH"] = n
+    systs_dict_values["ttH"]["pdf_Higgs_ttH"] = (1.03, None)
+
+    n = rl.NuisanceParameter("pdf_Higgs_qqbar", "lnN")
+    systs_dict["WH"]["pdf_Higgs_qqbar"] = n
+    systs_dict_values["WH"]["pdf_Higgs_qqbar"] = (1.017, None)
+    systs_dict["ZH"]["pdf_Higgs_qqbar"] = n
+    systs_dict_values["ZH"]["pdf_Higgs_qqbar"] = (1.013, None)
+
+    # QCD scale
+    n = rl.NuisanceParameter("QCDscale_ggH", "lnN")
+    systs_dict["ggF"]["QCDscale_ggH"] = n
+    systs_dict_values["ggF"]["QCDscale_ggH"] = (1.039, None)
+
+    n = rl.NuisanceParameter("QCDscale_qqH", "lnN")
+    systs_dict["VBF"]["QCDscale_qqH"] = n
+    systs_dict_values["VBF"]["QCDscale_qqH"] = (1.004, 0.997)
+
+    n = rl.NuisanceParameter("QCDscale_ttH", "lnN")
+    systs_dict["ttH"]["QCDscale_ttH"] = n
+    systs_dict_values["ttH"]["QCDscale_ttH"] = (1.058, 0.908)
+
+    n = rl.NuisanceParameter("QCDscale_VH", "lnN")
+    systs_dict["WH"]["QCDscale_VH"] = n
+    systs_dict_values["WH"]["QCDscale_VH"] = (1.005, 0.993)
+    systs_dict["ZH"]["QCDscale_VH"] = n
+    systs_dict_values["ZH"]["QCDscale_VH"] = (1.038, 0.97)
+
+    # alphas
+    n = rl.NuisanceParameter("alpha_s", "lnN")
+    systs_dict["ggF"]["alpha_s"] = n
+    systs_dict_values["ggF"]["alpha_s"] = (1.026, None)
+    systs_dict["VBF"]["alpha_s"] = n
+    systs_dict_values["VBF"]["alpha_s"] = (1.005, None)
+    systs_dict["ttH"]["alpha_s"] = n
+    systs_dict_values["ttH"]["alpha_s"] = (1.020, None)
+    systs_dict["WH"]["alpha_s"] = n
+    systs_dict_values["WH"]["alpha_s"] = (1.009, None)
+    systs_dict["ZH"]["alpha_s"] = n
+    systs_dict_values["ZH"]["alpha_s"] = (1.009, None)
 
     return systs_dict, systs_dict_values
 
@@ -142,7 +171,7 @@ def systs_from_parquets(years):
 
     systs_from_parquets = {
         "all_samples": {
-            # "weight_pileup": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_PU_{year}", "shape"),
+            "weight_pileup": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_pileup_{year}", "shape"),
             "weight_pileupIDSF": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_PUIDSF_{year}", "shape"),
             "weight_isolation_mu": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_isolation_{year}", "lnN"),
             "weight_isolation_ele": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_isolation_{year}", "lnN"),
@@ -163,6 +192,8 @@ def systs_from_parquets(years):
             "rec_higgs_mJER": rl.NuisanceParameter("AK8_JER", "shape"),
             "rec_higgs_mJMS": rl.NuisanceParameter("AK8_JMS", "shape"),
             "rec_higgs_mJMR": rl.NuisanceParameter("AK8_JMR", "shape"),
+            "weight_scale": rl.NuisanceParameter("QCDscale_acc", "shape"),
+            "weight_pdf": rl.NuisanceParameter("PDFscale_acc", "shape"),
         },
         "VBF": {
             "weight_PSFSR": rl.NuisanceParameter("PSFSR_VBF", "shape"),
@@ -172,13 +203,22 @@ def systs_from_parquets(years):
             "rec_higgs_mJER": rl.NuisanceParameter("AK8_JER", "shape"),
             "rec_higgs_mJMS": rl.NuisanceParameter("AK8_JMS", "shape"),
             "rec_higgs_mJMR": rl.NuisanceParameter("AK8_JMR", "shape"),
+            "weight_scale": rl.NuisanceParameter("QCDscale_acc", "shape"),
+            "weight_pdf": rl.NuisanceParameter("PDFscale_acc", "shape"),
         },
         "ttH": {},
-        "WH": {},
-        "ZH": {},
+        "WH": {
+            "weight_scale": rl.NuisanceParameter("QCDscale_acc", "shape"),
+            "weight_pdf": rl.NuisanceParameter("PDFscale_acc", "shape"),
+        },
+        "ZH": {
+            "weight_scale": rl.NuisanceParameter("QCDscale_acc", "shape"),
+            "weight_pdf": rl.NuisanceParameter("PDFscale_acc", "shape"),
+        },
         # bkgs
         "QCD": {},
         "WJetsLNu": {
+            "weight_scale": rl.NuisanceParameter("QCDscale_acc", "shape"),
             "weight_d1K_NLO": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d1K_NLO_{year}", "lnN"),
             "weight_d2K_NLO": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d2K_NLO_{year}", "lnN"),
             "weight_d3K_NLO": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d3K_NLO_{year}", "lnN"),
@@ -186,7 +226,9 @@ def systs_from_parquets(years):
             "weight_W_d2kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_W_d2kappa_EW_{year}", "lnN"),
             "weight_W_d3kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_W_d3kappa_EW_{year}", "lnN"),
         },
-        "TTbar": {},
+        "TTbar": {
+            "weight_scale": rl.NuisanceParameter("QCDscale_acc", "shape"),
+        },
         "SingleTop": {},
         "Diboson": {},
         "EWKvjets": {},
