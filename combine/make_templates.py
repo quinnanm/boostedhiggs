@@ -27,8 +27,8 @@ pd.set_option("mode.chained_assignment", None)
 
 # ("key", "value"): the "key" is the common naming (to commonalize over both channels)
 weights = {
-    "weight_pdf_acceptance": {},
-    "weight_qcd_scale": {},
+    # "weight_pdf_acceptance": {},
+    # "weight_qcd_scale": {},
     # common for all samples
     "weight_btagSFlightCorrelated": {"mu": "weight_btagSFlightCorrelated", "ele": "weight_btagSFlightCorrelated"},
     "weight_btagSFbcCorrelated": {"mu": "weight_btagSFbcCorrelated", "ele": "weight_btagSFbcCorrelated"},
@@ -203,6 +203,13 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                 luminosity = json.load(f)[ch][year]
 
             for sample in os.listdir(samples_dir[year]):
+
+                if "WJetsToLNu_1J" in sample:
+                    print(f"Skipping sample {sample}")
+                    continue
+                if "WJetsToLNu_2J" in sample:
+                    print(f"Skipping sample {sample}")
+                    continue
 
                 if "VBFHToWWToLNuQQ_" in sample:
                     print(f"Skipping sample {sample}")
