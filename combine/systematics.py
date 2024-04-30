@@ -218,13 +218,13 @@ def systs_from_parquets(years):
         # bkgs
         "QCD": {},
         "WJetsLNu": {
-            "weight_qcd_scale": rl.NuisanceParameter("QCDscale_acc", "shape"),
             "weight_d1K_NLO": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d1K_NLO_{year}", "lnN"),
             "weight_d2K_NLO": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d2K_NLO_{year}", "lnN"),
             "weight_d3K_NLO": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d3K_NLO_{year}", "lnN"),
             "weight_d1kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_W_d1kappa_EW_{year}", "lnN"),
             "weight_W_d2kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_W_d2kappa_EW_{year}", "lnN"),
             "weight_W_d3kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_W_d3kappa_EW_{year}", "lnN"),
+            "weight_qcd_scale": rl.NuisanceParameter("QCDscale_acc", "shape"),
         },
         "TTbar": {
             "weight_qcd_scale": rl.NuisanceParameter("QCDscale_acc", "shape"),
