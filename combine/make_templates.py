@@ -290,7 +290,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                                 shape_up = nominal * (1 + rel_unc)
                                 shape_down = nominal * (1 - rel_unc)
 
-                                shape_down[shape_down < 0] = 0
+                                shape_down[shape_down < 0] = 0.0001
                             else:
                                 shape_up = nominal
                                 shape_down = nominal
