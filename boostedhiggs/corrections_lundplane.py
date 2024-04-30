@@ -1,9 +1,17 @@
+import sys
 from typing import Union
 
 import awkward as ak
 import numpy as np
 from coffea.nanoevents.methods import candidate, vector
 from coffea.nanoevents.methods.nanoaod import FatJetArray, GenParticleArray
+
+sys.path.insert(0, "")
+sys.path.append("LundReweighting")
+sys.path.append("LundReweighting/utils")
+import ROOT
+
+from boostedhiggs.LundReweighting.utils.LundReweighter import LundReweighter
 
 ak.behavior.update(vector.behavior)
 
@@ -287,16 +295,6 @@ def dRcleanup(events_final, GenlepVars):
 
     pf_cands_pxpypzE_lvqq = np.dstack((pf_cands_px, pf_cands_py, pf_cands_pz, pf_cands_E))
     return pf_cands_pxpypzE_lvqq
-
-
-import sys
-
-sys.path.insert(0, "")
-sys.path.append("LundReweighting")
-sys.path.append("LundReweighting/utils")
-import ROOT
-
-from boostedhiggs.LundReweighting.utils.LundReweighter import LundReweighter
 
 
 def getLPweights(events, candidatefj):

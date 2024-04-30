@@ -588,49 +588,6 @@ class HwwProcessor(processor.ProcessorABC):
                     add_HiggsEW_kFactors(self.weights[ch], events.GenPart, dataset)
 
                 if "HToWW" in dataset or "TT" in dataset or "WJets" in dataset:
-
-                    def get_scale_weights(events):
-                        """
-                        QCD Scale variations, best explanation I found is here:
-                        https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopSystematics#Factorization_and_renormalizatio
-
-                        TLDR: we want to vary the renormalization and factorization scales by a factor of 0.5 and 2,
-                        and then take the envelope of the variations on our final observation as the up/down uncertainties.
-
-                        Importantly, we need to keep track of the normalization for each variation,
-                        so that this uncertainty takes into account the acceptance effects of our selections.
-
-                        LHE scale variation weights (w_var / w_nominal) (from https://cms-nanoaod-integration.web.cern.ch/autoDoc/NanoAODv9/2018UL/doc_TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1.html#LHEScaleWeight)
-                        [0] is renscfact=0.5d0 facscfact=0.5d0 ; <=
-                        [1] is renscfact=0.5d0 facscfact=1d0 ; <=
-                        [2] is renscfact=0.5d0 facscfact=2d0 ;
-                        [3] is renscfact=1d0 facscfact=0.5d0 ; <=
-                        [4] is renscfact=1d0 facscfact=1d0 ;
-                        [5] is renscfact=1d0 facscfact=2d0 ; <=
-                        [6] is renscfact=2d0 facscfact=0.5d0 ;
-                        [7] is renscfact=2d0 facscfact=1d0 ; <=
-                        [8] is renscfact=2d0 facscfact=2d0 ; <=
-
-                        See also https://git.rwth-aachen.de/3pia/cms_analyses/common/-/blob/11e0c5225416a580d27718997a11dc3f1ec1e8d1/processor/generator.py#L93 for an example.
-                        """
-                        if len(events[0].LHEScaleWeight) == 9:
-                            variations = events.LHEScaleWeight[:, [0, 1, 3, 5, 7, 8]].to_numpy()
-                            nominal = events.LHEScaleWeight[:, 4].to_numpy()[:, np.newaxis]
-                            variations /= nominal
-                        else:
-                            variations = events.LHEScaleWeight[:, [0, 1, 3, 4, 6, 7]].to_numpy()
-
-                        # clipping to avoid negative / too large weights
-                        return np.clip(variations, 0.0, 4.0)
-
-                    # scale_weights = {}
-                    # w = get_scale_weights(events)
-                    # for i in range(w.shape[1]):
-                    #     scale_weights[f"weight_{i}"] = w[:, i]
-
-                    # # weights_dict["scale_weights"] = scale_weights * weights_dict["weight"][:, np.newaxis]
-                    # variables = {**variables, **scale_weights}
-
                     """
                     For the QCD acceptance uncertainty:
                     - we save the individual weights [0, 1, 3, 5, 7, 8]
@@ -650,6 +607,22 @@ class HwwProcessor(processor.ProcessorABC):
                             for i in [0, 1, 3, 5, 7, 8, 4]:
                                 scale_weights[f"weight_scale{i}"] = events.LHEScaleWeight[:, i]
                     variables = {**variables, **scale_weights}
+
+                if "HToWW" in dataset:
+                    """
+                    For the PDF acceptance uncertainty:
+                    - store 103 variations. 0-100 PDF values
+                    - The last two values: alpha_s variations.
+                    - you just sum the yield difference from the nominal in quadrature to get the total uncertainty.
+                    e.g. https://github.com/LPC-HH/HHLooper/blob/master/python/prepare_card_SR_final.py#L258
+                    and https://github.com/LPC-HH/HHLooper/blob/master/app/HHLooper.cc#L1488
+                    """
+                    pdf_weights = {}
+                    if "LHEPdfWeight" in events.fields:
+                        # save individual weights
+                        for i in range(len(events.LHEPdfWeight[0])):
+                            pdf_weights[f"weight_pdf{i}"] = events.LHEPdfWeight[:, i]
+                    variables = {**variables, **pdf_weights}
 
                 if "HToWW" in dataset:
                     """
