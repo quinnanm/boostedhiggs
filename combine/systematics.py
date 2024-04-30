@@ -94,7 +94,7 @@ def systs_not_from_parquets(years: List[str], lep_channels: List[str]):
     n = rl.NuisanceParameter("taggereff", "lnN")
     for sample in sigs:
         systs_dict[sample]["taggereff"] = n
-        systs_dict_values[sample]["taggereff"] = (1.30, None)
+        systs_dict_values[sample]["taggereff"] = (1.27, None)
 
     # QCD MC rate
     n = rl.NuisanceParameter("QCD_rate", "lnN")
