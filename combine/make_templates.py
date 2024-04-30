@@ -27,7 +27,6 @@ pd.set_option("mode.chained_assignment", None)
 
 # ("key", "value"): the "key" is the common naming (to commonalize over both channels)
 weights = {
-    # for signal
     "weight_pdf_acceptance": {},
     "weight_qcd_scale": {},
     # common for all samples
@@ -374,20 +373,20 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                                 weight=shape_down,
                             )
 
-                        for rec_higgs_m_variation in AK8_systs:
+                    for rec_higgs_m_variation in AK8_systs:
 
-                            if is_data:
-                                x = "rec_higgs_m"
-                            else:
-                                x = rec_higgs_m_variation
+                        if is_data:
+                            x = "rec_higgs_m"
+                        else:
+                            x = rec_higgs_m_variation
 
-                            hists.fill(
-                                Sample=sample_to_use,
-                                Systematic=rec_higgs_m_variation,
-                                Region=region,
-                                mass_observable=df[x],
-                                weight=nominal,
-                            )
+                        hists.fill(
+                            Sample=sample_to_use,
+                            Systematic=rec_higgs_m_variation,
+                            Region=region,
+                            mass_observable=df[x],
+                            weight=nominal,
+                        )
 
     logging.info(hists)
 
