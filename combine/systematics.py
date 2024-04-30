@@ -162,75 +162,140 @@ def systs_not_from_parquets(years: List[str], lep_channels: List[str]):
 
 def systs_from_parquets(years):
     """
-    Specify systematics that ARE stored in the parquets
+    Specify systematics that ARE stored in the parquets.
+
+    The convention is:
+        Dict[tuple[]]
+
+        key: name of nuissance in the hist
+        tuple[0]: name of the nuissance in the datacard
+        tuple[1]: list of samples for ewhich the nuissance is applied
+
     """
     if len(years) == 4:
         yearlabel = "Run2"
     else:
         yearlabel = years[0]
 
-    # Systematics applied on specefic samples
     systs_from_parquets = {
-        sigs
-        + bkgs: {
-            "weight_pileup": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_pileup_{yearlabel}", "shape"),
-            "weight_pileupIDSF": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_PUIDSF_{yearlabel}", "shape"),
-            "weight_isolation_mu": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_isolation_{yearlabel}", "lnN"),
-            "weight_isolation_ele": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_isolation_{yearlabel}", "lnN"),
-            "weight_id_mu": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_identification_{yearlabel}", "lnN"),
-            "weight_id_ele": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_identification_{yearlabel}", "lnN"),
-            "weight_reco_ele": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_reconstruction_{yearlabel}", "lnN"),
-            "weight_L1Prefiring": rl.NuisanceParameter(f"C{CMS_PARAMS_LABEL}L1Prefiring_{yearlabel}", "lnN"),
-            "weight_trigger_ele": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_trigger_{yearlabel}", "lnN"),
-            "weight_trigger_iso_mu": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_trigger_iso_{yearlabel}", "lnN"),
-            "weight_trigger_noniso_mu": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_trigger_{yearlabel}", "lnN"),
-        },
-        ["ggF", "VBF"]: {
-            "weight_PSFSR": rl.NuisanceParameter("PSFSR", "shape"),
-            "weight_PSISR": rl.NuisanceParameter("PSISR", "shape"),
-            "rec_higgs_mUES": rl.NuisanceParameter("AK8_UES", "shape"),
-            "rec_higgs_mJES": rl.NuisanceParameter("AK8_JES", "shape"),
-            "rec_higgs_mJER": rl.NuisanceParameter("AK8_JER", "shape"),
-            "rec_higgs_mJMS": rl.NuisanceParameter("AK8_JMS", "shape"),
-            "rec_higgs_mJMR": rl.NuisanceParameter("AK8_JMR", "shape"),
-            "weight_qcd_scale": rl.NuisanceParameter("QCDscale_acc", "shape"),
-            "weight_pdf_acceptance": rl.NuisanceParameter("PDFscale_acc", "shape"),
-        },
-        ["ggF", "VBF", "WH", "ZH"]: {
-            "weight_pdf_acceptance": rl.NuisanceParameter("PDFscale_acc", "shape"),
-        },
-        ["ggF", "VBF", "WH", "ZH", "WJetsLNu", "TTbar"]: {
-            "weight_qcd_scale": rl.NuisanceParameter("QCDscale_acc", "shape"),
-        },
-        ["WJetsLNu"]: {
-            "weight_d1K_NLO": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d1K_NLO_{yearlabel}", "lnN"),
-            "weight_d2K_NLO": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d2K_NLO_{yearlabel}", "lnN"),
-            "weight_d3K_NLO": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d3K_NLO_{yearlabel}", "lnN"),
-            "weight_d1kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_W_d1kappa_EW_{yearlabel}", "lnN"),
-            "weight_W_d2kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_W_d2kappa_EW_{yearlabel}", "lnN"),
-            "weight_W_d3kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_W_d3kappa_EW_{yearlabel}", "lnN"),
-        },
-        # ["DYJets"]: {
-        #     "weight_d1kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d1kappa_EW_{year}", "lnN"),
-        #     "weight_Z_d2kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d2kappa_EW_{year}", "lnN"),
-        #     "weight_Z_d3kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d3kappa_EW_{year}", "lnN"),
-        # },
+        # systematics applied on all samples
+        "weight_pileup": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_pileup_{yearlabel}", "shape"), sigs + bkgs),
+        "weight_pileupIDSF": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_PUIDSF_{yearlabel}", "shape"), sigs + bkgs),
+        "weight_isolation_mu": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_isolation_{yearlabel}", "lnN"), sigs + bkgs),
+        "weight_isolation_ele": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_isolation_{yearlabel}", "lnN"), sigs + bkgs),
+        "weight_id_mu": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_identification_{yearlabel}", "lnN"), sigs + bkgs),
+        "weight_id_ele": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_identification_{yearlabel}", "lnN"), sigs + bkgs),
+        "weight_reco_ele": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_reconstruction_{yearlabel}", "lnN"), sigs + bkgs),
+        "weight_L1Prefiring": (rl.NuisanceParameter(f"C{CMS_PARAMS_LABEL}L1Prefiring_{yearlabel}", "lnN"), sigs + bkgs),
+        "weight_trigger_ele": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_trigger_{yearlabel}", "lnN"), sigs + bkgs),
+        "weight_trigger_iso_mu": (
+            rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_trigger_iso_{yearlabel}", "lnN"),
+            sigs + bkgs,
+        ),
+        "weight_trigger_noniso_mu": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_trigger_{yearlabel}", "lnN"), sigs + bkgs),
+        # systematics applied only on ggF/VBF
+        "weight_PSFSR": (rl.NuisanceParameter("PSFSR", "shape"), ["ggF", "VBF"]),
+        "weight_PSISR": (rl.NuisanceParameter("PSISR", "shape"), ["ggF", "VBF"]),
+        "rec_higgs_mUES": (rl.NuisanceParameter("AK8_UES", "shape"), ["ggF", "VBF"]),
+        "rec_higgs_mJES": (rl.NuisanceParameter("AK8_JES", "shape"), ["ggF", "VBF"]),
+        "rec_higgs_mJER": (rl.NuisanceParameter("AK8_JER", "shape"), ["ggF", "VBF"]),
+        "rec_higgs_mJMS": (rl.NuisanceParameter("AK8_JMS", "shape"), ["ggF", "VBF"]),
+        "rec_higgs_mJMR": (rl.NuisanceParameter("AK8_JMR", "shape"), ["ggF", "VBF"]),
+        # systematics applied only on WJets
+        "weight_d1K_NLO": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d1K_NLO_{yearlabel}", "lnN"), ["WJetsLNu"]),
+        "weight_d2K_NLO": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d2K_NLO_{yearlabel}", "lnN"), ["WJetsLNu"]),
+        "weight_d3K_NLO": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d3K_NLO_{yearlabel}", "lnN"), ["WJetsLNu"]),
+        "weight_d1kappa_EW": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_W_d1kappa_EW_{yearlabel}", "lnN"), ["WJetsLNu"]),
+        "weight_W_d2kappa_EW": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_W_d2kappa_EW_{yearlabel}", "lnN"), ["WJetsLNu"]),
+        "weight_W_d3kappa_EW": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_W_d3kappa_EW_{yearlabel}", "lnN"), ["WJetsLNu"]),
+        # acceptance unc.
+        "weight_pdf_acceptance": (rl.NuisanceParameter("PDFscale_acc", "shape"), ["ggF", "VBF", "WH", "ZH"]),
+        "weight_qcd_scale": (rl.NuisanceParameter("QCDscale_acc", "shape"), ["ggF", "VBF", "WH", "ZH", "WJetsLNu", "TTbar"]),
     }
+    # ["DYJets"]: {
+    #     "weight_d1kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d1kappa_EW_{year}", "lnN"),
+    #     "weight_Z_d2kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d2kappa_EW_{year}", "lnN"),
+    #     "weight_Z_d3kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d3kappa_EW_{year}", "lnN"),
+    # },
 
-    # add btag SF
-    for year in years:
-        systs_from_parquets[sigs + bkgs][f"weight_btagSFlight{year}"] = rl.NuisanceParameter(
-            f"{CMS_PARAMS_LABEL}_btagSFlight_{year}", "lnN"
-        )
-        systs_from_parquets[sigs + bkgs][f"weight_btagSFbc{year}"] = rl.NuisanceParameter(
-            f"{CMS_PARAMS_LABEL}_btagSFbc_{year}", "lnN"
-        )
+    # # add btag SF
+    # for year in years:
+    #     systs_from_parquets[sigs + bkgs][f"weight_btagSFlight{year}"] = rl.NuisanceParameter(
+    #         f"{CMS_PARAMS_LABEL}_btagSFlight_{year}", "lnN"
+    #     )
+    #     systs_from_parquets[sigs + bkgs][f"weight_btagSFbc{year}"] = rl.NuisanceParameter(
+    #         f"{CMS_PARAMS_LABEL}_btagSFbc_{year}", "lnN"
+    #     )
 
-    systs_from_parquets[sigs + bkgs]["weight_btagSFlightCorrelated"] = rl.NuisanceParameter(
-        f"{CMS_PARAMS_LABEL}_btagSFlightCorrelated", "lnN"
-    )
-    systs_from_parquets[sigs + bkgs]["weight_btagSFbcCorrelated"] = rl.NuisanceParameter(
-        f"{CMS_PARAMS_LABEL}_btagSFbcCorrelated", "lnN"
-    )
+    # systs_from_parquets[sigs + bkgs]["weight_btagSFlightCorrelated"] = rl.NuisanceParameter(
+    #     f"{CMS_PARAMS_LABEL}_btagSFlightCorrelated", "lnN"
+    # )
+    # systs_from_parquets[sigs + bkgs]["weight_btagSFbcCorrelated"] = rl.NuisanceParameter(
+    #     f"{CMS_PARAMS_LABEL}_btagSFbcCorrelated", "lnN"
+    # )
+
+    # # Systematics applied on specefic samples
+    # systs_from_parquets = {
+    #     sigs
+    #     + bkgs: {
+    #         "weight_pileup": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_pileup_{yearlabel}", "shape"),
+    #         "weight_pileupIDSF": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_PUIDSF_{yearlabel}", "shape"),
+    #         "weight_isolation_mu": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_isolation_{yearlabel}", "lnN"),
+    #         "weight_isolation_ele": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_isolation_{yearlabel}", "lnN"),
+    #         "weight_id_mu": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_identification_{yearlabel}", "lnN"),
+    #         "weight_id_ele": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_identification_{yearlabel}", "lnN"),
+    #         "weight_reco_ele": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_reconstruction_{yearlabel}", "lnN"),
+    #         "weight_L1Prefiring": rl.NuisanceParameter(f"C{CMS_PARAMS_LABEL}L1Prefiring_{yearlabel}", "lnN"),
+    #         "weight_trigger_ele": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_trigger_{yearlabel}", "lnN"),
+    #         "weight_trigger_iso_mu": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_trigger_iso_{yearlabel}", "lnN"),
+    #         "weight_trigger_noniso_mu": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_trigger_{yearlabel}", "lnN"),
+    #     },
+    #     ["ggF", "VBF"]: {
+    #         "weight_PSFSR": rl.NuisanceParameter("PSFSR", "shape"),
+    #         "weight_PSISR": rl.NuisanceParameter("PSISR", "shape"),
+    #         "rec_higgs_mUES": rl.NuisanceParameter("AK8_UES", "shape"),
+    #         "rec_higgs_mJES": rl.NuisanceParameter("AK8_JES", "shape"),
+    #         "rec_higgs_mJER": rl.NuisanceParameter("AK8_JER", "shape"),
+    #         "rec_higgs_mJMS": rl.NuisanceParameter("AK8_JMS", "shape"),
+    #         "rec_higgs_mJMR": rl.NuisanceParameter("AK8_JMR", "shape"),
+    #         "weight_qcd_scale": rl.NuisanceParameter("QCDscale_acc", "shape"),
+    #         "weight_pdf_acceptance": rl.NuisanceParameter("PDFscale_acc", "shape"),
+    #     },
+    #     ["ggF", "VBF", "WH", "ZH"]: {
+    #         "weight_pdf_acceptance": rl.NuisanceParameter("PDFscale_acc", "shape"),
+    #     },
+    #     ["ggF", "VBF", "WH", "ZH", "WJetsLNu", "TTbar"]: {
+    #         "weight_qcd_scale": rl.NuisanceParameter("QCDscale_acc", "shape"),
+    #     },
+    #     ["WJetsLNu"]: {
+    #         "weight_d1K_NLO": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d1K_NLO_{yearlabel}", "lnN"),
+    #         "weight_d2K_NLO": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d2K_NLO_{yearlabel}", "lnN"),
+    #         "weight_d3K_NLO": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d3K_NLO_{yearlabel}", "lnN"),
+    #         "weight_d1kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_W_d1kappa_EW_{yearlabel}", "lnN"),
+    #         "weight_W_d2kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_W_d2kappa_EW_{yearlabel}", "lnN"),
+    #         "weight_W_d3kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_W_d3kappa_EW_{yearlabel}", "lnN"),
+    #     },
+    #     # ["DYJets"]: {
+    #     #     "weight_d1kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d1kappa_EW_{year}", "lnN"),
+    #     #     "weight_Z_d2kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d2kappa_EW_{year}", "lnN"),
+    #     #     "weight_Z_d3kappa_EW": rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d3kappa_EW_{year}", "lnN"),
+    #     # },
+    # }
+
+    # # add btag SF
+    # for year in years:
+    #     systs_from_parquets[sigs + bkgs][f"weight_btagSFlight{year}"] = rl.NuisanceParameter(
+    #         f"{CMS_PARAMS_LABEL}_btagSFlight_{year}", "lnN"
+    #     )
+    #     systs_from_parquets[sigs + bkgs][f"weight_btagSFbc{year}"] = rl.NuisanceParameter(
+    #         f"{CMS_PARAMS_LABEL}_btagSFbc_{year}", "lnN"
+    #     )
+
+    # systs_from_parquets[sigs + bkgs]["weight_btagSFlightCorrelated"] = rl.NuisanceParameter(
+    #     f"{CMS_PARAMS_LABEL}_btagSFlightCorrelated", "lnN"
+    # )
+    # systs_from_parquets[sigs + bkgs]["weight_btagSFbcCorrelated"] = rl.NuisanceParameter(
+    #     f"{CMS_PARAMS_LABEL}_btagSFbcCorrelated", "lnN"
+    # )
 
     return systs_from_parquets

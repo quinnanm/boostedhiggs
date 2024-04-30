@@ -86,17 +86,11 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
                         )
 
             # SYSTEMATICS FROM PARQUETS
-            for list_of_samples, nps in sys_from_parquets.items():
+            for sys_name, (list_of_samples, sys_value) in sys_from_parquets.items():
                 for sName in list_of_samples:
-
-                    for sys_name, sys_value in nps.items():
-                        syst_up = hists_templates[
-                            {"Sample": sName, "Region": ChName, "Systematic": sys_name + "_up"}
-                        ].values()
-                        syst_do = hists_templates[
-                            {"Sample": sName, "Region": ChName, "Systematic": sys_name + "_down"}
-                        ].values()
-                        nominal = hists_templates[{"Sample": sName, "Region": ChName, "Systematic": "nominal"}].values()
+                    syst_up = hists_templates[{"Sample": sName, "Region": ChName, "Systematic": sys_name + "_up"}].values()
+                    syst_do = hists_templates[{"Sample": sName, "Region": ChName, "Systematic": sys_name + "_down"}].values()
+                    nominal = hists_templates[{"Sample": sName, "Region": ChName, "Systematic": "nominal"}].values()
 
                 if sys_value.combinePrior == "lnN":
                     eff_up = shape_to_num(syst_up, nominal)
