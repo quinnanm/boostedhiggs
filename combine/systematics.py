@@ -256,7 +256,7 @@ def systs_from_parquets(years):
         rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_btagSFlightCorrelated", "lnN"),
         sigs + bkgs,
     )
-    systs_from_parquets[sigs + bkgs]["weight_btagSFbcCorrelated"] = (
+    systs_from_parquets["weight_btagSFbcCorrelated"] = (
         rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_btagSFbcCorrelated", "lnN"),
         sigs + bkgs,
     )
