@@ -87,8 +87,8 @@ def systs_not_from_parquets(years: List[str], lep_channels: List[str]):
         systs_dict[sample], systs_dict_values[sample] = {}, {}
 
     # mini-isolation
-    systs_dict["all_samples"]["mini-isolation_SF"] = rl.NuisanceParameter("mini-isolation_SF", "lnN")
-    systs_dict_values["all_samples"]["muon_mini-isolation_SF"] = (1.02, 0.98)
+    systs_dict["all_samples"]["miniisolation_SF"] = rl.NuisanceParameter("miniisolation_SF", "lnN")
+    systs_dict_values["all_samples"]["miniisolation_SF"] = (1.02, 0.98)
 
     # tagger eff
     n = rl.NuisanceParameter("taggereff", "lnN")

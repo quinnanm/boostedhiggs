@@ -296,7 +296,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
 
                             hists.fill(
                                 Sample=sample_to_use,
-                                Systematic="weight_pdfUp",
+                                Systematic="weight_pdf_up",
                                 Region=region,
                                 mass_observable=df["rec_higgs_m"],
                                 weight=shape_up,
@@ -304,7 +304,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
 
                             hists.fill(
                                 Sample=sample_to_use,
-                                Systematic="weight_pdfDown",
+                                Systematic="weight_pdf_down",
                                 Region=region,
                                 mass_observable=df["rec_higgs_m"],
                                 weight=shape_down,
@@ -323,7 +323,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
 
                             hists.fill(
                                 Sample=sample_to_use,
-                                Systematic="weight_scaleUp",
+                                Systematic="weight_scale_up",
                                 Region=region,
                                 mass_observable=df["rec_higgs_m"],
                                 weight=shape_up,
@@ -331,7 +331,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
 
                             hists.fill(
                                 Sample=sample_to_use,
-                                Systematic="weight_scaleDown",
+                                Systematic="weight_scale_down",
                                 Region=region,
                                 mass_observable=df["rec_higgs_m"],
                                 weight=shape_down,
