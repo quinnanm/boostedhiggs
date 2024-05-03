@@ -262,11 +262,20 @@ class FakesProcessor(processor.ProcessorABC):
         NumFatjets = ak.num(good_fatjets)
 
         candidatelep_p4 = build_p4(loose_lep1)  # build p4 for candidate lepton
+        candidatelep_p4_tight = build_p4(tight_lep1)  # build p4 for candidate lepton (tight)
 
         fj_idx_lep = ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)
         candidatefj = ak.firsts(good_fatjets[fj_idx_lep])
 
         lep_fj_dr = candidatefj.delta_r(candidatelep_p4)
+
+        # mT
+        mT_tight1 = np.sqrt(
+            2.0 * candidatelep_p4_tight.pt * met.pt * (ak.ones_like(met.pt) - np.cos(candidatelep_p4_tight.delta_phi(met)))
+        )
+        mT_loose1 = np.sqrt(
+            2.0 * candidatelep_p4.pt * met.pt * (ak.ones_like(met.pt) - np.cos(candidatelep_p4.delta_phi(met)))
+        )
 
         variables = {
             "N_tight_lep": N_tight_lep,
@@ -290,6 +299,8 @@ class FakesProcessor(processor.ProcessorABC):
             "fj_pt": candidatefj.pt,
             "fj_eta": candidatefj.eta,
             "fj_phi": candidatefj.phi,
+            "mT_tight1": mT_tight1,
+            "mT_loose1": mT_loose1,
         }
 
         for ch in self._channels:
