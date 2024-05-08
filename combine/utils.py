@@ -79,7 +79,41 @@ def get_sum_sumgenweight(pkl_files, year, sample):
     return sum_sumgenweight
 
 
+def get_sum_sumpdfweight(pkl_files, year, sample):
+    sum_sumpdfweight = {}
+    for key in range(103):
+        sum_sumpdfweight[key] = 0
+
+    for ifile in pkl_files:
+        # load and sum the sumgenweight of each
+        with open(ifile, "rb") as f:
+            metadata = pkl.load(f)
+
+        for key in range(103):
+            sum_sumpdfweight[key] = sum_sumpdfweight[key] + metadata[sample][year]["sumpdfweight"][key]
+    return sum_sumpdfweight
+
+
+def get_sum_sumscsaleweight(pkl_files, year, sample):
+    sum_sumpdfweight = {}
+    for key in range(103):
+        sum_sumpdfweight[key] = 0
+
+    for ifile in pkl_files:
+        # load and sum the sumgenweight of each
+        with open(ifile, "rb") as f:
+            metadata = pkl.load(f)
+
+        for key in range(8):
+            sum_sumpdfweight[key] = sum_sumpdfweight[key] + metadata[sample][year]["sumlheweight"][key]
+    return sum_sumpdfweight
+
+
 def get_xsecweight(pkl_files, year, sample, is_data, luminosity):
+    """
+    Returns the xsec*lumi / [sumgenweight, sumlheweight, or sumpdfweight]
+    """
+    xsecweight = {}
     if not is_data:
         # find xsection
         f = open("../fileset/xsec_pfnano.json")
@@ -93,10 +127,16 @@ def get_xsecweight(pkl_files, year, sample, is_data, luminosity):
 
         # get overall weighting of events.. each event has a genweight...
         # sumgenweight sums over events in a chunk... sum_sumgenweight sums over chunks
-        xsec_weight = (xsec * luminosity) / get_sum_sumgenweight(pkl_files, year, sample)
+        totgenweights = get_sum_sumgenweight(pkl_files, year, sample)
+        totpdfweights = get_sum_sumpdfweight(pkl_files, year, sample)
+        totscaleweights = get_sum_sumscsaleweight(pkl_files, year, sample)
+
+        xsecweight = (xsec * luminosity) / totgenweights
+
+        return xsecweight, totgenweights, totpdfweights, totscaleweights
+
     else:
-        xsec_weight = 1
-    return xsec_weight
+        return 1, 1, 1, 1
 
 
 def shape_to_num(var, nom, clip=1.5):

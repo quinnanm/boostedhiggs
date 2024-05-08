@@ -30,41 +30,41 @@ weights = {
     "weight_pdf_acceptance": {},
     "weight_qcd_scale": {},
     # common for all samples
-    "weight_btagSFlightCorrelated": {"mu": "weight_btagSFlightCorrelated", "ele": "weight_btagSFlightCorrelated"},
-    "weight_btagSFbcCorrelated": {"mu": "weight_btagSFbcCorrelated", "ele": "weight_btagSFbcCorrelated"},
-    "weight_btagSFlight2016": {"mu": "weight_btagSFlight2016", "ele": "weight_btagSFlight2016"},
-    "weight_btagSFbc2016": {"mu": "weight_btagSFbc2016", "ele": "weight_btagSFbc2016"},
-    "weight_btagSFlight2016APV": {"mu": "weight_btagSFlight2016APV", "ele": "weight_btagSFlight2016APV"},
-    "weight_btagSFbc2016APV": {"mu": "weight_btagSFbc2016APV", "ele": "weight_btagSFbc2016APV"},
-    "weight_btagSFlight2017": {"mu": "weight_btagSFlight2017", "ele": "weight_btagSFlight2017"},
-    "weight_btagSFbc2017": {"mu": "weight_btagSFbc2017", "ele": "weight_btagSFbc2017"},
-    "weight_btagSFlight2018": {"mu": "weight_btagSFlight2018", "ele": "weight_btagSFlight2018"},
-    "weight_btagSFbc2018": {"mu": "weight_btagSFbc2018", "ele": "weight_btagSFbc2018"},
-    "weight_pileup": {"mu": "weight_mu_pileup", "ele": "weight_ele_pileup"},
-    "weight_pileupIDSF": {"mu": "weight_mu_pileupIDSFDown", "ele": "weight_ele_pileupIDSFDown"},
-    "weight_isolation_mu": {"mu": "weight_mu_isolation_muon", "ele": ""},
-    "weight_isolation_ele": {"mu": "", "ele": "weight_ele_isolation_electron"},
-    "weight_id_mu": {"mu": "weight_mu_id_muon", "ele": ""},
-    "weight_id_ele": {"mu": "", "ele": "weight_ele_id_electron"},
-    "weight_reco_ele": {"mu": "", "ele": "weight_ele_reco_electron"},
-    "weight_L1Prefiring": {"mu": "weight_mu_L1Prefiring", "ele": "weight_ele_L1Prefiring"},
-    "weight_trigger_ele": {"mu": "", "ele": "weight_ele_trigger_electron"},
-    "weight_trigger_iso_mu": {"mu": "weight_mu_trigger_iso_muon", "ele": ""},
-    "weight_trigger_noniso_mu": {"mu": "weight_mu_trigger_noniso_muon", "ele": ""},
-    # ggF & VBF
-    "weight_PSFSR": {"mu": "weight_mu_PSFSR", "ele": "weight_ele_PSFSR_weight"},
-    "weight_PSISR": {"mu": "weight_mu_PSISR", "ele": "weight_ele_PSISR_weight"},
-    # WJetsLNu & DY
-    "weight_d1kappa_EW": {"mu": "weight_mu_d1kappa_EW", "ele": "weight_ele_d1kappa_EW"},
-    # WJetsLNu
-    "weight_d1K_NLO": {"mu": "weight_mu_d1K_NLO", "ele": "weight_ele_d1K_NLO"},
-    "weight_d2K_NLO": {"mu": "weight_mu_d2K_NLO", "ele": "weight_ele_d2K_NLO"},
-    "weight_d3K_NLO": {"mu": "weight_mu_d3K_NLO", "ele": "weight_ele_d3K_NLO"},
-    "weight_W_d2kappa_EW": {"mu": "weight_mu_W_d2kappa_EW", "ele": "weight_ele_W_d2kappa_EW"},
-    "weight_W_d3kappa_EW": {"mu": "weight_mu_W_d3kappa_EW", "ele": "weight_ele_W_d3kappa_EW"},
-    # DY
-    "weight_Z_d2kappa_EW": {"mu": "weight_mu_Z_d2kappa_EW", "ele": "weight_ele_Z_d2kappa_EW"},
-    "weight_Z_d3kappa_EW": {"mu": "weight_mu_Z_d3kappa_EW", "ele": "weight_ele_Z_d3kappa_EW"},
+    # "weight_btagSFlightCorrelated": {"mu": "weight_btagSFlightCorrelated", "ele": "weight_btagSFlightCorrelated"},
+    # "weight_btagSFbcCorrelated": {"mu": "weight_btagSFbcCorrelated", "ele": "weight_btagSFbcCorrelated"},
+    # "weight_btagSFlight2016": {"mu": "weight_btagSFlight2016", "ele": "weight_btagSFlight2016"},
+    # "weight_btagSFbc2016": {"mu": "weight_btagSFbc2016", "ele": "weight_btagSFbc2016"},
+    # "weight_btagSFlight2016APV": {"mu": "weight_btagSFlight2016APV", "ele": "weight_btagSFlight2016APV"},
+    # "weight_btagSFbc2016APV": {"mu": "weight_btagSFbc2016APV", "ele": "weight_btagSFbc2016APV"},
+    # "weight_btagSFlight2017": {"mu": "weight_btagSFlight2017", "ele": "weight_btagSFlight2017"},
+    # "weight_btagSFbc2017": {"mu": "weight_btagSFbc2017", "ele": "weight_btagSFbc2017"},
+    # "weight_btagSFlight2018": {"mu": "weight_btagSFlight2018", "ele": "weight_btagSFlight2018"},
+    # "weight_btagSFbc2018": {"mu": "weight_btagSFbc2018", "ele": "weight_btagSFbc2018"},
+    # "weight_pileup": {"mu": "weight_mu_pileup", "ele": "weight_ele_pileup"},
+    # "weight_pileupIDSF": {"mu": "weight_mu_pileupIDSFDown", "ele": "weight_ele_pileupIDSFDown"},
+    # "weight_isolation_mu": {"mu": "weight_mu_isolation_muon", "ele": ""},
+    # "weight_isolation_ele": {"mu": "", "ele": "weight_ele_isolation_electron"},
+    # "weight_id_mu": {"mu": "weight_mu_id_muon", "ele": ""},
+    # "weight_id_ele": {"mu": "", "ele": "weight_ele_id_electron"},
+    # "weight_reco_ele": {"mu": "", "ele": "weight_ele_reco_electron"},
+    # "weight_L1Prefiring": {"mu": "weight_mu_L1Prefiring", "ele": "weight_ele_L1Prefiring"},
+    # "weight_trigger_ele": {"mu": "", "ele": "weight_ele_trigger_electron"},
+    # "weight_trigger_iso_mu": {"mu": "weight_mu_trigger_iso_muon", "ele": ""},
+    # "weight_trigger_noniso_mu": {"mu": "weight_mu_trigger_noniso_muon", "ele": ""},
+    # # ggF & VBF
+    # "weight_PSFSR": {"mu": "weight_mu_PSFSR", "ele": "weight_ele_PSFSR_weight"},
+    # "weight_PSISR": {"mu": "weight_mu_PSISR", "ele": "weight_ele_PSISR_weight"},
+    # # WJetsLNu & DY
+    # "weight_d1kappa_EW": {"mu": "weight_mu_d1kappa_EW", "ele": "weight_ele_d1kappa_EW"},
+    # # WJetsLNu
+    # "weight_d1K_NLO": {"mu": "weight_mu_d1K_NLO", "ele": "weight_ele_d1K_NLO"},
+    # "weight_d2K_NLO": {"mu": "weight_mu_d2K_NLO", "ele": "weight_ele_d2K_NLO"},
+    # "weight_d3K_NLO": {"mu": "weight_mu_d3K_NLO", "ele": "weight_ele_d3K_NLO"},
+    # "weight_W_d2kappa_EW": {"mu": "weight_mu_W_d2kappa_EW", "ele": "weight_ele_W_d2kappa_EW"},
+    # "weight_W_d3kappa_EW": {"mu": "weight_mu_W_d3kappa_EW", "ele": "weight_ele_W_d3kappa_EW"},
+    # # DY
+    # "weight_Z_d2kappa_EW": {"mu": "weight_mu_Z_d2kappa_EW", "ele": "weight_ele_Z_d2kappa_EW"},
+    # "weight_Z_d3kappa_EW": {"mu": "weight_mu_Z_d3kappa_EW", "ele": "weight_ele_Z_d3kappa_EW"},
 }
 
 AK8_systs = [
@@ -254,8 +254,10 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                     logging.info(f"Applying {selection} selection on {len(data)} events")
                     data = data.query(presel[ch][selection])
 
-                # get event_weight
-                event_weight = utils.get_xsecweight(pkl_files, year, sample, is_data, luminosity)
+                # get the xsecweight
+                xsecweight, sumgenweights, sumpdfweights, sumscaleweights = utils.get_xsecweight(
+                    pkl_files, year, sample, is_data, luminosity
+                )
 
                 for region, region_sel in regions_sel.items():  # e.g. pass, fail, top control region, etc.
                     df = data.copy()
@@ -268,7 +270,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                     if is_data:
                         nominal = np.ones_like(df["fj_pt"])  # for data (nominal is 1)
                     else:
-                        nominal = df[f"weight_{ch}"] * event_weight
+                        nominal = df[f"weight_{ch}"] * xsecweight
 
                         # if "bjets" in region_sel:  # add btag SF
                         #     nominal *= df["weight_btag"]
@@ -295,25 +297,47 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                             if weight == "weight_pdf_acceptance":
                                 if sample_to_use in ["ggF", "VBF", "VH", "ZH"]:
 
-                                    pdfweights = df.loc[:, df.columns.str.contains("pdf")]
+                                    pdfweights = []
+                                    for weight_i in sumpdfweights:
+                                        # noqa: get the normalization factor per variation i (ratio of sumpdfweights_i/sumgenweights)
+                                        R_i = sumpdfweights[weight_i] / sumgenweights
 
-                                    abs_unc = np.linalg.norm((pdfweights.values - np.array(nominal).reshape(-1, 1)), axis=1)
+                                        pdfweight = df[f"weight_pdf{weight_i}"].values * nominal / R_i
+                                        pdfweights.append(pdfweight)
+
+                                    pdfweights = np.swapaxes(
+                                        np.array(pdfweights), 0, 1
+                                    )  # so that the shape is (# events, variation)
+
+                                    abs_unc = np.linalg.norm((pdfweights - nominal.values.reshape(-1, 1)), axis=1)
                                     # cap at 100% uncertainty
                                     rel_unc = np.clip(abs_unc / nominal, 0, 1)
                                     shape_up = nominal * (1 + rel_unc)
                                     shape_down = nominal * (1 - rel_unc)
 
-                                    # shape_down[shape_down < 0] = 0
                                 else:
                                     shape_up = nominal
                                     shape_down = nominal
 
                             elif weight == "weight_qcd_scale":
                                 if sample_to_use in ["ggF", "VBF", "VH", "ZH", "WJetsLNu", "TTbar"]:
-                                    scaleweights = df.loc[:, df.columns.str.contains("weight_scale")]
 
-                                    shape_up = np.max(scaleweights.values, axis=1) * nominal
-                                    shape_down = np.min(scaleweights.values, axis=1) * nominal
+                                    scaleweights = []
+                                    # TODO: for scale_8 the totscaleweights is 0 so R_i is 0 so scaleweight is inf
+                                    # for weight_i in [0, 1, 3, 5, 7, 4, 8]:
+                                    for weight_i in [0, 1, 3, 5, 7, 4]:
+                                        # noqa: get the normalization factor per variation i (ratio of sumscaleweights_i/sumgenweights)
+                                        R_i = sumscaleweights[weight_i] / sumgenweights
+
+                                        scaleweight = df[f"weight_scale{weight_i}"].values * nominal / R_i
+                                        scaleweights.append(scaleweight)
+
+                                    scaleweights = np.swapaxes(
+                                        np.array(scaleweights), 0, 1
+                                    )  # so that the shape is (# events, variation)
+
+                                    shape_up = np.max(scaleweights, axis=1)
+                                    shape_down = np.min(scaleweights, axis=1)
 
                                 else:
                                     shape_up = nominal
@@ -329,8 +353,8 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
 
                             else:
                                 try:
-                                    shape_up = df[f"{weights[weight][ch]}Up"] * event_weight
-                                    shape_down = df[f"{weights[weight][ch]}Down"] * event_weight
+                                    shape_up = df[f"{weights[weight][ch]}Up"] * xsecweight
+                                    shape_down = df[f"{weights[weight][ch]}Down"] * xsecweight
                                 except KeyError:
                                     shape_up = nominal
                                     shape_down = nominal
@@ -387,8 +411,8 @@ def fix_neg_yields(h):
                 region_index = np.argmax(np.array(h.axes["Region"]) == region)
 
                 for neg_bin in neg_bins:
-                    h.view(flow=True)[sample_index, :, region_index, neg_bin + 1].value = 0
-                    h.view(flow=True)[sample_index, :, region_index, neg_bin + 1].variance = 0
+                    h.view(flow=True)[sample_index, :, region_index, neg_bin + 1].value = 1e-3
+                    h.view(flow=True)[sample_index, :, region_index, neg_bin + 1].variance = 1e-3
 
 
 def main(args):
