@@ -681,11 +681,12 @@ class HwwProcessor(processor.ProcessorABC):
                 if self._getLPweights:
                     from boostedhiggs.corrections_lundplane import getLPweights
 
+                    # must save the PFCands and
                     lunplaneVars = {}
                     (
-                        lunplaneVars["LP_weights"],
-                        lunplaneVars["LP_weights_sys_up"],
-                        lunplaneVars["LP_weights_sys_down"],
+                        lunplaneVars["pf_cands"],
+                        lunplaneVars["gen_parts_eta_phi"],
+                        lunplaneVars["ak8_jets"],
                         lunplaneVars["LPnumquarks"],
                     ) = getLPweights(events[selection_ch], candidatefj[selection_ch])
                     output[ch] = {**output[ch], **lunplaneVars}
