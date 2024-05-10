@@ -8,8 +8,10 @@ import correctionlib
 import numpy as np
 from coffea import util as cutil
 from coffea.analysis_tools import Weights
-from coffea.nanoevents.methods import candidate
-from coffea.nanoevents.methods.nanoaod import JetArray
+from coffea.nanoevents.methods import candidate, vector
+from coffea.nanoevents.methods.nanoaod import FatJetArray, GenParticleArray, JetArray
+
+ak.behavior.update(vector.behavior)
 
 btagWPs = {
     "deepJet": {
@@ -890,3 +892,280 @@ def getJMSRVariables(fatjetvars, candidatelep_p4, met, mass_shift=None):
         variables[f"rec_W_lnu_pt{mass_shift}"] = rec_W_lnu.pt
 
     return variables
+
+
+# ------------------- Lund plane reweighting ------------------- #
+
+
+from utils import (
+    ELE_PDGID,
+    FILL_NONE_VALUE,
+    GEN_FLAGS,
+    HIGGS_PDGID,
+    JET_DR,
+    MU_PDGID,
+    TAU_PDGID,
+    W_PDGID,
+    b_PDGID,
+    get_pid_mask,
+    to_label,
+    vELE_PDGID,
+    vMU_PDGID,
+    vTAU_PDGID,
+)
+
+
+def match_H(genparts: GenParticleArray, fatjet: FatJetArray):
+    """Gen matching for Higgs samples"""
+    higgs = genparts[get_pid_mask(genparts, HIGGS_PDGID, byall=False) * genparts.hasFlags(GEN_FLAGS)]
+
+    # only select events that match an specific decay
+    # matched_higgs = higgs[ak.argmin(fatjet.delta_r(higgs), axis=1, keepdims=True)][:, 0]
+    matched_higgs = higgs[ak.argmin(fatjet.delta_r(higgs), axis=1, keepdims=True)]
+    matched_higgs_mask = ak.any(fatjet.delta_r(matched_higgs) < 0.8, axis=1)
+
+    matched_higgs = ak.firsts(matched_higgs)
+
+    matched_higgs_children = matched_higgs.children
+    higgs_children = higgs.children
+
+    children_mask = get_pid_mask(matched_higgs_children, [W_PDGID], byall=False)
+    is_hww = ak.any(children_mask, axis=1)
+
+    # order by mass, select lower mass child as V* and higher as V
+    matched_higgs_children = matched_higgs_children[children_mask]
+    children_mass = matched_higgs_children.mass
+    v_star = ak.firsts(matched_higgs_children[ak.argmin(children_mass, axis=1, keepdims=True)])
+    v = ak.firsts(matched_higgs_children[ak.argmax(children_mass, axis=1, keepdims=True)])
+
+    # VV daughters
+    # requires coffea-0.7.21
+    all_daus = higgs_children.distinctChildrenDeep
+    all_daus = ak.flatten(all_daus, axis=2)
+    all_daus_flat = ak.flatten(all_daus, axis=2)
+    all_daus_flat_pdgId = abs(all_daus_flat.pdgId)
+
+    # the following tells you about the decay
+    num_quarks = ak.sum(all_daus_flat_pdgId <= b_PDGID, axis=1)
+    num_leptons = ak.sum(
+        (all_daus_flat_pdgId == ELE_PDGID) | (all_daus_flat_pdgId == MU_PDGID) | (all_daus_flat_pdgId == TAU_PDGID),
+        axis=1,
+    )
+    num_electrons = ak.sum(all_daus_flat_pdgId == ELE_PDGID, axis=1)
+    num_muons = ak.sum(all_daus_flat_pdgId == MU_PDGID, axis=1)
+    num_taus = ak.sum(all_daus_flat_pdgId == TAU_PDGID, axis=1)
+
+    # the following tells you about the matching
+    # prongs except neutrino
+    neutrinos = (
+        (all_daus_flat_pdgId == vELE_PDGID) | (all_daus_flat_pdgId == vMU_PDGID) | (all_daus_flat_pdgId == vTAU_PDGID)
+    )
+
+    leptons = (all_daus_flat_pdgId == ELE_PDGID) | (all_daus_flat_pdgId == MU_PDGID) | (all_daus_flat_pdgId == TAU_PDGID)
+
+    # num_m: number of matched leptons
+    # number of quarks excludes neutrino and leptons
+    num_m_quarks = ak.sum(fatjet.delta_r(all_daus_flat[~neutrinos & ~leptons]) < JET_DR, axis=1)
+    num_m_leptons = ak.sum(fatjet.delta_r(all_daus_flat[leptons]) < JET_DR, axis=1)
+    num_m_cquarks = ak.sum(fatjet.delta_r(all_daus_flat[all_daus_flat.pdgId == b_PDGID]) < JET_DR, axis=1)
+
+    lep_daughters = all_daus_flat[leptons]
+    # parent = ak.firsts(lep_daughters[fatjet.delta_r(lep_daughters) < JET_DR].distinctParent)
+    parent = ak.firsts(lep_daughters.distinctParent)
+    iswlepton = parent.mass == v.mass
+    iswstarlepton = parent.mass == v_star.mass
+
+    genVars = {"fj_genH_pt": ak.fill_none(higgs.pt, FILL_NONE_VALUE)}
+
+    genVVars = {
+        "fj_genH_jet": fatjet.delta_r(higgs[:, 0]),
+        "fj_genV_dR": fatjet.delta_r(v),
+        "fj_genVstar": fatjet.delta_r(v_star),
+        "genV_genVstar_dR": v.delta_r(v_star),
+    }
+
+    genHVVVars = {
+        "fj_isHVV": is_hww,
+        "fj_isHVV_Matched": matched_higgs_mask,
+        "fj_isHVV_4q": to_label((num_quarks == 4) & (num_leptons == 0)),
+        "fj_isHVV_elenuqq": to_label((num_electrons == 1) & (num_quarks == 2) & (num_leptons == 1)),
+        "fj_isHVV_munuqq": to_label((num_muons == 1) & (num_quarks == 2) & (num_leptons == 1)),
+        "fj_isHVV_taunuqq": to_label((num_taus == 1) & (num_quarks == 2) & (num_leptons == 1)),
+        "fj_isHVV_Vlepton": iswlepton,
+        "fj_isHVV_Vstarlepton": iswstarlepton,
+        "fj_genRes_mass": matched_higgs.mass,
+        "fj_nquarks": num_m_quarks,
+        "fj_ncquarks": num_m_cquarks,
+        "fj_lepinprongs": num_m_leptons,
+        "lep_daughters": leptons,
+        "all_daus": all_daus,
+    }
+
+    lepVars = {
+        "lepton_pt": all_daus_flat[leptons].pt,
+        "lepton_eta": all_daus_flat[leptons].eta,
+        "lepton_phi": all_daus_flat[leptons].phi,
+        "lepton_mass": all_daus_flat[leptons].mass,
+    }
+
+    quarkVars = {
+        "quark_pt": all_daus_flat[all_daus_flat_pdgId <= b_PDGID].pt,
+        "quark_eta": all_daus_flat[all_daus_flat_pdgId <= b_PDGID].eta,
+        "quark_phi": all_daus_flat[all_daus_flat_pdgId <= b_PDGID].phi,
+        "quark_mass": all_daus_flat[all_daus_flat_pdgId <= b_PDGID].mass,
+    }
+
+    genVars = {**genVars, **genVVars, **genHVVVars, **lepVars, **quarkVars}
+
+    return genVars
+
+
+# count the number of quarks inside the AK8 jet, require 3 or 4 quarks.
+def count_quarks_in_jets(jet_4vec, gen_parts_eta_phi, delta_r_cut=0.8):
+    num_jets = len(jet_4vec)
+    num_quarks_in_jets = np.zeros(num_jets, dtype=int)
+
+    for i in range(num_jets):
+        jet_eta, jet_phi = jet_4vec[i][1], jet_4vec[i][2]
+
+        quark_eta_phi = gen_parts_eta_phi[i]
+        quark_eta, quark_phi = quark_eta_phi[:, 0], quark_eta_phi[:, 1]
+
+        delta_eta = jet_eta - quark_eta
+        delta_phi = jet_phi - quark_phi
+
+        delta_r_squared = delta_eta**2 + delta_phi**2
+        quarks_in_jet = np.sqrt(delta_r_squared) < delta_r_cut
+
+        num_quarks_in_jets[i] = np.sum(quarks_in_jet)
+
+    return num_quarks_in_jets
+
+
+def dRcleanup(events_final, GenlepVars):
+
+    # fj_idx_lep = ak.argmin(events_final.FatJet.delta_r(candidatelep_p4), axis=1, keepdims=True)
+    # candidatefj = ak.firsts(events_final.FatJet[fj_idx_lep])
+
+    higgs = events_final.GenPart[(abs(events_final.GenPart.pdgId) == HIGGS_PDGID) * events_final.GenPart.hasFlags(GEN_FLAGS)]
+    HWWidx = ak.argmin(events_final.FatJet.delta_r(ak.firsts(higgs)), axis=1, keepdims=True)
+
+    # Get FatJetPFCands 4-vector, up to 150 length to suit the input of Oz's function
+    HWW_FatJetPFCands = events_final.FatJetPFCands.jetIdx == ak.firsts(HWWidx)
+    HWW_FatJetPFCands_pFCandsIdx = events_final.FatJetPFCands.pFCandsIdx[HWW_FatJetPFCands]
+
+    pt_array = ak.Array(events_final.PFCands.pt)
+    eta_array = ak.Array(events_final.PFCands.eta)
+    phi_array = ak.Array(events_final.PFCands.phi)
+    mass_array = ak.Array(events_final.PFCands.mass)
+
+    # Need to clean PFCands with dR(l,pf)<0.2
+    lep_eta = GenlepVars["GenlepEta"]
+    lep_phi = GenlepVars["GenlepPhi"]
+
+    # this is because the length of PFCands can be up to 409, so we pad to target = 500
+    pf_eta = pad_val(eta_array, target=500, axis=1, value=0)
+    pf_phi = pad_val(phi_array, target=500, axis=1, value=0)
+    pf_pt = pad_val(pt_array, target=500, axis=1, value=0)
+    pf_mass = pad_val(mass_array, target=500, axis=1, value=0)
+
+    lep_eta_reshaped = lep_eta.reshape(-1, 1)
+    lep_phi_reshaped = lep_phi.reshape(-1, 1)
+
+    delta_eta = lep_eta_reshaped - pf_eta
+    delta_phi = lep_phi_reshaped - pf_phi
+
+    delta_r = np.sqrt(delta_eta**2 + delta_phi**2)
+
+    pf_eta_rm_lep = np.copy(pf_eta)
+    pf_phi_rm_lep = np.copy(pf_phi)
+    pf_pt_rm_lep = np.copy(pf_pt)
+    pf_mass_rm_lep = np.copy(pf_mass)
+
+    pf_eta_rm_lep[delta_r < 0.2] = 0.0
+    pf_phi_rm_lep[delta_r < 0.2] = 0.0
+    pf_pt_rm_lep[delta_r < 0.2] = 0.0
+    pf_mass_rm_lep[delta_r < 0.2] = 0.0
+
+    selected_eta = ak.Array(pf_eta_rm_lep)[HWW_FatJetPFCands_pFCandsIdx]
+    selected_phi = ak.Array(pf_phi_rm_lep)[HWW_FatJetPFCands_pFCandsIdx]
+    selected_pt = ak.Array(pf_pt_rm_lep)[HWW_FatJetPFCands_pFCandsIdx]
+    selected_mass = ak.Array(pf_mass_rm_lep)[HWW_FatJetPFCands_pFCandsIdx]
+
+    # pad the selected 4-vec array up to length of 150 to match the Lund Plane input
+    selected_pt_padded = pad_val(selected_pt, 150, 0, 1, True)
+    selected_eta_padded = pad_val(selected_eta, 150, 0, 1, True)
+    selected_phi_padded = pad_val(selected_phi, 150, 0, 1, True)
+    selected_mass_padded = pad_val(selected_mass, 150, 0, 1, True)
+
+    pf_cands_px = selected_pt_padded * np.cos(selected_phi_padded)
+    pf_cands_py = selected_pt_padded * np.sin(selected_phi_padded)
+    pf_cands_pz = selected_pt_padded * np.sinh(selected_eta_padded)
+    pf_cands_E = np.sqrt(pf_cands_px**2 + pf_cands_py**2 + pf_cands_pz**2 + selected_mass_padded**2)
+
+    pf_cands_pxpypzE_lvqq = np.dstack((pf_cands_px, pf_cands_py, pf_cands_pz, pf_cands_E))
+    return pf_cands_pxpypzE_lvqq
+
+
+def getLPweights(events, candidatefj):
+    """
+    Relies on
+        (1) higgs_jet_4vec_Hlvqq
+        (2) gen_parts_eta_phi_Hlvqq_2q
+        (3) pf_cands_pxpypzE_lvqq
+    """
+
+    genVars = match_H(events.GenPart, candidatefj)
+
+    ak8_jets = np.array(
+        np.stack(
+            (np.array(candidatefj.pt), np.array(candidatefj.eta), np.array(candidatefj.phi), np.array(candidatefj.mass)),
+            axis=1,
+        )  # four vector for HWW jet
+    )
+
+    skim_vars = {
+        "eta": "Eta",
+        "phi": "Phi",
+        "mass": "Mass",
+        "pt": "Pt",
+    }
+
+    Gen2qVars = {
+        f"Gen2q{var}": ak.to_numpy(
+            ak.fill_none(
+                ak.pad_none(genVars[f"quark_{key}"], 2, axis=1, clip=True),
+                FILL_NONE_VALUE,
+            )
+        )
+        for key, var in skim_vars.items()
+    }
+
+    GenlepVars = {
+        f"Genlep{var}": ak.to_numpy(
+            ak.fill_none(
+                ak.pad_none(genVars[f"lepton_{key}"], 1, axis=1, clip=True),
+                FILL_NONE_VALUE,
+            )
+        )
+        for key, var in skim_vars.items()
+    }
+
+    # prepare eta, phi array only for 2q, used for Lund Plane reweighting
+    # since it only takes quarks gen-level 4-vector as input
+    eta_2q = Gen2qVars["Gen2qEta"]
+    phi_2q = Gen2qVars["Gen2qPhi"]
+    gen_parts_eta_phi = np.array(np.dstack((eta_2q, phi_2q)))
+
+    # Generator level quarks from hard process
+    # prepare eta, phi array for 2q + lep, to do gen-matching of the jet
+    eta = np.concatenate([Gen2qVars["Gen2qEta"], GenlepVars["GenlepEta"]], axis=1)
+    phi = np.concatenate([Gen2qVars["Gen2qPhi"], GenlepVars["GenlepPhi"]], axis=1)
+
+    gen_parts_eta_phi_HWW = np.array(np.dstack((eta, phi)))
+    LPnumquarks = count_quarks_in_jets(ak8_jets, gen_parts_eta_phi_HWW)
+
+    # PF candidates in the AK8 jet
+    pf_cands = dRcleanup(events, GenlepVars)
+
+    return pf_cands, gen_parts_eta_phi, ak8_jets, LPnumquarks

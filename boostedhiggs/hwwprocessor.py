@@ -679,7 +679,7 @@ class HwwProcessor(processor.ProcessorABC):
                 output[ch] = {key: value[selection_ch] for (key, value) in out.items()}
 
                 if self._getLPweights:
-                    from boostedhiggs.corrections_lundplane import getLPweights
+                    from boostedhiggs.corrections import getLPweights
 
                     (
                         pf_cands,
