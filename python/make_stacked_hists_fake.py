@@ -69,7 +69,12 @@ def make_events_dict(years, channels, samples_dir, samples, logging_=True):
                 luminosity = json.load(f)[ch][year]
 
             for sample in os.listdir(samples_dir):
-                # get a combined label to combine samples of the same process
+
+                # if "LHEFilter" in sample:
+                #     continue
+
+                if "DYJetsToLL_M-" in sample:
+                    continue
 
                 # second: if not, combine under common label
                 for key in combine_samples:

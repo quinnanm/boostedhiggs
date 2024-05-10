@@ -625,22 +625,6 @@ class HwwProcessor(processor.ProcessorABC):
                     variables = {**variables, **pdf_weights}
 
                 if "HToWW" in dataset:
-                    """
-                    For the PDF acceptance uncertainty:
-                    - store 103 variations. 0-100 PDF values
-                    - The last two values: alpha_s variations.
-                    - you just sum the yield difference from the nominal in quadrature to get the total uncertainty.
-                    e.g. https://github.com/LPC-HH/HHLooper/blob/master/python/prepare_card_SR_final.py#L258
-                    and https://github.com/LPC-HH/HHLooper/blob/master/app/HHLooper.cc#L1488
-                    """
-                    pdf_weights = {}
-                    if "LHEPdfWeight" in events.fields:
-                        # save individual weights
-                        for i in range(len(events.LHEPdfWeight[0])):
-                            pdf_weights[f"weight_pdf{i}"] = events.LHEPdfWeight[:, i]
-                    variables = {**variables, **pdf_weights}
-
-                if "HToWW" in dataset:
                     add_ps_weight(
                         self.weights[ch],
                         events.PSWeight if "PSWeight" in events.fields else [],
