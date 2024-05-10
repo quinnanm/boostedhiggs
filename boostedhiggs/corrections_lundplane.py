@@ -297,10 +297,9 @@ def getLPweights(events, candidatefj):
         (3) pf_cands_pxpypzE_lvqq
     """
 
-    print("events", len(events))
     genVars = match_H(events.GenPart, candidatefj)
 
-    higgs_jet_4vec_Hlvqq = np.array(
+    ak8_jets = np.array(
         np.stack(
             (np.array(candidatefj.pt), np.array(candidatefj.eta), np.array(candidatefj.phi), np.array(candidatefj.mass)),
             axis=1,
@@ -340,32 +339,21 @@ def getLPweights(events, candidatefj):
     phi_2q = Gen2qVars["Gen2qPhi"]
     gen_parts_eta_phi_Hlvqq_2q = np.array(np.dstack((eta_2q, phi_2q)))
 
+    # Generator level quarks from hard process
     # prepare eta, phi array for 2q + lep, to do gen-matching of the jet
     eta = np.concatenate([Gen2qVars["Gen2qEta"], GenlepVars["GenlepEta"]], axis=1)
     phi = np.concatenate([Gen2qVars["Gen2qPhi"], GenlepVars["GenlepPhi"]], axis=1)
 
     gen_parts_eta_phi_HWW = np.array(np.dstack((eta, phi)))
-    LPnumquarks = count_quarks_in_jets(higgs_jet_4vec_Hlvqq, gen_parts_eta_phi_HWW)
-    # Hlvqq_cut = LPnumquarks >= 3
+    LPnumquarks = count_quarks_in_jets(ak8_jets, gen_parts_eta_phi_HWW)
 
+    # PF candidates in the AK8 jet
     pf_cands_pxpypzE_lvqq = dRcleanup(events, GenlepVars)
-
-    # gen_parts_eta_phi_Hlvqq_2q = gen_parts_eta_phi_Hlvqq_2q[Hlvqq_cut]
-    # pf_cands_pxpypzE_lvqq = pf_cands_pxpypzE_lvqq[Hlvqq_cut]
-    # higgs_jet_4vec_Hlvqq = higgs_jet_4vec_Hlvqq[Hlvqq_cut]
-    # candidatefj = candidatefj[Hlvqq_cut]
 
     max_evts = len(pf_cands_pxpypzE_lvqq)
 
-    # Compute reweighting factors
-
-    # PF candidates in the AK8 jet
     pf_cands = pf_cands_pxpypzE_lvqq[:max_evts]
-
-    # Generator level quarks from hard process
     gen_parts_eta_phi = gen_parts_eta_phi_Hlvqq_2q[:max_evts]
-
-    # ak8_jets = d.get_masked('jet_kinematics')[:max_evts][:,2:6].astype(np.float64)
-    ak8_jets = higgs_jet_4vec_Hlvqq[:max_evts]
+    ak8_jets = ak8_jets[:max_evts]
 
     return pf_cands, gen_parts_eta_phi, ak8_jets, LPnumquarks
