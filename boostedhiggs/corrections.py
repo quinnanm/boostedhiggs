@@ -916,7 +916,10 @@ from .utils import (
 
 
 def match_H(genparts: GenParticleArray, fatjet: FatJetArray):
-    """Gen matching for Higgs samples"""
+    """Gen matching for Higgs samples.
+
+    An edited version of the function that returns the genquark info that is useful for LP method.
+    """
     higgs = genparts[get_pid_mask(genparts, HIGGS_PDGID, byall=False) * genparts.hasFlags(GEN_FLAGS)]
 
     # only select events that match an specific decay
@@ -1020,8 +1023,9 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray):
     return genVars
 
 
-# count the number of quarks inside the AK8 jet, require 3 or 4 quarks.
 def count_quarks_in_jets(jet_4vec, gen_parts_eta_phi, delta_r_cut=0.8):
+    """Count the number of quarks inside the AK8 jet, require 3 or 4 quarks."""
+
     num_jets = len(jet_4vec)
     num_quarks_in_jets = np.zeros(num_jets, dtype=int)
 
@@ -1043,6 +1047,7 @@ def count_quarks_in_jets(jet_4vec, gen_parts_eta_phi, delta_r_cut=0.8):
 
 
 def dRcleanup(events_final, GenlepVars):
+    """Removes all PFcands within dR<=0.2 from the lepton."""
 
     # fj_idx_lep = ak.argmin(events_final.FatJet.delta_r(candidatelep_p4), axis=1, keepdims=True)
     # candidatefj = ak.firsts(events_final.FatJet[fj_idx_lep])
@@ -1110,9 +1115,9 @@ def dRcleanup(events_final, GenlepVars):
 def getLPweights(events, candidatefj):
     """
     Relies on
-        (1) higgs_jet_4vec_Hlvqq
-        (2) gen_parts_eta_phi_Hlvqq_2q
-        (3) pf_cands_pxpypzE_lvqq
+        (1) ak8_jets
+        (2) gen_parts_eta_phi
+        (3) pf_cands
     """
 
     genVars = match_H(events.GenPart, candidatefj)
