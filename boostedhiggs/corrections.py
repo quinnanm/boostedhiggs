@@ -537,13 +537,13 @@ def add_lepton_weight(weights, lepton, year, lepton_type="muon"):
 
         values = {}
         if lepton_type == "muon":
-            values["nominal"] = cset[json_map_name].evaluate(ul_year, lepton_eta, lepton_pt, "sf")
+            values["nominal"] = cset[json_map_name].evaluate(lepton_eta, lepton_pt, "sf")
         else:
             values["nominal"] = cset["UL-Electron-ID-SF"].evaluate(ul_year, "sf", json_map_name, lepton_eta, lepton_pt)
 
         if lepton_type == "muon":
-            values["up"] = cset[json_map_name].evaluate(ul_year, lepton_eta, lepton_pt, "systup")
-            values["down"] = cset[json_map_name].evaluate(ul_year, lepton_eta, lepton_pt, "systdown")
+            values["up"] = cset[json_map_name].evaluate(lepton_eta, lepton_pt, "systup")
+            values["down"] = cset[json_map_name].evaluate(lepton_eta, lepton_pt, "systdown")
         else:
             values["up"] = cset["UL-Electron-ID-SF"].evaluate(ul_year, "sfup", json_map_name, lepton_eta, lepton_pt)
             values["down"] = cset["UL-Electron-ID-SF"].evaluate(ul_year, "sfdown", json_map_name, lepton_eta, lepton_pt)
