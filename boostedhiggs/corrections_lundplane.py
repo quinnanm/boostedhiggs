@@ -337,7 +337,7 @@ def getLPweights(events, candidatefj):
     # since it only takes quarks gen-level 4-vector as input
     eta_2q = Gen2qVars["Gen2qEta"]
     phi_2q = Gen2qVars["Gen2qPhi"]
-    gen_parts_eta_phi_Hlvqq_2q = np.array(np.dstack((eta_2q, phi_2q)))
+    gen_parts_eta_phi = np.array(np.dstack((eta_2q, phi_2q)))
 
     # Generator level quarks from hard process
     # prepare eta, phi array for 2q + lep, to do gen-matching of the jet
@@ -348,12 +348,12 @@ def getLPweights(events, candidatefj):
     LPnumquarks = count_quarks_in_jets(ak8_jets, gen_parts_eta_phi_HWW)
 
     # PF candidates in the AK8 jet
-    pf_cands_pxpypzE_lvqq = dRcleanup(events, GenlepVars)
+    pf_cands = dRcleanup(events, GenlepVars)
 
-    max_evts = len(pf_cands_pxpypzE_lvqq)
+    # max_evts = len(pf_cands_pxpypzE_lvqq)
 
-    pf_cands = pf_cands_pxpypzE_lvqq[:max_evts]
-    gen_parts_eta_phi = gen_parts_eta_phi_Hlvqq_2q[:max_evts]
-    ak8_jets = ak8_jets[:max_evts]
+    # pf_cands = pf_cands[:max_evts]
+    # gen_parts_eta_phi = gen_parts_eta_phi[:max_evts]
+    # ak8_jets = ak8_jets[:max_evts]
 
     return pf_cands, gen_parts_eta_phi, ak8_jets, LPnumquarks
