@@ -690,6 +690,8 @@ class HwwProcessor(processor.ProcessorABC):
                         lunplaneVars["LPnumquarks"],
                     ) = getLPweights(events[selection_ch], candidatefj[selection_ch])
 
+                    print(output[ch]["fj_pt"])
+                    print(output[ch]["fj_pt"].shape)
                     lunplaneVars["pf_cands"] = lunplaneVars["pf_cands"][:, 0]
 
                     output[ch] = {**output[ch], **lunplaneVars}
