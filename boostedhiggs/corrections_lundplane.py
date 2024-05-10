@@ -356,7 +356,6 @@ def getLPweights(events, candidatefj):
     # candidatefj = candidatefj[Hlvqq_cut]
 
     max_evts = len(pf_cands_pxpypzE_lvqq)
-    print("max_evts", max_evts)
 
     # Compute reweighting factors
 
