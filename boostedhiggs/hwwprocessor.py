@@ -689,6 +689,9 @@ class HwwProcessor(processor.ProcessorABC):
                         lunplaneVars["ak8_jets"],
                         lunplaneVars["LPnumquarks"],
                     ) = getLPweights(events[selection_ch], candidatefj[selection_ch])
+
+                    lunplaneVars["pf_cands"] = lunplaneVars["pf_cands"][:, 0]
+
                     output[ch] = {**output[ch], **lunplaneVars}
 
                 # fill inference
