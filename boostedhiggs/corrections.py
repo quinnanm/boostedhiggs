@@ -897,7 +897,7 @@ def getJMSRVariables(fatjetvars, candidatelep_p4, met, mass_shift=None):
 # ------------------- Lund plane reweighting ------------------- #
 
 
-from utils import (
+from .utils import (
     ELE_PDGID,
     FILL_NONE_VALUE,
     GEN_FLAGS,
