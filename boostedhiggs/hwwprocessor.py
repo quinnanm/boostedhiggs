@@ -408,7 +408,7 @@ class HwwProcessor(processor.ProcessorABC):
             "SecondFatjet_phi": SecondFatjet.phi,
             "SecondFatjet_msd": SecondFatjet.msdcorr,
             # "SecondFatjet_lep_dr": candidatelep_p4.delta_r(SecondFatjet),
-            "n_tight_electrons": n_tight_electrons,
+            "n_loose_electrons": n_loose_electrons,
             "n_tight_electrons": n_tight_electrons,
             "n_loose_muons": n_loose_muons,
             "n_tight_muons": n_tight_muons,
