@@ -111,6 +111,7 @@ def main(args):
             inference=args.inference,
             systematics=args.systematics,
             getLPweights=args.getLPweights,
+            uselooselep=args.uselooselep,
             output_location="./outfiles" + job_name,
         )
 
@@ -287,6 +288,9 @@ if __name__ == "__main__":
     parser.add_argument("--no-systematics", dest="systematics", action="store_false")
     parser.add_argument("--getLPweights", dest="getLPweights", action="store_true")
     parser.add_argument("--no-getLPweights", dest="getLPweights", action="store_false")
+
+    parser.add_argument("--uselooselep", dest="uselooselep", action="store_true")
+    parser.add_argument("--no-uselooselep", dest="uselooselep", action="store_false")
 
     # fakes
     parser.add_argument("--apply-PR-sel", dest="apply_PR_sel", action="store_true")
