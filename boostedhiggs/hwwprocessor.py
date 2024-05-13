@@ -249,18 +249,22 @@ class HwwProcessor(processor.ProcessorABC):
         )
         n_loose_muons = ak.sum(loose_muons, axis=1)
 
+        tight_muons = (
+            (muons.pt > 30)
+            & (np.abs(muons.eta) < 2.4)
+            & (np.abs(muons.dz) < 0.1)
+            & (np.abs(muons.dxy) < 0.05)
+            & (muons.sip3d <= 4.0)
+            & muons.mediumId
+            & (((muons.pfRelIso04_all < 0.15) & (muons.pt < 55)) | (muons.pt >= 55))
+        )
+        n_tight_muons = ak.sum(tight_muons, axis=1)
+
         if self._uselooselep:
             good_muons = loose_muons
         else:
-            good_muons = (
-                (muons.pt > 30)
-                & (np.abs(muons.eta) < 2.4)
-                & (np.abs(muons.dz) < 0.1)
-                & (np.abs(muons.dxy) < 0.05)
-                & (muons.sip3d <= 4.0)
-                & muons.mediumId
-                & (((muons.pfRelIso04_all < 0.15) & (muons.pt < 55)) | (muons.pt >= 55))
-            )
+            good_muons = tight_muons
+
         n_good_muons = ak.sum(good_muons, axis=1)
 
         # OBJECT: electrons
@@ -274,19 +278,23 @@ class HwwProcessor(processor.ProcessorABC):
         )
         n_loose_electrons = ak.sum(loose_electrons, axis=1)
 
+        tight_electrons = (
+            (electrons.pt > 38)
+            & (np.abs(electrons.eta) < 2.4)
+            & ((np.abs(electrons.eta) < 1.44) | (np.abs(electrons.eta) > 1.57))
+            & (np.abs(electrons.dz) < 0.1)
+            & (np.abs(electrons.dxy) < 0.05)
+            & (electrons.sip3d <= 4.0)
+            & (electrons.mvaFall17V2noIso_WP90)
+            & (((electrons.pfRelIso03_all < 0.15) & (electrons.pt < 120)) | (electrons.pt >= 120))
+        )
+        n_tight_electrons = ak.sum(tight_electrons, axis=1)
+
         if self._uselooselep:
             good_electrons = loose_electrons
         else:
-            good_electrons = (
-                (electrons.pt > 38)
-                & (np.abs(electrons.eta) < 2.4)
-                & ((np.abs(electrons.eta) < 1.44) | (np.abs(electrons.eta) > 1.57))
-                & (np.abs(electrons.dz) < 0.1)
-                & (np.abs(electrons.dxy) < 0.05)
-                & (electrons.sip3d <= 4.0)
-                & (electrons.mvaFall17V2noIso_WP90)
-                & (((electrons.pfRelIso03_all < 0.15) & (electrons.pt < 120)) | (electrons.pt >= 120))
-            )
+            good_electrons = tight_electrons
+
         n_good_electrons = ak.sum(good_electrons, axis=1)
 
         # OBJECT: candidate lepton
@@ -400,6 +408,10 @@ class HwwProcessor(processor.ProcessorABC):
             "SecondFatjet_phi": SecondFatjet.phi,
             "SecondFatjet_msd": SecondFatjet.msdcorr,
             # "SecondFatjet_lep_dr": candidatelep_p4.delta_r(SecondFatjet),
+            "n_tight_electrons": n_tight_electrons,
+            "n_tight_electrons": n_tight_electrons,
+            "n_loose_muons": n_loose_muons,
+            "n_tight_muons": n_tight_muons,
         }
 
         fatjetvars = {
