@@ -247,7 +247,6 @@ class HwwProcessor(processor.ProcessorABC):
             & (np.abs(muons.eta) < 2.4)
             & (muons.looseId)
         )
-        n_loose_muons = ak.sum(loose_muons, axis=1)
 
         tight_muons = (
             (muons.pt > 30)
@@ -258,6 +257,8 @@ class HwwProcessor(processor.ProcessorABC):
             & muons.mediumId
             & (((muons.pfRelIso04_all < 0.15) & (muons.pt < 55)) | (muons.pt >= 55))
         )
+
+        n_loose_muons = ak.sum(loose_muons, axis=1)
         n_tight_muons = ak.sum(tight_muons, axis=1)
 
         if self._uselooselep:
@@ -276,7 +277,6 @@ class HwwProcessor(processor.ProcessorABC):
             & ((np.abs(electrons.eta) < 1.44) | (np.abs(electrons.eta) > 1.57))
             & (electrons.cutBased >= electrons.LOOSE)
         )
-        n_loose_electrons = ak.sum(loose_electrons, axis=1)
 
         tight_electrons = (
             (electrons.pt > 38)
@@ -288,6 +288,8 @@ class HwwProcessor(processor.ProcessorABC):
             & (electrons.mvaFall17V2noIso_WP90)
             & (((electrons.pfRelIso03_all < 0.15) & (electrons.pt < 120)) | (electrons.pt >= 120))
         )
+
+        n_loose_electrons = ak.sum(loose_electrons, axis=1)
         n_tight_electrons = ak.sum(tight_electrons, axis=1)
 
         if self._uselooselep:

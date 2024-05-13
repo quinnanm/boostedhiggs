@@ -406,7 +406,7 @@ https://twiki.cern.ch/twiki/bin/view/CMS/MuonUL2017
 https://twiki.cern.ch/twiki/bin/view/CMS/MuonUL2018
 
 - UL CorrectionLib html files:
-  https://cms-nanoaod-integration.web.cern.ch/commonJSONSFs/MUO_muon_Z_Run2_UL/
+  https://cms-nanoaod-integration.web.cern.ch/commonJSONSFs/summaries/MUO_2017_UL_muon_Z.html
   e.g. one example of the correction json files can be found here:
   https://gitlab.cern.ch/cms-muonPOG/muonefficiencies/-/raw/master/Run2/UL/2017/2017_trigger/Efficiencies_muon_generalTracks_Z_Run2017_UL_SingleMuonTriggers_schemaV2.json
   - Trigger iso and non-iso
