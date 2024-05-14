@@ -708,26 +708,23 @@ class HwwProcessor(processor.ProcessorABC):
                         pf_cands,
                         gen_parts_eta_phi,
                         ak8_jets,
-                        LPnumquarks,
                     ) = getLPweights(events[selection_ch], candidatefj[selection_ch])
 
                     lpvars = {}
                     for pfcandidx in range(pf_cands.shape[1]):
-                        lpvars[f"LP_pfcand{pfcandidx}_pt"] = pf_cands[:, pfcandidx, 0]
-                        lpvars[f"LP_pfcand{pfcandidx}_eta"] = pf_cands[:, pfcandidx, 1]
-                        lpvars[f"LP_pfcand{pfcandidx}_phi"] = pf_cands[:, pfcandidx, 2]
+                        lpvars[f"LP_pfcand{pfcandidx}_px"] = pf_cands[:, pfcandidx, 0]
+                        lpvars[f"LP_pfcand{pfcandidx}_py"] = pf_cands[:, pfcandidx, 1]
+                        lpvars[f"LP_pfcand{pfcandidx}_pz"] = pf_cands[:, pfcandidx, 2]
                         lpvars[f"LP_pfcand{pfcandidx}_energy"] = pf_cands[:, pfcandidx, 3]
 
                     for quarkidx in range(gen_parts_eta_phi.shape[1]):
-                        lpvars[f"LP_quark{quarkidx}_eta"] = pf_cands[:, quarkidx, 1]
-                        lpvars[f"LP_quark{quarkidx}_phi"] = pf_cands[:, quarkidx, 2]
+                        lpvars[f"LP_quark{quarkidx}_eta"] = gen_parts_eta_phi[:, quarkidx, 0]
+                        lpvars[f"LP_quark{quarkidx}_phi"] = gen_parts_eta_phi[:, quarkidx, 1]
 
                     lpvars["LP_fj_pt"] = ak8_jets[:, 0]
                     lpvars["LP_fj_eta"] = ak8_jets[:, 1]
                     lpvars["LP_fj_phi"] = ak8_jets[:, 2]
                     lpvars["LP_fj_energy"] = ak8_jets[:, 3]
-
-                    lpvars["LP_numquarks"] = LPnumquarks
 
                     output[ch] = {**output[ch], **lpvars}
 
