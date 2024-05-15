@@ -243,19 +243,21 @@ class HwwProcessor(processor.ProcessorABC):
         muons = ak.with_field(events.Muon, 0, "flavor")
 
         loose_muons = (
-            (((muons.pt > 30) & (muons.pfRelIso04_all < 0.25)) | (muons.pt > 55))
+            (muons.pt > 30)
             & (np.abs(muons.eta) < 2.4)
             & (muons.looseId)
+            & (((muons.pfRelIso04_all < 0.25) & (muons.pt < 55)) | (muons.pt >= 55))
         )
 
         tight_muons = (
             (muons.pt > 30)
             & (np.abs(muons.eta) < 2.4)
+            & muons.mediumId
+            & (((muons.pfRelIso04_all < 0.15) & (muons.pt < 55)) | (muons.pt >= 55))
+            # additional cuts
             & (np.abs(muons.dz) < 0.1)
             & (np.abs(muons.dxy) < 0.05)
             & (muons.sip3d <= 4.0)
-            & muons.mediumId
-            & (((muons.pfRelIso04_all < 0.15) & (muons.pt < 55)) | (muons.pt >= 55))
         )
 
         n_loose_muons = ak.sum(loose_muons, axis=1)
@@ -272,21 +274,23 @@ class HwwProcessor(processor.ProcessorABC):
         electrons = ak.with_field(events.Electron, 1, "flavor")
 
         loose_electrons = (
-            (((electrons.pt > 38) & (electrons.pfRelIso03_all < 0.25)) | (electrons.pt > 120))
+            (electrons.pt > 38)
             & (np.abs(electrons.eta) < 2.4)
             & ((np.abs(electrons.eta) < 1.44) | (np.abs(electrons.eta) > 1.57))
-            & (electrons.cutBased >= electrons.LOOSE)  # TODO: must update
+            & (electrons.mvaFall17V2noIso_WPL)
+            & (((electrons.pfRelIso03_all < 0.25) & (electrons.pt < 120)) | (electrons.pt >= 120))
         )
 
         tight_electrons = (
             (electrons.pt > 38)
             & (np.abs(electrons.eta) < 2.4)
             & ((np.abs(electrons.eta) < 1.44) | (np.abs(electrons.eta) > 1.57))
+            & (electrons.mvaFall17V2noIso_WP90)
+            & (((electrons.pfRelIso03_all < 0.15) & (electrons.pt < 120)) | (electrons.pt >= 120))
+            # additional cuts
             & (np.abs(electrons.dz) < 0.1)
             & (np.abs(electrons.dxy) < 0.05)
             & (electrons.sip3d <= 4.0)
-            & (electrons.mvaFall17V2noIso_WP90)
-            & (((electrons.pfRelIso03_all < 0.15) & (electrons.pt < 120)) | (electrons.pt >= 120))
         )
 
         n_loose_electrons = ak.sum(loose_electrons, axis=1)
