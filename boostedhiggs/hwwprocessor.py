@@ -275,7 +275,7 @@ class HwwProcessor(processor.ProcessorABC):
             (((electrons.pt > 38) & (electrons.pfRelIso03_all < 0.25)) | (electrons.pt > 120))
             & (np.abs(electrons.eta) < 2.4)
             & ((np.abs(electrons.eta) < 1.44) | (np.abs(electrons.eta) > 1.57))
-            & (electrons.cutBased >= electrons.LOOSE)
+            & (electrons.cutBased >= electrons.LOOSE)  # TODO: must update
         )
 
         tight_electrons = (
@@ -708,7 +708,7 @@ class HwwProcessor(processor.ProcessorABC):
                         pf_cands,
                         gen_parts_eta_phi,
                         ak8_jets,
-                    ) = getLPweights(events[selection_ch], candidatefj[selection_ch])
+                    ) = getLPweights(events[selection_ch], candidatefj[selection_ch], fj_idx_lep[selection_ch])
 
                     lpvars = {}
                     for pfcandidx in range(pf_cands.shape[1]):

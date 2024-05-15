@@ -935,7 +935,7 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray):
 
     # VV daughters
     # requires coffea-0.7.21
-    all_daus = higgs_children.distinctChildrenDeep
+    all_daus = higgs_children.distinctChildrenDeep  # TODO: double check it's always 4
     all_daus_flat = ak.flatten(all_daus, axis=2)  # flattents the daughters of the two Ws
     all_daus_flat_pdgId = abs(all_daus_flat.pdgId)
 
@@ -989,7 +989,8 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray):
         "fj_isHVV_Vlepton": iswlepton,
         "fj_isHVV_Vstarlepton": iswstarlepton,
         "fj_genRes_mass": higgs.mass,
-        "fj_nquarks": num_m_quarks,
+        "num_quarks": num_quarks,  # TODO
+        "num_m_quarks": num_m_quarks,
         "fj_ncquarks": num_m_cquarks,
         "fj_lepinprongs": num_m_leptons,
         "lep_daughters": leptons,
@@ -1015,7 +1016,7 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray):
     return genVars
 
 
-def getLPweights(events, candidatefj):
+def getLPweights(events, candidatefj, fj_idx_lep):
     """
     Relies on
         (1) ak8_jets
@@ -1040,7 +1041,7 @@ def getLPweights(events, candidatefj):
     }
 
     print(genVars["quark_pt"])
-    
+
     Gen2qVars = {
         f"Gen2q{var}": ak.to_numpy(
             ak.fill_none(
@@ -1058,16 +1059,24 @@ def getLPweights(events, candidatefj):
     gen_parts_eta_phi = np.array(np.dstack((eta_2q, phi_2q)))
 
     # PF candidates in the AK8 jet
+    HWW_FatJetPFCands = events.FatJetPFCands.jetIdx == ak.firsts(fj_idx_lep)
+    HWW_FatJetPFCands_pFCandsIdx = events.FatJetPFCands.pFCandsIdx[HWW_FatJetPFCands]
+
     pt_array = ak.Array(events.PFCands.pt)
     eta_array = ak.Array(events.PFCands.eta)
     phi_array = ak.Array(events.PFCands.phi)
     mass_array = ak.Array(events.PFCands.mass)
 
+    selected_pt = ak.Array(pt_array)[HWW_FatJetPFCands_pFCandsIdx]
+    selected_eta = ak.Array(eta_array)[HWW_FatJetPFCands_pFCandsIdx]
+    selected_phi = ak.Array(phi_array)[HWW_FatJetPFCands_pFCandsIdx]
+    selected_mass = ak.Array(mass_array)[HWW_FatJetPFCands_pFCandsIdx]
+
     # pad the selected 4-vec array up to length of 150 to match the Lund Plane input
-    selected_pt_padded = pad_val(pt_array, 150, 0, 1, True)
-    selected_eta_padded = pad_val(eta_array, 150, 0, 1, True)
-    selected_phi_padded = pad_val(phi_array, 150, 0, 1, True)
-    selected_mass_padded = pad_val(mass_array, 150, 0, 1, True)
+    selected_pt_padded = pad_val(selected_pt, 150, 0, 1, True)
+    selected_eta_padded = pad_val(selected_eta, 150, 0, 1, True)
+    selected_phi_padded = pad_val(selected_phi, 150, 0, 1, True)
+    selected_mass_padded = pad_val(selected_mass, 150, 0, 1, True)
 
     pf_cands_px = selected_pt_padded * np.cos(selected_phi_padded)
     pf_cands_py = selected_pt_padded * np.sin(selected_phi_padded)
