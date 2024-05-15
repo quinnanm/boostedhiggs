@@ -959,9 +959,9 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray):
 
     # num_m: number of matched leptons
     # number of quarks excludes neutrino and leptons
-    num_m_quarks = ak.sum(fatjet.delta_r(all_daus_flat[~neutrinos & ~leptons]) < JET_DR, axis=1)
+    num_m_quarks = ak.sum(fatjet.delta_r(all_daus_flat[all_daus_flat_pdgId <= b_PDGID]) < JET_DR, axis=1)
     num_m_leptons = ak.sum(fatjet.delta_r(all_daus_flat[leptons]) < JET_DR, axis=1)
-    num_m_cquarks = ak.sum(fatjet.delta_r(all_daus_flat[all_daus_flat.pdgId == b_PDGID]) < JET_DR, axis=1)
+    num_m_bquarks = ak.sum(fatjet.delta_r(all_daus_flat[all_daus_flat.pdgId == b_PDGID]) < JET_DR, axis=1)
 
     lep_daughters = all_daus_flat[leptons]
     # parent = ak.firsts(lep_daughters[fatjet.delta_r(lep_daughters) < JET_DR].distinctParent)
@@ -991,7 +991,7 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray):
         "fj_genRes_mass": higgs.mass,
         "num_quarks": num_quarks,  # TODO
         "num_m_quarks": num_m_quarks,
-        "fj_ncquarks": num_m_cquarks,
+        "fj_nbquarks": num_m_bquarks,
         "fj_lepinprongs": num_m_leptons,
         "lep_daughters": leptons,
         "all_daus": all_daus,
