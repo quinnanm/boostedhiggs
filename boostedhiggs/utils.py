@@ -120,17 +120,17 @@ def match_H(
         num_taus = ak.sum(all_daus_flat_pdgId == TAU_PDGID, axis=1)
 
         # the following tells you about the matching
-        # prongs except neutrino
-        neutrinos = (
-            (all_daus_flat_pdgId == vELE_PDGID) | (all_daus_flat_pdgId == vMU_PDGID) | (all_daus_flat_pdgId == vTAU_PDGID)
-        )
+        # # prongs except neutrino
+        # neutrinos = (
+        #     (all_daus_flat_pdgId == vELE_PDGID) | (all_daus_flat_pdgId == vMU_PDGID) | (all_daus_flat_pdgId == vTAU_PDGID)
+        # )
         leptons = (all_daus_flat_pdgId == ELE_PDGID) | (all_daus_flat_pdgId == MU_PDGID) | (all_daus_flat_pdgId == TAU_PDGID)
 
         # num_m: number of matched leptons
         # number of quarks excludes neutrino and leptons
-        num_m_quarks = ak.sum(fatjet.delta_r(all_daus_flat[~neutrinos & ~leptons]) < JET_DR, axis=1)
+        num_m_quarks = ak.sum(fatjet.delta_r(all_daus_flat[all_daus_flat_pdgId <= b_PDGID]) < JET_DR, axis=1)
         num_m_leptons = ak.sum(fatjet.delta_r(all_daus_flat[leptons]) < JET_DR, axis=1)
-        num_m_cquarks = ak.sum(
+        num_m_bquarks = ak.sum(
             fatjet.delta_r(all_daus_flat[all_daus_flat.pdgId == b_PDGID]) < JET_DR,
             axis=1,
         )
@@ -144,8 +144,9 @@ def match_H(
         gen_lepton = ak.firsts(lep_daughters)
 
         genHVVVars = {
-            "fj_nquarks": num_m_quarks,
-            "fj_ncquarks": num_m_cquarks,
+            "num_quarks": num_quarks,
+            "num_m_quarks": num_m_quarks,
+            "fj_nbquarks": num_m_bquarks,
             "fj_lepinprongs": num_m_leptons,
             "fj_H_VV_4q": to_label((num_quarks == 4) & (num_leptons == 0)),
             "fj_H_VV_elenuqq": to_label((num_electrons == 1) & (num_quarks == 2) & (num_leptons == 1)),
