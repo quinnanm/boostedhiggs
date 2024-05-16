@@ -705,10 +705,11 @@ class HwwProcessor(processor.ProcessorABC):
                 # fill the output dictionary after selections
                 output[ch] = {key: value[selection_ch] for (key, value) in out.items()}
 
-                if "HToWW" in dataset and self._getLPweights:
+                if self._getLPweights:
                     from boostedhiggs.corrections import getLPweights
 
                     (pf_cands, gen_parts_eta_phi, ak8_jets) = getLPweights(
+                        dataset,
                         events[selection_ch],
                         candidatefj[selection_ch],
                         fj_idx_lep[selection_ch],

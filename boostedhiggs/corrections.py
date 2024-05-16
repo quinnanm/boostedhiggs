@@ -905,11 +905,122 @@ from .utils import (
     JET_DR,
     MU_PDGID,
     TAU_PDGID,
+    TOP_PDGID,
     W_PDGID,
     b_PDGID,
+    c_PDGID,
     get_pid_mask,
     to_label,
+    vELE_PDGID,
+    vMU_PDGID,
+    vTAU_PDGID,
 )
+
+
+def match_Top(genparts: GenParticleArray, fatjet: FatJetArray):
+    tops = genparts[get_pid_mask(genparts, TOP_PDGID, byall=False) * genparts.hasFlags(GEN_FLAGS)]
+    matched_tops = tops[fatjet.delta_r(tops) < JET_DR]
+    num_matched_tops = ak.sum(fatjet.delta_r(matched_tops) < JET_DR, axis=1)
+
+    # take all possible daughters!
+    daughters = ak.flatten(tops.distinctChildren, axis=2)
+    daughters = daughters[daughters.hasFlags(["fromHardProcess", "isLastCopy"])]
+    daughters_pdgId = abs(daughters.pdgId)
+
+    wboson_daughters = ak.flatten(daughters[(daughters_pdgId == W_PDGID)].distinctChildren, axis=2)
+    wboson_daughters = wboson_daughters[wboson_daughters.hasFlags(["fromHardProcess", "isLastCopy"])]
+    wboson_daughters_pdgId = abs(wboson_daughters.pdgId)
+
+    bquark = daughters[(daughters_pdgId == 5)]
+    neutrinos = (
+        (wboson_daughters_pdgId == vELE_PDGID)
+        | (wboson_daughters_pdgId == vMU_PDGID)
+        | (wboson_daughters_pdgId == vTAU_PDGID)
+    )
+    leptons = (
+        (wboson_daughters_pdgId == ELE_PDGID) | (wboson_daughters_pdgId == MU_PDGID) | (wboson_daughters_pdgId == TAU_PDGID)
+    )
+    quarks = ~leptons & ~neutrinos
+    cquarks = wboson_daughters_pdgId == c_PDGID
+    electrons = wboson_daughters_pdgId == ELE_PDGID
+    muons = wboson_daughters_pdgId == MU_PDGID
+    taus = wboson_daughters_pdgId == TAU_PDGID
+
+    # get tau decays from V daughters
+    taudaughters = wboson_daughters[(wboson_daughters_pdgId == TAU_PDGID)].children
+    taudaughters = taudaughters[taudaughters.hasFlags(["isLastCopy"])]
+    taudaughters_pdgId = abs(taudaughters.pdgId)
+    taudecay = (
+        # pions/kaons (hadronic tau) * 1
+        (
+            ak.sum(
+                (taudaughters_pdgId == ELE_PDGID) | (taudaughters_pdgId == MU_PDGID),
+                axis=2,
+            )
+            == 0
+        )
+        * 1
+        # 1 electron * 3
+        + (ak.sum(taudaughters_pdgId == ELE_PDGID, axis=2) == 1) * 3
+        # 1 muon * 5
+        + (ak.sum(taudaughters_pdgId == MU_PDGID, axis=2) == 1) * 5
+    )
+    # flatten taudecay - so painful
+    taudecay = ak.sum(taudecay, axis=-1)
+
+    # get number of matched daughters
+    num_m_quarks_nob = ak.sum(fatjet.delta_r(wboson_daughters[quarks]) < JET_DR, axis=1)
+    num_m_bquarks = ak.sum(fatjet.delta_r(bquark) < JET_DR, axis=1)
+    num_m_cquarks = ak.sum(fatjet.delta_r(wboson_daughters[cquarks]) < JET_DR, axis=1)
+    num_m_leptons = ak.sum(fatjet.delta_r(wboson_daughters[leptons]) < JET_DR, axis=1)
+    num_m_electrons = ak.sum(fatjet.delta_r(wboson_daughters[electrons]) < JET_DR, axis=1)
+    num_m_muons = ak.sum(fatjet.delta_r(wboson_daughters[muons]) < JET_DR, axis=1)
+    num_m_taus = ak.sum(fatjet.delta_r(wboson_daughters[taus]) < JET_DR, axis=1)
+
+    matched_tops_mask = ak.any(fatjet.delta_r(tops) < JET_DR, axis=1)
+    matched_topdaus_mask = ak.any(fatjet.delta_r(daughters) < JET_DR, axis=1)
+    matched_mask = matched_tops_mask & matched_topdaus_mask
+
+    genVars = {
+        "fj_isTop": np.ones(len(genparts), dtype="bool"),
+        "fj_isTop_matched": matched_mask,  # at least one top and one daughter matched..
+        "fj_Top_numMatched": num_matched_tops,  # number of tops matched
+        "fj_Top_nquarksnob": num_m_quarks_nob,  # number of quarks from W decay (not b) matched in dR
+        "fj_Top_nbquarks": num_m_bquarks,  # number of b quarks ..
+        "fj_Top_ncquarks": num_m_cquarks,  # number of c quarks ..
+        "fj_Top_nleptons": num_m_leptons,  # number of leptons ..
+        "fj_Top_nele": num_m_electrons,  # number of electrons...
+        "fj_Top_nmu": num_m_muons,  # number of muons...
+        "fj_Top_ntau": num_m_taus,  # number of taus...
+        "fj_Top_taudecay": taudecay,  # taudecay (1: hadronic, 3: electron, 5: muon)
+        # added recently
+        "fj_isTop_W_lep_b": to_label((num_m_leptons == 1) & (num_m_bquarks == 1)),
+        "fj_isTop_W_lep": to_label(num_m_leptons == 1),
+        "fj_isTop_W_ele_b": to_label((num_m_electrons == 1) & (num_m_leptons == 1) & (num_m_bquarks == 1)),
+        "fj_isTop_W_ele": to_label((num_m_electrons == 1) & (num_m_leptons == 1)),
+        "fj_isTop_W_mu_b": to_label((num_m_muons == 1) & (num_m_leptons == 1) & (num_m_bquarks == 1)),
+        "fj_isTop_W_mu": to_label((num_m_muons == 1) & (num_m_leptons == 1)),
+        "fj_isTop_W_tau_b": to_label((num_m_taus == 1) & (num_m_leptons == 1) & (num_m_bquarks == 1)),
+        "fj_isTop_W_tau": to_label((num_m_taus == 1) & (num_m_leptons == 1)),
+    }
+
+    lepVars = {
+        "lepton_pt": wboson_daughters[leptons].pt,
+        "lepton_eta": wboson_daughters[leptons].eta,
+        "lepton_phi": wboson_daughters[leptons].phi,
+        "lepton_mass": wboson_daughters[leptons].mass,
+    }
+
+    quarkVars = {
+        "quark_pt": wboson_daughters[quarks].pt,
+        "quark_eta": wboson_daughters[quarks].eta,
+        "quark_phi": wboson_daughters[quarks].phi,
+        "quark_mass": wboson_daughters[quarks].mass,
+    }
+
+    genVars = {**genVars, **lepVars, **quarkVars}
+
+    return genVars
 
 
 def match_H(genparts: GenParticleArray, fatjet: FatJetArray):
@@ -1057,7 +1168,7 @@ def lep_removal(pt_array, eta_array, phi_array, mass_array, GenlepVars, HWW_FatJ
     return pf_cands_px, pf_cands_py, pf_cands_pz, pf_cands_E
 
 
-def getLPweights(events, candidatefj, fj_idx_lep, candidatelep_p4):
+def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
     """
     Relies on
         (1) ak8_jets
@@ -1067,7 +1178,10 @@ def getLPweights(events, candidatefj, fj_idx_lep, candidatelep_p4):
 
     candidatefj = candidatefj - candidatelep_p4
 
-    genVars = match_H(events.GenPart, candidatefj)
+    if "HtoWW" in dataset:
+        genVars = match_H(events.GenPart, candidatefj)
+    else:
+        genVars = match_Top(events.GenPart, candidatefj)
 
     ak8_jets = np.array(
         np.stack(
