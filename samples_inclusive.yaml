@@ -263,3 +263,20 @@ prompt_old:
 - DYJetsToLL_M-50_HT-800to1200
 - DYJetsToLL_M-50_HT-1200to2500
 - DYJetsToLL_M-50_HT-2500toInf
+wjets:
+  - WJetsToLNu_HT-70To100
+  - WJetsToLNu_HT-100To200
+  - WJetsToLNu_HT-200To400
+  - WJetsToLNu_HT-400To600
+  - WJetsToLNu_HT-600To800
+  - WJetsToLNu_HT-800To1200
+  - WJetsToLNu_HT-1200To2500
+  - WJetsToLNu_HT-2500ToInf
+  - WJetsToQQ_HT-200to400
+  - WJetsToQQ_HT-400to600
+  - WJetsToQQ_HT-600to800
+  - WJetsToQQ_HT-800toInf
+  - ZJetsToQQ_HT-200to400
+  - ZJetsToQQ_HT-400to600
+  - ZJetsToQQ_HT-600to800
+  - ZJetsToQQ_HT-800toInf
