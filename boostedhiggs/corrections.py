@@ -909,9 +909,6 @@ from .utils import (
     b_PDGID,
     get_pid_mask,
     to_label,
-    vELE_PDGID,
-    vMU_PDGID,
-    vTAU_PDGID,
 )
 
 
@@ -950,11 +947,6 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray):
     num_taus = ak.sum(all_daus_flat_pdgId == TAU_PDGID, axis=1)
 
     # the following tells you about the matching
-    # prongs except neutrino
-    neutrinos = (
-        (all_daus_flat_pdgId == vELE_PDGID) | (all_daus_flat_pdgId == vMU_PDGID) | (all_daus_flat_pdgId == vTAU_PDGID)
-    )
-
     leptons = (all_daus_flat_pdgId == ELE_PDGID) | (all_daus_flat_pdgId == MU_PDGID) | (all_daus_flat_pdgId == TAU_PDGID)
 
     # num_m: number of matched leptons
