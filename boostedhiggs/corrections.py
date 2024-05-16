@@ -1176,7 +1176,7 @@ def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
         (3) pf_cands
     """
 
-    candidatefj = candidatefj - candidatelep_p4
+    # candidatefj = candidatefj - candidatelep_p4
 
     if "HtoWW" in dataset:
         genVars = match_H(events.GenPart, candidatefj)
