@@ -1129,10 +1129,10 @@ def getLPweights(events, candidatefj, fj_idx_lep, candidatelep_p4):
         | (ak.Array(events.PFCands.pdgId) == TAU_PDGID)
     )
 
-    selected_pt = ak.Array(pt_array)[HWW_FatJetPFCands_pFCandsIdx][~islep]
-    selected_eta = ak.Array(eta_array)[HWW_FatJetPFCands_pFCandsIdx][~islep]
-    selected_phi = ak.Array(phi_array)[HWW_FatJetPFCands_pFCandsIdx][~islep]
-    selected_mass = ak.Array(mass_array)[HWW_FatJetPFCands_pFCandsIdx][~islep]
+    selected_pt = pt_array[HWW_FatJetPFCands_pFCandsIdx & (~islep)]
+    selected_eta = eta_array[HWW_FatJetPFCands_pFCandsIdx & (~islep)]
+    selected_phi = phi_array[HWW_FatJetPFCands_pFCandsIdx & (~islep)]
+    selected_mass = mass_array[HWW_FatJetPFCands_pFCandsIdx & (~islep)]
 
     # pad the selected 4-vec array up to length of 150 to match the Lund Plane input
     selected_pt_padded = pad_val(selected_pt, 150, 0, 1, True)
