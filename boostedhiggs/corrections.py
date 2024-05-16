@@ -1032,8 +1032,6 @@ def getLPweights(events, candidatefj, fj_idx_lep):
         "pt": "Pt",
     }
 
-    print(genVars["quark_pt"])
-
     Gen2qVars = {
         f"Gen2q{var}": ak.to_numpy(
             ak.fill_none(
