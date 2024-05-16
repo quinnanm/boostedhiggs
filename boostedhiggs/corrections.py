@@ -1057,13 +1057,15 @@ def lep_removal(pt_array, eta_array, phi_array, mass_array, GenlepVars, HWW_FatJ
     return pf_cands_px, pf_cands_py, pf_cands_pz, pf_cands_E
 
 
-def getLPweights(events, candidatefj, fj_idx_lep):
+def getLPweights(events, candidatefj, fj_idx_lep, candidatelep_p4):
     """
     Relies on
         (1) ak8_jets
         (2) gen_parts_eta_phi
         (3) pf_cands
     """
+
+    candidatefj = candidatefj - candidatelep_p4
 
     genVars = match_H(events.GenPart, candidatefj)
 

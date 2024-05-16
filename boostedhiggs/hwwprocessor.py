@@ -708,11 +708,12 @@ class HwwProcessor(processor.ProcessorABC):
                 if "HToWW" in dataset and self._getLPweights:
                     from boostedhiggs.corrections import getLPweights
 
-                    (
-                        pf_cands,
-                        gen_parts_eta_phi,
-                        ak8_jets,
-                    ) = getLPweights(events[selection_ch], candidatefj[selection_ch], fj_idx_lep[selection_ch])
+                    (pf_cands, gen_parts_eta_phi, ak8_jets,) = getLPweights(
+                        events[selection_ch],
+                        candidatefj[selection_ch],
+                        fj_idx_lep[selection_ch],
+                        candidatelep_p4[selection_ch],
+                    )
 
                     lpvars = {}
                     for pfcandidx in range(pf_cands.shape[1]):
