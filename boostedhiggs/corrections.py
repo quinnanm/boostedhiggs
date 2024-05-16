@@ -1065,7 +1065,7 @@ def getLPweights(events, candidatefj, fj_idx_lep, candidatelep_p4):
         (3) pf_cands
     """
 
-    candidatefj = candidatefj - candidatelep_p4
+    # candidatefj = candidatefj - candidatelep_p4
 
     genVars = match_H(events.GenPart, candidatefj)
 
