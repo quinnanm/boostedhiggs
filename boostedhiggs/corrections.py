@@ -1124,9 +1124,9 @@ def getLPweights(events, candidatefj, fj_idx_lep, candidatelep_p4):
     # pf_cands = np.dstack((pf_cands_px, pf_cands_py, pf_cands_pz, pf_cands_E))
 
     islep = (
-        (ak.Array(events.PFCands.pdgId) == ELE_PDGID)
-        | (ak.Array(events.PFCands.pdgId) == MU_PDGID)
-        | (ak.Array(events.PFCands.pdgId) == TAU_PDGID)
+        (ak.Array(events.FatJetPFCands.pdgId) == ELE_PDGID)
+        | (ak.Array(events.FatJetPFCands.pdgId) == MU_PDGID)
+        | (ak.Array(events.FatJetPFCands.pdgId) == TAU_PDGID)
     )
 
     selected_pt = pt_array[HWW_FatJetPFCands_pFCandsIdx & (~islep)]
