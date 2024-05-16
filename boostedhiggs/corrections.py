@@ -1008,6 +1008,44 @@ def match_H(genparts: GenParticleArray, fatjet: FatJetArray):
     return genVars
 
 
+def lep_removal(selected_pt, selected_eta, selected_phi, selected_mass, GenlepVars):
+
+    # Need to clean PFCands with dR(l,pf)<0.2
+    lep_eta = GenlepVars["GenlepEta"]
+    lep_phi = GenlepVars["GenlepPhi"]
+
+    # # this is because the length of PFCands can be up to 409, so we pad to target = 500
+    # pf_eta = pad_val(eta_array, target=500, axis=1, value=0)
+    # pf_phi = pad_val(phi_array, target=500, axis=1, value=0)
+    # pf_pt = pad_val(pt_array, target=500, axis=1, value=0)
+    # pf_mass = pad_val(mass_array, target=500, axis=1, value=0)
+
+    lep_eta_reshaped = lep_eta.reshape(-1, 1)
+    lep_phi_reshaped = lep_phi.reshape(-1, 1)
+
+    delta_eta = lep_eta_reshaped - selected_eta
+    delta_phi = lep_phi_reshaped - selected_phi
+
+    delta_r = np.sqrt(delta_eta**2 + delta_phi**2)
+
+    pf_pt_rm_lep = np.copy(selected_pt)
+    pf_eta_rm_lep = np.copy(selected_eta)
+    pf_phi_rm_lep = np.copy(selected_phi)
+    pf_mass_rm_lep = np.copy(selected_mass)
+
+    pf_eta_rm_lep[delta_r < 0.2] = 0.0
+    pf_phi_rm_lep[delta_r < 0.2] = 0.0
+    pf_pt_rm_lep[delta_r < 0.2] = 0.0
+    pf_mass_rm_lep[delta_r < 0.2] = 0.0
+
+    selected_pt = ak.Array(pf_pt_rm_lep)
+    selected_eta = ak.Array(pf_eta_rm_lep)
+    selected_phi = ak.Array(pf_phi_rm_lep)
+    selected_mass = ak.Array(pf_mass_rm_lep)
+
+    return selected_pt, selected_eta, selected_phi, selected_mass
+
+
 def getLPweights(events, candidatefj, fj_idx_lep):
     """
     Relies on
@@ -1042,6 +1080,15 @@ def getLPweights(events, candidatefj, fj_idx_lep):
         for key, var in skim_vars.items()
     }
 
+    GenlepVars = {
+        f"Genlep{var}": ak.to_numpy(
+            ak.fill_none(
+                ak.pad_none(genVars[f"lepton_{key}"], 1, axis=1, clip=True),
+                FILL_NONE_VALUE,
+            )
+        )
+        for key, var in skim_vars.items()
+    }
     # prepare eta, phi array only for 2q, used for Lund Plane reweighting
     # since it only takes quarks gen-level 4-vector as input
     eta_2q = Gen2qVars["Gen2qEta"]
@@ -1061,6 +1108,10 @@ def getLPweights(events, candidatefj, fj_idx_lep):
     selected_eta = ak.Array(eta_array)[HWW_FatJetPFCands_pFCandsIdx]
     selected_phi = ak.Array(phi_array)[HWW_FatJetPFCands_pFCandsIdx]
     selected_mass = ak.Array(mass_array)[HWW_FatJetPFCands_pFCandsIdx]
+
+    selected_pt, selected_eta, selected_phi, selected_mass = lep_removal(
+        selected_pt, selected_eta, selected_phi, selected_mass, GenlepVars
+    )
 
     # pad the selected 4-vec array up to length of 150 to match the Lund Plane input
     selected_pt_padded = pad_val(selected_pt, 150, 0, 1, True)
