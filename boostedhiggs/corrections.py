@@ -1124,15 +1124,15 @@ def getLPweights(events, candidatefj, fj_idx_lep, candidatelep_p4):
     # pf_cands = np.dstack((pf_cands_px, pf_cands_py, pf_cands_pz, pf_cands_E))
 
     islep = (
-        (ak.Array(events.FatJetPFCands.pdgId) == ELE_PDGID)
-        | (ak.Array(events.FatJetPFCands.pdgId) == MU_PDGID)
-        | (ak.Array(events.FatJetPFCands.pdgId) == TAU_PDGID)
+        (ak.Array(events.PFCands.pdgId) == ELE_PDGID)
+        | (ak.Array(events.PFCands.pdgId) == MU_PDGID)
+        | (ak.Array(events.PFCands.pdgId) == TAU_PDGID)
     )
 
-    selected_pt = pt_array[HWW_FatJetPFCands_pFCandsIdx & (~islep)]
-    selected_eta = eta_array[HWW_FatJetPFCands_pFCandsIdx & (~islep)]
-    selected_phi = phi_array[HWW_FatJetPFCands_pFCandsIdx & (~islep)]
-    selected_mass = mass_array[HWW_FatJetPFCands_pFCandsIdx & (~islep)]
+    selected_pt = pt_array[~islep][HWW_FatJetPFCands_pFCandsIdx]
+    selected_eta = eta_array[~islep][HWW_FatJetPFCands_pFCandsIdx]
+    selected_phi = phi_array[~islep][HWW_FatJetPFCands_pFCandsIdx]
+    selected_mass = mass_array[~islep][HWW_FatJetPFCands_pFCandsIdx]
 
     # pad the selected 4-vec array up to length of 150 to match the Lund Plane input
     selected_pt_padded = pad_val(selected_pt, 150, 0, 1, True)
