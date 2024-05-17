@@ -1043,8 +1043,6 @@ def lep_removal(events, pt_array, eta_array, phi_array, mass_array, GenlepVars, 
     pf_pt_rm_lep[delta_r < 0.1] = 0.0
     pf_mass_rm_lep[delta_r < 0.1] = 0.0
 
-    print("LOOL:", ak.Array(events.PFCands.pdgId[delta_r < 0.1]))
-
     selected_eta = ak.Array(pf_eta_rm_lep)[HWW_FatJetPFCands_pFCandsIdx]
     selected_phi = ak.Array(pf_phi_rm_lep)[HWW_FatJetPFCands_pFCandsIdx]
     selected_pt = ak.Array(pf_pt_rm_lep)[HWW_FatJetPFCands_pFCandsIdx]
