@@ -156,7 +156,7 @@ def main(args):
         from boostedhiggs.fakesprocessor import FakesProcessor
 
         p = FakesProcessor(
-            year=args.year, yearmod=yearmod, output_location=f"./outfiles/{job_name}", apply_PR_sel=args.apply_PR_sel
+            year=year, yearmod=yearmod, output_location=f"./outfiles/{job_name}", apply_PR_sel=args.apply_PR_sel
         )
     else:
         from boostedhiggs.trigger_efficiencies_processor import (
