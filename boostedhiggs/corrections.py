@@ -1134,31 +1134,33 @@ def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
     mass_array = ak.Array(jet_pfcands.mass)
     pid_array = ak.Array(abs(jet_pfcands.pdgId))
 
-    selected_pt = pt_array
-    selected_eta = eta_array
-    selected_phi = phi_array
-    selected_mass = mass_array
-
     # pf_cands_px, pf_cands_py, pf_cands_pz, pf_cands_E = lep_removal(
     #     events, pt_array, eta_array, phi_array, mass_array, pid_array, GenlepVars, HWW_FatJetPFCands_pFCandsIdx
     # )
     # pf_cands = np.dstack((pf_cands_px, pf_cands_py, pf_cands_pz, pf_cands_E))
 
     msk_lep = (pid_array == ELE_PDGID) | (pid_array == MU_PDGID) | (pid_array == TAU_PDGID)
+    msk_gamma = pid_array == GAMMA_PDGID
 
-    # this is because the length of PFCands can be up to 409, so we pad to target = 500
-    delta_eta = GenlepVars["GenlepEta"].reshape(-1, 1) - eta_array
-    delta_phi = GenlepVars["GenlepPhi"].reshape(-1, 1) - phi_array
+    GenLep = ak.zip(
+        {
+            "pt": GenlepVars["GenlepPt"],
+            "eta": GenlepVars["GenlepEta"],
+            "phi": GenlepVars["GenlepPhi"],
+            "mass": GenlepVars["GenlepMass"],
+        },
+        with_name="PtEtaPhiMCandidate",
+        behavior=candidate.behavior,
+    )
 
-    delta_r = np.sqrt(delta_eta**2 + delta_phi**2)
+    msk_delta = GenLep.delta_r(jet_pfcands) < 0.1
 
-    msk_gamma = (pid_array == GAMMA_PDGID) & (delta_r < 0.1)
-    msk = msk_lep | msk_gamma
+    msk = ~(msk_lep | (msk_gamma & msk_delta))
 
-    selected_pt[msk] = 0.0
-    selected_eta[msk] = 0.0
-    selected_phi[msk] = 0.0
-    selected_mass[msk] = 0.0
+    selected_pt = pt_array[msk]
+    selected_eta = eta_array[msk]
+    selected_phi = phi_array[msk]
+    selected_mass = mass_array[msk]
 
     # pad the selected 4-vec array up to length of 150 to match the Lund Plane input
     selected_pt_padded = pad_val(selected_pt, 150, 0, 1, True)
