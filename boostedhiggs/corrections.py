@@ -1038,9 +1038,10 @@ def lep_removal(events, pt_array, eta_array, phi_array, mass_array, pid_array, G
     pf_pt_rm_lep = np.copy(pf_pt)
     pf_mass_rm_lep = np.copy(pf_mass)
 
-    msk_lep = (pid_array == ELE_PDGID) | (pid_array == MU_PDGID) | (pid_array == TAU_PDGID)
+    # msk_lep = (pid_array == ELE_PDGID) | (pid_array == MU_PDGID) | (pid_array == TAU_PDGID)
 
-    msk = msk_lep & (delta_r < 0.1)
+    # msk = msk_lep & (delta_r < 0.1)
+    msk = delta_r < 0.1
 
     pf_eta_rm_lep[msk] = 0.0
     pf_phi_rm_lep[msk] = 0.0
