@@ -900,7 +900,6 @@ def getJMSRVariables(fatjetvars, candidatelep_p4, met, mass_shift=None):
 from .utils import (
     ELE_PDGID,
     FILL_NONE_VALUE,
-    GAMMA_PDGID,
     GEN_FLAGS,
     HIGGS_PDGID,
     MU_PDGID,
@@ -1017,8 +1016,8 @@ def getGenLepGenQuarks(dataset, genparts: GenParticleArray):
 def lep_removal(events, pt_array, eta_array, phi_array, mass_array, pid_array, GenlepVars, HWW_FatJetPFCands_pFCandsIdx):
 
     # Need to clean PFCands with dR(l,pf)<0.2
-    lep_eta = GenlepVars["GenlepEta"]
-    lep_phi = GenlepVars["GenlepPhi"]
+    # lep_eta = GenlepVars["GenlepEta"]
+    # lep_phi = GenlepVars["GenlepPhi"]
 
     # this is because the length of PFCands can be up to 409, so we pad to target = 500
     pf_eta = pad_val(eta_array, target=500, axis=1, value=0)
@@ -1027,13 +1026,13 @@ def lep_removal(events, pt_array, eta_array, phi_array, mass_array, pid_array, G
     pf_mass = pad_val(mass_array, target=500, axis=1, value=0)
     pf_pid = pad_val(pid_array, target=500, axis=1, value=0)
 
-    lep_eta_reshaped = lep_eta.reshape(-1, 1)
-    lep_phi_reshaped = lep_phi.reshape(-1, 1)
+    # lep_eta_reshaped = lep_eta.reshape(-1, 1)
+    # lep_phi_reshaped = lep_phi.reshape(-1, 1)
 
-    delta_eta = lep_eta_reshaped - pf_eta
-    delta_phi = lep_phi_reshaped - pf_phi
+    # delta_eta = lep_eta_reshaped - pf_eta
+    # delta_phi = lep_phi_reshaped - pf_phi
 
-    delta_r = np.sqrt(delta_eta**2 + delta_phi**2)
+    # delta_r = np.sqrt(delta_eta**2 + delta_phi**2)
 
     pf_eta_rm_lep = np.copy(pf_eta)
     pf_phi_rm_lep = np.copy(pf_phi)
@@ -1041,9 +1040,9 @@ def lep_removal(events, pt_array, eta_array, phi_array, mass_array, pid_array, G
     pf_mass_rm_lep = np.copy(pf_mass)
 
     msk_lep = (pf_pid == ELE_PDGID) | (pf_pid == MU_PDGID) | (pf_pid == TAU_PDGID)
-    msk_gamma = (pf_pid == GAMMA_PDGID) & (delta_r < 0.1)
+    # msk_gamma = (pf_pid == GAMMA_PDGID) & (delta_r < 0.1)
 
-    msk = msk_lep | msk_gamma
+    msk = msk_lep
     # msk = msk_lep & msk_gamma
     # msk = delta_r < 0.1
 
