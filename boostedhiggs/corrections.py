@@ -1014,63 +1014,6 @@ def getGenLepGenQuarks(dataset, genparts: GenParticleArray):
     return lepVars, quarkVars
 
 
-def lep_removal(events, pt_array, eta_array, phi_array, mass_array, pid_array, GenlepVars, HWW_FatJetPFCands_pFCandsIdx):
-
-    # Need to clean PFCands with dR(l,pf)<0.2
-    # lep_eta = GenlepVars["GenlepEta"]
-    # lep_phi = GenlepVars["GenlepPhi"]
-
-    # this is because the length of PFCands can be up to 409, so we pad to target = 500
-    pf_eta = pad_val(eta_array, target=500, axis=1, value=0)
-    pf_phi = pad_val(phi_array, target=500, axis=1, value=0)
-    pf_pt = pad_val(pt_array, target=500, axis=1, value=0)
-    pf_mass = pad_val(mass_array, target=500, axis=1, value=0)
-    pf_pid = pad_val(pid_array, target=500, axis=1, value=0)
-
-    # lep_eta_reshaped = lep_eta.reshape(-1, 1)
-    # lep_phi_reshaped = lep_phi.reshape(-1, 1)
-
-    # delta_eta = lep_eta_reshaped - pf_eta
-    # delta_phi = lep_phi_reshaped - pf_phi
-
-    # delta_r = np.sqrt(delta_eta**2 + delta_phi**2)
-
-    pf_eta_rm_lep = np.copy(pf_eta)
-    pf_phi_rm_lep = np.copy(pf_phi)
-    pf_pt_rm_lep = np.copy(pf_pt)
-    pf_mass_rm_lep = np.copy(pf_mass)
-
-    msk_lep = (pf_pid == ELE_PDGID) | (pf_pid == MU_PDGID) | (pf_pid == TAU_PDGID)
-    # msk_gamma = (pf_pid == GAMMA_PDGID) & (delta_r < 0.1)
-
-    msk = msk_lep
-    # msk = msk_lep & msk_gamma
-    # msk = delta_r < 0.1
-
-    pf_eta_rm_lep[msk] = 0.0
-    pf_phi_rm_lep[msk] = 0.0
-    pf_pt_rm_lep[msk] = 0.0
-    pf_mass_rm_lep[msk] = 0.0
-
-    selected_eta = ak.Array(pf_eta_rm_lep)[HWW_FatJetPFCands_pFCandsIdx]
-    selected_phi = ak.Array(pf_phi_rm_lep)[HWW_FatJetPFCands_pFCandsIdx]
-    selected_pt = ak.Array(pf_pt_rm_lep)[HWW_FatJetPFCands_pFCandsIdx]
-    selected_mass = ak.Array(pf_mass_rm_lep)[HWW_FatJetPFCands_pFCandsIdx]
-
-    # pad the selected 4-vec array up to length of 150 to match the Lund Plane input
-    selected_pt_padded = pad_val(selected_pt, 150, 0, 1, True)
-    selected_eta_padded = pad_val(selected_eta, 150, 0, 1, True)
-    selected_phi_padded = pad_val(selected_phi, 150, 0, 1, True)
-    selected_mass_padded = pad_val(selected_mass, 150, 0, 1, True)
-
-    pf_cands_px = selected_pt_padded * np.cos(selected_phi_padded)
-    pf_cands_py = selected_pt_padded * np.sin(selected_phi_padded)
-    pf_cands_pz = selected_pt_padded * np.sinh(selected_eta_padded)
-    pf_cands_E = np.sqrt(pf_cands_px**2 + pf_cands_py**2 + pf_cands_pz**2 + selected_mass_padded**2)
-
-    return pf_cands_px, pf_cands_py, pf_cands_pz, pf_cands_E
-
-
 def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
     """
     Relies on
@@ -1113,6 +1056,7 @@ def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
     phi_2q = Gen2qVars["Gen2qPhi"]
     gen_parts_eta_phi = np.array(np.dstack((eta_2q, phi_2q)))
 
+    # prepare the Gen lepton in case we mask objects around it
     GenlepVars = {
         f"Genlep{var}": ak.to_numpy(
             ak.fill_none(
@@ -1122,25 +1066,6 @@ def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
         )
         for key, var in skim_vars.items()
     }
-
-    # PF candidates in the AK8 jet
-    HWW_FatJetPFCands = events.FatJetPFCands.jetIdx == ak.firsts(fj_idx_lep)
-    HWW_FatJetPFCands_pFCandsIdx = events.FatJetPFCands.pFCandsIdx[HWW_FatJetPFCands]
-
-    jet_pfcands = events.PFCands[HWW_FatJetPFCands_pFCandsIdx]
-    pt_array = ak.Array(jet_pfcands.pt)
-    eta_array = ak.Array(jet_pfcands.eta)
-    phi_array = ak.Array(jet_pfcands.phi)
-    mass_array = ak.Array(jet_pfcands.mass)
-    pid_array = ak.Array(abs(jet_pfcands.pdgId))
-
-    # pf_cands_px, pf_cands_py, pf_cands_pz, pf_cands_E = lep_removal(
-    #     events, pt_array, eta_array, phi_array, mass_array, pid_array, GenlepVars, HWW_FatJetPFCands_pFCandsIdx
-    # )
-    # pf_cands = np.dstack((pf_cands_px, pf_cands_py, pf_cands_pz, pf_cands_E))
-
-    msk_lep = (pid_array == ELE_PDGID) | (pid_array == MU_PDGID) | (pid_array == TAU_PDGID)
-    msk_gamma = pid_array == GAMMA_PDGID
 
     GenLep = ak.zip(
         {
@@ -1153,14 +1078,29 @@ def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
         behavior=candidate.behavior,
     )
 
+    # PF candidates in the AK8 jet
+    HWW_FatJetPFCands = events.FatJetPFCands.jetIdx == ak.firsts(fj_idx_lep)
+    HWW_FatJetPFCands_pFCandsIdx = events.FatJetPFCands.pFCandsIdx[HWW_FatJetPFCands]
+
+    jet_pfcands = events.PFCands[HWW_FatJetPFCands_pFCandsIdx]
+    pt_array = ak.Array(jet_pfcands.pt)
+    eta_array = ak.Array(jet_pfcands.eta)
+    phi_array = ak.Array(jet_pfcands.phi)
+    mass_array = ak.Array(jet_pfcands.mass)
+    pid_array = ak.Array(abs(jet_pfcands.pdgId))
+
+    # build any masking you want
+    msk_lep = (pid_array == ELE_PDGID) | (pid_array == MU_PDGID) | (pid_array == TAU_PDGID)
+    msk_gamma = pid_array == GAMMA_PDGID
     msk_delta = GenLep.delta_r(jet_pfcands) < 0.1
 
-    msk = ~(msk_lep | (msk_gamma & msk_delta))
+    msk = msk_lep | (msk_gamma & msk_delta)
 
-    selected_pt = pt_array[msk]
-    selected_eta = eta_array[msk]
-    selected_phi = phi_array[msk]
-    selected_mass = mass_array[msk]
+    # apply the masking by selecting events that don't have "msk"
+    selected_pt = pt_array[~msk]
+    selected_eta = eta_array[~msk]
+    selected_phi = phi_array[~msk]
+    selected_mass = mass_array[~msk]
 
     # pad the selected 4-vec array up to length of 150 to match the Lund Plane input
     selected_pt_padded = pad_val(selected_pt, 150, 0, 1, True)
