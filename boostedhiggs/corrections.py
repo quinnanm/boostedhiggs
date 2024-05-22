@@ -1041,7 +1041,7 @@ def lep_removal(events, pt_array, eta_array, phi_array, mass_array, pid_array, G
 
     msk_lep = (pf_pid == ELE_PDGID) | (pf_pid == MU_PDGID) | (pf_pid == TAU_PDGID)
 
-    msk = msk_lep & (delta_r < 0.1)
+    msk = msk_lep & (delta_r < 0.001)
     # msk = msk_lep
     # msk = delta_r < 0.1
 
@@ -1137,9 +1137,9 @@ def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
     pf_cands = np.dstack((pf_cands_px, pf_cands_py, pf_cands_pz, pf_cands_E))
 
     # islep = (
-    #     (ak.Array(events.PFCands.pdgId) == ELE_PDGID)
-    #     | (ak.Array(events.PFCands.pdgId) == MU_PDGID)
-    #     | (ak.Array(events.PFCands.pdgId) == TAU_PDGID)
+    #     (ak.Array(abs(events.PFCands.pdgId)) == ELE_PDGID)
+    #     | (ak.Array(abs(events.PFCands.pdgId)) == MU_PDGID)
+    #     | (ak.Array(abs(events.PFCands.pdgId)) == TAU_PDGID)
     # )
 
     # selected_pt = pt_array[~islep][HWW_FatJetPFCands_pFCandsIdx]
