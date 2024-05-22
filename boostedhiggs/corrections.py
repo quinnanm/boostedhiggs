@@ -1013,7 +1013,7 @@ def getGenLepGenQuarks(dataset, genparts: GenParticleArray):
     return lepVars, quarkVars
 
 
-def lep_removal(events, pt_array, eta_array, phi_array, mass_array, GenlepVars, HWW_FatJetPFCands_pFCandsIdx):
+def lep_removal(events, pt_array, eta_array, phi_array, mass_array, pid_array, GenlepVars, HWW_FatJetPFCands_pFCandsIdx):
 
     # Need to clean PFCands with dR(l,pf)<0.2
     lep_eta = GenlepVars["GenlepEta"]
@@ -1038,10 +1038,14 @@ def lep_removal(events, pt_array, eta_array, phi_array, mass_array, GenlepVars, 
     pf_pt_rm_lep = np.copy(pf_pt)
     pf_mass_rm_lep = np.copy(pf_mass)
 
-    pf_eta_rm_lep[delta_r < 0.1] = 0.0
-    pf_phi_rm_lep[delta_r < 0.1] = 0.0
-    pf_pt_rm_lep[delta_r < 0.1] = 0.0
-    pf_mass_rm_lep[delta_r < 0.1] = 0.0
+    msk_lep = (pid_array == ELE_PDGID) | (pid_array == MU_PDGID) | (pid_array == TAU_PDGID)
+
+    msk = msk_lep & (delta_r < 0.1)
+
+    pf_eta_rm_lep[msk] = 0.0
+    pf_phi_rm_lep[msk] = 0.0
+    pf_pt_rm_lep[msk] = 0.0
+    pf_mass_rm_lep[msk] = 0.0
 
     selected_eta = ak.Array(pf_eta_rm_lep)[HWW_FatJetPFCands_pFCandsIdx]
     selected_phi = ak.Array(pf_phi_rm_lep)[HWW_FatJetPFCands_pFCandsIdx]
@@ -1122,9 +1126,10 @@ def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
     eta_array = ak.Array(events.PFCands.eta)
     phi_array = ak.Array(events.PFCands.phi)
     mass_array = ak.Array(events.PFCands.mass)
+    pid_array = ak.Array(abs(events.PFCands.pdgId))
 
     pf_cands_px, pf_cands_py, pf_cands_pz, pf_cands_E = lep_removal(
-        events, pt_array, eta_array, phi_array, mass_array, GenlepVars, HWW_FatJetPFCands_pFCandsIdx
+        events, pt_array, eta_array, phi_array, mass_array, pid_array, GenlepVars, HWW_FatJetPFCands_pFCandsIdx
     )
     pf_cands = np.dstack((pf_cands_px, pf_cands_py, pf_cands_pz, pf_cands_E))
 
