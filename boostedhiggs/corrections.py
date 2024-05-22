@@ -1126,35 +1126,36 @@ def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
     HWW_FatJetPFCands = events.FatJetPFCands.jetIdx == ak.firsts(fj_idx_lep)
     HWW_FatJetPFCands_pFCandsIdx = events.FatJetPFCands.pFCandsIdx[HWW_FatJetPFCands]
 
-    pt_array = ak.Array(events.PFCands.pt)
-    eta_array = ak.Array(events.PFCands.eta)
-    phi_array = ak.Array(events.PFCands.phi)
-    mass_array = ak.Array(events.PFCands.mass)
-    pid_array = ak.Array(abs(events.PFCands.pdgId))
+    jet_pfcands = events.PFCands[HWW_FatJetPFCands_pFCandsIdx]
+    pt_array = ak.Array(jet_pfcands.pt)
+    eta_array = ak.Array(jet_pfcands.eta)
+    phi_array = ak.Array(jet_pfcands.phi)
+    mass_array = ak.Array(jet_pfcands.mass)
+    pid_array = ak.Array(abs(jet_pfcands.pdgId))
 
-    pf_cands_px, pf_cands_py, pf_cands_pz, pf_cands_E = lep_removal(
-        events, pt_array, eta_array, phi_array, mass_array, pid_array, GenlepVars, HWW_FatJetPFCands_pFCandsIdx
-    )
-    pf_cands = np.dstack((pf_cands_px, pf_cands_py, pf_cands_pz, pf_cands_E))
-
-    # msk_lep = (pid_array == ELE_PDGID) | (pid_array == MU_PDGID) | (pid_array == TAU_PDGID)
-
-    # selected_pt = pt_array[~msk_lep][HWW_FatJetPFCands_pFCandsIdx]
-    # selected_eta = eta_array[~msk_lep][HWW_FatJetPFCands_pFCandsIdx]
-    # selected_phi = phi_array[~msk_lep][HWW_FatJetPFCands_pFCandsIdx]
-    # selected_mass = mass_array[~msk_lep][HWW_FatJetPFCands_pFCandsIdx]
-
-    # # pad the selected 4-vec array up to length of 150 to match the Lund Plane input
-    # selected_pt_padded = pad_val(selected_pt, 150, 0, 1, True)
-    # selected_eta_padded = pad_val(selected_eta, 150, 0, 1, True)
-    # selected_phi_padded = pad_val(selected_phi, 150, 0, 1, True)
-    # selected_mass_padded = pad_val(selected_mass, 150, 0, 1, True)
-
-    # pf_cands_px = selected_pt_padded * np.cos(selected_phi_padded)
-    # pf_cands_py = selected_pt_padded * np.sin(selected_phi_padded)
-    # pf_cands_pz = selected_pt_padded * np.sinh(selected_eta_padded)
-    # pf_cands_E = np.sqrt(pf_cands_px**2 + pf_cands_py**2 + pf_cands_pz**2 + selected_mass_padded**2)
-
+    # pf_cands_px, pf_cands_py, pf_cands_pz, pf_cands_E = lep_removal(
+    #     events, pt_array, eta_array, phi_array, mass_array, pid_array, GenlepVars, HWW_FatJetPFCands_pFCandsIdx
+    # )
     # pf_cands = np.dstack((pf_cands_px, pf_cands_py, pf_cands_pz, pf_cands_E))
+
+    msk_lep = (pid_array == ELE_PDGID) | (pid_array == MU_PDGID) | (pid_array == TAU_PDGID)
+
+    selected_pt = pt_array[~msk_lep]
+    selected_eta = eta_array[~msk_lep]
+    selected_phi = phi_array[~msk_lep]
+    selected_mass = mass_array[~msk_lep]
+
+    # pad the selected 4-vec array up to length of 150 to match the Lund Plane input
+    selected_pt_padded = pad_val(selected_pt, 150, 0, 1, True)
+    selected_eta_padded = pad_val(selected_eta, 150, 0, 1, True)
+    selected_phi_padded = pad_val(selected_phi, 150, 0, 1, True)
+    selected_mass_padded = pad_val(selected_mass, 150, 0, 1, True)
+
+    pf_cands_px = selected_pt_padded * np.cos(selected_phi_padded)
+    pf_cands_py = selected_pt_padded * np.sin(selected_phi_padded)
+    pf_cands_pz = selected_pt_padded * np.sinh(selected_eta_padded)
+    pf_cands_E = np.sqrt(pf_cands_px**2 + pf_cands_py**2 + pf_cands_pz**2 + selected_mass_padded**2)
+
+    pf_cands = np.dstack((pf_cands_px, pf_cands_py, pf_cands_pz, pf_cands_E))
 
     return pf_cands, gen_parts_eta_phi, ak8_jets
