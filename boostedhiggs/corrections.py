@@ -1094,7 +1094,7 @@ def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
     msk_gamma = pid_array == GAMMA_PDGID
     msk_delta = GenLep.delta_r(jet_pfcands) < 0.1
 
-    msk = msk_lep | (msk_gamma & msk_delta)
+    msk = (msk_lep | msk_gamma) & msk_delta
 
     # apply the masking by selecting events that don't have "msk"
     selected_pt = pt_array[~msk]
