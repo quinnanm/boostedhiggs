@@ -621,7 +621,7 @@ def add_pileupid_weights(weights: Weights, year: str, mod: str, jets: JetArray, 
 
 # find corrections path using this file's path
 try:
-    with importlib.resources.path("boostedhiggs.data", "jec_compiled.pkl.gz") as filename:
+    with importlib.resources.path("boostedhiggs.data", "jec_compiled.pkl") as filename:
         with open(filename, "rb") as filehandler:
             jmestuff = pickle.load(filehandler)
         ak4jet_factory = jmestuff["jet_factory"]
