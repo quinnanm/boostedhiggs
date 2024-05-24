@@ -4,7 +4,9 @@ import importlib.resources
 from coffea.jetmet_tools import CorrectedJetsFactory, CorrectedMETFactory, JECStack
 from coffea.lookup_tools import extractor
 
-"""Twiki: https://twiki.cern.ch/twiki/bin/view/CMS/JECDataMC.
+"""Twikis:
+    - Recommendations: https://twiki.cern.ch/twiki/bin/view/CMS/JECDataMC
+    - Explanation: https://twiki.cern.ch/twiki/bin/view/CMS/JECUncertaintySources
 
 I copied Dylan's file https://github.com/drankincms/boostedhiggs/blob/ULv2/boostedhiggs/build_jec.py and I updated
 the corrections "UncertaintySources" by the corresponding "Regrouped" unc.
@@ -44,7 +46,7 @@ def jet_factory_factory(files):
 
 
 jet_factory = {
-    "2016APVmc": jet_factory_factory(
+    "2016preVFPmc": jet_factory_factory(
         files=[
             "Summer19UL16APV_V7_MC_L1FastJet_AK4PFchs.jec.txt",
             "Summer19UL16APV_V7_MC_L2Relative_AK4PFchs.jec.txt",
@@ -55,7 +57,7 @@ jet_factory = {
             "Summer20UL16APV_JRV3_MC_SF_AK4PFchs.jersf.txt",
         ]
     ),
-    "2016mc": jet_factory_factory(
+    "2016postVFPmc": jet_factory_factory(
         files=[
             # "Summer16_07Aug2017_V11_MC_L1FastJet_AK4PFchs.jec.txt.gz",
             # "Summer16_07Aug2017_V11_MC_L2Relative_AK4PFchs.jec.txt.gz",
@@ -109,7 +111,7 @@ jet_factory = {
 }
 
 fatjet_factory = {
-    "2016APVmc": jet_factory_factory(
+    "2016preVFPmc": jet_factory_factory(
         files=[
             # "Summer16_07Aug2017_V11_MC_L1FastJet_AK8PFPuppi.jec.txt.gz",
             # "Summer16_07Aug2017_V11_MC_L2Relative_AK8PFPuppi.jec.txt.gz",
@@ -126,7 +128,7 @@ fatjet_factory = {
             "Summer20UL16APV_JRV3_MC_SF_AK8PFPuppi.jersf.txt",
         ]
     ),
-    "2016mc": jet_factory_factory(
+    "2016postVFPmc": jet_factory_factory(
         files=[
             # "Summer16_07Aug2017_V11_MC_L1FastJet_AK8PFPuppi.jec.txt.gz",
             # "Summer16_07Aug2017_V11_MC_L2Relative_AK8PFPuppi.jec.txt.gz",
