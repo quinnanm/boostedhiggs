@@ -780,14 +780,18 @@ def getJECVariables(fatjetvars, candidatelep_p4, met, pt_shift=None, met_shift=N
     variables = {}
 
     ptlabel = pt_shift if pt_shift is not None else ""
+    print("YALLA")
     if met_shift is not None:
+        print("00000000")
         if met_shift == "UES_up":
             metvar = met.MET_UnclusteredEnergy.up
         elif met_shift == "UES_down":
             metvar = met.MET_UnclusteredEnergy.down
         metlabel = met_shift
     else:
+        print("1111111")
         if ptlabel != "":
+            print("2222222")
             metlabel = ""
             if ptlabel == "JES_up":
                 metvar = met.JES_jes.up
@@ -798,8 +802,11 @@ def getJECVariables(fatjetvars, candidatelep_p4, met, pt_shift=None, met_shift=N
             elif ptlabel == "JER_down":
                 metvar = met.JER.down
         else:
+            print("3333333")
             metvar = met
             metlabel = ""
+
+    print("metvar", metvar)
     shift = ptlabel + metlabel
 
     candidatefj = ak.zip(
