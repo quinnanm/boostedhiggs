@@ -196,27 +196,27 @@ class HwwProcessor(processor.ProcessorABC):
 
         # TODO: what we do is correct if: all high pt leptons that pass the low pt triggers also pass the high pt triggers
         # TODO: split electron/muon triggers ()
-        # trigger, trigger_noiso, trigger_iso = {}, {}, {}
-        # for ch in self._channels:
-        #     trigger[ch] = np.zeros(nevents, dtype="bool")
-        #     trigger_noiso[ch] = np.zeros(nevents, dtype="bool")
-        #     trigger_iso[ch] = np.zeros(nevents, dtype="bool")
-        #     for t in self._HLTs[ch]:
-        #         if t in events.HLT.fields:
-        #             if "Iso" in t or "WPTight_Gsf" in t:
-        #                 trigger_iso[ch] = trigger_iso[ch] | events.HLT[t]
-        #             else:
-        #                 trigger_noiso[ch] = trigger_noiso[ch] | events.HLT[t]
-        #             trigger[ch] = trigger[ch] | events.HLT[t]
-
-        trigger = {}
-        for ch in ["ele", "mu"]:
+        trigger, trigger_noiso, trigger_iso = {}, {}, {}
+        for ch in self._channels:
             trigger[ch] = np.zeros(nevents, dtype="bool")
+            trigger_noiso[ch] = np.zeros(nevents, dtype="bool")
+            trigger_iso[ch] = np.zeros(nevents, dtype="bool")
             for t in self._HLTs[ch]:
                 if t in events.HLT.fields:
+                    if "Iso" in t or "WPTight_Gsf" in t:
+                        trigger_iso[ch] = trigger_iso[ch] | events.HLT[t]
+                    else:
+                        trigger_noiso[ch] = trigger_noiso[ch] | events.HLT[t]
                     trigger[ch] = trigger[ch] | events.HLT[t]
-        trigger["ele"] = trigger["ele"] & (~trigger["mu"])
-        trigger["mu"] = trigger["mu"] & (~trigger["ele"])
+
+        # trigger = {}
+        # for ch in ["ele", "mu"]:
+        #     trigger[ch] = np.zeros(nevents, dtype="bool")
+        #     for t in self._HLTs[ch]:
+        #         if t in events.HLT.fields:
+        #             trigger[ch] = trigger[ch] | events.HLT[t]
+        # trigger["ele"] = trigger["ele"] & (~trigger["mu"])
+        # trigger["mu"] = trigger["mu"] & (~trigger["ele"])
 
         ######################
         # METFLITERS
