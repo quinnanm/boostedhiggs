@@ -112,21 +112,8 @@ def main(args):
             systematics=args.systematics,
             getLPweights=args.getLPweights,
             uselooselep=args.uselooselep,
+            fakevalidation=args.fakevalidation,
             output_location="./outfiles" + job_name,
-        )
-
-    elif args.processor == "vh":
-        from boostedhiggs.vhprocessor import vhProcessor
-
-        p = vhProcessor(
-            year=year,
-            yearmod=yearmod,
-            # channel=channels[0],
-            channels=channels,
-            inference=args.inference,
-            systematics=args.systematics,
-            output_location=f"./outfiles/{job_name}",
-            region=args.region,
         )
 
     elif args.processor == "lumi":
@@ -134,16 +121,6 @@ def main(args):
 
         p = LumiProcessor(year=args.year, yearmod=yearmod, output_location=f"./outfiles/{job_name}")
 
-    elif args.processor == "zll":
-        from boostedhiggs.zll_processor import ZllProcessor
-
-        p = ZllProcessor(
-            year=year,
-            yearmod=yearmod,
-            channels=channels,
-            inference=args.inference,
-            output_location="./outfiles" + job_name,
-        )
     elif args.processor == "input":
         # define processor
         from boostedhiggs.inputprocessor import InputProcessor
@@ -234,14 +211,12 @@ def main(args):
 if __name__ == "__main__":
     # e.g.
     # noqa: run locally on lpc (hww mc) as: python run.py --year 2017 --processor hww --pfnano v2_2 --n 1 --starti 0 --config samples_inclusive.yaml --key mc
-    # noqa: run locally on lpc (vh) as: python run.py --year 2018 --sample HZJ_HToWW_M-125 --processor vh --pfnano v2_2 --n 1 --starti 0 --config samples_vh.yaml --key mc --channels lep --executor iterative
     # noqa: run locally on lpc (hww trigger) as: python run.py --year 2017 --processor trigger --pfnano v2_2 --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele --config samples_inclusive.yaml --key mc
 
     # noqa: run locally on single file (hww): python run.py --year 2017 --processor hww --pfnano v2_2 --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele --config samples_inclusive.yaml --key mc
-    # noqa: run locally on on single file (zll): python run.py --year 2017 --processor zll --pfnano v2_2 --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele --config samples_inclusive.yaml --key mc
 
-    # python run.py --processor input --macos --sample GluGluHToWW_Pt-200ToInf_M-125 --n 1 --starti 0 --inference
-    # python run.py --processor input --local --sample GluGluHToWW_Pt-200ToInf_M-125 --n 1 --starti 0 --inference
+    # noqa LP: python run.py --year 2017 --processor hww --pfnano v2_2 --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele,mu --config samples_inclusive.yaml --key mc --getLPweights --inference
+    # noqa Fakes: python run.py --year 2017 --processor fakes --pfnano v2_2 --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele,mu --config samples_inclusive.yaml --key mc
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--year", dest="year", default="2017", help="year", type=str)
@@ -295,6 +270,9 @@ if __name__ == "__main__":
     # fakes
     parser.add_argument("--apply-PR-sel", dest="apply_PR_sel", action="store_true")
     parser.add_argument("--no-apply-PR-sel", dest="apply_PR_sel", action="store_false")
+
+    parser.add_argument("--fakevalidation", dest="fakevalidation", action="store_true")
+    parser.add_argument("--no-fakevalidation", dest="fakevalidation", action="store_false")
 
     parser.set_defaults(inference=False)
     args = parser.parse_args()

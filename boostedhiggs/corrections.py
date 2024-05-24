@@ -331,22 +331,15 @@ def get_btag_weights(
     lightEff = efflookup(lightJets.pt, abs(lightJets.eta), lightJets.hadronFlavour)
     bcEff = efflookup(bcJets.pt, abs(bcJets.eta), bcJets.hadronFlavour)
 
+    # TODO:
+    print(bcEff, "tagging eff")
+    print(lightEff, "mistagging eff (light quarks)")
+
     lightSF = _btagSF(lightJets, "light")
     bcSF = _btagSF(bcJets, "bc")
 
     lightPass = lightJets.btagDeepB > btagWPs[algo][year][wp]
     bcPass = bcJets.btagDeepB > btagWPs[algo][year][wp]
-
-    # 1b method
-    # https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods#1b_Event_reweighting_using_scale
-    def _get_weight(veto, eff, SF):
-        if veto:
-            # 0 btag
-            weight = ak.prod(1 - SF * eff, axis=-1) / ak.prod(1 - eff, axis=-1)
-        else:
-            # >=1 btag
-            weight = (1 - ak.prod(1 - SF * eff, axis=-1)) / (1 - ak.prod(1 - eff, axis=-1))
-        return np.nan_to_num(ak.fill_none(weight, 1.0), nan=1)
 
     # 1a method
     # https://btv-wiki.docs.cern.ch/PerformanceCalibration/fixedWPSFRecommendations/
@@ -490,10 +483,7 @@ def add_lepton_weight(weights, lepton, year, lepton_type="muon"):
         """
         restrict values to 1 for some SFs if we are above/below the ISO threshold
         """
-        iso_threshold = {
-            "muon": 55.0,
-            "electron": 120.0,
-        }[lepton_type]
+        iso_threshold = {"muon": 55.0, "electron": 120.0}[lepton_type]
         if corr == "trigger_iso":
             value[lepton_pt > iso_threshold] = 1.0
         elif corr == "trigger_noniso":

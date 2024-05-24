@@ -78,12 +78,14 @@ class HwwProcessor(processor.ProcessorABC):
         systematics=False,
         getLPweights=False,
         uselooselep=False,
+        fakevalidation=False,
     ):
         self._year = year
         self._yearmod = yearmod
         self._channels = channels
         self._systematics = systematics
         self._getLPweights = getLPweights
+        self._fakevalidation = fakevalidation
 
         self._output_location = output_location
 
@@ -111,6 +113,19 @@ class HwwProcessor(processor.ProcessorABC):
         self.jecs = {
             "JES": "JES_jes",
             "JER": "JER",
+            # individual sources
+            "JES_FlavorQCD": "JES_FlavorQCD",
+            "JES_RelativeBal": "JES_RelativeBal",
+            "JES_HF": "JES_HF",
+            "JES_BBEC1": "JES_BBEC1",
+            "JES_EC2": "JES_EC2",
+            "JES_Absolute": "JES_Absolute",
+            f"JES_BBEC1_{self._year}": f"JES_BBEC1_{self._year}",
+            f"JES_RelativeSample_{self._year}": f"JES_RelativeSample_{self._year}",
+            f"JES_EC2_{self._year}": f"JES_EC2_{self._year}",
+            f"JES_HF_{self._year}": f"JES_HF_{self._year}",
+            f"JES_Absolute_{self._year}": f"JES_Absolute_{self._year}",
+            "JES_Total": "JES_Total",
         }
 
         # do inference
@@ -202,6 +217,8 @@ class HwwProcessor(processor.ProcessorABC):
         # Trigger
         ######################
 
+        # TODO: what we do is correct if: all high pt leptons that pass the low pt triggers also pass the high pt triggers
+        # TODO: split electron/muon triggers ()
         trigger, trigger_noiso, trigger_iso = {}, {}, {}
         for ch in self._channels:
             trigger[ch] = np.zeros(nevents, dtype="bool")
@@ -253,7 +270,7 @@ class HwwProcessor(processor.ProcessorABC):
             (muons.pt > 30)
             & (np.abs(muons.eta) < 2.4)
             & muons.mediumId
-            & (((muons.pfRelIso04_all < 0.15) & (muons.pt < 55)) | (muons.pt >= 55))
+            & (((muons.pfRelIso04_all < 0.15) & (muons.pt < 55)) | (muons.pt >= 55) & (muons.miniPFRelIso_all < 0.2))
             # additional cuts
             & (np.abs(muons.dz) < 0.1)
             & (np.abs(muons.dxy) < 0.05)
@@ -521,11 +538,6 @@ class HwwProcessor(processor.ProcessorABC):
             & ~ak.any(loose_electrons & ~good_electrons, 1),
             channel="ele",
         )
-        self.add_selection(
-            name="LepMiniIso",
-            sel=(candidatelep.pt < 55) | ((candidatelep.pt >= 55) & (lep_miso < 0.2)),
-            channel="mu",
-        )
         self.add_selection(name="NoTaus", sel=(n_loose_taus_mu == 0), channel="mu")
         self.add_selection(name="NoTaus", sel=(n_loose_taus_ele == 0), channel="ele")
         self.add_selection(name="AtLeastOneFatJet", sel=(NumFatjets >= 1))
@@ -533,7 +545,11 @@ class HwwProcessor(processor.ProcessorABC):
         self.add_selection(name="LepInJet", sel=(lep_fj_dr < 0.8))
         self.add_selection(name="JetLepOverlap", sel=(lep_fj_dr > 0.03))
         self.add_selection(name="dPhiJetMET", sel=(np.abs(met_fj_dphi) < 1.57))
-        self.add_selection(name="MET", sel=(met.pt > 20))
+
+        if self._fakevalidation:
+            self.add_selection(name="MET", sel=(met.pt < 20))
+        else:
+            self.add_selection(name="MET", sel=(met.pt > 20))
 
         # gen-level matching
         signal_mask = None
