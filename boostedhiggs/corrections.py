@@ -619,25 +619,14 @@ def add_pileupid_weights(weights: Weights, year: str, mod: str, jets: JetArray, 
     weights.add("pileupIDSF", *sfs_var)
 
 
-# # find corrections path using this file's path
-# try:
-#     with importlib.resources.path("boostedhiggs.data", "jec_compiled.pkl") as filename:
-#         with open(filename, "rb") as filehandler:
-#             jmestuff = pickle.load(filehandler)
-#         ak4jet_factory = jmestuff["jet_factory"]
-#         fatjet_factory = jmestuff["fatjet_factory"]
-#         met_factory = jmestuff["met_factory"]
-# except KeyError:
-#     print("Failed loading compiled JECs")
-
-
 # find corrections path using this file's path
 try:
-    with open("boostedhiggs/data/jec_compiled.pkl", "rb") as f:
-        jmestuff = pickle.load(f)
-    ak4jet_factory = jmestuff["jet_factory"]
-    fatjet_factory = jmestuff["fatjet_factory"]
-    met_factory = jmestuff["met_factory"]
+    with importlib.resources.path("boostedhiggs.data", "jec_compiled.pkl.gz") as filename:
+        with open(filename, "rb") as filehandler:
+            jmestuff = pickle.load(filehandler)
+        ak4jet_factory = jmestuff["jet_factory"]
+        fatjet_factory = jmestuff["fatjet_factory"]
+        met_factory = jmestuff["met_factory"]
 except KeyError:
     print("Failed loading compiled JECs")
 
