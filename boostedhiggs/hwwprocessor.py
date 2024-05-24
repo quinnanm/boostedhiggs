@@ -28,7 +28,6 @@ from boostedhiggs.corrections import (
     get_btag_weights,
     get_jec_jets,
     get_jmsr,
-    get_pileup_weight,
     getJECVariables,
     getJMSRVariables,
     met_factory,
@@ -59,14 +58,6 @@ def build_p4(cand):
     )
 
 
-def pileup_cutoff(events, year, mod, cutoff: float = 4):
-    pweights = get_pileup_weight(year, mod, events.Pileup.nPU.to_numpy())
-    pw_pass = (pweights["nominal"] <= cutoff) * (pweights["up"] <= cutoff) * (pweights["down"] <= cutoff)
-    logging.info(f"Passing pileup weight cut: {np.sum(pw_pass)} out of {len(events)} events")
-    events = events[pw_pass]
-    return events
-
-
 class HwwProcessor(processor.ProcessorABC):
     def __init__(
         self,
@@ -85,6 +76,7 @@ class HwwProcessor(processor.ProcessorABC):
         self._channels = channels
         self._systematics = systematics
         self._getLPweights = getLPweights
+        self._uselooselep = uselooselep
         self._fakevalidation = fakevalidation
 
         self._output_location = output_location
@@ -128,13 +120,9 @@ class HwwProcessor(processor.ProcessorABC):
             "JES_Total": "JES_Total",
         }
 
-        # do inference
+        # for tagger inference
         self._inference = inference
-
-        # for tagger model and preprocessing dict
         self.tagger_resources_path = str(pathlib.Path(__file__).parent.resolve()) + "/tagger_resources/"
-
-        self._uselooselep = uselooselep
 
     @property
     def accumulator(self):
@@ -177,17 +165,6 @@ class HwwProcessor(processor.ProcessorABC):
         dataset = events.metadata["dataset"]
         self.isMC = hasattr(events, "genWeight")
 
-        # if self.isMC:
-        #     # remove events with pileup weights un-physically large
-        #     events = pileup_cutoff(events, self._year, self._yearmod, cutoff=4)
-
-        # if self.isMC:
-        #     gen_weights = events["genWeight"].to_numpy()
-        # else:
-        #     gen_weights = None
-
-        # nevents = np.sum(gen_weights) if self.isMC else len(events)
-
         nevents = len(events)
         self.weights = {ch: Weights(nevents, storeIndividual=True) for ch in self._channels}
         self.selections = {ch: PackedSelection() for ch in self._channels}
@@ -219,18 +196,27 @@ class HwwProcessor(processor.ProcessorABC):
 
         # TODO: what we do is correct if: all high pt leptons that pass the low pt triggers also pass the high pt triggers
         # TODO: split electron/muon triggers ()
-        trigger, trigger_noiso, trigger_iso = {}, {}, {}
-        for ch in self._channels:
+        # trigger, trigger_noiso, trigger_iso = {}, {}, {}
+        # for ch in self._channels:
+        #     trigger[ch] = np.zeros(nevents, dtype="bool")
+        #     trigger_noiso[ch] = np.zeros(nevents, dtype="bool")
+        #     trigger_iso[ch] = np.zeros(nevents, dtype="bool")
+        #     for t in self._HLTs[ch]:
+        #         if t in events.HLT.fields:
+        #             if "Iso" in t or "WPTight_Gsf" in t:
+        #                 trigger_iso[ch] = trigger_iso[ch] | events.HLT[t]
+        #             else:
+        #                 trigger_noiso[ch] = trigger_noiso[ch] | events.HLT[t]
+        #             trigger[ch] = trigger[ch] | events.HLT[t]
+
+        trigger = {}
+        for ch in ["ele", "mu"]:
             trigger[ch] = np.zeros(nevents, dtype="bool")
-            trigger_noiso[ch] = np.zeros(nevents, dtype="bool")
-            trigger_iso[ch] = np.zeros(nevents, dtype="bool")
             for t in self._HLTs[ch]:
                 if t in events.HLT.fields:
-                    if "Iso" in t or "WPTight_Gsf" in t:
-                        trigger_iso[ch] = trigger_iso[ch] | events.HLT[t]
-                    else:
-                        trigger_noiso[ch] = trigger_noiso[ch] | events.HLT[t]
                     trigger[ch] = trigger[ch] | events.HLT[t]
+        trigger["ele"] = trigger["ele"] & (~trigger["mu"])
+        trigger["mu"] = trigger["mu"] & (~trigger["ele"])
 
         ######################
         # METFLITERS
@@ -403,6 +389,10 @@ class HwwProcessor(processor.ProcessorABC):
         # delta phi MET and higgs candidate
         met_fj_dphi = candidatefj.delta_phi(met)
 
+        ######################
+        # Store variables
+        ######################
+
         variables = {
             "lep_pt": candidatelep.pt,
             "lep_eta": candidatelep.eta,
@@ -461,42 +451,41 @@ class HwwProcessor(processor.ProcessorABC):
             # add variables affected by JECs/MET
             mjj_shift = {}
             for shift, vals in jec_shifted_jetvars["pt"].items():
-                if shift == "":
-                    continue
-                pt_1 = jet1.pt
-                pt_2 = jet2.pt
-                try:
-                    pt_1 = vals[ak4_outside_ak8_selector][:, 0]
-                except Exception:
+                if shift != "":
                     pt_1 = jet1.pt
-                try:
-                    pt_2 = vals[ak4_outside_ak8_selector][:, 1]
-                except Exception:
                     pt_2 = jet2.pt
+                    try:
+                        pt_1 = vals[ak4_outside_ak8_selector][:, 0]
+                    except Exception:
+                        pt_1 = jet1.pt
+                    try:
+                        pt_2 = vals[ak4_outside_ak8_selector][:, 1]
+                    except Exception:
+                        pt_2 = jet2.pt
 
-                jet1_shift = ak.zip(
-                    {
-                        "pt": pt_1,
-                        "eta": jet1.eta,
-                        "phi": jet1.phi,
-                        "mass": jet1.mass,
-                        "charge": 0,
-                    },
-                    with_name="PtEtaPhiMCandidate",
-                    behavior=candidate.behavior,
-                )
-                jet2_shift = ak.zip(
-                    {
-                        "pt": pt_2,
-                        "eta": jet2.eta,
-                        "phi": jet2.phi,
-                        "mass": jet2.mass,
-                        "charge": 0,
-                    },
-                    with_name="PtEtaPhiMCandidate",
-                    behavior=candidate.behavior,
-                )
-                mjj_shift[f"mjj{shift}"] = (ak.firsts(jet1_shift) + ak.firsts(jet2_shift)).mass
+                    jet1_shift = ak.zip(
+                        {
+                            "pt": pt_1,
+                            "eta": jet1.eta,
+                            "phi": jet1.phi,
+                            "mass": jet1.mass,
+                            "charge": 0,
+                        },
+                        with_name="PtEtaPhiMCandidate",
+                        behavior=candidate.behavior,
+                    )
+                    jet2_shift = ak.zip(
+                        {
+                            "pt": pt_2,
+                            "eta": jet2.eta,
+                            "phi": jet2.phi,
+                            "mass": jet2.mass,
+                            "charge": 0,
+                        },
+                        with_name="PtEtaPhiMCandidate",
+                        behavior=candidate.behavior,
+                    )
+                    mjj_shift[f"mjj{shift}"] = (ak.firsts(jet1_shift) + ak.firsts(jet2_shift)).mass
             variables = {**variables, **mjj_shift}
 
             for met_shift in ["UES_up", "UES_down"]:
