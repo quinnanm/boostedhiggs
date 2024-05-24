@@ -800,9 +800,9 @@ def getJECVariables(fatjetvars, candidatelep_p4, met, pt_shift=None, met_shift=N
             #     metvar = met.JER.down
             else:
                 if "up" in ptlabel:
-                    metvar = met[ptlabel].up
+                    metvar = met[ptlabel.replace("up", "")].up
                 elif "down" in ptlabel:
-                    metvar = met[ptlabel].down
+                    metvar = met[ptlabel.replace("down", "")].down
         else:
             metvar = met
 
