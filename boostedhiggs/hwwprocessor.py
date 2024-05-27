@@ -267,8 +267,8 @@ class HwwProcessor(processor.ProcessorABC):
             (electrons.pt > 38)
             & (np.abs(electrons.eta) < 2.4)
             & ((np.abs(electrons.eta) < 1.44) | (np.abs(electrons.eta) > 1.57))
-            & (electrons.cutBased >= electrons.LOOSE)
-            # & (electrons.mvaFall17V2noIso_WPL)
+            # & (electrons.cutBased >= electrons.LOOSE)
+            & (electrons.mvaFall17V2noIso_WPL)
             & (((electrons.pfRelIso03_all < 0.25) & (electrons.pt < 120)) | (electrons.pt >= 120))
         )
 
