@@ -145,18 +145,14 @@ class FakesProcessor(processor.ProcessorABC):
         # Trigger
         ######################
 
-        trigger, trigger_noiso, trigger_iso = {}, {}, {}
-        for ch in self._channels:
+        trigger = {}
+        for ch in ["ele", "mu"]:
             trigger[ch] = np.zeros(nevents, dtype="bool")
-            trigger_noiso[ch] = np.zeros(nevents, dtype="bool")
-            trigger_iso[ch] = np.zeros(nevents, dtype="bool")
             for t in self._HLTs[ch]:
                 if t in events.HLT.fields:
-                    if "Iso" in t or "WPTight_Gsf" in t:
-                        trigger_iso[ch] = trigger_iso[ch] | events.HLT[t]
-                    else:
-                        trigger_noiso[ch] = trigger_noiso[ch] | events.HLT[t]
                     trigger[ch] = trigger[ch] | events.HLT[t]
+        trigger["ele"] = trigger["ele"] & (~trigger["mu"])
+        trigger["mu"] = trigger["mu"] & (~trigger["ele"])
 
         ######################
         # METFLITERS
@@ -329,7 +325,6 @@ class FakesProcessor(processor.ProcessorABC):
             self.add_selection(name="Zpeak", sel=(mll_loose > 76) & (mll_loose < 106))
 
         else:  # apply FR selection
-            self.add_selection(name="MET", sel=(met.pt < 30))
             self.add_selection(name="OneLep", sel=(n_loose_muons == 1) & (n_loose_electrons == 0), channel="mu")
             self.add_selection(name="OneLep", sel=(n_loose_muons == 0) & (n_loose_electrons == 1), channel="ele")
 
@@ -337,6 +332,7 @@ class FakesProcessor(processor.ProcessorABC):
             self.add_selection(name="CandidateJetpT", sel=(candidatefj.pt > 250))
             self.add_selection(name="LepInJet", sel=(lep_fj_dr < 0.8))
             self.add_selection(name="JetLepOverlap", sel=(lep_fj_dr > 0.03))
+            self.add_selection(name="MET", sel=(met.pt < 30))
 
         # hem-cleaning selection
         if self._year == "2018":
