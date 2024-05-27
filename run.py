@@ -132,9 +132,7 @@ def main(args):
         # define processor
         from boostedhiggs.fakesprocessor import FakesProcessor
 
-        p = FakesProcessor(
-            year=year, yearmod=yearmod, output_location=f"./outfiles/{job_name}", apply_PR_sel=args.apply_PR_sel
-        )
+        p = FakesProcessor(year=year, yearmod=yearmod, output_location=f"./outfiles/{job_name}")
     else:
         from boostedhiggs.trigger_efficiencies_processor import (
             TriggerEfficienciesProcessor,
@@ -268,9 +266,6 @@ if __name__ == "__main__":
     parser.add_argument("--no-uselooselep", dest="uselooselep", action="store_false")
 
     # fakes
-    parser.add_argument("--apply-PR-sel", dest="apply_PR_sel", action="store_true")
-    parser.add_argument("--no-apply-PR-sel", dest="apply_PR_sel", action="store_false")
-
     parser.add_argument("--fakevalidation", dest="fakevalidation", action="store_true")
     parser.add_argument("--no-fakevalidation", dest="fakevalidation", action="store_false")
 
