@@ -15,13 +15,7 @@ from coffea.nanoevents.methods import candidate
 
 logger = logging.getLogger(__name__)
 
-from boostedhiggs.corrections import (
-    add_pileup_weight,
-    add_pileupid_weights,
-    btagWPs,
-    get_jec_jets,
-    met_factory,
-)
+from boostedhiggs.corrections import add_pileup_weight, add_pileupid_weights, btagWPs
 
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -79,11 +73,6 @@ class FakesProcessor(processor.ProcessorABC):
                 "ele": "SingleElectron",
                 "mu": "SingleMuon",
             }
-
-        self.jecs = {
-            "JES": "JES_jes",
-            "JER": "JER",
-        }
 
     @property
     def accumulator(self):
@@ -237,8 +226,7 @@ class FakesProcessor(processor.ProcessorABC):
         mll_tight = (tight_lep1 + tight_lep2).mass
 
         # OBJECT: AK4 jets
-        jets, _ = get_jec_jets(events, events.Jet, self._year, not self.isMC, self.jecs, fatjets=False)
-        met = met_factory.build(events.MET, jets, {}) if self.isMC else events.MET
+        jets = events.Jet
 
         jet_selector = (
             (jets.pt > 30)
@@ -247,6 +235,8 @@ class FakesProcessor(processor.ProcessorABC):
             & ((jets.pt >= 50) | ((jets.pt < 50) & (jets.puId & 2) == 2))
         )
         goodjets = jets[jet_selector]
+
+        met = events.MET
 
         # OBJECT: b-jets
         n_bjets_L = ak.sum(jets.btagDeepFlavB > btagWPs["deepJet"][self._year]["L"], axis=1)
@@ -257,7 +247,6 @@ class FakesProcessor(processor.ProcessorABC):
         good_fatjets = fatjets[fatjet_selector]
         good_fatjets = good_fatjets[ak.argsort(good_fatjets.pt, ascending=False)]  # sort them by pt
 
-        good_fatjets, _ = get_jec_jets(events, good_fatjets, self._year, not self.isMC, self.jecs, fatjets=True)
         NumFatjets = ak.num(good_fatjets)
 
         candidatelep_p4 = build_p4(loose_lep1)  # build p4 for candidate lepton
