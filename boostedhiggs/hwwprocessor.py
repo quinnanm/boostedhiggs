@@ -512,7 +512,14 @@ class HwwProcessor(processor.ProcessorABC):
         self.add_selection(name="NoTaus", sel=(n_loose_taus_mu == 0), channel="mu")
         self.add_selection(name="NoTaus", sel=(n_loose_taus_ele == 0), channel="ele")
         self.add_selection(name="AtLeastOneFatJet", sel=(NumFatjets >= 1))
-        self.add_selection(name="CandidateJetpT", sel=(candidatefj.pt > 250))
+
+        fj_pt_sel = ak.zeros_like(candidatefj.pt, dtype=bool)
+        for k, v in self.jecs.items():
+            for var in ["up", "down"]:
+                fj_pt_sel = fj_pt_sel | (candidatefj[v][var].pt > 250)
+        self.add_selection(name="CandidateJetpT", sel=(fj_pt_sel == 1))
+        # self.add_selection(name="CandidateJetpT", sel=(candidatefj.pt > 250))
+
         self.add_selection(name="LepInJet", sel=(lep_fj_dr < 0.8))
         self.add_selection(name="JetLepOverlap", sel=(lep_fj_dr > 0.03))
         self.add_selection(name="dPhiJetMET", sel=(np.abs(met_fj_dphi) < 1.57))
