@@ -118,11 +118,6 @@ def main(args):
             else:
                 line = line.replace("GETLPWEIGHTS", "--no-getLPweights")
 
-            if args.apply_PR_sel:
-                line = line.replace("PROMPTRATESEL", "--apply-PR-sel")
-            else:
-                line = line.replace("PROMPTRATESEL", "--no-apply-PR-sel")
-
             if args.uselooselep:
                 line = line.replace("LOOSELEP", "--uselooselep")
             else:
@@ -179,9 +174,6 @@ if __name__ == "__main__":
     parser.add_argument("--label", dest="label", default="H", help="jet label for inputskimmer", type=str)
     parser.add_argument("--region", dest="region", default="signal", help="specify region for selections", type=str)
     parser.add_argument("--maxfiles", default=-1, help="max number of files to run on", type=int)
-    parser.add_argument("--apply-PR-sel", dest="apply_PR_sel", action="store_true")
-    parser.add_argument("--no-apply-PR-sel", dest="apply_PR_sel", action="store_false")
-
     parser.add_argument("--uselooselep", dest="uselooselep", action="store_true")
     parser.add_argument("--no-uselooselep", dest="uselooselep", action="store_false")
 
