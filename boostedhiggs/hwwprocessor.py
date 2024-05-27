@@ -196,19 +196,6 @@ class HwwProcessor(processor.ProcessorABC):
 
         # TODO: what we do is correct if: all high pt leptons that pass the low pt triggers also pass the high pt triggers
         # TODO: split electron/muon triggers ()
-        # trigger, trigger_noiso, trigger_iso = {}, {}, {}
-        # for ch in self._channels:
-        #     trigger[ch] = np.zeros(nevents, dtype="bool")
-        #     trigger_noiso[ch] = np.zeros(nevents, dtype="bool")
-        #     trigger_iso[ch] = np.zeros(nevents, dtype="bool")
-        #     for t in self._HLTs[ch]:
-        #         if t in events.HLT.fields:
-        #             if "Iso" in t or "WPTight_Gsf" in t:
-        #                 trigger_iso[ch] = trigger_iso[ch] | events.HLT[t]
-        #             else:
-        #                 trigger_noiso[ch] = trigger_noiso[ch] | events.HLT[t]
-        #             trigger[ch] = trigger[ch] | events.HLT[t]
-
         trigger = {}
         for ch in ["ele", "mu"]:
             trigger[ch] = np.zeros(nevents, dtype="bool")
@@ -281,6 +268,7 @@ class HwwProcessor(processor.ProcessorABC):
             & (np.abs(electrons.eta) < 2.4)
             & ((np.abs(electrons.eta) < 1.44) | (np.abs(electrons.eta) > 1.57))
             & (electrons.cutBased >= electrons.LOOSE)
+            # & (electrons.mvaFall17V2noIso_WPL)
             & (((electrons.pfRelIso03_all < 0.25) & (electrons.pt < 120)) | (electrons.pt >= 120))
         )
 
@@ -513,18 +501,12 @@ class HwwProcessor(processor.ProcessorABC):
         self.add_selection(name="METFilters", sel=metfilters)
         self.add_selection(
             name="OneLep",
-            sel=(n_good_muons == 1)
-            & (n_good_electrons == 0)
-            & (n_loose_electrons == 0)
-            & ~ak.any(loose_muons & ~good_muons, 1),
+            sel=(n_good_muons == 1) & (n_loose_electrons == 0),
             channel="mu",
         )
         self.add_selection(
             name="OneLep",
-            sel=(n_good_muons == 0)
-            & (n_loose_muons == 0)
-            & (n_good_electrons == 1)
-            & ~ak.any(loose_electrons & ~good_electrons, 1),
+            sel=(n_loose_muons == 0) & (n_good_electrons == 1),
             channel="ele",
         )
         self.add_selection(name="NoTaus", sel=(n_loose_taus_mu == 0), channel="mu")
