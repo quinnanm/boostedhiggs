@@ -907,9 +907,6 @@ from .utils import (
     W_PDGID,
     b_PDGID,
     get_pid_mask,
-    vELE_PDGID,
-    vMU_PDGID,
-    vTAU_PDGID,
 )
 
 
@@ -932,8 +929,8 @@ def getGenLepGenQuarks(dataset, genparts: GenParticleArray):
         all_daus_flat = ak.flatten(all_daus, axis=2)  # flattents the daughters of the two Ws
         all_daus_flat_pdgId = abs(all_daus_flat.pdgId)
 
-        # the following tells you about the matching
         leptons = (all_daus_flat_pdgId == ELE_PDGID) | (all_daus_flat_pdgId == MU_PDGID) | (all_daus_flat_pdgId == TAU_PDGID)
+        quarks = all_daus_flat_pdgId < b_PDGID
 
         lepVars = {
             "lepton_pt": all_daus_flat[leptons].pt,
@@ -943,10 +940,10 @@ def getGenLepGenQuarks(dataset, genparts: GenParticleArray):
         }
 
         quarkVars = {
-            "quark_pt": all_daus_flat[all_daus_flat_pdgId <= b_PDGID].pt,
-            "quark_eta": all_daus_flat[all_daus_flat_pdgId <= b_PDGID].eta,
-            "quark_phi": all_daus_flat[all_daus_flat_pdgId <= b_PDGID].phi,
-            "quark_mass": all_daus_flat[all_daus_flat_pdgId <= b_PDGID].mass,
+            "quark_pt": all_daus_flat[quarks].pt,
+            "quark_eta": all_daus_flat[quarks].eta,
+            "quark_phi": all_daus_flat[quarks].phi,
+            "quark_mass": all_daus_flat[quarks].mass,
         }
 
     else:
@@ -961,19 +958,13 @@ def getGenLepGenQuarks(dataset, genparts: GenParticleArray):
         wboson_daughters = wboson_daughters[wboson_daughters.hasFlags(["fromHardProcess", "isLastCopy"])]
         wboson_daughters_pdgId = abs(wboson_daughters.pdgId)
 
-        # neutrinos = (
-        #     (wboson_daughters_pdgId == vELE_PDGID)
-        #     | (wboson_daughters_pdgId == vMU_PDGID)
-        #     | (wboson_daughters_pdgId == vTAU_PDGID)
-        # )
         leptons = (
             (wboson_daughters_pdgId == ELE_PDGID)
             | (wboson_daughters_pdgId == MU_PDGID)
             | (wboson_daughters_pdgId == TAU_PDGID)
         )
-        # quarks = ~leptons & ~neutrinos
 
-        quarks = wboson_daughters_pdgId <= b_PDGID
+        quarks = wboson_daughters_pdgId < b_PDGID
 
         lepVars = {
             "lepton_pt": wboson_daughters[leptons].pt,
@@ -1018,6 +1009,8 @@ def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
         "pt": "Pt",
     }
 
+    # prepare eta, phi array only for 2q, used for Lund Plane reweighting
+    # since it only takes quarks gen-level 4-vector as input
     Gen2qVars = {
         f"Gen2q{var}": ak.to_numpy(
             ak.fill_none(
@@ -1028,11 +1021,7 @@ def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
         for key, var in skim_vars.items()
     }
 
-    # prepare eta, phi array only for 2q, used for Lund Plane reweighting
-    # since it only takes quarks gen-level 4-vector as input
-    eta_2q = Gen2qVars["Gen2qEta"]
-    phi_2q = Gen2qVars["Gen2qPhi"]
-    gen_parts_eta_phi = np.array(np.dstack((eta_2q, phi_2q)))
+    gen_parts_eta_phi = np.array(np.dstack((Gen2qVars["Gen2qEta"], Gen2qVars["Gen2qPhi"])))
 
     # prepare the Gen lepton in case we mask objects around it
     GenlepVars = {
