@@ -513,7 +513,7 @@ class HwwProcessor(processor.ProcessorABC):
         self.add_selection(name="NoTaus", sel=(n_loose_taus_ele == 0), channel="ele")
         self.add_selection(name="AtLeastOneFatJet", sel=(NumFatjets >= 1))
 
-        fj_pt_sel = ak.zeros_like(candidatefj.pt, dtype=bool)
+        fj_pt_sel = candidatefj.pt > 250
         for k, v in self.jecs.items():
             for var in ["up", "down"]:
                 fj_pt_sel = fj_pt_sel | (candidatefj[v][var].pt > 250)
