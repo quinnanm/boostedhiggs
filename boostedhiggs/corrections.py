@@ -961,39 +961,19 @@ def getGenLepGenQuarks(dataset, genparts: GenParticleArray):
         wboson_daughters = wboson_daughters[wboson_daughters.hasFlags(["fromHardProcess", "isLastCopy"])]
         wboson_daughters_pdgId = abs(wboson_daughters.pdgId)
 
-        neutrinos = (
-            (wboson_daughters_pdgId == vELE_PDGID)
-            | (wboson_daughters_pdgId == vMU_PDGID)
-            | (wboson_daughters_pdgId == vTAU_PDGID)
-        )
+        # neutrinos = (
+        #     (wboson_daughters_pdgId == vELE_PDGID)
+        #     | (wboson_daughters_pdgId == vMU_PDGID)
+        #     | (wboson_daughters_pdgId == vTAU_PDGID)
+        # )
         leptons = (
             (wboson_daughters_pdgId == ELE_PDGID)
             | (wboson_daughters_pdgId == MU_PDGID)
             | (wboson_daughters_pdgId == TAU_PDGID)
         )
-        quarks = ~leptons & ~neutrinos
+        # quarks = ~leptons & ~neutrinos
 
-        # get tau decays from V daughters
-        taudaughters = wboson_daughters[(wboson_daughters_pdgId == TAU_PDGID)].children
-        taudaughters = taudaughters[taudaughters.hasFlags(["isLastCopy"])]
-        taudaughters_pdgId = abs(taudaughters.pdgId)
-        taudecay = (
-            # pions/kaons (hadronic tau) * 1
-            (
-                ak.sum(
-                    (taudaughters_pdgId == ELE_PDGID) | (taudaughters_pdgId == MU_PDGID),
-                    axis=2,
-                )
-                == 0
-            )
-            * 1
-            # 1 electron * 3
-            + (ak.sum(taudaughters_pdgId == ELE_PDGID, axis=2) == 1) * 3
-            # 1 muon * 5
-            + (ak.sum(taudaughters_pdgId == MU_PDGID, axis=2) == 1) * 5
-        )
-        # flatten taudecay - so painful
-        taudecay = ak.sum(taudecay, axis=-1)
+        quarks = wboson_daughters_pdgId <= b_PDGID
 
         lepVars = {
             "lepton_pt": wboson_daughters[leptons].pt,
