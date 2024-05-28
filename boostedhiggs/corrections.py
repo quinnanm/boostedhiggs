@@ -307,7 +307,10 @@ def get_btag_weights(
     and 1a
     """
 
-    cset = correctionlib.CorrectionSet.from_file(get_pog_json("btagging", year))
+    try:
+        cset = correctionlib.CorrectionSet.from_file(get_pog_json("btagging", year))
+    except FileNotFoundError:
+        cset = correctionlib.CorrectionSet.from_file("btagging.json.gz")
 
     ul_year = get_UL_year(year)
     with importlib.resources.path("boostedhiggs.data", f"btageff_{algo}_{wp}_{ul_year}.coffea") as filename:
@@ -330,10 +333,6 @@ def get_btag_weights(
 
     lightEff = efflookup(lightJets.pt, abs(lightJets.eta), lightJets.hadronFlavour)
     bcEff = efflookup(bcJets.pt, abs(bcJets.eta), bcJets.hadronFlavour)
-
-    # TODO:
-    print(bcEff, "tagging eff")
-    print(lightEff, "mistagging eff (light quarks)")
 
     lightSF = _btagSF(lightJets, "light")
     bcSF = _btagSF(bcJets, "bc")
@@ -386,8 +385,11 @@ def get_btag_weights(
         ret_weights["weight_btagSFbcCorrelatedUp"] = _combine(bcEff, _btagSF(bcJets, "bc", syst="up_correlated"), bcPass)
         ret_weights["weight_btagSFbcCorrelatedDown"] = _combine(bcEff, _btagSF(bcJets, "bc", syst="down_correlated"), bcPass)
 
-        ret_weights["bcEff"] = ak.fill_none(bcEff, 1.0)
-        ret_weights["lightEff"] = ak.fill_none(lightEff, 1.0)
+        # bcEff = ak.flatten(bcEff)
+        ret_weights["bcEff"] = ak.flatten(bcEff[~ak.is_none(bcEff)])
+
+        # lightEff = ak.flatten(lightEff)
+        ret_weights["lightEff"] = ak.flatten(lightEff[~ak.is_none(lightEff)])
 
     return ret_weights
 
