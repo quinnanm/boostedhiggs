@@ -619,6 +619,11 @@ def add_pileupid_weights(weights: Weights, year: str, mod: str, jets: JetArray, 
     weights.add("pileupIDSF", *sfs_var)
 
 
+"""
+JECs
+----
+"""
+
 # find corrections path using this file's path
 try:
     with importlib.resources.path("boostedhiggs.data", "jec_compiled.pkl") as filename:
@@ -641,14 +646,7 @@ def _add_jec_variables(jets: JetArray, event_rho: ak.Array) -> JetArray:
     return jets
 
 
-def get_jec_jets(
-    events,
-    jets,
-    year: str,
-    isData: bool = False,
-    jecs: Dict[str, str] = None,
-    fatjets: bool = True,
-):
+def get_jec_jets(events, jets, year: str, isData: bool = False, jecs: Dict[str, str] = None, fatjets: bool = True):
     """
     Based on https://github.com/nsmith-/boostedhiggs/blob/master/boostedhiggs/hbbprocessor.py
     Eventually update to V5 JECs once I figure out what's going on with the 2017 UL V5 JER scale factors
@@ -890,7 +888,9 @@ def getJMSRVariables(fatjetvars, candidatelep_p4, met, mass_shift=None):
     return variables
 
 
-# ------------------- Lund plane reweighting ------------------- #
+"""
+------------------- Lund plane reweighting ------------------- #
+"""
 
 
 from .utils import (

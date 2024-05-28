@@ -515,10 +515,10 @@ class HwwProcessor(processor.ProcessorABC):
         self.add_selection(name="JetLepOverlap", sel=(lep_fj_dr > 0.03))
         self.add_selection(name="dPhiJetMET", sel=(np.abs(met_fj_dphi) < 1.57))
 
-        if self._fakevalidation:
-            self.add_selection(name="MET", sel=(met.pt < 20))
-        else:
-            self.add_selection(name="MET", sel=(met.pt > 20))
+        # if self._fakevalidation:
+        #     self.add_selection(name="MET", sel=(met.pt < 20))
+        # else:
+        #     self.add_selection(name="MET", sel=(met.pt > 20))
 
         # gen-level matching
         signal_mask = None
