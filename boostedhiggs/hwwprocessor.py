@@ -499,16 +499,8 @@ class HwwProcessor(processor.ProcessorABC):
         for ch in self._channels:
             self.add_selection(name="Trigger", sel=trigger[ch], channel=ch)
         self.add_selection(name="METFilters", sel=metfilters)
-        self.add_selection(
-            name="OneLep",
-            sel=(n_good_muons == 1) & (n_loose_electrons == 0),
-            channel="mu",
-        )
-        self.add_selection(
-            name="OneLep",
-            sel=(n_loose_muons == 0) & (n_good_electrons == 1),
-            channel="ele",
-        )
+        self.add_selection(name="OneLep", sel=(n_good_muons == 1) & (n_loose_electrons == 0), channel="mu")
+        self.add_selection(name="OneLep", sel=(n_loose_muons == 0) & (n_good_electrons == 1), channel="ele")
         self.add_selection(name="NoTaus", sel=(n_loose_taus_mu == 0), channel="mu")
         self.add_selection(name="NoTaus", sel=(n_loose_taus_ele == 0), channel="ele")
         self.add_selection(name="AtLeastOneFatJet", sel=(NumFatjets >= 1))
@@ -518,16 +510,15 @@ class HwwProcessor(processor.ProcessorABC):
             for var in ["up", "down"]:
                 fj_pt_sel = fj_pt_sel | (candidatefj[v][var].pt > 250)
         self.add_selection(name="CandidateJetpT", sel=(fj_pt_sel == 1))
-        # self.add_selection(name="CandidateJetpT", sel=(candidatefj.pt > 250))
 
         self.add_selection(name="LepInJet", sel=(lep_fj_dr < 0.8))
         self.add_selection(name="JetLepOverlap", sel=(lep_fj_dr > 0.03))
         self.add_selection(name="dPhiJetMET", sel=(np.abs(met_fj_dphi) < 1.57))
 
-        if self._fakevalidation:
-            self.add_selection(name="MET", sel=(met.pt < 20))
-        else:
-            self.add_selection(name="MET", sel=(met.pt > 20))
+        # if self._fakevalidation:
+        #     self.add_selection(name="MET", sel=(met.pt < 20))
+        # else:
+        #     self.add_selection(name="MET", sel=(met.pt > 20))
 
         # gen-level matching
         signal_mask = None
