@@ -267,8 +267,8 @@ class HwwProcessor(processor.ProcessorABC):
             (electrons.pt > 38)
             & (np.abs(electrons.eta) < 2.4)
             & ((np.abs(electrons.eta) < 1.44) | (np.abs(electrons.eta) > 1.57))
-            & (electrons.cutBased >= electrons.LOOSE)
-            # & (electrons.mvaFall17V2noIso_WPL)
+            # & (electrons.cutBased >= electrons.LOOSE)
+            & (electrons.mvaFall17V2noIso_WPL)
             & (((electrons.pfRelIso03_all < 0.25) & (electrons.pt < 120)) | (electrons.pt >= 120))
         )
 
@@ -515,10 +515,10 @@ class HwwProcessor(processor.ProcessorABC):
         self.add_selection(name="JetLepOverlap", sel=(lep_fj_dr > 0.03))
         self.add_selection(name="dPhiJetMET", sel=(np.abs(met_fj_dphi) < 1.57))
 
-        # if self._fakevalidation:
-        #     self.add_selection(name="MET", sel=(met.pt < 20))
-        # else:
-        #     self.add_selection(name="MET", sel=(met.pt > 20))
+        if self._fakevalidation:
+            self.add_selection(name="MET", sel=(met.pt < 20))
+        else:
+            self.add_selection(name="MET", sel=(met.pt > 20))
 
         # gen-level matching
         signal_mask = None
