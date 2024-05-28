@@ -386,8 +386,8 @@ def get_btag_weights(
         ret_weights["weight_btagSFbcCorrelatedUp"] = _combine(bcEff, _btagSF(bcJets, "bc", syst="up_correlated"), bcPass)
         ret_weights["weight_btagSFbcCorrelatedDown"] = _combine(bcEff, _btagSF(bcJets, "bc", syst="down_correlated"), bcPass)
 
-        ret_weights["bcEff"] = bcEff
-        ret_weights["lightEff"] = lightEff
+        ret_weights["bcEff"] = ak.fill_none(bcEff, 1.0)
+        ret_weights["lightEff"] = ak.fill_none(lightEff, 1.0)
 
     return ret_weights
 
