@@ -312,7 +312,9 @@ def match_Top(genparts: GenParticleArray, fatjet: FatJetArray):
     leptons = (
         (wboson_daughters_pdgId == ELE_PDGID) | (wboson_daughters_pdgId == MU_PDGID) | (wboson_daughters_pdgId == TAU_PDGID)
     )
-    quarks = ~leptons & ~neutrinos
+    # quarks = ~leptons & ~neutrinos
+    quarks = wboson_daughters_pdgId < b_PDGID
+
     cquarks = wboson_daughters_pdgId == c_PDGID
     electrons = wboson_daughters_pdgId == ELE_PDGID
     muons = wboson_daughters_pdgId == MU_PDGID
