@@ -419,29 +419,29 @@ class HwwProcessor(processor.ProcessorABC):
             "SecondFatjet_Vscore": VScore(FirstFatjet),
         }
 
-        fatjetvariables = {
+        fatjetvars = {
             "fj_pt": candidatefj.pt,
             "fj_eta": candidatefj.eta,
             "fj_phi": candidatefj.phi,
             "fj_mass": candidatefj.msdcorr,
         }
 
-        variables = {**variables, **fatjetvariables}
+        variables = {**variables, **fatjetvars}
 
         if self._systematics and self.isMC:
-            fatjetvars = {}
+            fatjetvars_sys = {}
             # JEC vars
             for shift, vals in jec_shifted_fatjetvars["pt"].items():
                 if shift != "":
-                    fatjetvars[f"fj_pt{shift}"] = ak.firsts(vals[fj_idx_lep])
+                    fatjetvars_sys[f"fj_pt{shift}"] = ak.firsts(vals[fj_idx_lep])
 
             # JMSR vars
             for shift, vals in jmsr_shifted_fatjetvars["msoftdrop"].items():
                 if shift != "":
-                    fatjetvars[f"fj_mass{shift}"] = ak.firsts(vals)
+                    fatjetvars_sys[f"fj_mass{shift}"] = ak.firsts(vals)
 
-            variables = {**variables, **fatjetvars}
-            fatjetvars = {**fatjetvars, **fatjetvariables}
+            variables = {**variables, **fatjetvars_sys}
+            fatjetvars = {**fatjetvars, **fatjetvars_sys}
 
             # add variables affected by JECs/MET
             mjj_shift = {}
