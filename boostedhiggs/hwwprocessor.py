@@ -415,15 +415,17 @@ class HwwProcessor(processor.ProcessorABC):
             "n_tight_muons": n_tight_muons,
         }
 
-        fatjetvars = {
+        fatjetvariables = {
             "fj_pt": candidatefj.pt,
             "fj_eta": candidatefj.eta,
             "fj_phi": candidatefj.phi,
             "fj_mass": candidatefj.msdcorr,
         }
 
-        if self._systematics and self.isMC:
+        variables = {**variables, **fatjetvariables}
 
+        if self._systematics and self.isMC:
+            fatjetvars = {}
             # JEC vars
             for shift, vals in jec_shifted_fatjetvars["pt"].items():
                 if shift != "":
@@ -435,6 +437,7 @@ class HwwProcessor(processor.ProcessorABC):
                     fatjetvars[f"fj_mass{shift}"] = ak.firsts(vals)
 
             variables = {**variables, **fatjetvars}
+            fatjetvars = {**fatjetvars, **fatjetvariables}
 
             # add variables affected by JECs/MET
             mjj_shift = {}
