@@ -138,13 +138,13 @@ def get_xsecweight(pkl_files, year, sample, sample_to_use, is_data, luminosity):
 
         # get overall weighting of events.. each event has a genweight...
         # sumgenweight sums over events in a chunk... sum_sumgenweight sums over chunks
-        totgenweights = get_sum_sumgenweight(pkl_files, year, sample)
-        totpdfweights = get_sum_sumpdfweight(pkl_files, year, sample, sample_to_use)
-        totscaleweights = get_sum_sumscsaleweight(pkl_files, year, sample, sample_to_use)
+        sumgenweights = get_sum_sumgenweight(pkl_files, year, sample)
+        sumpdfweights = get_sum_sumpdfweight(pkl_files, year, sample, sample_to_use)
+        sumscaleweights = get_sum_sumscsaleweight(pkl_files, year, sample, sample_to_use)
 
-        xsecweight = (xsec * luminosity) / totgenweights
+        xsecweight = (xsec * luminosity) / sumgenweights
 
-        return xsecweight, totgenweights, totpdfweights, totscaleweights
+        return xsecweight, sumgenweights, sumpdfweights, sumscaleweights
 
     else:
         return 1, 1, 1, 1
