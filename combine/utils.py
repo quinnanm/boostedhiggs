@@ -104,18 +104,18 @@ def get_sum_sumscsaleweight(pkl_files, year, sample, sample_to_use):
 
     if sample_to_use in ["ggF", "VBF", "VH", "ZH", "WJetsLNu", "TTbar"]:
 
-        sum_sumpdfweight = {}
-        for key in range(103):
-            sum_sumpdfweight[key] = 0
+        sum_sumlheweight = {}
+        for key in [0, 1, 3, 5, 7, 8, 4]:
+            sum_sumlheweight[key] = 0
 
         for ifile in pkl_files:
             # load and sum the sumgenweight of each
             with open(ifile, "rb") as f:
                 metadata = pkl.load(f)
 
-            for key in range(8):
-                sum_sumpdfweight[key] = sum_sumpdfweight[key] + metadata[sample][year]["sumlheweight"][key]
-        return sum_sumpdfweight
+            for key in [0, 1, 3, 5, 7, 8, 4]:
+                sum_sumlheweight[key] = sum_sumlheweight[key] + metadata[sample][year]["sumlheweight"][key]
+        return sum_sumlheweight
     else:
         return 1
 

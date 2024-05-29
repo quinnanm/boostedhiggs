@@ -29,57 +29,98 @@ pd.set_option("mode.chained_assignment", None)
 weights = {
     "weight_pdf_acceptance": {},
     "weight_qcd_scale": {},
-    # common for all samples
-    "weight_btagSFlightCorrelated": {"mu": "weight_btagSFlightCorrelated", "ele": "weight_btagSFlightCorrelated"},
-    "weight_btagSFbcCorrelated": {"mu": "weight_btagSFbcCorrelated", "ele": "weight_btagSFbcCorrelated"},
-    "weight_btagSFlight2016": {"mu": "weight_btagSFlight2016", "ele": "weight_btagSFlight2016"},
-    "weight_btagSFbc2016": {"mu": "weight_btagSFbc2016", "ele": "weight_btagSFbc2016"},
-    "weight_btagSFlight2016APV": {"mu": "weight_btagSFlight2016APV", "ele": "weight_btagSFlight2016APV"},
-    "weight_btagSFbc2016APV": {"mu": "weight_btagSFbc2016APV", "ele": "weight_btagSFbc2016APV"},
-    "weight_btagSFlight2017": {"mu": "weight_btagSFlight2017", "ele": "weight_btagSFlight2017"},
-    "weight_btagSFbc2017": {"mu": "weight_btagSFbc2017", "ele": "weight_btagSFbc2017"},
-    "weight_btagSFlight2018": {"mu": "weight_btagSFlight2018", "ele": "weight_btagSFlight2018"},
-    "weight_btagSFbc2018": {"mu": "weight_btagSFbc2018", "ele": "weight_btagSFbc2018"},
-    "weight_pileup": {"mu": "weight_mu_pileup", "ele": "weight_ele_pileup"},
-    "weight_pileupIDSF": {"mu": "weight_mu_pileupIDSFDown", "ele": "weight_ele_pileupIDSFDown"},
-    "weight_isolation_mu": {"mu": "weight_mu_isolation_muon", "ele": ""},
-    "weight_isolation_ele": {"mu": "", "ele": "weight_ele_isolation_electron"},
-    "weight_id_mu": {"mu": "weight_mu_id_muon", "ele": ""},
-    "weight_id_ele": {"mu": "", "ele": "weight_ele_id_electron"},
-    "weight_reco_ele": {"mu": "", "ele": "weight_ele_reco_electron"},
-    "weight_L1Prefiring": {"mu": "weight_mu_L1Prefiring", "ele": "weight_ele_L1Prefiring"},
-    "weight_trigger_ele": {"mu": "", "ele": "weight_ele_trigger_electron"},
-    "weight_trigger_iso_mu": {"mu": "weight_mu_trigger_iso_muon", "ele": ""},
-    "weight_trigger_noniso_mu": {"mu": "weight_mu_trigger_noniso_muon", "ele": ""},
-    # ggF & VBF
-    "weight_PSFSR": {"mu": "weight_mu_PSFSR", "ele": "weight_ele_PSFSR_weight"},
-    "weight_PSISR": {"mu": "weight_mu_PSISR", "ele": "weight_ele_PSISR_weight"},
-    # WJetsLNu & DY
-    "weight_d1kappa_EW": {"mu": "weight_mu_d1kappa_EW", "ele": "weight_ele_d1kappa_EW"},
-    # WJetsLNu
-    "weight_d1K_NLO": {"mu": "weight_mu_d1K_NLO", "ele": "weight_ele_d1K_NLO"},
-    "weight_d2K_NLO": {"mu": "weight_mu_d2K_NLO", "ele": "weight_ele_d2K_NLO"},
-    "weight_d3K_NLO": {"mu": "weight_mu_d3K_NLO", "ele": "weight_ele_d3K_NLO"},
-    "weight_W_d2kappa_EW": {"mu": "weight_mu_W_d2kappa_EW", "ele": "weight_ele_W_d2kappa_EW"},
-    "weight_W_d3kappa_EW": {"mu": "weight_mu_W_d3kappa_EW", "ele": "weight_ele_W_d3kappa_EW"},
-    # DY
-    "weight_Z_d2kappa_EW": {"mu": "weight_mu_Z_d2kappa_EW", "ele": "weight_ele_Z_d2kappa_EW"},
-    "weight_Z_d3kappa_EW": {"mu": "weight_mu_Z_d3kappa_EW", "ele": "weight_ele_Z_d3kappa_EW"},
+    # # common for all samples
+    # "weight_pileup": {"mu": "weight_mu_pileup", "ele": "weight_ele_pileup"},
+    # "weight_pileupIDSF": {"mu": "weight_mu_pileupIDSFDown", "ele": "weight_ele_pileupIDSFDown"},
+    # "weight_isolation_mu": {"mu": "weight_mu_isolation_muon", "ele": ""},
+    # "weight_isolation_ele": {"mu": "", "ele": "weight_ele_isolation_electron"},
+    # "weight_id_mu": {"mu": "weight_mu_id_muon", "ele": ""},
+    # "weight_id_ele": {"mu": "", "ele": "weight_ele_id_electron"},
+    # "weight_reco_ele": {"mu": "", "ele": "weight_ele_reco_electron"},
+    # "weight_L1Prefiring": {"mu": "weight_mu_L1Prefiring", "ele": "weight_ele_L1Prefiring"},
+    # "weight_trigger_ele": {"mu": "", "ele": "weight_ele_trigger_electron"},
+    # "weight_trigger_iso_mu": {"mu": "weight_mu_trigger_iso_muon", "ele": ""},
+    # "weight_trigger_noniso_mu": {"mu": "weight_mu_trigger_noniso_muon", "ele": ""},
+    # # ggF & VBF
+    # "weight_PSFSR": {"mu": "weight_mu_PSFSR", "ele": "weight_ele_PSFSR_weight"},
+    # "weight_PSISR": {"mu": "weight_mu_PSISR", "ele": "weight_ele_PSISR_weight"},
+    # # WJetsLNu & DY
+    # "weight_d1kappa_EW": {"mu": "weight_mu_d1kappa_EW", "ele": "weight_ele_d1kappa_EW"},
+    # # WJetsLNu
+    # "weight_d1K_NLO": {"mu": "weight_mu_d1K_NLO", "ele": "weight_ele_d1K_NLO"},
+    # "weight_d2K_NLO": {"mu": "weight_mu_d2K_NLO", "ele": "weight_ele_d2K_NLO"},
+    # "weight_d3K_NLO": {"mu": "weight_mu_d3K_NLO", "ele": "weight_ele_d3K_NLO"},
+    # "weight_W_d2kappa_EW": {"mu": "weight_mu_W_d2kappa_EW", "ele": "weight_ele_W_d2kappa_EW"},
+    # "weight_W_d3kappa_EW": {"mu": "weight_mu_W_d3kappa_EW", "ele": "weight_ele_W_d3kappa_EW"},
+    # # DY
+    # "weight_Z_d2kappa_EW": {"mu": "weight_mu_Z_d2kappa_EW", "ele": "weight_ele_Z_d2kappa_EW"},
+    # "weight_Z_d3kappa_EW": {"mu": "weight_mu_Z_d3kappa_EW", "ele": "weight_ele_Z_d3kappa_EW"},
 }
 
-AK8_systs = [
-    "rec_higgs_mUES_up",
-    "rec_higgs_mUES_down",
-    "rec_higgs_mJES_up",
-    "rec_higgs_mJES_down",
-    "rec_higgs_mJER_up",
-    "rec_higgs_mJER_down",
-    # these
-    "rec_higgs_mJMS_up",
-    "rec_higgs_mJMS_down",
-    "rec_higgs_mJMR_up",
-    "rec_higgs_mJMR_down",
-]
+
+def get_btag_systs(years):
+    BTAG_systs = {
+        "weight_btagSFlightCorrelated": {"mu": "weight_btagSFlightCorrelated", "ele": "weight_btagSFlightCorrelated"},
+        "weight_btagSFbcCorrelated": {"mu": "weight_btagSFbcCorrelated", "ele": "weight_btagSFbcCorrelated"},
+    }
+
+    for year in years:
+        BTAG_systs[f"weight_btagSFlight{year}"] = {"mu": f"weight_btagSFlight{year}", "ele": f"weight_btagSFlight{year}"}
+        BTAG_systs[f"weight_btagSFbc{year}"] = {"mu": f"weight_btagSFbc{year}", "ele": f"weight_btagSFbc{year}"}
+
+    return BTAG_systs
+
+
+def get_AK8_systs(years):
+
+    AK8_systs = [
+        # "rec_higgs_mUES_up",
+        # "rec_higgs_mUES_down",
+        # "rec_higgs_mJES_up",
+        # "rec_higgs_mJES_down",
+        # "rec_higgs_mJER_up",
+        # "rec_higgs_mJER_down",
+        # # these
+        # "rec_higgs_mJMS_up",
+        # "rec_higgs_mJMS_down",
+        # "rec_higgs_mJMR_up",
+        # "rec_higgs_mJMR_down",
+        # individual sources
+        # "rec_higgs_mJES_FlavorQCD_up",
+        # "rec_higgs_mJES_FlavorQCD_down",
+        # "rec_higgs_mJES_RelativeBal_up",
+        # "rec_higgs_mJES_RelativeBal_down",
+        # "rec_higgs_mJES_HF_up",
+        # "rec_higgs_mJES_HF_down",
+        # "rec_higgs_mJES_BBEC1_up",
+        # "rec_higgs_mJES_BBEC1_down",
+        # "rec_higgs_mJES_EC2_up",
+        # "rec_higgs_mJES_EC2_down",
+        # "rec_higgs_mJES_Absolute_up",
+        # "rec_higgs_mJES_Absolute_down",
+        # "rec_higgs_mJES_Total_up",
+        # "rec_higgs_mJES_Total_down",
+    ]
+
+    for year in years:
+        if ("APV" in year) and ("2016" in years):
+            continue
+        else:
+            year.replace("APV", "")
+
+        AK8_systs += [f"rec_higgs_mJES_BBEC1_{year}_up"]
+        AK8_systs += [f"rec_higgs_mJES_BBEC1_{year}_down"]
+        AK8_systs += [f"rec_higgs_mJES_RelativeSample_{year}_up"]
+        AK8_systs += [f"rec_higgs_mJES_RelativeSample_{year}_down"]
+        AK8_systs += [f"rec_higgs_mJES_EC2_{year}_up"]
+        AK8_systs += [f"rec_higgs_mJES_EC2_{year}_down"]
+        AK8_systs += [f"rec_higgs_mJES_HF_{year}_up"]
+        AK8_systs += [f"rec_higgs_mJES_HF_{year}_down"]
+        AK8_systs += [f"rec_higgs_mJES_Absolute_{year}_up"]
+        AK8_systs += [f"rec_higgs_mJES_Absolute_{year}_down"]
+
+    return AK8_systs
+
 
 # shape_weights = {
 #     # "fj_pt": [
@@ -168,15 +209,10 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
     # add extra selections to preselection
     presel = {
         "mu": {
-            "tagger>0.80": "fj_ParT_score_finetuned>0.80",
-            # "msoftdrop": "fj_mass>40",
-            # "met": "met_pt>35",
+            "tagger>0.80": "THWW>0.50",
         },
         "ele": {
-            "tagger>0.80": "fj_ParT_score_finetuned>0.80",
-            # "msoftdrop": "fj_mass>40",
-            # "met": "met_pt>55",
-            "lepmiso": "(lep_pt<120) | ( (lep_pt>120) & (lep_misolation<0.2))",
+            "tagger>0.80": "THWW>0.50",
         },
     }
 
@@ -203,17 +239,6 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                 luminosity = json.load(f)[ch][year]
 
             for sample in os.listdir(samples_dir[year]):
-
-                if "WJetsToLNu_1J" in sample:
-                    print(f"Skipping sample {sample}")
-                    continue
-                if "WJetsToLNu_2J" in sample:
-                    print(f"Skipping sample {sample}")
-                    continue
-
-                if "VBFHToWWToLNuQQ_" in sample:
-                    print(f"Skipping sample {sample}")
-                    continue
 
                 sample_to_use = get_common_name(sample)
 
@@ -244,7 +269,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                     continue
 
                 # use hidNeurons to get the finetuned scores
-                data["fj_ParT_score_finetuned"] = utils.get_finetuned_score(data, model_path)
+                data["THWW"] = utils.get_finetuned_score(data, model_path)
 
                 # drop hidNeurons which are not needed anymore
                 data = data[data.columns.drop(list(data.filter(regex="hidNeuron")))]
@@ -263,8 +288,8 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                     df = data.copy()
 
                     logging.info(f"Applying {region} selection on {len(data)} events")
-
                     df = df.query(region_sel)
+                    logging.info(f"Will fill the histograms with the remaining {len(data)} events")
 
                     # get the nominal weight
                     if is_data:
@@ -272,10 +297,8 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                     else:
                         nominal = df[f"weight_{ch}"] * xsecweight
 
-                        # if "bjets" in region_sel:  # add btag SF
-                        #     nominal *= df["weight_btag"]
-
-                    logging.info(f"Will fill the histograms with the remaining {len(data)} events")
+                        if "bjets" in region_sel:  # add btag SF
+                            nominal *= df["weight_btag"]
 
                     hists.fill(
                         Sample=sample_to_use,
@@ -285,7 +308,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                         weight=nominal,
                     )
 
-                    # add Up/Down variations
+                    # get the Up/Down variations
                     for weight in weights:
 
                         if is_data:  # for data (fill as 1 for Up and Down variations)
@@ -293,12 +316,12 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                             shape_down = nominal
 
                         else:  # retrieve Up/Down variations for MC
-
                             if weight == "weight_pdf_acceptance":
                                 if sample_to_use in ["ggF", "VBF", "VH", "ZH"]:
 
                                     pdfweights = []
                                     for weight_i in sumpdfweights:
+
                                         # noqa: get the normalization factor per variation i (ratio of sumpdfweights_i/sumgenweights)
                                         R_i = sumpdfweights[weight_i] / sumgenweights
 
@@ -323,9 +346,8 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                                 if sample_to_use in ["ggF", "VBF", "VH", "ZH", "WJetsLNu", "TTbar"]:
 
                                     scaleweights = []
-                                    # TODO: for scale_8 the totscaleweights is 0 so R_i is 0 so scaleweight is inf
-                                    # for weight_i in [0, 1, 3, 5, 7, 4, 8]:
-                                    for weight_i in [0, 1, 3, 5, 7, 4]:
+                                    for weight_i in sumscaleweights:
+
                                         # noqa: get the normalization factor per variation i (ratio of sumscaleweights_i/sumgenweights)
                                         R_i = sumscaleweights[weight_i] / sumgenweights
 
@@ -340,14 +362,6 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                                     shape_down = np.min(scaleweights, axis=1)
 
                                 else:
-                                    shape_up = nominal
-                                    shape_down = nominal
-
-                            elif "btag" in weight:
-                                try:
-                                    shape_up = df[f"{weights[weight][ch]}Up"] * nominal
-                                    shape_down = df[f"{weights[weight][ch]}Down"] * nominal
-                                except KeyError:
                                     shape_up = nominal
                                     shape_down = nominal
 
@@ -375,18 +389,43 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                             weight=shape_down,
                         )
 
-                    for rec_higgs_m_variation in AK8_systs:
+                    BTAG_systs = get_btag_systs(years)
+                    for weight in BTAG_systs:
+                        try:
+                            shape_up = df[f"{BTAG_systs[weight][ch]}Up"] * nominal
+                            shape_down = df[f"{BTAG_systs[weight][ch]}Down"] * nominal
+                        except KeyError:  # should fail for either "Data" or when  year is different than the weight_year
+                            shape_up = nominal
+                            shape_down = nominal
 
-                        if is_data:
-                            x = "rec_higgs_m"
-                        else:
-                            x = rec_higgs_m_variation
+                        hists.fill(
+                            Sample=sample_to_use,
+                            Systematic=f"{weight}_up",
+                            Region=region,
+                            mass_observable=df["rec_higgs_m"],
+                            weight=shape_up,
+                        )
+
+                        hists.fill(
+                            Sample=sample_to_use,
+                            Systematic=f"{weight}_down",
+                            Region=region,
+                            mass_observable=df["rec_higgs_m"],
+                            weight=shape_down,
+                        )
+
+                    for rec_higgs_m_variation in get_AK8_systs(years):
+
+                        try:
+                            x = df[rec_higgs_m_variation]
+                        except KeyError:  # should fail for either "Data" or when  year is different than the weight_year
+                            x = df["rec_higgs_m"]
 
                         hists.fill(
                             Sample=sample_to_use,
                             Systematic=rec_higgs_m_variation,
                             Region=region,
-                            mass_observable=df[x],
+                            mass_observable=x,
                             weight=nominal,
                         )
 

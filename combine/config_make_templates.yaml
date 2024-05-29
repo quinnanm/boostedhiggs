@@ -1,27 +1,27 @@
 samples:
     - ggF
-    - VBF
-    - ttH
-    - WH
-    - ZH
-    - QCD
+    # - VBF
+    # - ttH
+    # - WH
+    # - ZH
+    # - QCD
     - WJetsLNu
     - TTbar
-    - SingleTop
-    - Diboson
-    - EWKvjets
-    - WZQQorDYJets
+    # - SingleTop
+    # - Diboson
+    # - EWKvjets
+    # - WZQQorDYJets
     - Data
 
 regions_sel:
-    "VBF": (fj_ParT_score_finetuned>0.925) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
+    # "VBF": (THWW>0.925) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
 
-    "ggFpt250to300": (fj_ParT_score_finetuned>0.95) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
-    "ggFpt300to450": (fj_ParT_score_finetuned>0.95) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    "ggFpt450toInf": (fj_ParT_score_finetuned>0.95) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
+    "ggFpt250to300": (THWW>0.95) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
+    # "ggFpt300to450": (THWW>0.95) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
+    # "ggFpt450toInf": (THWW>0.95) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
 
-    "WJetsCR": (fj_ParT_score_finetuned>0.80) & (fj_ParT_score_finetuned<0.925) & (n_bjets_T==0)
-    "TopCR": (fj_ParT_score_finetuned>0.80) & (n_bjets_T>0)
+    # "WJetsCR": (THWW>0.80) & (THWW<0.925) & (n_bjets_T==0)
+    # "TopCR": (THWW>0.80) & (n_bjets_T>0)
 
 
 samples_dir:
@@ -31,4 +31,4 @@ samples_dir:
     "2016": ../eos/Feb9_2016
 
 
-model_path: ../../weaver-core-dev/experiments_finetuning/v35_26/model.onnx
+model_path: ../../weaver-core-dev/experiments_finetuning/v35_30/model.onnx

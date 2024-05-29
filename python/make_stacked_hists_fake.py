@@ -34,6 +34,7 @@ combine_samples = {
     # bkg
     "QCD_Pt": "QCD",
     "DYJets": "DYJets",
+    "WJets": "WJetsLNu",
 }
 
 
@@ -74,6 +75,12 @@ def make_events_dict(years, channels, samples_dir, samples, logging_=True):
                 #     continue
 
                 if "DYJetsToLL_M-" in sample:
+                    continue
+
+                if (ch == "ele") and ("Muon") in sample:
+                    continue
+
+                if (ch == "mu") and ("Electron") in sample:
                     continue
 
                 # second: if not, combine under common label

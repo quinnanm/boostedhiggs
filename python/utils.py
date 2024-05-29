@@ -115,6 +115,7 @@ color_by_sample = {
     "ttH": "tab:olive",
     # background
     "QCD": "tab:orange",
+    "Fake": "tab:orange",
     "WJetsLNu": "tab:green",
     "TTbar": "tab:blue",
     "Diboson": "orchid",
@@ -129,6 +130,7 @@ color_by_sample = {
     "WZQQorDYJets": "khaki",
     "TTbar_allmatched": "tab:blue",
     "TTbar_unmatched": "lightskyblue",
+    "TTbar_LP": "lightskyblue",
 }
 
 plot_labels = {
@@ -142,6 +144,7 @@ plot_labels = {
     # "ttH": "ttH(WW)",
     "ttH": r"$t\bar{t}$H",
     "QCD": "Multijet",
+    "Fake": "Fake",
     "Diboson": "VV",
     "WJetsLNu": r"W$(\ell\nu)$+jets",
     "TTbar": r"$t\bar{t}$+jets",
@@ -161,6 +164,7 @@ plot_labels = {
     "WZQQorDYJets": r"W$(qq)$/Z(inc.)+jets",
     "TTbar_allmatched": r"$t\bar{t}$+jets matched",
     "TTbar_unmatched": r"$t\bar{t}$+jets unmatched",
+    "TTbar_LP": "TTbar_LP",
 }
 
 label_by_ch = {"mu": "Muon", "ele": "Electron"}

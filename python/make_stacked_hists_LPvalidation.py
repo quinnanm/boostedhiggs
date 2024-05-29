@@ -26,7 +26,7 @@ warnings.filterwarnings("ignore", message="Found duplicate branch ")
 pd.set_option("mode.chained_assignment", None)
 
 
-def make_events_dict(years, channels, samples_dir, samples, presel, logging_=True):
+def make_events_dict(years, channels, samples_dir1, samples, presel, logging_=True):
     """
     Postprocess the parquets by applying preselections, saving an `event_weight` column, and
     a tagger score column in a big concatenated dataframe.
@@ -58,7 +58,7 @@ def make_events_dict(years, channels, samples_dir, samples, presel, logging_=Tru
             with open("../fileset/luminosity.json") as f:
                 luminosity = json.load(f)[ch][year]
 
-            for sample in os.listdir(samples_dir):
+            for sample in os.listdir(samples_dir1):
                 # get a combined label to combine samples of the same process
 
                 if "WJetsToLNu_1J" in sample:
@@ -71,6 +71,11 @@ def make_events_dict(years, channels, samples_dir, samples, presel, logging_=Tru
                 if "VBFHToWWToLNuQQ_" in sample:
                     print(f"Skipping sample {sample}")
                     continue
+
+                if "TTToSemiLeptonic" in sample:
+                    samples_dir = "../eos/May16_LP_2017/"
+                else:
+                    samples_dir = samples_dir1
 
                 # first: check if the sample is in one of combine_samples_by_name
                 sample_to_use = None
