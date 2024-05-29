@@ -32,7 +32,7 @@ from boostedhiggs.corrections import (
     getJMSRVariables,
     met_factory,
 )
-from boostedhiggs.utils import match_H, match_Top, match_V, sigs
+from boostedhiggs.utils import VScore, match_H, match_Top, match_V, sigs
 
 from .run_tagger_inference import runInferenceTriton
 
@@ -413,6 +413,10 @@ class HwwProcessor(processor.ProcessorABC):
             "n_tight_electrons": n_tight_electrons,
             "n_loose_muons": n_loose_muons,
             "n_tight_muons": n_tight_muons,
+            # Vscore
+            "fj_VScore": VScore(candidatefj),
+            "FirstFatjet_Vscore": VScore(SecondFatjet),
+            "SecondFatjet_Vscore": VScore(FirstFatjet),
         }
 
         fatjetvariables = {
