@@ -593,3 +593,17 @@ others = [
     "fj_ParT_probHtauhtaum",
     "fj_ParT_probHtauhtauh",
 ]
+
+
+def VScore(goodFatJetsSelected):
+    num = (
+        goodFatJetsSelected.particleNetMD_Xbb + goodFatJetsSelected.particleNetMD_Xcc + goodFatJetsSelected.particleNetMD_Xqq
+    )
+    den = (
+        goodFatJetsSelected.particleNetMD_Xbb
+        + goodFatJetsSelected.particleNetMD_Xcc
+        + goodFatJetsSelected.particleNetMD_Xqq
+        + goodFatJetsSelected.particleNetMD_QCD
+    )
+    score = num / den
+    return score
