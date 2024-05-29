@@ -506,9 +506,10 @@ class HwwProcessor(processor.ProcessorABC):
         self.add_selection(name="AtLeastOneFatJet", sel=(NumFatjets >= 1))
 
         fj_pt_sel = candidatefj.pt > 250
-        for k, v in self.jecs.items():
-            for var in ["up", "down"]:
-                fj_pt_sel = fj_pt_sel | (candidatefj[v][var].pt > 250)
+        if self.isMC:  # make an OR of all the JECs
+            for k, v in self.jecs.items():
+                for var in ["up", "down"]:
+                    fj_pt_sel = fj_pt_sel | (candidatefj[v][var].pt > 250)
         self.add_selection(name="CandidateJetpT", sel=(fj_pt_sel == 1))
 
         self.add_selection(name="LepInJet", sel=(lep_fj_dr < 0.8))
