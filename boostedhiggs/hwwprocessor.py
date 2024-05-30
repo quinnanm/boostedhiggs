@@ -203,7 +203,7 @@ class HwwProcessor(processor.ProcessorABC):
                 if t in events.HLT.fields:
                     trigger[ch] = trigger[ch] | events.HLT[t]
         trigger["ele"] = trigger["ele"] & (~trigger["mu_lowpt"]) & (~trigger["mu_highpt"])
-        trigger["mu_hightpt"] = trigger["mu_hightpt"] & (~trigger["ele"])
+        trigger["mu_highpt"] = trigger["mu_highpt"] & (~trigger["ele"])
         trigger["mu_lowpt"] = trigger["mu_lowpt"] & (~trigger["ele"])
 
         ######################
