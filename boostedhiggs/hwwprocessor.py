@@ -505,9 +505,13 @@ class HwwProcessor(processor.ProcessorABC):
         ######################
 
         for ch in self._channels:
+            # trigger
             if ch == "mu":
-
-                self.add_selection(name="Trigger", sel=trigger["mu_highpt"], channel=ch)
+                self.add_selection(
+                    name="Trigger",
+                    sel=((candidatelep.pt < 55) & trigger["mu_lowpt"]) | ((candidatelep.pt >= 55) & trigger["mu_highpt"]),
+                    channel=ch,
+                )
             else:
                 self.add_selection(name="Trigger", sel=trigger[ch], channel=ch)
 
