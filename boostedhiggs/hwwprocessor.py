@@ -197,13 +197,14 @@ class HwwProcessor(processor.ProcessorABC):
         # TODO: what we do is correct if: all high pt leptons that pass the low pt triggers also pass the high pt triggers
         # TODO: split electron/muon triggers ()
         trigger = {}
-        for ch in ["ele", "mu"]:
+        for ch in ["ele", "mu_lowpt", "mu_highpt"]:
             trigger[ch] = np.zeros(nevents, dtype="bool")
             for t in self._HLTs[ch]:
                 if t in events.HLT.fields:
                     trigger[ch] = trigger[ch] | events.HLT[t]
-        trigger["ele"] = trigger["ele"] & (~trigger["mu"])
-        trigger["mu"] = trigger["mu"] & (~trigger["ele"])
+        trigger["ele"] = trigger["ele"] & (~trigger["mu_lowpt"]) & (~trigger["mu_highpt"])
+        trigger["mu_hightpt"] = trigger["mu_hightpt"] & (~trigger["ele"])
+        trigger["mu_lowpt"] = trigger["mu_lowpt"] & (~trigger["ele"])
 
         ######################
         # METFLITERS
@@ -265,7 +266,7 @@ class HwwProcessor(processor.ProcessorABC):
 
         loose_electrons = (
             (electrons.pt > 38)
-            & (np.abs(electrons.eta) < 2.4)
+            & (np.abs(electrons.eta) < 2.5)
             & ((np.abs(electrons.eta) < 1.44) | (np.abs(electrons.eta) > 1.57))
             # & (electrons.cutBased >= electrons.LOOSE)
             & (electrons.mvaFall17V2noIso_WPL)
@@ -274,7 +275,7 @@ class HwwProcessor(processor.ProcessorABC):
 
         tight_electrons = (
             (electrons.pt > 38)
-            & (np.abs(electrons.eta) < 2.4)
+            & (np.abs(electrons.eta) < 2.5)
             & ((np.abs(electrons.eta) < 1.44) | (np.abs(electrons.eta) > 1.57))
             & (electrons.mvaFall17V2noIso_WP90)
             & (((electrons.pfRelIso03_all < 0.15) & (electrons.pt < 120)) | (electrons.pt >= 120))
@@ -504,7 +505,12 @@ class HwwProcessor(processor.ProcessorABC):
         ######################
 
         for ch in self._channels:
-            self.add_selection(name="Trigger", sel=trigger[ch], channel=ch)
+            if ch == "mu":
+
+                self.add_selection(name="Trigger", sel=trigger["mu_highpt"], channel=ch)
+            else:
+                self.add_selection(name="Trigger", sel=trigger[ch], channel=ch)
+
         self.add_selection(name="METFilters", sel=metfilters)
         self.add_selection(name="OneLep", sel=(n_good_muons == 1) & (n_loose_electrons == 0), channel="mu")
         self.add_selection(name="OneLep", sel=(n_loose_muons == 0) & (n_good_electrons == 1), channel="ele")
