@@ -132,13 +132,14 @@ class FakesProcessor(processor.ProcessorABC):
         ######################
 
         trigger = {}
-        for ch in ["ele", "mu"]:
+        for ch in ["ele", "mu_lowpt", "mu_highpt"]:
             trigger[ch] = np.zeros(nevents, dtype="bool")
             for t in self._HLTs[ch]:
                 if t in events.HLT.fields:
                     trigger[ch] = trigger[ch] | events.HLT[t]
-        trigger["ele"] = trigger["ele"] & (~trigger["mu"])
-        trigger["mu"] = trigger["mu"] & (~trigger["ele"])
+        trigger["ele"] = trigger["ele"] & (~trigger["mu_lowpt"]) & (~trigger["mu_highpt"])
+        trigger["mu_highpt"] = trigger["mu_highpt"] & (~trigger["ele"])
+        trigger["mu_lowpt"] = trigger["mu_lowpt"] & (~trigger["ele"])
 
         ######################
         # METFLITERS
@@ -169,12 +170,11 @@ class FakesProcessor(processor.ProcessorABC):
             (muons.pt > 30)
             & (np.abs(muons.eta) < 2.4)
             & muons.mediumId
-            & (((muons.pfRelIso04_all < 0.15) & (muons.pt < 55)) | (muons.pt >= 55))
+            & (((muons.pfRelIso04_all < 0.20) & (muons.pt < 55)) | (muons.pt >= 55) & (muons.miniPFRelIso_all < 0.2))
             # additional cuts
             & (np.abs(muons.dz) < 0.1)
             & (np.abs(muons.dxy) < 0.05)
             & (muons.sip3d <= 4.0)
-            & ((muons.pt < 55) | ((muons.pt >= 55) & (muons.miniPFRelIso_all < 0.2))),
         )
 
         n_loose_muons = ak.sum(loose_muons, axis=1)
@@ -182,16 +182,15 @@ class FakesProcessor(processor.ProcessorABC):
         # OBJECT: loose & tight electrons
         loose_electrons = (
             (electrons.pt > 38)
-            & (np.abs(electrons.eta) < 2.4)
+            & (np.abs(electrons.eta) < 2.5)
             & ((np.abs(electrons.eta) < 1.44) | (np.abs(electrons.eta) > 1.57))
             & (electrons.mvaFall17V2noIso_WPL)
-            # & (electrons.cutBased >= electrons.LOOSE)
             & (((electrons.pfRelIso03_all < 0.25) & (electrons.pt < 120)) | (electrons.pt >= 120))
         )
 
         tight_electrons = (
             (electrons.pt > 38)
-            & (np.abs(electrons.eta) < 2.4)
+            & (np.abs(electrons.eta) < 2.5)
             & ((np.abs(electrons.eta) < 1.44) | (np.abs(electrons.eta) > 1.57))
             & (electrons.mvaFall17V2noIso_WP90)
             & (((electrons.pfRelIso03_all < 0.15) & (electrons.pt < 120)) | (electrons.pt >= 120))
@@ -292,7 +291,16 @@ class FakesProcessor(processor.ProcessorABC):
         }
 
         for ch in self._channels:
-            self.add_selection(name="Trigger", sel=trigger[ch], channel=ch)
+            # trigger
+            if ch == "mu":
+                self.add_selection(
+                    name="Trigger",
+                    sel=((loose_lep1.pt < 55) & trigger["mu_lowpt"]) | ((loose_lep1.pt >= 55) & trigger["mu_highpt"]),
+                    channel=ch,
+                )
+            else:
+                self.add_selection(name="Trigger", sel=trigger[ch], channel=ch)
+
         self.add_selection(name="METFilters", sel=metfilters)
         self.add_selection(name="bveto", sel=(n_bjets_L == 0))
 
