@@ -194,8 +194,6 @@ class HwwProcessor(processor.ProcessorABC):
         # Trigger
         ######################
 
-        # TODO: what we do is correct if: all high pt leptons that pass the low pt triggers also pass the high pt triggers
-        # TODO: split electron/muon triggers ()
         trigger = {}
         for ch in ["ele", "mu_lowpt", "mu_highpt"]:
             trigger[ch] = np.zeros(nevents, dtype="bool")
@@ -268,7 +266,6 @@ class HwwProcessor(processor.ProcessorABC):
             (electrons.pt > 38)
             & (np.abs(electrons.eta) < 2.5)
             & ((np.abs(electrons.eta) < 1.44) | (np.abs(electrons.eta) > 1.57))
-            # & (electrons.cutBased >= electrons.LOOSE)
             & (electrons.mvaFall17V2noIso_WPL)
             & (((electrons.pfRelIso03_all < 0.25) & (electrons.pt < 120)) | (electrons.pt >= 120))
         )
@@ -383,8 +380,13 @@ class HwwProcessor(processor.ProcessorABC):
         ######################
 
         variables = {
+            # candidatefj
+            "fj_lsf3": candidatefj.lsf3,
+            "fj_VScore": VScore(candidatefj),
+            # lepton
             "lep_pt": candidatelep.pt,
             "lep_eta": candidatelep.eta,
+            # others
             "lep_isolation": lep_reliso,
             "lep_misolation": lep_miso,
             "lep_fj_dr": lep_fj_dr,
@@ -394,30 +396,33 @@ class HwwProcessor(processor.ProcessorABC):
             "deta": deta,
             "mjj": mjj,
             "ht": ht,
+            # bjets
             "n_bjets_L": n_bjets_L,
             "n_bjets_M": n_bjets_M,
             "n_bjets_T": n_bjets_T,
-            "fj_lsf3": candidatefj.lsf3,
             "NumFatjets": NumFatjets,
             "NumOtherJets": NumOtherJets,
+            # leading fatjet
             "FirstFatjet_pt": FirstFatjet.pt,
             "FirstFatjet_eta": FirstFatjet.eta,
             "FirstFatjet_phi": FirstFatjet.phi,
             "FirstFatjet_msd": FirstFatjet.msdcorr,
-            # "FirstFatjet_lep_dr": candidatelep_p4.delta_r(FirstFatjet),
+            "FirstFatjet_Vscore": VScore(SecondFatjet),
+            # second leading fatjet
             "SecondFatjet_pt": SecondFatjet.pt,
             "SecondFatjet_eta": SecondFatjet.eta,
             "SecondFatjet_phi": SecondFatjet.phi,
             "SecondFatjet_msd": SecondFatjet.msdcorr,
-            # "SecondFatjet_lep_dr": candidatelep_p4.delta_r(SecondFatjet),
+            "SecondFatjet_Vscore": VScore(FirstFatjet),
+            # number
             "n_loose_electrons": n_loose_electrons,
             "n_tight_electrons": n_tight_electrons,
             "n_loose_muons": n_loose_muons,
             "n_tight_muons": n_tight_muons,
-            # Vscore
-            "fj_VScore": VScore(candidatefj),
-            "FirstFatjet_Vscore": VScore(SecondFatjet),
-            "SecondFatjet_Vscore": VScore(FirstFatjet),
+            # second fatjet after candidate jet
+            "VH_fj_pt": ak.firsts(good_fatjets[~fj_idx_lep]).pt,
+            "VH_fj_eta": ak.firsts(good_fatjets[~fj_idx_lep]).eta,
+            "VH_fj_VScore": VScore(ak.firsts(good_fatjets[~fj_idx_lep])),
         }
 
         fatjetvars = {
