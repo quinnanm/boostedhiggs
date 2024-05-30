@@ -319,6 +319,16 @@ class HwwProcessor(processor.ProcessorABC):
         fj_idx_lep = ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)
         candidatefj = ak.firsts(good_fatjets[fj_idx_lep])
 
+        deltaR_lepton_all_jets = candidatelep_p4.delta_r(good_fatjets)
+        minDeltaR = ak.argmin(deltaR_lepton_all_jets, axis=1)
+        fatJetIndices = ak.local_index(good_fatjets, axis=1)
+        mask1 = fatJetIndices != minDeltaR
+
+        # VH jet
+        allScores = VScore(good_fatjets)
+        masked = allScores[mask1]
+        VH_fj = ak.firsts(good_fatjets[allScores == ak.max(masked, axis=1)])
+
         jmsr_shifted_fatjetvars = get_jmsr(good_fatjets[fj_idx_lep], num_jets=1, year=self._year, isData=not self.isMC)
 
         # OBJECT: AK4 jets
@@ -420,9 +430,9 @@ class HwwProcessor(processor.ProcessorABC):
             "n_loose_muons": n_loose_muons,
             "n_tight_muons": n_tight_muons,
             # second fatjet after candidate jet
-            "VH_fj_pt": ak.firsts(good_fatjets[~fj_idx_lep]).pt,
-            "VH_fj_eta": ak.firsts(good_fatjets[~fj_idx_lep]).eta,
-            "VH_fj_VScore": VScore(ak.firsts(good_fatjets[~fj_idx_lep])),
+            "VH_fj_pt": VH_fj.pt,
+            "VH_fj_eta": VH_fj.eta,
+            "VH_fj_VScore": VScore(VH_fj),
         }
 
         fatjetvars = {
