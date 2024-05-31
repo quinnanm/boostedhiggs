@@ -15,7 +15,13 @@ from coffea.nanoevents.methods import candidate
 
 logger = logging.getLogger(__name__)
 
-from boostedhiggs.corrections import add_pileup_weight, add_pileupid_weights, btagWPs
+from boostedhiggs.corrections import (
+    add_lepton_weight,
+    add_pileup_weight,
+    add_pileupid_weights,
+    add_VJets_kFactors,
+    btagWPs,
+)
 
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -173,8 +179,7 @@ class FakesProcessor(processor.ProcessorABC):
             & (((muons.pfRelIso04_all < 0.20) & (muons.pt < 55)) | (muons.pt >= 55) & (muons.miniPFRelIso_all < 0.2))
             # additional cuts
             & (np.abs(muons.dz) < 0.1)
-            & (np.abs(muons.dxy) < 0.05)
-            & (muons.sip3d <= 4.0)
+            & (np.abs(muons.dxy) < 0.02)
         )
 
         n_loose_muons = ak.sum(loose_muons, axis=1)
@@ -347,8 +352,32 @@ class FakesProcessor(processor.ProcessorABC):
 
                 add_pileupid_weights(self.weights[ch], self._year, self._yearmod, goodjets, events.GenJet, wp="L")
 
-                # store the gen-weight
-                variables[f"weight_{ch}"] = self.weights[ch].partial_weight(["genweight"])
+                if self._year in ("2016", "2017"):
+                    self.weights[ch].add(
+                        "L1Prefiring",
+                        events.L1PreFiringWeight.Nom,
+                        events.L1PreFiringWeight.Up,
+                        events.L1PreFiringWeight.Dn,
+                    )
+                add_pileup_weight(
+                    self.weights[ch],
+                    self._year,
+                    self._yearmod,
+                    nPU=ak.to_numpy(events.Pileup.nPU),
+                )
+
+                add_pileupid_weights(self.weights[ch], self._year, self._yearmod, goodjets, events.GenJet, wp="L")
+
+                if ch == "mu":
+                    add_lepton_weight(self.weights[ch], loose_lep1, self._year + self._yearmod, "muon")
+                elif ch == "ele":
+                    add_lepton_weight(self.weights[ch], loose_lep1, self._year + self._yearmod, "electron")
+
+                ewk_corr, qcd_corr, alt_qcd_corr = add_VJets_kFactors(self.weights[ch], events.GenPart, dataset, events)
+                # add corrections for plotting
+                variables["weight_ewkcorr"] = ewk_corr
+                variables["weight_qcdcorr"] = qcd_corr
+                variables["weight_altqcdcorr"] = alt_qcd_corr
 
                 # store the final weight per ch
                 variables[f"weight_{ch}"] = self.weights[ch].weight()

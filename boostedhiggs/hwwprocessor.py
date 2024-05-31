@@ -195,17 +195,15 @@ class HwwProcessor(processor.ProcessorABC):
         ######################
 
         trigger = {}
-        for ch in ["ele", "mu", "mu_lowpt", "mu_highpt"]:
+        for ch in ["ele", "mu_lowpt", "mu_highpt"]:
             trigger[ch] = np.zeros(nevents, dtype="bool")
             for t in self._HLTs[ch]:
                 if t in events.HLT.fields:
                     trigger[ch] = trigger[ch] | events.HLT[t]
-        trigger["ele"] = trigger["ele"] & (~trigger["mu"])
-        trigger["mu"] = trigger["mu"] & (~trigger["ele"])
 
-        # trigger["ele"] = trigger["ele"] & (~trigger["mu_lowpt"]) & (~trigger["mu_highpt"])
-        # trigger["mu_highpt"] = trigger["mu_highpt"] & (~trigger["ele"])
-        # trigger["mu_lowpt"] = trigger["mu_lowpt"] & (~trigger["ele"])
+        trigger["ele"] = trigger["ele"] & (~trigger["mu_lowpt"]) & (~trigger["mu_highpt"])
+        trigger["mu_highpt"] = trigger["mu_highpt"] & (~trigger["ele"])
+        trigger["mu_lowpt"] = trigger["mu_lowpt"] & (~trigger["ele"])
 
         ######################
         # METFLITERS
@@ -248,8 +246,7 @@ class HwwProcessor(processor.ProcessorABC):
             & (((muons.pfRelIso04_all < 0.20) & (muons.pt < 55)) | (muons.pt >= 55) & (muons.miniPFRelIso_all < 0.2))
             # additional cuts
             & (np.abs(muons.dz) < 0.1)
-            & (np.abs(muons.dxy) < 0.05)
-            & (muons.sip3d <= 4.0)
+            & (np.abs(muons.dxy) < 0.02)
         )
 
         n_loose_muons = ak.sum(loose_muons, axis=1)
@@ -523,15 +520,15 @@ class HwwProcessor(processor.ProcessorABC):
 
         for ch in self._channels:
             # trigger
-            # if ch == "mu":
-            #     self.add_selection(
-            #         name="Trigger",
-            #         sel=((candidatelep.pt < 55) & trigger["mu_lowpt"]) | ((candidatelep.pt >= 55) & trigger["mu_highpt"]),
-            #         channel=ch,
-            #     )
-            # else:
-            #     self.add_selection(name="Trigger", sel=trigger[ch], channel=ch)
-            self.add_selection(name="Trigger", sel=trigger[ch], channel=ch)
+            if ch == "mu":
+                self.add_selection(
+                    name="Trigger",
+                    sel=((candidatelep.pt < 55) & trigger["mu_lowpt"]) | ((candidatelep.pt >= 55) & trigger["mu_highpt"]),
+                    channel=ch,
+                )
+            else:
+                self.add_selection(name="Trigger", sel=trigger[ch], channel=ch)
+
         self.add_selection(name="METFilters", sel=metfilters)
         self.add_selection(name="OneLep", sel=(n_good_muons == 1) & (n_loose_electrons == 0), channel="mu")
         self.add_selection(name="OneLep", sel=(n_loose_muons == 0) & (n_good_electrons == 1), channel="ele")
@@ -550,10 +547,10 @@ class HwwProcessor(processor.ProcessorABC):
         self.add_selection(name="JetLepOverlap", sel=(lep_fj_dr > 0.03))
         self.add_selection(name="dPhiJetMET", sel=(np.abs(met_fj_dphi) < 1.57))
 
-        # if self._fakevalidation:
-        #     self.add_selection(name="MET", sel=(met.pt < 20))
-        # else:
-        #     self.add_selection(name="MET", sel=(met.pt > 20))
+        if self._fakevalidation:
+            self.add_selection(name="MET", sel=(met.pt < 20))
+        else:
+            self.add_selection(name="MET", sel=(met.pt > 20))
 
         # gen-level matching
         signal_mask = None
@@ -676,9 +673,6 @@ class HwwProcessor(processor.ProcessorABC):
                         self.weights[ch],
                         events.PSWeight if "PSWeight" in events.fields else [],
                     )
-
-                # store the gen-weight
-                variables[f"weight_{ch}"] = self.weights[ch].partial_weight(["genweight"])
 
                 # store the final weight per ch
                 variables[f"weight_{ch}"] = self.weights[ch].weight()
