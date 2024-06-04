@@ -65,7 +65,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
     SYSTEMATICS_lep = {
         "weight_pileup": utils.sigs + utils.bkgs,
         "weight_pileupIDSF": utils.sigs + utils.bkgs,
-        "weight_L1Prefiring": utils.sigs + utils.bkgs,  # not there for 2018
+        "weight_L1Prefiring": utils.sigs + utils.bkgs,  # not there for 2018, must manually fix
         # ggF & VBF
         "weight_PSFSR": ["ggF", "VBF"],
         "weight_PSISR": ["ggF", "VBF"],
