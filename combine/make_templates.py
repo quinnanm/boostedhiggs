@@ -61,6 +61,97 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
 
     """
 
+    # ("key", "value"): the "key" is the systematic, the "value" is the samples to apply the systematic for
+    SYSTEMATICS_lep = {
+        "weight_pileup": utils.sigs + utils.bkgs,
+        "weight_pileupIDSF": utils.sigs + utils.bkgs,
+        "weight_L1Prefiring": utils.sigs + utils.bkgs,  # not there for 2018
+        # ggF & VBF
+        "weight_PSFSR": ["ggF", "VBF"],
+        "weight_PSISR": ["ggF", "VBF"],
+        # WJetsLNu & DY
+        "weight_d1kappa_EW": ["WJetsLNu", "DYJets"],
+        # WJetsLNu
+        "weight_d1K_NLO": ["WJetsLNu"],
+        "weight_d2K_NLO": ["WJetsLNu"],
+        "weight_d3K_NLO": ["WJetsLNu"],
+        "weight_W_d2kappa_EW": ["WJetsLNu"],
+        "weight_W_d3kappa_EW": ["WJetsLNu"],
+        # DY
+        "weight_Z_d2kappa_EW": ["DYJets"],
+        "weight_Z_d3kappa_EW": ["DYJets"],
+    }
+
+    # systematics for electron channel
+    SYSTEMATICS_ele = [
+        "weight_ele_isolation_electron",
+        "weight_ele_id_electron",
+        "weight_ele_reco_electron",
+        "weight_ele_trigger_electron",
+    ]
+
+    # systematics for muon channel
+    SYSTEMATICS_mu = [
+        "weight_mu_isolation_muon",
+        "weight_mu_id_muon",
+        "weight_mu_trigger_iso_muon",
+        "weight_mu_trigger_noniso_muon",
+    ]
+
+    BTAG_systs_correlated = [
+        "weight_btagSFlightCorrelated",
+        "weight_btagSFbcCorrelated",
+    ]
+
+    # key: name of systematic to store, value: (year to process up/down, name of variable in parquet)
+    BTAG_systs_uncorrelated = {}
+    for year in years:
+        if "APV" in year:  # all APV parquets don't have APV explicitly in the systematics
+            yearlabel = "2016"
+        else:
+            yearlabel = year
+
+        BTAG_systs_uncorrelated = {
+            **BTAG_systs_uncorrelated,
+            **{
+                f"weight_btagSFlight{year}": (year, f"weight_btagSFlight{yearlabel}"),
+                f"weight_btagSFbc{year}": (2018, f"weight_btagSFbc{yearlabel}"),
+            },
+        }
+
+    JEC_systs_correlated = [
+        "UES",
+        # individual sources
+        "JES_FlavorQCD",
+        "JES_RelativeBal",
+        "JES_HF",
+        "JES_BBEC1",
+        "JES_EC2",
+        "JES_Absolute",
+    ]
+
+    # key: name of systematic to store, value: (year to process up/down otherwise store nominal, name of variable in parquet)
+    JEC_systs_uncorrelated = {}
+    for year in years:
+        if "APV" in year:  # all APV parquets don't have APV explicitly in the systematics
+            yearlabel = "2016"
+        else:
+            yearlabel = year
+
+        JEC_systs_uncorrelated = {
+            **JEC_systs_uncorrelated,
+            **{
+                f"JER_{year}": (year, "JER"),
+                f"JMR_{year}": (year, "JMR"),
+                f"JMS_{year}": (year, "JMS"),
+                f"JES_BBEC1_{year}": (year, f"JES_BBEC1_{yearlabel}"),
+                f"JES_RelativeSample_{year}": (year, f"JES_RelativeSample_{yearlabel}"),
+                f"JES_EC2_{year}": (year, f"JES_EC2_{yearlabel}"),
+                f"JES_HF_{year}": (year, f"JES_HF_{yearlabel}"),
+                f"JES_Absolute_{year}": (year, f"JES_Absolute_{yearlabel}"),
+            },
+        }
+
     # add extra selections to preselection
     presel = {
         "mu": {
@@ -171,33 +262,12 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                     )
 
                     # ------------------- Systematics correlated across both channels  -------------------
-
-                    # ("key", "value"): the "key" is the systematic, the "value" is the samples to apply the systematic for
-                    SYSTEMATICS_lep = {
-                        "weight_pileup": utils.sigs + utils.bkgs,
-                        "weight_pileupIDSF": utils.sigs + utils.bkgs,
-                        "weight_L1Prefiring": utils.sigs + utils.bkgs,
-                        # ggF & VBF
-                        "weight_PSFSR": ["ggF", "VBF"],
-                        "weight_PSISR": ["ggF", "VBF"],
-                        # WJetsLNu & DY
-                        "weight_d1kappa_EW": ["WJetsLNu", "DYJets"],
-                        # WJetsLNu
-                        "weight_d1K_NLO": ["WJetsLNu"],
-                        "weight_d2K_NLO": ["WJetsLNu"],
-                        "weight_d3K_NLO": ["WJetsLNu"],
-                        "weight_W_d2kappa_EW": ["WJetsLNu"],
-                        "weight_W_d3kappa_EW": ["WJetsLNu"],
-                        # DY
-                        "weight_Z_d2kappa_EW": ["DYJets"],
-                        "weight_Z_d3kappa_EW": ["DYJets"],
-                    }
-
                     for syst in SYSTEMATICS_lep:
                         if (year == "2018") and ("weight_L1Prefiring" in syst):
-                            continue
+                            shape_up = nominal
+                            shape_down = nominal
 
-                        if (is_data) | (sample_to_use not in SYSTEMATICS_lep[syst]):
+                        elif (is_data) | (sample_to_use not in SYSTEMATICS_lep[syst]):
                             shape_up = nominal
                             shape_down = nominal
                         else:
@@ -221,14 +291,6 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                         )
 
                     # ------------------- Systematics uncorrelated across both channels  -------------------
-
-                    # systematics for electron channel
-                    SYSTEMATICS_ele = [
-                        "weight_ele_isolation_electron",
-                        "weight_ele_id_electron",
-                        "weight_ele_reco_electron",
-                        "weight_ele_trigger_electron",
-                    ]
                     for syst in SYSTEMATICS_ele:
 
                         if (is_data) | (ch == "mu"):
@@ -253,14 +315,6 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                             mass_observable=df["rec_higgs_m"],
                             weight=shape_down,
                         )
-
-                    # systematics for muon channel
-                    SYSTEMATICS_mu = [
-                        "weight_mu_isolation_muon",
-                        "weight_mu_id_muon",
-                        "weight_mu_trigger_iso_muon",
-                        "weight_mu_trigger_noniso_muon",
-                    ]
 
                     for syst in SYSTEMATICS_mu:
 
@@ -395,11 +449,6 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                     # ------------------- btag syst. -------------------
 
                     # systematics correlated across all years
-                    BTAG_systs_correlated = [
-                        "weight_btagSFlightCorrelated",
-                        "weight_btagSFbcCorrelated",
-                    ]
-
                     for syst in BTAG_systs_correlated:
                         if is_data:
                             shape_up = nominal
@@ -425,29 +474,17 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                         )
 
                     # systematics uncorrelated across all years and stored in the parquets per year
-                    if "APV" in year:  # all APV parquets don't have APV explicitly in the systematics
-                        yearlabel = "2016"
-                    else:
-                        yearlabel = year
-
-                    BTAG_systs_uncorrelated = [
-                        f"weight_btagSFlight{yearlabel}",
-                        f"weight_btagSFbc{yearlabel}",
-                    ]
-                    for syst in BTAG_systs_uncorrelated:
-                        if is_data:
+                    for lab, (yr, syst) in BTAG_systs_uncorrelated.items():
+                        if is_data or (yr != year):
                             shape_up = nominal
                             shape_down = nominal
                         else:
                             shape_up = df[f"{syst}Up"] * nominal
                             shape_down = df[f"{syst}Down"] * nominal
 
-                        if year == "2016APV":
-                            syst = syst.replace("2016", "2016APV")
-
                         hists.fill(
                             Sample=sample_to_use,
-                            Systematic=f"{syst}_up",
+                            Systematic=f"{lab}_up",
                             Region=region,
                             mass_observable=df["rec_higgs_m"],
                             weight=shape_up,
@@ -455,7 +492,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
 
                         hists.fill(
                             Sample=sample_to_use,
-                            Systematic=f"{syst}_down",
+                            Systematic=f"{lab}_down",
                             Region=region,
                             mass_observable=df["rec_higgs_m"],
                             weight=shape_down,
@@ -464,94 +501,50 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                     # ------------------- JECs -------------------
 
                     # systematics correlated across all years
-                    JEC_systs_correlated = [
-                        "UES_up",
-                        "UES_down",
-                        # individual sources
-                        "JES_FlavorQCD_up",
-                        "JES_FlavorQCD_down",
-                        "JES_RelativeBal_up",
-                        "JES_RelativeBal_down",
-                        "JES_HF_up",
-                        "JES_HF_down",
-                        "JES_BBEC1_up",
-                        "JES_BBEC1_down",
-                        "JES_EC2_up",
-                        "JES_EC2_down",
-                        "JES_Absolute_up",
-                        "JES_Absolute_down",
-                    ]
                     for syst in JEC_systs_correlated:
                         if is_data:
-                            x = df["rec_higgs_m"]
+                            shape_up = df["rec_higgs_m"]
+                            shape_down = df["rec_higgs_m"]
                         else:
-                            x = df[f"rec_higgs_m{syst}"]
+                            shape_up = df[f"rec_higgs_m{syst}_up"]
+                            shape_down = df[f"rec_higgs_m{syst}_down"]
 
                         hists.fill(
                             Sample=sample_to_use,
-                            Systematic=syst,
+                            Systematic=f"{syst}_up",
                             Region=region,
-                            mass_observable=x,
+                            mass_observable=shape_up,
+                            weight=nominal,
+                        )
+                        hists.fill(
+                            Sample=sample_to_use,
+                            Systematic=f"{syst}_down",
+                            Region=region,
+                            mass_observable=shape_down,
                             weight=nominal,
                         )
 
-                    # systematics uncorrelated across all years and NOT stored in the parquets per year
-                    JEC_systs_uncorrelated = [
-                        "JER_up",
-                        "JER_down",
-                        "JMR_up",
-                        "JMR_down",
-                        "JMS_up",
-                        "JMS_down",
-                    ]
-                    for syst in JEC_systs_uncorrelated:
-                        if is_data:
-                            x = df["rec_higgs_m"]
+                    # systematics uncorrelated across all years
+                    for lab, (yr, syst) in JEC_systs_uncorrelated.items():
+                        if is_data or (yr != year):
+                            shape_up = df["rec_higgs_m"]
+                            shape_down = df["rec_higgs_m"]
                         else:
-                            x = df[f"rec_higgs_m{syst}"]
-
-                        syst = syst.replace("_", f"_{year}_")
+                            shape_up = df[f"rec_higgs_m{syst}_up"]
+                            shape_down = df[f"rec_higgs_m{syst}_down"]
 
                         hists.fill(
                             Sample=sample_to_use,
-                            Systematic=syst,
+                            Systematic=f"{lab}_up",
                             Region=region,
-                            mass_observable=x,
+                            mass_observable=shape_up,
                             weight=nominal,
                         )
-
-                    # systematics uncorrelated across all years and stored in the parquets per year
-                    if "APV" in year:  # all APV parquets don't have APV explicitly in the systematics
-                        yearlabel = "2016"
-                    else:
-                        yearlabel = year
-
-                    JEC_systs_uncorrelated = [
-                        f"JES_BBEC1_{yearlabel}_up",
-                        f"JES_BBEC1_{yearlabel}_down",
-                        f"JES_RelativeSample_{yearlabel}_up",
-                        f"JES_RelativeSample_{yearlabel}_down",
-                        f"JES_EC2_{yearlabel}_up",
-                        f"JES_EC2_{yearlabel}_down",
-                        f"JES_HF_{yearlabel}_up",
-                        f"JES_HF_{yearlabel}_down",
-                        f"JES_Absolute_{yearlabel}_up",
-                        f"JES_Absolute_{yearlabel}_down",
-                    ]
-                    for syst in JEC_systs_uncorrelated:
-                        if is_data:
-                            x = df["rec_higgs_m"]
-                        else:
-                            x = df[f"rec_higgs_m{syst}"]
-
-                        if year == "2016APV":
-                            syst = syst.replace("2016", "2016APV")
-
                         hists.fill(
                             Sample=sample_to_use,
-                            Systematic=syst,
+                            Systematic=f"{lab}_down",
                             Region=region,
-                            mass_observable=x,
+                            mass_observable=shape_down,
                             weight=nominal,
                         )
 
