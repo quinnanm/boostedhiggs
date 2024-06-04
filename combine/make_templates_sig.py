@@ -152,6 +152,13 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                     else:
                         nominal = df[f"weight_{ch}"] * xsecweight
 
+                    ###################################
+                    if sample == "EWKvjets":
+                        threshold = 20
+                        avg_good_weight = nominal[nominal < threshold].mean()
+                        nominal[nominal > threshold] = avg_good_weight
+                    ###################################
+
                     hists.fill(
                         Sample=sample_to_use,
                         Systematic="nominal",

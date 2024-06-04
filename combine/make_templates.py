@@ -155,6 +155,13 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                         if "bjets" in region_sel:  # if there's a bjet selection, add btag SF to the nominal weight
                             nominal *= df["weight_btag"]
 
+                    ###################################
+                    if sample == "EWKvjets":
+                        threshold = 20
+                        avg_good_weight = nominal[nominal < threshold].mean()
+                        nominal[nominal > threshold] = avg_good_weight
+                    ###################################
+
                     hists.fill(
                         Sample=sample_to_use,
                         Systematic="nominal",
