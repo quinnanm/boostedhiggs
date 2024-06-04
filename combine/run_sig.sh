@@ -1,6 +1,6 @@
 ######## Script to combine datacards and run asimov significance to study optimal working points.
 
-cards_dir="/uscms/home/fmokhtar/nobackup/boostedhiggs/combine/templates/v1_sig/datacards"
+cards_dir="/uscms/home/fmokhtar/nobackup/boostedhiggs/combine/templates/v4_sig/datacards"
 
 ####################################################################################################
 # Combine cards
