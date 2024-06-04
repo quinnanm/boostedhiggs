@@ -233,7 +233,8 @@ def systs_from_parquets(years):
         "weight_pdf_acceptance": (rl.NuisanceParameter("PDFscale_acc", "shape"), ["ggF", "VBF", "WH", "ZH"]),
         "weight_qcd_scale": (
             rl.NuisanceParameter("QCDscale_acc", "shape"),
-            ["ggF", "VBF", "WH", "ZH", "WJetsLNu", "TTbar"],
+            # ["ggF", "VBF", "WH", "ZH", "WJetsLNu", "TTbar"],
+            ["ggF", "VBF", "WH", "ZH", "WJetsLNu"],
         ),
     }
 
