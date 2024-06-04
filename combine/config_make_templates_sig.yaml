@@ -18,6 +18,8 @@ regions_sel:
     "TopCR": (THWW>0.50) & (n_bjets_T>0)
 
     ### ParT vs ParT-Finetuned (no VBF and ggF categorization)
+    "ParT9999": (fj_ParT_score>0.9999) & (n_bjets_T==0)
+    "ParT9995": (fj_ParT_score>0.9995) & (n_bjets_T==0)
     "ParT999": (fj_ParT_score>0.999) & (n_bjets_T==0)
     "ParT995": (fj_ParT_score>0.995) & (n_bjets_T==0)
     "ParT99": (fj_ParT_score>0.99) & (n_bjets_T==0)
