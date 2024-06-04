@@ -1,7 +1,6 @@
 # SAMPLES to run (assume same names for all years 2016,2016APV,2017,2018)
 mc:
   - GluGluHToWW_Pt-200ToInf_M-125
-  - VBFHToWWToLNuQQ_M-125_withDipoleRecoil
   - VBFHToWWToAny_M-125_TuneCP5_withDipoleRecoil
   - HWminusJ_HToWW_M-125
   - HWplusJ_HToWW_M-125

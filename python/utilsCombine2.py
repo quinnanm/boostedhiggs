@@ -48,7 +48,7 @@ combine_samples = {
     "JetsToQQ": "WZQQorDYJets",
 }
 
-signals = ["VBF", "ggF"]
+signals = ["VBF", "ggF", "WH", "ZH", "ttH"]
 
 
 def get_sum_sumgenweight(pkl_files, year, sample):
@@ -115,6 +115,7 @@ color_by_sample = {
     "ttH": "tab:olive",
     # background
     "QCD": "tab:orange",
+    "Fake": "tab:orange",
     "WJetsLNu": "tab:green",
     "TTbar": "tab:blue",
     "Diboson": "orchid",
@@ -139,6 +140,7 @@ plot_labels = {
     # "ttH": "ttH(WW)",
     "ttH": r"$t\bar{t}$H",
     "QCD": "Multijet",
+    "Fake": "Fake",
     "Diboson": "VV",
     "WJetsLNu": r"W$(\ell\nu)$+jets",
     "TTbar": r"$t\bar{t}$+jets",
@@ -337,9 +339,9 @@ def plot_hists(
         tot_signal *= mult_factor
 
         if mult_factor == 1:
-            siglabel = r"ggF+VBF"
+            siglabel = r"ggF+VBF+WH+ZH+ttH"
         else:
-            siglabel = r"ggF+VBF $\times$" + f"{mult_factor}"
+            siglabel = r"ggF+VBF+WH+ZH+ttH $\times$" + f"{mult_factor}"
 
         hep.histplot(
             tot_signal,
@@ -407,7 +409,7 @@ def plot_hists(
         [hand_new[idx] for idx in range(len(hand_new))],
         [lab_new[idx] for idx in range(len(lab_new))],
         title=text_,
-        ncol=3,
+        ncol=2,
         fontsize=14,
     )
 

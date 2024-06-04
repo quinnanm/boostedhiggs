@@ -208,14 +208,54 @@ def systs_from_parquets(years):
             rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_trigger_{yearlabel}", "lnN"),
             sigs + bkgs,
         ),
+        "UES": (
+            rl.NuisanceParameter("CMS_scale_UES", "shape"),
+            sigs + bkgs,
+        ),
+        "JES": (
+            rl.NuisanceParameter("AK8_JES", "shape"),
+            sigs + bkgs,
+        ),
+        "JER": (
+            rl.NuisanceParameter("AK8_JER", "shape"),
+            sigs + bkgs,
+        ),
+        "JMS": (
+            rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_jms_", "shape"),
+            sigs + bkgs,
+        ),
+        "JMR": (
+            rl.NuisanceParameter("AK8_JMR", "shape"),
+            sigs + bkgs,
+        ),
+
+
+                # these
+        "JMS_up",
+        "JMS_down",
+        "JMR_up",
+        "JMR_down",
+        # individual sources
+        "JES_FlavorQCD_up",
+        "JES_FlavorQCD_down",
+        "JES_RelativeBal_up",
+        "JES_RelativeBal_down",
+        "JES_HF_up",
+        "JES_HF_down",
+        "JES_BBEC1_up",
+        "JES_BBEC1_down",
+        "JES_EC2_up",
+        "JES_EC2_down",
+        "JES_Absolute_up",
+        "JES_Absolute_down",
+        "JES_Total_up",
+        "JES_Total_down",
+
+
+
         # systematics applied only on ggF/VBF
         "weight_PSFSR": (rl.NuisanceParameter("PSFSR", "shape"), ["ggF", "VBF"]),
         "weight_PSISR": (rl.NuisanceParameter("PSISR", "shape"), ["ggF", "VBF"]),
-        "rec_higgs_mUES": (rl.NuisanceParameter("AK8_UES", "shape"), ["ggF", "VBF"]),
-        "rec_higgs_mJES": (rl.NuisanceParameter("AK8_JES", "shape"), ["ggF", "VBF"]),
-        "rec_higgs_mJER": (rl.NuisanceParameter("AK8_JER", "shape"), ["ggF", "VBF"]),
-        "rec_higgs_mJMS": (rl.NuisanceParameter("AK8_JMS", "shape"), ["ggF", "VBF"]),
-        "rec_higgs_mJMR": (rl.NuisanceParameter("AK8_JMR", "shape"), ["ggF", "VBF"]),
         # systematics applied only on WJets
         "weight_d1K_NLO": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d1K_NLO_{yearlabel}", "lnN"), ["WJetsLNu"]),
         "weight_d2K_NLO": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d2K_NLO_{yearlabel}", "lnN"), ["WJetsLNu"]),
@@ -235,7 +275,6 @@ def systs_from_parquets(years):
             rl.NuisanceParameter("QCDscale_acc", "shape"),
             # ["ggF", "VBF", "WH", "ZH", "WJetsLNu", "TTbar"],
             ["ggF", "VBF", "WH", "ZH", "WJetsLNu"],
-
         ),
         # "weight_d1kappa_EW": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d1kappa_EW_{yearlabel}", "lnN"), ["DYJets"]), # noqa
         # "weight_Z_d2kappa_EW": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d2kappa_EW_{yearlabel}", "lnN"), ["DYJets"]), # noqa

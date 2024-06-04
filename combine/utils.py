@@ -29,7 +29,6 @@ combine_samples = {
     "SingleMuon_": "Data",
     "EGamma_": "Data",
     # bkg
-    "QCD_Pt": "QCD",
     "TT": "TTbar",
     "WJetsToLNu_": "WJetsLNu",
     "ST_": "SingleTop",
@@ -37,9 +36,11 @@ combine_samples = {
     "WZ": "Diboson",
     "ZZ": "Diboson",
     "EWK": "EWKvjets",
+    "DYJets": "DYJets",
+    "JetsToQQ": "WZQQ",
     # TODO: make sure it's WZQQ is NLO in next iteration
-    "DYJets": "WZQQorDYJets",
-    "JetsToQQ": "WZQQorDYJets",
+    # "DYJets": "WZQQorDYJets",
+    # "JetsToQQ": "WZQQorDYJets",
 }
 
 # (name in templates, name in cards)
@@ -51,7 +52,6 @@ labels = {
     "WH": "WH",
     "ZH": "ZH",
     # BKGS
-    "QCD": "qcd",
     "WJetsLNu": "wjets",
     "TTbar": "ttbar",
     "SingleTop": "singletop",
@@ -60,11 +60,11 @@ labels = {
     # TODO: make sure it's WZQQ is NLO in next iteration
     "DYJets": "zjets",
     "WZQQ": "wzqq",
-    "WZQQorDYJets": "vjets",
+    # "WZQQorDYJets": "vjets",
+    "Fake": "fake",
 }
 
-# bkgs = ["TTbar", "WJetsLNu", "SingleTop", "DYJets", "QCD", "Diboson", "WZQQ", "EWKvjets"]
-bkgs = ["TTbar", "WJetsLNu", "SingleTop", "WZQQorDYJets", "QCD", "Diboson", "EWKvjets"]
+bkgs = ["TTbar", "WJetsLNu", "SingleTop", "DYJets", "WZQQ", "Diboson", "EWKvjets", "Fake"]
 sigs = ["ggF", "VBF", "WH", "ZH", "ttH"]
 samples = sigs + bkgs
 
@@ -156,11 +156,6 @@ def shape_to_num(var, nom, clip=1.5):
     """
     nom_rate = np.sum(nom)
     var_rate = np.sum(var)
-    # print("nom", nom)
-    # print("var", var)
-    # print("-----------------------------------")
-    # print("nom", nom_rate, "var", var_rate, "ratio", var_rate / nom_rate)
-    # print(var)
 
     if var_rate == nom_rate:  # in cases when both are zero
         return 1
