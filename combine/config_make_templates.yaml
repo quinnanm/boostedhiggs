@@ -14,13 +14,13 @@ samples:
     - Data
 
 regions_sel:
-    # "VBF": (THWW>0.9) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
+    "VBF": (THWW>0.9) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
 
-    # "ggFpt250to300": (THWW>0.92) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
-    # "ggFpt300to450": (THWW>0.92) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    # "ggFpt450toInf": (THWW>0.92) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
+    "ggFpt250to300": (THWW>0.92) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
+    "ggFpt300to450": (THWW>0.92) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
+    "ggFpt450toInf": (THWW>0.92) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
 
-    # "WJetsCR": (THWW>0.50) & (THWW<0.92) & (n_bjets_T==0)
+    "WJetsCR": (THWW>0.50) & (THWW<0.9) & (n_bjets_T==0)
     "TopCR": (THWW>0.50) & (n_bjets_T>0)
 
 samples_dir:

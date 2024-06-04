@@ -251,7 +251,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # python make_templates.py --years 2016,2016APV,2017,2018 --channels mu,ele --outdir templates/v1 --add-fake
+    # python make_templates_sig.py --years 2016,2016APV,2017,2018 --channels mu,ele --outdir templates/v1 --add-fake
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--years", dest="years", default="2017", help="years separated by commas")

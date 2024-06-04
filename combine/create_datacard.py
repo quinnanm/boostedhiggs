@@ -60,10 +60,6 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
 
         for sName in Samples:
 
-            if "CR" in ChName:  # TODO: remove signal from control regions
-                if sName in sigs:
-                    continue
-
             templ = get_template(hists_templates, sName, ChName)
             if templ == 0:
                 continue
