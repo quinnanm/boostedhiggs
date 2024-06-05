@@ -176,7 +176,7 @@ def systs_from_parquets(years):
         # systematics applied on all samples
         "weight_pileup": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_pileup_{yearlabel}", "shape"), sigs + bkgs),
         "weight_pileupIDSF": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_PUIDSF_{yearlabel}", "shape"), sigs + bkgs),
-        "weight_L1Prefiring": (rl.NuisanceParameter(f"C{CMS_PARAMS_LABEL}L1Prefiring_{yearlabel}", "lnN"), sigs + bkgs),
+        "weight_L1Prefiring": (rl.NuisanceParameter("L1Prefiring", "lnN"), sigs + bkgs),
         # muon channel systematics
         "weight_mu_isolation_muon": (
             rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_isolation_{yearlabel}", "lnN"),
@@ -241,7 +241,7 @@ def systs_from_parquets(years):
     # ------------------- JECs -------------------
     # systematics correlated across all years
     JEC_systs_correlated = {
-        "UES": "CMS_scale_UES",
+        "UES": "unclustered_Energy",
         # individual sources
         "JES_FlavorQCD": "CMS_scale_j_FlavQCD",
         "JES_RelativeBal": "CMS_scale_j_RelBal",
