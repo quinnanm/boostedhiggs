@@ -592,11 +592,11 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                     for syst, (yrs, smpls, var) in {**JEC_systs_correlated, **JEC_systs_uncorrelated}.items():
 
                         if (sample_to_use in smpls) and (year in yrs) and (ch in var):
-                            shape_up = df["rec_higgs_m" + var[ch] + "_up"] * xsecweight
-                            shape_down = df["rec_higgs_m" + var[ch] + "_down"] * xsecweight
+                            shape_up = df["rec_higgs_m" + var[ch] + "_up"]
+                            shape_down = df["rec_higgs_m" + var[ch] + "_down"]
                         else:
-                            shape_up = nominal
-                            shape_down = nominal
+                            shape_up = df["rec_higgs_m"]
+                            shape_down = df["rec_higgs_m"]
 
                         hists.fill(
                             Sample=sample_to_use,
