@@ -414,8 +414,8 @@ def systs_from_parquets(years):
     SYSTEMATICS = {
         **SYSTEMATICS_correlated,
         **SYSTEMATICS_uncorrelated,
-        **BTAG_systs_correlated,
-        **BTAG_systs_uncorrelated,
+        # **BTAG_systs_correlated,
+        # **BTAG_systs_uncorrelated,
         **JEC_systs_correlated,
         **JEC_systs_uncorrelated,
     }
