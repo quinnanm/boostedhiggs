@@ -351,8 +351,9 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                     e.g. https://github.com/LPC-HH/HHLooper/blob/master/python/prepare_card_SR_final.py#L258
                     and https://github.com/LPC-HH/HHLooper/blob/master/app/HHLooper.cc#L1488
                     """
-                    if sample_to_use in ["ggF", "VBF", "VH", "ZH"]:
+                    if sample_to_use in ["ggF", "VBF", "WH", "ZH"]:
                         pdfweights = []
+
                         for weight_i in sumpdfweights:
 
                             # noqa: get the normalization factor per variation i (ratio of sumpdfweights_i/sumgenweights)
@@ -403,7 +404,10 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                     - then, take max/min of h0, h1, h3, h5, h7, h8 w.r.t h4: h_up and h_dn
                     - the uncertainty is the nominal histogram * h_up / h4
                     """
-                    if sample_to_use in ["ggF", "VBF", "VH", "ZH", "WJetsLNu", "TTbar"]:
+                    if sample_to_use in ["ggF", "VBF", "WH", "ZH", "WJetsLNu", "TTbar"]:
+
+                        R_4 = sumscaleweights[4] / sumgenweights
+                        scaleweight_4 = df["weight_scale4"].values * nominal / R_4
 
                         scaleweights = []
                         for weight_i in sumscaleweights:
@@ -413,7 +417,6 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                             # noqa: get the normalization factor per variation i (ratio of sumscaleweights_i/sumgenweights)
                             R_i = sumscaleweights[weight_i] / sumgenweights
                             scaleweight_i = df[f"weight_scale{weight_i}"].values * nominal / R_i
-                            scaleweight_i = scaleweight_i
 
                             scaleweights.append(scaleweight_i)
 
@@ -423,8 +426,9 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                             np.array(scaleweights), 0, 1
                         )  # so that the shape is (# events, variation)
 
-                        shape_up = np.max(scaleweights, axis=1)
-                        shape_down = np.min(scaleweights, axis=1)
+                        # TODO: debug
+                        shape_up = nominal * np.max(scaleweights, axis=1) / scaleweight_4
+                        shape_down = nominal * np.min(scaleweights, axis=1) / scaleweight_4
 
                     else:
                         shape_up = nominal

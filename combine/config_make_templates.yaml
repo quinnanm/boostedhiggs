@@ -1,9 +1,9 @@
 samples:
     - ggF
     - VBF
-    - ttH
     - WH
     - ZH
+    - ttH
     - WJetsLNu
     - TTbar
     - SingleTop
@@ -22,6 +22,8 @@ regions_sel:
 
     "WJetsCR": (THWW>0.50) & (THWW<0.905) & (n_bjets_T==0)
     "TopCR": (THWW>0.50) & (n_bjets_T>0)
+
+    "Pre-selection": (THWW>0.50)
 
 samples_dir:
     "2018": ../eos/May31_hww_2018
