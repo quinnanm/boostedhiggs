@@ -171,8 +171,8 @@ def systs_from_parquets(years):
     # ------------------- Common systematics -------------------
 
     SYSTEMATICS_correlated = {
-        rl.NuisanceParameter("ps_fsr", "shape"): (
-            "CMS_pileup_id",
+        rl.NuisanceParameter("CMS_pileup_id", "shape"): (
+            "weight_pileup_id",
             sigs + bkgs,
         ),
         # systematics applied only on ggF/VBF
