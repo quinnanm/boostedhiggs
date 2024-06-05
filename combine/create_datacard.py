@@ -82,7 +82,7 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
                         )
 
             # SYSTEMATICS FROM PARQUETS
-            for sys_name, (sys_value, list_of_samples) in sys_from_parquets.items():
+            for sys_value, (sys_name, list_of_samples) in sys_from_parquets.items():
                 if sName in list_of_samples:
                     syst_up = hists_templates[{"Sample": sName, "Region": ChName, "Systematic": sys_name + "_up"}].values()
                     syst_do = hists_templates[{"Sample": sName, "Region": ChName, "Systematic": sys_name + "_down"}].values()

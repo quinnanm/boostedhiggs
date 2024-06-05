@@ -172,123 +172,132 @@ def systs_from_parquets(years):
     else:
         yearlabel = years[0]
 
+    # key: name in datacard, value: (var in histogram, samples to apply for)
+
     systs_from_parquets = {
         # systematics applied on all samples
-        "weight_pileup": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_pileup_{yearlabel}", "shape"), sigs + bkgs),
-        "weight_pileupIDSF": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_PUIDSF_{yearlabel}", "shape"), sigs + bkgs),
-        "weight_L1Prefiring": (rl.NuisanceParameter("L1Prefiring", "lnN"), sigs + bkgs),
-        # muon channel systematics
-        "weight_mu_isolation_muon": (
-            rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_isolation_{yearlabel}", "lnN"),
+        rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_pileup_{yearlabel}", "shape"): ("weight_pileup", sigs + bkgs),
+        rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_PUIDSF_{yearlabel}", "shape"): ("weight_pileupIDSF", sigs + bkgs),
+        rl.NuisanceParameter("L1Prefiring", "lnN"): ("weight_L1Prefiring", sigs + bkgs),
+        rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_isolation_{yearlabel}", "lnN"): (
+            "weight_mu_isolation_muon",
             sigs + bkgs,
-        ),
-        "weight_mu_trigger_iso_muon": (
-            rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_trigger_iso_{yearlabel}", "lnN"),
-            sigs + bkgs,
-        ),
-        "weight_mu_trigger_noniso_muon": (
-            rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_trigger_{yearlabel}", "lnN"),
-            sigs + bkgs,
-        ),
-        "weight_mu_id_muon": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_identification_{yearlabel}", "lnN"), sigs + bkgs),
-        # electron channel systematics
-        "weight_ele_trigger_electron": (
-            rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_trigger_{yearlabel}", "lnN"),
-            sigs + bkgs,
-        ),
-        "weight_ele_id_electron": (
-            rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_identification_{yearlabel}", "lnN"),
-            sigs + bkgs,
-        ),
-        "weight_ele_isolation_electron": (
-            rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_isolation_{yearlabel}", "lnN"),
-            sigs + bkgs,
-        ),
-        "weight_ele_reco_electron": (
-            rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_reconstruction_{yearlabel}", "lnN"),
-            sigs + bkgs,
-        ),
-        # systematics applied only on ggF/VBF
-        "weight_PSFSR": (rl.NuisanceParameter("ps_fsr", "shape"), ["ggF", "VBF"]),
-        "weight_PSISR": (rl.NuisanceParameter("ps_isr", "shape"), ["ggF", "VBF"]),
-        # systematics applied only on WJets & DYJets
-        "weight_d1K_NLO": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d1K_NLO_{yearlabel}", "lnN"), ["WJetsLNu"]),
-        "weight_d2K_NLO": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d2K_NLO_{yearlabel}", "lnN"), ["WJetsLNu"]),
-        "weight_d3K_NLO": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d3K_NLO_{yearlabel}", "lnN"), ["WJetsLNu"]),
-        "weight_d1kappa_EW": (
-            rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_W_d1kappa_EW_{yearlabel}", "lnN"),
-            ["WJetsLNu", "DYJets"],
-        ),
-        "weight_W_d2kappa_EW": (
-            rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_W_d2kappa_EW_{yearlabel}", "lnN"),
-            ["WJetsLNu"],
-        ),
-        "weight_W_d3kappa_EW": (
-            rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_W_d3kappa_EW_{yearlabel}", "lnN"),
-            ["WJetsLNu"],
-        ),
-        "weight_Z_d2kappa_EW": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d2kappa_EW_{yearlabel}", "lnN"), ["DYJets"]),
-        "weight_Z_d3kappa_EW": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d3kappa_EW_{yearlabel}", "lnN"), ["DYJets"]),
-        # PDF acceptance and QCD scale acceptance
-        "weight_pdf_acceptance": (rl.NuisanceParameter("PDFscale_acc", "shape"), ["ggF", "VBF", "WH", "ZH"]),
-        "weight_qcd_scale": (
-            rl.NuisanceParameter("QCDscale_acc", "shape"),
-            # ["ggF", "VBF", "WH", "ZH", "WJetsLNu", "TTbar"],
-            ["ggF", "VBF", "WH", "ZH", "WJetsLNu"],
         ),
     }
 
-    # ------------------- JECs -------------------
-    # systematics correlated across all years
-    JEC_systs_correlated = {
-        "UES": "unclustered_Energy",
-        # individual sources
-        "JES_FlavorQCD": "CMS_scale_j_FlavQCD",
-        "JES_RelativeBal": "CMS_scale_j_RelBal",
-        "JES_HF": "CMS_scale_j_HF",
-        "JES_BBEC1": "CMS_scale_j_BBEC1",
-        "JES_EC2": "CMS_scale_j_EC2",
-        "JES_Absolute": "CMS_scale_j_Abs",
-    }
-    for syst, label in JEC_systs_correlated.items():
-        systs_from_parquets[syst] = (rl.NuisanceParameter(label, "lnN"), sigs + bkgs)
+    # systs_from_parquets = {
 
-    # systematics uncorrelated across all years
-    for year in years:
-        JEC_systs_uncorrelated = {
-            f"JER_{year}": f"CMS_res_j_{year}",
-            f"JMR_{year}": f"{CMS_PARAMS_LABEL}_jmr_{year}",
-            f"JMS_{year}": f"{CMS_PARAMS_LABEL}_jms_{year}",
-            f"JES_BBEC1_{year}": f"CMS_scale_j_BBEC1_{year}",
-            f"JES_RelativeSample_{year}": f"CMS_scale_j_RelSample_{year}",
-            f"JES_EC2_{year}": f"CMS_scale_j_EC2_{year}",
-            f"JES_HF_{year}": f"CMS_scale_j_HF_{year}",
-            f"JES_Absolute_{year}": f"CMS_scale_j_Abs_{year}",
-        }
-        for syst, label in JEC_systs_uncorrelated.items():
-            systs_from_parquets[syst] = (rl.NuisanceParameter(label, "lnN"), sigs + bkgs)
+    #     # muon channel systematics
+    #     "": (
 
-    # ------------------- btag SFs -------------------
-    # systematics correlated across all years
-    systs_from_parquets["weight_btagSFlightCorrelated"] = (
-        rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_btagSFlightCorrelated", "lnN"),
-        sigs + bkgs,
-    )
-    systs_from_parquets["weight_btagSFbcCorrelated"] = (
-        rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_btagSFbcCorrelated", "lnN"),
-        sigs + bkgs,
-    )
+    #     ),
+    #     "weight_mu_trigger_iso_muon": (
+    #         rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_trigger_iso_{yearlabel}", "lnN"),
+    #         sigs + bkgs,
+    #     ),
+    #     "weight_mu_trigger_noniso_muon": (
+    #         rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_trigger_{yearlabel}", "lnN"),
+    #         sigs + bkgs,
+    #     ),
+    #     "weight_mu_id_muon": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_identification_{yearlabel}", "lnN"), sigs + bkgs),
+    #     # electron channel systematics
+    #     "weight_ele_trigger_electron": (
+    #         rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_trigger_{yearlabel}", "lnN"),
+    #         sigs + bkgs,
+    #     ),
+    #     "weight_ele_id_electron": (
+    #         rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_identification_{yearlabel}", "lnN"),
+    #         sigs + bkgs,
+    #     ),
+    #     "weight_ele_isolation_electron": (
+    #         rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_isolation_{yearlabel}", "lnN"),
+    #         sigs + bkgs,
+    #     ),
+    #     "weight_ele_reco_electron": (
+    #         rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_reconstruction_{yearlabel}", "lnN"),
+    #         sigs + bkgs,
+    #     ),
+    #     # systematics applied only on ggF/VBF
+    #     "weight_PSFSR": (rl.NuisanceParameter("ps_fsr", "shape"), ["ggF", "VBF"]),
+    #     "weight_PSISR": (rl.NuisanceParameter("ps_isr", "shape"), ["ggF", "VBF"]),
+    #     # systematics applied only on WJets & DYJets
+    #     "weight_d1K_NLO": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d1K_NLO_{yearlabel}", "lnN"), ["WJetsLNu"]),
+    #     "weight_d2K_NLO": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d2K_NLO_{yearlabel}", "lnN"), ["WJetsLNu"]),
+    #     "weight_d3K_NLO": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d3K_NLO_{yearlabel}", "lnN"), ["WJetsLNu"]),
+    #     "weight_d1kappa_EW": (
+    #         rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_W_d1kappa_EW_{yearlabel}", "lnN"),
+    #         ["WJetsLNu", "DYJets"],
+    #     ),
+    #     "weight_W_d2kappa_EW": (
+    #         rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_W_d2kappa_EW_{yearlabel}", "lnN"),
+    #         ["WJetsLNu"],
+    #     ),
+    #     "weight_W_d3kappa_EW": (
+    #         rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_W_d3kappa_EW_{yearlabel}", "lnN"),
+    #         ["WJetsLNu"],
+    #     ),
+    #     "weight_Z_d2kappa_EW": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d2kappa_EW_{yearlabel}", "lnN"), ["DYJets"]),
+    #     "weight_Z_d3kappa_EW": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_Z_d3kappa_EW_{yearlabel}", "lnN"), ["DYJets"]),
+    #     # PDF acceptance and QCD scale acceptance
+    #     "weight_pdf_acceptance": (rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_PDFacc_", "shape"), ["ggF", "VBF", "WH", "ZH"]),
+    #     "weight_qcd_scale": (
+    #         rl.NuisanceParameter("QCDscale_acc", "shape"),
+    #         # ["ggF", "VBF", "WH", "ZH", "WJetsLNu", "TTbar"],
+    #         ["ggF", "VBF", "WH", "ZH", "WJetsLNu"],
+    #     ),
+    # }
 
-    # systematics uncorrelated across all years
-    for year in years:
-        systs_from_parquets[f"weight_btagSFlight{year}"] = (
-            rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_btagSFlight_{year}", "lnN"),
-            sigs + bkgs,
-        )
+    # # ------------------- JECs -------------------
+    # # systematics correlated across all years
+    # JEC_systs_correlated = {
+    #     "UES": "unclustered_Energy",
+    #     # individual sources
+    #     "JES_FlavorQCD": "CMS_scale_j_FlavQCD",
+    #     "JES_RelativeBal": "CMS_scale_j_RelBal",
+    #     "JES_HF": "CMS_scale_j_HF",
+    #     "JES_BBEC1": "CMS_scale_j_BBEC1",
+    #     "JES_EC2": "CMS_scale_j_EC2",
+    #     "JES_Absolute": "CMS_scale_j_Abs",
+    # }
+    # for syst, label in JEC_systs_correlated.items():
+    #     systs_from_parquets[syst] = (rl.NuisanceParameter(label, "lnN"), sigs + bkgs)
 
-        systs_from_parquets[f"weight_btagSFbc{year}"] = (
-            rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_btagSFbc_{year}", "lnN"),
-            sigs + bkgs,
-        )
+    # # systematics uncorrelated across all years
+    # for year in years:
+    #     JEC_systs_uncorrelated = {
+    #         f"JER_{year}": f"CMS_res_j_{year}",
+    #         f"JMR_{year}": f"{CMS_PARAMS_LABEL}_jmr_{year}",
+    #         f"JMS_{year}": f"{CMS_PARAMS_LABEL}_jms_{year}",
+    #         f"JES_BBEC1_{year}": f"CMS_scale_j_BBEC1_{year}",
+    #         f"JES_RelativeSample_{year}": f"CMS_scale_j_RelSample_{year}",
+    #         f"JES_EC2_{year}": f"CMS_scale_j_EC2_{year}",
+    #         f"JES_HF_{year}": f"CMS_scale_j_HF_{year}",
+    #         f"JES_Absolute_{year}": f"CMS_scale_j_Abs_{year}",
+    #     }
+    #     for syst, label in JEC_systs_uncorrelated.items():
+    #         systs_from_parquets[syst] = (rl.NuisanceParameter(label, "lnN"), sigs + bkgs)
+
+    # # ------------------- btag SFs -------------------
+    # # systematics correlated across all years
+    # systs_from_parquets["weight_btagSFlightCorrelated"] = (
+    #     rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_btagSFlightCorrelated", "lnN"),
+    #     sigs + bkgs,
+    # )
+    # systs_from_parquets["weight_btagSFbcCorrelated"] = (
+    #     rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_btagSFbcCorrelated", "lnN"),
+    #     sigs + bkgs,
+    # )
+
+    # # systematics uncorrelated across all years
+    # for year in years:
+    #     systs_from_parquets[f"weight_btagSFlight{year}"] = (
+    #         rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_btagSFlight_{year}", "lnN"),
+    #         sigs + bkgs,
+    #     )
+
+    #     systs_from_parquets[f"weight_btagSFbc{year}"] = (
+    #         rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_btagSFbc_{year}", "lnN"),
+    #         sigs + bkgs,
+    #     )
 
     return systs_from_parquets
