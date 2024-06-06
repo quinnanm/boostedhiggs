@@ -450,13 +450,41 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                     for syst, (yrs, smpls, var) in {
                         **SYSTEMATICS_correlated,
                         **SYSTEMATICS_uncorrelated,
-                        **BTAG_systs_correlated,
-                        **BTAG_systs_uncorrelated,
                     }.items():
 
                         if (sample_to_use in smpls) and (year in yrs) and (ch in var):
                             shape_up = df[var[ch] + "Up"] * xsecweight
                             shape_down = df[var[ch] + "Down"] * xsecweight
+                        else:
+                            shape_up = nominal
+                            shape_down = nominal
+
+                        hists.fill(
+                            Sample=sample_to_use,
+                            Systematic=f"{syst}_up",
+                            Region=region,
+                            mass_observable=df["rec_higgs_m"],
+                            weight=shape_up,
+                        )
+
+                        hists.fill(
+                            Sample=sample_to_use,
+                            Systematic=f"{syst}_down",
+                            Region=region,
+                            mass_observable=df["rec_higgs_m"],
+                            weight=shape_down,
+                        )
+
+                    # ------------------- btag systematics  -------------------
+
+                    for syst, (yrs, smpls, var) in {
+                        **BTAG_systs_correlated,
+                        **BTAG_systs_uncorrelated,
+                    }.items():
+
+                        if (sample_to_use in smpls) and (year in yrs) and (ch in var):
+                            shape_up = df[var[ch] + "Up"] * nominal
+                            shape_down = df[var[ch] + "Down"] * nominal
                         else:
                             shape_up = nominal
                             shape_down = nominal
