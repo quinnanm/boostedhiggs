@@ -5,7 +5,6 @@ import os
 import pickle as pkl
 import warnings
 
-import hist as hist2
 import matplotlib.pyplot as plt
 import mplhep as hep
 import numpy as np
@@ -246,11 +245,10 @@ def plot_hists(
                 tot = tot + b
 
         tot_val = tot.values()
-        tot_val_zero_mask = tot_val == 0
+        tot_val_zero_mask = tot_val == 0  # check if this is for the ratio or not
         tot_val[tot_val_zero_mask] = 1
 
-        tot_err = np.sqrt(tot_val)
-        tot_err[tot_val_zero_mask] = 0
+        tot_err_MC = np.sqrt(tot.variances())
 
     if add_data and data:
         data_err_opts = {
@@ -281,12 +279,13 @@ def plot_hists(
         )
 
         if len(bkg) > 0:
-            from hist.intervals import ratio_uncertainty
 
             data_val = data.values()
             data_val[tot_val_zero_mask] = 1
 
-            yerr = ratio_uncertainty(data_val, tot_val, "poisson")
+            # from hist.intervals import ratio_uncertainty
+            # yerr = ratio_uncertainty(data_val, tot_val, "poisson")
+            yerr = np.sqrt(data_val) / tot_val
 
             hep.histplot(
                 data_val / tot_val,
@@ -297,6 +296,13 @@ def plot_hists(
                 color="k",
                 capsize=4,
                 flow="none",
+            )
+            rax.stairs(
+                values=1 + tot_err_MC / tot_val,
+                baseline=1 - tot_err_MC / tot_val,
+                edges=tot.axes[0].edges,
+                **errps,
+                label="Stat. unc.",
             )
 
             rax.axhline(1, ls="--", color="k")
@@ -317,8 +323,8 @@ def plot_hists(
             flow="none",
         )
         ax.stairs(
-            values=tot.values() + tot_err,
-            baseline=tot.values() - tot_err,
+            values=tot.values() + tot_err_MC,
+            baseline=tot.values() - tot_err_MC,
             edges=tot.axes[0].edges,
             **errps,
             label="Stat. unc.",

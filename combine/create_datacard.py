@@ -60,6 +60,9 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
 
         for sName in Samples:
 
+            if (sName in sigs) and (ChName in CONTROL_regions):
+                continue
+
             templ = get_template(hists_templates, sName, ChName)
             if templ == 0:
                 continue

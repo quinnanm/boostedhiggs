@@ -620,6 +620,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                     # # ------------------- JECs -------------------
 
                     # systematics correlated across all years
+                    # TODO: apply the jet pt cut on the up/down variations
                     for syst, (yrs, smpls, var) in {**JEC_systs_correlated, **JEC_systs_uncorrelated}.items():
 
                         if (sample_to_use in smpls) and (year in yrs) and (ch in var):
