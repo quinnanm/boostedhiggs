@@ -1,4 +1,4 @@
-# Datacard for <Channel (VBF) instance at 0x7efd91ac3a60> generated on 2024-06-06 08:52:09.261801
+# Datacard for <Channel (VBF) instance at 0x7fcebca36640> generated on 2024-06-07 09:18:51.339604
 imax 1 # number of categories ('bins' but here we are using shape templates)
 jmax 12 # number of samples minus 1
 kmax 108 # number of nuisance parameters
