@@ -71,7 +71,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
 
     """
     The following dictionaries have the following convention,
-        key: name of systematic to store in the histogram
+        key [str] --> name of systematic to store in the histogram
         value [tuple] --> (t1, t2, t3):
             t1 [list]: years to process the up/down variations for (store nominal value for the other years)
             t2 [list]: samples to apply systematic for (store nominal value for the other samples)
