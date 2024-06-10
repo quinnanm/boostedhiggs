@@ -126,6 +126,7 @@ color_by_sample = {
     "DYJets": "tab:purple",
     "WZQQ": "khaki",
     "WZQQorDYJets": "khaki",
+    "Fake": "tab:orange",
 }
 
 plot_labels = {
@@ -156,6 +157,7 @@ plot_labels = {
     "DYJets": r"Z$(\ell\ell)$+jets",
     "WZQQ": r"V$(qq)$",
     "WZQQorDYJets": r"W$(qq)$/Z(inc.)+jets",
+    "Fake": "Fake",
 }
 
 label_by_ch = {"mu": "Muon", "ele": "Electron"}
@@ -211,11 +213,12 @@ def plot_hists(
     # signal
     signal = [h[{"Sample": label}] for label in signal_labels]
     # scale signal for non-log plots
-    if logy:
-        mult_factor = 1
-    else:
-        mult_factor = mult
-    signal_mult = [s * mult_factor for s in signal]
+    if mult is not None:
+        if logy:
+            mult_factor = 1
+        else:
+            mult_factor = mult
+        signal_mult = [s * mult_factor for s in signal]
 
     # background
     bkg = [h[{"Sample": label}] for label in bkg_labels]
@@ -246,11 +249,10 @@ def plot_hists(
                 tot = tot + b
 
         tot_val = tot.values()
-        tot_val_zero_mask = tot_val == 0
+        tot_val_zero_mask = tot_val == 0  # check if this is for the ratio or not
         tot_val[tot_val_zero_mask] = 1
 
-        tot_err = np.sqrt(tot_val)
-        tot_err[tot_val_zero_mask] = 0
+        tot_err_MC = np.sqrt(tot.values())
 
     if add_data and data:
         data_err_opts = {
@@ -265,7 +267,8 @@ def plot_hists(
             lv = int(np.searchsorted(massbins, blind_region[0], "right"))
             rv = int(np.searchsorted(massbins, blind_region[1], "left") + 1)
 
-            data.view(flow=True)[lv:rv] = 0
+            data.view(flow=True)[lv:rv].value = 0
+            data.view(flow=True)[lv:rv].variance = 0
 
         hep.histplot(
             data,
@@ -280,16 +283,16 @@ def plot_hists(
         )
 
         if len(bkg) > 0:
-            from hist.intervals import ratio_uncertainty
 
             data_val = data.values()
             data_val[tot_val_zero_mask] = 1
 
+            # from hist.intervals import ratio_uncertainty
             # yerr = ratio_uncertainty(data_val, tot_val, "poisson")
+            yerr = np.sqrt(data_val) / tot_val
 
-            yerr = np.sqrt(data_val) + np.sqrt(tot_val)
             hep.histplot(
-                data_val - tot_val,
+                data_val / tot_val,
                 tot.axes[0].edges,
                 yerr=yerr,
                 ax=rax,
@@ -298,9 +301,16 @@ def plot_hists(
                 capsize=4,
                 flow="none",
             )
+            rax.stairs(
+                values=1 + tot_err_MC / tot_val,
+                baseline=1 - tot_err_MC / tot_val,
+                edges=tot.axes[0].edges,
+                **errps,
+                label="Stat. unc.",
+            )
 
             rax.axhline(1, ls="--", color="k")
-            rax.set_ylim(-10.2, 10.8)
+            rax.set_ylim(0.2, 1.8)
 
     # plot the background
     if len(bkg) > 0 and not only_sig:
@@ -317,8 +327,8 @@ def plot_hists(
             flow="none",
         )
         ax.stairs(
-            values=tot.values() + tot_err,
-            baseline=tot.values() - tot_err,
+            values=tot.values() + tot_err_MC,
+            baseline=tot.values() - tot_err_MC,
             edges=tot.axes[0].edges,
             **errps,
             label="Stat. unc.",
@@ -338,26 +348,27 @@ def plot_hists(
         # plot the total signal (w/o scaling)
         tot_signal *= mult_factor
 
-        if mult_factor == 1:
-            siglabel = r"ggF+VBF"
-        else:
-            siglabel = r"ggF+VBF $\times$" + f"{mult_factor}"
+        if mult is not None:
+            if mult_factor == 1:
+                siglabel = r"ggF+VBF+WH+ZH+ttH"
+            else:
+                siglabel = r"ggF+VBF+WH+ZH+ttH $\times$" + f"{mult_factor}"
 
-        hep.histplot(
-            tot_signal,
-            ax=ax,
-            label=siglabel,
-            linewidth=2,
-            color="tab:red",
-            flow="none",
-        )
-        # add MC stat errors
-        ax.stairs(
-            values=tot_signal.values() + np.sqrt(tot_signal.values()),
-            baseline=tot_signal.values() - np.sqrt(tot_signal.values()),
-            edges=sig.axes[0].edges,
-            **errps,
-        )
+            hep.histplot(
+                tot_signal,
+                ax=ax,
+                label=siglabel,
+                linewidth=2,
+                color="tab:red",
+                flow="none",
+            )
+            # add MC stat errors
+            ax.stairs(
+                values=tot_signal.values() + np.sqrt(tot_signal.values()),
+                baseline=tot_signal.values() - np.sqrt(tot_signal.values()),
+                edges=sig.axes[0].edges,
+                **errps,
+            )
 
     ax.set_ylabel("Events")
 
@@ -398,7 +409,7 @@ def plot_hists(
         [hand_new[idx] for idx in range(len(hand_new))],
         [lab_new[idx] for idx in range(len(lab_new))],
         title=text_,
-        ncol=3,
+        ncol=2,
         fontsize=14,
     )
 

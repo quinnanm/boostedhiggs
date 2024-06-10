@@ -248,6 +248,15 @@ def plot_hists(
         tot_val_zero_mask = tot_val == 0  # check if this is for the ratio or not
         tot_val[tot_val_zero_mask] = 1
 
+        # print("tot", tot.values())
+        # print("np var", np.sqrt(tot.values()))
+        # print("hist", tot.variances())
+
+        # tot_err_MC = np.sqrt(np.var(tot.values()))
+
+        # tot_err_MC = np.sqrt(np.var(tot.values()))
+        # print(tot)
+
         tot_err_MC = np.sqrt(tot.variances())
 
     if add_data and data:
