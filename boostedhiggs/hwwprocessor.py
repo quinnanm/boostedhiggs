@@ -307,7 +307,7 @@ class HwwProcessor(processor.ProcessorABC):
         # OBJECT: AK8 fatjets
         fatjets = events.FatJet
         fatjets["msdcorr"] = corrected_msoftdrop(fatjets)
-        fatjets["msdcorr"] = fatjets.msoftdrop
+        # fatjets["msdcorr"] = fatjets.msoftdrop
         fatjet_selector = (fatjets.pt > 200) & (abs(fatjets.eta) < 2.5) & fatjets.isTight
         good_fatjets = fatjets[fatjet_selector]
         good_fatjets = good_fatjets[ak.argsort(good_fatjets.pt, ascending=False)]  # sort them by pt
