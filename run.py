@@ -133,6 +133,13 @@ def main(args):
         from boostedhiggs.fakesprocessor import FakesProcessor
 
         p = FakesProcessor(year=year, yearmod=yearmod, output_location=f"./outfiles/{job_name}")
+
+    elif args.processor == "zll":
+        # define processor
+        from boostedhiggs.zll_processor import ZllProcessor
+
+        p = ZllProcessor(year=year, yearmod=yearmod, output_location=f"./outfiles/{job_name}")
+
     else:
         from boostedhiggs.trigger_efficiencies_processor import (
             TriggerEfficienciesProcessor,

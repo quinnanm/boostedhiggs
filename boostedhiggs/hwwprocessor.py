@@ -631,6 +631,7 @@ class HwwProcessor(processor.ProcessorABC):
                 variables["weight_altqcdcorr"] = alt_qcd_corr
 
                 # add top_reweighting
+                # https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopPtReweighting
                 if "TT" in dataset:
                     tops = events.GenPart[
                         get_pid_mask(events.GenPart, 6, byall=False) * events.GenPart.hasFlags(["isLastCopy"])
