@@ -136,7 +136,7 @@ def main(args):
 
     elif args.processor == "zll":
         # define processor
-        from boostedhiggs.zll_processor import ZllProcessor
+        from boostedhiggs.zllprocessor import ZllProcessor
 
         p = ZllProcessor(year=year, yearmod=yearmod, output_location=f"./outfiles/{job_name}")
 

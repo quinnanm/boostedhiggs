@@ -182,7 +182,7 @@ class ZllProcessor(processor.ProcessorABC):
             & (np.abs(muons.dxy) < 0.02)
         )
 
-        n_loose_muons = ak.sum(loose_muons, axis=1)
+        # n_loose_muons = ak.sum(loose_muons, axis=1)
         n_tight_muons = ak.sum(tight_muons, axis=1)
 
         # OBJECT: loose & tight electrons
@@ -206,7 +206,7 @@ class ZllProcessor(processor.ProcessorABC):
             & (electrons.sip3d <= 4.0)
         )
 
-        n_loose_electrons = ak.sum(loose_electrons, axis=1)
+        # n_loose_electrons = ak.sum(loose_electrons, axis=1)
         n_tight_electrons = ak.sum(tight_electrons, axis=1)
 
         # OBJECT: loose leptons
@@ -311,13 +311,10 @@ class ZllProcessor(processor.ProcessorABC):
         self.add_selection(name="METFilters", sel=metfilters)
         self.add_selection(name="bveto", sel=(n_bjets_L == 0))
 
-        self.add_selection(
-            name="TwoLep", sel=(n_tight_muons == 1) & (n_loose_muons == 2) & (n_loose_electrons == 0), channel="mu"
-        )
-        self.add_selection(
-            name="TwoLep", sel=(n_loose_muons == 0) & (n_tight_electrons == 1) & (n_loose_electrons == 2), channel="ele"
-        )
-
+        # # dilepton selection
+        self.add_selection(name="TwoLep", sel=(n_tight_muons >= 2), channel="mu")
+        self.add_selection(name="TwoLep", sel=(n_tight_electrons >= 2), channel="ele")
+        self.add_selection(name="oppositeCharge", sel=(tight_lep1.charge * tight_lep2.charge < 0))
         self.add_selection(name="AtLeastOneFatJet", sel=(NumFatjets >= 1))
         self.add_selection(name="CandidateJetpT", sel=(candidatefj.pt > 250))
         self.add_selection(name="LepInJet", sel=(lep_fj_dr < 0.8))
