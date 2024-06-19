@@ -630,10 +630,12 @@ class HwwProcessor(processor.ProcessorABC):
                 variables["weight_qcdcorr"] = qcd_corr
                 variables["weight_altqcdcorr"] = alt_qcd_corr
 
-                tops = events.GenPart[get_pid_mask(events.GenPart, 6, byall=False) * events.GenPart.hasFlags(["isLastCopy"])]
-                variables["top_reweighting"] = add_TopPtReweighting(
-                    self.weights[ch], tops.pt, dataset
-                )  # 123 gives a weight of 1
+                # add top_reweighting
+                if "TT" in dataset:
+                    tops = events.GenPart[
+                        get_pid_mask(events.GenPart, 6, byall=False) * events.GenPart.hasFlags(["isLastCopy"])
+                    ]
+                    variables["top_reweighting"] = add_TopPtReweighting(tops.pt)
 
                 if "HToWW" in dataset:
                     add_HiggsEW_kFactors(self.weights[ch], events.GenPart, dataset)
