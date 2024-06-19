@@ -22,6 +22,7 @@ from boostedhiggs.corrections import (
     add_pileup_weight,
     add_pileupid_weights,
     add_ps_weight,
+    add_TopPtReweighting,
     add_VJets_kFactors,
     btagWPs,
     corrected_msoftdrop,
@@ -628,6 +629,20 @@ class HwwProcessor(processor.ProcessorABC):
                 variables["weight_ewkcorr"] = ewk_corr
                 variables["weight_qcdcorr"] = qcd_corr
                 variables["weight_altqcdcorr"] = alt_qcd_corr
+
+                # add_TopPtReweighting
+                def getParticles(events, lo_id=22, hi_id=25, flags=["fromHardProcess", "isLastCopy"]):
+                    absid = np.abs(events.GenPart.pdgId)
+                    return events.GenPart[
+                        # no gluons
+                        (absid >= lo_id)
+                        & (absid <= hi_id)
+                        & events.GenPart.hasFlags(flags)
+                    ]
+
+                variables["top_reweighting"] = add_TopPtReweighting(
+                    self.weights[ch], getParticles(events, 6, 6, ["isLastCopy"]).pt.pad(2, clip=True), self._year, dataset
+                )  # 123 gives a weight of 1
 
                 if "HToWW" in dataset:
                     add_HiggsEW_kFactors(self.weights[ch], events.GenPart, dataset)
