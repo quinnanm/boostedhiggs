@@ -33,7 +33,7 @@ from boostedhiggs.corrections import (
     getJMSRVariables,
     met_factory,
 )
-from boostedhiggs.utils import VScore, match_H, match_Top, match_V, sigs
+from boostedhiggs.utils import VScore, get_pid_mask, match_H, match_Top, match_V, sigs
 
 from .run_tagger_inference import runInferenceTriton
 
@@ -640,8 +640,11 @@ class HwwProcessor(processor.ProcessorABC):
                         & events.GenPart.hasFlags(flags)
                     ]
 
+                getParticles(events, 6, 6, ["isLastCopy"]).pt.pad(2, clip=True)
+
+                tops = events.GenPart[get_pid_mask(events.GenPart, 6, byall=False) * events.GenPart.hasFlags(["isLastCopy"])]
                 variables["top_reweighting"] = add_TopPtReweighting(
-                    self.weights[ch], getParticles(events, 6, 6, ["isLastCopy"]).pt.pad(2, clip=True), self._year, dataset
+                    self.weights[ch], tops, self._year, dataset
                 )  # 123 gives a weight of 1
 
                 if "HToWW" in dataset:
