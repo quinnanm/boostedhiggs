@@ -630,18 +630,6 @@ class HwwProcessor(processor.ProcessorABC):
                 variables["weight_qcdcorr"] = qcd_corr
                 variables["weight_altqcdcorr"] = alt_qcd_corr
 
-                # add_TopPtReweighting
-                def getParticles(events, lo_id=22, hi_id=25, flags=["fromHardProcess", "isLastCopy"]):
-                    absid = np.abs(events.GenPart.pdgId)
-                    return events.GenPart[
-                        # no gluons
-                        (absid >= lo_id)
-                        & (absid <= hi_id)
-                        & events.GenPart.hasFlags(flags)
-                    ]
-
-                getParticles(events, 6, 6, ["isLastCopy"]).pt.pad(2, clip=True)
-
                 tops = events.GenPart[get_pid_mask(events.GenPart, 6, byall=False) * events.GenPart.hasFlags(["isLastCopy"])]
                 variables["top_reweighting"] = add_TopPtReweighting(
                     self.weights[ch], tops, self._year, dataset
