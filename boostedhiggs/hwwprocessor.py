@@ -632,7 +632,7 @@ class HwwProcessor(processor.ProcessorABC):
 
                 tops = events.GenPart[get_pid_mask(events.GenPart, 6, byall=False) * events.GenPart.hasFlags(["isLastCopy"])]
                 variables["top_reweighting"] = add_TopPtReweighting(
-                    self.weights[ch], tops, dataset
+                    self.weights[ch], tops.pt, dataset
                 )  # 123 gives a weight of 1
 
                 if "HToWW" in dataset:
