@@ -219,7 +219,6 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
         ),
     }
 
-    # key: name of systematic to store, value: (year to process up/down, name of variable in parquet)
     BTAG_systs_uncorrelated = {}
     for year in years:
         if "APV" in year:  # all APV parquets don't have APV explicitly in the systematics
@@ -243,12 +242,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
             },
         }
 
-    JEC_systs_correlated = {
-        "UES": (
-            years,
-            sigs + bkgs,
-            {"ele": "UES", "mu": "UES"},
-        ),
+    JES_systs_correlated = {
         # individual sources
         "JES_FlavorQCD": (
             years,
@@ -282,32 +276,16 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
         ),
     }
 
-    # key: name of systematic to store, value: (year to process up/down otherwise store nominal, name of variable in parquet)
-    JEC_systs_uncorrelated = {}
+    JES_systs_uncorrelated = {}
     for year in years:
         if "APV" in year:  # all APV parquets don't have APV explicitly in the systematics
             yearlabel = "2016"
         else:
             yearlabel = year
 
-        JEC_systs_uncorrelated = {
-            **JEC_systs_uncorrelated,
+        JES_systs_uncorrelated = {
+            **JES_systs_uncorrelated,
             **{
-                f"JER_{year}": (
-                    year,
-                    sigs + bkgs,
-                    {"ele": "JER", "mu": "JER"},
-                ),
-                f"JMR_{year}": (
-                    year,
-                    sigs + bkgs,
-                    {"ele": "JMR", "mu": "JMR"},
-                ),
-                f"JMS_{year}": (
-                    year,
-                    sigs + bkgs,
-                    {"ele": "JMS", "mu": "JMS"},
-                ),
                 f"JES_BBEC1_{year}": (
                     year,
                     sigs + bkgs,
@@ -332,6 +310,43 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                     year,
                     sigs + bkgs,
                     {"ele": f"JES_Absolute_{yearlabel}", "mu": f"JES_Absolute_{yearlabel}"},
+                ),
+            },
+        }
+
+    JEC_systs_correlated_others = {
+        "UES": (
+            years,
+            sigs + bkgs,
+            {"ele": "UES", "mu": "UES"},
+        ),
+    }
+
+    # key: name of systematic to store, value: (year to process up/down otherwise store nominal, name of variable in parquet)
+    JEC_systs_uncorrelated_others = {}
+    for year in years:
+        if "APV" in year:  # all APV parquets don't have APV explicitly in the systematics
+            yearlabel = "2016"
+        else:
+            yearlabel = year
+
+        JEC_systs_uncorrelated_others = {
+            **JEC_systs_uncorrelated_others,
+            **{
+                f"JER_{year}": (
+                    year,
+                    sigs + bkgs,
+                    {"ele": "JER", "mu": "JER"},
+                ),
+                f"JMR_{year}": (
+                    year,
+                    sigs + bkgs,
+                    {"ele": "JMR", "mu": "JMR"},
+                ),
+                f"JMS_{year}": (
+                    year,
+                    sigs + bkgs,
+                    {"ele": "JMS", "mu": "JMS"},
                 ),
             },
         }
@@ -435,9 +450,6 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                         threshold = 20
                         df = df[nominal < threshold]
                         nominal = nominal[nominal < threshold]
-
-                        # avg_good_weight = nominal[nominal < threshold].mean()
-                        # nominal[nominal > threshold] = avg_good_weight
                     ###################################
 
                     hists.fill(
@@ -617,11 +629,59 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                         weight=shape_down,
                     )
 
-                    # # ------------------- JECs -------------------
+                    # ------------------- Some JECs -------------------
 
-                    # systematics correlated across all years
-                    # TODO: apply the jet pt cut on the up/down variations
-                    for syst, (yrs, smpls, var) in {**JEC_systs_correlated, **JEC_systs_uncorrelated}.items():
+                    for syst, (yrs, smpls, var) in {**JEC_systs_uncorrelated_others, **JEC_systs_correlated_others}.items():
+
+                        if (sample_to_use in smpls) and (year in yrs) and (ch in var):
+                            shape_up = df["rec_higgs_m" + var[ch] + "_up"]
+                            shape_down = df["rec_higgs_m" + var[ch] + "_down"]
+                        else:
+                            shape_up = df["rec_higgs_m"]
+                            shape_down = df["rec_higgs_m"]
+
+                        hists.fill(
+                            Sample=sample_to_use,
+                            Systematic=f"{syst}_up",
+                            Region=region,
+                            mass_observable=shape_up,
+                            weight=nominal,
+                        )
+                        hists.fill(
+                            Sample=sample_to_use,
+                            Systematic=f"{syst}_down",
+                            Region=region,
+                            mass_observable=shape_down,
+                            weight=nominal,
+                        )
+                # ------------------- individual sources of JES -------------------
+
+                """We apply the jet pt cut on the up/down variations. Must loop over systematics first."""
+                for syst, (yrs, smpls, var) in {**JES_systs_correlated, **JES_systs_uncorrelated}.items():
+
+                    for region, region_sel in regions_sel.items():  # e.g. pass, fail, top control region, etc.
+
+                        if (sample_to_use in smpls) and (year in yrs) and (ch in var):
+                            region_sel = region_sel.replace("fj_pt", "fj_pt" + var[ch] + "_up")
+
+                        df = data.copy()
+                        df = df.query(region_sel)
+
+                        # ------------------- Nominal -------------------
+                        if is_data:
+                            nominal = np.ones_like(df["fj_pt"])  # for data (nominal is 1)
+                        else:
+                            nominal = df[f"weight_{ch}"] * xsecweight
+
+                            if "bjets" in region_sel:  # if there's a bjet selection, add btag SF to the nominal weight
+                                nominal *= df["weight_btag"]
+
+                        ###################################
+                        if sample_to_use == "EWKvjets":
+                            threshold = 20
+                            df = df[nominal < threshold]
+                            nominal = nominal[nominal < threshold]
+                        ###################################
 
                         if (sample_to_use in smpls) and (year in yrs) and (ch in var):
                             shape_up = df["rec_higgs_m" + var[ch] + "_up"]

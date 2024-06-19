@@ -55,18 +55,18 @@ def systs_not_from_parquets(years: List[str], lep_channels: List[str]):
 
     # lumi systematics
     if "2016" in years:
-        systs_dict["all_samples"]["lumi_13TeV_2016"] = rl.NuisanceParameter("CMS_lumi_13TeV_2016", "lnN")
+        systs_dict["all_samples"]["lumi_13TeV_2016"] = rl.NuisanceParameter("lumi_13TeV_2016", "lnN")
         systs_dict_values["all_samples"]["lumi_13TeV_2016"] = (1.01 ** ((LUMI["2016"] + LUMI["2016APV"]) / full_lumi), None)
     if "2017" in years:
-        systs_dict["all_samples"]["lumi_13TeV_2017"] = rl.NuisanceParameter("CMS_lumi_13TeV_2017", "lnN")
+        systs_dict["all_samples"]["lumi_13TeV_2017"] = rl.NuisanceParameter("lumi_13TeV_2017", "lnN")
         systs_dict_values["all_samples"]["lumi_13TeV_2017"] = (1.02 ** (LUMI["2017"] / full_lumi), None)
 
     if "2018" in years:
-        systs_dict["all_samples"]["lumi_13TeV_2018"] = rl.NuisanceParameter("CMS_lumi_13TeV_2018", "lnN")
+        systs_dict["all_samples"]["lumi_13TeV_2018"] = rl.NuisanceParameter("lumi_13TeV_2018", "lnN")
         systs_dict_values["all_samples"]["lumi_13TeV_2018"] = (1.015 ** (LUMI["2018"] / full_lumi), None)
 
     if len(years) == 4:
-        systs_dict["all_samples"]["lumi_13TeV_correlated"] = rl.NuisanceParameter("CMS_lumi_13TeV_corelated", "lnN")
+        systs_dict["all_samples"]["lumi_13TeV_correlated"] = rl.NuisanceParameter("lumi_13TeV_corelated", "lnN")
         systs_dict_values["all_samples"]["lumi_13TeV_correlated"] = (
             (
                 (1.006 ** ((LUMI["2016"] + LUMI["2016APV"]) / full_lumi))
@@ -76,7 +76,7 @@ def systs_not_from_parquets(years: List[str], lep_channels: List[str]):
             None,
         )
 
-        systs_dict["all_samples"]["lumi_13TeV_1718"] = rl.NuisanceParameter("CMS_lumi_13TeV_1718", "lnN")
+        systs_dict["all_samples"]["lumi_13TeV_1718"] = rl.NuisanceParameter("lumi_13TeV_1718", "lnN")
         systs_dict_values["all_samples"]["lumi_13TeV_1718"] = (
             (1.006 ** (LUMI["2017"] / full_lumi)) * (1.002 ** (LUMI["2018"] / full_lumi)),
             None,
@@ -106,15 +106,13 @@ def systs_not_from_parquets(years: List[str], lep_channels: List[str]):
     systs_dict["ggF"]["pdf_Higgs_gg"] = n
     systs_dict_values["ggF"]["pdf_Higgs_gg"] = (1.019, None)
 
-    n = rl.NuisanceParameter("pdf_Higgs_qqHH", "lnN")
-    systs_dict["VBF"]["pdf_Higgs_qqHH"] = n
-    systs_dict_values["VBF"]["pdf_Higgs_qqHH"] = (1.021, 0.979)
-
     n = rl.NuisanceParameter("pdf_Higgs_ttH", "lnN")
     systs_dict["ttH"]["pdf_Higgs_ttH"] = n
     systs_dict_values["ttH"]["pdf_Higgs_ttH"] = (1.03, None)
 
     n = rl.NuisanceParameter("pdf_Higgs_qqbar", "lnN")
+    systs_dict["VBF"]["pdf_Higgs_qqHH"] = n
+    systs_dict_values["VBF"]["pdf_Higgs_qqHH"] = (1.021, None)
     systs_dict["WH"]["pdf_Higgs_qqbar"] = n
     systs_dict_values["WH"]["pdf_Higgs_qqbar"] = (1.017, None)
     systs_dict["ZH"]["pdf_Higgs_qqbar"] = n
