@@ -132,6 +132,8 @@ color_by_sample = {
     "TTbar_allmatched": "tab:blue",
     "TTbar_unmatched": "lightskyblue",
     "TTbar_LP": "lightskyblue",
+    "TTbar (2 gen quarks matched)": "tab:blue",
+    "TTbar (other)": "lightskyblue",
 }
 
 plot_labels = {
@@ -161,6 +163,8 @@ plot_labels = {
     "TTbar_allmatched": r"$t\bar{t}$+jets matched",
     "TTbar_unmatched": r"$t\bar{t}$+jets unmatched",
     "TTbar_LP": "TTbar_LP",
+    "TTbar (2 gen quarks matched)": r"$t\bar{t}$+jets (2 gen quarks matched)",
+    "TTbar (other)": r"$t\bar{t}$+jets (other)",
 }
 
 label_by_ch = {"mu": "Muon", "ele": "Electron"}
@@ -530,7 +534,8 @@ def plot_hists(
         )
 
         _, a = ax.get_ylim()
-        if logy or ("isolation" in var) or ("lsf3" in var) or ("THWW" in var):
+        if logy or ("isolation" in var) or ("lsf3" in var):
+            # if logy or ("isolation" in var) or ("lsf3" in var) or ("THWW" in var):
             ax.set_yscale("log")
             ax.set_ylim(1e-1, a * 15.7)
         else:

@@ -14,15 +14,15 @@ samples:
     - Data
 
 regions_sel:
-    "Pre-selection": (THWW>0.50)
+    "Pre-selection": (THWW>0.50) & (fj_pt>250)
 
     "VBF": (THWW>0.905) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) ) & (fj_pt>250)
-    "ggFpt250to300": (THWW>0.93) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
+    "ggFpt250to300": (THWW>0.93) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>250) & (fj_pt<300)
     "ggFpt300to450": (THWW>0.93) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
     "ggFpt450toInf": (THWW>0.93) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
 
-    "WJetsCR": (THWW>0.50) & (THWW<0.905) & (n_bjets_T==0)
-    "TopCR": (THWW>0.50) & (n_bjets_T>0)
+    "WJetsCR": (THWW>0.50) & (THWW<0.905) & (n_bjets_T==0) & (fj_pt>250)
+    "TopCR": (THWW>0.50) & (n_bjets_T>0) & (fj_pt>250)
 
 samples_dir:
     "2018": ../eos/May31_hww_2018
