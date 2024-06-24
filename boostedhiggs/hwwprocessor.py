@@ -164,7 +164,9 @@ class HwwProcessor(processor.ProcessorABC):
         """Returns skimmed events which pass preselection cuts and with the branches listed in self._skimvars"""
 
         dataset = events.metadata["dataset"]
+
         self.isMC = hasattr(events, "genWeight")
+        self.isSignal = True if ("HToWW" in dataset) or ("ttHToNonbb" in dataset) else False
 
         nevents = len(events)
         self.weights = {ch: Weights(nevents, storeIndividual=True) for ch in self._channels}
@@ -182,7 +184,7 @@ class HwwProcessor(processor.ProcessorABC):
 
         # sum PDF weight
         sumpdfweight = {}
-        if "LHEPdfWeight" in events.fields and self.isMC and "HToWW" in dataset:
+        if "LHEPdfWeight" in events.fields and self.isMC and self.isSignal:
             for i in range(len(events.LHEPdfWeight[0])):
                 sumpdfweight[i] = ak.sum(events.LHEPdfWeight[:, i] * events.genWeight)
 
@@ -557,7 +559,7 @@ class HwwProcessor(processor.ProcessorABC):
         # gen-level matching
         signal_mask = None
         if self.isMC:
-            if ("HToWW" in dataset) or ("HWW" in dataset) or ("ttHToNonbb" in dataset):
+            if self.isSignal:
                 genVars, signal_mask = match_H(events.GenPart, candidatefj, fatjet_pt=FirstFatjet)
                 # add signal mask and modify sum of genweights to only consider those events that pass the mask
                 self.add_selection(name="Signal", sel=signal_mask)
@@ -638,10 +640,10 @@ class HwwProcessor(processor.ProcessorABC):
                     ]
                     variables["top_reweighting"] = add_TopPtReweighting(tops.pt)
 
-                if "HToWW" in dataset:
+                if self.isSignal:
                     add_HiggsEW_kFactors(self.weights[ch], events.GenPart, dataset)
 
-                if "HToWW" in dataset or "TT" in dataset or "WJets" in dataset:
+                if self.isSignal or "TT" in dataset or "WJets" in dataset:
                     """
                     For the QCD acceptance uncertainty:
                     - we save the individual weights [0, 1, 3, 5, 7, 8]
@@ -662,7 +664,7 @@ class HwwProcessor(processor.ProcessorABC):
                                 scale_weights[f"weight_scale{i}"] = events.LHEScaleWeight[:, i]
                     variables = {**variables, **scale_weights}
 
-                if "HToWW" in dataset:
+                if self.isSignal:
                     """
                     For the PDF acceptance uncertainty:
                     - store 103 variations. 0-100 PDF values
@@ -678,7 +680,7 @@ class HwwProcessor(processor.ProcessorABC):
                             pdf_weights[f"weight_pdf{i}"] = events.LHEPdfWeight[:, i]
                     variables = {**variables, **pdf_weights}
 
-                if "HToWW" in dataset:
+                if self.isSignal:
                     add_ps_weight(
                         self.weights[ch],
                         events.PSWeight if "PSWeight" in events.fields else [],
