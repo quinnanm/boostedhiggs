@@ -252,7 +252,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             selection.add("LepInJet", (lep_fj_dr < 0.8))
             selection.add("JetLepOverlap", (lep_fj_dr > 0.03))
             selection.add("dPhiJetMET", (np.abs(met_fj_dphi) < 1.57))
-            selection.add("MET", (met.pt < 20))
+            selection.add("MET", (met.pt > 20))
 
             ######################
             # variables to store
