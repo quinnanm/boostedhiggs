@@ -13,7 +13,6 @@ from boostedhiggs.corrections import (
     add_pileup_weight,
     add_VJets_kFactors,
     corrected_msoftdrop,
-    get_jec_jets,
 )
 from boostedhiggs.utils import match_H
 
@@ -196,10 +195,6 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         fatjet_selector = (fatjets.pt > 200) & (abs(fatjets.eta) < 2.5) & fatjets.isTight
         good_fatjets = fatjets[fatjet_selector]
         good_fatjets = good_fatjets[ak.argsort(good_fatjets.pt, ascending=False)]  # sort them by pt
-
-        good_fatjets, jec_shifted_fatjetvars = get_jec_jets(
-            events, good_fatjets, self._year, not self.isMC, self.jecs, fatjets=True
-        )
 
         # OBJECT: candidate fatjet
         fj_idx_lep = ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)
