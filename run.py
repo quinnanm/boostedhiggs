@@ -199,7 +199,7 @@ def main(args):
         # remove unmerged parquet files
         os.system("rm -rf ./outfiles/" + job_name)
 
-    else:
+    elif args.processor != "trigger":
         # dump to pickle
         filehandler = open("./outfiles/" + job_name + ".pkl", "wb")
         pkl.dump(out, filehandler)
