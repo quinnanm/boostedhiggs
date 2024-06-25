@@ -264,7 +264,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
 
             if "HToWW" in dataset:
                 genVars, _ = match_H(events.GenPart, candidatefj)
-                matchedH_pt = genVars["fj_genH_pt"]
+                matchedH_pt = genVars["fj_genH_pt"].data
             else:
                 matchedH_pt = ak.zeros_like(candidatefj.pt)
             out[channel]["vars"]["fj_genH_pt"] = pad_val_nevents(matchedH_pt)
