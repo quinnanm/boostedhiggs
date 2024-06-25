@@ -254,7 +254,9 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             selection.add("dPhiJetMET", (np.abs(met_fj_dphi) < 1.57))
             selection.add("MET", (met.pt < 20))
 
-            """Define other variables to save"""
+            ######################
+            # variables to store
+            ######################
             out[channel]["vars"] = {}
             out[channel]["vars"]["fj_pt"] = pad_val_nevents(candidatefj.pt)
             out[channel]["vars"]["fj_eta"] = pad_val_nevents(candidatefj.eta)
@@ -264,10 +266,10 @@ class TriggerEfficienciesProcessor(ProcessorABC):
 
             if "HToWW" in dataset:
                 genVars, _ = match_H(events.GenPart, candidatefj)
-                matchedH_pt = genVars["fj_genH_pt"].data
+                matchedH_pt = genVars["fj_genH_pt"]
             else:
                 matchedH_pt = ak.zeros_like(candidatefj.pt)
-            out[channel]["vars"]["fj_genH_pt"] = pad_val_nevents(matchedH_pt)
+            out[channel]["vars"]["fj_genH_pt"] = pad_val_nevents(matchedH_pt).data
 
             out[channel]["weights"] = {}
             for key in self.weights._weights.keys():
