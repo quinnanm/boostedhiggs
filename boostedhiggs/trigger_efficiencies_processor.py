@@ -1,3 +1,5 @@
+import importlib.resources
+import json
 import warnings
 
 import awkward as ak
@@ -10,38 +12,13 @@ from boostedhiggs.corrections import (
     add_lepton_weight,
     add_pileup_weight,
     add_VJets_kFactors,
+    corrected_msoftdrop,
+    get_jec_jets,
 )
 from boostedhiggs.utils import match_H
 
-# from boostedhiggs.utils import getParticles
-
 # we suppress ROOT warnings where our input ROOT tree has duplicate branches - these are handled correctly.
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
-
-
-def getParticles(genparticles, lowid=22, highid=25, flags=["fromHardProcess", "isLastCopy"]):
-    """
-    returns the particle objects that satisfy a low id,
-    high id condition and have certain flags
-    """
-    absid = abs(genparticles.pdgId)
-    return genparticles[((absid >= lowid) & (absid <= highid)) & genparticles.hasFlags(flags)]
-
-
-# def simple_match_HWW(genparticles, candidatefj):
-#     """
-#     return the number of matched objects (hWW*),daughters,
-#     and gen flavor (enuqq, munuqq, taunuqq)
-#     """
-#     higgs = getParticles(genparticles, 25)  # genparticles is the full set... this function selects Higgs particles
-#     # W~24 so we get H->WW (limitation: only picking one W and assumes the other will be there)
-#     is_hWW = ak.all(abs(higgs.children.pdgId) == 24, axis=2)
-
-#     higgs = higgs[is_hWW]
-
-#     matchedH = candidatefj.nearest(higgs, axis=1, threshold=0.8)  # choose higgs closest to fj
-
-#     return matchedH
 
 
 def build_p4(cand):
@@ -81,6 +58,11 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         }
 
         self._channels = ["ele", "mu"]
+
+        # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFiltersRun2
+        with importlib.resources.path("boostedhiggs.data", "metfilters.json") as path:
+            with open(path, "r") as f:
+                self._metfilters = json.load(f)[self._year]
 
     def pad_val(
         self,
@@ -123,78 +105,120 @@ class TriggerEfficienciesProcessor(ProcessorABC):
                 )
             out[channel]["triggers"] = {**out[channel]["triggers"], **HLT_triggers}
 
-        """ basic definitions """
-        # DEFINE MUONS
-        loose_muons = (
-            (((events.Muon.pt > 30) & (events.Muon.pfRelIso04_all < 0.25)) | (events.Muon.pt > 55))
-            & (np.abs(events.Muon.eta) < 2.4)
-            & (events.Muon.looseId)
-        )
-        n_loose_muons = ak.sum(loose_muons, axis=1)
+        ######################
+        # METFLITERS
+        ######################
 
-        good_muons = (
-            (events.Muon.pt > 30)
-            & (np.abs(events.Muon.eta) < 2.4)
-            & (np.abs(events.Muon.dz) < 0.1)
-            & (np.abs(events.Muon.dxy) < 0.05)
-            & (events.Muon.sip3d <= 4.0)
-            & events.Muon.mediumId
+        metfilters = np.ones(nevents, dtype="bool")
+        metfilterkey = "mc" if self.isMC else "data"
+        for mf in self._metfilters[metfilterkey]:
+            if mf in events.Flag.fields:
+                metfilters = metfilters & events.Flag[mf]
+
+        ######################
+        # OBJECT DEFINITION
+        ######################
+
+        # OBJECT: taus
+        loose_taus_mu = (events.Tau.pt > 20) & (abs(events.Tau.eta) < 2.3) & (events.Tau.idAntiMu >= 1)  # loose antiMu ID
+        loose_taus_ele = (
+            (events.Tau.pt > 20)
+            & (abs(events.Tau.eta) < 2.3)
+            & (events.Tau.idAntiEleDeadECal >= 2)  # loose Anti-electron MVA discriminator V6 (2018) ?
         )
+        n_loose_taus_mu = ak.sum(loose_taus_mu, axis=1)
+        n_loose_taus_ele = ak.sum(loose_taus_ele, axis=1)
+
+        # OBJECT: muons
+        muons = ak.with_field(events.Muon, 0, "flavor")
+
+        loose_muons = (
+            (muons.pt > 30)
+            & (np.abs(muons.eta) < 2.4)
+            & (muons.looseId)
+            & (((muons.pfRelIso04_all < 0.25) & (muons.pt < 55)) | (muons.pt >= 55))
+        )
+
+        tight_muons = (
+            (muons.pt > 30)
+            & (np.abs(muons.eta) < 2.4)
+            & muons.mediumId
+            & (((muons.pfRelIso04_all < 0.20) & (muons.pt < 55)) | (muons.pt >= 55) & (muons.miniPFRelIso_all < 0.2))
+            # additional cuts
+            & (np.abs(muons.dz) < 0.1)
+            & (np.abs(muons.dxy) < 0.02)
+        )
+
+        n_loose_muons = ak.sum(loose_muons, axis=1)
+        good_muons = tight_muons
+
         n_good_muons = ak.sum(good_muons, axis=1)
 
-        # DEFINE ELECTRONS
-        loose_electrons = (
-            (((events.Electron.pt > 38) & (events.Electron.pfRelIso03_all < 0.25)) | (events.Electron.pt > 120))
-            & (np.abs(events.Electron.eta) < 2.4)
-            & ((np.abs(events.Electron.eta) < 1.44) | (np.abs(events.Electron.eta) > 1.57))
-            & (events.Electron.cutBased >= events.Electron.LOOSE)
-        )
-        n_loose_electrons = ak.sum(loose_electrons, axis=1)
+        # OBJECT: electrons
+        electrons = ak.with_field(events.Electron, 1, "flavor")
 
-        good_electrons = (
-            (events.Electron.pt > 38)
-            & (np.abs(events.Electron.eta) < 2.4)
-            & ((np.abs(events.Electron.eta) < 1.44) | (np.abs(events.Electron.eta) > 1.57))
-            & (np.abs(events.Electron.dz) < 0.1)
-            & (np.abs(events.Electron.dxy) < 0.05)
-            & (events.Electron.sip3d <= 4.0)
-            & (events.Electron.mvaFall17V2noIso_WP90)
+        loose_electrons = (
+            (electrons.pt > 38)
+            & (np.abs(electrons.eta) < 2.5)
+            & ((np.abs(electrons.eta) < 1.44) | (np.abs(electrons.eta) > 1.57))
+            & (electrons.mvaFall17V2noIso_WPL)
+            & (((electrons.pfRelIso03_all < 0.25) & (electrons.pt < 120)) | (electrons.pt >= 120))
         )
+
+        tight_electrons = (
+            (electrons.pt > 38)
+            & (np.abs(electrons.eta) < 2.5)
+            & ((np.abs(electrons.eta) < 1.44) | (np.abs(electrons.eta) > 1.57))
+            & (electrons.mvaFall17V2noIso_WP90)
+            & (((electrons.pfRelIso03_all < 0.15) & (electrons.pt < 120)) | (electrons.pt >= 120))
+            # additional cuts
+            & (np.abs(electrons.dz) < 0.1)
+            & (np.abs(electrons.dxy) < 0.05)
+            & (electrons.sip3d <= 4.0)
+        )
+
+        n_loose_electrons = ak.sum(loose_electrons, axis=1)
+        good_electrons = tight_electrons
+
         n_good_electrons = ak.sum(good_electrons, axis=1)
 
-        # get candidate lepton
-        goodleptons = ak.concatenate(
-            [events.Muon[good_muons], events.Electron[good_electrons]], axis=1
-        )  # concat muons and electrons
+        # OBJECT: candidate lepton
+        goodleptons = ak.concatenate([muons[good_muons], electrons[good_electrons]], axis=1)  # concat muons and electrons
         goodleptons = goodleptons[ak.argsort(goodleptons.pt, ascending=False)]  # sort by pt
-        candidatelep = ak.firsts(goodleptons)  # pick highest pt
 
+        candidatelep = ak.firsts(goodleptons)  # pick highest pt
         candidatelep_p4 = build_p4(candidatelep)  # build p4 for candidate lepton
 
-        # DEFINE JETS
-        goodjets = events.Jet[
-            (events.Jet.pt > 30) & (abs(events.Jet.eta) < 5.0) & events.Jet.isTight & (events.Jet.puId > 0)
-        ]
-        # reject EE noisy jets for 2017
-        if self._year == "2017":
-            goodjets = goodjets[(goodjets.pt > 50) | (abs(goodjets.eta) < 2.65) | (abs(goodjets.eta) > 3.139)]
-
-        # fatjets
+        # OBJECT: AK8 fatjets
         fatjets = events.FatJet
-
-        good_fatjets = (fatjets.pt > 200) & (abs(fatjets.eta) < 2.5) & fatjets.isTight
-        # n_fatjets = ak.sum(good_fatjets, axis=1)
-
-        good_fatjets = fatjets[good_fatjets]  # select good fatjets
+        fatjets["msdcorr"] = corrected_msoftdrop(fatjets)
+        # fatjets["msdcorr"] = fatjets.msoftdrop
+        fatjet_selector = (fatjets.pt > 200) & (abs(fatjets.eta) < 2.5) & fatjets.isTight
+        good_fatjets = fatjets[fatjet_selector]
         good_fatjets = good_fatjets[ak.argsort(good_fatjets.pt, ascending=False)]  # sort them by pt
 
-        # for lep channel: first clean jets and leptons by removing overlap, then pick candidate_fj closest to the lepton
-        lep_in_fj_overlap_bool = good_fatjets.delta_r(candidatelep_p4) > 0.1
-        good_fatjets = good_fatjets[lep_in_fj_overlap_bool]
+        good_fatjets, jec_shifted_fatjetvars = get_jec_jets(
+            events, good_fatjets, self._year, not self.isMC, self.jecs, fatjets=True
+        )
+
+        # OBJECT: candidate fatjet
         fj_idx_lep = ak.argmin(good_fatjets.delta_r(candidatelep_p4), axis=1, keepdims=True)
         candidatefj = ak.firsts(good_fatjets[fj_idx_lep])
 
-        """ Baseline weight """
+        met = events.MET
+
+        NumFatjets = ak.num(good_fatjets)
+
+        # delta R between AK8 jet and lepton
+        lep_fj_dr = candidatefj.delta_r(candidatelep_p4)
+
+        # delta phi MET and higgs candidate
+        met_fj_dphi = candidatefj.delta_phi(met)
+
+        ######################
+        # Baseline weight
+        ######################
+
         self.weights.add("genweight", events.genWeight)
         self.weights.add(
             "L1Prefiring",
@@ -205,40 +229,43 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         add_pileup_weight(self.weights, self._year, "", nPU=ak.to_numpy(events.Pileup.nPU))
         add_VJets_kFactors(self.weights, events.GenPart, dataset, events)
 
-        # """ Baseline selection """
-        # # define selections for different channels
+        ######################
+        # Baseline selection
+        ######################
+
         for channel in self._channels:
             selection = PackedSelection()
             if channel == "mu":
                 add_lepton_weight(self.weights, candidatelep, self._year, "muon")
                 selection.add(
-                    "onemuon",
-                    (
-                        (n_good_muons == 1)
-                        & (n_good_electrons == 0)
-                        & (n_loose_electrons == 0)
-                        & ~ak.any(loose_muons & ~good_muons, 1)
-                    ),
+                    "OneLep",
+                    ((n_good_muons == 1) & (n_loose_electrons == 0)),
                 )
-                selection.add("muonkin", (candidatelep.pt > 30))
+                selection.add("NoTaus", (n_loose_taus_mu == 0))
+
             elif channel == "ele":
                 add_lepton_weight(self.weights, candidatelep, self._year, "electron")
                 selection.add(
-                    "oneelectron",
-                    (
-                        (n_good_muons == 0)
-                        & (n_loose_muons == 0)
-                        & (n_good_electrons == 1)
-                        & ~ak.any(loose_electrons & ~good_electrons, 1)
-                    ),
+                    "OneLep",
+                    ((n_loose_muons == 0) & (n_good_electrons == 1)),
                 )
-                selection.add("electronkin", (candidatelep.pt > 40))
+                selection.add("NoTaus", (n_loose_taus_ele == 0))
+
+            selection.add("METFilters", (metfilters))
+            selection.add("AtLeastOneFatJet", (NumFatjets >= 1))
+            selection.add("CandidateJetpT", (candidatefj.pt > 250))
+            selection.add("LepInJet", (lep_fj_dr < 0.8))
+            selection.add("JetLepOverlap", (lep_fj_dr > 0.03))
+            selection.add("dPhiJetMET", (np.abs(met_fj_dphi) < 1.57))
+            selection.add("MET", (met.pt < 20))
 
             """Define other variables to save"""
             out[channel]["vars"] = {}
             out[channel]["vars"]["fj_pt"] = pad_val_nevents(candidatefj.pt)
+            out[channel]["vars"]["fj_eta"] = pad_val_nevents(candidatefj.eta)
             out[channel]["vars"]["fj_msoftdrop"] = pad_val_nevents(candidatefj.msoftdrop)
             out[channel]["vars"]["lep_pt"] = pad_val_nevents(candidatelep.pt)
+            out[channel]["vars"]["lep_eta"] = pad_val_nevents(candidatelep.eta)
 
             if "HToWW" in dataset:
                 genVars, _ = match_H(events.GenPart, candidatefj)

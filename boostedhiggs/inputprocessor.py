@@ -17,7 +17,7 @@ import pyarrow.parquet as pq
 import uproot
 from coffea.analysis_tools import PackedSelection
 from coffea.nanoevents.methods import candidate
-from coffea.processor import ProcessorABC, dict_accumulator
+from coffea.processor import ProcessorABC
 
 from .corrections import btagWPs
 from .run_tagger_inference import runInferenceTriton
