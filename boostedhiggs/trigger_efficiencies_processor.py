@@ -182,7 +182,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         n_good_electrons = ak.sum(good_electrons, axis=1)
 
         # OBJECT: candidate lepton
-        goodleptons = ak.concatenate([muons[good_muons], electrons[good_electrons]], axis=1)  # concat muons and electrons
+        goodleptons = electrons[good_electrons]
         goodleptons = goodleptons[ak.argsort(goodleptons.pt, ascending=False)]  # sort by pt
 
         candidatelep = ak.firsts(goodleptons)  # pick highest pt
