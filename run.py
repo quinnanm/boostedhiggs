@@ -141,7 +141,7 @@ def main(args):
         p = ZllProcessor(year=year, yearmod=yearmod, output_location=f"./outfiles/{job_name}")
 
     else:
-        from boostedhiggs.trigger_efficiencies_processor import (
+        from boostedhiggs.documentation.trigger_efficiencies_processor_ele_MVA_test import (
             TriggerEfficienciesProcessor,
         )
 

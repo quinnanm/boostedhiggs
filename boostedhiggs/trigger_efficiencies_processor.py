@@ -168,7 +168,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             (electrons.pt > 38)
             & (np.abs(electrons.eta) < 2.5)
             & ((np.abs(electrons.eta) < 1.44) | (np.abs(electrons.eta) > 1.57))
-            # & (electrons.mvaFall17V2noIso_WP90)
+            & (electrons.mvaFall17V2noIso_WP90)
             & (((electrons.pfRelIso03_all < 0.15) & (electrons.pt < 120)) | (electrons.pt >= 120))
             # additional cuts
             & (np.abs(electrons.dz) < 0.1)
@@ -182,7 +182,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         n_good_electrons = ak.sum(good_electrons, axis=1)
 
         # OBJECT: candidate lepton
-        goodleptons = electrons[good_electrons]
+        goodleptons = ak.concatenate([muons[good_muons], electrons[good_electrons]], axis=1)  # concat muons and electrons
         goodleptons = goodleptons[ak.argsort(goodleptons.pt, ascending=False)]  # sort by pt
 
         candidatelep = ak.firsts(goodleptons)  # pick highest pt
@@ -265,10 +265,6 @@ class TriggerEfficienciesProcessor(ProcessorABC):
 
             out[channel]["vars"]["lep_pt"] = pad_val_nevents(candidatelep.pt)
             out[channel]["vars"]["lep_eta"] = pad_val_nevents(candidatelep.eta)
-
-            if channel == "ele":
-                print(channel)
-                out[channel]["vars"]["ele_MVA"] = pad_val_nevents(candidatelep.mvaFall17V2noIso_WP90)
 
             if "HToWW" in dataset:
                 genVars, _ = match_H(events.GenPart, candidatefj)
