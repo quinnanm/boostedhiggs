@@ -1083,8 +1083,10 @@ def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
 
 
 def add_TopPtReweighting(topPt):
+
     toppt_weight1 = np.exp(0.0615 - 0.0005 * np.clip(topPt[:, 0], 0.0, 500.0))
     toppt_weight2 = np.exp(0.0615 - 0.0005 * np.clip(topPt[:, 1], 0.0, 500.0))
+
     return np.sqrt(toppt_weight1 * toppt_weight2)
 
     # weights.add(

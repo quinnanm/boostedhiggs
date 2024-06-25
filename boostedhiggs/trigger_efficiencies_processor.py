@@ -203,7 +203,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             events.L1PreFiringWeight.Dn,
         )
         add_pileup_weight(self.weights, self._year, "", nPU=ak.to_numpy(events.Pileup.nPU))
-        add_VJets_kFactors(self.weights, events.GenPart, dataset)
+        add_VJets_kFactors(self.weights, events.GenPart, dataset, events)
 
         # """ Baseline selection """
         # # define selections for different channels
