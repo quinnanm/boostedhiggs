@@ -267,6 +267,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             out[channel]["vars"]["lep_eta"] = pad_val_nevents(candidatelep.eta)
 
             if channel == "ele":
+                print(channel)
                 out[channel]["vars"]["ele_MVA"] = pad_val_nevents(candidatelep.mvaFall17V2noIso_WP90)
 
             if "HToWW" in dataset:
