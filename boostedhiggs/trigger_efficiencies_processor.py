@@ -144,8 +144,8 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             & muons.mediumId
             & (((muons.pfRelIso04_all < 0.20) & (muons.pt < 55)) | (muons.pt >= 55) & (muons.miniPFRelIso_all < 0.2))
             # additional cuts
-            # & (np.abs(muons.dz) < 0.1)
-            # & (np.abs(muons.dxy) < 0.02)
+            & (np.abs(muons.dz) < 0.1)
+            & (np.abs(muons.dxy) < 0.02)
         )
 
         n_loose_muons = ak.sum(loose_muons, axis=1)
@@ -265,10 +265,6 @@ class TriggerEfficienciesProcessor(ProcessorABC):
 
             out[channel]["vars"]["lep_pt"] = pad_val_nevents(candidatelep.pt)
             out[channel]["vars"]["lep_eta"] = pad_val_nevents(candidatelep.eta)
-
-            if channel == "mu":
-                out[channel]["vars"]["muon_dz"] = pad_val_nevents((np.abs(candidatelep.dz) < 0.1))
-                out[channel]["vars"]["muon_dxy"] = pad_val_nevents((np.abs(candidatelep.dxy) < 0.02))
 
             if "HToWW" in dataset:
                 genVars, _ = match_H(events.GenPart, candidatefj)
