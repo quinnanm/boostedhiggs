@@ -263,6 +263,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             out[channel]["vars"]["fj_msoftdrop"] = pad_val_nevents(candidatefj.msoftdrop)
             out[channel]["vars"]["lep_pt"] = pad_val_nevents(candidatelep.pt)
             out[channel]["vars"]["lep_eta"] = pad_val_nevents(candidatelep.eta)
+            out[channel]["vars"]["met_pt"] = pad_val_nevents(met.pt)
 
             if "HToWW" in dataset:
                 genVars, _ = match_H(events.GenPart, candidatefj)
