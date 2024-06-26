@@ -432,9 +432,9 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                 for region, region_sel in regions_sel.items():  # e.g. pass, fail, top control region, etc.
                     df = data.copy()
 
-                    logging.info(f"Applying {region} selection on {len(data)} events")
+                    logging.info(f"Applying {region} selection on {len(df)} events")
                     df = df.query(region_sel)
-                    logging.info(f"Will fill the histograms with the remaining {len(data)} events")
+                    logging.info(f"Will fill the histograms with the remaining {len(df)} events")
 
                     # ------------------- Nominal -------------------
                     if is_data:
@@ -716,9 +716,9 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
             for region in hists.axes["Region"]:
                 df = data.copy()
 
-                logging.info(f"Applying {region} selection on {len(data)} events")
+                logging.info(f"Applying {region} selection on {len(df)} events")
                 df = df.query(regions_sel[region])
-                logging.info(f"Will fill the histograms with the remaining {len(data)} events")
+                logging.info(f"Will fill the histograms with the remaining {len(df)} events")
 
                 for syst in hists.axes["Systematic"]:
                     hists.fill(
