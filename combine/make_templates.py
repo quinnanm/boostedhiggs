@@ -467,10 +467,13 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
 
                     # top pt reweighting systematic
                     if sample_to_use == "TTbar":
-                        shape_up = (nominal / df["top_reweighting"]) * (
-                            2 * df["top_reweighting"]
-                        )  # "up" is twice the correction
-                        shape_down = nominal / df["top_reweighting"]  # "down" is no correction
+                        # first remove the reweighting effect
+                        nominal_noreweighting = nominal / df["top_reweighting"]
+
+                        # shape_up = nominal_noreweighting * (2 * df["top_reweighting"])  # "up" is twice the correction
+                        shape_up = nominal_noreweighting * (df["top_reweighting"] ** 2)  # "up" is twice the correction
+
+                        shape_down = nominal_noreweighting  # "down" is no correction
                     else:
                         shape_up = nominal
                         shape_down = nominal
