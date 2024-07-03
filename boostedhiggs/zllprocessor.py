@@ -191,7 +191,7 @@ class ZllProcessor(processor.ProcessorABC):
             & (np.abs(electrons.eta) < 2.5)
             & ((np.abs(electrons.eta) < 1.44) | (np.abs(electrons.eta) > 1.57))
             & (electrons.mvaFall17V2noIso_WPL)
-            & (((electrons.pfRelIso03_all < 0.25) & (electrons.pt < 120)) | (electrons.pt >= 120))
+            # & (((electrons.pfRelIso03_all < 0.25) & (electrons.pt < 120)) | (electrons.pt >= 120))
         )
 
         tight_electrons = (
@@ -199,7 +199,7 @@ class ZllProcessor(processor.ProcessorABC):
             & (np.abs(electrons.eta) < 2.5)
             & ((np.abs(electrons.eta) < 1.44) | (np.abs(electrons.eta) > 1.57))
             & (electrons.mvaFall17V2noIso_WP90)
-            & (((electrons.pfRelIso03_all < 0.15) & (electrons.pt < 120)) | (electrons.pt >= 120))
+            # & (((electrons.pfRelIso03_all < 0.15) & (electrons.pt < 120)) | (electrons.pt >= 120))
             # additional cuts
             & (np.abs(electrons.dz) < 0.1)
             & (np.abs(electrons.dxy) < 0.05)
@@ -280,6 +280,9 @@ class ZllProcessor(processor.ProcessorABC):
             "tight_lep2_pt": tight_lep2.pt,
             "tight_lep2_eta": tight_lep2.eta,
             "mll_tight": mll_tight,
+            # iso cuts
+            "tight_lep1_iso": tight_lep1.electrons.pfRelIso03_all,
+            "tight_lep2_iso": tight_lep2.electrons.pfRelIso03_all,
             # loose
             "loose_lep1_pt": loose_lep1.pt,
             "loose_lep1_eta": loose_lep1.eta,
