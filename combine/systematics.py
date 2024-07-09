@@ -244,10 +244,10 @@ def systs_from_parquets(years):
             "weight_ele_id",
             sigs + bkgs,
         ),
-        rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_isolation", "lnN"): (
-            "weight_ele_isolation",
-            sigs + bkgs,
-        ),
+        # rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_isolation", "lnN"): (
+        #     "weight_ele_isolation",
+        #     sigs + bkgs,
+        # ),
         rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_reconstruction", "lnN"): (
             "weight_ele_reco",
             sigs + bkgs,
