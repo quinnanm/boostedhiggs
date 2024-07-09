@@ -49,10 +49,6 @@ def systs_not_from_parquets(years: List[str], lep_channels: List[str]):
     # COMMON SYSTEMATICS
     systs_dict["all_samples"], systs_dict_values["all_samples"] = {}, {}
 
-    # branching ratio systematics
-    systs_dict["all_samples"]["BR_hww"] = rl.NuisanceParameter("BR_hww", "lnN")
-    systs_dict_values["all_samples"]["BR_hww"] = (1.0153, 0.9848)
-
     # lumi systematics
     if "2016" in years:
         systs_dict["all_samples"]["lumi_13TeV_2016"] = rl.NuisanceParameter("lumi_13TeV_2016", "lnN")
@@ -66,7 +62,7 @@ def systs_not_from_parquets(years: List[str], lep_channels: List[str]):
         systs_dict_values["all_samples"]["lumi_13TeV_2018"] = (1.015 ** (LUMI["2018"] / full_lumi), None)
 
     if len(years) == 4:
-        systs_dict["all_samples"]["lumi_13TeV_correlated"] = rl.NuisanceParameter("lumi_13TeV_corelated", "lnN")
+        systs_dict["all_samples"]["lumi_13TeV_correlated"] = rl.NuisanceParameter("lumi_13TeV_correlated", "lnN")
         systs_dict_values["all_samples"]["lumi_13TeV_correlated"] = (
             (
                 (1.006 ** ((LUMI["2016"] + LUMI["2016APV"]) / full_lumi))
@@ -82,17 +78,24 @@ def systs_not_from_parquets(years: List[str], lep_channels: List[str]):
             None,
         )
 
+    # mini-isolation
+    systs_dict["all_samples"]["miniisolation_SF_unc"] = rl.NuisanceParameter(
+        f"{CMS_PARAMS_LABEL}_miniisolation_SF_unc", "lnN"
+    )
+    systs_dict_values["all_samples"]["miniisolation_SF_unc"] = (1.02, 0.98)
+
     # PER SAMPLE SYSTEMATICS
     for sample in samples:
         systs_dict[sample], systs_dict_values[sample] = {}, {}
 
-    # mini-isolation
-    systs_dict["all_samples"]["miniisolation_SF_unc"] = rl.NuisanceParameter("miniisolation_SF_unc", "lnN")
-    systs_dict_values["all_samples"]["miniisolation_SF_unc"] = (1.02, 0.98)
-
-    # tagger eff
-    n = rl.NuisanceParameter("taggereff", "lnN")
+    n = rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_taggereff", "lnN")
+    m = rl.NuisanceParameter("BR_hww", "lnN")
     for sample in sigs:
+        # branching ratio systematics
+        systs_dict[sample]["BR_hww"] = m
+        systs_dict_values[sample]["BR_hww"] = (1.0153, 0.9848)
+
+        # tagger eff
         systs_dict[sample]["taggereff"] = n
         systs_dict_values[sample]["taggereff"] = (1.27, None)
 

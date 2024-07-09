@@ -105,7 +105,7 @@ def main(args):
 if __name__ == "__main__":
     """
     e.g.
-    python check_jobs.py --year 2017 --username fmokhtar --tag Sep12_QCD --config samples_inclusive.yaml --key mc
+    python check_jobs.py --year 2017 --username fmokhtar --config samples_inclusive.yaml --tag Sep12_QCD --key mc
     """
 
     parser = argparse.ArgumentParser()
