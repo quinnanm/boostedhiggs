@@ -439,7 +439,7 @@ lepton_corrections = {
             "2017": "NUM_LooseRelIso_DEN_MediumPromptID",
             "2018": "NUM_LooseRelIso_DEN_MediumPromptID",
         },
-        "electron": {
+        "electron": {  # TODO: remove because these are ID SFs
             "2016APV": "wp90iso",
             "2016": "wp90iso",
             "2017": "wp90iso",

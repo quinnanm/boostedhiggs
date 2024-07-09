@@ -14,16 +14,14 @@ samples:
     - Data
 
 regions_sel:
-    "Pre-selection": (THWW>0.50) & (rec_higgs_pt>250) & (fj_mass>40)
 
-    "VBF": (THWW>0.905) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) ) & (rec_higgs_pt>250) & (fj_mass>40)
-    "ggFpt250to300": (THWW>0.93) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>250) & (rec_higgs_pt<300) & (fj_mass>40)
-    "ggFpt300to450": (THWW>0.93) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>300) & (rec_higgs_pt<450) & (fj_mass>40)
-    "ggFpt450to650": (THWW>0.93) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>450) & (rec_higgs_pt<650) & (fj_mass>40)
-    "ggFpt650toInf": (THWW>0.93) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>650) & (fj_mass>40)
+    "VBF": (THWW>0.905) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) ) & (fj_mass>40)
+    "ggFpt250to300": (THWW>0.93) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>(250+25)) & (rec_higgs_pt<(300+25)) & (fj_mass>40)
+    "ggFpt300to450": (THWW>0.93) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>(300+25)) & (rec_higgs_pt<(450+25)) & (fj_mass>40)
+    "ggFpt450toInf": (THWW>0.93) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>(450+25)) & (fj_mass>40)
 
-    "WJetsCR": (THWW>0.50) & (THWW<0.905) & (n_bjets_T==0) & (rec_higgs_pt>250) & (fj_mass>40)
-    "TopCR": (THWW>0.50) & (n_bjets_T>0) & (rec_higgs_pt>250) & (fj_mass>40)
+    "WJetsCR": (THWW>0.50) & (THWW<0.905) & (n_bjets_T==0) & (fj_mass>40)
+    "TopCR": (THWW>0.50) & (n_bjets_T>0) & (fj_mass>40)
 
 samples_dir:
     "2018": ../eos/June25_hww_2018

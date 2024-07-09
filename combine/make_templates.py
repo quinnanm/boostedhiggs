@@ -139,11 +139,11 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
             {"ele": "weight_ele_Z_d3kappa_EW", "mu": "weight_mu_Z_d3kappa_EW"},
         ),
         # systematics for electron channel
-        "weight_ele_isolation": (
-            years,
-            sigs + bkgs,
-            {"ele": "weight_ele_isolation_electron"},
-        ),
+        # "weight_ele_isolation": (
+        #     years,
+        #     sigs + bkgs,
+        #     {"ele": "weight_ele_isolation_electron"},
+        # ),
         "weight_ele_id": (
             years,
             sigs + bkgs,
@@ -470,9 +470,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                         # first remove the reweighting effect
                         nominal_noreweighting = nominal / df["top_reweighting"]
 
-                        # shape_up = nominal_noreweighting * (2 * df["top_reweighting"])  # "up" is twice the correction
                         shape_up = nominal_noreweighting * (df["top_reweighting"] ** 2)  # "up" is twice the correction
-
                         shape_down = nominal_noreweighting  # "down" is no correction
                     else:
                         shape_up = nominal
