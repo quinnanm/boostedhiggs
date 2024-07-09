@@ -109,7 +109,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         ######################
 
         trigger = np.zeros(nevents, dtype="bool")
-        for t in self._HLTs["mu"]:
+        for t in self._triggers["mu"]:
             if t in events.HLT.fields:
                 trigger = trigger | events.HLT[t]
 
