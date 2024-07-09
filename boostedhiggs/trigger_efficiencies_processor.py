@@ -56,7 +56,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             "mu": ["Mu50", "IsoMu27", "OldMu100", "TkMu100"],
         }
 
-        self._channels = ["ele", "mu"]
+        self._channels = ["ele"]
 
         # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFiltersRun2
         with importlib.resources.path("boostedhiggs.data", "metfilters.json") as path:
