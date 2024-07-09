@@ -39,7 +39,7 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
     model = rl.Model("testModel")
 
     # define the signal and control regions
-    SIG_regions = ["VBF", "ggFpt250to300", "ggFpt300to450", "ggFpt450toInf"]
+    SIG_regions = ["VBF", "ggFpt250to300", "ggFpt300to450", "ggFpt450to650", "ggFpt650toInf"]
     CONTROL_regions = ["TopCR", "WJetsCR"]
 
     # SIG_regions = list(hists_templates.axes["Region"])
