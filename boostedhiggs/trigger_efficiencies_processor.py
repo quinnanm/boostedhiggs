@@ -104,6 +104,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
                 )
             out[channel]["triggers"] = {**out[channel]["triggers"], **HLT_triggers}
 
+        print("LOL", out[channel]["triggers"])
         ######################
         # Trigger
         ######################
