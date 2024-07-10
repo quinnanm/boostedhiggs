@@ -104,7 +104,6 @@ class TriggerEfficienciesProcessor(ProcessorABC):
                 )
             out[channel]["triggers"] = {**out[channel]["triggers"], **HLT_triggers}
 
-        print("LOL", out[channel]["triggers"])
         ######################
         # Trigger
         ######################
@@ -287,14 +286,8 @@ class TriggerEfficienciesProcessor(ProcessorABC):
 
             # use column accumulators
             for key_ in out[channel].keys():
-
-                # out[channel][key_] = {
-                #     key: column_accumulator(value[selection.all(*selection.names)])
-                #     for (key, value) in out[channel][key_].items()
-                # }
-
                 for key, value in out[channel][key_].items():
-                    print(key)
+                    print("LOL", key, value)
                     out[channel][key_][key] = column_accumulator(value[selection.all(*selection.names)])
 
         return {self._year: {dataset: {"nevents": nevents, "skimmed_events": out}}}
