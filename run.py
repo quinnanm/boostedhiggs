@@ -205,7 +205,7 @@ def main(args):
         pkl.dump(out, filehandler)
         filehandler.close()
 
-        if args.processor != "trigger":
+        if (args.processor != "trigger") & (args.processor != "lumi"):
             # merge parquet
             for ch in channels:
                 data = pd.read_parquet("./outfiles/" + job_name + ch + "/parquet")
