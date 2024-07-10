@@ -81,6 +81,8 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         dataset = events.metadata["dataset"]
         nevents = len(events)
         self.isMC = hasattr(events, "genWeight")
+        sumgenweight = ak.sum(events.genWeight) if self.isMC else nevents
+
         self.weights = Weights(nevents, storeIndividual=True)
         self.weights_per_ch = {}
 
@@ -273,9 +275,6 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             out[channel]["vars"]["lep_pt"] = pad_val_nevents(candidatelep.pt)
             out[channel]["vars"]["lep_eta"] = pad_val_nevents(candidatelep.eta)
 
-            print("LOL")
-            print((out[channel]["vars"]["fj_pt"] != -1).sum())
-
             if "HToWW" in dataset:
                 genVars, _ = match_H(events.GenPart, candidatefj)
                 out[channel]["vars"]["fj_genH_pt"] = pad_val_nevents(genVars["fj_genH_pt"]).data
@@ -292,15 +291,17 @@ class TriggerEfficienciesProcessor(ProcessorABC):
                 for key, value in out[channel][key_].items():
                     out[channel][key_][key] = column_accumulator(value[selection.all(*selection.names)])
 
-        return {self._year: {dataset: {"nevents": nevents, "skimmed_events": out}}}
+        return {self._year: {dataset: {"nevents": nevents, "sumgenweight": sumgenweight, "skimmed_events": out}}}
 
+    # def postprocess(self, accumulator):
+    #     for year, datasets in accumulator.items():
+    #         for dataset, output in datasets.items():
+    #             for channel in output["skimmed_events"].keys():
+    #                 for key_ in output["skimmed_events"][channel].keys():
+    #                     output["skimmed_events"][channel][key_] = {
+    #                         key: value.value for (key, value) in output["skimmed_events"][channel][key_].items()
+    #                     }
+
+    #     return accumulator
     def postprocess(self, accumulator):
-        for year, datasets in accumulator.items():
-            for dataset, output in datasets.items():
-                for channel in output["skimmed_events"].keys():
-                    for key_ in output["skimmed_events"][channel].keys():
-                        output["skimmed_events"][channel][key_] = {
-                            key: value.value for (key, value) in output["skimmed_events"][channel][key_].items()
-                        }
-
         return accumulator
