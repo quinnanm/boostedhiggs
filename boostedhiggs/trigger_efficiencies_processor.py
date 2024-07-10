@@ -274,7 +274,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             out[channel]["vars"]["lep_eta"] = pad_val_nevents(candidatelep.eta)
 
             print("LOL")
-            print(out[channel]["vars"]["fj_pt"])
+            print((out[channel]["vars"]["fj_pt"] != -1).sum())
 
             if "HToWW" in dataset:
                 genVars, _ = match_H(events.GenPart, candidatefj)
