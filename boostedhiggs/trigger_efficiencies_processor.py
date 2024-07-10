@@ -130,24 +130,15 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         ######################
 
         # OBJECT: taus
-        # loose_taus_mu = (events.Tau.pt > 20) & (abs(events.Tau.eta) < 2.3) & (events.Tau.idAntiMu >= 1)  # loose antiMu ID
         loose_taus_ele = (
             (events.Tau.pt > 20)
             & (abs(events.Tau.eta) < 2.3)
             & (events.Tau.idAntiEleDeadECal >= 2)  # loose Anti-electron MVA discriminator V6 (2018) ?
         )
-        # n_loose_taus_mu = ak.sum(loose_taus_mu, axis=1)
         n_loose_taus_ele = ak.sum(loose_taus_ele, axis=1)
 
         # OBJECT: muons
         muons = ak.with_field(events.Muon, 0, "flavor")
-
-        # loose_muons = (
-        #     (muons.pt > 30)
-        #     & (np.abs(muons.eta) < 2.4)
-        #     & (muons.looseId)
-        #     & (((muons.pfRelIso04_all < 0.25) & (muons.pt < 55)) | (muons.pt >= 55))
-        # )
 
         tight_muons = (
             (muons.pt > 30)
@@ -158,22 +149,12 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             & (np.abs(muons.dz) < 0.1)
             & (np.abs(muons.dxy) < 0.02)
         )
-
-        # n_loose_muons = ak.sum(loose_muons, axis=1)
         good_muons = tight_muons
 
         n_good_muons = ak.sum(good_muons, axis=1)
 
         # OBJECT: electrons
         electrons = ak.with_field(events.Electron, 1, "flavor")
-
-        # loose_electrons = (
-        #     (electrons.pt > 38)
-        #     & (np.abs(electrons.eta) < 2.5)
-        #     & ((np.abs(electrons.eta) < 1.44) | (np.abs(electrons.eta) > 1.57))
-        #     & (electrons.mvaFall17V2noIso_WPL)
-        #     & (((electrons.pfRelIso03_all < 0.25) & (electrons.pt < 120)) | (electrons.pt >= 120))
-        # )
 
         tight_electrons = (
             (electrons.pt > 38)
@@ -186,8 +167,6 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             & (np.abs(electrons.dxy) < 0.05)
             & (electrons.sip3d <= 4.0)
         )
-
-        # n_loose_electrons = ak.sum(loose_electrons, axis=1)
         good_electrons = tight_electrons
 
         n_good_electrons = ak.sum(good_electrons, axis=1)
@@ -244,24 +223,24 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             add_lepton_weight(self.weights, candidatelep, self._year, "electron")
 
             selection = PackedSelection()
-            selection.add("MuonTrigger", trigger)
-            selection.add("METFilters", (metfilters))
-            selection.add(
-                "AtLeatOneTightElectron",
-                (n_good_electrons >= 1),
-            )
-            selection.add(
-                "AtLeatOneTightMuon",
-                (n_good_muons >= 1),
-            )
-            selection.add("NoTaus", (n_loose_taus_ele == 0))
-            selection.add("AtLeastOneFatJet", (NumFatjets >= 1))
-            selection.add("CandidateJetpT", (candidatefj.pt > 250))
-            selection.add("LepInJet", (lep_fj_dr < 0.8))
-            selection.add("JetLepOverlap", (lep_fj_dr > 0.03))
-            selection.add("dPhiJetMET", (np.abs(met_fj_dphi) < 1.57))
-            selection.add("MET", (met.pt > 20))
-            selection.add("CandidateJetSoftdropMass", (candidatefj.msdcorr > 40))
+            # selection.add("MuonTrigger", trigger)
+            # selection.add("METFilters", (metfilters))
+            # selection.add(
+            #     "AtLeatOneTightElectron",
+            #     (n_good_electrons >= 1),
+            # )
+            # selection.add(
+            #     "AtLeatOneTightMuon",
+            #     (n_good_muons >= 1),
+            # )
+            # selection.add("NoTaus", (n_loose_taus_ele == 0))
+            # selection.add("AtLeastOneFatJet", (NumFatjets >= 1))
+            # selection.add("CandidateJetpT", (candidatefj.pt > 250))
+            # selection.add("LepInJet", (lep_fj_dr < 0.8))
+            # selection.add("JetLepOverlap", (lep_fj_dr > 0.03))
+            # selection.add("dPhiJetMET", (np.abs(met_fj_dphi) < 1.57))
+            selection.add("MET", (met.pt > 0))
+            # selection.add("CandidateJetSoftdropMass", (candidatefj.msdcorr > 40))
 
             ######################
             # variables to store
