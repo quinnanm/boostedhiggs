@@ -242,24 +242,24 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             add_lepton_weight(self.weights, candidatelep, self._year, "electron")
 
             selection = PackedSelection()
-            selection.add("MuonTrigger", trigger)
-            selection.add("METFilters", (metfilters))
-            selection.add(
-                "AtLeatOneTightElectron",
-                (n_good_electrons >= 1),
-            )
-            selection.add(
-                "AtLeatOneTightMuon",
-                (n_good_muons >= 1),
-            )
-            selection.add("NoTaus", (n_loose_taus_ele == 0))
-            selection.add("AtLeastOneFatJet", (NumFatjets >= 1))
-            selection.add("CandidateJetpT", (candidatefj.pt > 250))
-            selection.add("LepInJet", (lep_fj_dr < 0.8))
-            selection.add("JetLepOverlap", (lep_fj_dr > 0.03))
-            selection.add("dPhiJetMET", (np.abs(met_fj_dphi) < 1.57))
+            # selection.add("MuonTrigger", trigger)
+            # selection.add("METFilters", (metfilters))
+            # selection.add(
+            #     "AtLeatOneTightElectron",
+            #     (n_good_electrons >= 1),
+            # )
+            # selection.add(
+            #     "AtLeatOneTightMuon",
+            #     (n_good_muons >= 1),
+            # )
+            # selection.add("NoTaus", (n_loose_taus_ele == 0))
+            # selection.add("AtLeastOneFatJet", (NumFatjets >= 1))
+            # selection.add("CandidateJetpT", (candidatefj.pt > 250))
+            # selection.add("LepInJet", (lep_fj_dr < 0.8))
+            # selection.add("JetLepOverlap", (lep_fj_dr > 0.03))
+            # selection.add("dPhiJetMET", (np.abs(met_fj_dphi) < 1.57))
             selection.add("MET", (met.pt > 20))
-            selection.add("CandidateJetSoftdropMass", (candidatefj.msdcorr > 40))
+            # selection.add("CandidateJetSoftdropMass", (candidatefj.msdcorr > 40))
 
             ######################
             # variables to store
@@ -287,7 +287,6 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             # use column accumulators
             for key_ in out[channel].keys():
                 for key, value in out[channel][key_].items():
-                    print("LOL", key, value)
                     out[channel][key_][key] = column_accumulator(value[selection.all(*selection.names)])
 
         return {self._year: {dataset: {"nevents": nevents, "skimmed_events": out}}}
