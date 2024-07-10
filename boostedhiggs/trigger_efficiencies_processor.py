@@ -242,7 +242,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             add_lepton_weight(self.weights, candidatelep, self._year, "electron")
 
             selection = PackedSelection()
-            # selection.add("MuonTrigger", trigger)
+            selection.add("MuonTrigger", trigger)
             selection.add("METFilters", (metfilters))
             selection.add(
                 "AtLeatOneTightElectron",
@@ -273,7 +273,9 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             out[channel]["vars"]["lep_pt"] = pad_val_nevents(candidatelep.pt)
             out[channel]["vars"]["lep_eta"] = pad_val_nevents(candidatelep.eta)
 
+            print("LOL")
             print(out[channel]["vars"]["fj_pt"])
+
             if "HToWW" in dataset:
                 genVars, _ = match_H(events.GenPart, candidatefj)
                 out[channel]["vars"]["fj_genH_pt"] = pad_val_nevents(genVars["fj_genH_pt"]).data
