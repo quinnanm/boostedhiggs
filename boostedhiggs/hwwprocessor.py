@@ -25,13 +25,13 @@ from boostedhiggs.corrections import (
     add_TopPtReweighting,
     add_VJets_kFactors,
     btagWPs,
-    corrected_msoftdrop,
     get_btag_weights,
     get_jec_jets,
     get_jmsr,
     getJECVariables,
     getJMSRVariables,
     met_factory,
+    get_JetVetoMap,
 )
 from boostedhiggs.utils import VScore, get_pid_mask, match_H, match_Top, match_V, sigs
 
@@ -309,8 +309,7 @@ class HwwProcessor(processor.ProcessorABC):
 
         # OBJECT: AK8 fatjets
         fatjets = events.FatJet
-        fatjets["msdcorr"] = corrected_msoftdrop(fatjets)
-        # fatjets["msdcorr"] = fatjets.msoftdrop
+        fatjets["msdcorr"] = fatjets.msoftdrop
         fatjet_selector = (fatjets.pt > 200) & (abs(fatjets.eta) < 2.5) & fatjets.isTight
         good_fatjets = fatjets[fatjet_selector]
         good_fatjets = good_fatjets[ak.argsort(good_fatjets.pt, ascending=False)]  # sort them by pt
@@ -339,6 +338,15 @@ class HwwProcessor(processor.ProcessorABC):
         met = met_factory.build(events.MET, jets, {}) if self.isMC else events.MET
 
         ht = ak.sum(jets.pt, axis=1)
+
+        loose_jet_selector = (
+            (jets.pt > 15)
+            & jets.isTight
+            & ((jets.pt >= 50) | ((jets.pt < 50) & (jets.puId & 2) == 2))
+            & (jets.neEmEF < 0.9)  # neutral energy fraction
+        )
+        vetomapjets = jets[loose_jet_selector]
+        _, cut_jetveto = get_JetVetoMap(vetomapjets, self._year)
 
         jet_selector = (
             (jets.pt > 30)
@@ -436,6 +444,8 @@ class HwwProcessor(processor.ProcessorABC):
             "VH_fj_pt": VH_fj.pt,
             "VH_fj_eta": VH_fj.eta,
             "VH_fj_VScore": VScore(VH_fj),
+            # add jetveto as optional selection
+            "jetvetomap": cut_jetveto,
         }
 
         fatjetvars = {
