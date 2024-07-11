@@ -24,8 +24,6 @@ def main():
     with open(f"{dir_}/lumi_set.pkl", "rb") as f:
         lumi_set = pickle.load(f)
 
-    print("------------------------------------")
-
     lumis = {}
 
     # combine the sets from the different datasets
@@ -41,6 +39,8 @@ def main():
         else:
             lumis[ch] = lumis[ch] | lumi_set[dataset]
 
+    print("------------------------------------")
+
     lumi_list = {}
     for ch in ["ele", "mu"]:
         # convert the set to a numpy 2d-array
@@ -53,7 +53,6 @@ def main():
         # https://github.com/CoffeaTeam/coffea/blob/52e102fce21a3e19f8c079adc649dfdd27c92075/coffea/lumi_tools/lumi_tools.py#L20
         lumidata = LumiData(f"lumi{year}.csv")
         print(f"---> Lumi for {ch} channel = {lumidata.get_lumi(lumi_list[ch])}")
-        print("------------------------------------")
 
 
 if __name__ == "__main__":
