@@ -39,7 +39,7 @@ def main(args):
         for i, pkl_file in enumerate(pkl_files):
             # you can load the output!
             with open(pkl_file, "rb") as f:
-                out = pickle.load(f)[dataset][args.year]["lumilist"]
+                out = pickle.load(f)[dataset][args.year.replace("APV", "")]["lumilist"]
 
             if i == 0:
                 out_all[dataset] = out
