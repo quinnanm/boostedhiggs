@@ -119,7 +119,7 @@ def main(args):
     elif args.processor == "lumi":
         from boostedhiggs.lumi_processor import LumiProcessor
 
-        p = LumiProcessor(year=args.year + yearmod, output_location=f"./outfiles/{job_name}")
+        p = LumiProcessor(year=args.year, output_location=f"./outfiles/{job_name}")
 
     elif args.processor == "input":
         # define processor
