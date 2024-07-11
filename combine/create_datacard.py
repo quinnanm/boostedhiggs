@@ -106,24 +106,15 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
             continue
         sample = rl.TemplateSample(ch.name + "_" + labels[sName], rl.Sample.BACKGROUND, templ)
 
-        # SYSTEMATICS NOT FROM PARQUETS
-        for syst_on_sample in ["Fake"]:  # apply common systs and per sample systs
-            for sys_name, sys_value in systs_dict[syst_on_sample].items():
-                if systs_dict_values[syst_on_sample][sys_name][1] is None:  # if up and down are the same
-                    sample.setParamEffect(sys_value, systs_dict_values[syst_on_sample][sys_name][0])
-                else:
-                    sample.setParamEffect(
-                        sys_value,
-                        systs_dict_values[syst_on_sample][sys_name][0],
-                        systs_dict_values[syst_on_sample][sys_name][1],
-                    )
-        ch.addSample(sample)
+        # # add Fake unc.
+        # sample.setParamEffect(rl.NuisanceParameter("Fake_rate_unc", "lnN"), 1.5)
+        # ch.addSample(sample)
 
         # add data
         data_obs = get_template(hists_templates, "Data", ChName)
         ch.setObservation(data_obs)
 
-        # if "CR" not in ChName:
+        # add mcstats
         ch.autoMCStats(
             channel_name=f"{CMS_PARAMS_LABEL}_{ChName}",
         )
