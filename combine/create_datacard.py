@@ -106,9 +106,9 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
             continue
         sample = rl.TemplateSample(ch.name + "_" + labels[sName], rl.Sample.BACKGROUND, templ)
 
-        # # add Fake unc.
-        # sample.setParamEffect(rl.NuisanceParameter("Fake_rate_unc", "lnN"), 1.5)
-        # ch.addSample(sample)
+        # add Fake unc.
+        sample.setParamEffect(rl.NuisanceParameter("Fake_rate_unc", "lnN"), 1.5)
+        ch.addSample(sample)
 
         # add data
         data_obs = get_template(hists_templates, "Data", ChName)
