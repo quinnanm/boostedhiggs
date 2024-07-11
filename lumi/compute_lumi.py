@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import argparse
+import pickle as pkl
 
 import numpy as np
 from coffea.lumi_tools import LumiData, LumiList
@@ -19,40 +20,58 @@ def main(args):
 
     dir_ = f"/eos/uscms/store/user/fmokhtar/boostedhiggs/lumi_{args.year}/"
 
-    import pickle
-
     with open(f"{dir_}/lumi_set.pkl", "rb") as f:
-        lumi_set = pickle.load(f)
+        lumi_set = pkl.load(f)
 
-    lumis = {}
+    # Lumi from individual datasets
+    for ch in ["ele", "mu"]:
+        print(f"---> Lumi for {ch} channel:")
+        for dataset in lumi_set.keys():
+            if ("Muon" in dataset) and (ch != "mu"):
+                continue
+            elif ("Muon" not in dataset) and (ch == "mu"):
+                continue
+
+            lumis = lumi_set[dataset]
+
+            # convert the set to a numpy 2d-array
+            lumis = np.array(list(lumis))
+
+            # make LumiList object
+            lumi_list = LumiList(runs=lumis[:, 0], lumis=lumis[:, 1])
+
+            # this csv was made using brilcalc and the GoldenJson2017... refer to
+            # https://github.com/CoffeaTeam/coffea/blob/52e102fce21a3e19f8c079adc649dfdd27c92075/coffea/lumi_tools/lumi_tools.py#L20
+            lumidata = LumiData(f"lumi{args.year}.csv")
+            print(f"{dataset}: {lumidata.get_lumi(lumi_list)}")
+
+        print("------------------------------------")
 
     # combine the sets from the different datasets
-    for i, dataset in enumerate(lumi_set.keys()):
-        if "Muon" in dataset:
-            ch = "mu"
-        else:
-            ch = "ele"
+    lumis = {}
+    for ch in ["ele", "mu"]:
+        for dataset in lumi_set.keys():
+            if ("Muon" in dataset) and (ch != "mu"):
+                continue
+            elif ("Muon" not in dataset) and (ch == "mu"):
+                continue
 
-        print(f"Retrieving lumi_set of {dataset}")
-        if ch not in lumis.keys():
-            lumis[ch] = lumi_set[dataset]
-        else:
-            lumis[ch] = lumis[ch] | lumi_set[dataset]
+            if ch not in lumis.keys():
+                lumis[ch] = lumi_set[dataset]
+            else:
+                lumis[ch] = lumis[ch] | lumi_set[dataset]
 
-    print("------------------------------------")
-
-    lumi_list = {}
     for ch in ["ele", "mu"]:
         # convert the set to a numpy 2d-array
         lumis[ch] = np.array(list(lumis[ch]))
 
         # make LumiList object
-        lumi_list[ch] = LumiList(runs=lumis[ch][:, 0], lumis=lumis[ch][:, 1])
+        lumi_list = LumiList(runs=lumis[ch][:, 0], lumis=lumis[ch][:, 1])
 
         # this csv was made using brilcalc and the GoldenJson2017... refer to
         # https://github.com/CoffeaTeam/coffea/blob/52e102fce21a3e19f8c079adc649dfdd27c92075/coffea/lumi_tools/lumi_tools.py#L20
         lumidata = LumiData(f"lumi{args.year}.csv")
-        print(f"---> Lumi for {ch} channel = {lumidata.get_lumi(lumi_list[ch])}")
+        print(f"---> Total lumi for {ch} channel = {lumidata.get_lumi(lumi_list)}")
 
 
 if __name__ == "__main__":
