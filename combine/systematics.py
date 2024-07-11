@@ -155,8 +155,8 @@ def systs_not_from_parquets(years: List[str], lep_channels: List[str]):
 
     # Fake unc.
     n = rl.NuisanceParameter("Fake_rate_unc", "lnN")
-    systs_dict["Fake"]["Fake_rate_unc"] = n
-    systs_dict_values["Fake"]["Fake_rate_unc"] = (1.5, None)
+    systs_dict["fake"]["Fake_rate_unc"] = n
+    systs_dict_values["fake"]["Fake_rate_unc"] = (1.5, None)
 
     return systs_dict, systs_dict_values
 
