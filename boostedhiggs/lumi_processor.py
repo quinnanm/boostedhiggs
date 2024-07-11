@@ -26,14 +26,17 @@ class LumiProcessor(processor.ProcessorABC):
     def process(self, events: ak.Array):
         """Returns skimmed events which pass preselection cuts and with the branches listed in self._skimvars"""
         dataset = events.metadata["dataset"]
-        # isMC = hasattr(events, "genWeight")
-        # nevents = len(events)
 
-        # lumilist = coffea.lumi_tools.LumiList(events.run.to_numpy(), events.luminosityBlock.to_numpy())
-        lumilist = set(zip(events.run, events.luminosityBlock))
+        # TODO: save the run number + lumi number + event number
+        # Check that each combination of the 3 numbers is unique
+        lumilist = set(
+            zip(
+                events.run,
+                events.luminosityBlock,
+                events.event,
+            )
+        )
 
-        # TODO: if possible, get lumi value per file and accumulate
-        # return dictionary with cutflows
         return {dataset: {self._year: {"lumilist": lumilist}}}
 
     def postprocess(self, accumulator):
