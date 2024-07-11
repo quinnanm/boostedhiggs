@@ -1095,3 +1095,44 @@ def add_TopPtReweighting(topPt):
     #     np.ones_like(toppt_weight1),
     #     np.sqrt(toppt_weight1 * toppt_weight2),
     # )
+
+
+def get_JetVetoMap(jets, year: str):
+    """
+    Jet Veto Maps recommendation from JERC.
+
+    All JERC analysers and anybody doing precision measurements with jets should use the strictest veto maps.
+    Recommended for analyses strongly relying on events with large MET.
+
+    Recommendation link: https://cms-jerc.web.cern.ch/Recommendations/#run-3_2
+
+    Get event selection that rejects events with jets in the veto map.
+    """
+
+    # Jet veto maps are synced daily here
+    era_tags = {"2016APV": "2016preVFP_UL", "2016": "2016postVFP_UL", "2017": "2017_UL", "2018": "2018_UL"}
+    era_tag = era_tags[year]
+
+    fname = f"/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/JME/{era_tag}/jetvetomaps.json.gz"
+
+    # correctionlib doesn't support awkward arrays, so we have to flatten them out
+    j, nj = ak.flatten(jets), ak.num(jets)
+    j_phi = np.clip(np.array(j.phi), -3.1415, 3.1415)
+    j_eta = np.clip(np.array(j.eta), -4.7, 4.7)
+
+    # load the correction set
+    evaluator = correctionlib.CorrectionSet.from_file(fname)
+
+    # apply the correction and recreate the awkward array shape
+    hname = {"2016APV": "Summer19UL16_V1", "2016": "Summer19UL16_V1", "2017": "Summer19UL17_V1", "2018": "Summer19UL18_V1"}
+
+    weight = evaluator[hname[year]].evaluate("jetvetomap", j_eta, j_phi)
+    weight_ak = ak.unflatten(np.array(weight), counts=nj)
+
+    # any non-zero weight means the jet is vetoed
+    jetmask = weight_ak == 0
+
+    # events are selected only if they have no jets in the vetoed region
+    eventmask = ak.sum(weight_ak, axis=-1) == 0
+
+    return jetmask, eventmask

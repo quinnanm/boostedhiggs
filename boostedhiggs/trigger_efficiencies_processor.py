@@ -12,7 +12,6 @@ from boostedhiggs.corrections import (
     add_lepton_weight,
     add_pileup_weight,
     add_VJets_kFactors,
-    corrected_msoftdrop,
 )
 from boostedhiggs.utils import match_H
 
@@ -100,9 +99,9 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         for channel in self._channels:
             HLT_triggers = {}
             for t in self._triggers[channel]:
-                HLT_triggers["HLT_" + t] = np.any(
-                    np.array([events.HLT[trigger] for trigger in self._trigger_dict[t] if trigger in events.HLT.fields]),
-                    axis=0,
+                trigger_path = self._trigger_dict[t][0]
+                HLT_triggers["HLT_" + t] = (
+                    np.array(events.HLT[trigger_path]) if trigger_path in events.fields else np.zeros(nevents, dtype="bool")
                 )
             out[channel]["triggers"] = {**out[channel]["triggers"], **HLT_triggers}
 
@@ -180,8 +179,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
 
         # OBJECT: AK8 fatjets
         fatjets = events.FatJet
-        fatjets["msdcorr"] = corrected_msoftdrop(fatjets)
-        # fatjets["msdcorr"] = fatjets.msoftdrop
+        fatjets["msdcorr"] = fatjets.msoftdrop
         fatjet_selector = (fatjets.pt > 200) & (abs(fatjets.eta) < 2.5) & fatjets.isTight
         good_fatjets = fatjets[fatjet_selector]
         good_fatjets = good_fatjets[ak.argsort(good_fatjets.pt, ascending=False)]  # sort them by pt
@@ -226,12 +224,12 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             selection.add("MuonTrigger", trigger)
             selection.add("METFilters", (metfilters))
             selection.add(
-                "AtLeatOneTightElectron",
-                (n_good_electrons >= 1),
-            )
-            selection.add(
                 "AtLeatOneTightMuon",
                 (n_good_muons >= 1),
+            )
+            selection.add(
+                "AtLeatOneTightElectron",
+                (n_good_electrons >= 1),
             )
             selection.add("NoTaus", (n_loose_taus_ele == 0))
             selection.add("AtLeastOneFatJet", (NumFatjets >= 1))
@@ -250,7 +248,6 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             out[channel]["vars"]["fj_eta"] = pad_val_nevents(candidatefj.eta)
             out[channel]["vars"]["fj_msoftdrop"] = pad_val_nevents(candidatefj.msoftdrop)
             out[channel]["vars"]["met_pt"] = pad_val_nevents(met.pt)
-
             out[channel]["vars"]["lep_pt"] = pad_val_nevents(candidatelep.pt)
             out[channel]["vars"]["lep_eta"] = pad_val_nevents(candidatelep.eta)
 
@@ -265,7 +262,6 @@ class TriggerEfficienciesProcessor(ProcessorABC):
                 if channel in self.weights_per_ch.keys():
                     self.weights_per_ch[channel].append(key)
 
-            print(out)
             # use column accumulators
             for key_ in out[channel].keys():
                 for key, value in out[channel][key_].items():
@@ -283,6 +279,3 @@ class TriggerEfficienciesProcessor(ProcessorABC):
                         }
 
         return accumulator
-
-    # def postprocess(self, accumulator):
-    #     return accumulator
