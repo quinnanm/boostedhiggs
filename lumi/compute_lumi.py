@@ -1,4 +1,5 @@
 #!/usr/bin/python
+import argparse
 
 import numpy as np
 from coffea.lumi_tools import LumiData, LumiList
@@ -14,10 +15,9 @@ This script computes the total luminosity using
 """
 
 
-def main():
+def main(args):
 
-    year = "2016APV"
-    dir_ = f"/eos/uscms/store/user/fmokhtar/boostedhiggs/lumi_{year}/"
+    dir_ = f"/eos/uscms/store/user/fmokhtar/boostedhiggs/lumi_{args.year}/"
 
     import pickle
 
@@ -51,7 +51,7 @@ def main():
 
         # this csv was made using brilcalc and the GoldenJson2017... refer to
         # https://github.com/CoffeaTeam/coffea/blob/52e102fce21a3e19f8c079adc649dfdd27c92075/coffea/lumi_tools/lumi_tools.py#L20
-        lumidata = LumiData(f"lumi{year}.csv")
+        lumidata = LumiData(f"lumi{args.year}.csv")
         print(f"---> Lumi for {ch} channel = {lumidata.get_lumi(lumi_list[ch])}")
 
 
@@ -59,4 +59,8 @@ if __name__ == "__main__":
     # e.g.
     # run locally on lpc as: python compute_lumi.py
 
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--year", dest="year", default="2017", help="year", type=str)
+
+    args = parser.parse_args()
+    main(args)

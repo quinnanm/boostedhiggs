@@ -1,5 +1,5 @@
 #!/usr/bin/python
-
+import argparse
 import glob
 import os
 import pickle
@@ -11,10 +11,9 @@ that holds a dictionary with "key=dataset_name" and "value=lumi_set" which has t
 """
 
 
-def main():
+def main(args):
     # load the pkl outfiles
-    year = "2016APV"
-    dir_ = f"/eos/uscms/store/user/fmokhtar/boostedhiggs/lumi_{year}/"
+    dir_ = f"/eos/uscms/store/user/fmokhtar/boostedhiggs/lumi_{args.year}/"
 
     # datasets = [
     #     "SingleElectron_Run2017B",
@@ -40,7 +39,7 @@ def main():
         for i, pkl_file in enumerate(pkl_files):
             # you can load the output!
             with open(pkl_file, "rb") as f:
-                out = pickle.load(f)[dataset][year + "APV"]["lumilist"]
+                out = pickle.load(f)[dataset][args.year]["lumilist"]
 
             if i == 0:
                 out_all[dataset] = out
@@ -56,4 +55,8 @@ if __name__ == "__main__":
     # e.g.
     # run locally on lpc as: python combine_lumi.py
 
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--year", dest="year", default="2017", help="year", type=str)
+
+    args = parser.parse_args()
+    main(args)
