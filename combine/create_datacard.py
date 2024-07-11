@@ -19,7 +19,7 @@ import warnings
 import pandas as pd
 import rhalphalib as rl
 from systematics import systs_from_parquets, systs_not_from_parquets
-from utils import get_template, labels, load_templates, samples, shape_to_num, sigs
+from utils import bkgs, get_template, labels, load_templates, shape_to_num, sigs
 
 rl.ParametericSample.PreferRooParametricHist = True
 logging.basicConfig(level=logging.INFO)
@@ -54,12 +54,11 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
 
     # fill datacard with systematics and rates
     for ChName in SIG_regions + CONTROL_regions:
-        Samples = samples.copy()
 
         ch = rl.Channel(ChName)
         model.addChannel(ch)
 
-        for sName in Samples:
+        for sName in sigs + bkgs:
 
             if (sName in sigs) and (ChName in CONTROL_regions):
                 continue
@@ -69,9 +68,6 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
                 continue
             stype = rl.Sample.SIGNAL if sName in sigs else rl.Sample.BACKGROUND
             sample = rl.TemplateSample(ch.name + "_" + labels[sName], stype, templ)
-
-            # if "CR" in ChName:
-            #     sample.autoMCStats(lnN=True)
 
             # SYSTEMATICS NOT FROM PARQUETS
             for syst_on_sample in ["all_samples", sName]:  # apply common systs and per sample systs
@@ -106,6 +102,25 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
                         sample.setParamEffect(sys_value, (syst_up / nominal), (syst_do / nominal))
 
             ch.addSample(sample)
+
+        # Fake unc.
+        sName = "Fake"
+        templ = get_template(hists_templates, sName, ChName)
+        if templ == 0:
+            continue
+        sample = rl.TemplateSample(ch.name + "_" + labels[sName], rl.Sample.BACKGROUND, templ)
+
+        # SYSTEMATICS NOT FROM PARQUETS
+        for syst_on_sample in ["Fake"]:  # apply common systs and per sample systs
+            for sys_name, sys_value in systs_dict[syst_on_sample].items():
+                if systs_dict_values[syst_on_sample][sys_name][1] is None:  # if up and down are the same
+                    sample.setParamEffect(sys_value, systs_dict_values[syst_on_sample][sys_name][0])
+                else:
+                    sample.setParamEffect(
+                        sys_value,
+                        systs_dict_values[syst_on_sample][sys_name][0],
+                        systs_dict_values[syst_on_sample][sys_name][1],
+                    )
 
         # add data
         data_obs = get_template(hists_templates, "Data", ChName)
