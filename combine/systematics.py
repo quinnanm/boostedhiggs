@@ -176,14 +176,39 @@ def systs_from_parquets(years):
             "weight_pileup_id",
             sigs + bkgs,
         ),
-        # systematics applied only on ggF/VBF
-        rl.NuisanceParameter("ps_fsr", "shape"): (
-            "weight_PSFSR",
-            ["ggF", "VBF", "WH", "ZH"],
-        ),
-        rl.NuisanceParameter("ps_isr", "shape"): (
+        # ISR systematics
+        rl.NuisanceParameter("ps_isr_ggH_hww", "shape"): (
             "weight_PSISR",
-            ["ggF", "VBF", "WH", "ZH"],
+            ["ggF"],
+        ),
+        rl.NuisanceParameter("ps_isr_qqH_hww", "shape"): (
+            "weight_PSISR",
+            ["VBF"],
+        ),
+        rl.NuisanceParameter("ps_isr_VH_hww", "shape"): (
+            "weight_PSISR",
+            ["WH", "ZH"],
+        ),
+        rl.NuisanceParameter("ps_isr_ttH_hww", "shape"): (
+            "weight_PSISR",
+            ["ttH"],
+        ),
+        # FSR systematics
+        rl.NuisanceParameter("ps_fsr_ggH_hww", "shape"): (
+            "weight_PSFSR",
+            ["ggF"],
+        ),
+        rl.NuisanceParameter("ps_fsr_qqH_hww", "shape"): (
+            "weight_PSFSR",
+            ["VBF"],
+        ),
+        rl.NuisanceParameter("ps_fsr_VH_hww", "shape"): (
+            "weight_PSFSR",
+            ["WH", "ZH"],
+        ),
+        rl.NuisanceParameter("ps_fsr_ttH_hww", "shape"): (
+            "weight_PSFSR",
+            ["ttH"],
         ),
         # systematics applied only on WJets & DYJets
         rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d1K_NLO", "lnN"): (
