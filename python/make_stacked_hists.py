@@ -104,7 +104,10 @@ def make_events_dict(years, channels, samples_dir, samples, presel, add_THWW=Tru
 
                 # get event_weight
                 if sample_to_use != "Data":
-                    xsecweight = utils.get_xsecweight(pkl_files, year, sample, False, luminosity)
+                    try:
+                        xsecweight = utils.get_xsecweight(pkl_files, year, sample, False, luminosity)
+                    except EOFError:
+                        continue
                     data["event_weight"] = xsecweight * data[f"weight_{ch}"]
                 else:
                     data["event_weight"] = np.ones_like(data["fj_pt"])

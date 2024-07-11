@@ -19,7 +19,7 @@ combine_samples_by_name = {
     "HWminusJ_HToWW_M-125": "WH",
     "HWplusJ_HToWW_M-125": "WH",
     "HZJ_HToWW_M-125": "ZH",
-    "GluGluZH_HToWW_M-125_TuneCP5_13TeV-powheg-pythia8": "ZH",
+    "GluGluZH_HToWW_M-125_TuneCP5_13TeV-powheg-pythia8": "ZH",  # TODO: skip
     "GluGluHToTauTau": "HTauTau",
 }
 

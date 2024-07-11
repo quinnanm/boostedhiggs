@@ -355,9 +355,11 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
     presel = {
         "mu": {
             "tagger>0.50": "THWW>0.50",
+            "fj_mass": "fj_mass>40",
         },
         "ele": {
             "tagger>0.50": "THWW>0.50",
+            "fj_mass": "fj_mass>40",
         },
     }
 

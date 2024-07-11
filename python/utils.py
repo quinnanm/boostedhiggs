@@ -116,7 +116,8 @@ color_by_sample = {
     "ttH": "tab:olive",
     # background
     "QCD": "tab:orange",
-    "Fake": "tab:orange",
+    "Fake": "orange",
+    # "Fake": "navajowhite",
     "WJetsLNu": "tab:green",
     "TTbar": "tab:blue",
     "Diboson": "orchid",
@@ -288,6 +289,7 @@ def plot_hists(
     text_="",
     blind_region=None,
     save_as=None,
+    plot_Fake_unc=None,
 ):
     # luminosity
     luminosity = 0
@@ -374,6 +376,17 @@ def plot_hists(
 
             tot_err_MC = np.sqrt(tot.variances())
 
+            if plot_Fake_unc:
+                tot_err_Fake = h[{"samples": "Fake"}].values() * plot_Fake_unc
+                errps_Fake = {
+                    "hatch": "////",
+                    "facecolor": "tab:orange",
+                    "lw": 0,
+                    "color": "tab:orange",
+                    "linewidth": 0,
+                    "alpha": 1,
+                }
+
         if add_data and data:
             data_err_opts = {
                 "linestyle": "none",
@@ -434,6 +447,22 @@ def plot_hists(
                     label="Stat. unc.",
                 )
 
+                if plot_Fake_unc:  # plot the fake unc.
+                    rax.stairs(
+                        values=(1 + tot_err_MC / tot_val) + tot_err_Fake / tot_val,
+                        baseline=(1 + tot_err_MC / tot_val),
+                        edges=tot.axes[0].edges,
+                        **errps_Fake,
+                        label="Fake unc.",
+                    )
+                    rax.stairs(
+                        values=(1 - tot_err_MC / tot_val) - tot_err_Fake / tot_val,
+                        baseline=(1 - tot_err_MC / tot_val),
+                        edges=tot.axes[0].edges,
+                        **errps_Fake,
+                        # label="Fake unc.",
+                    )
+
                 rax.axhline(1, ls="--", color="k")
                 rax.set_ylim(0.2, 1.8)
 
@@ -458,6 +487,21 @@ def plot_hists(
                 **errps,
                 label="Stat. unc.",
             )
+            if plot_Fake_unc:
+                ax.stairs(
+                    values=(tot.values() + tot_err_MC) + tot_err_Fake,
+                    baseline=(tot.values() + tot_err_MC),
+                    edges=tot.axes[0].edges,
+                    **errps_Fake,
+                    label="Fake unc.",
+                )
+                ax.stairs(
+                    values=(tot.values() - tot_err_MC) - tot_err_Fake,
+                    baseline=(tot.values() - tot_err_MC),
+                    edges=tot.axes[0].edges,
+                    **errps_Fake,
+                    # label="Fake unc.",
+                )
 
         # ax.text(0.5, 0.9, text_, fontsize=14, transform=ax.transAxes, weight="bold")
 
