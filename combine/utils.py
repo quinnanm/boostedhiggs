@@ -66,7 +66,7 @@ labels = {
 
 bkgs = ["TTbar", "WJetsLNu", "SingleTop", "DYJets", "WZQQ", "Diboson", "EWKvjets"]
 sigs = ["ggF", "VBF", "WH", "ZH", "ttH"]
-samples = sigs + bkgs + "Fake"
+samples = sigs + bkgs + ["Fake"]
 
 
 def get_sum_sumgenweight(pkl_files, year, sample):
