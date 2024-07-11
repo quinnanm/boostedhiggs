@@ -39,8 +39,10 @@ def main(args):
         for i, pkl_file in enumerate(pkl_files):
             # you can load the output!
             with open(pkl_file, "rb") as f:
-                print(pickle.load(f)[dataset].keys())
-                out = pickle.load(f)[dataset][args.year.replace("APV", "")]["lumilist"]
+                if "APV" in args.year:
+                    out = pickle.load(f)[dataset][args.year + "APV"]["lumilist"]
+                else:
+                    out = pickle.load(f)[dataset][args.year]["lumilist"]
 
             if i == 0:
                 out_all[dataset] = out
