@@ -39,12 +39,8 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
     model = rl.Model("testModel")
 
     # define the signal and control regions
-    # SIG_regions = ["VBF", "ggFpt250to300", "ggFpt300to450", "ggFpt450to650", "ggFpt650toInf"]
     SIG_regions = ["VBF", "ggFpt250to300", "ggFpt300to450", "ggFpt450toInf"]
     CONTROL_regions = ["TopCR", "WJetsCR"]
-
-    # SIG_regions = list(hists_templates.axes["Region"])
-    # CONTROL_regions = []
 
     if add_ttbar_constraint:
         ttbarnormSF = rl.IndependentParameter("ttbarnormSF", 1.0, 0, 10)
@@ -103,7 +99,7 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
 
             ch.addSample(sample)
 
-        # Fake unc.
+        # add Fake
         sName = "Fake"
         templ = get_template(hists_templates, sName, ChName)
         if templ == 0:
@@ -121,6 +117,7 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
                         systs_dict_values[syst_on_sample][sys_name][0],
                         systs_dict_values[syst_on_sample][sys_name][1],
                     )
+        ch.addSample(sample)
 
         # add data
         data_obs = get_template(hists_templates, "Data", ChName)
