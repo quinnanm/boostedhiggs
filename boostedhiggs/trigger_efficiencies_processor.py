@@ -38,14 +38,14 @@ class TriggerEfficienciesProcessor(ProcessorABC):
 
     def __init__(self, year="2017"):
         super(TriggerEfficienciesProcessor, self).__init__()
+
         self._year = year
-
-        self._triggers = {
-            "ele": ["Ele35_WPTight_Gsf", "Ele115_CaloIdVT_GsfTrkIdT", "Photon200"],
-            "mu": ["Mu50", "IsoMu27", "OldMu100", "TkMu100"],
-        }
-
         self._channels = ["ele"]
+
+        # trigger paths
+        with importlib.resources.path("boostedhiggs.data", "triggers.json") as path:
+            with open(path, "r") as f:
+                self._HLTs = json.load(f)[self._year]
 
         # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFiltersRun2
         with importlib.resources.path("boostedhiggs.data", "metfilters.json") as path:
@@ -81,42 +81,27 @@ class TriggerEfficienciesProcessor(ProcessorABC):
 
         # skimmed events for different channels
         out = {}
-        for channel in self._channels:
-            out[channel] = {}
-            out[channel]["triggers"] = {}
+        for ch in self._channels:
+            out[ch] = {}
+            out[ch]["triggers"] = {}
 
         """ Save OR of triggers as booleans """
-        for channel in self._channels:
+        for ch in self._channels:
             HLT_triggers = {}
-            for trigger in self._triggers[channel]:
+            for trigger in self._HLTs[ch]:
 
                 HLT_triggers["HLT_" + trigger] = np.zeros(nevents, dtype="bool")
                 if trigger in events.HLT.fields:
                     HLT_triggers["HLT_" + trigger] = HLT_triggers["HLT_" + trigger] | np.array(events.HLT[trigger])
 
-                # HLT_triggers["HLT_" + t] = np.any(
-                #     np.array([events.HLT[trigger] for trigger in self._trigger_dict[t] if trigger in events.HLT.fields]),
-                #     axis=0,
-                # )
-
-                # print("NO", len(HLT_triggers["HLT_" + t]))
-                # if isinstance((HLT_triggers["HLT_" + t]), bool):
-                #     print("YES", HLT_triggers["HLT_" + t])
-                #     HLT_triggers["HLT_" + t] = np.zeros(nevents, dtype="bool")
-
-                # trigger_path = self._trigger_dict[t][0]
-                # HLT_triggers["HLT_" + t] = (
-                #     np.array(events.HLT[trigger_path]) if trigger_path in events.fields else np.zeros(nevents, dtype="bool")
-                # )
-
-            out[channel]["triggers"] = {**out[channel]["triggers"], **HLT_triggers}
+            out[ch]["triggers"] = {**out[ch]["triggers"], **HLT_triggers}
 
         ######################
         # Trigger
         ######################
 
         trigger = np.zeros(nevents, dtype="bool")
-        for t in self._triggers["mu"]:
+        for t in self._HLTs["mu"]:
             if t in events.HLT.fields:
                 trigger = trigger | events.HLT[t]
 
@@ -223,7 +208,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         # Baseline selection
         ######################
 
-        for channel in ["ele"]:
+        for ch in ["ele"]:
             add_lepton_weight(self.weights, candidatelep, self._year, "electron")
 
             selection = PackedSelection()
@@ -249,39 +234,39 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             ######################
             # variables to store
             ######################
-            out[channel]["vars"] = {}
-            out[channel]["vars"]["fj_pt"] = pad_val_nevents(candidatefj.pt)
-            out[channel]["vars"]["fj_eta"] = pad_val_nevents(candidatefj.eta)
-            out[channel]["vars"]["fj_msoftdrop"] = pad_val_nevents(candidatefj.msoftdrop)
-            out[channel]["vars"]["met_pt"] = pad_val_nevents(met.pt)
-            out[channel]["vars"]["lep_pt"] = pad_val_nevents(candidatelep.pt)
-            out[channel]["vars"]["lep_eta"] = pad_val_nevents(candidatelep.eta)
+            out[ch]["vars"] = {}
+            out[ch]["vars"]["fj_pt"] = pad_val_nevents(candidatefj.pt)
+            out[ch]["vars"]["fj_eta"] = pad_val_nevents(candidatefj.eta)
+            out[ch]["vars"]["fj_msoftdrop"] = pad_val_nevents(candidatefj.msoftdrop)
+            out[ch]["vars"]["met_pt"] = pad_val_nevents(met.pt)
+            out[ch]["vars"]["lep_pt"] = pad_val_nevents(candidatelep.pt)
+            out[ch]["vars"]["lep_eta"] = pad_val_nevents(candidatelep.eta)
 
             if "HToWW" in dataset:
                 genVars, _ = match_H(events.GenPart, candidatefj)
-                out[channel]["vars"]["fj_genH_pt"] = pad_val_nevents(genVars["fj_genH_pt"]).data
+                out[ch]["vars"]["fj_genH_pt"] = pad_val_nevents(genVars["fj_genH_pt"]).data
 
-            out[channel]["weights"] = {}
+            out[ch]["weights"] = {}
             for key in self.weights._weights.keys():
                 # store the individual weights (ONLY for now until we debug)
-                out[channel]["weights"][f"weight_{key}"] = self.weights.partial_weight([key])
-                if channel in self.weights_per_ch.keys():
-                    self.weights_per_ch[channel].append(key)
+                out[ch]["weights"][f"weight_{key}"] = self.weights.partial_weight([key])
+                if ch in self.weights_per_ch.keys():
+                    self.weights_per_ch[ch].append(key)
 
             # use column accumulators
-            for key_ in out[channel].keys():
-                for key, value in out[channel][key_].items():
-                    out[channel][key_][key] = column_accumulator(value[selection.all(*selection.names)])
+            for key_ in out[ch].keys():
+                for key, value in out[ch][key_].items():
+                    out[ch][key_][key] = column_accumulator(value[selection.all(*selection.names)])
 
         return {self._year: {dataset: {"nevents": nevents, "sumgenweight": sumgenweight, "skimmed_events": out}}}
 
     def postprocess(self, accumulator):
         for year, datasets in accumulator.items():
             for dataset, output in datasets.items():
-                for channel in output["skimmed_events"].keys():
-                    for key_ in output["skimmed_events"][channel].keys():
-                        output["skimmed_events"][channel][key_] = {
-                            key: value.value for (key, value) in output["skimmed_events"][channel][key_].items()
+                for ch in output["skimmed_events"].keys():
+                    for key_ in output["skimmed_events"][ch].keys():
+                        output["skimmed_events"][ch][key_] = {
+                            key: value.value for (key, value) in output["skimmed_events"][ch][key_].items()
                         }
 
         return accumulator
