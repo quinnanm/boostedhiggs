@@ -39,19 +39,9 @@ class TriggerEfficienciesProcessor(ProcessorABC):
     def __init__(self, year="2017"):
         super(TriggerEfficienciesProcessor, self).__init__()
         self._year = year
-        self._trigger_dict = {
-            "2017": {
-                "ele35": ["Ele35_WPTight_Gsf"],
-                "ele115": ["Ele115_CaloIdVT_GsfTrkIdT"],
-                "Photon200": ["Photon200"],
-                "Mu50": ["Mu50"],
-                "IsoMu27": ["IsoMu27"],
-                "OldMu100": ["OldMu100"],
-                "TkMu100": ["TkMu100"],
-            }
-        }[self._year]
+
         self._triggers = {
-            "ele": ["ele35", "ele115", "Photon200"],
+            "ele": ["Ele35_WPTight_Gsf", "Ele115_CaloIdVT_GsfTrkIdT", "Photon200"],
             "mu": ["Mu50", "IsoMu27", "OldMu100", "TkMu100"],
         }
 
@@ -98,12 +88,11 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         """ Save OR of triggers as booleans """
         for channel in self._channels:
             HLT_triggers = {}
-            for t in self._triggers[channel]:
+            for trigger in self._triggers[channel]:
 
-                HLT_triggers["HLT_" + t] = np.zeros(nevents, dtype="bool")
-                for trigger in self._trigger_dict[t]:
-                    if trigger in events.HLT.fields:
-                        HLT_triggers["HLT_" + t] = HLT_triggers["HLT_" + t] | np.array(events.HLT[trigger])
+                HLT_triggers["HLT_" + trigger] = np.zeros(nevents, dtype="bool")
+                if trigger in events.HLT.fields:
+                    HLT_triggers["HLT_" + trigger] = HLT_triggers["HLT_" + trigger] | np.array(events.HLT[trigger])
 
                 # HLT_triggers["HLT_" + t] = np.any(
                 #     np.array([events.HLT[trigger] for trigger in self._trigger_dict[t] if trigger in events.HLT.fields]),
