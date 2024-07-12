@@ -104,7 +104,10 @@ class TriggerEfficienciesProcessor(ProcessorABC):
                     np.array([events.HLT[trigger] for trigger in self._trigger_dict[t] if trigger in events.HLT.fields]),
                     axis=0,
                 )
-                print(HLT_triggers["HLT_" + t])
+
+                if isinstance((HLT_triggers["HLT_" + t]), bool):
+                    HLT_triggers["HLT_" + t] = np.zeros(nevents, dtype="bool")
+
                 # trigger_path = self._trigger_dict[t][0]
                 # HLT_triggers["HLT_" + t] = (
                 #     np.array(events.HLT[trigger_path]) if trigger_path in events.fields else np.zeros(nevents, dtype="bool")
