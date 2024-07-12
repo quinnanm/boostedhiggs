@@ -105,7 +105,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
                     axis=0,
                 )
 
-                print("NO", HLT_triggers["HLT_" + t])
+                print("NO", type(HLT_triggers["HLT_" + t]))
                 if isinstance((HLT_triggers["HLT_" + t]), bool):
                     print("YES", HLT_triggers["HLT_" + t])
                     HLT_triggers["HLT_" + t] = np.zeros(nevents, dtype="bool")
