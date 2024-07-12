@@ -100,15 +100,20 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             HLT_triggers = {}
             for t in self._triggers[channel]:
 
-                HLT_triggers["HLT_" + t] = np.any(
-                    np.array([events.HLT[trigger] for trigger in self._trigger_dict[t] if trigger in events.HLT.fields]),
-                    axis=0,
-                )
+                HLT_triggers["HLT_" + t] = np.zeros(nevents, dtype="bool")
+                for trigger in self._trigger_dict[t]:
+                    if trigger in events.HLT.fields:
+                        HLT_triggers["HLT_" + t] = HLT_triggers["HLT_" + t] | np.array(events.HLT[trigger])
 
-                print("NO", len(HLT_triggers["HLT_" + t]))
-                if isinstance((HLT_triggers["HLT_" + t]), bool):
-                    print("YES", HLT_triggers["HLT_" + t])
-                    HLT_triggers["HLT_" + t] = np.zeros(nevents, dtype="bool")
+                # HLT_triggers["HLT_" + t] = np.any(
+                #     np.array([events.HLT[trigger] for trigger in self._trigger_dict[t] if trigger in events.HLT.fields]),
+                #     axis=0,
+                # )
+
+                # print("NO", len(HLT_triggers["HLT_" + t]))
+                # if isinstance((HLT_triggers["HLT_" + t]), bool):
+                #     print("YES", HLT_triggers["HLT_" + t])
+                #     HLT_triggers["HLT_" + t] = np.zeros(nevents, dtype="bool")
 
                 # trigger_path = self._trigger_dict[t][0]
                 # HLT_triggers["HLT_" + t] = (
