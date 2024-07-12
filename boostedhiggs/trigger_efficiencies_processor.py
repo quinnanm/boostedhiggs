@@ -85,14 +85,14 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             out[ch] = {}
             out[ch]["triggers"] = {}
 
-        """ Save OR of triggers as booleans """
         for ch in self._channels:
             HLT_triggers = {}
             for trigger in self._HLTs[ch]:
 
-                HLT_triggers["HLT_" + trigger] = np.zeros(nevents, dtype="bool")
                 if trigger in events.HLT.fields:
-                    HLT_triggers["HLT_" + trigger] = HLT_triggers["HLT_" + trigger] | np.array(events.HLT[trigger])
+                    HLT_triggers["HLT_" + trigger] = np.array(events.HLT[trigger])
+                else:
+                    HLT_triggers["HLT_" + trigger] = np.zeros(nevents, dtype="bool")
 
             out[ch]["triggers"] = {**out[ch]["triggers"], **HLT_triggers}
 
