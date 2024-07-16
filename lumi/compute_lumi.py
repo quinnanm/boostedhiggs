@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import argparse
+import os
 import pickle as pkl
 
 import numpy as np
@@ -18,60 +19,29 @@ This script computes the total luminosity using
 
 def main(args):
 
-    dir_ = f"/eos/uscms/store/user/fmokhtar/boostedhiggs/lumi_{args.year}/"
+    dir_ = f"../eos/Lumi_July11_{args.year}/"
+    datasets = os.listdir(dir_)
 
-    with open(f"{dir_}/lumi_set.pkl", "rb") as f:
-        lumi_set = pkl.load(f)
+    for dataset in datasets:
+        pklfile = dataset + f"{dataset}/lumi_set_{dataset}.pkl"
 
-    # Lumi from individual datasets
-    for ch in ["ele", "mu"]:
-        print(f"---> Lumi for {ch} channel:")
-        for dataset in lumi_set.keys():
-            if ("Muon" in dataset) and (ch != "mu"):
-                continue
-            elif ("Muon" not in dataset) and (ch == "mu"):
-                continue
+        with open(pklfile, "rb") as f:
+            lumi_set = pkl.load(f)
 
-            lumis = lumi_set[dataset]
+        dataset = list(lumi_set.keys())[0]
 
-            # convert the set to a numpy 2d-array
-            lumis = np.array(list(lumis))
-
-            # make LumiList object
-            lumi_list = LumiList(runs=lumis[:, 0], lumis=lumis[:, 1])
-
-            # this csv was made using brilcalc and the GoldenJson2017... refer to
-            # https://github.com/CoffeaTeam/coffea/blob/52e102fce21a3e19f8c079adc649dfdd27c92075/coffea/lumi_tools/lumi_tools.py#L20
-            lumidata = LumiData(f"lumi{args.year}.csv")
-            print(f"{dataset}: {lumidata.get_lumi(lumi_list)}")
-
-        print("------------------------------------")
-
-    # combine the sets from the different datasets
-    lumis = {}
-    for ch in ["ele", "mu"]:
-        for dataset in lumi_set.keys():
-            if ("Muon" in dataset) and (ch != "mu"):
-                continue
-            elif ("Muon" not in dataset) and (ch == "mu"):
-                continue
-
-            if ch not in lumis.keys():
-                lumis[ch] = lumi_set[dataset]
-            else:
-                lumis[ch] = lumis[ch] | lumi_set[dataset]
-
-    for ch in ["ele", "mu"]:
         # convert the set to a numpy 2d-array
-        lumis[ch] = np.array(list(lumis[ch]))
+        lumis = np.array(lumi_set[dataset])
 
         # make LumiList object
-        lumi_list = LumiList(runs=lumis[ch][:, 0], lumis=lumis[ch][:, 1])
+        lumi_list = LumiList(runs=lumis[:, 0], lumis=lumis[:, 1])
 
         # this csv was made using brilcalc and the GoldenJson2017... refer to
         # https://github.com/CoffeaTeam/coffea/blob/52e102fce21a3e19f8c079adc649dfdd27c92075/coffea/lumi_tools/lumi_tools.py#L20
         lumidata = LumiData(f"lumi{args.year}.csv")
-        print(f"---> Total lumi for {ch} channel = {lumidata.get_lumi(lumi_list)}")
+        print(f"{dataset}: {lumidata.get_lumi(lumi_list)}")
+
+        print("------------------------------------")
 
 
 if __name__ == "__main__":
