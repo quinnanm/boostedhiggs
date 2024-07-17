@@ -207,7 +207,7 @@ def main(args):
 
         if args.processor == "lumi":
             data = pd.read_parquet("./outfiles/" + job_name + "/parquet")
-            data.to_parquet("./outfiles/" + job_name + "_" + ".parquet")
+            data.to_parquet("./outfiles/" + job_name + ".parquet")
             # remove old parquet files
             os.system("rm -rf ./outfiles/" + job_name)
 
