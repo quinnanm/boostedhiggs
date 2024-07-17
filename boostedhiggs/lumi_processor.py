@@ -1,7 +1,9 @@
+import os
 import warnings
 
 import awkward as ak
 import numpy as np
+import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 from coffea import processor
@@ -26,6 +28,18 @@ class LumiProcessor(processor.ProcessorABC):
     def accumulator(self):
         return self._accumulator
 
+    def save_dfs_parquet(self, fname, dfs_dict):
+        if self._output_location is not None:
+            table = pa.Table.from_pandas(dfs_dict)
+            if len(table) != 0:  # skip dataframes with empty entries
+                pq.write_table(table, self._output_location + "/parquet/" + fname + ".parquet")
+
+    def ak_to_pandas(self, output_collection: ak.Array) -> pd.DataFrame:
+        output = pd.DataFrame()
+        for field in ak.fields(output_collection):
+            output[field] = ak.to_numpy(output_collection[field])
+        return output
+
     def process(self, events: ak.Array):
         """Returns a set holding 3 values: (run number, lumi block, even number)."""
         # dataset = events.metadata["dataset"]
@@ -43,13 +57,9 @@ class LumiProcessor(processor.ProcessorABC):
         output["luminosityBlock"] = events.luminosityBlock
         output["event"] = events.event
 
-        import pandas as pd
-
         # convert arrays to pandas
         if not isinstance(output, pd.DataFrame):
             output = self.ak_to_pandas(output)
-
-        import os
 
         # now save pandas dataframes
         fname = events.behavior["__events_factory__"]._partition_key.replace("/", "_")
@@ -63,9 +73,3 @@ class LumiProcessor(processor.ProcessorABC):
 
     def postprocess(self, accumulator):
         return accumulator
-
-    def save_dfs_parquet(self, fname, dfs_dict):
-        if self._output_location is not None:
-            table = pa.Table.from_pandas(dfs_dict)
-            if len(table) != 0:  # skip dataframes with empty entries
-                pq.write_table(table, self._output_location + "/parquet/" + fname + ".parquet")
