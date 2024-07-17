@@ -42,7 +42,9 @@ class LumiProcessor(processor.ProcessorABC):
 
     def process(self, events: ak.Array):
         """Returns a set holding 3 values: (run number, lumi block, even number)."""
-        # dataset = events.metadata["dataset"]
+        dataset = events.metadata["dataset"]
+
+        nevents = len(events)
 
         # # store as a parquet filec
         # lumilist = set(
@@ -69,7 +71,14 @@ class LumiProcessor(processor.ProcessorABC):
             os.makedirs(self._output_location + "/parquet")
         self.save_dfs_parquet(fname, output)
 
-        return None
+        # return dictionary with cutflows
+        return {
+            dataset: {
+                self._year: {
+                    "nevents": nevents,
+                },
+            }
+        }
 
     def postprocess(self, accumulator):
         return accumulator
