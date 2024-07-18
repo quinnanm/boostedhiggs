@@ -109,7 +109,8 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
         # add Fake unc.
         sample.setParamEffect(rl.NuisanceParameter("Fake_rate_unc", "lnN"), 1.5)
 
-        for syst in ["FR_stat", "EWK_SF_Up"]:
+        for sys_name in ["FR_stat", "EWK_SF"]:
+            sys_value = rl.NuisanceParameter(sys_name, "shape")
             syst_up = hists_templates[{"Sample": "Fake", "Region": ChName, "Systematic": sys_name + "_Up"}].values()
             syst_do = hists_templates[{"Sample": "Fake", "Region": ChName, "Systematic": sys_name + "_Down"}].values()
             nominal = hists_templates[{"Sample": "Fake", "Region": ChName, "Systematic": "nominal"}].values()
