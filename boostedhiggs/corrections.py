@@ -439,12 +439,12 @@ lepton_corrections = {
             "2017": "NUM_LooseRelIso_DEN_MediumPromptID",
             "2018": "NUM_LooseRelIso_DEN_MediumPromptID",
         },
-        "electron": {  # TODO: remove because these are ID SFs
-            "2016APV": "wp90iso",
-            "2016": "wp90iso",
-            "2017": "wp90iso",
-            "2018": "wp90iso",
-        },
+        # "electron": {  # TODO: remove because these are ID SFs
+        #     "2016APV": "wp90iso",
+        #     "2016": "wp90iso",
+        #     "2017": "wp90iso",
+        #     "2018": "wp90iso",
+        # },
     },
     "id": {
         "muon": {
@@ -543,20 +543,22 @@ def add_lepton_weight(weights, lepton, year, lepton_type="muon"):
         # add weights (for now only the nominal weight)
         weights.add(f"{corr}_{lepton_type}", values["nominal"], values["up"], values["down"])
 
-    # quick hack to add electron trigger SFs
-    if lepton_type == "electron":
-        corr = "trigger"
-        with importlib.resources.path("boostedhiggs.data", f"electron_trigger_{ul_year}_UL.json") as filename:
-            cset = correctionlib.CorrectionSet.from_file(str(filename))
-            lepton_pt, lepton_eta = get_clip(lep_pt, lep_eta, lepton_type, corr)
-            values["nominal"] = cset["UL-Electron-Trigger-SF"].evaluate(
-                ul_year + "_UL", "sf", "trigger", lepton_eta, lepton_pt
-            )
-            values["up"] = cset["UL-Electron-Trigger-SF"].evaluate(ul_year + "_UL", "sfup", "trigger", lepton_eta, lepton_pt)
-            values["down"] = cset["UL-Electron-Trigger-SF"].evaluate(
-                ul_year + "_UL", "sfdown", "trigger", lepton_eta, lepton_pt
-            )
-            weights.add(f"{corr}_{lepton_type}", values["nominal"], values["up"], values["down"])
+    # # quick hack to add electron trigger SFs
+    # if lepton_type == "electron":
+    #     corr = "trigger"
+    #     with importlib.resources.path("boostedhiggs.data", f"electron_trigger_{ul_year}_UL.json") as filename:
+    #         cset = correctionlib.CorrectionSet.from_file(str(filename))
+    #         lepton_pt, lepton_eta = get_clip(lep_pt, lep_eta, lepton_type, corr)
+    #         values["nominal"] = cset["UL-Electron-Trigger-SF"].evaluate(
+    #             ul_year + "_UL", "sf", "trigger", lepton_eta, lepton_pt
+    #         )
+    #         values["up"] = cset["UL-Electron-Trigger-SF"].evaluate(
+    #             ul_year + "_UL", "sfup", "trigger", lepton_eta, lepton_pt,
+    #             )
+    #         values["down"] = cset["UL-Electron-Trigger-SF"].evaluate(
+    #             ul_year + "_UL", "sfdown", "trigger", lepton_eta, lepton_pt
+    #         )
+    #         weights.add(f"{corr}_{lepton_type}", values["nominal"], values["up"], values["down"])
 
 
 def get_pileup_weight(year: str, mod: str, nPU: np.ndarray):
