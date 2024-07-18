@@ -15,13 +15,13 @@ samples:
 
 regions_sel:
 
-    "VBF": (n_bjets_T==0) & (THWW>0.905) & ( (mjj>1000) & (deta>3.5) )
+    "VBF": (n_bjets_T==0) & (THWW>0.905) & ( (mjj>1000) & (deta>3.5) ) & (rec_higgs_pt>250)
     "ggFpt250to300": (n_bjets_T==0) & (THWW>0.93) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>250) & (rec_higgs_pt<350)
     "ggFpt300to450": (n_bjets_T==0) & (THWW>0.93) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>350) & (rec_higgs_pt<500)
     "ggFpt450toInf": (n_bjets_T==0) & (THWW>0.93) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>500)
 
-    "WJetsCR": (n_bjets_T==0) & (THWW<0.905)
-    "TopCR": (n_bjets_T>0)
+    "WJetsCR": (n_bjets_T==0) & (THWW<0.905) & (rec_higgs_pt>250)
+    "TopCR": (n_bjets_T>0) & (rec_higgs_pt>250)
 
 samples_dir:
     "2018": ../eos/June25_hww_2018

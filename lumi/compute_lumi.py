@@ -33,6 +33,7 @@ def main(args):
         # convert the set to a numpy 2d-array
         lumis = np.array(lumi_set[dataset])
 
+        # (run number, lumi block, event id)
         # make LumiList object
         lumi_list = LumiList(runs=lumis[:, 0], lumis=lumis[:, 1])
 
