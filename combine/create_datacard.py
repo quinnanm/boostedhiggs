@@ -108,6 +108,15 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
 
         # add Fake unc.
         sample.setParamEffect(rl.NuisanceParameter("Fake_rate_unc", "lnN"), 1.5)
+
+        for syst in ["FR_stat", "EWK_SF_Up"]:
+            syst_up = hists_templates[{"Sample": "Fake", "Region": ChName, "Systematic": sys_name + "_Up"}].values()
+            syst_do = hists_templates[{"Sample": "Fake", "Region": ChName, "Systematic": sys_name + "_Down"}].values()
+            nominal = hists_templates[{"Sample": "Fake", "Region": ChName, "Systematic": "nominal"}].values()
+
+            nominal[nominal == 0] = 1  # to avoid invalid value encountered in true_divide in "syst_up/nominal"
+            sample.setParamEffect(sys_value, (syst_up / nominal), (syst_do / nominal))
+
         ch.addSample(sample)
 
         # add data
