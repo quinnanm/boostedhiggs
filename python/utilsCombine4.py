@@ -345,15 +345,15 @@ def plot_hists(
             else:
                 tot_signal = tot_signal + signal[i]
 
-        # plot the total signal (w/o scaling)
         tot_signal *= mult_factor
 
         if mult is not None:
             if mult_factor == 1:
-                siglabel = r"ggF+VBF+WH+ZH+ttH"
+                siglabel = r"Background + Signal"
             else:
-                siglabel = r"ggF+VBF+WH+ZH+ttH $\times$" + f"{mult_factor}"
+                siglabel = r"Background + Signal $\times$" + f"{mult_factor}"
 
+            tot_signal += np.array(bkg).sum(axis=0)
             hep.histplot(
                 tot_signal,
                 ax=ax,
@@ -363,12 +363,12 @@ def plot_hists(
                 flow="none",
             )
             # add MC stat errors
-            ax.stairs(
-                values=tot_signal.values() + np.sqrt(tot_signal.values()),
-                baseline=tot_signal.values() - np.sqrt(tot_signal.values()),
-                edges=sig.axes[0].edges,
-                **errps,
-            )
+            # ax.stairs(
+            #     values=tot_signal.values() + np.sqrt(tot_signal.values()),
+            #     baseline=tot_signal.values() - np.sqrt(tot_signal.values()),
+            #     edges=sig.axes[0].edges,
+            #     **errps,
+            # )
 
     ax.set_ylabel("Events")
 
