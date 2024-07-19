@@ -105,40 +105,46 @@ def systs_not_from_parquets(years: List[str], lep_channels: List[str]):
     # Theory Systematics. (convention: https://gitlab.cern.ch/hh/naming-conventions#theory-uncertainties)
 
     # PDF
-    n = rl.NuisanceParameter("pdf_Higgs_gg", "lnN")
-    systs_dict["ggF"]["pdf_Higgs_gg"] = n
-    systs_dict_values["ggF"]["pdf_Higgs_gg"] = (1.019, None)
+    n = rl.NuisanceParameter("pdf_Higgs_ggH_hww", "lnN")
+    systs_dict["ggF"]["pdf_Higgs_ggH_hww"] = n
+    systs_dict_values["ggF"]["pdf_Higgs_ggH_hww"] = (1.019, None)
 
-    n = rl.NuisanceParameter("pdf_Higgs_ttH", "lnN")
-    systs_dict["ttH"]["pdf_Higgs_ttH"] = n
-    systs_dict_values["ttH"]["pdf_Higgs_ttH"] = (1.03, None)
+    n = rl.NuisanceParameter("pdf_Higgs_qqH_hww", "lnN")
+    systs_dict["VBF"]["pdf_Higgs_qqH_hww"] = n
+    systs_dict_values["VBF"]["pdf_Higgs_qqH_hww"] = (1.021, None)
 
-    n = rl.NuisanceParameter("pdf_Higgs_qqbar", "lnN")
-    systs_dict["VBF"]["pdf_Higgs_qqHH"] = n
-    systs_dict_values["VBF"]["pdf_Higgs_qqHH"] = (1.021, None)
-    systs_dict["WH"]["pdf_Higgs_qqbar"] = n
-    systs_dict_values["WH"]["pdf_Higgs_qqbar"] = (1.017, None)
-    systs_dict["ZH"]["pdf_Higgs_qqbar"] = n
-    systs_dict_values["ZH"]["pdf_Higgs_qqbar"] = (1.013, None)
+    n = rl.NuisanceParameter("pdf_Higgs_ttH_hww", "lnN")
+    systs_dict["ttH"]["pdf_Higgs_ttH_hww"] = n
+    systs_dict_values["ttH"]["pdf_Higgs_ttH_hww"] = (1.03, None)
+
+    n = rl.NuisanceParameter("pdf_Higgs_WH_hww", "lnN")
+    systs_dict["WH"]["pdf_Higgs_WH"] = n
+    systs_dict_values["WH"]["pdf_Higgs_WH"] = (1.017, None)
+
+    n = rl.NuisanceParameter("pdf_Higgs_ZH_hww", "lnN")
+    systs_dict["ZH"]["pdf_Higgs_ZH_hww"] = n
+    systs_dict_values["ZH"]["pdf_Higgs_ZH_hww"] = (1.013, None)
 
     # QCD scale
-    n = rl.NuisanceParameter("QCDscale_ggH", "lnN")
-    systs_dict["ggF"]["QCDscale_ggH"] = n
-    systs_dict_values["ggF"]["QCDscale_ggH"] = (1.039, None)
+    n = rl.NuisanceParameter("QCDscale_ggH_hww", "lnN")
+    systs_dict["ggF"]["QCDscale_ggH_hww"] = n
+    systs_dict_values["ggF"]["QCDscale_ggH_hww"] = (1.039, None)
 
-    n = rl.NuisanceParameter("QCDscale_qqH", "lnN")
-    systs_dict["VBF"]["QCDscale_qqH"] = n
-    systs_dict_values["VBF"]["QCDscale_qqH"] = (1.004, 0.997)
+    n = rl.NuisanceParameter("QCDscale_qqH_hww", "lnN")
+    systs_dict["VBF"]["QCDscale_qqH_hww"] = n
+    systs_dict_values["VBF"]["QCDscale_qqH_hww"] = (1.004, 0.997)
 
-    n = rl.NuisanceParameter("QCDscale_ttH", "lnN")
-    systs_dict["ttH"]["QCDscale_ttH"] = n
-    systs_dict_values["ttH"]["QCDscale_ttH"] = (1.058, 0.908)
+    n = rl.NuisanceParameter("QCDscale_ttH_hww", "lnN")
+    systs_dict["ttH"]["QCDscale_ttH_hww"] = n
+    systs_dict_values["ttH"]["QCDscale_ttH_hww"] = (1.058, 0.908)
 
-    n = rl.NuisanceParameter("QCDscale_VH", "lnN")
-    systs_dict["WH"]["QCDscale_VH"] = n
-    systs_dict_values["WH"]["QCDscale_VH"] = (1.005, 0.993)
-    systs_dict["ZH"]["QCDscale_VH"] = n
-    systs_dict_values["ZH"]["QCDscale_VH"] = (1.038, 0.97)
+    n = rl.NuisanceParameter("QCDscale_WH_hww", "lnN")
+    systs_dict["WH"]["QCDscale_WH_hww"] = n
+    systs_dict_values["WH"]["QCDscale_WH_hww"] = (1.005, 0.993)
+
+    n = rl.NuisanceParameter("QCDscale_ZH_hww", "lnN")
+    systs_dict["ZH"]["QCDscale_ZH_hww"] = n
+    systs_dict_values["ZH"]["QCDscale_ZH_hww"] = (1.038, 0.97)
 
     # alphas
     n = rl.NuisanceParameter("alpha_s", "lnN")
@@ -185,9 +191,13 @@ def systs_from_parquets(years):
             "weight_PSISR",
             ["VBF"],
         ),
-        rl.NuisanceParameter("ps_isr_VH_hww", "shape"): (
+        rl.NuisanceParameter("ps_isr_WH_hww", "shape"): (
             "weight_PSISR",
-            ["WH", "ZH"],
+            ["WH"],
+        ),
+        rl.NuisanceParameter("ps_isr_ZH_hww", "shape"): (
+            "weight_PSISR",
+            ["ZH"],
         ),
         rl.NuisanceParameter("ps_isr_ttH_hww", "shape"): (
             "weight_PSISR",
@@ -202,9 +212,13 @@ def systs_from_parquets(years):
             "weight_PSFSR",
             ["VBF"],
         ),
-        rl.NuisanceParameter("ps_fsr_VH_hww", "shape"): (
+        rl.NuisanceParameter("ps_fsr_WH_hww", "shape"): (
             "weight_PSFSR",
-            ["WH", "ZH"],
+            ["WH"],
+        ),
+        rl.NuisanceParameter("ps_fsr_ZH_hww", "shape"): (
+            "weight_PSFSR",
+            ["ZH"],
         ),
         rl.NuisanceParameter("ps_fsr_ttH_hww", "shape"): (
             "weight_PSFSR",
@@ -261,49 +275,49 @@ def systs_from_parquets(years):
             sigs + bkgs,
         ),
         # systematics for electron channel
-        rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_trigger", "lnN"): (
-            "weight_ele_trigger",
-            sigs + bkgs,
-        ),
         rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_identification", "lnN"): (
             "weight_ele_id",
             sigs + bkgs,
         ),
-        # rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_isolation", "lnN"): (
-        #     "weight_ele_isolation",
-        #     sigs + bkgs,
-        # ),
         rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_reconstruction", "lnN"): (
             "weight_ele_reco",
             sigs + bkgs,
         ),
         # PDF acceptance
-        rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_PDFacc_ggH", "shape"): (
+        rl.NuisanceParameter(f"PDF_ggH_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
             "weight_pdf_acceptance",
             ["ggF"],
         ),
-        rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_PDFacc_qqH", "shape"): (
+        rl.NuisanceParameter(f"PDF_qqH_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
             "weight_pdf_acceptance",
             ["VBF"],
         ),
-        rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_PDFacc_VH", "shape"): (
+        rl.NuisanceParameter(f"PDF_WH_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
             "weight_pdf_acceptance",
-            ["WH", "ZH"],
+            ["WH"],
+        ),
+        rl.NuisanceParameter(f"PDF_ZH_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
+            "weight_pdf_acceptance",
+            ["ZH"],
         ),
         # QCD scale acceptance
-        rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_QCDScaleacc_ggH", "shape"): (
+        rl.NuisanceParameter(f"QCDscale_ggH_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
             "weight_qcd_scale",
             ["ggF"],
         ),
-        rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_QCDScaleacc_qqH", "shape"): (
+        rl.NuisanceParameter(f"QCDscale_qqH_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
             "weight_qcd_scale",
             ["VBF"],
         ),
-        rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_QCDScaleacc_VH", "shape"): (
+        rl.NuisanceParameter(f"QCDscale_WH_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
             "weight_qcd_scale",
-            ["WH", "ZH"],
+            ["WH"],
         ),
-        rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_QCDScaleacc_wjets", "shape"): (
+        rl.NuisanceParameter(f"QCDscale_ZH_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
+            "weight_qcd_scale",
+            ["ZH"],
+        ),
+        rl.NuisanceParameter(f"QCDscale_wjets_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
             "weight_qcd_scale",
             ["WJetsLNu"],
         ),
