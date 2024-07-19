@@ -145,7 +145,7 @@ def main(args):
             TriggerEfficienciesProcessor,
         )
 
-        p = TriggerEfficienciesProcessor(year=args.year)
+        p = TriggerEfficienciesProcessor(year=year, yearmod=yearmod)
 
     tic = time.time()
     if args.executor == "dask":

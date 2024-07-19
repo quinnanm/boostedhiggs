@@ -36,10 +36,11 @@ def build_p4(cand):
 class TriggerEfficienciesProcessor(ProcessorABC):
     """Accumulates yields from all input events: 1) before triggers, and 2) after triggers"""
 
-    def __init__(self, year="2017"):
+    def __init__(self, year="2017", yearmod=""):
         super(TriggerEfficienciesProcessor, self).__init__()
 
         self._year = year
+        self._yearmod = yearmod
         self._channels = ["ele"]
 
         # trigger paths
@@ -258,7 +259,9 @@ class TriggerEfficienciesProcessor(ProcessorABC):
                 for key, value in out[ch][key_].items():
                     out[ch][key_][key] = column_accumulator(value[selection.all(*selection.names)])
 
-        return {self._year: {dataset: {"nevents": nevents, "sumgenweight": sumgenweight, "skimmed_events": out}}}
+        return {
+            self._year + self._yearmod: {dataset: {"nevents": nevents, "sumgenweight": sumgenweight, "skimmed_events": out}}
+        }
 
     def postprocess(self, accumulator):
         for year, datasets in accumulator.items():
