@@ -1,7 +1,7 @@
-# Datacard for <Channel (ggFpt250to300) instance at 0x7f4ccb4c50d0> generated on 2024-07-19 09:54:37.516637
+# Datacard for <Channel (ggFpt250to300) instance at 0x7fcb61cdd4c0> generated on 2024-07-19 10:13:36.056570
 imax 1 # number of categories ('bins' but here we are using shape templates)
 jmax 12 # number of samples minus 1
-kmax 122 # number of nuisance parameters
+kmax 124 # number of nuisance parameters
 shapes * ggFpt250to300 testModel.root testModel:ggFpt250to300_$PROCESS testModel:ggFpt250to300_$PROCESS_$SYSTEMATIC
 bin ggFpt250to300
 observation 215.000
@@ -94,19 +94,21 @@ CMS_scale_j_RelSample_2018 shape                        1.0000         1.0000   
 EWK_SF shape                                                 -              -              -              -              -              -              -              -              -              -              -              -         1.0000
 FR_stat shape                                                -              -              -              -              -              -              -              -              -              -              -              -         1.0000
 Fake_rate_unc lnN                                            -              -              -              -              -              -              -              -              -              -              -              -         1.5000
-PDF_WH_ACCEPT_CMS_HWW_boosted shape                          -              -         1.0000              -              -              -              -              -              -              -              -              -              -
-PDF_ZH_ACCEPT_CMS_HWW_boosted shape                          -              -              -         1.0000              -              -              -              -              -              -              -              -              -
-PDF_ggH_ACCEPT_CMS_HWW_boosted shape                    1.0000              -              -              -              -              -              -              -              -              -              -              -              -
-PDF_qqH_ACCEPT_CMS_HWW_boosted shape                         -         1.0000              -              -              -              -              -              -              -              -              -              -              -
-QCDscale_WH_ACCEPT_CMS_HWW_boosted shape                     -              -         1.0000              -              -              -              -              -              -              -              -              -              -
+PDF_WH_hww_ACCEPT_CMS_HWW_boosted shape                      -              -         1.0000              -              -              -              -              -              -              -              -              -              -
+PDF_ZH_hww_ACCEPT_CMS_HWW_boosted shape                      -              -              -         1.0000              -              -              -              -              -              -              -              -              -
+PDF_ggH_hww_ACCEPT_CMS_HWW_boosted shape                1.0000              -              -              -              -              -              -              -              -              -              -              -              -
+PDF_qqH_hww_ACCEPT_CMS_HWW_boosted shape                     -         1.0000              -              -              -              -              -              -              -              -              -              -              -
+PDF_ttH_hww_ACCEPT_CMS_HWW_boosted shape                     -              -              -              -         1.0000              -              -              -              -              -              -              -              -
 QCDscale_WH_hww lnN                                          -              -  0.9930/1.0050              -              -              -              -              -              -              -              -              -              -
-QCDscale_ZH_ACCEPT_CMS_HWW_boosted shape                     -              -              -         1.0000              -              -              -              -              -              -              -              -              -
+QCDscale_WH_hww_ACCEPT_CMS_HWW_boosted shape                 -              -         1.0000              -              -              -              -              -              -              -              -              -              -
 QCDscale_ZH_hww lnN                                          -              -              -  0.9700/1.0380              -              -              -              -              -              -              -              -              -
-QCDscale_ggH_ACCEPT_CMS_HWW_boosted shape               1.0000              -              -              -              -              -              -              -              -              -              -              -              -
+QCDscale_ZH_hww_ACCEPT_CMS_HWW_boosted shape                 -              -              -         1.0000              -              -              -              -              -              -              -              -              -
 QCDscale_ggH_hww lnN                                    1.0390              -              -              -              -              -              -              -              -              -              -              -              -
-QCDscale_qqH_ACCEPT_CMS_HWW_boosted shape                    -         1.0000              -              -              -              -              -              -              -              -              -              -              -
+QCDscale_ggH_hww_ACCEPT_CMS_HWW_boosted shape           1.0000              -              -              -              -              -              -              -              -              -              -              -              -
 QCDscale_qqH_hww lnN                                         -  0.9970/1.0040              -              -              -              -              -              -              -              -              -              -              -
+QCDscale_qqH_hww_ACCEPT_CMS_HWW_boosted shape                -         1.0000              -              -              -              -              -              -              -              -              -              -              -
 QCDscale_ttH_hww lnN                                         -              -              -              -  0.9080/1.0580              -              -              -              -              -              -              -              -
+QCDscale_ttH_hww_ACCEPT_CMS_HWW_boosted shape                -              -              -              -         1.0000              -              -              -              -              -              -              -              -
 QCDscale_wjets_ACCEPT_CMS_HWW_boosted shape                  -              -              -              -              -              -         1.0000              -              -              -              -              -              -
 alpha_s lnN                                             1.0260         1.0050         1.0090         1.0090         1.0200              -              -              -              -              -              -              -              -
 lumi_13TeV_1718 lnN                                     1.0027         1.0027         1.0027         1.0027         1.0027         1.0027         1.0027         1.0027         1.0027         1.0027         1.0027         1.0027              -

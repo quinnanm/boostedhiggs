@@ -1,4 +1,4 @@
-# Datacard for <Channel (WJetsCR) instance at 0x7f4ccb3dc6d0> generated on 2024-07-19 09:54:37.533706
+# Datacard for <Channel (WJetsCR) instance at 0x7fcb61bb5730> generated on 2024-07-19 10:13:36.109819
 imax 1 # number of categories ('bins' but here we are using shape templates)
 jmax 7 # number of samples minus 1
 kmax 91 # number of nuisance parameters
