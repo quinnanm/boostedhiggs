@@ -284,36 +284,44 @@ def systs_from_parquets(years):
             sigs + bkgs,
         ),
         # PDF acceptance
-        rl.NuisanceParameter(f"PDF_ggH_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
+        rl.NuisanceParameter(f"PDF_ggH_hww_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
             "weight_pdf_acceptance",
             ["ggF"],
         ),
-        rl.NuisanceParameter(f"PDF_qqH_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
+        rl.NuisanceParameter(f"PDF_qqH_hww_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
             "weight_pdf_acceptance",
             ["VBF"],
         ),
-        rl.NuisanceParameter(f"PDF_WH_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
+        rl.NuisanceParameter(f"PDF_ttH_hww_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
+            "weight_pdf_acceptance",
+            ["ttH"],
+        ),
+        rl.NuisanceParameter(f"PDF_WH_hww_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
             "weight_pdf_acceptance",
             ["WH"],
         ),
-        rl.NuisanceParameter(f"PDF_ZH_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
+        rl.NuisanceParameter(f"PDF_ZH_hww_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
             "weight_pdf_acceptance",
             ["ZH"],
         ),
         # QCD scale acceptance
-        rl.NuisanceParameter(f"QCDscale_ggH_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
+        rl.NuisanceParameter(f"QCDscale_ggH_hww_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
             "weight_qcd_scale",
             ["ggF"],
         ),
-        rl.NuisanceParameter(f"QCDscale_qqH_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
+        rl.NuisanceParameter(f"QCDscale_qqH_hww_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
             "weight_qcd_scale",
             ["VBF"],
         ),
-        rl.NuisanceParameter(f"QCDscale_WH_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
+        rl.NuisanceParameter(f"QCDscale_ttH_hww_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
+            "weight_qcd_scale",
+            ["ttH"],
+        ),
+        rl.NuisanceParameter(f"QCDscale_WH_hww_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
             "weight_qcd_scale",
             ["WH"],
         ),
-        rl.NuisanceParameter(f"QCDscale_ZH_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
+        rl.NuisanceParameter(f"QCDscale_ZH_hww_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
             "weight_qcd_scale",
             ["ZH"],
         ),
