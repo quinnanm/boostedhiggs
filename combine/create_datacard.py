@@ -102,8 +102,6 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
         # add Fake
         sName = "Fake"
         templ = get_template(hists_templates, sName, ChName)
-        if templ == 0:
-            continue
         sample = rl.TemplateSample(ch.name + "_" + labels[sName], rl.Sample.BACKGROUND, templ)
 
         # add Fake unc.
