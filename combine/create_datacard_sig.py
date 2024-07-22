@@ -19,7 +19,7 @@ import warnings
 
 import pandas as pd
 import rhalphalib as rl
-from utils import get_template, labels, load_templates, samples, sigs
+from utils import bkgs, get_template, labels, load_templates, sigs
 
 rl.ParametericSample.PreferRooParametricHist = True
 logging.basicConfig(level=logging.INFO)
@@ -51,12 +51,11 @@ def create_datacard(hists_templates, add_ttbar_constraint=True, add_wjets_constr
 
     # fill datacard with systematics and rates
     for ChName in SIG_regions + CONTROL_regions:
-        Samples = samples.copy()
 
         ch = rl.Channel(ChName)
         model.addChannel(ch)
 
-        for sName in Samples:
+        for sName in sigs + bkgs:
 
             templ = get_template(hists_templates, sName, ChName)
             if templ == 0:
