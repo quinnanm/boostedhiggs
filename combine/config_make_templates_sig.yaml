@@ -1,9 +1,9 @@
 samples:
     - ggF
     - VBF
-    - ttH
     - WH
     - ZH
+    - ttH
     - WJetsLNu
     - TTbar
     - SingleTop
@@ -14,8 +14,8 @@ samples:
     - Data
 
 regions_sel:
-    "WJetsCR": (THWW>0.50) & (THWW<0.88) & (n_bjets_T==0)
-    "TopCR": (THWW>0.50) & (n_bjets_T>0)
+    "WJetsCR": (THWW>0.75) & (THWW<0.88) & (n_bjets_T==0)
+    "TopCR": (THWW>0.75) & (n_bjets_T>0)
 
     ### ParT vs ParT-Finetuned (no VBF and ggF categorization)
     "ParT9999": (fj_ParT_score>0.9999) & (n_bjets_T==0)
@@ -85,70 +85,70 @@ regions_sel:
     "VBF88": (THWW>88) & (n_bjets_T==0) & ( (mjj>1000) & (deta>3.5) )
 
     ### ggF pt bins
-    "ggF95pt250to300": (THWW>0.95) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
-    "ggF95pt300to450": (THWW>0.95) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    "ggF95pt450toInf": (THWW>0.95) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
+    "ggF95pt250to350": (THWW>0.95) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt<300)
+    "ggF95pt350to500": (THWW>0.95) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>300) & (rec_higgs_pt<450)
+    "ggF95pt500toInf": (THWW>0.95) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>450)
 
-    "ggF945pt250to300": (THWW>0.945) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
-    "ggF945pt300to450": (THWW>0.945) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    "ggF945pt450toInf": (THWW>0.945) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
+    "ggF945pt250to350": (THWW>0.945) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt<300)
+    "ggF945pt350to500": (THWW>0.945) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>300) & (rec_higgs_pt<450)
+    "ggF945pt500toInf": (THWW>0.945) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>450)
 
-    "ggF94pt250to300": (THWW>0.94) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
-    "ggF94pt300to450": (THWW>0.94) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    "ggF94pt450toInf": (THWW>0.94) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
+    "ggF94pt250to350": (THWW>0.94) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt<300)
+    "ggF94pt350to500": (THWW>0.94) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>300) & (rec_higgs_pt<450)
+    "ggF94pt500toInf": (THWW>0.94) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>450)
 
-    "ggF935pt250to300": (THWW>0.935) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
-    "ggF935pt300to450": (THWW>0.935) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    "ggF935pt450toInf": (THWW>0.935) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
+    "ggF935pt250to350": (THWW>0.935) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt<300)
+    "ggF935pt350to500": (THWW>0.935) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>300) & (rec_higgs_pt<450)
+    "ggF935pt500toInf": (THWW>0.935) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>450)
 
-    "ggF93pt250to300": (THWW>0.93) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
-    "ggF93pt300to450": (THWW>0.93) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    "ggF93pt450toInf": (THWW>0.93) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
+    "ggF93pt250to350": (THWW>0.93) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt<300)
+    "ggF93pt350to500": (THWW>0.93) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>300) & (rec_higgs_pt<450)
+    "ggF93pt500toInf": (THWW>0.93) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>450)
 
-    "ggF925pt250to300": (THWW>0.925) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
-    "ggF925pt300to450": (THWW>0.925) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    "ggF925pt450toInf": (THWW>0.925) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
+    "ggF925pt250to350": (THWW>0.925) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt<300)
+    "ggF925pt350to500": (THWW>0.925) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>300) & (rec_higgs_pt<450)
+    "ggF925pt500toInf": (THWW>0.925) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>450)
 
-    "ggF92pt250to300": (THWW>0.92) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
-    "ggF92pt300to450": (THWW>0.92) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    "ggF92pt450toInf": (THWW>0.92) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
+    "ggF92pt250to350": (THWW>0.92) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt<300)
+    "ggF92pt350to500": (THWW>0.92) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>300) & (rec_higgs_pt<450)
+    "ggF92pt500toInf": (THWW>0.92) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>450)
 
-    "ggF915pt250to300": (THWW>0.915) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
-    "ggF915pt300to450": (THWW>0.915) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    "ggF915pt450toInf": (THWW>0.915) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
+    "ggF915pt250to350": (THWW>0.915) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt<300)
+    "ggF915pt350to500": (THWW>0.915) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>300) & (rec_higgs_pt<450)
+    "ggF915pt500toInf": (THWW>0.915) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>450)
 
-    "ggF91pt250to300": (THWW>0.91) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
-    "ggF91pt300to450": (THWW>0.91) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    "ggF91pt450toInf": (THWW>0.91) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
+    "ggF91pt250to350": (THWW>0.91) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt<300)
+    "ggF91pt350to500": (THWW>0.91) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>300) & (rec_higgs_pt<450)
+    "ggF91pt500toInf": (THWW>0.91) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>450)
 
-    "ggF905pt250to300": (THWW>0.905) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
-    "ggF905pt300to450": (THWW>0.905) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    "ggF905pt450toInf": (THWW>0.905) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
+    "ggF905pt250to350": (THWW>0.905) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt<300)
+    "ggF905pt350to500": (THWW>0.905) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>300) & (rec_higgs_pt<450)
+    "ggF905pt500toInf": (THWW>0.905) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>450)
 
-    "ggF90pt250to300": (THWW>0.90) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
-    "ggF90pt300to450": (THWW>0.90) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    "ggF90pt450toInf": (THWW>0.90) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
+    "ggF90pt250to350": (THWW>0.90) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt<300)
+    "ggF90pt350to500": (THWW>0.90) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>300) & (rec_higgs_pt<450)
+    "ggF90pt500toInf": (THWW>0.90) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>450)
 
-    "ggF895pt250to300": (THWW>0.895) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
-    "ggF895pt300to450": (THWW>0.895) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    "ggF895pt450toInf": (THWW>0.895) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
+    "ggF895pt250to350": (THWW>0.895) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt<300)
+    "ggF895pt350to500": (THWW>0.895) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>300) & (rec_higgs_pt<450)
+    "ggF895pt500toInf": (THWW>0.895) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>450)
 
-    "ggF89pt250to300": (THWW>0.89) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
-    "ggF89pt300to450": (THWW>0.89) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    "ggF89pt450toInf": (THWW>0.89) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
+    "ggF89pt250to350": (THWW>0.89) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt<300)
+    "ggF89pt350to500": (THWW>0.89) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>300) & (rec_higgs_pt<450)
+    "ggF89pt500toInf": (THWW>0.89) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>450)
 
-    "ggF885pt250to300": (THWW>0.885) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
-    "ggF885pt300to450": (THWW>0.885) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    "ggF885pt450toInf": (THWW>0.885) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
+    "ggF885pt250to350": (THWW>0.885) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt<300)
+    "ggF885pt350to500": (THWW>0.885) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>300) & (rec_higgs_pt<450)
+    "ggF885pt500toInf": (THWW>0.885) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>450)
 
-    "ggF88pt250to300": (THWW>0.88) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt<300)
-    "ggF88pt300to450": (THWW>0.88) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>300) & (fj_pt<450)
-    "ggF88pt450toInf": (THWW>0.88) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (fj_pt>450)
+    "ggF88pt250to350": (THWW>0.88) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt<300)
+    "ggF88pt350to500": (THWW>0.88) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>300) & (rec_higgs_pt<450)
+    "ggF88pt500toInf": (THWW>0.88) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>450)
 
 samples_dir:
-    "2018": ../eos/May31_hww_2018
-    "2017": ../eos/May31_hww_2017
-    "2016": ../eos/May31_hww_2016
-    "2016APV": ../eos/May31_hww_2016APV
+    "2018": ../eos/June25_hww_2018
+    "2017": ../eos/June25_hww_2017
+    "2016": ../eos/June25_hww_2016
+    "2016APV": ../eos/June25_hww_2016APV
 
 model_path: ../../weaver-core-dev/experiments_finetuning/v35_30/model.onnx

@@ -64,10 +64,12 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
     # add extra selections to preselection
     presel = {
         "mu": {
-            "tagger>0.50": "THWW>0.50",
+            "fj_mass": "fj_mass>40",
+            "tagger>0.75": "THWW>0.75",
         },
         "ele": {
-            "tagger>0.50": "THWW>0.50",
+            "fj_mass": "fj_mass>40",
+            "tagger>0.75": "THWW>0.75",
         },
     }
 
