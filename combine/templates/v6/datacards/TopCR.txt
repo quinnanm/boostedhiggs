@@ -1,14 +1,14 @@
-# Datacard for <Channel (TopCR) instance at 0x7fcb61c34a30> generated on 2024-07-19 10:13:36.106285
+# Datacard for <Channel (TopCR) instance at 0x7f1dbe490a60> generated on 2024-07-22 10:13:52.548048
 imax 1 # number of categories ('bins' but here we are using shape templates)
 jmax 7 # number of samples minus 1
 kmax 91 # number of nuisance parameters
 shapes * TopCR testModel.root testModel:TopCR_$PROCESS testModel:TopCR_$PROCESS_$SYSTEMATIC
 bin TopCR
-observation 5343.000
+observation 1809.000
 bin                                                  TopCR          TopCR          TopCR          TopCR          TopCR          TopCR          TopCR   TopCR
 process                                              ttbar          wjets      singletop          zjets           wzqq        diboson       ewkvjets    fake
 process                                                  1              2              3              4              5              6              7       8
-rate                                              3546.119        832.384        287.724         46.599          5.657         11.351         29.293   2.446
+rate                                              1222.665        268.956        107.132         12.901          1.939          5.580          8.992   0.920
 CMS_HWW_boosted_TopCR_mcstat_bin0 shape             1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000  1.0000
 CMS_HWW_boosted_TopCR_mcstat_bin1 shape             1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000  1.0000
 CMS_HWW_boosted_TopCR_mcstat_bin2 shape             1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000  1.0000
@@ -18,26 +18,26 @@ CMS_HWW_boosted_TopCR_mcstat_bin5 shape             1.0000         1.0000       
 CMS_HWW_boosted_TopCR_mcstat_bin6 shape             1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000  1.0000
 CMS_HWW_boosted_TopCR_mcstat_bin7 shape             1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000  1.0000
 CMS_HWW_boosted_TopCR_mcstat_bin8 shape             1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000  1.0000
-CMS_HWW_boosted_W_d1kappa_EW lnN                         -         0.9896              -         0.9989              -              -              -       -
-CMS_HWW_boosted_W_d2kappa_EW lnN                         -         0.9929              -              -              -              -              -       -
-CMS_HWW_boosted_W_d3kappa_EW lnN                         -         0.9896              -              -              -              -              -       -
-CMS_HWW_boosted_Z_d2kappa_EW lnN                         -              -              -         1.0011              -              -              -       -
-CMS_HWW_boosted_Z_d3kappa_EW lnN                         -              -              -         0.9992              -              -              -       -
-CMS_HWW_boosted_btagSFbcCorrelated lnN       0.9813/1.0531  0.9789/1.0561  0.9902/1.0490  0.9730/1.0436  1.0131/1.0288  0.9623/1.0314  0.9927/1.0748       -
-CMS_HWW_boosted_btagSFbc_2016 lnN                   1.0034         1.0014         1.0028         0.9994         1.0072         0.9987         1.0012       -
-CMS_HWW_boosted_btagSFbc_2016APV lnN         0.9921/1.0073         1.0019  0.9933/1.0039         0.9976  0.9929/1.0112         0.9998         1.0022       -
-CMS_HWW_boosted_btagSFbc_2017 lnN            0.9825/1.0279  0.9780/1.0320  0.9837/1.0270  0.9707/1.0308  1.0103/1.0262  0.9619/1.0353  0.9876/1.0184       -
-CMS_HWW_boosted_btagSFbc_2018 lnN            0.9924/1.0330  0.9921/1.0365  0.9981/1.0346  0.9954/1.0265         1.0032         0.9996  0.9836/1.0761       -
-CMS_HWW_boosted_btagSFlightCorrelated lnN           1.0009  0.9938/1.0076         1.0009         1.0012  0.9887/1.0009  0.9942/1.0063         0.9985       -
-CMS_HWW_boosted_btagSFlight_2016 lnN                1.0002         1.0023         1.0000         1.0003         1.0000         1.0034         1.0001       -
-CMS_HWW_boosted_btagSFlight_2016APV lnN             1.0005         1.0046         1.0004         1.0007  0.9875/1.0024  0.9932/1.0074         0.9988       -
-CMS_HWW_boosted_btagSFlight_2017 lnN                1.0001         1.0007         1.0002         1.0018         1.0001         1.0000         1.0000       -
-CMS_HWW_boosted_btagSFlight_2018 lnN                1.0004         1.0030         1.0003         1.0014         1.0001         1.0000         1.0000       -
-CMS_HWW_boosted_d1K_NLO lnN                              -  0.9204/1.0583              -              -              -              -              -       -
-CMS_HWW_boosted_d2K_NLO lnN                              -  0.9339/1.0448              -              -              -              -              -       -
-CMS_HWW_boosted_d3K_NLO lnN                              -  0.9766/1.0021              -              -              -              -              -       -
-CMS_HWW_boosted_ele_identification lnN              1.0349         0.9993         0.9965         1.0016         0.9954         1.0012         0.9970       -
-CMS_HWW_boosted_ele_reconstruction lnN              1.0354         0.9994         0.9966         1.0021         0.9944         1.0010         0.9969       -
+CMS_HWW_boosted_W_d1kappa_EW lnN                         -         0.9909              -         1.0106              -              -              -       -
+CMS_HWW_boosted_W_d2kappa_EW lnN                         -         0.9942              -              -              -              -              -       -
+CMS_HWW_boosted_W_d3kappa_EW lnN                         -         0.9909              -              -              -              -              -       -
+CMS_HWW_boosted_Z_d2kappa_EW lnN                         -              -              -         1.0126              -              -              -       -
+CMS_HWW_boosted_Z_d3kappa_EW lnN                         -              -              -         1.0109              -              -              -       -
+CMS_HWW_boosted_btagSFbcCorrelated lnN       0.9779/1.0466  0.9780/1.0518  0.9879/1.0469  0.9552/1.0244  1.0349/1.0461  0.9214/1.0661  0.9986/1.0752       -
+CMS_HWW_boosted_btagSFbc_2016 lnN                   1.0023         1.0021         1.0028         0.9987         0.9957  0.9950/1.0128         1.0000       -
+CMS_HWW_boosted_btagSFbc_2016APV lnN         0.9923/1.0053         1.0005  0.9898/1.0037  0.9859/0.9968  0.9740/0.9994  0.9933/1.0099  0.9839/1.0008       -
+CMS_HWW_boosted_btagSFbc_2017 lnN            0.9819/1.0254  0.9789/1.0309  0.9850/1.0277  0.9519/1.0029  1.0173/1.0777  0.9240/1.0603  0.9758/1.0497       -
+CMS_HWW_boosted_btagSFbc_2018 lnN            0.9907/1.0296  0.9917/1.0337  0.9974/1.0332  0.9993/1.0442         1.0096              -  0.9942/1.0692       -
+CMS_HWW_boosted_btagSFlightCorrelated lnN           1.0008  0.9927/1.0108         1.0017         1.0059  0.9876/1.0112  0.9913/1.0057         1.0003       -
+CMS_HWW_boosted_btagSFlight_2016 lnN                1.0002         1.0028         1.0000         1.0032              -  0.9901/1.0070         1.0001       -
+CMS_HWW_boosted_btagSFlight_2016APV lnN             1.0005  0.9951/1.0061         1.0000         1.0034  0.9856/1.0135  0.9901/1.0070         1.0002       -
+CMS_HWW_boosted_btagSFlight_2017 lnN                1.0002         1.0010         1.0007         1.0056         1.0001         1.0000         1.0001       -
+CMS_HWW_boosted_btagSFlight_2018 lnN                1.0002         1.0047         1.0011         1.0000         1.0000              -         1.0000       -
+CMS_HWW_boosted_d1K_NLO lnN                              -  0.9216/1.0597              -              -              -              -              -       -
+CMS_HWW_boosted_d2K_NLO lnN                              -  0.9350/1.0463              -              -              -              -              -       -
+CMS_HWW_boosted_d3K_NLO lnN                              -  0.9779/1.0034              -              -              -              -              -       -
+CMS_HWW_boosted_ele_identification lnN              1.0334         0.9999         0.9985         1.0021         0.9694         0.9909         0.9900       -
+CMS_HWW_boosted_ele_reconstruction lnN              1.0342         1.0001         0.9993         1.0030         0.9693         0.9918         0.9903       -
 CMS_HWW_boosted_jmr_2016 shape                      1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000       -
 CMS_HWW_boosted_jmr_2016APV shape                   1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000       -
 CMS_HWW_boosted_jmr_2017 shape                      1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000       -
@@ -47,10 +47,10 @@ CMS_HWW_boosted_jms_2016APV shape                   1.0000         1.0000       
 CMS_HWW_boosted_jms_2017 shape                      1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000       -
 CMS_HWW_boosted_jms_2018 shape                      1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000       -
 CMS_HWW_boosted_miniisolation_SF_unc lnN     0.9800/1.0200  0.9800/1.0200  0.9800/1.0200  0.9800/1.0200  0.9800/1.0200  0.9800/1.0200  0.9800/1.0200       -
-CMS_HWW_boosted_mu_identification lnN               1.0382         0.9937         0.9969         1.0004         1.0026         1.0098         0.9892       -
-CMS_HWW_boosted_mu_isolation lnN                    1.0374         0.9926         0.9963         0.9994         1.0016         1.0088         0.9882       -
-CMS_HWW_boosted_mu_trigger lnN                      1.0384         0.9939         0.9972         1.0007         1.0030         1.0100         0.9895       -
-CMS_HWW_boosted_mu_trigger_iso lnN                  1.0374         0.9926         0.9963         0.9995         1.0016         1.0088         0.9882       -
+CMS_HWW_boosted_mu_identification lnN               1.0366         0.9943         0.9956         1.0106         1.0071         1.0227         0.9840       -
+CMS_HWW_boosted_mu_isolation lnN                    1.0358         0.9932         0.9950         1.0100         1.0054         1.0217         0.9827       -
+CMS_HWW_boosted_mu_trigger lnN                      1.0367         0.9944         0.9957         1.0109         1.0070         1.0229         0.9842       -
+CMS_HWW_boosted_mu_trigger_iso lnN                  1.0358         0.9932         0.9950         1.0100         1.0054         1.0218         0.9827       -
 CMS_l1_ecal_prefiring_2016 shape                    1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000       -
 CMS_l1_ecal_prefiring_2016APV shape                 1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000       -
 CMS_l1_ecal_prefiring_2017 shape                    1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000       -

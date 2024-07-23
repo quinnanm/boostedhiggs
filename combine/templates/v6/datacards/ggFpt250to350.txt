@@ -1,11 +1,11 @@
-# Datacard for <Channel (ggFpt250to300) instance at 0x7fcb61cdd4c0> generated on 2024-07-19 10:13:36.056570
+# Datacard for <Channel (ggFpt250to350) instance at 0x7f1dbe563b80> generated on 2024-07-22 10:13:52.534568
 imax 1 # number of categories ('bins' but here we are using shape templates)
 jmax 12 # number of samples minus 1
 kmax 124 # number of nuisance parameters
-shapes * ggFpt250to300 testModel.root testModel:ggFpt250to300_$PROCESS testModel:ggFpt250to300_$PROCESS_$SYSTEMATIC
-bin ggFpt250to300
+shapes * ggFpt250to350 testModel.root testModel:ggFpt250to350_$PROCESS testModel:ggFpt250to350_$PROCESS_$SYSTEMATIC
+bin ggFpt250to350
 observation 215.000
-bin                                              ggFpt250to300  ggFpt250to300  ggFpt250to300  ggFpt250to300  ggFpt250to300  ggFpt250to300  ggFpt250to300  ggFpt250to300  ggFpt250to300  ggFpt250to300  ggFpt250to300  ggFpt250to300  ggFpt250to300
+bin                                              ggFpt250to350  ggFpt250to350  ggFpt250to350  ggFpt250to350  ggFpt250to350  ggFpt250to350  ggFpt250to350  ggFpt250to350  ggFpt250to350  ggFpt250to350  ggFpt250to350  ggFpt250to350  ggFpt250to350
 process                                                    ggF            VBF             WH             ZH            ttH          ttbar          wjets      singletop          zjets           wzqq        diboson       ewkvjets           fake
 process                                                     -4             -3             -2             -1              0              1              2              3              4              5              6              7              8
 rate                                                     8.731          2.557          1.301          0.856          0.256         61.756        131.940          5.358          8.162          2.302         13.550          9.210          0.937
@@ -30,15 +30,15 @@ CMS_HWW_boosted_d2K_NLO lnN                                  -              -   
 CMS_HWW_boosted_d3K_NLO lnN                                  -              -              -              -              -              -  0.9743/1.0014              -              -              -              -              -              -
 CMS_HWW_boosted_ele_identification lnN                  0.9967         0.9913         0.9832         0.9846         0.9452         0.9921         0.9968         0.9831         0.9845         0.9951         0.9930         0.9978              -
 CMS_HWW_boosted_ele_reconstruction lnN                  0.9979         0.9923         0.9843         0.9857         0.9464         0.9940         0.9980         0.9845  0.9778/0.9884         0.9985         0.9948         0.9999              -
-CMS_HWW_boosted_ggFpt250to300_mcstat_bin0 shape         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000
-CMS_HWW_boosted_ggFpt250to300_mcstat_bin1 shape         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000
-CMS_HWW_boosted_ggFpt250to300_mcstat_bin2 shape         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000
-CMS_HWW_boosted_ggFpt250to300_mcstat_bin3 shape         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000
-CMS_HWW_boosted_ggFpt250to300_mcstat_bin4 shape         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000
-CMS_HWW_boosted_ggFpt250to300_mcstat_bin5 shape         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000
-CMS_HWW_boosted_ggFpt250to300_mcstat_bin6 shape         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000
-CMS_HWW_boosted_ggFpt250to300_mcstat_bin7 shape         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000
-CMS_HWW_boosted_ggFpt250to300_mcstat_bin8 shape         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000
+CMS_HWW_boosted_ggFpt250to350_mcstat_bin0 shape         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000
+CMS_HWW_boosted_ggFpt250to350_mcstat_bin1 shape         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000
+CMS_HWW_boosted_ggFpt250to350_mcstat_bin2 shape         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000
+CMS_HWW_boosted_ggFpt250to350_mcstat_bin3 shape         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000
+CMS_HWW_boosted_ggFpt250to350_mcstat_bin4 shape         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000
+CMS_HWW_boosted_ggFpt250to350_mcstat_bin5 shape         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000
+CMS_HWW_boosted_ggFpt250to350_mcstat_bin6 shape         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000
+CMS_HWW_boosted_ggFpt250to350_mcstat_bin7 shape         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000
+CMS_HWW_boosted_ggFpt250to350_mcstat_bin8 shape         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000
 CMS_HWW_boosted_jmr_2016 shape                          1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000              -
 CMS_HWW_boosted_jmr_2016APV shape                       1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000              -
 CMS_HWW_boosted_jmr_2017 shape                          1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000              -
@@ -135,5 +135,5 @@ top_reweighting shape                                        -              -   
 unclustered_Energy shape                                1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000              -
 ttbarnormSF extArg testModel.root:testModel
 wjetsnormSF extArg testModel.root:testModel
-ttbarnormSF_effect_ggFpt250to300_ttbar rateParam ggFpt250to300 ttbar (1*@0) ttbarnormSF
-wjetsnormSF_effect_ggFpt250to300_wjets rateParam ggFpt250to300 wjets (1*@0) wjetsnormSF
+ttbarnormSF_effect_ggFpt250to350_ttbar rateParam ggFpt250to350 ttbar (1*@0) ttbarnormSF
+wjetsnormSF_effect_ggFpt250to350_wjets rateParam ggFpt250to350 wjets (1*@0) wjetsnormSF
