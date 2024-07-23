@@ -131,7 +131,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         # OBJECT: muons
         muons = ak.with_field(events.Muon, 0, "flavor")
 
-        tight_muons = (
+        good_muons = (
             (muons.pt > 30)
             & (np.abs(muons.eta) < 2.4)
             & muons.mediumId
@@ -140,14 +140,16 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             & (np.abs(muons.dz) < 0.1)
             & (np.abs(muons.dxy) < 0.02)
         )
-        good_muons = tight_muons
-
         n_good_muons = ak.sum(good_muons, axis=1)
+
+        goodmuons = muons[good_muons]
+        goodmuons = goodmuons[ak.argsort(goodmuons.pt, ascending=False)]  # sort by pt
+        candidate_mu = ak.firsts(goodmuons)
 
         # OBJECT: electrons
         electrons = ak.with_field(events.Electron, 1, "flavor")
 
-        tight_electrons = (
+        good_electrons = (
             (electrons.pt > 38)
             & (np.abs(electrons.eta) < 2.5)
             & ((np.abs(electrons.eta) < 1.44) | (np.abs(electrons.eta) > 1.57))
@@ -158,9 +160,11 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             & (np.abs(electrons.dxy) < 0.05)
             & (electrons.sip3d <= 4.0)
         )
-        good_electrons = tight_electrons
-
         n_good_electrons = ak.sum(good_electrons, axis=1)
+
+        goodelectrons = electrons[good_electrons]
+        goodelectrons = goodelectrons[ak.argsort(goodelectrons.pt, ascending=False)]  # sort by pt
+        candidate_ele = ak.firsts(goodelectrons)
 
         # OBJECT: candidate lepton
         goodleptons = ak.concatenate([muons[good_muons], electrons[good_electrons]], axis=1)  # concat muons and electrons
@@ -242,6 +246,12 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             out[ch]["vars"]["met_pt"] = pad_val_nevents(met.pt)
             out[ch]["vars"]["lep_pt"] = pad_val_nevents(candidatelep.pt)
             out[ch]["vars"]["lep_eta"] = pad_val_nevents(candidatelep.eta)
+
+            out[ch]["vars"]["ele_pt"] = pad_val_nevents(candidate_ele.pt)
+            out[ch]["vars"]["ele_eta"] = pad_val_nevents(candidate_ele.eta)
+
+            out[ch]["vars"]["mu_pt"] = pad_val_nevents(candidate_mu.pt)
+            out[ch]["vars"]["mu_eta"] = pad_val_nevents(candidate_mu.eta)
 
             if "HToWW" in dataset:
                 genVars, _ = match_H(events.GenPart, candidatefj)
