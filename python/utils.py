@@ -226,7 +226,7 @@ axis_dict = {
     "SecondFatjet_pt": hist2.axis.Regular(30, 250, 600, name="var", label=r"Sub-Leading AK8 jet $p_T$ [GeV]", overflow=True),
     "fj_pt": hist2.axis.Regular(30, 250, 600, name="var", label=r"Higgs candidate jet $p_T$ [GeV]", overflow=True),
     "lep_pt": hist2.axis.Regular(40, 30, 400, name="var", label=r"Lepton $p_T$ [GeV]", overflow=True),
-    "lep_eta": hist2.axis.Regular(25, 0, 2.5, name="var", label=r"|Lepton $\eta$|", overflow=True),
+    "lep_eta": hist2.axis.Regular(25, -2.5, 2.5, name="var", label=r"Lepton $\eta$", overflow=True),
     "NumFatjets": hist2.axis.Regular(5, 0.5, 5.5, name="var", label="Number of AK8 jets", overflow=True),
     "NumOtherJets": hist2.axis.Regular(
         7, 0.5, 7.5, name="var", label="Number of AK4 jets (non-overlapping with AK8)", overflow=True
@@ -248,7 +248,7 @@ axis_dict = {
     "fj_mass": hist2.axis.Variable(
         list(range(10, 240, massbin)), name="var", label=r"Higgs candidate soft-drop mass [GeV]", overflow=True
     ),
-    "fj_lsf3": hist2.axis.Regular(35, 0, 1, name="var", label=r"Higgs candidate jet lsf3", overflow=True),
+    "fj_lsf3": hist2.axis.Regular(35, 0, 1, name="var", label=r"Higgs candidate jet LSF$_3$", overflow=True),
     # lepton isolation
     "lep_isolation": hist2.axis.Regular(35, 0, 0.5, name="var", label=r"Lepton PF isolation", overflow=True),
     "lep_isolation_ele": hist2.axis.Regular(35, 0, 0.5, name="var", label=r"Electron PF isolation", overflow=True),
@@ -310,6 +310,7 @@ def plot_hists(
         luminosity += lum / len(channels)
 
     for var in vars_to_plot:
+
         if var not in hists.keys():
             print(f"{var} not stored in hists")
             continue
@@ -318,6 +319,13 @@ def plot_hists(
 
         # get histograms
         h = hists[var]
+
+        if plot_Fake_unc:
+            plot_Fake_unc_ = True
+            if "Fake" not in h.axes["samples"]:
+                plot_Fake_unc_ = False
+        else:
+            plot_Fake_unc_ = False
 
         if h.shape[0] == 0:  # skip empty histograms (such as lepton_pt for hadronic channel)
             print("Empty histogram ", var)
@@ -384,7 +392,8 @@ def plot_hists(
 
             tot_err_MC = np.sqrt(tot.variances())
 
-            if plot_Fake_unc:
+            if plot_Fake_unc_:
+
                 tot_err_Fake = h[{"samples": "Fake"}].values() * plot_Fake_unc
                 errps_Fake = {
                     "hatch": "////",
@@ -455,7 +464,7 @@ def plot_hists(
                     label="Stat. unc.",
                 )
 
-                if plot_Fake_unc:  # plot the fake unc.
+                if plot_Fake_unc_:  # plot the fake unc.
                     rax.stairs(
                         values=(1 + tot_err_MC / tot_val) + tot_err_Fake / tot_val,
                         baseline=(1 + tot_err_MC / tot_val),
@@ -538,13 +547,13 @@ def plot_hists(
                 color="tab:red",
                 flow="none",
             )
-            # add MC stat errors
-            ax.stairs(
-                values=tot_signal.values() + np.sqrt(tot_signal.values()),
-                baseline=tot_signal.values() - np.sqrt(tot_signal.values()),
-                edges=sig.axes[0].edges,
-                **errps,
-            )
+            # # add MC stat errors
+            # ax.stairs(
+            #     values=tot_signal.values() + np.sqrt(tot_signal.values()),
+            #     baseline=tot_signal.values() - np.sqrt(tot_signal.values()),
+            #     edges=sig.axes[0].edges,
+            #     **errps_signal,
+            # )
 
         ax.set_ylabel("Events")
 
@@ -629,6 +638,7 @@ def plot_hists_sb(
     text_="",
     blind_region=None,
     save_as=None,
+    plot_Fake_unc=None,
 ):
     """
     Same function as the above except that;
@@ -655,6 +665,13 @@ def plot_hists_sb(
 
         # get histograms
         h = hists[var]
+
+        if plot_Fake_unc:
+            plot_Fake_unc_ = True
+            if "Fake" not in h.axes["samples"]:
+                plot_Fake_unc_ = False
+        else:
+            plot_Fake_unc_ = False
 
         if h.shape[0] == 0:  # skip empty histograms (such as lepton_pt for hadronic channel)
             print("Empty histogram ", var)
@@ -748,6 +765,18 @@ def plot_hists_sb(
 
             tot_err_MC = np.sqrt(tot.variances())
 
+            if plot_Fake_unc_:
+
+                tot_err_Fake = h[{"samples": "Fake"}].values() * plot_Fake_unc
+                errps_Fake = {
+                    "hatch": "////",
+                    "facecolor": "tab:orange",
+                    "lw": 0,
+                    "color": "tab:orange",
+                    "linewidth": 0,
+                    "alpha": 1,
+                }
+
         if add_data and data:
             data_err_opts = {
                 "linestyle": "none",
@@ -812,6 +841,22 @@ def plot_hists_sb(
                 rax.axhline(1, ls="--", color="k")
                 rax.set_ylim(0.2, 1.8)
 
+                if plot_Fake_unc_:  # plot the fake unc.
+                    rax.stairs(
+                        values=(1 + tot_err_MC / tot_val) + tot_err_Fake / tot_val,
+                        baseline=(1 + tot_err_MC / tot_val),
+                        edges=tot.axes[0].edges,
+                        **errps_Fake,
+                        label="Fake unc.",
+                    )
+                    rax.stairs(
+                        values=(1 - tot_err_MC / tot_val) - tot_err_Fake / tot_val,
+                        baseline=(1 - tot_err_MC / tot_val),
+                        edges=tot.axes[0].edges,
+                        **errps_Fake,
+                        # label="Fake unc.",
+                    )
+
         # plot the background
         if len(bkg) > 0 and not only_sig:
             hep.histplot(
@@ -833,6 +878,21 @@ def plot_hists_sb(
                 **errps,
                 label="Stat. unc.",
             )
+            if plot_Fake_unc:
+                ax.stairs(
+                    values=(tot.values() + tot_err_MC) + tot_err_Fake,
+                    baseline=(tot.values() + tot_err_MC),
+                    edges=tot.axes[0].edges,
+                    **errps_Fake,
+                    label="Fake unc.",
+                )
+                ax.stairs(
+                    values=(tot.values() - tot_err_MC) - tot_err_Fake,
+                    baseline=(tot.values() - tot_err_MC),
+                    edges=tot.axes[0].edges,
+                    **errps_Fake,
+                    # label="Fake unc.",
+                )
 
         # ax.text(0.5, 0.9, text_, fontsize=14, transform=ax.transAxes, weight="bold")
 

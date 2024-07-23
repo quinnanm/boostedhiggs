@@ -326,13 +326,13 @@ def plot_hists(
             color=[color_by_sample[bkg_label] for bkg_label in bkg_labels],
             flow="none",
         )
-        ax.stairs(
-            values=tot.values() + tot_err_MC,
-            baseline=tot.values() - tot_err_MC,
-            edges=tot.axes[0].edges,
-            **errps,
-            label="Stat. unc.",
-        )
+        # ax.stairs(
+        #     values=tot.values() + tot_err_MC,
+        #     baseline=tot.values() - tot_err_MC,
+        #     edges=tot.axes[0].edges,
+        #     **errps,
+        #     label="Stat. unc.",
+        # )
 
     # ax.text(0.5, 0.9, text_, fontsize=14, transform=ax.transAxes, weight="bold")
 
@@ -363,12 +363,12 @@ def plot_hists(
                 flow="none",
             )
             # add MC stat errors
-            # ax.stairs(
-            #     values=tot_signal.values() + np.sqrt(tot_signal.values()),
-            #     baseline=tot_signal.values() - np.sqrt(tot_signal.values()),
-            #     edges=sig.axes[0].edges,
-            #     **errps,
-            # )
+            ax.stairs(
+                values=tot_signal.values() + np.sqrt(tot_signal.values()),
+                baseline=tot_signal.values() - np.sqrt(tot_signal.values()),
+                edges=sig.axes[0].edges,
+                **errps,
+            )
 
     ax.set_ylabel("Events")
 
