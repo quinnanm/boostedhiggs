@@ -58,7 +58,7 @@ def initialize_syst_unc_hists(SYST_DICT, plot_config):
 def fill_syst_unc_hists(SYST_DICT, SYST_hists, year, ch, sample, var_to_plot, df):
 
     # only get systematic uncertainty on MC samples
-    if ("Fake" in sample) or ("Data" in sample):
+    if ("Fake" in sample) or ("Data" in sample) or (sample in utils.signals):
         return SYST_hists
 
     # get the nominal

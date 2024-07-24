@@ -7,7 +7,7 @@ from typing import List
 
 import pandas as pd
 import rhalphalib as rl
-from utils import bkgs, samples, sigs
+from systematics import bkgs, samples, sigs
 
 rl.ParametericSample.PreferRooParametricHist = True
 logging.basicConfig(level=logging.INFO)
