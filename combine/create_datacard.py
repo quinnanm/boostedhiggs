@@ -18,7 +18,7 @@ import warnings
 
 import pandas as pd
 import rhalphalib as rl
-from systematics import systs_from_parquets, systs_not_from_parquets
+from datacard_systematics import systs_from_parquets, systs_not_from_parquets
 from utils import bkgs, get_template, labels, load_templates, shape_to_num, sigs
 
 rl.ParametericSample.PreferRooParametricHist = True

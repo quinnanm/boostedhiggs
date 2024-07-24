@@ -69,6 +69,25 @@ sigs = ["ggF", "VBF", "WH", "ZH", "ttH"]
 samples = sigs + bkgs + ["Fake"]
 
 
+def get_common_sample_name(sample):
+    # first: check if the sample is in one of combine_samples_by_name
+    sample_to_use = None
+    for key in combine_samples_by_name:
+        if key in sample:
+            sample_to_use = combine_samples_by_name[key]
+            break
+
+    # second: if not, combine under common label
+    if sample_to_use is None:
+        for key in combine_samples:
+            if key in sample:
+                sample_to_use = combine_samples[key]
+                break
+            else:
+                sample_to_use = sample
+    return sample_to_use
+
+
 def get_sum_sumgenweight(pkl_files, year, sample):
     sum_sumgenweight = 0
     for ifile in pkl_files:
