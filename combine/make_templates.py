@@ -389,7 +389,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                                 df = df[nominal < threshold]
                                 nominal = nominal[nominal < threshold]
                             ###################################
-                            
+
                             if (sample_to_use in smpls) and (year in yrs) and (ch in var):
                                 shape_variation = df["rec_higgs_m" + var[ch] + f"_{variation}"]
                             else:

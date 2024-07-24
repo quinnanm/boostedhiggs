@@ -14,21 +14,21 @@ def get_systematic_dict(years):
                 value(s): the name of the variable in the parquet for that channel
     """
 
-    SYSTEMATICS_correlated = {
+    COMMON_systs_correlated = {
         "weight_pileup_id": (
             years,
             sigs + bkgs,
             {"ele": "weight_ele_pileupIDSF", "mu": "weight_mu_pileupIDSF"},
         ),
-        # systematics applied only on ggF/VBF
+        # systematics applied only on signal
         "weight_PSFSR": (
             years,
-            ["ggF", "VBF", "WH", "ZH"],
+            sigs,
             {"ele": "weight_ele_PSFSR", "mu": "weight_mu_PSFSR"},
         ),
         "weight_PSISR": (
             years,
-            ["ggF", "VBF", "WH", "ZH"],
+            sigs,
             {"ele": "weight_ele_PSISR", "mu": "weight_mu_PSISR"},
         ),
         # systematics applied only on WJets & DYJets
@@ -106,10 +106,10 @@ def get_systematic_dict(years):
         ),
     }
 
-    SYSTEMATICS_uncorrelated = {}
+    COMMON_systs_uncorrelated = {}
     for year in years:
-        SYSTEMATICS_uncorrelated = {
-            **SYSTEMATICS_uncorrelated,
+        COMMON_systs_uncorrelated = {
+            **COMMON_systs_uncorrelated,
             **{
                 f"weight_pileup_{year}": (
                     [year],
@@ -119,8 +119,8 @@ def get_systematic_dict(years):
             },
         }
         if year != "2018":
-            SYSTEMATICS_uncorrelated = {
-                **SYSTEMATICS_uncorrelated,
+            COMMON_systs_uncorrelated = {
+                **COMMON_systs_uncorrelated,
                 **{
                     f"weight_L1Prefiring_{year}": (
                         [year],
@@ -130,7 +130,7 @@ def get_systematic_dict(years):
                 },
             }
 
-    # btag syst. have a different treatement because they are not stored in the nominal
+    # btag syst. have a different treatment because they are not stored in the nominal
     BTAG_systs_correlated = {
         "weight_btagSFlightCorrelated": (
             years,
@@ -260,7 +260,7 @@ def get_systematic_dict(years):
         }
 
     SYST_DICT = {
-        "common": {**SYSTEMATICS_correlated, **SYSTEMATICS_uncorrelated},
+        "common": {**COMMON_systs_correlated, **COMMON_systs_uncorrelated},
         "btag": {**BTAG_systs_correlated, **BTAG_systs_uncorrelated},
         "JEC": {**JEC_systs_correlated, **JEC_systs_uncorrelated},
     }

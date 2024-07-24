@@ -46,11 +46,11 @@ combine_samples = {
 # (name in templates, name in cards)
 labels = {
     # sigs
-    "ggF": "ggF",
-    "VBF": "VBF",
-    "ttH": "ttH",
-    "WH": "WH",
-    "ZH": "ZH",
+    "ggF": "ggH_hww",
+    "VBF": "qqH_hww",
+    "ttH": "ttH_hww",
+    "WH": "WH_hww",
+    "ZH": "ZH_hww",
     # BKGS
     "WJetsLNu": "wjets",
     "TTbar": "ttbar",
@@ -63,10 +63,6 @@ labels = {
     # "WZQQorDYJets": "vjets",
     "Fake": "fake",
 }
-
-bkgs = ["TTbar", "WJetsLNu", "SingleTop", "DYJets", "WZQQ", "Diboson", "EWKvjets"]
-sigs = ["ggF", "VBF", "WH", "ZH", "ttH"]
-samples = sigs + bkgs + ["Fake"]
 
 
 def get_common_sample_name(sample):

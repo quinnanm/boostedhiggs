@@ -1,27 +1,27 @@
 samples:
     - ggF
-    # - VBF
-    # - WH
-    # - ZH
-    # - ttH
-    # - WJetsLNu
-    # - TTbar
-    # - SingleTop
-    # - Diboson
-    # - EWKvjets
-    # - DYJets
-    # - WZQQ
-    # - Data
+    - VBF
+    - WH
+    - ZH
+    - ttH
+    - WJetsLNu
+    - TTbar
+    - SingleTop
+    - Diboson
+    - EWKvjets
+    - DYJets
+    - WZQQ
+    - Data
 
 regions_sel:
 
-    # "VBF": (n_bjets_T==0) & (THWW>0.905) & ( (mjj>1000) & (deta>3.5) ) & (rec_higgs_pt>250)
+    "VBF": (n_bjets_T==0) & (THWW>0.905) & ( (mjj>1000) & (deta>3.5) ) & (rec_higgs_pt>250)
     "ggFpt250to350": (n_bjets_T==0) & (THWW>0.93) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>250) & (rec_higgs_pt<350)
-    # "ggFpt350to500": (n_bjets_T==0) & (THWW>0.93) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>350) & (rec_higgs_pt<500)
-    # "ggFpt500toInf": (n_bjets_T==0) & (THWW>0.93) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>500)
+    "ggFpt350to500": (n_bjets_T==0) & (THWW>0.93) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>350) & (rec_higgs_pt<500)
+    "ggFpt500toInf": (n_bjets_T==0) & (THWW>0.93) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>500)
 
-    # "WJetsCR": (n_bjets_T==0) & (THWW<0.905) & (rec_higgs_pt>250)
-    # "TopCR": (n_bjets_T>0) & (rec_higgs_pt>250)
+    "WJetsCR": (n_bjets_T==0) & (THWW<0.905) & (rec_higgs_pt>250)
+    "TopCR": (n_bjets_T>0) & (rec_higgs_pt>250)
 
 samples_dir:
     "2018": ../eos/July18_hww_2018

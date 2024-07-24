@@ -1,10 +1,10 @@
 events_dict_path: "hists/v1/events_dict.pkl"
 
 years_to_plot:
-    # - "2018"
+    - "2018"
     - "2017"
-    # - "2016"
-    # - "2016APV"
+    - "2016"
+    - "2016APV"
 
 channels_to_plot:
     - ele
@@ -14,9 +14,10 @@ regions_to_plot:
 
     # "2016": met_pt > 20
     # "2016APV": met_pt > 20
-    "2017": met_pt > 20
+    # "2017": met_pt > 20
     # "2018": met_pt > 20
 
+    "RUN2": met_pt > 20
 
 
     # Pre-selection: met_pt > 20
@@ -78,7 +79,7 @@ plot_syst_unc: True
 plot_Fake_unc: 0.5
 
 add_data: 1
-add_soverb: True
+add_soverb: False
 logy: 0
 legend_ncol: 2
 mult: 1

@@ -19,7 +19,8 @@ import warnings
 import pandas as pd
 import rhalphalib as rl
 from datacard_systematics import systs_from_parquets, systs_not_from_parquets
-from utils import bkgs, get_template, labels, load_templates, shape_to_num, sigs
+from systematics import bkgs, sigs
+from utils import get_template, labels, load_templates, shape_to_num
 
 rl.ParametericSample.PreferRooParametricHist = True
 logging.basicConfig(level=logging.INFO)
