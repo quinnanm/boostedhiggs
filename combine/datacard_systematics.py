@@ -329,8 +329,8 @@ def systs_from_parquets(years):
             "weight_qcd_scale",
             ["WJetsLNu"],
         ),
-        rl.NuisanceParameter("top_reweighting", "shape"): (
-            f"{CMS_PARAMS_LABEL}_top_reweighting",
+        rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_top_reweighting", "shape"): (
+            "top_reweighting",
             ["TTbar"],
         ),
     }
