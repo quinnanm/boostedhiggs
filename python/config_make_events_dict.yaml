@@ -3,8 +3,8 @@ samples_dir:
     "2017": ../eos/July18_hww_2017
     "2016": ../eos/July18_hww_2016
     "2016APV": ../eos/July18_hww_2016APV
-    
-years: 
+
+years:
     - "2018"
     - "2017"
     - "2016"
@@ -17,10 +17,10 @@ channels:
 presel:
     ele:
         msoftdrop: (fj_mass>40)
-        THWW: (THWW>0.75)
+        # THWW: (THWW>0.75)
     mu:
         msoftdrop: (fj_mass>40)
-        THWW: (THWW>0.75)
+        # THWW: (THWW>0.75)
 
 samples:
     - ggF

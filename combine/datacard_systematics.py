@@ -105,46 +105,46 @@ def systs_not_from_parquets(years: List[str], lep_channels: List[str]):
     # Theory Systematics. (convention: https://gitlab.cern.ch/hh/naming-conventions#theory-uncertainties)
 
     # PDF
-    n = rl.NuisanceParameter("pdf_Higgs_ggH_hww", "lnN")
-    systs_dict["ggF"]["pdf_Higgs_ggH_hww"] = n
-    systs_dict_values["ggF"]["pdf_Higgs_ggH_hww"] = (1.019, None)
+    n = rl.NuisanceParameter("pdf_Higgs_ggH", "lnN")
+    systs_dict["ggF"]["pdf_Higgs_ggH"] = n
+    systs_dict_values["ggF"]["pdf_Higgs_ggH"] = (1.019, None)
 
-    n = rl.NuisanceParameter("pdf_Higgs_qqH_hww", "lnN")
-    systs_dict["VBF"]["pdf_Higgs_qqH_hww"] = n
-    systs_dict_values["VBF"]["pdf_Higgs_qqH_hww"] = (1.021, None)
+    n = rl.NuisanceParameter("pdf_Higgs_qqH", "lnN")
+    systs_dict["VBF"]["pdf_Higgs_qqH"] = n
+    systs_dict_values["VBF"]["pdf_Higgs_qqH"] = (1.021, None)
 
-    n = rl.NuisanceParameter("pdf_Higgs_ttH_hww", "lnN")
-    systs_dict["ttH"]["pdf_Higgs_ttH_hww"] = n
-    systs_dict_values["ttH"]["pdf_Higgs_ttH_hww"] = (1.03, None)
+    n = rl.NuisanceParameter("pdf_Higgs_ttH", "lnN")
+    systs_dict["ttH"]["pdf_Higgs_ttH"] = n
+    systs_dict_values["ttH"]["pdf_Higgs_ttH"] = (1.03, None)
 
-    n = rl.NuisanceParameter("pdf_Higgs_WH_hww", "lnN")
+    n = rl.NuisanceParameter("pdf_Higgs_WH", "lnN")
     systs_dict["WH"]["pdf_Higgs_WH"] = n
     systs_dict_values["WH"]["pdf_Higgs_WH"] = (1.017, None)
 
-    n = rl.NuisanceParameter("pdf_Higgs_ZH_hww", "lnN")
-    systs_dict["ZH"]["pdf_Higgs_ZH_hww"] = n
-    systs_dict_values["ZH"]["pdf_Higgs_ZH_hww"] = (1.013, None)
+    n = rl.NuisanceParameter("pdf_Higgs_ZH", "lnN")
+    systs_dict["ZH"]["pdf_Higgs_ZH"] = n
+    systs_dict_values["ZH"]["pdf_Higgs_ZH"] = (1.013, None)
 
     # QCD scale
-    n = rl.NuisanceParameter("QCDscale_ggH_hww", "lnN")
-    systs_dict["ggF"]["QCDscale_ggH_hww"] = n
-    systs_dict_values["ggF"]["QCDscale_ggH_hww"] = (1.039, None)
+    n = rl.NuisanceParameter("QCDscale_ggH", "lnN")
+    systs_dict["ggF"]["QCDscale_ggH"] = n
+    systs_dict_values["ggF"]["QCDscale_ggH"] = (1.039, None)
 
-    n = rl.NuisanceParameter("QCDscale_qqH_hww", "lnN")
-    systs_dict["VBF"]["QCDscale_qqH_hww"] = n
-    systs_dict_values["VBF"]["QCDscale_qqH_hww"] = (1.004, 0.997)
+    n = rl.NuisanceParameter("QCDscale_qqH", "lnN")
+    systs_dict["VBF"]["QCDscale_qqH"] = n
+    systs_dict_values["VBF"]["QCDscale_qqH"] = (1.004, 0.997)
 
-    n = rl.NuisanceParameter("QCDscale_ttH_hww", "lnN")
-    systs_dict["ttH"]["QCDscale_ttH_hww"] = n
-    systs_dict_values["ttH"]["QCDscale_ttH_hww"] = (1.058, 0.908)
+    n = rl.NuisanceParameter("QCDscale_ttH", "lnN")
+    systs_dict["ttH"]["QCDscale_ttH"] = n
+    systs_dict_values["ttH"]["QCDscale_ttH"] = (1.058, 0.908)
 
-    n = rl.NuisanceParameter("QCDscale_WH_hww", "lnN")
-    systs_dict["WH"]["QCDscale_WH_hww"] = n
-    systs_dict_values["WH"]["QCDscale_WH_hww"] = (1.005, 0.993)
+    n = rl.NuisanceParameter("QCDscale_WH", "lnN")
+    systs_dict["WH"]["QCDscale_WH"] = n
+    systs_dict_values["WH"]["QCDscale_WH"] = (1.005, 0.993)
 
-    n = rl.NuisanceParameter("QCDscale_ZH_hww", "lnN")
-    systs_dict["ZH"]["QCDscale_ZH_hww"] = n
-    systs_dict_values["ZH"]["QCDscale_ZH_hww"] = (1.038, 0.97)
+    n = rl.NuisanceParameter("QCDscale_ZH", "lnN")
+    systs_dict["ZH"]["QCDscale_ZH"] = n
+    systs_dict_values["ZH"]["QCDscale_ZH"] = (1.038, 0.97)
 
     # alphas
     n = rl.NuisanceParameter("alpha_s", "lnN")
@@ -183,44 +183,44 @@ def systs_from_parquets(years):
             sigs + bkgs,
         ),
         # ISR systematics
-        rl.NuisanceParameter("ps_isr_ggH_hww", "shape"): (
+        rl.NuisanceParameter("ps_isr_ggH", "shape"): (
             "weight_PSISR",
             ["ggF"],
         ),
-        rl.NuisanceParameter("ps_isr_qqH_hww", "shape"): (
+        rl.NuisanceParameter("ps_isr_qqH", "shape"): (
             "weight_PSISR",
             ["VBF"],
         ),
-        rl.NuisanceParameter("ps_isr_WH_hww", "shape"): (
+        rl.NuisanceParameter("ps_isr_WH", "shape"): (
             "weight_PSISR",
             ["WH"],
         ),
-        rl.NuisanceParameter("ps_isr_ZH_hww", "shape"): (
+        rl.NuisanceParameter("ps_isr_ZH", "shape"): (
             "weight_PSISR",
             ["ZH"],
         ),
-        rl.NuisanceParameter("ps_isr_ttH_hww", "shape"): (
+        rl.NuisanceParameter("ps_isr_ttH", "shape"): (
             "weight_PSISR",
             ["ttH"],
         ),
         # FSR systematics
-        rl.NuisanceParameter("ps_fsr_ggH_hww", "shape"): (
+        rl.NuisanceParameter("ps_fsr_ggH", "shape"): (
             "weight_PSFSR",
             ["ggF"],
         ),
-        rl.NuisanceParameter("ps_fsr_qqH_hww", "shape"): (
+        rl.NuisanceParameter("ps_fsr_qqH", "shape"): (
             "weight_PSFSR",
             ["VBF"],
         ),
-        rl.NuisanceParameter("ps_fsr_WH_hww", "shape"): (
+        rl.NuisanceParameter("ps_fsr_WH", "shape"): (
             "weight_PSFSR",
             ["WH"],
         ),
-        rl.NuisanceParameter("ps_fsr_ZH_hww", "shape"): (
+        rl.NuisanceParameter("ps_fsr_ZH", "shape"): (
             "weight_PSFSR",
             ["ZH"],
         ),
-        rl.NuisanceParameter("ps_fsr_ttH_hww", "shape"): (
+        rl.NuisanceParameter("ps_fsr_ttH", "shape"): (
             "weight_PSFSR",
             ["ttH"],
         ),

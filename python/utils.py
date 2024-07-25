@@ -73,16 +73,20 @@ def get_common_sample_name(sample):
 
 
 def get_sum_sumgenweight(pkl_files, year, sample):
+    """Load and sum the sumgenweight of each pkl file."""
+
     sum_sumgenweight = 0
     for ifile in pkl_files:
-        # load and sum the sumgenweight of each
         with open(ifile, "rb") as f:
             metadata = pkl.load(f)
         sum_sumgenweight = sum_sumgenweight + metadata[sample][year]["sumgenweight"]
+
     return sum_sumgenweight
 
 
 def get_xsecweight(pkl_files, year, sample, is_data, luminosity):
+    """Get xsec-weight and scales events by lumi/sumgenweights."""
+
     if not is_data:
         # find xsection
         f = open("../fileset/xsec_pfnano.json")
@@ -194,7 +198,7 @@ plot_labels = {
     "TTbar_LP": "TTbar_LP",
     "TTbar (2 gen quarks matched)": r"$t\bar{t}$+jets (2 gen quarks matched)",
     "TTbar (other)": r"$t\bar{t}$+jets (other)",
-    "TTbar_pt": r"$t\bar{t}$+jets (after pt reweighting)",
+    # "TTbar": r"$t\bar{t}$+jets (after $p_T$ reweighting)",
     # "TTbar_pt": r"$t\bar{t}$+jets",
 }
 
@@ -240,6 +244,7 @@ def get_axis(var, massbin=5):
         "inclusive_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
         "fj_ParT_score_finetuned": hist2.axis.Regular(25, 0.5, 1, name="var", label=r"$T_{HWW}$", overflow=True),
         "THWW": hist2.axis.Regular(25, 0, 1, name="var", label=r"$T_{HWW}$", overflow=True),
+        # "THWW": hist2.axis.Regular(15, 0.75, 1, name="var", label=r"$T_{HWW}$", overflow=True),
         "fj_ParT_inclusive_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"ParT-Finetuned score", overflow=True),
         "fj_ParT_all_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
         # AN
@@ -271,7 +276,7 @@ def get_axis(var, massbin=5):
         "ht": hist2.axis.Regular(30, 400, 1400, name="var", label=r"ht [GeV]", overflow=True),
         "rec_W_qq_m": hist2.axis.Regular(40, 0, 160, name="var", label=r"Reconstructed $W_{qq}$ mass [GeV]", overflow=True),
         "rec_higgs_m": hist2.axis.Variable(
-            list(range(55, 255, massbin)), name="var", label=r"Higgs reconstructed mass [GeV]", overflow=True
+            list(range(45, 255, massbin)), name="var", label=r"Higgs reconstructed mass [GeV]", overflow=True
         ),
         "rec_W_lnu_m": hist2.axis.Regular(
             40, 0, 160, name="var", label=r"Reconstructed $W_{\ell \nu}$ mass [GeV]", overflow=True

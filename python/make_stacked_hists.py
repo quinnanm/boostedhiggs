@@ -204,7 +204,26 @@ def plot_hists_from_events_dict(events_dict, plot_config):
                         if (ch == "mu") and (sample == "Fake"):
                             continue
 
-                        df = events_dict[year][ch][sample]
+                        # -------------- some samples may be split during plotting to matched/unmatched
+                        if "TTbar" in sample:
+                            df = events_dict[year][ch]["TTbar"]
+
+                            if "TTbar_allmatched" in sample:
+                                df = df[df["fj_isTop_W_lep_b"] == 1]
+                            elif "TTbar_unmatched" in sample:
+                                df = df[df["fj_isTop_W_lep_b"] != 1]
+
+                        elif "WJetsLNu" in sample:
+                            df = events_dict[year][ch]["WJetsLNu"]
+
+                            if "unmatched" in sample:
+                                df = df[df["fj_V_isMatched"] != 1]
+                            elif "matched" in sample:
+                                df = df[df["fj_V_isMatched"] == 1]
+
+                        else:
+                            df = events_dict[year][ch][sample]
+
                         df = df.query(sel)
 
                         if sample == "EWKvjets":
@@ -219,7 +238,7 @@ def plot_hists_from_events_dict(events_dict, plot_config):
                                 met_phi = np.arctan2(np.sin(met_phi), np.cos(met_phi))  # ensure it is between [-pi, pi]
                                 return met_phi
 
-                            df["met_phi"] = compute_met_phi(df["fj_phi"], df["met_fj_dphi"])
+                            df[var_to_plot] = compute_met_phi(df["fj_phi"], df["met_fj_dphi"])
 
                         elif "lep_isolation_ele" in var_to_plot:
                             if ch != "ele":
@@ -271,6 +290,7 @@ def plot_hists_from_events_dict(events_dict, plot_config):
             logy=plot_config["logy"],
             mult=plot_config["mult"],
             legend_ncol=plot_config["legend_ncol"],
+            text_=plot_config["legend_text"],
             outpath=plot_config["outdir"] + f"/{region}/",
             plot_Fake_unc=plot_config["plot_Fake_unc"] if plot_config["plot_Fake_unc"] != 0 else None,
             plot_syst_unc=(SYST_UNC_up, SYST_UNC_down) if plot_config["plot_syst_unc"] else None,
