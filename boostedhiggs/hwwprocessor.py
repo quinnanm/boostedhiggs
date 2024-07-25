@@ -648,8 +648,8 @@ class HwwProcessor(processor.ProcessorABC):
                     tops = events.GenPart[
                         get_pid_mask(events.GenPart, 6, byall=False) * events.GenPart.hasFlags(["isLastCopy"])
                     ]
-                    add_TopPtReweighting(self.weights[ch], tops.pt)
-                    # variables["top_reweighting"] = add_TopPtReweighting(tops.pt)
+                    # add_TopPtReweighting(self.weights[ch], tops.pt)
+                    variables["top_reweighting"] = add_TopPtReweighting(tops.pt)
 
                 if self.isSignal:
                     add_HiggsEW_kFactors(self.weights[ch], events.GenPart, dataset)
