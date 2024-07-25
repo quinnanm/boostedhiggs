@@ -1091,7 +1091,7 @@ def add_TopPtReweighting(weights, topPt):
 
     nominal = np.sqrt(toppt_weight1 * toppt_weight2)
 
-    weights.add("TopPtReweight", nominal, nominal, 1 / nominal)
+    weights.add("TopPtReweight", nominal, nominal**2, np.ones_like(nominal))
 
     return nominal
 
