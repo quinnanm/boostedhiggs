@@ -27,11 +27,11 @@ from boostedhiggs.corrections import (
     btagWPs,
     get_btag_weights,
     get_jec_jets,
+    get_JetVetoMap,
     get_jmsr,
     getJECVariables,
     getJMSRVariables,
     met_factory,
-    get_JetVetoMap,
 )
 from boostedhiggs.utils import VScore, get_pid_mask, match_H, match_Top, match_V, sigs
 
@@ -653,7 +653,7 @@ class HwwProcessor(processor.ProcessorABC):
                 if self.isSignal:
                     add_HiggsEW_kFactors(self.weights[ch], events.GenPart, dataset)
 
-                if self.isSignal or "TT" in dataset or "WJets" in dataset:
+                if self.isSignal or "TT" in dataset or "WJets" in dataset or "ST_" in dataset:
                     """
                     For the QCD acceptance uncertainty:
                     - we save the individual weights [0, 1, 3, 5, 7, 8]
@@ -674,7 +674,7 @@ class HwwProcessor(processor.ProcessorABC):
                                 scale_weights[f"weight_scale{i}"] = events.LHEScaleWeight[:, i]
                     variables = {**variables, **scale_weights}
 
-                if self.isSignal:
+                if self.isSignal or "TT" in dataset or "WJets" in dataset or "ST_" in dataset:
                     """
                     For the PDF acceptance uncertainty:
                     - store 103 variations. 0-100 PDF values
@@ -690,7 +690,7 @@ class HwwProcessor(processor.ProcessorABC):
                             pdf_weights[f"weight_pdf{i}"] = events.LHEPdfWeight[:, i]
                     variables = {**variables, **pdf_weights}
 
-                if self.isSignal:
+                if self.isSignal or "TT" in dataset or "WJets" in dataset or "ST_" in dataset:
                     add_ps_weight(
                         self.weights[ch],
                         events.PSWeight if "PSWeight" in events.fields else [],
