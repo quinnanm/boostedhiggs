@@ -1084,15 +1084,14 @@ def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
     return pf_cands, gen_parts_eta_phi, ak8_jets
 
 
-def add_TopPtReweighting(topPt):
+def add_TopPtReweighting(weights, topPt):
 
     toppt_weight1 = np.exp(0.0615 - 0.0005 * np.clip(topPt[:, 0], 0.0, 500.0))
     toppt_weight2 = np.exp(0.0615 - 0.0005 * np.clip(topPt[:, 1], 0.0, 500.0))
 
     nominal = np.sqrt(toppt_weight1 * toppt_weight2)
-    # up = nominal**2
-    # down = np.ones_like(nominal)
-    # weights.add("TopPtReweight", nominal, up, down)
+
+    weights.add("TopPtReweight", nominal, nominal, 1 / nominal)
 
     return nominal
 
