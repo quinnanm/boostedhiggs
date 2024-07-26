@@ -177,6 +177,8 @@ class HwwProcessor(processor.ProcessorABC):
 
         # sum LHE weight
         sumlheweight = {}
+        print(events.fields)
+        print(events.LHEScaleWeight)
         if "LHEScaleWeight" in events.fields and self.isMC:
             if len(events.LHEScaleWeight[0]) == 9:
                 for i in range(len(events.LHEScaleWeight[0])):
@@ -184,8 +186,6 @@ class HwwProcessor(processor.ProcessorABC):
 
         # sum PDF weight
         sumpdfweight = {}
-        print(events.fields)
-        print(events.LHEPdfWeight)
         if "LHEPdfWeight" in events.fields and self.isMC:
             for i in range(len(events.LHEPdfWeight[0])):
                 sumpdfweight[i] = ak.sum(events.LHEPdfWeight[:, i] * events.genWeight)
