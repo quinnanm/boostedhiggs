@@ -203,6 +203,18 @@ def systs_from_parquets(years):
             "weight_PSISR",
             ["ttH"],
         ),
+        rl.NuisanceParameter("ps_isr_wjets", "shape"): (
+            "weight_PSISR",
+            ["WJetsLNu"],
+        ),
+        rl.NuisanceParameter("ps_isr_ttbar", "shape"): (
+            "weight_PSISR",
+            ["TTbar"],
+        ),
+        rl.NuisanceParameter("ps_isr_singletop", "shape"): (
+            "weight_PSISR",
+            ["SingleTop"],
+        ),
         # FSR systematics
         rl.NuisanceParameter("ps_fsr_ggH", "shape"): (
             "weight_PSFSR",
@@ -223,6 +235,18 @@ def systs_from_parquets(years):
         rl.NuisanceParameter("ps_fsr_ttH", "shape"): (
             "weight_PSFSR",
             ["ttH"],
+        ),
+        rl.NuisanceParameter("ps_fsr_wjets", "shape"): (
+            "weight_PSFSR",
+            ["WJetsLNu"],
+        ),
+        rl.NuisanceParameter("ps_fsr_ttbar", "shape"): (
+            "weight_PSFSR",
+            ["TTbar"],
+        ),
+        rl.NuisanceParameter("ps_fsr_singletop", "shape"): (
+            "weight_PSFSR",
+            ["SingleTop"],
         ),
         # systematics applied only on WJets & DYJets
         rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_d1K_NLO", "lnN"): (
@@ -328,6 +352,14 @@ def systs_from_parquets(years):
         rl.NuisanceParameter(f"QCDscale_wjets_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
             "weight_qcd_scale",
             ["WJetsLNu"],
+        ),
+        rl.NuisanceParameter(f"QCDscale_ttbar_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
+            "weight_qcd_scale",
+            ["TTbar"],
+        ),
+        rl.NuisanceParameter(f"QCDscale_singletop_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
+            "weight_qcd_scale",
+            ["SingleTop"],
         ),
         rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_top_reweighting", "shape"): (
             "top_reweighting",

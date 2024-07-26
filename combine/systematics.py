@@ -21,15 +21,15 @@ def get_systematic_dict(years):
             sigs + bkgs,
             {"ele": "weight_ele_pileupIDSF", "mu": "weight_mu_pileupIDSF"},
         ),
-        # systematics applied only on signal
+        # ISR/FSR
         "weight_PSFSR": (
             years,
-            sigs,
+            sigs + ["TTbar", "WJetsLNu", "SingleTop"],
             {"ele": "weight_ele_PSFSR", "mu": "weight_mu_PSFSR"},
         ),
         "weight_PSISR": (
             years,
-            sigs,
+            sigs + ["TTbar", "WJetsLNu", "SingleTop"],
             {"ele": "weight_ele_PSISR", "mu": "weight_mu_PSISR"},
         ),
         # systematics applied only on WJets & DYJets

@@ -17,7 +17,7 @@ import numpy as np
 import pandas as pd
 import pyarrow
 import yaml
-from systematics import get_systematic_dict
+from systematics import get_systematic_dict, sigs
 from utils import get_common_sample_name, get_finetuned_score, get_xsecweight
 
 logging.basicConfig(level=logging.INFO)
@@ -167,7 +167,9 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                     e.g. https://github.com/LPC-HH/HHLooper/blob/master/python/prepare_card_SR_final.py#L258
                     and https://github.com/LPC-HH/HHLooper/blob/master/app/HHLooper.cc#L1488
                     """
-                    if sample_to_use in ["ggF", "VBF", "WH", "ZH", "ttH"]:
+                    if sample_to_use in sigs:
+                        # if sample_to_use in sigs + ["WJetsLNu", "TTbar", "SingleTop"]:
+
                         pdfweights = []
 
                         for weight_i in sumpdfweights:
@@ -220,7 +222,9 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                     - then, take max/min of h0, h1, h3, h5, h7, h8 w.r.t h4: h_up and h_dn
                     - the uncertainty is the nominal histogram * h_up / h4
                     """
-                    if sample_to_use in ["ggF", "VBF", "WH", "ZH", "ttH", "WJetsLNu", "TTbar"]:
+                    if (sample_to_use in sigs + ["WJetsLNu", "TTbar", "SingleTop"]) and (
+                        sample != "ST_s-channel_4f_hadronicDecays"
+                    ):
 
                         R_4 = sumscaleweights[4] / sumgenweights
                         scaleweight_4 = df["weight_scale4"].values * nominal / R_4
@@ -230,7 +234,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                             if weight_i == 4:
                                 continue
 
-                            # noqa: get the normalization factor per variation i (ratio of sumscaleweights_i/sumgenweights)
+                            # get the normalization factor per variation i (ratio of sumscaleweights_i/sumgenweights)
                             R_i = sumscaleweights[weight_i] / sumgenweights
                             scaleweight_i = df[f"weight_scale{weight_i}"].values * nominal / R_i
 

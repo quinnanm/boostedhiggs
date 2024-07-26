@@ -97,7 +97,6 @@ def get_sum_sumgenweight(pkl_files, year, sample):
 def get_sum_sumpdfweight(pkl_files, year, sample, sample_to_use):
 
     if sample_to_use in ["ggF", "VBF", "WH", "ZH", "ttH"]:
-
         sum_sumpdfweight = {}
         for key in range(103):
             sum_sumpdfweight[key] = 0
@@ -110,15 +109,15 @@ def get_sum_sumpdfweight(pkl_files, year, sample, sample_to_use):
             for key in range(103):
                 sum_sumpdfweight[key] = sum_sumpdfweight[key] + metadata[sample][year]["sumpdfweight"][key]
         return sum_sumpdfweight
-
     else:
         return 1
 
 
 def get_sum_sumscsaleweight(pkl_files, year, sample, sample_to_use):
 
-    if sample_to_use in ["ggF", "VBF", "WH", "ZH", "ttH", "WJetsLNu", "TTbar"]:
-
+    if (sample_to_use in ["ggF", "VBF", "WH", "ZH", "ttH", "WJetsLNu", "TTbar", "SingleTop"]) and (
+        sample != "ST_s-channel_4f_hadronicDecays"
+    ):
         sum_sumlheweight = {}
         for key in [0, 1, 3, 5, 7, 8, 4]:
             sum_sumlheweight[key] = 0
