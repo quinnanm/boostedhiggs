@@ -177,9 +177,6 @@ class HwwProcessor(processor.ProcessorABC):
 
         # sum LHE weight
         sumlheweight = {}
-        print(events.fields)
-        print(events.LHEScaleWeight)
-        print(len(events.LHEScaleWeight[0]))
         if "LHEScaleWeight" in events.fields and self.isMC:
             if len(events.LHEScaleWeight[0]) == 9:
                 for i in range(len(events.LHEScaleWeight[0])):
