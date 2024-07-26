@@ -164,7 +164,7 @@ class HwwProcessor(processor.ProcessorABC):
         """Returns skimmed events which pass preselection cuts and with the branches listed in self._skimvars"""
 
         dataset = events.metadata["dataset"]
-
+        print(dataset)
         self.isMC = hasattr(events, "genWeight")
         self.isSignal = True if ("HToWW" in dataset) or ("ttHToNonbb" in dataset) else False
 
