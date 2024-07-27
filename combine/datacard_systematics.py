@@ -328,6 +328,18 @@ def systs_from_parquets(years):
             "weight_pdf_acceptance",
             ["ZH"],
         ),
+        rl.NuisanceParameter(f"PDF_wjets_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
+            "weight_pdf_acceptance",
+            ["WJetsLNu"],
+        ),
+        rl.NuisanceParameter(f"PDF_ttbar_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
+            "weight_pdf_acceptance",
+            ["TTbar"],
+        ),
+        # rl.NuisanceParameter(f"PDF_singletop_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
+        #     "weight_pdf_acceptance",
+        #     ["SingleTop"],
+        # ),
         # QCD scale acceptance
         rl.NuisanceParameter(f"QCDscale_ggH_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
             "weight_qcd_scale",
