@@ -167,8 +167,8 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                     e.g. https://github.com/LPC-HH/HHLooper/blob/master/python/prepare_card_SR_final.py#L258
                     and https://github.com/LPC-HH/HHLooper/blob/master/app/HHLooper.cc#L1488
                     """
-                    if sample_to_use in sigs:
-                        # if sample_to_use in sigs + ["WJetsLNu", "TTbar", "SingleTop"]:
+                    # if sample_to_use in sigs:
+                    if (sample_to_use in sigs + ["WJetsLNu", "TTbar"]) and (sample != "ST_s-channel_4f_hadronicDecays"):
 
                         pdfweights = []
 

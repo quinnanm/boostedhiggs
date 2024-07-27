@@ -9,6 +9,7 @@ from typing import List
 import numpy as np
 import scipy
 from hist import Hist
+from systematics import sigs
 
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
@@ -96,7 +97,7 @@ def get_sum_sumgenweight(pkl_files, year, sample):
 
 def get_sum_sumpdfweight(pkl_files, year, sample, sample_to_use):
 
-    if sample_to_use in ["ggF", "VBF", "WH", "ZH", "ttH"]:
+    if (sample_to_use in sigs + ["WJetsLNu", "TTbar"]) and (sample != "ST_s-channel_4f_hadronicDecays"):
         sum_sumpdfweight = {}
         for key in range(103):
             sum_sumpdfweight[key] = 0
@@ -115,9 +116,7 @@ def get_sum_sumpdfweight(pkl_files, year, sample, sample_to_use):
 
 def get_sum_sumscsaleweight(pkl_files, year, sample, sample_to_use):
 
-    if (sample_to_use in ["ggF", "VBF", "WH", "ZH", "ttH", "WJetsLNu", "TTbar", "SingleTop"]) and (
-        sample != "ST_s-channel_4f_hadronicDecays"
-    ):
+    if (sample_to_use in sigs + ["WJetsLNu", "TTbar", "SingleTop"]) and (sample != "ST_s-channel_4f_hadronicDecays"):
         sum_sumlheweight = {}
         for key in [0, 1, 3, 5, 7, 8, 4]:
             sum_sumlheweight[key] = 0
