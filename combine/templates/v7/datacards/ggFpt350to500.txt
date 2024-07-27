@@ -1,7 +1,7 @@
-# Datacard for <Channel (ggFpt350to500) instance at 0x7f62e107adf0> generated on 2024-07-26 06:28:35.783603
+# Datacard for <Channel (ggFpt350to500) instance at 0x7f5882f18be0> generated on 2024-07-27 02:14:02.363235
 imax 1 # number of categories ('bins' but here we are using shape templates)
 jmax 12 # number of samples minus 1
-kmax 129 # number of nuisance parameters
+kmax 133 # number of nuisance parameters
 shapes * ggFpt350to500 testModel.root testModel:ggFpt350to500_$PROCESS testModel:ggFpt350to500_$PROCESS_$SYSTEMATIC
 bin ggFpt350to500
 observation 332.000
@@ -100,6 +100,8 @@ PDF_ZH_ACCEPT_CMS_HWW_boosted shape                                        -    
 PDF_ggH_ACCEPT_CMS_HWW_boosted shape                                  1.0000              -              -              -              -              -              -              -              -              -              -              -              -
 PDF_qqH_ACCEPT_CMS_HWW_boosted shape                                       -         1.0000              -              -              -              -              -              -              -              -              -              -              -
 PDF_ttH_ACCEPT_CMS_HWW_boosted shape                                       -              -              -              -         1.0000              -              -              -              -              -              -              -              -
+PDF_ttbar_ACCEPT_CMS_HWW_boosted shape                                     -              -              -              -              -         1.0000              -              -              -              -              -              -              -
+PDF_wjets_ACCEPT_CMS_HWW_boosted shape                                     -              -              -              -              -              -         1.0000              -              -              -              -              -              -
 QCDscale_WH lnN                                                            -              -  0.9930/1.0050              -              -              -              -              -              -              -              -              -              -
 QCDscale_WH_ACCEPT_CMS_HWW_boosted shape                                   -              -         1.0000              -              -              -              -              -              -              -              -              -              -
 QCDscale_ZH lnN                                                            -              -              -  0.9700/1.0380              -              -              -              -              -              -              -              -              -
@@ -129,6 +131,8 @@ ps_fsr_ggH shape                                                      1.0000    
 ps_fsr_qqH shape                                                           -         1.0000              -              -              -              -              -              -              -              -              -              -              -
 ps_fsr_singletop shape                                                     -              -              -              -              -              -              -         1.0000              -              -              -              -              -
 ps_fsr_ttH shape                                                           -              -              -              -         1.0000              -              -              -              -              -              -              -              -
+ps_fsr_ttbar shape                                                         -              -              -              -              -         1.0000              -              -              -              -              -              -              -
+ps_fsr_wjets shape                                                         -              -              -              -              -              -         1.0000              -              -              -              -              -              -
 ps_isr_WH shape                                                            -              -         1.0000              -              -              -              -              -              -              -              -              -              -
 ps_isr_ZH shape                                                            -              -              -         1.0000              -              -              -              -              -              -              -              -              -
 ps_isr_ggH shape                                                      1.0000              -              -              -              -              -              -              -              -              -              -              -              -

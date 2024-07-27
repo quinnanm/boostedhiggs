@@ -1,7 +1,7 @@
-# Datacard for <Channel (WJetsCR) instance at 0x7f62e1052f10> generated on 2024-07-26 06:28:35.796890
+# Datacard for <Channel (WJetsCR) instance at 0x7f5882e91b20> generated on 2024-07-27 02:14:02.376335
 imax 1 # number of categories ('bins' but here we are using shape templates)
 jmax 7 # number of samples minus 1
-kmax 96 # number of nuisance parameters
+kmax 100 # number of nuisance parameters
 shapes * WJetsCR testModel.root testModel:WJetsCR_$PROCESS testModel:WJetsCR_$PROCESS_$SYSTEMATIC
 bin WJetsCR
 observation 6826.000
@@ -93,6 +93,8 @@ CMS_scale_j_RelSample_2016 shape                                      1.0000    
 CMS_scale_j_RelSample_2016APV shape                                   1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000        -
 CMS_scale_j_RelSample_2017 shape                                      1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000        -
 CMS_scale_j_RelSample_2018 shape                                      1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000        -
+PDF_ttbar_ACCEPT_CMS_HWW_boosted shape                                1.0000              -              -              -              -              -              -        -
+PDF_wjets_ACCEPT_CMS_HWW_boosted shape                                     -         1.0000              -              -              -              -              -        -
 QCDscale_singletop_ACCEPT_CMS_HWW_boosted shape                            -              -         1.0000              -              -              -              -        -
 QCDscale_wjets_ACCEPT_CMS_HWW_boosted shape                                -         1.0000              -              -              -              -              -        -
 lumi_13TeV_1718 lnN                                                   1.0027         1.0027         1.0027         1.0027         1.0027         1.0027         1.0027        -
@@ -101,6 +103,8 @@ lumi_13TeV_2017 lnN                                                   1.0060    
 lumi_13TeV_2018 lnN                                                   1.0065         1.0065         1.0065         1.0065         1.0065         1.0065         1.0065        -
 lumi_13TeV_correlated lnN                                             1.0130         1.0130         1.0130         1.0130         1.0130         1.0130         1.0130        -
 ps_fsr_singletop shape                                                     -              -         1.0000              -              -              -              -        -
+ps_fsr_ttbar shape                                                    1.0000              -              -              -              -              -              -        -
+ps_fsr_wjets shape                                                         -         1.0000              -              -              -              -              -        -
 ps_isr_singletop shape                                                     -              -         1.0000              -              -              -              -        -
 ps_isr_ttbar shape                                                    1.0000              -              -              -              -              -              -        -
 ps_isr_wjets shape                                                         -         1.0000              -              -              -              -              -        -
