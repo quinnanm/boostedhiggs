@@ -631,10 +631,10 @@ class HwwProcessor(processor.ProcessorABC):
 
                 add_pileupid_weights(self.weights[ch], self._year, self._yearmod, goodjets, events.GenJet, wp="L")
 
-                if ch == "mu":
-                    add_lepton_weight(self.weights[ch], candidatelep, self._year + self._yearmod, "muon")
-                elif ch == "ele":
-                    add_lepton_weight(self.weights[ch], candidatelep, self._year + self._yearmod, "electron")
+                # if ch == "mu":
+                #     add_lepton_weight(self.weights[ch], candidatelep, self._year + self._yearmod, "muon")
+                # elif ch == "ele":
+                #     add_lepton_weight(self.weights[ch], candidatelep, self._year + self._yearmod, "electron")
 
                 ewk_corr, qcd_corr, alt_qcd_corr = add_VJets_kFactors(self.weights[ch], events.GenPart, dataset, events)
                 # add corrections for plotting
