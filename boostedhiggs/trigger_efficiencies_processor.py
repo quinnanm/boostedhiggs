@@ -106,6 +106,8 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             if t in events.HLT.fields:
                 trigger = trigger | events.HLT[t]
 
+        out[ch]["Muontrigger"] = trigger
+
         ######################
         # METFLITERS
         ######################
@@ -217,7 +219,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             add_lepton_weight(self.weights, candidatelep, self._year, "electron")
 
             selection = PackedSelection()
-            selection.add("MuonTrigger", trigger)
+            # selection.add("MuonTrigger", trigger)
             selection.add("METFilters", (metfilters))
             selection.add(
                 "AtLeatOneTightMuon",
