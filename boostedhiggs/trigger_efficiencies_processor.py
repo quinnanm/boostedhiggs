@@ -106,7 +106,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             if t in events.HLT.fields:
                 trigger = trigger | events.HLT[t]
 
-        out[ch]["triggers"]["Muontrigger"] = trigger
+        out["ele"]["triggers"]["Muontrigger"] = np.array(trigger)
 
         ######################
         # METFLITERS
