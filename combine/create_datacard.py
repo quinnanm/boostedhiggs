@@ -176,7 +176,7 @@ def main(args):
 
     hists_templates = load_templates(years, lep_channels, args.outdir)
 
-    model = create_datacard(hists_templates, years, lep_channels)
+    model = create_datacard(hists_templates, years, lep_channels, args.do_unfolding)
 
     model.renderCombine(os.path.join(str("{}".format(args.outdir)), "datacards"))
 
@@ -189,6 +189,7 @@ if __name__ == "__main__":
     parser.add_argument("--years", default="2017", help="years separated by commas")
     parser.add_argument("--channels", default="mu", help="channels separated by commas (e.g. mu,ele)")
     parser.add_argument("--outdir", default="templates/test", type=str, help="name of template directory")
+    parser.add_argument("--do-unfolding", dest="do_unfolding", action="store_true")
 
     args = parser.parse_args()
 
