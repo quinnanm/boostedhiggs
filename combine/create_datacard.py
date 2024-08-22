@@ -55,6 +55,7 @@ def create_datacard(
     if do_unfolding:
         samples.remove("ggF")
     else:
+        print("yess")
         samples.remove("ggFpt200to300")
         samples.remove("ggFpt300to450")
         samples.remove("ggFpt450toInf")
@@ -69,7 +70,7 @@ def create_datacard(
 
             if (sName in sigs) and (ChName in CONTROL_regions):
                 continue
-
+            print(ChName, sName)
             templ = get_template(hists_templates, sName, ChName)
             if templ == 0:
                 continue
@@ -179,7 +180,7 @@ def main(args):
 
     hists_templates = load_templates(years, lep_channels, args.outdir)
 
-    model = create_datacard(hists_templates, years, lep_channels, args.do_unfolding)
+    model = create_datacard(hists_templates, years, lep_channels, do_unfolding=args.do_unfolding)
 
     model.renderCombine(os.path.join(str("{}".format(args.outdir)), "datacards"))
 
