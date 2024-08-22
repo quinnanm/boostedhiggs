@@ -181,7 +181,10 @@ def main(args):
 
     model = create_datacard(hists_templates, years, lep_channels, do_unfolding=args.do_unfolding)
 
-    model.renderCombine(os.path.join(str("{}".format(args.outdir)), "datacards"))
+    if args.do_unfolding:
+        model.renderCombine(os.path.join(str("{}".format(args.outdir)), "datacards_unfolding"))
+    else:
+        model.renderCombine(os.path.join(str("{}".format(args.outdir)), "datacards"))
 
 
 if __name__ == "__main__":
