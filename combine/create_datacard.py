@@ -31,7 +31,9 @@ pd.set_option("mode.chained_assignment", None)
 CMS_PARAMS_LABEL = "CMS_HWW_boosted"
 
 
-def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=True, add_wjets_constraint=True):
+def create_datacard(
+    hists_templates, years, lep_channels, add_ttbar_constraint=True, add_wjets_constraint=True, do_unfolding=False
+):
     # define the systematics
     systs_dict, systs_dict_values = systs_not_from_parquets(years, lep_channels)
     sys_from_parquets = systs_from_parquets(years)
@@ -49,15 +51,20 @@ def create_datacard(hists_templates, years, lep_channels, add_ttbar_constraint=T
     if add_wjets_constraint:
         wjetsnormSF = rl.IndependentParameter("wjetsnormSF", 1.0, 0, 10)
 
+    samples = sigs + bkgs
+    if do_unfolding:
+        samples.remove("ggF")
+        samples += ["ggFpt200to300", "ggFpt300to450", "ggFpt450toInf"]
+
     # fill datacard with systematics and rates
     for ChName in SIG_regions + CONTROL_regions:
 
         ch = rl.Channel(ChName)
         model.addChannel(ch)
 
-        for sName in sigs + bkgs:
+        for sName in samples:
 
-            if (sName in sigs) and (ChName in CONTROL_regions):
+            if ((sName in sigs) or ("ggF" in sigs)) and (ChName in CONTROL_regions):
                 continue
 
             templ = get_template(hists_templates, sName, ChName)

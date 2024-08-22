@@ -48,6 +48,9 @@ combine_samples = {
 labels = {
     # sigs
     "ggF": "ggH_hww",
+    "ggFpt200to300": "ggH_hww_200_300",
+    "ggFpt300to450": "ggH_hww_300_450",
+    "ggFpt450toInf": "ggH_hww_450_Inf",
     "VBF": "qqH_hww",
     "ttH": "ttH_hww",
     "WH": "WH_hww",
