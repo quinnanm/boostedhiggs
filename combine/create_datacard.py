@@ -55,7 +55,6 @@ def create_datacard(
     if do_unfolding:
         samples.remove("ggF")
     else:
-        print("yess")
         samples.remove("ggFpt200to300")
         samples.remove("ggFpt300to450")
         samples.remove("ggFpt450toInf")
@@ -70,7 +69,7 @@ def create_datacard(
 
             if (sName in sigs) and (ChName in CONTROL_regions):
                 continue
-            print(ChName, sName)
+
             templ = get_template(hists_templates, sName, ChName)
             if templ == 0:
                 continue
