@@ -54,7 +54,8 @@ def create_datacard(
     samples = sigs + bkgs
     if do_unfolding:
         samples.remove("ggF")
-        samples += ["ggFpt200to300", "ggFpt300to450", "ggFpt450toInf"]
+    else:
+        samples.remove(["ggFpt200to300", "ggFpt300to450", "ggFpt450toInf"])
 
     # fill datacard with systematics and rates
     for ChName in SIG_regions + CONTROL_regions:

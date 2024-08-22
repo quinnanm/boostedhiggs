@@ -26,6 +26,307 @@ warnings.filterwarnings("ignore", message="Found duplicate branch ")
 pd.set_option("mode.chained_assignment", None)
 
 
+def fill_systematics(
+    data,
+    hists,
+    years,
+    year,
+    ch,
+    regions_sel,
+    is_data,
+    sample,
+    sample_label,
+    xsecweight,
+    sumpdfweights,
+    sumgenweights,
+    sumscaleweights,
+):
+    SYST_DICT = get_systematic_dict(years)
+
+    for region, region_sel in regions_sel.items():  # e.g. pass, fail, top control region, etc.
+
+        df = data.copy()
+        logging.info(f"Applying {region} selection on {len(df)} events")
+        df = df.query(region_sel)
+        logging.info(f"Will fill the histograms with the remaining {len(df)} events")
+
+        # ------------------- Nominal -------------------
+        if is_data:
+            nominal = np.ones_like(df["fj_pt"])  # for data (nominal is 1)
+        else:
+            nominal = df[f"weight_{ch}"] * xsecweight
+
+            if "bjets" in region_sel:  # if there's a bjet selection, add btag SF to the nominal weight
+                nominal *= df["weight_btag"]
+
+            if sample_label == "TTbar":
+                nominal *= df["top_reweighting"]
+
+        ###################################
+        if sample_label == "EWKvjets":
+            threshold = 20
+            df = df[nominal < threshold]
+            nominal = nominal[nominal < threshold]
+        ###################################
+
+        hists.fill(
+            Sample=sample_label,
+            Systematic="nominal",
+            Region=region,
+            mass_observable=df["rec_higgs_m"],
+            weight=nominal,
+        )
+
+        # ------------------- PDF acceptance -------------------
+
+        """
+        For the PDF acceptance uncertainty:
+        - store 103 variations. 0-100 PDF values
+        - The last two values: alpha_s variations.
+        - you just sum the yield difference from the nominal in quadrature to get the total uncertainty.
+        e.g. https://github.com/LPC-HH/HHLooper/blob/master/python/prepare_card_SR_final.py#L258
+        and https://github.com/LPC-HH/HHLooper/blob/master/app/HHLooper.cc#L1488
+        """
+        # if sample_to_use in sigs:
+        if (sample_label in sigs + ["WJetsLNu", "TTbar"]) and (sample != "ST_s-channel_4f_hadronicDecays"):
+
+            pdfweights = []
+
+            for weight_i in sumpdfweights:
+
+                # noqa: get the normalization factor per variation i (ratio of sumpdfweights_i/sumgenweights)
+                R_i = sumpdfweights[weight_i] / sumgenweights
+
+                pdfweight = df[f"weight_pdf{weight_i}"].values * nominal / R_i
+                pdfweights.append(pdfweight)
+
+            pdfweights = np.swapaxes(np.array(pdfweights), 0, 1)  # so that the shape is (# events, variation)
+
+            abs_unc = np.linalg.norm((pdfweights - nominal.values.reshape(-1, 1)), axis=1)
+            # cap at 100% uncertainty
+            rel_unc = np.clip(abs_unc / nominal, 0, 1)
+            shape_up = nominal * (1 + rel_unc)
+            shape_down = nominal * (1 - rel_unc)
+
+        else:
+            shape_up = nominal
+            shape_down = nominal
+
+        hists.fill(
+            Sample=sample_label,
+            Systematic="weight_pdf_acceptance_up",
+            Region=region,
+            mass_observable=df["rec_higgs_m"],
+            weight=shape_up,
+        )
+
+        hists.fill(
+            Sample=sample_label,
+            Systematic="weight_pdf_acceptance_down",
+            Region=region,
+            mass_observable=df["rec_higgs_m"],
+            weight=shape_down,
+        )
+
+        # ------------------- QCD scale -------------------
+
+        """
+        For the QCD acceptance uncertainty:
+        - we save the individual weights [0, 1, 3, 5, 7, 8]
+        - postprocessing: we obtain sum_sumlheweight
+        - postprocessing: we obtain LHEScaleSumw: sum_sumlheweight[i] / sum_sumgenweight
+        - postprocessing:
+        obtain histograms for 0, 1, 3, 5, 7, 8 and 4: h0, h1, ... respectively
+        weighted by scale_0, scale_1, etc
+        and normalize them by  (xsec * luminosity) / LHEScaleSumw[i]
+        - then, take max/min of h0, h1, h3, h5, h7, h8 w.r.t h4: h_up and h_dn
+        - the uncertainty is the nominal histogram * h_up / h4
+        """
+        if (sample_label in sigs + ["WJetsLNu", "TTbar", "SingleTop"]) and (sample != "ST_s-channel_4f_hadronicDecays"):
+
+            R_4 = sumscaleweights[4] / sumgenweights
+            scaleweight_4 = df["weight_scale4"].values * nominal / R_4
+
+            scaleweights = []
+            for weight_i in sumscaleweights:
+                if weight_i == 4:
+                    continue
+
+                # get the normalization factor per variation i (ratio of sumscaleweights_i/sumgenweights)
+                R_i = sumscaleweights[weight_i] / sumgenweights
+                scaleweight_i = df[f"weight_scale{weight_i}"].values * nominal / R_i
+
+                scaleweights.append(scaleweight_i)
+
+            scaleweights = np.array(scaleweights)
+
+            scaleweights = np.swapaxes(np.array(scaleweights), 0, 1)  # so that the shape is (# events, variation)
+
+            # TODO: debug
+            shape_up = nominal * np.max(scaleweights, axis=1) / scaleweight_4
+            shape_down = nominal * np.min(scaleweights, axis=1) / scaleweight_4
+
+        else:
+            shape_up = nominal
+            shape_down = nominal
+
+        hists.fill(
+            Sample=sample_label,
+            Systematic="weight_qcd_scale_up",
+            Region=region,
+            mass_observable=df["rec_higgs_m"],
+            weight=shape_up,
+        )
+
+        hists.fill(
+            Sample=sample_label,
+            Systematic="weight_qcd_scale_down",
+            Region=region,
+            mass_observable=df["rec_higgs_m"],
+            weight=shape_down,
+        )
+
+        # ------------------- Top pt reweighting systematic  -------------------
+
+        if sample_label == "TTbar":
+            # first remove the reweighting effect
+            nominal_noreweighting = nominal / df["top_reweighting"]
+
+            shape_up = nominal_noreweighting * (df["top_reweighting"] ** 2)  # "up" is twice the correction
+            shape_down = nominal_noreweighting  # "down" is no correction
+        else:
+            shape_up = nominal
+            shape_down = nominal
+
+        hists.fill(
+            Sample=sample_label,
+            Systematic="top_reweighting_up",
+            Region=region,
+            mass_observable=df["rec_higgs_m"],
+            weight=shape_up,
+        )
+
+        hists.fill(
+            Sample=sample_label,
+            Systematic="top_reweighting_down",
+            Region=region,
+            mass_observable=df["rec_higgs_m"],
+            weight=shape_down,
+        )
+
+        # ------------------- Common systematics  -------------------
+
+        for syst, (yrs, smpls, var) in SYST_DICT["common"].items():
+
+            if (sample_label in smpls) and (year in yrs) and (ch in var):
+                shape_up = df[var[ch] + "Up"] * xsecweight
+                shape_down = df[var[ch] + "Down"] * xsecweight
+
+                if "bjets" in region_sel:  # if there's a bjet selection, add btag SF to the nominal weight
+                    shape_up *= df["weight_btag"]
+                    shape_down *= df["weight_btag"]
+
+                if sample_label == "TTbar":
+                    shape_up *= df["top_reweighting"]
+                    shape_down *= df["top_reweighting"]
+            else:
+                shape_up = nominal
+                shape_down = nominal
+
+            hists.fill(
+                Sample=sample_label,
+                Systematic=f"{syst}_up",
+                Region=region,
+                mass_observable=df["rec_higgs_m"],
+                weight=shape_up,
+            )
+
+            hists.fill(
+                Sample=sample_label,
+                Systematic=f"{syst}_down",
+                Region=region,
+                mass_observable=df["rec_higgs_m"],
+                weight=shape_down,
+            )
+
+        # ------------------- btag systematics  -------------------
+
+        for syst, (yrs, smpls, var) in SYST_DICT["btag"].items():
+
+            if (sample_label in smpls) and (year in yrs) and (ch in var):
+                shape_up = df[var[ch] + "Up"] * nominal
+                shape_down = df[var[ch] + "Down"] * nominal
+            else:
+                shape_up = nominal
+                shape_down = nominal
+
+            hists.fill(
+                Sample=sample_label,
+                Systematic=f"{syst}_up",
+                Region=region,
+                mass_observable=df["rec_higgs_m"],
+                weight=shape_up,
+            )
+
+            hists.fill(
+                Sample=sample_label,
+                Systematic=f"{syst}_down",
+                Region=region,
+                mass_observable=df["rec_higgs_m"],
+                weight=shape_down,
+            )
+
+    # ------------------- individual sources of JES -------------------
+
+    """We apply the jet pt cut on the up/down variations. Must loop over systematics first."""
+    for syst, (yrs, smpls, var) in SYST_DICT["JEC"].items():
+
+        for variation in ["up", "down"]:
+
+            for (
+                region,
+                region_sel,
+            ) in regions_sel.items():  # e.g. pass, fail, top control region, etc.
+
+                if (sample_label in smpls) and (year in yrs) and (ch in var):
+                    region_sel = region_sel.replace("rec_higgs_pt", "rec_higgs_pt" + var[ch] + f"_{variation}")
+
+                df = data.copy()
+                df = df.query(region_sel)
+
+                # ------------------- Nominal -------------------
+                if is_data:
+                    nominal = np.ones_like(df["fj_pt"])  # for data (nominal is 1)
+                else:
+                    nominal = df[f"weight_{ch}"] * xsecweight
+
+                    if "bjets" in region_sel:  # if there's a bjet selection, add btag SF to the nominal weight
+                        nominal *= df["weight_btag"]
+
+                    if sample_label == "TTbar":
+                        nominal *= df["top_reweighting"]
+
+                ###################################
+                if sample_label == "EWKvjets":
+                    threshold = 20
+                    df = df[nominal < threshold]
+                    nominal = nominal[nominal < threshold]
+                ###################################
+
+                if (sample_label in smpls) and (year in yrs) and (ch in var):
+                    shape_variation = df["rec_higgs_m" + var[ch] + f"_{variation}"]
+                else:
+                    shape_variation = df["rec_higgs_m"]
+
+                hists.fill(
+                    Sample=sample_label,
+                    Systematic=f"{syst}_{variation}",
+                    Region=region,
+                    mass_observable=shape_variation,
+                    weight=nominal,
+                )
+
+
 def get_templates(years, channels, samples, samples_dir, regions_sel, model_path, add_fake=False):
     """
     Postprocesses the parquets by applying preselections, and fills templates for different regions.
@@ -70,8 +371,6 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
         ),
         storage=hist2.storage.Weight(),
     )
-
-    SYST_DICT = get_systematic_dict(years)
 
     for year in years:  # e.g. 2018, 2017, 2016APV, 2016
         for ch in channels:  # e.g. mu, ele
@@ -123,289 +422,50 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                     pkl_files, year, sample, sample_to_use, is_data, luminosity
                 )
 
-                for region, region_sel in regions_sel.items():  # e.g. pass, fail, top control region, etc.
-                    df = data.copy()
+                if sample_to_use == "ggF":
 
-                    logging.info(f"Applying {region} selection on {len(df)} events")
-                    df = df.query(region_sel)
-                    logging.info(f"Will fill the histograms with the remaining {len(df)} events")
+                    stxs_dict = {
+                        "ggFpt200to300": (200, 300),
+                        "ggFpt300to450": (300, 450),
+                        "ggFpt450toInf": (450, 2000),
+                    }
 
-                    # ------------------- Nominal -------------------
-                    if is_data:
-                        nominal = np.ones_like(df["fj_pt"])  # for data (nominal is 1)
-                    else:
-                        nominal = df[f"weight_{ch}"] * xsecweight
+                    for genprocess, genHbin in stxs_dict.items():
+                        df1 = data.copy()
+                        msk_gen = (df1["fj_genH_pt"] > genHbin[0]) & (df1["fj_genH_pt"] < genHbin[1])
+                        df1 = df1[msk_gen]
 
-                        if "bjets" in region_sel:  # if there's a bjet selection, add btag SF to the nominal weight
-                            nominal *= df["weight_btag"]
-
-                        if sample_to_use == "TTbar":
-                            nominal *= df["top_reweighting"]
-
-                    ###################################
-                    if sample_to_use == "EWKvjets":
-                        threshold = 20
-                        df = df[nominal < threshold]
-                        nominal = nominal[nominal < threshold]
-                    ###################################
-
-                    hists.fill(
-                        Sample=sample_to_use,
-                        Systematic="nominal",
-                        Region=region,
-                        mass_observable=df["rec_higgs_m"],
-                        weight=nominal,
-                    )
-
-                    # ------------------- PDF acceptance -------------------
-
-                    """
-                    For the PDF acceptance uncertainty:
-                    - store 103 variations. 0-100 PDF values
-                    - The last two values: alpha_s variations.
-                    - you just sum the yield difference from the nominal in quadrature to get the total uncertainty.
-                    e.g. https://github.com/LPC-HH/HHLooper/blob/master/python/prepare_card_SR_final.py#L258
-                    and https://github.com/LPC-HH/HHLooper/blob/master/app/HHLooper.cc#L1488
-                    """
-                    # if sample_to_use in sigs:
-                    if (sample_to_use in sigs + ["WJetsLNu", "TTbar"]) and (sample != "ST_s-channel_4f_hadronicDecays"):
-
-                        pdfweights = []
-
-                        for weight_i in sumpdfweights:
-
-                            # noqa: get the normalization factor per variation i (ratio of sumpdfweights_i/sumgenweights)
-                            R_i = sumpdfweights[weight_i] / sumgenweights
-
-                            pdfweight = df[f"weight_pdf{weight_i}"].values * nominal / R_i
-                            pdfweights.append(pdfweight)
-
-                        pdfweights = np.swapaxes(np.array(pdfweights), 0, 1)  # so that the shape is (# events, variation)
-
-                        abs_unc = np.linalg.norm((pdfweights - nominal.values.reshape(-1, 1)), axis=1)
-                        # cap at 100% uncertainty
-                        rel_unc = np.clip(abs_unc / nominal, 0, 1)
-                        shape_up = nominal * (1 + rel_unc)
-                        shape_down = nominal * (1 - rel_unc)
-
-                    else:
-                        shape_up = nominal
-                        shape_down = nominal
-
-                    hists.fill(
-                        Sample=sample_to_use,
-                        Systematic="weight_pdf_acceptance_up",
-                        Region=region,
-                        mass_observable=df["rec_higgs_m"],
-                        weight=shape_up,
-                    )
-
-                    hists.fill(
-                        Sample=sample_to_use,
-                        Systematic="weight_pdf_acceptance_down",
-                        Region=region,
-                        mass_observable=df["rec_higgs_m"],
-                        weight=shape_down,
-                    )
-
-                    # ------------------- QCD scale -------------------
-
-                    """
-                    For the QCD acceptance uncertainty:
-                    - we save the individual weights [0, 1, 3, 5, 7, 8]
-                    - postprocessing: we obtain sum_sumlheweight
-                    - postprocessing: we obtain LHEScaleSumw: sum_sumlheweight[i] / sum_sumgenweight
-                    - postprocessing:
-                    obtain histograms for 0, 1, 3, 5, 7, 8 and 4: h0, h1, ... respectively
-                    weighted by scale_0, scale_1, etc
-                    and normalize them by  (xsec * luminosity) / LHEScaleSumw[i]
-                    - then, take max/min of h0, h1, h3, h5, h7, h8 w.r.t h4: h_up and h_dn
-                    - the uncertainty is the nominal histogram * h_up / h4
-                    """
-                    if (sample_to_use in sigs + ["WJetsLNu", "TTbar", "SingleTop"]) and (
-                        sample != "ST_s-channel_4f_hadronicDecays"
-                    ):
-
-                        R_4 = sumscaleweights[4] / sumgenweights
-                        scaleweight_4 = df["weight_scale4"].values * nominal / R_4
-
-                        scaleweights = []
-                        for weight_i in sumscaleweights:
-                            if weight_i == 4:
-                                continue
-
-                            # get the normalization factor per variation i (ratio of sumscaleweights_i/sumgenweights)
-                            R_i = sumscaleweights[weight_i] / sumgenweights
-                            scaleweight_i = df[f"weight_scale{weight_i}"].values * nominal / R_i
-
-                            scaleweights.append(scaleweight_i)
-
-                        scaleweights = np.array(scaleweights)
-
-                        scaleweights = np.swapaxes(
-                            np.array(scaleweights), 0, 1
-                        )  # so that the shape is (# events, variation)
-
-                        # TODO: debug
-                        shape_up = nominal * np.max(scaleweights, axis=1) / scaleweight_4
-                        shape_down = nominal * np.min(scaleweights, axis=1) / scaleweight_4
-
-                    else:
-                        shape_up = nominal
-                        shape_down = nominal
-
-                    hists.fill(
-                        Sample=sample_to_use,
-                        Systematic="weight_qcd_scale_up",
-                        Region=region,
-                        mass_observable=df["rec_higgs_m"],
-                        weight=shape_up,
-                    )
-
-                    hists.fill(
-                        Sample=sample_to_use,
-                        Systematic="weight_qcd_scale_down",
-                        Region=region,
-                        mass_observable=df["rec_higgs_m"],
-                        weight=shape_down,
-                    )
-
-                    # ------------------- Top pt reweighting systematic  -------------------
-
-                    if sample_to_use == "TTbar":
-                        # first remove the reweighting effect
-                        nominal_noreweighting = nominal / df["top_reweighting"]
-
-                        shape_up = nominal_noreweighting * (df["top_reweighting"] ** 2)  # "up" is twice the correction
-                        shape_down = nominal_noreweighting  # "down" is no correction
-                    else:
-                        shape_up = nominal
-                        shape_down = nominal
-
-                    hists.fill(
-                        Sample=sample_to_use,
-                        Systematic="top_reweighting_up",
-                        Region=region,
-                        mass_observable=df["rec_higgs_m"],
-                        weight=shape_up,
-                    )
-
-                    hists.fill(
-                        Sample=sample_to_use,
-                        Systematic="top_reweighting_down",
-                        Region=region,
-                        mass_observable=df["rec_higgs_m"],
-                        weight=shape_down,
-                    )
-
-                    # ------------------- Common systematics  -------------------
-
-                    for syst, (yrs, smpls, var) in SYST_DICT["common"].items():
-
-                        if (sample_to_use in smpls) and (year in yrs) and (ch in var):
-                            shape_up = df[var[ch] + "Up"] * xsecweight
-                            shape_down = df[var[ch] + "Down"] * xsecweight
-
-                            if "bjets" in region_sel:  # if there's a bjet selection, add btag SF to the nominal weight
-                                shape_up *= df["weight_btag"]
-                                shape_down *= df["weight_btag"]
-
-                            if sample_to_use == "TTbar":
-                                shape_up *= df["top_reweighting"]
-                                shape_down *= df["top_reweighting"]
-                        else:
-                            shape_up = nominal
-                            shape_down = nominal
-
-                        hists.fill(
-                            Sample=sample_to_use,
-                            Systematic=f"{syst}_up",
-                            Region=region,
-                            mass_observable=df["rec_higgs_m"],
-                            weight=shape_up,
+                        fill_systematics(
+                            df1,
+                            hists,
+                            years,
+                            year,
+                            ch,
+                            regions_sel,
+                            is_data,
+                            sample,
+                            genprocess,  # use genprocess as label
+                            xsecweight,
+                            sumpdfweights,
+                            sumgenweights,
+                            sumscaleweights,
                         )
 
-                        hists.fill(
-                            Sample=sample_to_use,
-                            Systematic=f"{syst}_down",
-                            Region=region,
-                            mass_observable=df["rec_higgs_m"],
-                            weight=shape_down,
-                        )
-
-                    # ------------------- btag systematics  -------------------
-
-                    for syst, (yrs, smpls, var) in SYST_DICT["btag"].items():
-
-                        if (sample_to_use in smpls) and (year in yrs) and (ch in var):
-                            shape_up = df[var[ch] + "Up"] * nominal
-                            shape_down = df[var[ch] + "Down"] * nominal
-                        else:
-                            shape_up = nominal
-                            shape_down = nominal
-
-                        hists.fill(
-                            Sample=sample_to_use,
-                            Systematic=f"{syst}_up",
-                            Region=region,
-                            mass_observable=df["rec_higgs_m"],
-                            weight=shape_up,
-                        )
-
-                        hists.fill(
-                            Sample=sample_to_use,
-                            Systematic=f"{syst}_down",
-                            Region=region,
-                            mass_observable=df["rec_higgs_m"],
-                            weight=shape_down,
-                        )
-
-                # ------------------- individual sources of JES -------------------
-
-                """We apply the jet pt cut on the up/down variations. Must loop over systematics first."""
-                for syst, (yrs, smpls, var) in SYST_DICT["JEC"].items():
-
-                    for variation in ["up", "down"]:
-
-                        for region, region_sel in regions_sel.items():  # e.g. pass, fail, top control region, etc.
-
-                            if (sample_to_use in smpls) and (year in yrs) and (ch in var):
-                                region_sel = region_sel.replace("rec_higgs_pt", "rec_higgs_pt" + var[ch] + f"_{variation}")
-
-                            df = data.copy()
-                            df = df.query(region_sel)
-
-                            # ------------------- Nominal -------------------
-                            if is_data:
-                                nominal = np.ones_like(df["fj_pt"])  # for data (nominal is 1)
-                            else:
-                                nominal = df[f"weight_{ch}"] * xsecweight
-
-                                if "bjets" in region_sel:  # if there's a bjet selection, add btag SF to the nominal weight
-                                    nominal *= df["weight_btag"]
-
-                                if sample_to_use == "TTbar":
-                                    nominal *= df["top_reweighting"]
-
-                            ###################################
-                            if sample_to_use == "EWKvjets":
-                                threshold = 20
-                                df = df[nominal < threshold]
-                                nominal = nominal[nominal < threshold]
-                            ###################################
-
-                            if (sample_to_use in smpls) and (year in yrs) and (ch in var):
-                                shape_variation = df["rec_higgs_m" + var[ch] + f"_{variation}"]
-                            else:
-                                shape_variation = df["rec_higgs_m"]
-
-                            hists.fill(
-                                Sample=sample_to_use,
-                                Systematic=f"{syst}_{variation}",
-                                Region=region,
-                                mass_observable=shape_variation,
-                                weight=nominal,
-                            )
+                fill_systematics(
+                    data.copy(),
+                    hists,
+                    years,
+                    year,
+                    ch,
+                    regions_sel,
+                    is_data,
+                    sample,
+                    sample_to_use,  # use sample_to_use as label
+                    xsecweight,
+                    sumpdfweights,
+                    sumgenweights,
+                    sumscaleweights,
+                )
 
     if add_fake:
 

@@ -1,5 +1,6 @@
 bkgs = ["TTbar", "WJetsLNu", "SingleTop", "DYJets", "WZQQ", "Diboson", "EWKvjets"]
-sigs = ["ggF", "VBF", "WH", "ZH", "ttH"]
+sigs = ["ggFpt200to300", "ggFpt300to450", "ggFpt450toInf", "ggF", "VBF", "WH", "ZH", "ttH"]
+
 samples = sigs + bkgs + ["Fake"]
 
 
