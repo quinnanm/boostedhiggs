@@ -55,7 +55,9 @@ def create_datacard(
     if do_unfolding:
         samples.remove("ggF")
     else:
-        samples.remove(["ggFpt200to300", "ggFpt300to450", "ggFpt450toInf"])
+        samples.remove("ggFpt200to300")
+        samples.remove("ggFpt300to450")
+        samples.remove("ggFpt450toInf")
 
     # fill datacard with systematics and rates
     for ChName in SIG_regions + CONTROL_regions:
@@ -65,7 +67,7 @@ def create_datacard(
 
         for sName in samples:
 
-            if ((sName in sigs) or ("ggF" in sigs)) and (ChName in CONTROL_regions):
+            if (sName in sigs) and (ChName in CONTROL_regions):
                 continue
 
             templ = get_template(hists_templates, sName, ChName)
