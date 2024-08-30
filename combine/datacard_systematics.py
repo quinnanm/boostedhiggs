@@ -85,7 +85,7 @@ def systs_not_from_parquets(years: List[str], lep_channels: List[str]):
     systs_dict_values["all_samples"]["miniisolation_SF_unc"] = (1.02, 0.98)
 
     systs_dict["all_samples"]["trigger_SF_unc"] = rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_trigger_syst_unc", "lnN")
-    systs_dict_values["all_samples"][f"{CMS_PARAMS_LABEL}_ele_trigger_syst_unc"] = (1.053, None)
+    systs_dict_values["all_samples"]["trigger_SF_unc"] = (1.053, None)
 
     # PER SAMPLE SYSTEMATICS
     for sample in samples:
