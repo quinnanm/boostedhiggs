@@ -367,10 +367,10 @@ def systs_from_parquets(years):
             "weight_qcd_scale",
             ["WJetsLNu"],
         ),
-        rl.NuisanceParameter(f"QCDscale_ttbar_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
-            "weight_qcd_scale",
-            ["TTbar"],
-        ),
+        # rl.NuisanceParameter(f"QCDscale_ttbar_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
+        #     "weight_qcd_scale",
+        #     ["TTbar"],
+        # ),
         rl.NuisanceParameter(f"QCDscale_singletop_ACCEPT_{CMS_PARAMS_LABEL}", "shape"): (
             "weight_qcd_scale",
             ["SingleTop"],
