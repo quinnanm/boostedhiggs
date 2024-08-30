@@ -84,6 +84,8 @@ def systs_not_from_parquets(years: List[str], lep_channels: List[str]):
     )
     systs_dict_values["all_samples"]["miniisolation_SF_unc"] = (1.02, 0.98)
 
+    systs_dict_values["all_samples"]["trigger_SF_unc"] = (1.53, None)
+
     # PER SAMPLE SYSTEMATICS
     for sample in samples:
         systs_dict[sample], systs_dict_values[sample] = {}, {}
@@ -376,6 +378,11 @@ def systs_from_parquets(years):
         rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_top_reweighting", "shape"): (
             "top_reweighting",
             ["TTbar"],
+        ),
+        # trigger SF
+        rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_trigger", "shape"): (
+            "trigger_ele_SF",
+            sigs + bkgs,
         ),
     }
 
