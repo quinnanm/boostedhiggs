@@ -1024,6 +1024,7 @@ def getGenLepGenQuarks(dataset, genparts: GenParticleArray):
         )
 
         quarks = wboson_daughters_pdgId <= b_PDGID
+        print("len(quarks)", len(quarks))
 
         lepVars = {
             "lepton_pt": wboson_daughters[leptons].pt,
@@ -1038,6 +1039,8 @@ def getGenLepGenQuarks(dataset, genparts: GenParticleArray):
             "quark_phi": wboson_daughters[quarks].phi,
             "quark_mass": wboson_daughters[quarks].mass,
         }
+
+        print("quarkVars", quarkVars)
 
     return lepVars, quarkVars
 
