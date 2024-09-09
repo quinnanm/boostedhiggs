@@ -964,6 +964,7 @@ from .utils import (
     TAU_PDGID,
     TOP_PDGID,
     W_PDGID,
+    Z_PDGID,
     b_PDGID,
     get_pid_mask,
 )
@@ -1007,7 +1008,7 @@ def getGenLepGenQuarks(dataset, genparts: GenParticleArray):
 
         return lepVars, quarkVars, None
 
-    else:
+    elif "TT" in dataset:
         tops = genparts[get_pid_mask(genparts, TOP_PDGID, byall=False) * genparts.hasFlags(GEN_FLAGS)]
 
         # take all possible daughters!
@@ -1049,8 +1050,33 @@ def getGenLepGenQuarks(dataset, genparts: GenParticleArray):
             "bquarks_phi": bquarks.phi,
             "bquarks_mass": bquarks.mass,
         }
-
         return lepVars, quarkVars, bquarksVars
+
+    else:
+
+        vs = genparts[get_pid_mask(genparts, [W_PDGID, Z_PDGID], byall=False) * genparts.hasFlags(GEN_FLAGS)]
+        daughters = ak.flatten(vs.distinctChildren, axis=2)
+        daughters = daughters[daughters.hasFlags(GEN_FLAGS)]
+        daughters_pdgId = abs(daughters.pdgId)
+
+        leptons = (daughters_pdgId == ELE_PDGID) | (daughters_pdgId == MU_PDGID) | (daughters_pdgId == TAU_PDGID)
+        quarks = daughters_pdgId < b_PDGID
+
+        lepVars = {
+            "lepton_pt": all_daus_flat[leptons].pt,
+            "lepton_eta": all_daus_flat[leptons].eta,
+            "lepton_phi": all_daus_flat[leptons].phi,
+            "lepton_mass": all_daus_flat[leptons].mass,
+        }
+
+        quarkVars = {
+            "quark_pt": all_daus_flat[quarks].pt,
+            "quark_eta": all_daus_flat[quarks].eta,
+            "quark_phi": all_daus_flat[quarks].phi,
+            "quark_mass": all_daus_flat[quarks].mass,
+        }
+
+        return lepVars, quarkVars, None
 
 
 def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
@@ -1092,7 +1118,7 @@ def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
     }
     gen_parts_eta_phi = np.array(np.dstack((Gen2qVars["Gen2qEta"], Gen2qVars["Gen2qPhi"])))
 
-    if "HToWW" not in dataset:
+    if "TT" in dataset:
 
         GenbquarksVars = {
             f"Genbquarks{var}": ak.to_numpy(
