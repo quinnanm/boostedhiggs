@@ -1063,17 +1063,17 @@ def getGenLepGenQuarks(dataset, genparts: GenParticleArray):
         quarks = daughters_pdgId < b_PDGID
 
         lepVars = {
-            "lepton_pt": all_daus_flat[leptons].pt,
-            "lepton_eta": all_daus_flat[leptons].eta,
-            "lepton_phi": all_daus_flat[leptons].phi,
-            "lepton_mass": all_daus_flat[leptons].mass,
+            "lepton_pt": daughters[leptons].pt,
+            "lepton_eta": daughters[leptons].eta,
+            "lepton_phi": daughters[leptons].phi,
+            "lepton_mass": daughters[leptons].mass,
         }
 
         quarkVars = {
-            "quark_pt": all_daus_flat[quarks].pt,
-            "quark_eta": all_daus_flat[quarks].eta,
-            "quark_phi": all_daus_flat[quarks].phi,
-            "quark_mass": all_daus_flat[quarks].mass,
+            "quark_pt": daughters[quarks].pt,
+            "quark_eta": daughters[quarks].eta,
+            "quark_phi": daughters[quarks].phi,
+            "quark_mass": daughters[quarks].mass,
         }
 
         return lepVars, quarkVars, None
