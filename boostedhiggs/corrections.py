@@ -1073,7 +1073,7 @@ def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
     Gen2qVars = {
         f"Gen2q{var}": ak.to_numpy(
             ak.fill_none(
-                ak.pad_none(quarkVars[f"quark_{key}"], 2, axis=1, clip=True),
+                ak.pad_none(quarkVars[f"quark_{key}"], 4, axis=1, clip=True),
                 FILL_NONE_VALUE,
             )
         )
