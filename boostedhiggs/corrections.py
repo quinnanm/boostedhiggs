@@ -1023,7 +1023,7 @@ def getGenLepGenQuarks(dataset, genparts: GenParticleArray):
             | (wboson_daughters_pdgId == TAU_PDGID)
         )
 
-        quarks = wboson_daughters_pdgId < b_PDGID
+        quarks = wboson_daughters_pdgId <= b_PDGID
 
         lepVars = {
             "lepton_pt": wboson_daughters[leptons].pt,
