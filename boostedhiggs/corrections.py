@@ -1085,8 +1085,8 @@ def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
     }
 
     if "HToWW" not in dataset:
-        print("bquark.eta", bquark.eta)
-        print("Gen2qVars['Gen2qEta']", Gen2qVars["Gen2qEta"])
+        print("bquark.eta", bquark.eta.shape)
+        print("Gen2qVars['Gen2qEta']", Gen2qVars["Gen2qEta"].shape)
 
     gen_parts_eta_phi = np.array(np.dstack((Gen2qVars["Gen2qEta"], Gen2qVars["Gen2qPhi"])))
 
