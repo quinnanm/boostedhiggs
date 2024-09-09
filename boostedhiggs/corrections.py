@@ -1097,7 +1097,7 @@ def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
         GenbquarksVars = {
             f"Genbquarks{var}": ak.to_numpy(
                 ak.fill_none(
-                    ak.pad_none(bquarksVars[f"bquark_{key}"], 2, axis=1, clip=True),
+                    ak.pad_none(bquarksVars[f"bquarks_{key}"], 2, axis=1, clip=True),
                     FILL_NONE_VALUE,
                 )
             )
