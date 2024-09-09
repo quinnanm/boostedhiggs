@@ -746,7 +746,7 @@ class HwwProcessor(processor.ProcessorABC):
                 if self._getLPweights:
                     from boostedhiggs.corrections import getLPweights
 
-                    (pf_cands, gen_parts_eta_phi, ak8_jets) = getLPweights(
+                    (pf_cands, gen_parts_eta_phi, ak8_jets, bgen_parts_eta_phi) = getLPweights(
                         dataset,
                         events[selection_ch],
                         candidatefj[selection_ch],
@@ -764,6 +764,12 @@ class HwwProcessor(processor.ProcessorABC):
                     for quarkidx in range(gen_parts_eta_phi.shape[1]):
                         lpvars[f"LP_quark{quarkidx}_eta"] = gen_parts_eta_phi[:, quarkidx, 0]
                         lpvars[f"LP_quark{quarkidx}_phi"] = gen_parts_eta_phi[:, quarkidx, 1]
+
+                    if bgen_parts_eta_phi is not None:
+
+                        for quarkidx in range(bgen_parts_eta_phi.shape[1]):
+                            lpvars[f"LP_bquark{quarkidx}_eta"] = bgen_parts_eta_phi[:, quarkidx, 0]
+                            lpvars[f"LP_bquark{quarkidx}_phi"] = bgen_parts_eta_phi[:, quarkidx, 1]                        
 
                     lpvars["LP_fj_pt"] = ak8_jets[:, 0]
                     lpvars["LP_fj_eta"] = ak8_jets[:, 1]
