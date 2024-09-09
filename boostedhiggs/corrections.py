@@ -1005,6 +1005,8 @@ def getGenLepGenQuarks(dataset, genparts: GenParticleArray):
             "quark_mass": all_daus_flat[quarks].mass,
         }
 
+        return lepVars, quarkVars, None
+
     else:
         tops = genparts[get_pid_mask(genparts, TOP_PDGID, byall=False) * genparts.hasFlags(GEN_FLAGS)]
 
@@ -1024,7 +1026,8 @@ def getGenLepGenQuarks(dataset, genparts: GenParticleArray):
         )
 
         quarks = wboson_daughters_pdgId <= b_PDGID
-        print("len(quarks)", len(quarks))
+
+        bquark = daughters[(daughters_pdgId == b_PDGID)]
 
         lepVars = {
             "lepton_pt": wboson_daughters[leptons].pt,
@@ -1040,9 +1043,7 @@ def getGenLepGenQuarks(dataset, genparts: GenParticleArray):
             "quark_mass": wboson_daughters[quarks].mass,
         }
 
-        print("quarkVars", quarkVars)
-
-    return lepVars, quarkVars
+        return lepVars, quarkVars, bquark
 
 
 def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
@@ -1055,7 +1056,7 @@ def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
 
     candidatefj = candidatefj - candidatelep_p4
 
-    lepVars, quarkVars = getGenLepGenQuarks(dataset, events.GenPart)
+    lepVars, quarkVars, bquark = getGenLepGenQuarks(dataset, events.GenPart)
 
     ak8_jets = np.array(
         np.stack(
@@ -1076,12 +1077,16 @@ def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
     Gen2qVars = {
         f"Gen2q{var}": ak.to_numpy(
             ak.fill_none(
-                ak.pad_none(quarkVars[f"quark_{key}"], 4, axis=1, clip=True),
+                ak.pad_none(quarkVars[f"quark_{key}"], 2, axis=1, clip=True),
                 FILL_NONE_VALUE,
             )
         )
         for key, var in skim_vars.items()
     }
+
+    if "HToWW" not in dataset:
+        print("bquark.eta", bquark.eta)
+        print("Gen2qVars['Gen2qEta']", Gen2qVars["Gen2qEta"])
 
     gen_parts_eta_phi = np.array(np.dstack((Gen2qVars["Gen2qEta"], Gen2qVars["Gen2qPhi"])))
 
