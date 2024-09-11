@@ -407,6 +407,8 @@ class HwwProcessor(processor.ProcessorABC):
             # lepton
             "lep_pt": candidatelep.pt,
             "lep_eta": candidatelep.eta,
+            "lep_phi": candidatelep.phi,
+            "lep_mass": candidatelep.mass,
             # others
             "lep_isolation": lep_reliso,
             "lep_misolation": lep_miso,
