@@ -1031,7 +1031,6 @@ def getGenLepGenQuarks(dataset, genparts: GenParticleArray):
         bquarks = daughters[(daughters_pdgId == b_PDGID)]
 
         bquarksdaughters = ak.flatten(bquarks.distinctChildren, axis=2)
-        bquarksdaughters = bquarksdaughters[bquarksdaughters.hasFlags(GEN_FLAGS)]
         bquarksdaughters_pdgId = abs(bquarksdaughters.pdgId)
 
         bquarkslep = (
