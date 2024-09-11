@@ -1050,7 +1050,25 @@ def getGenLepGenQuarks(dataset, genparts: GenParticleArray):
             "bquarks_phi": bquarks.phi,
             "bquarks_mass": bquarks.mass,
         }
-        return lepVars, quarkVars, bquarksVars, tops[:, 0].delta_r(tops[:, 1])
+
+        def ang_dist(phi1, phi2):
+            phi1 = phi1 % (2.0 * np.pi)
+            phi2 = phi2 % (2.0 * np.pi)
+            dphi = phi1 - phi2
+            if len(dphi.shape) > 0:
+                dphi[dphi < -np.pi] += 2.0 * np.pi
+                dphi[dphi > np.pi] -= 2.0 * np.pi
+            else:
+                if dphi < -np.pi:
+                    dphi += 2.0 * np.pi
+                if dphi > np.pi:
+                    dphi -= 2.0 * np.pi
+
+            return dphi
+
+        topsdphi = ang_dist(tops[:, 0].phi, tops[:, 1].phi)
+
+        return lepVars, quarkVars, bquarksVars, topsdphi
 
     else:
 
