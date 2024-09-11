@@ -1066,7 +1066,7 @@ def getGenLepGenQuarks(dataset, genparts: GenParticleArray):
 
             return dphi
 
-        topsdphi = ang_dist(tops[:, 0].phi, tops[:, 1].phi)
+        topsdphi = ang_dist(ak.to_numpy(tops[:, 0].phi), ak.to_numpy(tops[:, 1].phi))
 
         return lepVars, quarkVars, bquarksVars, topsdphi
 
