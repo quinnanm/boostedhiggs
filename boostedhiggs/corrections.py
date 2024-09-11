@@ -1010,7 +1010,7 @@ def getGenLepGenQuarks(dataset, genparts: GenParticleArray):
 
     elif "TT" in dataset:
         tops = genparts[get_pid_mask(genparts, TOP_PDGID, byall=False) * genparts.hasFlags(GEN_FLAGS)]
-        print(tops[:, 0])
+        print(tops[:, 0].delta_r(tops[:, 1]))
 
         # take all possible daughters!
         daughters = ak.flatten(tops.distinctChildren, axis=2)
