@@ -1030,10 +1030,17 @@ def getGenLepGenQuarks(dataset, genparts: GenParticleArray):
 
         bquarks = daughters[(daughters_pdgId == b_PDGID)]
 
-        print("bquarks", bquarks)
-        print("bquarks.distinctChildren", bquarks.distinctChildren)
+        bquarksdaughters = ak.flatten(bquarks.distinctChildren, axis=2)
+        bquarksdaughters = bquarksdaughters[bquarksdaughters.hasFlags(GEN_FLAGS)]
+        bquarksdaughters_pdgId = abs(bquarksdaughters.pdgId)
 
-        print("bquarks.distinctChildren.flatten", ak.flatten(bquarks.distinctChildren, axis=2))
+        bquarkslep = (
+            (bquarksdaughters_pdgId == ELE_PDGID)
+            | (bquarksdaughters_pdgId == MU_PDGID)
+            | (bquarksdaughters_pdgId == TAU_PDGID)
+        )
+
+        print("bquarkslep", bquarkslep)
 
         lepVars = {
             "lepton_pt": wboson_daughters[leptons].pt,
