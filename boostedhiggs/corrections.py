@@ -1197,8 +1197,9 @@ def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
     pf_cands = np.dstack((pf_cands_px, pf_cands_py, pf_cands_pz, pf_cands_E))
 
     genlep = np.array(
-        np.dstack(
+        np.stack(
             (GenlepVars["GenlepPt"], GenlepVars["GenlepEta"], GenlepVars["GenlepPhi"], GenlepVars["GenlepMass"]),
+            axis=1,
         )
     )
 
