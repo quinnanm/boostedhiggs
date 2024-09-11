@@ -748,7 +748,7 @@ class HwwProcessor(processor.ProcessorABC):
                 if self._getLPweights:
                     from boostedhiggs.corrections import getLPweights
 
-                    (pf_cands, gen_parts_eta_phi, ak8_jets, bgen_parts_eta_phi, genlep, topsdr) = getLPweights(
+                    (pf_cands, gen_parts_eta_phi, ak8_jets, bgen_parts_eta_phi, genlep) = getLPweights(
                         dataset,
                         events[selection_ch],
                         candidatefj[selection_ch],
@@ -782,8 +782,6 @@ class HwwProcessor(processor.ProcessorABC):
                     lpvars["LP_fj_eta"] = ak8_jets[:, 1]
                     lpvars["LP_fj_phi"] = ak8_jets[:, 2]
                     lpvars["LP_fj_mass"] = ak8_jets[:, 3]
-
-                    lpvars["topsdr"] = topsdr
 
                     output[ch] = {**output[ch], **lpvars}
 
