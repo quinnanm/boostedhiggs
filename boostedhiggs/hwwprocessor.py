@@ -576,10 +576,10 @@ class HwwProcessor(processor.ProcessorABC):
             if self.isSignal:
                 genVars, signal_mask = match_H(events.GenPart, candidatefj, fatjet_pt=FirstFatjet)
                 # add signal mask and modify sum of genweights to only consider those events that pass the mask
-                self.add_selection(name="Signal", sel=signal_mask)
+                # self.add_selection(name="Signal", sel=signal_mask)
             elif "HToTauTau" in dataset:
                 genVars, signal_mask = match_H(events.GenPart, candidatefj, dau_pdgid=15)
-                self.add_selection(name="Signal", sel=signal_mask)
+                # self.add_selection(name="Signal", sel=signal_mask)
             elif ("WJets" in dataset) or ("ZJets" in dataset) or ("DYJets" in dataset):
                 genVars, _ = match_V(events.GenPart, candidatefj)
                 genVars["LHE_HT"] = events.LHE.HT
@@ -593,29 +593,29 @@ class HwwProcessor(processor.ProcessorABC):
             genVars["fj_genjetpt"] = candidatefj.matched_gen.pt
             variables = {**variables, **genVars}
 
-        # hem-cleaning selection
-        if self._year == "2018":
-            hem_veto = ak.any(
-                ((goodjets.eta > -3.2) & (goodjets.eta < -1.3) & (goodjets.phi > -1.57) & (goodjets.phi < -0.87)),
-                -1,
-            ) | ak.any(
-                (
-                    (electrons.pt > 30)
-                    & (electrons.eta > -3.2)
-                    & (electrons.eta < -1.3)
-                    & (electrons.phi > -1.57)
-                    & (electrons.phi < -0.87)
-                ),
-                -1,
-            )
+        # # hem-cleaning selection
+        # if self._year == "2018":
+        #     hem_veto = ak.any(
+        #         ((goodjets.eta > -3.2) & (goodjets.eta < -1.3) & (goodjets.phi > -1.57) & (goodjets.phi < -0.87)),
+        #         -1,
+        #     ) | ak.any(
+        #         (
+        #             (electrons.pt > 30)
+        #             & (electrons.eta > -3.2)
+        #             & (electrons.eta < -1.3)
+        #             & (electrons.phi > -1.57)
+        #             & (electrons.phi < -0.87)
+        #         ),
+        #         -1,
+        #     )
 
-            hem_cleaning = (
-                ((events.run >= 319077) & (not self.isMC))  # if data check if in Runs C or D
-                # else for MC randomly cut based on lumi fraction of C&D
-                | ((np.random.rand(len(events)) < 0.632) & self.isMC)
-            ) & (hem_veto)
+        #     hem_cleaning = (
+        #         ((events.run >= 319077) & (not self.isMC))  # if data check if in Runs C or D
+        #         # else for MC randomly cut based on lumi fraction of C&D
+        #         | ((np.random.rand(len(events)) < 0.632) & self.isMC)
+        #     ) & (hem_veto)
 
-            self.add_selection(name="HEMCleaning", sel=~hem_cleaning)
+        #     self.add_selection(name="HEMCleaning", sel=~hem_cleaning)
 
         if self.isMC:
             for ch in self._channels:
