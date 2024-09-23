@@ -576,10 +576,10 @@ class HwwProcessor(processor.ProcessorABC):
             if self.isSignal:
                 genVars, signal_mask = match_H(events.GenPart, candidatefj, fatjet_pt=FirstFatjet)
                 # add signal mask and modify sum of genweights to only consider those events that pass the mask
-                # self.add_selection(name="Signal", sel=signal_mask)
+                self.add_selection(name="Signal", sel=signal_mask)
             elif "HToTauTau" in dataset:
                 genVars, signal_mask = match_H(events.GenPart, candidatefj, dau_pdgid=15)
-                # self.add_selection(name="Signal", sel=signal_mask)
+                self.add_selection(name="Signal", sel=signal_mask)
             elif ("WJets" in dataset) or ("ZJets" in dataset) or ("DYJets" in dataset):
                 genVars, _ = match_V(events.GenPart, candidatefj)
                 genVars["LHE_HT"] = events.LHE.HT
