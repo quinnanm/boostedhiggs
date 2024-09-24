@@ -208,15 +208,17 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         # Baseline weight
         ######################
 
-        self.weights.add("genweight", events.genWeight)
-        self.weights.add(
-            "L1Prefiring",
-            events.L1PreFiringWeight.Nom,
-            events.L1PreFiringWeight.Up,
-            events.L1PreFiringWeight.Dn,
-        )
-        add_pileup_weight(self.weights, self._year, "", nPU=ak.to_numpy(events.Pileup.nPU))
-        add_VJets_kFactors(self.weights, events.GenPart, dataset, events)
+        self.isMC = hasattr(events, "genWeight")
+        if self.isMC:
+            self.weights.add("genweight", events.genWeight)
+            self.weights.add(
+                "L1Prefiring",
+                events.L1PreFiringWeight.Nom,
+                events.L1PreFiringWeight.Up,
+                events.L1PreFiringWeight.Dn,
+            )
+            add_pileup_weight(self.weights, self._year, "", nPU=ak.to_numpy(events.Pileup.nPU))
+            add_VJets_kFactors(self.weights, events.GenPart, dataset, events)
 
         ######################
         # Baseline selection
