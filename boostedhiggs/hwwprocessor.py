@@ -534,41 +534,39 @@ class HwwProcessor(processor.ProcessorABC):
         # Selection
         ######################
 
-        # for ch in self._channels:
-        #     # trigger
-        #     if ch == "mu":
-        #         self.add_selection(
-        #             name="Trigger",
-        #             sel=((candidatelep.pt < 55) & trigger["mu_lowpt"]) | ((candidatelep.pt >= 55) & trigger["mu_highpt"]),
-        #             channel=ch,
-        #         )
-        #     else:
-        #         self.add_selection(name="Trigger", sel=trigger[ch], channel=ch)
+        for ch in self._channels:
+            # trigger
+            if ch == "mu":
+                self.add_selection(
+                    name="Trigger",
+                    sel=((candidatelep.pt < 55) & trigger["mu_lowpt"]) | ((candidatelep.pt >= 55) & trigger["mu_highpt"]),
+                    channel=ch,
+                )
+            else:
+                self.add_selection(name="Trigger", sel=trigger[ch], channel=ch)
 
-        # self.add_selection(name="METFilters", sel=metfilters)
-        # self.add_selection(name="OneLep", sel=(n_good_muons == 1) & (n_loose_electrons == 0), channel="mu")
-        # self.add_selection(name="OneLep", sel=(n_loose_muons == 0) & (n_good_electrons == 1), channel="ele")
-        # self.add_selection(name="NoTaus", sel=(n_loose_taus_mu == 0), channel="mu")
-        # self.add_selection(name="NoTaus", sel=(n_loose_taus_ele == 0), channel="ele")
-        # self.add_selection(name="AtLeastOneFatJet", sel=(NumFatjets >= 1))
+        self.add_selection(name="METFilters", sel=metfilters)
+        self.add_selection(name="OneLep", sel=(n_good_muons == 1) & (n_loose_electrons == 0), channel="mu")
+        self.add_selection(name="OneLep", sel=(n_loose_muons == 0) & (n_good_electrons == 1), channel="ele")
+        self.add_selection(name="NoTaus", sel=(n_loose_taus_mu == 0), channel="mu")
+        self.add_selection(name="NoTaus", sel=(n_loose_taus_ele == 0), channel="ele")
+        self.add_selection(name="AtLeastOneFatJet", sel=(NumFatjets >= 1))
 
-        # fj_pt_sel = candidatefj.pt > 250
-        # if self.isMC:  # make an OR of all the JECs
-        #     for k, v in self.jecs.items():
-        #         for var in ["up", "down"]:
-        #             fj_pt_sel = fj_pt_sel | (candidatefj[v][var].pt > 250)
-        # self.add_selection(name="CandidateJetpT", sel=(fj_pt_sel == 1))
+        fj_pt_sel = candidatefj.pt > 250
+        if self.isMC:  # make an OR of all the JECs
+            for k, v in self.jecs.items():
+                for var in ["up", "down"]:
+                    fj_pt_sel = fj_pt_sel | (candidatefj[v][var].pt > 250)
+        self.add_selection(name="CandidateJetpT", sel=(fj_pt_sel == 1))
 
-        # self.add_selection(name="LepInJet", sel=(lep_fj_dr < 0.8))
-        # self.add_selection(name="JetLepOverlap", sel=(lep_fj_dr > 0.03))
-        # self.add_selection(name="dPhiJetMET", sel=(np.abs(met_fj_dphi) < 1.57))
+        self.add_selection(name="LepInJet", sel=(lep_fj_dr < 0.8))
+        self.add_selection(name="JetLepOverlap", sel=(lep_fj_dr > 0.03))
+        self.add_selection(name="dPhiJetMET", sel=(np.abs(met_fj_dphi) < 1.57))
 
-        # if self._fakevalidation:
-        #     self.add_selection(name="MET", sel=(met.pt < 20))
-        # else:
-        #     self.add_selection(name="MET", sel=(met.pt > 20))
-
-        self.add_selection(name="dummy", sel=(ht > 0))
+        if self._fakevalidation:
+            self.add_selection(name="MET", sel=(met.pt < 20))
+        else:
+            self.add_selection(name="MET", sel=(met.pt > 20))
 
         # gen-level matching
         signal_mask = None
@@ -593,29 +591,29 @@ class HwwProcessor(processor.ProcessorABC):
             genVars["fj_genjetpt"] = candidatefj.matched_gen.pt
             variables = {**variables, **genVars}
 
-        # # hem-cleaning selection
-        # if self._year == "2018":
-        #     hem_veto = ak.any(
-        #         ((goodjets.eta > -3.2) & (goodjets.eta < -1.3) & (goodjets.phi > -1.57) & (goodjets.phi < -0.87)),
-        #         -1,
-        #     ) | ak.any(
-        #         (
-        #             (electrons.pt > 30)
-        #             & (electrons.eta > -3.2)
-        #             & (electrons.eta < -1.3)
-        #             & (electrons.phi > -1.57)
-        #             & (electrons.phi < -0.87)
-        #         ),
-        #         -1,
-        #     )
+        # hem-cleaning selection
+        if self._year == "2018":
+            hem_veto = ak.any(
+                ((goodjets.eta > -3.2) & (goodjets.eta < -1.3) & (goodjets.phi > -1.57) & (goodjets.phi < -0.87)),
+                -1,
+            ) | ak.any(
+                (
+                    (electrons.pt > 30)
+                    & (electrons.eta > -3.2)
+                    & (electrons.eta < -1.3)
+                    & (electrons.phi > -1.57)
+                    & (electrons.phi < -0.87)
+                ),
+                -1,
+            )
 
-        #     hem_cleaning = (
-        #         ((events.run >= 319077) & (not self.isMC))  # if data check if in Runs C or D
-        #         # else for MC randomly cut based on lumi fraction of C&D
-        #         | ((np.random.rand(len(events)) < 0.632) & self.isMC)
-        #     ) & (hem_veto)
+            hem_cleaning = (
+                ((events.run >= 319077) & (not self.isMC))  # if data check if in Runs C or D
+                # else for MC randomly cut based on lumi fraction of C&D
+                | ((np.random.rand(len(events)) < 0.632) & self.isMC)
+            ) & (hem_veto)
 
-        #     self.add_selection(name="HEMCleaning", sel=~hem_cleaning)
+            self.add_selection(name="HEMCleaning", sel=~hem_cleaning)
 
         if self.isMC:
             for ch in self._channels:
