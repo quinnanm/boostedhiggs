@@ -145,7 +145,7 @@ def main(args):
             TriggerEfficienciesProcessor,
         )
 
-        p = TriggerEfficienciesProcessor(year=year, yearmod=yearmod)
+        p = TriggerEfficienciesProcessor(year=year, yearmod=yearmod, channels=channels)
 
     tic = time.time()
     if args.executor == "dask":
@@ -222,11 +222,15 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # noqa: run locally on lpc (trigger) as: python run.py --year 2017 --processor trigger --pfnano v2_2 --n 4 --starti 0 --sample TTTo2L2Nu --local --channels ele --config samples_inclusive.yaml --key mc --executor iterative
+    # noqa: python run.py --executor iterative --year 2017 --processor trigger --pfnano v2_2 --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele,mu --config samples_inclusive.yaml --key mc
 
-    # noqa: run locally on single file (hww): python run.py --year 2017 --processor hww --pfnano v2_2 --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele --config samples_inclusive.yaml --key mc --executor iterative
+    # noqa: python run.py --year 2017 --processor hww --pfnano v2_2 --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele --config samples_inclusive.yaml --key mc --executor iterative
 
-    # noqa LP: python run.py --year 2017 --processor hww --pfnano v2_2 --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele,mu --config samples_inclusive.yaml --key mc --getLPweights --inference
+    # noqa LP: python run.py --executor iterative --year 2017 --processor hww --pfnano v2_2 --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele,mu --config samples_inclusive.yaml --key mc --getLPweights --inference
+    # noqa LP: python run.py --executor iterative --year 2017 --processor hww --pfnano v2_2 --sample TTToSemiLeptonic --local --channels ele,mu --config samples_inclusive.yaml --key mc --getLPweights --n 1 --starti 0
+
+    # noqa LP: python run.py --executor iterative --year 2017 --processor hww --pfnano v2_2 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele,mu --config samples_inclusive.yaml --key mc --getLPweights --n 1 --starti 0
+
     # noqa Fakes: python run.py --year 2017 --processor fakes --pfnano v2_2 --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele,mu --config samples_inclusive.yaml --key mc
 
     parser = argparse.ArgumentParser()
