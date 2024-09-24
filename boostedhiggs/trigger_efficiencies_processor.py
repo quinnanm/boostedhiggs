@@ -37,26 +37,17 @@ def build_p4(cand):
 class TriggerEfficienciesProcessor(ProcessorABC):
     """Accumulates yields from all input events: 1) before triggers, and 2) after triggers"""
 
-    def __init__(self, year="2017"):
+    def __init__(self, year="2017", yearmod=""):
         super(TriggerEfficienciesProcessor, self).__init__()
-        self._year = year
-        self._trigger_dict = {
-            "2017": {
-                "ele35": ["Ele35_WPTight_Gsf"],
-                "ele115": ["Ele115_CaloIdVT_GsfTrkIdT"],
-                "Photon200": ["Photon200"],
-                "Mu50": ["Mu50"],
-                "IsoMu27": ["IsoMu27"],
-                "OldMu100": ["OldMu100"],
-                "TkMu100": ["TkMu100"],
-            }
-        }[self._year]
-        self._triggers = {
-            "ele": ["ele35", "ele115", "Photon200"],
-            "mu": ["Mu50", "IsoMu27", "OldMu100", "TkMu100"],
-        }
 
+        self._year = year
+        self._yearmod = yearmod
         self._channels = ["ele", "mu"]
+
+        # trigger paths
+        with importlib.resources.path("boostedhiggs.data", "triggers.json") as path:
+            with open(path, "r") as f:
+                self._HLTs = json.load(f)[self._year]
 
         # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFiltersRun2
         with importlib.resources.path("boostedhiggs.data", "metfilters.json") as path:
@@ -89,20 +80,23 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             return self.pad_val(arr, nevents, -1)
 
         # skimmed events for different channels
-        out = {}
-        for channel in self._channels:
-            out[channel] = {}
-            out[channel]["triggers"] = {}
 
         """ Save OR of triggers as booleans """
-        for channel in self._channels:
+        out = {}
+        for ch in self._channels:
+            out[ch] = {}
+            out[ch]["triggers"] = {}
+
+        for ch in self._channels:
             HLT_triggers = {}
-            for t in self._triggers[channel]:
-                HLT_triggers["HLT_" + t] = np.any(
-                    np.array([events.HLT[trigger] for trigger in self._trigger_dict[t] if trigger in events.HLT.fields]),
-                    axis=0,
-                )
-            out[channel]["triggers"] = {**out[channel]["triggers"], **HLT_triggers}
+            for trigger in self._HLTs[ch]:
+
+                if trigger in events.HLT.fields:
+                    HLT_triggers["HLT_" + trigger] = np.array(events.HLT[trigger])
+                else:
+                    HLT_triggers["HLT_" + trigger] = np.zeros(nevents, dtype="bool")
+
+            out[ch]["triggers"] = {**out[ch]["triggers"], **HLT_triggers}
 
         ######################
         # METFLITERS
@@ -287,7 +281,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
                     for (key, value) in out[channel][key_].items()
                 }
 
-        return {self._year: {dataset: {"nevents": nevents, "skimmed_events": out}}}
+        return {self._year + self._yearmod: {dataset: {"nevents": nevents, "skimmed_events": out}}}
 
     def postprocess(self, accumulator):
         for year, datasets in accumulator.items():
