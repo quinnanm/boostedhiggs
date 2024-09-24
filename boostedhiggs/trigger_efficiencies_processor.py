@@ -218,16 +218,18 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             )
             add_pileup_weight(self.weights, self._year, "", nPU=ak.to_numpy(events.Pileup.nPU))
             add_VJets_kFactors(self.weights, events.GenPart, dataset, events)
-            for ch in self._channels:
-                if ch == "mu":
-                    add_lepton_weight(self.weights, candidatelep, self._year, "muon")
-                elif ch == "ele":
-                    add_lepton_weight(self.weights, candidatelep, self._year, "electron")
+
         ######################
         # Baseline selection
         ######################
 
-        for channel in self._channels:
+        for ch in self._channels:
+
+            if ch == "mu":
+                add_lepton_weight(self.weights, candidatelep, self._year, "muon")
+            elif ch == "ele":
+                add_lepton_weight(self.weights, candidatelep, self._year, "electron")
+
             selection = PackedSelection()
             if ch == "mu":
                 selection.add(
