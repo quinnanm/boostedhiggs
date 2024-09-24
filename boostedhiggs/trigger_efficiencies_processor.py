@@ -36,12 +36,12 @@ def build_p4(cand):
 class TriggerEfficienciesProcessor(ProcessorABC):
     """Accumulates yields from all input events: 1) before triggers, and 2) after triggers"""
 
-    def __init__(self, year="2017", yearmod=""):
+    def __init__(self, year="2017", yearmod="", channels=["ele"]):
         super(TriggerEfficienciesProcessor, self).__init__()
 
         self._year = year
         self._yearmod = yearmod
-        self._channels = ["ele"]
+        self._channels = channels
 
         # trigger paths
         with importlib.resources.path("boostedhiggs.data", "triggers.json") as path:
