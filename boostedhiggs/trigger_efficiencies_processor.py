@@ -219,7 +219,11 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             )
             add_pileup_weight(self.weights, self._year, "", nPU=ak.to_numpy(events.Pileup.nPU))
             add_VJets_kFactors(self.weights, events.GenPart, dataset, events)
-
+            for channel in self._channels:
+                if ch == "mu":
+                    add_lepton_weight(self.weights, candidatelep, self._year, "muon")
+                elif ch == "ele":
+                    add_lepton_weight(self.weights, candidatelep, self._year, "electron")
         ######################
         # Baseline selection
         ######################
@@ -227,7 +231,6 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         for channel in self._channels:
             selection = PackedSelection()
             if channel == "mu":
-                add_lepton_weight(self.weights, candidatelep, self._year, "muon")
                 selection.add(
                     "OneLep",
                     ((n_good_muons == 1) & (n_loose_electrons == 0)),
@@ -235,7 +238,6 @@ class TriggerEfficienciesProcessor(ProcessorABC):
                 selection.add("NoTaus", (n_loose_taus_mu == 0))
 
             elif channel == "ele":
-                add_lepton_weight(self.weights, candidatelep, self._year, "electron")
                 selection.add(
                     "OneLep",
                     ((n_loose_muons == 0) & (n_good_electrons == 1)),
@@ -277,11 +279,15 @@ class TriggerEfficienciesProcessor(ProcessorABC):
                     self.weights_per_ch[channel].append(key)
 
             # use column accumulators
-            for key_ in out[channel].keys():
-                out[channel][key_] = {
-                    key: column_accumulator(value[selection.all(*selection.names)])
-                    for (key, value) in out[channel][key_].items()
-                }
+            # for key_ in out[channel].keys():
+            #     out[channel][key_] = {
+            #         key: column_accumulator(value[selection.all(*selection.names)])
+            #         for (key, value) in out[channel][key_].items()
+            #     }
+            # use column accumulators
+            for key_ in out[ch].keys():
+                for key, value in out[ch][key_].items():
+                    out[ch][key_][key] = column_accumulator(value[selection.all(*selection.names)])
 
         return {self._year + self._yearmod: {dataset: {"nevents": nevents, "skimmed_events": out}}}
 
