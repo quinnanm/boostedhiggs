@@ -12,7 +12,6 @@ from boostedhiggs.corrections import (
     add_lepton_weight,
     add_pileup_weight,
     add_VJets_kFactors,
-    corrected_msoftdrop,
 )
 from boostedhiggs.utils import match_H
 
@@ -184,7 +183,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
 
         # OBJECT: AK8 fatjets
         fatjets = events.FatJet
-        fatjets["msdcorr"] = corrected_msoftdrop(fatjets)
+        fatjets["msdcorr"] = fatjets.msoftdrop
         # fatjets["msdcorr"] = fatjets.msoftdrop
         fatjet_selector = (fatjets.pt > 200) & (abs(fatjets.eta) < 2.5) & fatjets.isTight
         good_fatjets = fatjets[fatjet_selector]
@@ -224,7 +223,6 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         ######################
 
         for ch in self._channels:
-            print(ch, "channel")
 
             if ch == "mu":
                 add_lepton_weight(self.weights, candidatelep, self._year, "muon")
@@ -253,6 +251,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             selection.add("JetLepOverlap", (lep_fj_dr > 0.03))
             selection.add("dPhiJetMET", (np.abs(met_fj_dphi) < 1.57))
             selection.add("MET", (met.pt > 20))
+            selection.add("CandidateJetSoftdropMass", (candidatefj.msdcorr > 40))
 
             ######################
             # variables to store
@@ -268,10 +267,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
 
             if "HToWW" in dataset:
                 genVars, _ = match_H(events.GenPart, candidatefj)
-                matchedH_pt = genVars["fj_genH_pt"]
-            else:
-                matchedH_pt = ak.zeros_like(candidatefj.pt)
-            out[ch]["vars"]["fj_genH_pt"] = pad_val_nevents(matchedH_pt).data
+                out[ch]["vars"]["fj_genH_pt"] = pad_val_nevents(genVars["fj_genH_pt"]).data
 
             out[ch]["weights"] = {}
             for key in self.weights._weights.keys():
