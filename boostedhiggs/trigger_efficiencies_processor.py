@@ -208,7 +208,6 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         # Baseline weight
         ######################
 
-        self.isMC = hasattr(events, "genWeight")
         if self.isMC:
             self.weights.add("genweight", events.genWeight)
             self.weights.add(
@@ -219,7 +218,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             )
             add_pileup_weight(self.weights, self._year, "", nPU=ak.to_numpy(events.Pileup.nPU))
             add_VJets_kFactors(self.weights, events.GenPart, dataset, events)
-            for channel in self._channels:
+            for ch in self._channels:
                 if ch == "mu":
                     add_lepton_weight(self.weights, candidatelep, self._year, "muon")
                 elif ch == "ele":
@@ -230,14 +229,14 @@ class TriggerEfficienciesProcessor(ProcessorABC):
 
         for channel in self._channels:
             selection = PackedSelection()
-            if channel == "mu":
+            if ch == "mu":
                 selection.add(
                     "OneLep",
                     ((n_good_muons == 1) & (n_loose_electrons == 0)),
                 )
                 selection.add("NoTaus", (n_loose_taus_mu == 0))
 
-            elif channel == "ele":
+            elif ch == "ele":
                 selection.add(
                     "OneLep",
                     ((n_loose_muons == 0) & (n_good_electrons == 1)),
@@ -255,28 +254,28 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             ######################
             # variables to store
             ######################
-            out[channel]["vars"] = {}
-            out[channel]["vars"]["fj_pt"] = pad_val_nevents(candidatefj.pt)
-            out[channel]["vars"]["fj_eta"] = pad_val_nevents(candidatefj.eta)
-            out[channel]["vars"]["fj_msoftdrop"] = pad_val_nevents(candidatefj.msoftdrop)
-            out[channel]["vars"]["met_pt"] = pad_val_nevents(met.pt)
+            out[ch]["vars"] = {}
+            out[ch]["vars"]["fj_pt"] = pad_val_nevents(candidatefj.pt)
+            out[ch]["vars"]["fj_eta"] = pad_val_nevents(candidatefj.eta)
+            out[ch]["vars"]["fj_msoftdrop"] = pad_val_nevents(candidatefj.msoftdrop)
+            out[ch]["vars"]["met_pt"] = pad_val_nevents(met.pt)
 
-            out[channel]["vars"]["lep_pt"] = pad_val_nevents(candidatelep.pt)
-            out[channel]["vars"]["lep_eta"] = pad_val_nevents(candidatelep.eta)
+            out[ch]["vars"]["lep_pt"] = pad_val_nevents(candidatelep.pt)
+            out[ch]["vars"]["lep_eta"] = pad_val_nevents(candidatelep.eta)
 
             if "HToWW" in dataset:
                 genVars, _ = match_H(events.GenPart, candidatefj)
                 matchedH_pt = genVars["fj_genH_pt"]
             else:
                 matchedH_pt = ak.zeros_like(candidatefj.pt)
-            out[channel]["vars"]["fj_genH_pt"] = pad_val_nevents(matchedH_pt).data
+            out[ch]["vars"]["fj_genH_pt"] = pad_val_nevents(matchedH_pt).data
 
-            out[channel]["weights"] = {}
+            out[ch]["weights"] = {}
             for key in self.weights._weights.keys():
                 # store the individual weights (ONLY for now until we debug)
-                out[channel]["weights"][f"weight_{key}"] = self.weights.partial_weight([key])
-                if channel in self.weights_per_ch.keys():
-                    self.weights_per_ch[channel].append(key)
+                out[ch]["weights"][f"weight_{key}"] = self.weights.partial_weight([key])
+                if ch in self.weights_per_ch.keys():
+                    self.weights_per_ch[ch].append(key)
 
             # use column accumulators
             # for key_ in out[channel].keys():
@@ -294,10 +293,10 @@ class TriggerEfficienciesProcessor(ProcessorABC):
     def postprocess(self, accumulator):
         for year, datasets in accumulator.items():
             for dataset, output in datasets.items():
-                for channel in output["skimmed_events"].keys():
-                    for key_ in output["skimmed_events"][channel].keys():
-                        output["skimmed_events"][channel][key_] = {
-                            key: value.value for (key, value) in output["skimmed_events"][channel][key_].items()
+                for ch in output["skimmed_events"].keys():
+                    for key_ in output["skimmed_events"][ch].keys():
+                        output["skimmed_events"][ch][key_] = {
+                            key: value.value for (key, value) in output["skimmed_events"][ch][key_].items()
                         }
 
         return accumulator
