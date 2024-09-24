@@ -155,8 +155,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             & (np.abs(electrons.eta) < 2.5)
             & ((np.abs(electrons.eta) < 1.44) | (np.abs(electrons.eta) > 1.57))
             & (electrons.mvaFall17V2noIso_WPL)
-            # & (((electrons.pfRelIso03_all < 0.25) & (electrons.pt < 120)) | (electrons.pt >= 120))
-            & (((electrons.pfRelIso03_all < 0.25)))
+            & (((electrons.pfRelIso03_all < 0.25) & (electrons.pt < 120)) | (electrons.pt >= 120))
         )
 
         tight_electrons = (
@@ -164,8 +163,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             & (np.abs(electrons.eta) < 2.5)
             & ((np.abs(electrons.eta) < 1.44) | (np.abs(electrons.eta) > 1.57))
             & (electrons.mvaFall17V2noIso_WP90)
-            # & (((electrons.pfRelIso03_all < 0.15) & (electrons.pt < 120)) | (electrons.pt >= 120))
-            & ((electrons.pfRelIso03_all < 0.15))
+            & (((electrons.pfRelIso03_all < 0.15) & (electrons.pt < 120)) | (electrons.pt >= 120))
             # additional cuts
             & (np.abs(electrons.dz) < 0.1)
             & (np.abs(electrons.dxy) < 0.05)
