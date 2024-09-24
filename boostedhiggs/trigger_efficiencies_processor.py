@@ -42,7 +42,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
 
         self._year = year
         self._yearmod = yearmod
-        self._channels = ["ele", "mu"]
+        self._channels = ["ele"]
 
         # trigger paths
         with importlib.resources.path("boostedhiggs.data", "triggers.json") as path:
