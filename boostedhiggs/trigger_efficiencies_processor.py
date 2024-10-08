@@ -12,7 +12,6 @@ from boostedhiggs.corrections import (
     add_lepton_weight,
     add_pileup_weight,
     add_VJets_kFactors,
-    corrected_msoftdrop,
 )
 from boostedhiggs.utils import match_H
 
@@ -37,26 +36,17 @@ def build_p4(cand):
 class TriggerEfficienciesProcessor(ProcessorABC):
     """Accumulates yields from all input events: 1) before triggers, and 2) after triggers"""
 
-    def __init__(self, year="2017"):
+    def __init__(self, year="2017", yearmod="", channels=["ele"]):
         super(TriggerEfficienciesProcessor, self).__init__()
-        self._year = year
-        self._trigger_dict = {
-            "2017": {
-                "ele35": ["Ele35_WPTight_Gsf"],
-                "ele115": ["Ele115_CaloIdVT_GsfTrkIdT"],
-                "Photon200": ["Photon200"],
-                "Mu50": ["Mu50"],
-                "IsoMu27": ["IsoMu27"],
-                "OldMu100": ["OldMu100"],
-                "TkMu100": ["TkMu100"],
-            }
-        }[self._year]
-        self._triggers = {
-            "ele": ["ele35", "ele115", "Photon200"],
-            "mu": ["Mu50", "IsoMu27", "OldMu100", "TkMu100"],
-        }
 
-        self._channels = ["ele"]
+        self._year = year
+        self._yearmod = yearmod
+        self._channels = channels
+
+        # trigger paths
+        with importlib.resources.path("boostedhiggs.data", "triggers.json") as path:
+            with open(path, "r") as f:
+                self._HLTs = json.load(f)[self._year]
 
         # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFiltersRun2
         with importlib.resources.path("boostedhiggs.data", "metfilters.json") as path:
@@ -81,8 +71,6 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         dataset = events.metadata["dataset"]
         nevents = len(events)
         self.isMC = hasattr(events, "genWeight")
-        sumgenweight = ak.sum(events.genWeight) if self.isMC else nevents
-
         self.weights = Weights(nevents, storeIndividual=True)
         self.weights_per_ch = {}
 
@@ -91,29 +79,23 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             return self.pad_val(arr, nevents, -1)
 
         # skimmed events for different channels
-        out = {}
-        for channel in self._channels:
-            out[channel] = {}
-            out[channel]["triggers"] = {}
 
         """ Save OR of triggers as booleans """
-        for channel in self._channels:
+        out = {}
+        for ch in self._channels:
+            out[ch] = {}
+            out[ch]["triggers"] = {}
+
+        for ch in self._channels:
             HLT_triggers = {}
-            for t in self._triggers[channel]:
-                HLT_triggers["HLT_" + t] = np.any(
-                    np.array([events.HLT[trigger] for trigger in self._trigger_dict[t] if trigger in events.HLT.fields]),
-                    axis=0,
-                )
-            out[channel]["triggers"] = {**out[channel]["triggers"], **HLT_triggers}
+            for trigger in self._HLTs[ch]:
 
-        ######################
-        # Trigger
-        ######################
+                if trigger in events.HLT.fields:
+                    HLT_triggers["HLT_" + trigger] = np.array(events.HLT[trigger])
+                else:
+                    HLT_triggers["HLT_" + trigger] = np.zeros(nevents, dtype="bool")
 
-        trigger = np.zeros(nevents, dtype="bool")
-        for t in self._triggers["mu"]:
-            if t in events.HLT.fields:
-                trigger = trigger | events.HLT[t]
+            out[ch]["triggers"] = {**out[ch]["triggers"], **HLT_triggers}
 
         ######################
         # METFLITERS
@@ -130,15 +112,24 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         ######################
 
         # OBJECT: taus
+        loose_taus_mu = (events.Tau.pt > 20) & (abs(events.Tau.eta) < 2.3) & (events.Tau.idAntiMu >= 1)  # loose antiMu ID
         loose_taus_ele = (
             (events.Tau.pt > 20)
             & (abs(events.Tau.eta) < 2.3)
             & (events.Tau.idAntiEleDeadECal >= 2)  # loose Anti-electron MVA discriminator V6 (2018) ?
         )
+        n_loose_taus_mu = ak.sum(loose_taus_mu, axis=1)
         n_loose_taus_ele = ak.sum(loose_taus_ele, axis=1)
 
         # OBJECT: muons
         muons = ak.with_field(events.Muon, 0, "flavor")
+
+        loose_muons = (
+            (muons.pt > 30)
+            & (np.abs(muons.eta) < 2.4)
+            & (muons.looseId)
+            & (((muons.pfRelIso04_all < 0.25) & (muons.pt < 55)) | (muons.pt >= 55))
+        )
 
         tight_muons = (
             (muons.pt > 30)
@@ -149,12 +140,22 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             & (np.abs(muons.dz) < 0.1)
             & (np.abs(muons.dxy) < 0.02)
         )
+
+        n_loose_muons = ak.sum(loose_muons, axis=1)
         good_muons = tight_muons
 
         n_good_muons = ak.sum(good_muons, axis=1)
 
         # OBJECT: electrons
         electrons = ak.with_field(events.Electron, 1, "flavor")
+
+        loose_electrons = (
+            (electrons.pt > 38)
+            & (np.abs(electrons.eta) < 2.5)
+            & ((np.abs(electrons.eta) < 1.44) | (np.abs(electrons.eta) > 1.57))
+            & (electrons.mvaFall17V2noIso_WPL)
+            & (((electrons.pfRelIso03_all < 0.25) & (electrons.pt < 120)) | (electrons.pt >= 120))
+        )
 
         tight_electrons = (
             (electrons.pt > 38)
@@ -167,6 +168,8 @@ class TriggerEfficienciesProcessor(ProcessorABC):
             & (np.abs(electrons.dxy) < 0.05)
             & (electrons.sip3d <= 4.0)
         )
+
+        n_loose_electrons = ak.sum(loose_electrons, axis=1)
         good_electrons = tight_electrons
 
         n_good_electrons = ak.sum(good_electrons, axis=1)
@@ -180,7 +183,7 @@ class TriggerEfficienciesProcessor(ProcessorABC):
 
         # OBJECT: AK8 fatjets
         fatjets = events.FatJet
-        fatjets["msdcorr"] = corrected_msoftdrop(fatjets)
+        fatjets["msdcorr"] = fatjets.msoftdrop
         # fatjets["msdcorr"] = fatjets.msoftdrop
         fatjet_selector = (fatjets.pt > 200) & (abs(fatjets.eta) < 2.5) & fatjets.isTight
         good_fatjets = fatjets[fatjet_selector]
@@ -219,70 +222,74 @@ class TriggerEfficienciesProcessor(ProcessorABC):
         # Baseline selection
         ######################
 
-        for channel in ["ele"]:
-            add_lepton_weight(self.weights, candidatelep, self._year, "electron")
+        for ch in self._channels:
+
+            if ch == "mu":
+                add_lepton_weight(self.weights, candidatelep, self._year, "muon")
+            elif ch == "ele":
+                add_lepton_weight(self.weights, candidatelep, self._year, "electron")
 
             selection = PackedSelection()
-            selection.add("MuonTrigger", trigger)
+            if ch == "mu":
+                selection.add(
+                    "OneLep",
+                    ((n_good_muons == 1) & (n_loose_electrons == 0)),
+                )
+                selection.add("NoTaus", (n_loose_taus_mu == 0))
+
+            elif ch == "ele":
+                selection.add(
+                    "OneLep",
+                    ((n_loose_muons == 0) & (n_good_electrons == 1)),
+                )
+                selection.add("NoTaus", (n_loose_taus_ele == 0))
+
             selection.add("METFilters", (metfilters))
-            selection.add(
-                "AtLeatOneTightElectron",
-                (n_good_electrons >= 1),
-            )
-            selection.add(
-                "AtLeatOneTightMuon",
-                (n_good_muons >= 1),
-            )
-            selection.add("NoTaus", (n_loose_taus_ele == 0))
             selection.add("AtLeastOneFatJet", (NumFatjets >= 1))
             selection.add("CandidateJetpT", (candidatefj.pt > 250))
             selection.add("LepInJet", (lep_fj_dr < 0.8))
             selection.add("JetLepOverlap", (lep_fj_dr > 0.03))
             selection.add("dPhiJetMET", (np.abs(met_fj_dphi) < 1.57))
-            selection.add("MET", (met.pt > 0))
+            selection.add("MET", (met.pt > 20))
             selection.add("CandidateJetSoftdropMass", (candidatefj.msdcorr > 40))
 
             ######################
             # variables to store
             ######################
-            out[channel]["vars"] = {}
-            out[channel]["vars"]["fj_pt"] = pad_val_nevents(candidatefj.pt)
-            out[channel]["vars"]["fj_eta"] = pad_val_nevents(candidatefj.eta)
-            out[channel]["vars"]["fj_msoftdrop"] = pad_val_nevents(candidatefj.msoftdrop)
-            out[channel]["vars"]["met_pt"] = pad_val_nevents(met.pt)
+            out[ch]["vars"] = {}
+            out[ch]["vars"]["fj_pt"] = pad_val_nevents(candidatefj.pt)
+            out[ch]["vars"]["fj_eta"] = pad_val_nevents(candidatefj.eta)
+            out[ch]["vars"]["fj_msoftdrop"] = pad_val_nevents(candidatefj.msoftdrop)
+            out[ch]["vars"]["met_pt"] = pad_val_nevents(met.pt)
 
-            out[channel]["vars"]["lep_pt"] = pad_val_nevents(candidatelep.pt)
-            out[channel]["vars"]["lep_eta"] = pad_val_nevents(candidatelep.eta)
+            out[ch]["vars"]["lep_pt"] = pad_val_nevents(candidatelep.pt)
+            out[ch]["vars"]["lep_eta"] = pad_val_nevents(candidatelep.eta)
 
             if "HToWW" in dataset:
                 genVars, _ = match_H(events.GenPart, candidatefj)
-                out[channel]["vars"]["fj_genH_pt"] = pad_val_nevents(genVars["fj_genH_pt"]).data
+                out[ch]["vars"]["fj_genH_pt"] = pad_val_nevents(genVars["fj_genH_pt"]).data
 
-            out[channel]["weights"] = {}
+            out[ch]["weights"] = {}
             for key in self.weights._weights.keys():
                 # store the individual weights (ONLY for now until we debug)
-                out[channel]["weights"][f"weight_{key}"] = self.weights.partial_weight([key])
-                if channel in self.weights_per_ch.keys():
-                    self.weights_per_ch[channel].append(key)
+                out[ch]["weights"][f"weight_{key}"] = self.weights.partial_weight([key])
+                if ch in self.weights_per_ch.keys():
+                    self.weights_per_ch[ch].append(key)
 
-            print(out)
             # use column accumulators
-            for key_ in out[channel].keys():
-                for key, value in out[channel][key_].items():
-                    out[channel][key_][key] = column_accumulator(value[selection.all(*selection.names)])
+            for key_ in out[ch].keys():
+                for key, value in out[ch][key_].items():
+                    out[ch][key_][key] = column_accumulator(value[selection.all(*selection.names)])
 
-        return {self._year: {dataset: {"nevents": nevents, "sumgenweight": sumgenweight, "skimmed_events": out}}}
+        return {self._year + self._yearmod: {dataset: {"nevents": nevents, "skimmed_events": out}}}
 
     def postprocess(self, accumulator):
         for year, datasets in accumulator.items():
             for dataset, output in datasets.items():
-                for channel in output["skimmed_events"].keys():
-                    for key_ in output["skimmed_events"][channel].keys():
-                        output["skimmed_events"][channel][key_] = {
-                            key: value.value for (key, value) in output["skimmed_events"][channel][key_].items()
+                for ch in output["skimmed_events"].keys():
+                    for key_ in output["skimmed_events"][ch].keys():
+                        output["skimmed_events"][ch][key_] = {
+                            key: value.value for (key, value) in output["skimmed_events"][ch][key_].items()
                         }
 
         return accumulator
-
-    # def postprocess(self, accumulator):
-    #     return accumulator

@@ -439,12 +439,12 @@ lepton_corrections = {
             "2017": "NUM_LooseRelIso_DEN_MediumPromptID",
             "2018": "NUM_LooseRelIso_DEN_MediumPromptID",
         },
-        "electron": {  # TODO: remove because these are ID SFs
-            "2016APV": "wp90iso",
-            "2016": "wp90iso",
-            "2017": "wp90iso",
-            "2018": "wp90iso",
-        },
+        # "electron": {  # TODO: remove because these are ID SFs
+        #     "2016APV": "wp90iso",
+        #     "2016": "wp90iso",
+        #     "2017": "wp90iso",
+        #     "2018": "wp90iso",
+        # },
     },
     "id": {
         "muon": {
@@ -543,20 +543,22 @@ def add_lepton_weight(weights, lepton, year, lepton_type="muon"):
         # add weights (for now only the nominal weight)
         weights.add(f"{corr}_{lepton_type}", values["nominal"], values["up"], values["down"])
 
-    # quick hack to add electron trigger SFs
-    if lepton_type == "electron":
-        corr = "trigger"
-        with importlib.resources.path("boostedhiggs.data", f"electron_trigger_{ul_year}_UL.json") as filename:
-            cset = correctionlib.CorrectionSet.from_file(str(filename))
-            lepton_pt, lepton_eta = get_clip(lep_pt, lep_eta, lepton_type, corr)
-            values["nominal"] = cset["UL-Electron-Trigger-SF"].evaluate(
-                ul_year + "_UL", "sf", "trigger", lepton_eta, lepton_pt
-            )
-            values["up"] = cset["UL-Electron-Trigger-SF"].evaluate(ul_year + "_UL", "sfup", "trigger", lepton_eta, lepton_pt)
-            values["down"] = cset["UL-Electron-Trigger-SF"].evaluate(
-                ul_year + "_UL", "sfdown", "trigger", lepton_eta, lepton_pt
-            )
-            weights.add(f"{corr}_{lepton_type}", values["nominal"], values["up"], values["down"])
+    # # quick hack to add electron trigger SFs
+    # if lepton_type == "electron":
+    #     corr = "trigger"
+    #     with importlib.resources.path("boostedhiggs.data", f"electron_trigger_{ul_year}_UL.json") as filename:
+    #         cset = correctionlib.CorrectionSet.from_file(str(filename))
+    #         lepton_pt, lepton_eta = get_clip(lep_pt, lep_eta, lepton_type, corr)
+    #         values["nominal"] = cset["UL-Electron-Trigger-SF"].evaluate(
+    #             ul_year + "_UL", "sf", "trigger", lepton_eta, lepton_pt
+    #         )
+    #         values["up"] = cset["UL-Electron-Trigger-SF"].evaluate(
+    #             ul_year + "_UL", "sfup", "trigger", lepton_eta, lepton_pt,
+    #             )
+    #         values["down"] = cset["UL-Electron-Trigger-SF"].evaluate(
+    #             ul_year + "_UL", "sfdown", "trigger", lepton_eta, lepton_pt
+    #         )
+    #         weights.add(f"{corr}_{lepton_type}", values["nominal"], values["up"], values["down"])
 
 
 def get_pileup_weight(year: str, mod: str, nPU: np.ndarray):
@@ -887,6 +889,66 @@ def getJMSRVariables(fatjetvars, candidatelep_p4, met, mass_shift=None):
     return variables
 
 
+def add_TopPtReweighting(topPt):
+
+    toppt_weight1 = np.exp(0.0615 - 0.0005 * np.clip(topPt[:, 0], 0.0, 500.0))
+    toppt_weight2 = np.exp(0.0615 - 0.0005 * np.clip(topPt[:, 1], 0.0, 500.0))
+
+    nominal = np.sqrt(toppt_weight1 * toppt_weight2)
+
+    # weights.add("TopPtReweight", nominal, nominal**2, np.ones_like(nominal))
+
+    return nominal
+
+    # weights.add(
+    #     "TopPtReweight",
+    #     np.sqrt(toppt_weight1 * toppt_weight2),
+    #     np.ones_like(toppt_weight1),
+    #     np.sqrt(toppt_weight1 * toppt_weight2),
+    # )
+
+
+def get_JetVetoMap(jets, year: str):
+    """
+    Jet Veto Maps recommendation from JERC.
+
+    All JERC analysers and anybody doing precision measurements with jets should use the strictest veto maps.
+    Recommended for analyses strongly relying on events with large MET.
+
+    Recommendation link: https://cms-jerc.web.cern.ch/Recommendations/#run-3_2
+
+    Get event selection that rejects events with jets in the veto map.
+    """
+
+    # Jet veto maps are synced daily here
+    era_tags = {"2016APV": "2016preVFP_UL", "2016": "2016postVFP_UL", "2017": "2017_UL", "2018": "2018_UL"}
+    era_tag = era_tags[year]
+
+    fname = f"/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/JME/{era_tag}/jetvetomaps.json.gz"
+
+    # correctionlib doesn't support awkward arrays, so we have to flatten them out
+    j, nj = ak.flatten(jets), ak.num(jets)
+    j_phi = np.clip(np.array(j.phi), -3.1415, 3.1415)
+    j_eta = np.clip(np.array(j.eta), -4.7, 4.7)
+
+    # load the correction set
+    evaluator = correctionlib.CorrectionSet.from_file(fname)
+
+    # apply the correction and recreate the awkward array shape
+    hname = {"2016APV": "Summer19UL16_V1", "2016": "Summer19UL16_V1", "2017": "Summer19UL17_V1", "2018": "Summer19UL18_V1"}
+
+    weight = evaluator[hname[year]].evaluate("jetvetomap", j_eta, j_phi)
+    weight_ak = ak.unflatten(np.array(weight), counts=nj)
+
+    # any non-zero weight means the jet is vetoed
+    jetmask = weight_ak == 0
+
+    # events are selected only if they have no jets in the vetoed region
+    eventmask = ak.sum(weight_ak, axis=-1) == 0
+
+    return jetmask, eventmask
+
+
 """
 ------------------- Lund plane reweighting ------------------- #
 """
@@ -902,6 +964,7 @@ from .utils import (
     TAU_PDGID,
     TOP_PDGID,
     W_PDGID,
+    Z_PDGID,
     b_PDGID,
     get_pid_mask,
 )
@@ -943,7 +1006,9 @@ def getGenLepGenQuarks(dataset, genparts: GenParticleArray):
             "quark_mass": all_daus_flat[quarks].mass,
         }
 
-    else:
+        return lepVars, quarkVars, None
+
+    elif "TT" in dataset:
         tops = genparts[get_pid_mask(genparts, TOP_PDGID, byall=False) * genparts.hasFlags(GEN_FLAGS)]
 
         # take all possible daughters!
@@ -961,7 +1026,20 @@ def getGenLepGenQuarks(dataset, genparts: GenParticleArray):
             | (wboson_daughters_pdgId == TAU_PDGID)
         )
 
-        quarks = wboson_daughters_pdgId < b_PDGID
+        quarks = wboson_daughters_pdgId <= b_PDGID
+
+        bquarks = daughters[(daughters_pdgId == b_PDGID)]
+
+        bquarksdaughters = ak.flatten(bquarks.distinctChildren, axis=2)
+        bquarksdaughters_pdgId = abs(bquarksdaughters.pdgId)
+
+        bquarkslep = (
+            (bquarksdaughters_pdgId == ELE_PDGID)
+            | (bquarksdaughters_pdgId == MU_PDGID)
+            | (bquarksdaughters_pdgId == TAU_PDGID)
+        )
+
+        print("bquarkslep", bquarkslep)
 
         lepVars = {
             "lepton_pt": wboson_daughters[leptons].pt,
@@ -977,7 +1055,57 @@ def getGenLepGenQuarks(dataset, genparts: GenParticleArray):
             "quark_mass": wboson_daughters[quarks].mass,
         }
 
-    return lepVars, quarkVars
+        bquarksVars = {
+            "bquarks_pt": bquarks.pt,
+            "bquarks_eta": bquarks.eta,
+            "bquarks_phi": bquarks.phi,
+            "bquarks_mass": bquarks.mass,
+        }
+
+        # def ang_dist(phi1, phi2):
+        #     phi1 = phi1 % (2.0 * np.pi)
+        #     phi2 = phi2 % (2.0 * np.pi)
+        #     dphi = phi1 - phi2
+        #     if len(dphi.shape) > 0:
+        #         dphi[dphi < -np.pi] += 2.0 * np.pi
+        #         dphi[dphi > np.pi] -= 2.0 * np.pi
+        #     else:
+        #         if dphi < -np.pi:
+        #             dphi += 2.0 * np.pi
+        #         if dphi > np.pi:
+        #             dphi -= 2.0 * np.pi
+
+        #     return dphi
+
+        # topsdphi = ang_dist(ak.to_numpy(tops[:, 0].phi), ak.to_numpy(tops[:, 1].phi))
+
+        return lepVars, quarkVars, bquarksVars
+
+    else:
+
+        vs = genparts[get_pid_mask(genparts, [W_PDGID, Z_PDGID], byall=False) * genparts.hasFlags(GEN_FLAGS)]
+        daughters = ak.flatten(vs.distinctChildren, axis=2)
+        daughters = daughters[daughters.hasFlags(GEN_FLAGS)]
+        daughters_pdgId = abs(daughters.pdgId)
+
+        leptons = (daughters_pdgId == ELE_PDGID) | (daughters_pdgId == MU_PDGID) | (daughters_pdgId == TAU_PDGID)
+        quarks = daughters_pdgId < b_PDGID
+
+        lepVars = {
+            "lepton_pt": daughters[leptons].pt,
+            "lepton_eta": daughters[leptons].eta,
+            "lepton_phi": daughters[leptons].phi,
+            "lepton_mass": daughters[leptons].mass,
+        }
+
+        quarkVars = {
+            "quark_pt": daughters[quarks].pt,
+            "quark_eta": daughters[quarks].eta,
+            "quark_phi": daughters[quarks].phi,
+            "quark_mass": daughters[quarks].mass,
+        }
+
+        return lepVars, quarkVars, None
 
 
 def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
@@ -990,7 +1118,7 @@ def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
 
     candidatefj = candidatefj - candidatelep_p4
 
-    lepVars, quarkVars = getGenLepGenQuarks(dataset, events.GenPart)
+    lepVars, quarkVars, bquarksVars = getGenLepGenQuarks(dataset, events.GenPart)
 
     ak8_jets = np.array(
         np.stack(
@@ -1017,8 +1145,24 @@ def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
         )
         for key, var in skim_vars.items()
     }
-
     gen_parts_eta_phi = np.array(np.dstack((Gen2qVars["Gen2qEta"], Gen2qVars["Gen2qPhi"])))
+
+    if "TT" in dataset:
+
+        GenbquarksVars = {
+            f"Genbquarks{var}": ak.to_numpy(
+                ak.fill_none(
+                    ak.pad_none(bquarksVars[f"bquarks_{key}"], 2, axis=1, clip=True),
+                    FILL_NONE_VALUE,
+                )
+            )
+            for key, var in skim_vars.items()
+        }
+
+        bgen_parts_eta_phi = np.array(np.dstack((GenbquarksVars["GenbquarksEta"], GenbquarksVars["GenbquarksPhi"])))
+
+    else:
+        bgen_parts_eta_phi = None
 
     # prepare the Gen lepton in case we mask objects around it
     GenlepVars = {
@@ -1056,11 +1200,13 @@ def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
     # build any masking you want
     msk_lep = (pid_array == ELE_PDGID) | (pid_array == MU_PDGID) | (pid_array == TAU_PDGID)
     msk_gamma = pid_array == GAMMA_PDGID
-    msk_delta = GenLep.delta_r(jet_pfcands) < 0.1
+    msk_delta = GenLep.delta_r(jet_pfcands) < 0.2
+    msk_pt = pt_array < 1
 
     msk = (msk_lep | msk_gamma) & msk_delta
+    msk = ((msk_lep | msk_gamma) & msk_delta) | msk_pt
 
-    # apply the masking by selecting events that don't have "msk"
+    # apply the masking by selecting particles that don't have "msk"
     selected_pt = pt_array[~msk]
     selected_eta = eta_array[~msk]
     selected_phi = phi_array[~msk]
@@ -1079,19 +1225,11 @@ def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
 
     pf_cands = np.dstack((pf_cands_px, pf_cands_py, pf_cands_pz, pf_cands_E))
 
-    return pf_cands, gen_parts_eta_phi, ak8_jets
+    genlep = np.array(
+        np.stack(
+            (GenlepVars["GenlepPt"], GenlepVars["GenlepEta"], GenlepVars["GenlepPhi"], GenlepVars["GenlepMass"]),
+            axis=1,
+        )
+    )
 
-
-def add_TopPtReweighting(topPt):
-
-    toppt_weight1 = np.exp(0.0615 - 0.0005 * np.clip(topPt[:, 0], 0.0, 500.0))
-    toppt_weight2 = np.exp(0.0615 - 0.0005 * np.clip(topPt[:, 1], 0.0, 500.0))
-
-    return np.sqrt(toppt_weight1 * toppt_weight2)
-
-    # weights.add(
-    #     "TopPtReweight",
-    #     np.sqrt(toppt_weight1 * toppt_weight2),
-    #     np.ones_like(toppt_weight1),
-    #     np.sqrt(toppt_weight1 * toppt_weight2),
-    # )
+    return pf_cands, gen_parts_eta_phi, ak8_jets, bgen_parts_eta_phi, genlep

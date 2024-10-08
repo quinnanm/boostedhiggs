@@ -143,6 +143,14 @@ def match_H(
 
         gen_lepton = ak.firsts(lep_daughters)
 
+        # identifying the leptonic gen V
+        Ws_children_pdgid = abs(matched_higgs_children.children.pdgId)
+        msk_isVlep = (Ws_children_pdgid == ELE_PDGID) | (Ws_children_pdgid == MU_PDGID) | (Ws_children_pdgid == TAU_PDGID)
+        msk_isVhad = ~msk_isVlep
+
+        genVlep = ak.firsts(matched_higgs_children[ak.singletons(ak.argmax(ak.sum(msk_isVlep, axis=-1), axis=-1))])
+        genVhad = ak.firsts(matched_higgs_children[ak.singletons(ak.argmax(ak.sum(msk_isVhad, axis=-1), axis=-1))])
+
         genHVVVars = {
             "num_quarks": num_quarks,
             "num_m_quarks": num_m_quarks,
@@ -160,6 +168,12 @@ def match_H(
             "gen_Vlep_pt": gen_lepton.pt,
             "genlep_dR_fj": fatjet.delta_r(gen_lepton),
             "fj_genRes_mass": matched_higgs.mass,
+            # added on Oct 2, 2024
+            "fj_genRes_pt": matched_higgs.pt,
+            "genVhad_pt": genVhad.pt,
+            "genVlep_pt": genVlep.pt,
+            "dR_genVhad_genlep": genVhad.delta_r(gen_lepton),
+            "dR_genVlep_genlep": genVlep.delta_r(gen_lepton),
         }
 
         if fatjet_pt is not None:
