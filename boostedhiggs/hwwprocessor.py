@@ -239,14 +239,14 @@ class HwwProcessor(processor.ProcessorABC):
             (muons.pt > 30)
             & (np.abs(muons.eta) < 2.4)
             & (muons.looseId)
-            & (((muons.pfRelIso04_all < 0.25) & (muons.pt < 55)) | (muons.pt >= 55))
+            & (((muons.pfRelIso04_all < 0.25) & (muons.pt < 55)) | ((muons.pt >= 55) & (muons.miniPFRelIso_all < 0.3)))
         )
 
         tight_muons = (
             (muons.pt > 30)
             & (np.abs(muons.eta) < 2.4)
             & muons.mediumId
-            & (((muons.pfRelIso04_all < 0.20) & (muons.pt < 55)) | (muons.pt >= 55) & (muons.miniPFRelIso_all < 0.2))
+            & (((muons.pfRelIso04_all < 0.20) & (muons.pt < 55)) | ((muons.pt >= 55) & (muons.miniPFRelIso_all < 0.2)))
             # additional cuts
             & (np.abs(muons.dz) < 0.1)
             & (np.abs(muons.dxy) < 0.02)
@@ -448,6 +448,8 @@ class HwwProcessor(processor.ProcessorABC):
             "VH_fj_VScore": VScore(VH_fj),
             # add jetveto as optional selection
             "jetvetomap": cut_jetveto,
+            # added on October 9th
+            "loose_lep1_miso": ak.firsts(loose_muons[ak.argsort(loose_muons.pt, ascending=False)]).miniPFRelIso_all,
         }
 
         fatjetvars = {
