@@ -293,6 +293,10 @@ class FakesProcessor(processor.ProcessorABC):
             "fj_phi": candidatefj.phi,
             "mT_tight1": mT_tight1,
             "mT_loose1": mT_loose1,
+            # added on Oct 9
+            "fj_mass": candidatefj.mass,
+            "loose_lep1_miso": loose_lep1.miniPFRelIso_all,
+            "loose_lep2_miso": loose_lep2.miniPFRelIso_all,
         }
 
         for ch in self._channels:
