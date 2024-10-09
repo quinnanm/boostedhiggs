@@ -449,7 +449,9 @@ class HwwProcessor(processor.ProcessorABC):
             # add jetveto as optional selection
             "jetvetomap": cut_jetveto,
             # added on October 9th
-            "loose_lep1_miso": ak.firsts(loose_muons[ak.argsort(loose_muons.pt, ascending=False)]).miniPFRelIso_all,
+            "loose_lep1_miso": ak.firsts(
+                muons[loose_muons][ak.argsort(muons[loose_muons].pt, ascending=False)]
+            ).miniPFRelIso_all,
         }
 
         fatjetvars = {
