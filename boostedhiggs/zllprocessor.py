@@ -169,14 +169,14 @@ class ZllProcessor(processor.ProcessorABC):
             (muons.pt > 30)
             & (np.abs(muons.eta) < 2.4)
             & (muons.looseId)
-            & (((muons.pfRelIso04_all < 0.25) & (muons.pt < 55)) | (muons.pt >= 55))
+            & (((muons.pfRelIso04_all < 0.25) & (muons.pt < 55)) | ((muons.pt >= 55) & (muons.miniPFRelIso_all < 0.3)))
         )
 
         tight_muons = (
             (muons.pt > 30)
             & (np.abs(muons.eta) < 2.4)
             & muons.mediumId
-            & (((muons.pfRelIso04_all < 0.20) & (muons.pt < 55)) | (muons.pt >= 55) & (muons.miniPFRelIso_all < 0.2))
+            & (((muons.pfRelIso04_all < 0.20) & (muons.pt < 55)) | ((muons.pt >= 55) & (muons.miniPFRelIso_all < 0.2)))
             # additional cuts
             & (np.abs(muons.dz) < 0.1)
             & (np.abs(muons.dxy) < 0.02)
@@ -295,6 +295,12 @@ class ZllProcessor(processor.ProcessorABC):
             "fj_phi": candidatefj.phi,
             "mT_tight1": mT_tight1,
             "mT_loose1": mT_loose1,
+            # added on Oct 9
+            "fj_mass": candidatefj.mass,
+            "loose_lep1_miso": loose_lep1.miniPFRelIso_all,
+            "loose_lep2_miso": loose_lep2.miniPFRelIso_all,
+            "tight_lep1_miso": tight_lep1.miniPFRelIso_all,
+            "tight_lep2_miso": tight_lep2.miniPFRelIso_all,
         }
 
         for ch in self._channels:
