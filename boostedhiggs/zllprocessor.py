@@ -169,7 +169,7 @@ class ZllProcessor(processor.ProcessorABC):
             (muons.pt > 30)
             & (np.abs(muons.eta) < 2.4)
             & (muons.looseId)
-            & (((muons.pfRelIso04_all < 0.25) & (muons.pt < 55)) | ((muons.pt >= 55) & (muons.miniPFRelIso_all < 0.3)))
+            & (((muons.pfRelIso04_all < 0.25) & (muons.pt < 55)) | (muons.pt >= 55))
         )
 
         tight_muons = (
