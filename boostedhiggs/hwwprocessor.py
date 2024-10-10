@@ -413,7 +413,7 @@ class HwwProcessor(processor.ProcessorABC):
         met_fj_dphi = candidatefj.delta_phi(met)
 
         # leptonic tauy veto
-        from utils import ELE_PDGID, MU_PDGID
+        from boostedhiggs.utils import ELE_PDGID, MU_PDGID
 
         loose_taus = (events.Tau.pt > 20) & (abs(events.Tau.eta) < 2.3)
 
