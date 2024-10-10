@@ -161,6 +161,13 @@ class HwwProcessor(processor.ProcessorABC):
             else:
                 self.cutflows[ch][name] = np.sum(selection_ch)
 
+    def pileup_cutoff(self, events, year, yearmod, cutoff: float = 4):
+        pweights = get_pileup_weight(year, yearmod, events.Pileup.nPU.to_numpy())
+        pw_pass = (pweights["nominal"] <= cutoff) * (pweights["up"] <= cutoff) * (pweights["down"] <= cutoff)
+        logging.info(f"Passing pileup weight cut: {np.sum(pw_pass)} out of {len(events)} events")
+        events = events[pw_pass]
+        return events
+
     def process(self, events: ak.Array):
         """Returns skimmed events which pass preselection cuts and with the branches listed in self._skimvars"""
 
@@ -169,19 +176,9 @@ class HwwProcessor(processor.ProcessorABC):
         self.isMC = hasattr(events, "genWeight")
         self.isSignal = True if ("HToWW" in dataset) or ("ttHToNonbb" in dataset) else False
 
-        def pileup_cutoff(events, year, yearmod, cutoff: float = 4):
-            pweights = get_pileup_weight(year, yearmod, events.Pileup.nPU.to_numpy())
-            pw_pass = (pweights["nominal"] <= cutoff) * (pweights["up"] <= cutoff) * (pweights["down"] <= cutoff)
-            logging.info(f"Passing pileup weight cut: {np.sum(pw_pass)} out of {len(events)} events")
-            events = events[pw_pass]
-            return events
-
-        print("b4 PU removal: ", len(events))
         if self.isMC:
             # remove events with pileup weights un-physically large
-            events = pileup_cutoff(events, self._year, self._yearmod, cutoff=4)
-
-        print("after PU removal: ", len(events))
+            events = self.pileup_cutoff(events, self._year, self._yearmod, cutoff=4)
 
         nevents = len(events)
         self.weights = {ch: Weights(nevents, storeIndividual=True) for ch in self._channels}
@@ -350,7 +347,7 @@ class HwwProcessor(processor.ProcessorABC):
 
         # OBJECT: AK4 jets
         jets, jec_shifted_jetvars = get_jec_jets(events, events.Jet, self._year, not self.isMC, self.jecs, fatjets=False)
-        # met = met_factory.build(events.MET, jets, {}) if self.isMC else events.MET
+        met = met_factory.build(events.MET, jets, {}) if self.isMC else events.MET
         met = events.MET
 
         ht = ak.sum(jets.pt, axis=1)
