@@ -545,23 +545,16 @@ def add_lepton_weight(weights, lepton, year, lepton_type="muon"):
         # add weights (for now only the nominal weight)
         weights.add(f"{corr}_{lepton_type}", values["nominal"], values["up"], values["down"])
 
-        # extra: split the stat. and syst. unc. on id for muons
+        # in addition: split the stat. and syst. unc. on id for muons
         if (corr == "id") and (lepton_type == "muon"):
-            values["stat"] = cset[json_map_name].evaluate(lepton_eta, lepton_pt, "stat")
-            for key, val in values.items():
-                values[key] = set_isothreshold(corr, val, np.array(ak.fill_none(lepton.pt, 0.0)), lepton_type)
+            for unc_type in ["stat", "syst"]:
+                values[unc_type] = cset[json_map_name].evaluate(lepton_eta, lepton_pt, unc_type)
+                for key, val in values.items():
+                    values[key] = set_isothreshold(corr, val, np.array(ak.fill_none(lepton.pt, 0.0)), lepton_type)
 
-            up = values["nominal"] * (1 + values["stat"])
-            down = values["nominal"] * (1 - values["stat"])
-            weights.add(f"{corr}_{lepton_type}_stat", values["nominal"], up, down)
-
-            values["syst"] = cset[json_map_name].evaluate(lepton_eta, lepton_pt, "syst")
-            for key, val in values.items():
-                values[key] = set_isothreshold(corr, val, np.array(ak.fill_none(lepton.pt, 0.0)), lepton_type)
-
-            up = values["nominal"] * (1 + values["syst"])
-            down = values["nominal"] * (1 - values["syst"])
-            weights.add(f"{corr}_{lepton_type}_syst", values["nominal"], up, down)
+                up = values["nominal"] * (1 + values[unc_type])
+                down = values["nominal"] * (1 - values[unc_type])
+                weights.add(f"{corr}_{lepton_type}_{unc_type}", values["nominal"], up, down)
 
 
 def get_pileup_weight(year: str, mod: str, nPU: np.ndarray):
