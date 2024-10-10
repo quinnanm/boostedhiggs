@@ -545,8 +545,8 @@ def add_lepton_weight(weights, lepton, year, lepton_type="muon"):
             values[key] = set_isothreshold(corr, val, np.array(ak.fill_none(lepton.pt, 0.0)), lepton_type)
 
         # add weights (for now only the nominal weight)
-        weights.add(f"{corr}_{lepton_type}", values["nominal"], values["up"], values["down"])
-        break
+    weights.add(f"{corr}_{lepton_type}", values["nominal"], values["up"], values["down"])
+    
     # # quick hack to add electron trigger SFs
     # if lepton_type == "electron":
     #     corr = "trigger"
