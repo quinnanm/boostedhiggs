@@ -532,7 +532,8 @@ def add_lepton_weight(weights, lepton, year, lepton_type="muon"):
 
         if lepton_type == "muon":
             values["up"] = cset[json_map_name].evaluate(lepton_eta, lepton_pt, "systup")
-            values["down"] = cset[json_map_name].evaluate(lepton_eta, lepton_pt, "systdown")
+            # values["down"] = cset[json_map_name].evaluate(lepton_eta, lepton_pt, "systdown")
+            values["down"] = cset[json_map_name].evaluate(lepton_eta, lepton_pt, "systup")
 
             # TODO: include stat unc.
         else:
