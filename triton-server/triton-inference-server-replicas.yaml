@@ -31,7 +31,7 @@ spec:
                     operator: NotIn
                     values:
                       - sdsu-rci
-                      - ucm-fiona01.ucmerced.edu                      
+                      - ucm-fiona01.ucmerced.edu
       tolerations:
         - key: "nautilus.io/large-gpu"
           operator: "Exists"
