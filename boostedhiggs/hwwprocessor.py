@@ -412,14 +412,14 @@ class HwwProcessor(processor.ProcessorABC):
         # delta phi MET and higgs candidate
         met_fj_dphi = candidatefj.delta_phi(met)
 
-        # leptonic tauy veto
+        # leptonic tau veto
         from boostedhiggs.utils import ELE_PDGID, MU_PDGID
 
         loose_taus = (events.Tau.pt > 20) & (abs(events.Tau.eta) < 2.3)
 
         loose_taus = events.Tau[loose_taus]
         leptonic_taus = (loose_taus["decayMode"] == ELE_PDGID) | (loose_taus["decayMode"] == MU_PDGID)
-        leptonic_tau_veto = ~ak.any(leptonic_taus, axis=1)
+        msk_leptonic_taus = ~ak.any(leptonic_taus, axis=1)
 
         ######################
         # Store variables
@@ -479,7 +479,7 @@ class HwwProcessor(processor.ProcessorABC):
                 muons[loose_muons1][ak.argsort(muons[loose_muons1].pt, ascending=False)]
             ).miniPFRelIso_all,
             "loose_lep1_pt": ak.firsts(muons[loose_muons1][ak.argsort(muons[loose_muons1].pt, ascending=False)]).pt,
-            "leptonic_tau_veto": leptonic_tau_veto,
+            "msk_leptonic_taus": msk_leptonic_taus,
         }
 
         fatjetvars = {
