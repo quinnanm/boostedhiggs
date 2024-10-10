@@ -559,10 +559,10 @@ class HwwProcessor(processor.ProcessorABC):
         # Selection
         ######################
 
-        if self.isMC:
-            # remove events with pileup weights un-physically large
-            pw_pass = self.pileup_cutoff(events, self._year, self._yearmod, cutoff=4)
-            self.add_selection(name="PU_cutoff", sel=pw_pass)
+        # if self.isMC:
+        #     # remove events with pileup weights un-physically large
+        #     pw_pass = self.pileup_cutoff(events, self._year, self._yearmod, cutoff=4)
+        #     self.add_selection(name="PU_cutoff", sel=pw_pass)
 
         for ch in self._channels:
 
