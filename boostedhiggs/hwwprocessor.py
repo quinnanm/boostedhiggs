@@ -176,9 +176,9 @@ class HwwProcessor(processor.ProcessorABC):
         self.isMC = hasattr(events, "genWeight")
         self.isSignal = True if ("HToWW" in dataset) or ("ttHToNonbb" in dataset) else False
 
-        if self.isMC:
-            # remove events with pileup weights un-physically large
-            events = self.pileup_cutoff(events, self._year, self._yearmod, cutoff=4)
+        # if self.isMC:
+        #     # remove events with pileup weights un-physically large
+        #     events = self.pileup_cutoff(events, self._year, self._yearmod, cutoff=4)
 
         nevents = len(events)
         self.weights = {ch: Weights(nevents, storeIndividual=True) for ch in self._channels}
@@ -347,8 +347,8 @@ class HwwProcessor(processor.ProcessorABC):
 
         # OBJECT: AK4 jets
         jets, jec_shifted_jetvars = get_jec_jets(events, events.Jet, self._year, not self.isMC, self.jecs, fatjets=False)
-        # met = met_factory.build(events.MET, jets, {}) if self.isMC else events.MET
-        met = events.MET
+        met = met_factory.build(events.MET, jets, {}) if self.isMC else events.MET
+        # met = events.MET
 
         ht = ak.sum(jets.pt, axis=1)
 
