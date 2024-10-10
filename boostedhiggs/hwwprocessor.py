@@ -175,10 +175,6 @@ class HwwProcessor(processor.ProcessorABC):
         self.isMC = hasattr(events, "genWeight")
         self.isSignal = True if ("HToWW" in dataset) or ("ttHToNonbb" in dataset) else False
 
-        # if self.isMC:
-        #     # remove events with pileup weights un-physically large
-        #     events = self.pileup_cutoff(events, self._year, self._yearmod, cutoff=4)
-
         nevents = len(events)
         self.weights = {ch: Weights(nevents, storeIndividual=True) for ch in self._channels}
         self.selections = {ch: PackedSelection() for ch in self._channels}
@@ -473,6 +469,7 @@ class HwwProcessor(processor.ProcessorABC):
             "loose_lep1_miso": ak.firsts(
                 muons[loose_muons1][ak.argsort(muons[loose_muons1].pt, ascending=False)]
             ).miniPFRelIso_all,
+            "loose_lep1_pt": ak.firsts(muons[loose_muons1][ak.argsort(muons[loose_muons1].pt, ascending=False)]).pt,
         }
 
         fatjetvars = {
