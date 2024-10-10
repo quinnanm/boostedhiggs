@@ -350,7 +350,8 @@ class HwwProcessor(processor.ProcessorABC):
 
         # OBJECT: AK4 jets
         jets, jec_shifted_jetvars = get_jec_jets(events, events.Jet, self._year, not self.isMC, self.jecs, fatjets=False)
-        met = met_factory.build(events.MET, jets, {}) if self.isMC else events.MET
+        # met = met_factory.build(events.MET, jets, {}) if self.isMC else events.MET
+        met = events.MET
 
         ht = ak.sum(jets.pt, axis=1)
 
