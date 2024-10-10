@@ -667,7 +667,8 @@ class HwwProcessor(processor.ProcessorABC):
                     tops = events.GenPart[
                         get_pid_mask(events.GenPart, 6, byall=False) * events.GenPart.hasFlags(["isLastCopy"])
                     ]
-                    # add_TopPtReweighting(self.weights[ch], tops.pt)
+
+                    # will also save it as a variable just in case
                     variables["top_reweighting"] = add_TopPtReweighting(self.weights[ch], tops.pt)
 
                 if self.isSignal:
