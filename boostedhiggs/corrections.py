@@ -545,36 +545,23 @@ def add_lepton_weight(weights, lepton, year, lepton_type="muon"):
         # add weights (for now only the nominal weight)
         weights.add(f"{corr}_{lepton_type}", values["nominal"], values["up"], values["down"])
 
-        # add stat unc. on id for muons
+        # extra: split the stat. and syst. unc. on id for muons
         if (corr == "id") and (lepton_type == "muon"):
             values["stat"] = cset[json_map_name].evaluate(lepton_eta, lepton_pt, "stat")
             for key, val in values.items():
                 values[key] = set_isothreshold(corr, val, np.array(ak.fill_none(lepton.pt, 0.0)), lepton_type)
 
-            weights.add(f"{corr}_{lepton_type}_stat", values["nominal"], values["stat"], values["stat"])
+            up = values["nominal"] * (1 + values["stat"])
+            down = values["nominal"] * (1 - values["stat"])
+            weights.add(f"{corr}_{lepton_type}_stat", values["nominal"], up, down)
 
             values["syst"] = cset[json_map_name].evaluate(lepton_eta, lepton_pt, "syst")
             for key, val in values.items():
                 values[key] = set_isothreshold(corr, val, np.array(ak.fill_none(lepton.pt, 0.0)), lepton_type)
 
-            weights.add(f"{corr}_{lepton_type}_syst", values["nominal"], values["syst"], values["syst"])
-
-    # # quick hack to add electron trigger SFs
-    # if lepton_type == "electron":
-    #     corr = "trigger"
-    #     with importlib.resources.path("boostedhiggs.data", f"electron_trigger_{ul_year}_UL.json") as filename:
-    #         cset = correctionlib.CorrectionSet.from_file(str(filename))
-    #         lepton_pt, lepton_eta = get_clip(lep_pt, lep_eta, lepton_type, corr)
-    #         values["nominal"] = cset["UL-Electron-Trigger-SF"].evaluate(
-    #             ul_year + "_UL", "sf", "trigger", lepton_eta, lepton_pt
-    #         )
-    #         values["up"] = cset["UL-Electron-Trigger-SF"].evaluate(
-    #             ul_year + "_UL", "sfup", "trigger", lepton_eta, lepton_pt,
-    #             )
-    #         values["down"] = cset["UL-Electron-Trigger-SF"].evaluate(
-    #             ul_year + "_UL", "sfdown", "trigger", lepton_eta, lepton_pt
-    #         )
-    #         weights.add(f"{corr}_{lepton_type}", values["nominal"], values["up"], values["down"])
+            up = values["nominal"] * (1 + values["syst"])
+            down = values["nominal"] * (1 - values["syst"])
+            weights.add(f"{corr}_{lepton_type}_syst", values["nominal"], up, down)
 
 
 def get_pileup_weight(year: str, mod: str, nPU: np.ndarray):
