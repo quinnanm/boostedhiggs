@@ -296,7 +296,6 @@ class FakesProcessor(processor.ProcessorABC):
             "mT_loose1": mT_loose1,
             # added on Oct 9
             "fj_mass": candidatefj.msdcorr,
-            "fj_mass1": candidatefj.mass,
             "loose_lep1_miso": loose_lep1.miniPFRelIso_all,
             "loose_lep2_miso": loose_lep2.miniPFRelIso_all,
         }
