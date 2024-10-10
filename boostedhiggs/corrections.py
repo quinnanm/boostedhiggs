@@ -892,9 +892,7 @@ def add_TopPtReweighting(weights, topPt):
 
     nominal = np.sqrt(toppt_weight1 * toppt_weight2)
 
-    weights.add("TopPtReweight", nominal, np.ones_like(nominal), nominal)
-
-    return nominal
+    weights.add("TopPtReweight", nominal, np.ones_like(nominal), nominal**2)
 
     # weights.add(
     #     "TopPtReweight",
@@ -902,6 +900,8 @@ def add_TopPtReweighting(weights, topPt):
     #     np.ones_like(toppt_weight1),
     #     np.sqrt(toppt_weight1 * toppt_weight2),
     # )
+
+    return nominal
 
 
 def get_JetVetoMap(jets, year: str):
