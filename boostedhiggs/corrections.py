@@ -407,7 +407,7 @@ https://twiki.cern.ch/twiki/bin/view/CMS/MuonUL2018
 
 Electrons:
 - UL CorrectionLib htmlfiles:
-  https://cms-nanoaod-integration.web.cern.ch/commonJSONSFs/EGM_electron_Run2_UL/
+  https://cms-nanoaod-integration.web.cern.ch/commonJSONSFs/
   - ID and Isolation:
     - wp90noiso for high pT electrons
     - wp90iso for low pT electrons
@@ -526,13 +526,17 @@ def add_lepton_weight(weights, lepton, year, lepton_type="muon"):
 
         values = {}
         if lepton_type == "muon":
+            print("mu", json_map_name)
             values["nominal"] = cset[json_map_name].evaluate(lepton_eta, lepton_pt, "nominal")
         else:
+            print("ele", json_map_name)
             values["nominal"] = cset["UL-Electron-ID-SF"].evaluate(ul_year, "sf", json_map_name, lepton_eta, lepton_pt)
 
         if lepton_type == "muon":
             values["up"] = cset[json_map_name].evaluate(lepton_eta, lepton_pt, "systup")
             values["down"] = cset[json_map_name].evaluate(lepton_eta, lepton_pt, "systdown")
+
+            # TODO: include stat unc.
         else:
             values["up"] = cset["UL-Electron-ID-SF"].evaluate(ul_year, "sfup", json_map_name, lepton_eta, lepton_pt)
             values["down"] = cset["UL-Electron-ID-SF"].evaluate(ul_year, "sfdown", json_map_name, lepton_eta, lepton_pt)
@@ -1030,16 +1034,16 @@ def getGenLepGenQuarks(dataset, genparts: GenParticleArray):
 
         bquarks = daughters[(daughters_pdgId == b_PDGID)]
 
-        bquarksdaughters = ak.flatten(bquarks.distinctChildren, axis=2)
-        bquarksdaughters_pdgId = abs(bquarksdaughters.pdgId)
+        # bquarksdaughters = ak.flatten(bquarks.distinctChildren, axis=2)
+        # bquarksdaughters_pdgId = abs(bquarksdaughters.pdgId)
 
-        bquarkslep = (
-            (bquarksdaughters_pdgId == ELE_PDGID)
-            | (bquarksdaughters_pdgId == MU_PDGID)
-            | (bquarksdaughters_pdgId == TAU_PDGID)
-        )
+        # bquarkslep = (
+        #     (bquarksdaughters_pdgId == ELE_PDGID)
+        #     | (bquarksdaughters_pdgId == MU_PDGID)
+        #     | (bquarksdaughters_pdgId == TAU_PDGID)
+        # )
 
-        print("bquarkslep", bquarkslep)
+        # print("bquarkslep", bquarkslep)
 
         lepVars = {
             "lepton_pt": wboson_daughters[leptons].pt,
@@ -1203,7 +1207,6 @@ def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
     msk_delta = GenLep.delta_r(jet_pfcands) < 0.2
     msk_pt = pt_array < 1
 
-    msk = (msk_lep | msk_gamma) & msk_delta
     msk = ((msk_lep | msk_gamma) & msk_delta) | msk_pt
 
     # apply the masking by selecting particles that don't have "msk"
