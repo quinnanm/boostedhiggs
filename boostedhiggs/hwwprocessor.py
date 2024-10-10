@@ -246,11 +246,18 @@ class HwwProcessor(processor.ProcessorABC):
         # OBJECT: muons
         muons = ak.with_field(events.Muon, 0, "flavor")
 
-        loose_muons = (
+        # for now use 2 definitions of loose lepton and cut on the looser definition (i.e. without miso cut)
+        loose_muons1 = (
             (muons.pt > 30)
             & (np.abs(muons.eta) < 2.4)
             & (muons.looseId)
             & (((muons.pfRelIso04_all < 0.25) & (muons.pt < 55)) | (muons.pt >= 55))
+        )
+        loose_muons2 = (
+            (muons.pt > 30)
+            & (np.abs(muons.eta) < 2.4)
+            & (muons.looseId)
+            & (((muons.pfRelIso04_all < 0.25) & (muons.pt < 55)) | ((muons.pt >= 55) & (muons.miniPFRelIso_all < 0.8)))
         )
 
         tight_muons = (
@@ -263,11 +270,12 @@ class HwwProcessor(processor.ProcessorABC):
             & (np.abs(muons.dxy) < 0.02)
         )
 
-        n_loose_muons = ak.sum(loose_muons, axis=1)
+        n_loose_muons1 = ak.sum(loose_muons1, axis=1)
+        n_loose_muons2 = ak.sum(loose_muons2, axis=1)
         n_tight_muons = ak.sum(tight_muons, axis=1)
 
         if self._uselooselep:
-            good_muons = loose_muons
+            good_muons = loose_muons1
         else:
             good_muons = tight_muons
 
@@ -452,7 +460,8 @@ class HwwProcessor(processor.ProcessorABC):
             # number
             "n_loose_electrons": n_loose_electrons,
             "n_tight_electrons": n_tight_electrons,
-            "n_loose_muons": n_loose_muons,
+            "n_loose_muons1": n_loose_muons1,
+            "n_loose_muons2": n_loose_muons2,
             "n_tight_muons": n_tight_muons,
             # second fatjet after candidate jet
             "VH_fj_pt": VH_fj.pt,
@@ -462,7 +471,7 @@ class HwwProcessor(processor.ProcessorABC):
             "jetvetomap": cut_jetveto,
             # added on October 9th
             "loose_lep1_miso": ak.firsts(
-                muons[loose_muons][ak.argsort(muons[loose_muons].pt, ascending=False)]
+                muons[loose_muons1][ak.argsort(muons[loose_muons1].pt, ascending=False)]
             ).miniPFRelIso_all,
         }
 
@@ -569,7 +578,7 @@ class HwwProcessor(processor.ProcessorABC):
 
         self.add_selection(name="METFilters", sel=metfilters)
         self.add_selection(name="OneLep", sel=(n_good_muons == 1) & (n_loose_electrons == 0), channel="mu")
-        self.add_selection(name="OneLep", sel=(n_loose_muons == 0) & (n_good_electrons == 1), channel="ele")
+        self.add_selection(name="OneLep", sel=(n_loose_muons1 == 0) & (n_good_electrons == 1), channel="ele")
         self.add_selection(name="NoTaus", sel=(n_loose_taus_mu == 0), channel="mu")
         self.add_selection(name="NoTaus", sel=(n_loose_taus_ele == 0), channel="ele")
         self.add_selection(name="AtLeastOneFatJet", sel=(NumFatjets >= 1))
