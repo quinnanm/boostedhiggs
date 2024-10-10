@@ -546,6 +546,10 @@ def add_lepton_weight(weights, lepton, year, lepton_type="muon"):
         # add weights (for now only the nominal weight)
         weights.add(f"{corr}_{lepton_type}", values["nominal"], values["up"], values["down"])
 
+        if corr == "id":
+            val = cset[json_map_name].evaluate(lepton_eta, lepton_pt, "stat")
+            weights.add(f"{corr}_{lepton_type}_stat", values["nominal"], val, val)
+
     # # quick hack to add electron trigger SFs
     # if lepton_type == "electron":
     #     corr = "trigger"
