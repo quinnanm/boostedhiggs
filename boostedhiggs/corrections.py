@@ -532,8 +532,7 @@ def add_lepton_weight(weights, lepton, year, lepton_type="muon"):
 
         if lepton_type == "muon":
             values["up"] = cset[json_map_name].evaluate(lepton_eta, lepton_pt, "systup")
-            # values["down"] = cset[json_map_name].evaluate(lepton_eta, lepton_pt, "systdown")
-            values["down"] = cset[json_map_name].evaluate(lepton_eta, lepton_pt, "systup")
+            values["down"] = cset[json_map_name].evaluate(lepton_eta, lepton_pt, "systdown")
 
             # TODO: include stat unc.
         else:
@@ -546,18 +545,19 @@ def add_lepton_weight(weights, lepton, year, lepton_type="muon"):
         # add weights (for now only the nominal weight)
         weights.add(f"{corr}_{lepton_type}", values["nominal"], values["up"], values["down"])
 
-        if corr == "id":
-            values["up"] = cset[json_map_name].evaluate(lepton_eta, lepton_pt, "stat")
+        # add stat unc. on id for muons
+        if (corr == "id") and (lepton_type == "muon"):
+            values["stat"] = cset[json_map_name].evaluate(lepton_eta, lepton_pt, "stat")
             for key, val in values.items():
                 values[key] = set_isothreshold(corr, val, np.array(ak.fill_none(lepton.pt, 0.0)), lepton_type)
 
-            weights.add(f"{corr}_{lepton_type}_stat", values["nominal"], values["up"], values["up"])
+            weights.add(f"{corr}_{lepton_type}_stat", values["nominal"], values["stat"], values["stat"])
 
-            values["up"] = cset[json_map_name].evaluate(lepton_eta, lepton_pt, "syst")
+            values["syst"] = cset[json_map_name].evaluate(lepton_eta, lepton_pt, "syst")
             for key, val in values.items():
                 values[key] = set_isothreshold(corr, val, np.array(ak.fill_none(lepton.pt, 0.0)), lepton_type)
 
-            weights.add(f"{corr}_{lepton_type}_syst", values["nominal"], values["up"], values["up"])
+            weights.add(f"{corr}_{lepton_type}_syst", values["nominal"], values["syst"], values["syst"])
 
     # # quick hack to add electron trigger SFs
     # if lepton_type == "electron":
