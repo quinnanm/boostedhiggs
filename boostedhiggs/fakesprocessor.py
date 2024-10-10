@@ -176,7 +176,7 @@ class FakesProcessor(processor.ProcessorABC):
             (muons.pt > 30)
             & (np.abs(muons.eta) < 2.4)
             & muons.mediumId
-            & (((muons.pfRelIso04_all < 0.20) & (muons.pt < 55)) | (muons.pt >= 55) & (muons.miniPFRelIso_all < 0.2))
+            & (((muons.pfRelIso04_all < 0.20) & (muons.pt < 55)) | ((muons.pt >= 55) & (muons.miniPFRelIso_all < 0.2)))
             # additional cuts
             & (np.abs(muons.dz) < 0.1)
             & (np.abs(muons.dxy) < 0.02)
@@ -247,6 +247,7 @@ class FakesProcessor(processor.ProcessorABC):
 
         # OBJECT: AK8 fatjets
         fatjets = events.FatJet
+        fatjets["msdcorr"] = fatjets.msoftdrop
         fatjet_selector = (fatjets.pt > 200) & (abs(fatjets.eta) < 2.5) & fatjets.isTight
         good_fatjets = fatjets[fatjet_selector]
         good_fatjets = good_fatjets[ak.argsort(good_fatjets.pt, ascending=False)]  # sort them by pt
@@ -293,6 +294,10 @@ class FakesProcessor(processor.ProcessorABC):
             "fj_phi": candidatefj.phi,
             "mT_tight1": mT_tight1,
             "mT_loose1": mT_loose1,
+            # added on Oct 9
+            "fj_mass": candidatefj.msdcorr,
+            "loose_lep1_miso": loose_lep1.miniPFRelIso_all,
+            "loose_lep2_miso": loose_lep2.miniPFRelIso_all,
         }
 
         for ch in self._channels:

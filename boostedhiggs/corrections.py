@@ -416,7 +416,7 @@ https://twiki.cern.ch/twiki/bin/view/CMS/MuonUL2018
 
 Electrons:
 - UL CorrectionLib htmlfiles:
-  https://cms-nanoaod-integration.web.cern.ch/commonJSONSFs/EGM_electron_Run2_UL/
+  https://cms-nanoaod-integration.web.cern.ch/commonJSONSFs/
   - ID and Isolation:
     - wp90noiso for high pT electrons
     - wp90iso for low pT electrons
@@ -539,35 +539,30 @@ def add_lepton_weight(weights, lepton, year, lepton_type="muon"):
         else:
             values["nominal"] = cset["UL-Electron-ID-SF"].evaluate(ul_year, "sf", json_map_name, lepton_eta, lepton_pt)
 
-        if lepton_type == "muon":
-            values["up"] = cset[json_map_name].evaluate(lepton_eta, lepton_pt, "systup")
-            values["down"] = cset[json_map_name].evaluate(lepton_eta, lepton_pt, "systdown")
+        if (lepton_type == "muon") and (corr == "id"):
+            # split the stat. and syst. unc. for the id SF for muons
+            for unc_type in ["stat", "syst"]:
+                values[unc_type] = cset[json_map_name].evaluate(lepton_eta, lepton_pt, unc_type)
+                for key, val in values.items():
+                    values[key] = set_isothreshold(corr, val, np.array(ak.fill_none(lepton.pt, 0.0)), lepton_type)
+
+                up = values["nominal"] * (1 + values[unc_type])
+                down = values["nominal"] * (1 - values[unc_type])
+                weights.add(f"{corr}_{lepton_type}_{unc_type}", values["nominal"], up, down)
+
         else:
-            values["up"] = cset["UL-Electron-ID-SF"].evaluate(ul_year, "sfup", json_map_name, lepton_eta, lepton_pt)
-            values["down"] = cset["UL-Electron-ID-SF"].evaluate(ul_year, "sfdown", json_map_name, lepton_eta, lepton_pt)
+            if lepton_type == "muon":
+                values["up"] = cset[json_map_name].evaluate(lepton_eta, lepton_pt, "systup")
+                values["down"] = cset[json_map_name].evaluate(lepton_eta, lepton_pt, "systdown")
+            else:
+                values["up"] = cset["UL-Electron-ID-SF"].evaluate(ul_year, "sfup", json_map_name, lepton_eta, lepton_pt)
+                values["down"] = cset["UL-Electron-ID-SF"].evaluate(ul_year, "sfdown", json_map_name, lepton_eta, lepton_pt)
 
-        for key, val in values.items():
-            values[key] = set_isothreshold(corr, val, np.array(ak.fill_none(lepton.pt, 0.0)), lepton_type)
+            for key, val in values.items():
+                values[key] = set_isothreshold(corr, val, np.array(ak.fill_none(lepton.pt, 0.0)), lepton_type)
 
-        # add weights (for now only the nominal weight)
-        weights.add(f"{corr}_{lepton_type}", values["nominal"], values["up"], values["down"])
-
-    # # quick hack to add electron trigger SFs
-    # if lepton_type == "electron":
-    #     corr = "trigger"
-    #     with importlib.resources.path("boostedhiggs.data", f"electron_trigger_{ul_year}_UL.json") as filename:
-    #         cset = correctionlib.CorrectionSet.from_file(str(filename))
-    #         lepton_pt, lepton_eta = get_clip(lep_pt, lep_eta, lepton_type, corr)
-    #         values["nominal"] = cset["UL-Electron-Trigger-SF"].evaluate(
-    #             ul_year + "_UL", "sf", "trigger", lepton_eta, lepton_pt
-    #         )
-    #         values["up"] = cset["UL-Electron-Trigger-SF"].evaluate(
-    #             ul_year + "_UL", "sfup", "trigger", lepton_eta, lepton_pt,
-    #             )
-    #         values["down"] = cset["UL-Electron-Trigger-SF"].evaluate(
-    #             ul_year + "_UL", "sfdown", "trigger", lepton_eta, lepton_pt
-    #         )
-    #         weights.add(f"{corr}_{lepton_type}", values["nominal"], values["up"], values["down"])
+            # add weights (for now only the nominal weight)
+            weights.add(f"{corr}_{lepton_type}", values["nominal"], values["up"], values["down"])
 
 
 def get_pileup_weight(year: str, mod: str, nPU: np.ndarray):
@@ -898,16 +893,14 @@ def getJMSRVariables(fatjetvars, candidatelep_p4, met, mass_shift=None):
     return variables
 
 
-def add_TopPtReweighting(topPt):
+def add_TopPtReweighting(weights, topPt):
 
     toppt_weight1 = np.exp(0.0615 - 0.0005 * np.clip(topPt[:, 0], 0.0, 500.0))
     toppt_weight2 = np.exp(0.0615 - 0.0005 * np.clip(topPt[:, 1], 0.0, 500.0))
 
     nominal = np.sqrt(toppt_weight1 * toppt_weight2)
 
-    # weights.add("TopPtReweight", nominal, nominal**2, np.ones_like(nominal))
-
-    return nominal
+    weights.add("TopPtReweight", nominal, np.ones_like(nominal), nominal**2)
 
     # weights.add(
     #     "TopPtReweight",
@@ -915,6 +908,8 @@ def add_TopPtReweighting(topPt):
     #     np.ones_like(toppt_weight1),
     #     np.sqrt(toppt_weight1 * toppt_weight2),
     # )
+
+    return nominal
 
 
 def get_JetVetoMap(jets, year: str):
@@ -1039,16 +1034,16 @@ def getGenLepGenQuarks(dataset, genparts: GenParticleArray):
 
         bquarks = daughters[(daughters_pdgId == b_PDGID)]
 
-        bquarksdaughters = ak.flatten(bquarks.distinctChildren, axis=2)
-        bquarksdaughters_pdgId = abs(bquarksdaughters.pdgId)
+        # bquarksdaughters = ak.flatten(bquarks.distinctChildren, axis=2)
+        # bquarksdaughters_pdgId = abs(bquarksdaughters.pdgId)
 
-        bquarkslep = (
-            (bquarksdaughters_pdgId == ELE_PDGID)
-            | (bquarksdaughters_pdgId == MU_PDGID)
-            | (bquarksdaughters_pdgId == TAU_PDGID)
-        )
+        # bquarkslep = (
+        #     (bquarksdaughters_pdgId == ELE_PDGID)
+        #     | (bquarksdaughters_pdgId == MU_PDGID)
+        #     | (bquarksdaughters_pdgId == TAU_PDGID)
+        # )
 
-        print("bquarkslep", bquarkslep)
+        # print("bquarkslep", bquarkslep)
 
         lepVars = {
             "lepton_pt": wboson_daughters[leptons].pt,
@@ -1212,7 +1207,6 @@ def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
     msk_delta = GenLep.delta_r(jet_pfcands) < 0.2
     msk_pt = pt_array < 1
 
-    msk = (msk_lep | msk_gamma) & msk_delta
     msk = ((msk_lep | msk_gamma) & msk_delta) | msk_pt
 
     # apply the masking by selecting particles that don't have "msk"

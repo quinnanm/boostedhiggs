@@ -29,6 +29,7 @@ from boostedhiggs.corrections import (
     get_jec_jets,
     get_JetVetoMap,
     get_jmsr,
+    get_pileup_weight,
     getJECVariables,
     getJMSRVariables,
     met_factory,
@@ -162,6 +163,12 @@ class HwwProcessor(processor.ProcessorABC):
             else:
                 self.cutflows[ch][name] = np.sum(selection_ch)
 
+    def pileup_cutoff(self, events, year, yearmod, cutoff: float = 4):
+        pweights = get_pileup_weight(year, yearmod, events.Pileup.nPU.to_numpy())
+        pw_pass = (pweights["nominal"] <= cutoff) * (pweights["up"] <= cutoff) * (pweights["down"] <= cutoff)
+        logging.info(f"Passing pileup weight cut: {np.sum(pw_pass)} out of {len(events)} events")
+        return pw_pass
+
     def process(self, events: ak.Array):
         """Returns skimmed events which pass preselection cuts and with the branches listed in self._skimvars"""
 
@@ -237,28 +244,36 @@ class HwwProcessor(processor.ProcessorABC):
         # OBJECT: muons
         muons = ak.with_field(events.Muon, 0, "flavor")
 
-        loose_muons = (
+        # for now use 2 definitions of loose lepton and cut on the looser definition (i.e. without miso cut)
+        loose_muons1 = (
             (muons.pt > 30)
             & (np.abs(muons.eta) < 2.4)
             & (muons.looseId)
             & (((muons.pfRelIso04_all < 0.25) & (muons.pt < 55)) | (muons.pt >= 55))
+        )
+        loose_muons2 = (
+            (muons.pt > 30)
+            & (np.abs(muons.eta) < 2.4)
+            & (muons.looseId)
+            & (((muons.pfRelIso04_all < 0.25) & (muons.pt < 55)) | ((muons.pt >= 55) & (muons.miniPFRelIso_all < 0.8)))
         )
 
         tight_muons = (
             (muons.pt > 30)
             & (np.abs(muons.eta) < 2.4)
             & muons.mediumId
-            & (((muons.pfRelIso04_all < 0.20) & (muons.pt < 55)) | (muons.pt >= 55) & (muons.miniPFRelIso_all < 0.2))
+            & (((muons.pfRelIso04_all < 0.20) & (muons.pt < 55)) | ((muons.pt >= 55) & (muons.miniPFRelIso_all < 0.2)))
             # additional cuts
             & (np.abs(muons.dz) < 0.1)
             & (np.abs(muons.dxy) < 0.02)
         )
 
-        n_loose_muons = ak.sum(loose_muons, axis=1)
+        n_loose_muons1 = ak.sum(loose_muons1, axis=1)
+        n_loose_muons2 = ak.sum(loose_muons2, axis=1)
         n_tight_muons = ak.sum(tight_muons, axis=1)
 
         if self._uselooselep:
-            good_muons = loose_muons
+            good_muons = loose_muons1
         else:
             good_muons = tight_muons
 
@@ -338,6 +353,7 @@ class HwwProcessor(processor.ProcessorABC):
         # OBJECT: AK4 jets
         jets, jec_shifted_jetvars = get_jec_jets(events, events.Jet, self._year, not self.isMC, self.jecs, fatjets=False)
         met = met_factory.build(events.MET, jets, {}) if self.isMC else events.MET
+        # met = events.MET
 
         ht = ak.sum(jets.pt, axis=1)
 
@@ -398,6 +414,15 @@ class HwwProcessor(processor.ProcessorABC):
         # delta phi MET and higgs candidate
         met_fj_dphi = candidatefj.delta_phi(met)
 
+        # leptonic tau veto
+        from boostedhiggs.utils import ELE_PDGID, MU_PDGID
+
+        loose_taus = (events.Tau.pt > 20) & (abs(events.Tau.eta) < 2.3)
+
+        loose_taus = events.Tau[loose_taus]
+        leptonic_taus = (loose_taus["decayMode"] == ELE_PDGID) | (loose_taus["decayMode"] == MU_PDGID)
+        msk_leptonic_taus = ~ak.any(leptonic_taus, axis=1)
+
         ######################
         # Store variables
         ######################
@@ -442,7 +467,8 @@ class HwwProcessor(processor.ProcessorABC):
             # number
             "n_loose_electrons": n_loose_electrons,
             "n_tight_electrons": n_tight_electrons,
-            "n_loose_muons": n_loose_muons,
+            "n_loose_muons1": n_loose_muons1,
+            "n_loose_muons2": n_loose_muons2,
             "n_tight_muons": n_tight_muons,
             # second fatjet after candidate jet
             "VH_fj_pt": VH_fj.pt,
@@ -450,6 +476,12 @@ class HwwProcessor(processor.ProcessorABC):
             "VH_fj_VScore": VScore(VH_fj),
             # add jetveto as optional selection
             "jetvetomap": cut_jetveto,
+            # added on October 9th
+            "loose_lep1_miso": ak.firsts(
+                muons[loose_muons1][ak.argsort(muons[loose_muons1].pt, ascending=False)]
+            ).miniPFRelIso_all,
+            "loose_lep1_pt": ak.firsts(muons[loose_muons1][ak.argsort(muons[loose_muons1].pt, ascending=False)]).pt,
+            "msk_leptonic_taus": msk_leptonic_taus,
         }
 
         fatjetvars = {
@@ -536,7 +568,13 @@ class HwwProcessor(processor.ProcessorABC):
         # Selection
         ######################
 
+        if self.isMC:
+            # remove events with pileup weights un-physically large
+            pw_pass = self.pileup_cutoff(events, self._year, self._yearmod, cutoff=4)
+            self.add_selection(name="PU_cutoff", sel=pw_pass)
+
         for ch in self._channels:
+
             # trigger
             if ch == "mu":
                 self.add_selection(
@@ -549,7 +587,7 @@ class HwwProcessor(processor.ProcessorABC):
 
         self.add_selection(name="METFilters", sel=metfilters)
         self.add_selection(name="OneLep", sel=(n_good_muons == 1) & (n_loose_electrons == 0), channel="mu")
-        self.add_selection(name="OneLep", sel=(n_loose_muons == 0) & (n_good_electrons == 1), channel="ele")
+        self.add_selection(name="OneLep", sel=(n_loose_muons1 == 0) & (n_good_electrons == 1), channel="ele")
         self.add_selection(name="NoTaus", sel=(n_loose_taus_mu == 0), channel="mu")
         self.add_selection(name="NoTaus", sel=(n_loose_taus_ele == 0), channel="ele")
         self.add_selection(name="AtLeastOneFatJet", sel=(NumFatjets >= 1))
@@ -660,8 +698,9 @@ class HwwProcessor(processor.ProcessorABC):
                     tops = events.GenPart[
                         get_pid_mask(events.GenPart, 6, byall=False) * events.GenPart.hasFlags(["isLastCopy"])
                     ]
-                    # add_TopPtReweighting(self.weights[ch], tops.pt)
-                    variables["top_reweighting"] = add_TopPtReweighting(tops.pt)
+
+                    # will also save it as a variable just in case
+                    variables["top_reweighting"] = add_TopPtReweighting(self.weights[ch], tops.pt)
 
                 if self.isSignal:
                     ew_weight = add_HiggsEW_kFactors(events.GenPart, dataset)
