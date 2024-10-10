@@ -247,6 +247,7 @@ class FakesProcessor(processor.ProcessorABC):
 
         # OBJECT: AK8 fatjets
         fatjets = events.FatJet
+        fatjets["msdcorr"] = fatjets.msoftdrop
         fatjet_selector = (fatjets.pt > 200) & (abs(fatjets.eta) < 2.5) & fatjets.isTight
         good_fatjets = fatjets[fatjet_selector]
         good_fatjets = good_fatjets[ak.argsort(good_fatjets.pt, ascending=False)]  # sort them by pt
@@ -294,7 +295,7 @@ class FakesProcessor(processor.ProcessorABC):
             "mT_tight1": mT_tight1,
             "mT_loose1": mT_loose1,
             # added on Oct 9
-            "fj_mass": candidatefj.mass,
+            "fj_mass": candidatefj.msdcorr,
             "loose_lep1_miso": loose_lep1.miniPFRelIso_all,
             "loose_lep2_miso": loose_lep2.miniPFRelIso_all,
         }
