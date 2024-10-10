@@ -165,8 +165,7 @@ class HwwProcessor(processor.ProcessorABC):
         pweights = get_pileup_weight(year, yearmod, events.Pileup.nPU.to_numpy())
         pw_pass = (pweights["nominal"] <= cutoff) * (pweights["up"] <= cutoff) * (pweights["down"] <= cutoff)
         logging.info(f"Passing pileup weight cut: {np.sum(pw_pass)} out of {len(events)} events")
-        events = events[pw_pass]
-        return events
+        return pw_pass
 
     def process(self, events: ak.Array):
         """Returns skimmed events which pass preselection cuts and with the branches listed in self._skimvars"""
@@ -551,7 +550,13 @@ class HwwProcessor(processor.ProcessorABC):
         # Selection
         ######################
 
+        if self.isMC:
+            # remove events with pileup weights un-physically large
+            pw_pass = self.pileup_cutoff(events, self._year, self._yearmod, cutoff=4)
+            self.add_selection(name="PU_cutoff", sel=pw_pass)
+
         for ch in self._channels:
+
             # trigger
             if ch == "mu":
                 self.add_selection(
