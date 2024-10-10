@@ -526,10 +526,9 @@ def add_lepton_weight(weights, lepton, year, lepton_type="muon"):
 
         values = {}
         if lepton_type == "muon":
-            print("mu", json_map_name)
+            print("mu", json_map_name, corr, corrDict)
             values["nominal"] = cset[json_map_name].evaluate(lepton_eta, lepton_pt, "nominal")
         else:
-            print("ele", json_map_name)
             values["nominal"] = cset["UL-Electron-ID-SF"].evaluate(ul_year, "sf", json_map_name, lepton_eta, lepton_pt)
 
         if lepton_type == "muon":
@@ -545,8 +544,8 @@ def add_lepton_weight(weights, lepton, year, lepton_type="muon"):
             values[key] = set_isothreshold(corr, val, np.array(ak.fill_none(lepton.pt, 0.0)), lepton_type)
 
         # add weights (for now only the nominal weight)
-    weights.add(f"{corr}_{lepton_type}", values["nominal"], values["up"], values["down"])
-    
+        weights.add(f"{corr}_{lepton_type}", values["nominal"], values["up"], values["down"])
+
     # # quick hack to add electron trigger SFs
     # if lepton_type == "electron":
     #     corr = "trigger"
