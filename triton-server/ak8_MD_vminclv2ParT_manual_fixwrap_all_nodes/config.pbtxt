@@ -1,0 +1,6 @@
+name: "ak8_MD_vminclv2ParT_manual_fixwrap_all_nodes"
+platform: "onnxruntime_onnx"
+max_batch_size : 192
+dynamic_batching {
+   preferred_batch_size: [ 192 ]
+}
