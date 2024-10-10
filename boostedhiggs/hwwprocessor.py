@@ -169,8 +169,8 @@ class HwwProcessor(processor.ProcessorABC):
         self.isMC = hasattr(events, "genWeight")
         self.isSignal = True if ("HToWW" in dataset) or ("ttHToNonbb" in dataset) else False
 
-        def pileup_cutoff(events, year, cutoff: float = 4):
-            pweights = get_pileup_weight(year, events.Pileup.nPU.to_numpy())
+        def pileup_cutoff(events, year, yearmod, cutoff: float = 4):
+            pweights = get_pileup_weight(year, yearmod, events.Pileup.nPU.to_numpy())
             pw_pass = (pweights["nominal"] <= cutoff) * (pweights["up"] <= cutoff) * (pweights["down"] <= cutoff)
             logging.info(f"Passing pileup weight cut: {np.sum(pw_pass)} out of {len(events)} events")
             events = events[pw_pass]
