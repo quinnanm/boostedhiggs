@@ -218,10 +218,6 @@ def plot_hists_from_events_dict(events_dict, plot_config):
 
                         df = df.query(sel)
 
-                        if sample == "EWKvjets":
-                            threshold = 20
-                            df = df[df["nominal"] < threshold]
-
                         # ----------- some variables need manual tweaking
                         if var_to_plot == "met_phi":
 

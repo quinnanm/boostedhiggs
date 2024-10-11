@@ -359,10 +359,13 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
         "mu": {
             "fj_mass": "fj_mass>40",
             "tagger>0.75": "THWW>0.75",
+            "jetvetomap": "jetvetomap==1",
+            "lepmiso": "(lep_pt<55) | ( (lep_pt>=55) & (lep_misolation<0.8))",  # needed for the fakes
         },
         "ele": {
             "fj_mass": "fj_mass>40",
             "tagger>0.75": "THWW>0.75",
+            "jetvetomap": "jetvetomap==1",
         },
     }
 
@@ -477,43 +480,47 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                 )
 
     if add_fake:
-
+        fake_SF = {
+            "ele": 0.75,
+            "mu": 1.0,
+        }
         for variation in ["FR_Nominal", "FR_stat_Up", "FR_stat_Down", "EWK_SF_Up", "EWK_SF_Down"]:
 
             for year in years:
+                for ch in channels:
 
-                data = pd.read_parquet(f"{samples_dir[year]}/fake_{year}_ele_{variation}.parquet")
+                    data = pd.read_parquet(f"{samples_dir[year]}/fake_{year}_{ch}_{variation}.parquet")
 
-                # apply selection
-                for selection in presel["ele"]:
-                    logging.info(f"Applying {selection} selection on {len(data)} events")
-                    data = data.query(presel["ele"][selection])
+                    # apply selection
+                    for selection in presel[ch]:
+                        logging.info(f"Applying {selection} selection on {len(data)} events")
+                        data = data.query(presel[ch][selection])
 
-                data["event_weight"] *= 0.6  # the closure test SF
+                    data["nominal"] *= fake_SF[ch]  # the closure test SF
 
-                for region in hists.axes["Region"]:
-                    df = data.copy()
+                    for region in hists.axes["Region"]:
+                        df = data.copy()
 
-                    logging.info(f"Applying {region} selection on {len(df)} events")
-                    df = df.query(regions_sel[region])
-                    logging.info(f"Will fill the histograms with the remaining {len(df)} events")
+                        logging.info(f"Applying {region} selection on {len(df)} events")
+                        df = df.query(regions_sel[region])
+                        logging.info(f"Will fill the histograms with the remaining {len(df)} events")
 
-                    if variation == "FR_Nominal":
-                        hists.fill(
-                            Sample="Fake",
-                            Systematic="nominal",
-                            Region=region,
-                            mass_observable=df["rec_higgs_m"],
-                            weight=df["event_weight"],
-                        )
-                    else:
-                        hists.fill(
-                            Sample="Fake",
-                            Systematic=variation,
-                            Region=region,
-                            mass_observable=df["rec_higgs_m"],
-                            weight=df["event_weight"],
-                        )
+                        if variation == "FR_Nominal":
+                            hists.fill(
+                                Sample="Fake",
+                                Systematic="nominal",
+                                Region=region,
+                                mass_observable=df["rec_higgs_m"],
+                                weight=df["event_weight"],
+                            )
+                        else:
+                            hists.fill(
+                                Sample="Fake",
+                                Systematic=variation,
+                                Region=region,
+                                mass_observable=df["rec_higgs_m"],
+                                weight=df["event_weight"],
+                            )
 
     logging.info(hists)
 
