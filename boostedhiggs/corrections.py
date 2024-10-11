@@ -255,7 +255,7 @@ def add_HiggsEW_kFactors(genpart, dataset):
         ewknom = ewkcorr.evaluate(hpt)
         ewknominal[hpt >= 400] = ewknom[hpt >= 400]
 
-    return ewknom
+    return ewknominal
 
 
 def build_lumimask(filename):
