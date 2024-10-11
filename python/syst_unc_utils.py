@@ -29,6 +29,9 @@ def initialize_syst_unc_hists(SYST_DICT, plot_config):
 
         for syst in {**SYST_DICT["common"], **SYST_DICT["btag"]}:
 
+            # if "pileup" in syst:
+            #     continue
+
             SYST_hists[var_to_plot]["up"][syst] = hist2.Hist(
                 utils.get_axis(var_to_plot, plot_config["massbin"]),
                 storage=hist2.storage.Weight(),
@@ -70,13 +73,12 @@ def fill_syst_unc_hists(SYST_DICT, SYST_hists, year, ch, sample, var_to_plot, df
     # get the up/down
     for syst, (yrs, smpls, var) in SYST_DICT["common"].items():
 
+        # if "pileup" in syst:
+        #     continue
+
         if (sample in smpls) and (year in yrs) and (ch in var):
             up = df["xsecweight"] * df[var[ch] + "Up"]
             down = df["xsecweight"] * df[var[ch] + "Down"]
-
-            if sample == "TTbar":  # this is included in the nominal but missing from all weight variations
-                up *= df["top_reweighting"]
-                down *= df["top_reweighting"]
 
             SYST_hists[var_to_plot]["up"][syst].fill(
                 var=df[var_to_plot],

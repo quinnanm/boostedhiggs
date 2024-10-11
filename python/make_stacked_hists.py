@@ -26,7 +26,7 @@ warnings.filterwarnings("ignore", message="Found duplicate branch ")
 pd.set_option("mode.chained_assignment", None)
 
 
-def make_events_dict(years, channels, samples_dir, samples, presel, THWW_path=None):
+def make_events_dict(years, channels, samples_dir, samples, presel, THWW_path=None, fake_SF={"ele": 1, "mu": 1}):
     """
     Postprocess the parquets by applying preselection, saving a `nominal` weight column, and
     saving a THWW tagger score column, all in a big concatenated dataframe.
@@ -96,9 +96,6 @@ def make_events_dict(years, channels, samples_dir, samples, presel, THWW_path=No
                         continue
                     data["nominal"] = data["xsecweight"] * data[f"weight_{ch}"]
 
-                    if sample_to_use == "TTbar":
-                        data["nominal"] *= data["top_reweighting"]
-
                 else:
                     data["xsecweight"] = np.ones_like(data["fj_pt"])
                     data["nominal"] = np.ones_like(data["fj_pt"])
@@ -124,21 +121,16 @@ def make_events_dict(years, channels, samples_dir, samples, presel, THWW_path=No
                 else:
                     events_dict[year][ch][sample_to_use] = pd.concat([events_dict[year][ch][sample_to_use], data])
 
-    if add_fake:
-        logging.info("Processing the fake background")
+            if add_fake:
+                logging.info("Processing the fake background")
 
-        for year in years:
-            if "ele" in channels:
-                df = pd.read_parquet(f"{samples_dir[year]}/fake_{year}_ele_FR_Nominal.parquet")
-                for selection in presel["ele"]:
-                    df = df.query(presel["ele"][selection])
+                df = pd.read_parquet(f"{samples_dir[year]}/fake_{year}_{ch}_FR_Nominal.parquet")
+                for selection in presel[ch]:
+                    df = df.query(presel[ch][selection])
 
-                df["nominal"] = df["event_weight"] * 0.6  # apply Fake SF
+                df["nominal"] *= fake_SF[ch]  # apply Fake SF
 
-                events_dict[year]["ele"]["Fake"] = df
-
-            if "mu" in channels:
-                events_dict[year]["mu"]["Fake"] = 0
+                events_dict[year][ch]["Fake"] = df
 
     return events_dict
 

@@ -254,6 +254,8 @@ def get_axis(var, massbin=5):
         ),
         "fj_pt": hist2.axis.Regular(30, 250, 600, name="var", label=r"Higgs candidate jet $p_T$ [GeV]", overflow=True),
         "lep_pt": hist2.axis.Regular(40, 30, 400, name="var", label=r"Lepton $p_T$ [GeV]", overflow=True),
+        "pt_ratio": hist2.axis.Regular(40, 0, 2, name="var", label=r"Lepton $p_T$ / Jet $p_T$", overflow=True),
+        "rho": hist2.axis.Regular(50, -1, -10, name="var", label=r"Rho", overflow=True),
         "lep_eta": hist2.axis.Regular(35, -2.5, 2.5, name="var", label=r"Lepton $\eta$", overflow=True),
         "NumFatjets": hist2.axis.Regular(5, 0.5, 5.5, name="var", label="Number of AK8 jets", overflow=True),
         "NumOtherJets": hist2.axis.Regular(
@@ -283,7 +285,7 @@ def get_axis(var, massbin=5):
         ),
         "fj_msoftdrop": hist2.axis.Regular(35, 20, 200, name="var", label=r"Jet $m_{sd}$ [GeV]", overflow=True),
         "fj_mass": hist2.axis.Variable(
-            list(range(40, 255, massbin)), name="var", label=r"Higgs candidate soft-drop mass [GeV]", overflow=True
+            list(range(0, 255, massbin)), name="var", label=r"Higgs candidate soft-drop mass [GeV]", overflow=True
         ),
         "fj_lsf3": hist2.axis.Regular(35, 0, 1, name="var", label=r"Higgs candidate jet LSF$_3$", overflow=True),
         # lepton isolation
@@ -337,6 +339,7 @@ def plot_hists(
     plot_syst_unc=None,
     add_soverb=False,
     legend_ncol=2,
+    seperate_Fake_unc=False,
 ):
     # luminosity
     luminosity = 0
@@ -516,9 +519,31 @@ def plot_hists(
                 unc_down = (tot_err_MC / tot_val) ** 2
 
                 if plot_Fake_unc and ("Fake" in h.axes["samples"]):
-                    # unc_lab += " + Fake"
-                    unc_up += (tot_err_Fake / tot_val) ** 2
-                    unc_down += (tot_err_Fake / tot_val) ** 2
+
+                    if seperate_Fake_unc:
+                        unc_fake_up = (tot_err_Fake / tot_val) ** 2
+                        unc_fake_down = (tot_err_Fake / tot_val) ** 2
+
+                        errps_fake = {
+                            "hatch": "////",
+                            "facecolor": "none",
+                            "lw": 0,
+                            "color": "orange",
+                            "edgecolor": (0, 0, 0, 0.5),
+                            "linewidth": 0,
+                            "alpha": 0.4,
+                        }
+
+                        rax.stairs(
+                            values=1 + np.sqrt(unc_fake_up),
+                            baseline=1 - np.sqrt(unc_fake_down),
+                            edges=tot.axes[0].edges,
+                            **errps_fake,
+                            label="Fake normalization unc.",
+                        )
+                    else:
+                        unc_up += (tot_err_Fake / tot_val) ** 2
+                        unc_down += (tot_err_Fake / tot_val) ** 2
 
                 if plot_syst_unc:
                     unc_lab += " + Syst."
@@ -560,9 +585,30 @@ def plot_hists(
             unc_down = tot_err_MC**2
 
             if plot_Fake_unc and ("Fake" in h.axes["samples"]):
-                # unc_lab += " + Fake"
-                unc_up += tot_err_Fake**2
-                unc_down += tot_err_Fake**2
+                if seperate_Fake_unc:
+                    unc_fake_up = (tot_err_Fake / tot_val) ** 2
+                    unc_fake_down = (tot_err_Fake / tot_val) ** 2
+
+                    errps_fake = {
+                        "hatch": "////",
+                        "facecolor": "none",
+                        "lw": 0,
+                        "color": "orange",
+                        "edgecolor": (0, 0, 0, 0.5),
+                        "linewidth": 0,
+                        "alpha": 0.4,
+                    }
+
+                    rax.stairs(
+                        values=1 + np.sqrt(unc_fake_up),
+                        baseline=1 - np.sqrt(unc_fake_down),
+                        edges=tot.axes[0].edges,
+                        **errps_fake,
+                        label="Fake normalization unc.",
+                    )
+                else:
+                    unc_up += tot_err_Fake**2
+                    unc_down += tot_err_Fake**2
 
             if plot_syst_unc:
                 unc_lab += " + Syst."

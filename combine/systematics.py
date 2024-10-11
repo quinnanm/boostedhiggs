@@ -91,10 +91,15 @@ def get_systematic_dict(years):
             sigs + bkgs,
             {"mu": "weight_mu_isolation_muon"},
         ),
-        "weight_mu_id": (
+        "weight_mu_id_stat": (
             years,
             sigs + bkgs,
-            {"mu": "weight_mu_id_muon"},
+            {"mu": "weight_mu_id_muon_stat"},
+        ),
+        "weight_mu_id_syst": (
+            years,
+            sigs + bkgs,
+            {"mu": "weight_mu_id_muon_syst"},
         ),
         "weight_mu_trigger_iso": (
             years,
@@ -105,6 +110,11 @@ def get_systematic_dict(years):
             years,
             sigs + bkgs,
             {"mu": "weight_mu_trigger_noniso_muon"},
+        ),
+        "weight_TopPtReweight": (
+            years,
+            ["TTbar"],
+            {"mu": "weight_mu_TopPtReweight", "ele": "weight_ele_TopPtReweight"},
         ),
     }
 

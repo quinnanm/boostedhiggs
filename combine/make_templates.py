@@ -41,6 +41,9 @@ def fill_systematics(
     sumgenweights,
     sumscaleweights,
 ):
+    with open("trg_eff_SF.pkl", "rb") as f:
+        TRIGGER_SF = pkl.load(f)
+
     SYST_DICT = get_systematic_dict(years)
 
     for region, region_sel in regions_sel.items():  # e.g. pass, fail, top control region, etc.
@@ -59,15 +62,24 @@ def fill_systematics(
             if "bjets" in region_sel:  # if there's a bjet selection, add btag SF to the nominal weight
                 nominal *= df["weight_btag"]
 
-            if sample_label == "TTbar":
-                nominal *= df["top_reweighting"]
+            if ch == "ele":
+                # add trigger SF
+                ptbinning = [2000, 200, 120, 30]
+                etabinning = [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5]
 
-        ###################################
-        if sample_label == "EWKvjets":
-            threshold = 20
-            df = df[nominal < threshold]
-            nominal = nominal[nominal < threshold]
-        ###################################
+                for i in range(len(ptbinning) - 1):
+                    high_pt = ptbinning[i]
+                    low_pt = ptbinning[i + 1]
+
+                    msk_pt = (df["lep_pt"] >= low_pt) & (df["lep_pt"] < high_pt)
+
+                    for j in range(len(etabinning) - 1):
+                        low_eta = etabinning[j]
+                        high_eta = etabinning[j + 1]
+
+                        msk_eta = (abs(df["lep_eta"]) >= low_eta) & (abs(df["lep_eta"]) < high_eta)
+
+                        nominal[msk_pt & msk_eta] *= TRIGGER_SF["UL" + year[2:].replace("APV", "")]["nominal"][i, j]
 
         hists.fill(
             Sample=sample_label,
@@ -75,6 +87,44 @@ def fill_systematics(
             Region=region,
             mass_observable=df["rec_higgs_m"],
             weight=nominal,
+        )
+
+        # ------------------- Trigger SF unc. -------------------
+        # for the up/down must revert the nominal that i had applied before
+        up, down = nominal.copy(), nominal.copy()
+        if (ch == "ele") and (not is_data):
+            # if ch == "ele":
+            for i in range(len(ptbinning) - 1):
+                high_pt = ptbinning[i]
+                low_pt = ptbinning[i + 1]
+
+                msk_pt = (df["lep_pt"] >= low_pt) & (df["lep_pt"] < high_pt)
+
+                for j in range(len(etabinning) - 1):
+                    low_eta = etabinning[j]
+                    high_eta = etabinning[j + 1]
+
+                    msk_eta = (abs(df["lep_eta"]) >= low_eta) & (abs(df["lep_eta"]) < high_eta)
+
+                    up[msk_pt & msk_eta] /= TRIGGER_SF["UL" + year[2:].replace("APV", "")]["nominal"][i, j]
+                    down[msk_pt & msk_eta] /= TRIGGER_SF["UL" + year[2:].replace("APV", "")]["nominal"][i, j]
+
+                    up[msk_pt & msk_eta] *= TRIGGER_SF["UL" + year[2:].replace("APV", "")]["up"][i, j]
+                    down[msk_pt & msk_eta] *= TRIGGER_SF["UL" + year[2:].replace("APV", "")]["down"][i, j]
+
+        hists.fill(
+            Sample=sample_label,
+            Systematic="trigger_ele_SF_up",
+            Region=region,
+            mass_observable=df["rec_higgs_m"],
+            weight=up,
+        )
+        hists.fill(
+            Sample=sample_label,
+            Systematic="trigger_ele_SF_down",
+            Region=region,
+            mass_observable=df["rec_higgs_m"],
+            weight=down,
         )
 
         # ------------------- PDF acceptance -------------------
@@ -186,34 +236,6 @@ def fill_systematics(
             weight=shape_down,
         )
 
-        # ------------------- Top pt reweighting systematic  -------------------
-
-        if sample_label == "TTbar":
-            # first remove the reweighting effect
-            nominal_noreweighting = nominal / df["top_reweighting"]
-
-            shape_up = nominal_noreweighting * (df["top_reweighting"] ** 2)  # "up" is twice the correction
-            shape_down = nominal_noreweighting  # "down" is no correction
-        else:
-            shape_up = nominal
-            shape_down = nominal
-
-        hists.fill(
-            Sample=sample_label,
-            Systematic="top_reweighting_up",
-            Region=region,
-            mass_observable=df["rec_higgs_m"],
-            weight=shape_up,
-        )
-
-        hists.fill(
-            Sample=sample_label,
-            Systematic="top_reweighting_down",
-            Region=region,
-            mass_observable=df["rec_higgs_m"],
-            weight=shape_down,
-        )
-
         # ------------------- Common systematics  -------------------
 
         for syst, (yrs, smpls, var) in SYST_DICT["common"].items():
@@ -226,9 +248,6 @@ def fill_systematics(
                     shape_up *= df["weight_btag"]
                     shape_down *= df["weight_btag"]
 
-                if sample_label == "TTbar":
-                    shape_up *= df["top_reweighting"]
-                    shape_down *= df["top_reweighting"]
             else:
                 shape_up = nominal
                 shape_down = nominal
@@ -302,16 +321,6 @@ def fill_systematics(
 
                     if "bjets" in region_sel:  # if there's a bjet selection, add btag SF to the nominal weight
                         nominal *= df["weight_btag"]
-
-                    if sample_label == "TTbar":
-                        nominal *= df["top_reweighting"]
-
-                ###################################
-                if sample_label == "EWKvjets":
-                    threshold = 20
-                    df = df[nominal < threshold]
-                    nominal = nominal[nominal < threshold]
-                ###################################
 
                 if (sample_label in smpls) and (year in yrs) and (ch in var):
                     shape_variation = df["rec_higgs_m" + var[ch] + f"_{variation}"]
@@ -543,7 +552,7 @@ def main(args):
         save_as = "_".join(years)
 
     if len(channels) == 1:
-        save_as += f"_{channels[0]}_"
+        save_as += f"_{channels[0]}"
 
     os.system(f"mkdir -p {args.outdir}")
 

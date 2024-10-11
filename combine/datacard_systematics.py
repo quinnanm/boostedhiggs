@@ -297,8 +297,12 @@ def systs_from_parquets(years):
             "weight_mu_trigger_noniso",
             sigs + bkgs,
         ),
-        rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_identification", "lnN"): (
-            "weight_mu_id",
+        rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_identification_stat", "lnN"): (
+            "weight_mu_id_stat",
+            sigs + bkgs,
+        ),
+        rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_identification_syst", "lnN"): (
+            "weight_mu_id_syst",
             sigs + bkgs,
         ),
         # systematics for electron channel
@@ -376,8 +380,8 @@ def systs_from_parquets(years):
             "weight_qcd_scale",
             ["SingleTop"],
         ),
-        rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_top_reweighting", "shape"): (
-            "top_reweighting",
+        rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_TopPtReweight", "shape"): (
+            "weight_TopPtReweight",
             ["TTbar"],
         ),
         # trigger SF
@@ -443,32 +447,32 @@ def systs_from_parquets(years):
 
     # systematics correlated across all years
     JEC_systs_correlated = {
-        rl.NuisanceParameter("unclustered_Energy", "shape"): (
+        rl.NuisanceParameter("unclustered_Energy", "lnN"): (
             "UES",
             sigs + bkgs,
         ),
         # individual sources
-        rl.NuisanceParameter("CMS_scale_j_FlavQCD", "shape"): (
+        rl.NuisanceParameter("CMS_scale_j_FlavQCD", "lnN"): (
             "JES_FlavorQCD",
             sigs + bkgs,
         ),
-        rl.NuisanceParameter("CMS_scale_j_RelBal", "shape"): (
+        rl.NuisanceParameter("CMS_scale_j_RelBal", "lnN"): (
             "JES_RelativeBal",
             sigs + bkgs,
         ),
-        rl.NuisanceParameter("CMS_scale_j_HF", "shape"): (
+        rl.NuisanceParameter("CMS_scale_j_HF", "lnN"): (
             "JES_HF",
             sigs + bkgs,
         ),
-        rl.NuisanceParameter("CMS_scale_j_BBEC1", "shape"): (
+        rl.NuisanceParameter("CMS_scale_j_BBEC1", "lnN"): (
             "JES_BBEC1",
             sigs + bkgs,
         ),
-        rl.NuisanceParameter("CMS_scale_j_EC2", "shape"): (
+        rl.NuisanceParameter("CMS_scale_j_EC2", "lnN"): (
             "JES_EC2",
             sigs + bkgs,
         ),
-        rl.NuisanceParameter("CMS_scale_j_Abs", "shape"): (
+        rl.NuisanceParameter("CMS_scale_j_Abs", "lnN"): (
             "JES_Absolute",
             sigs + bkgs,
         ),
@@ -480,35 +484,35 @@ def systs_from_parquets(years):
         JEC_systs_uncorrelated = {
             **JEC_systs_uncorrelated,
             **{
-                rl.NuisanceParameter(f"CMS_res_j_{year}", "shape"): (
+                rl.NuisanceParameter(f"CMS_res_j_{year}", "lnN"): (
                     f"JER_{year}",
                     sigs + bkgs,
                 ),
-                rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_jmr_{year}", "shape"): (
+                rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_jmr_{year}", "lnN"): (
                     f"JMR_{year}",
                     sigs + bkgs,
                 ),
-                rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_jms_{year}", "shape"): (
+                rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_jms_{year}", "lnN"): (
                     f"JMS_{year}",
                     sigs + bkgs,
                 ),
-                rl.NuisanceParameter(f"CMS_scale_j_BBEC1_{year}", "shape"): (
+                rl.NuisanceParameter(f"CMS_scale_j_BBEC1_{year}", "lnN"): (
                     f"JES_BBEC1_{year}",
                     sigs + bkgs,
                 ),
-                rl.NuisanceParameter(f"CMS_scale_j_RelSample_{year}", "shape"): (
+                rl.NuisanceParameter(f"CMS_scale_j_RelSample_{year}", "lnN"): (
                     f"JES_RelativeSample_{year}",
                     sigs + bkgs,
                 ),
-                rl.NuisanceParameter(f"CMS_scale_j_EC2_{year}", "shape"): (
+                rl.NuisanceParameter(f"CMS_scale_j_EC2_{year}", "lnN"): (
                     f"JES_EC2_{year}",
                     sigs + bkgs,
                 ),
-                rl.NuisanceParameter(f"CMS_scale_j_HF_{year}", "shape"): (
+                rl.NuisanceParameter(f"CMS_scale_j_HF_{year}", "lnN"): (
                     f"JES_HF_{year}",
                     sigs + bkgs,
                 ),
-                rl.NuisanceParameter(f"CMS_scale_j_Abs_{year}", "shape"): (
+                rl.NuisanceParameter(f"CMS_scale_j_Abs_{year}", "lnN"): (
                     f"JES_Absolute_{year}",
                     sigs + bkgs,
                 ),

@@ -178,7 +178,7 @@ if [ $workspace = 1 ]; then
     combineCards.py $ccargs > $combined_datacard
 
     echo "Running text2workspace"
-    
+
     # single POI
     text2workspace.py $combined_datacard -o $ws 2>&1 | tee $logsdir/text2workspace.txt
 
@@ -223,6 +223,9 @@ if [ $dfit_asimov = 1 ]; then
     combine -M FitDiagnostics -m 125 -d $ws \
     -t -1 --expectSignal=1 --saveWorkspace --saveToys -n Asimov --ignoreCovWarning \
     --saveShapes --saveNormalizations --saveWithUncertainties --saveOverallShapes 2>&1 | tee $logsdir/FitDiagnosticsAsimov.txt
+
+    # w frequentist toys mean prefit data
+    # w/o frequentist toys mean prefit asimov
 
 
 
