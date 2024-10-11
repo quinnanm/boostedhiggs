@@ -36,6 +36,8 @@ from boostedhiggs.corrections import (
 )
 from boostedhiggs.utils import VScore, get_pid_mask, match_H, match_Top, match_V, sigs
 
+# from boostedhiggs.utils import match_H_alljets
+
 from .run_tagger_inference import runInferenceTriton
 
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
@@ -355,22 +357,16 @@ class HwwProcessor(processor.ProcessorABC):
 
         ht = ak.sum(jets.pt, axis=1)
 
-        loose_jet_selector = (
-            (jets.pt > 15)
-            & jets.isTight
-            & ((jets.pt >= 50) | ((jets.pt < 50) & (jets.puId & 2) == 2))
-            & (jets.neEmEF < 0.9)  # neutral energy fraction
-        )
-        vetomapjets = jets[loose_jet_selector]
-        _, cut_jetveto = get_JetVetoMap(vetomapjets, self._year)
-
         jet_selector = (
-            (jets.pt > 30)
+            (jets.pt > 15)
             & (abs(jets.eta) < 5.0)
             & jets.isTight
             & ((jets.pt >= 50) | ((jets.pt < 50) & (jets.puId & 2) == 2))
+            & (jets.chEmEF + jets.neEmEF < 0.9)  # neutral and charged energy fraction
         )
-        goodjets = jets[jet_selector]
+        jets = jets[jet_selector]
+        jet_veto_map, _ = get_JetVetoMap(jets, self._year)
+        jets = jets[(jets.pt > 30) & jet_veto_map]
         ak4_outside_ak8_selector = jets.delta_r(candidatefj) > 0.8
         ak4_outside_ak8 = jets[ak4_outside_ak8_selector]
 
@@ -472,8 +468,6 @@ class HwwProcessor(processor.ProcessorABC):
             "VH_fj_pt": VH_fj.pt,
             "VH_fj_eta": VH_fj.eta,
             "VH_fj_VScore": VScore(VH_fj),
-            # add jetveto as optional selection
-            "jetvetomap": cut_jetveto,
             # added on October 9th
             "loose_lep1_miso": ak.firsts(
                 muons[loose_muons1][ak.argsort(muons[loose_muons1].pt, ascending=False)]
@@ -611,8 +605,16 @@ class HwwProcessor(processor.ProcessorABC):
         if self.isMC:
             if self.isSignal:
                 genVars, signal_mask = match_H(events.GenPart, candidatefj, fatjet_pt=FirstFatjet)
+                # genVars = {**genVars, **match_H_alljets(events.GenPart, fatjets)}
                 # add signal mask and modify sum of genweights to only consider those events that pass the mask
                 self.add_selection(name="Signal", sel=signal_mask)
+                lhehpt = events.LHEPart[events.LHEPart.pdgId == 25].pt
+                if ak.any(lhehpt):
+                    genVars["LHE_Hpt"] = lhehpt
+                if "HTXS" in events.fields:
+                    genVars["STXS_Higgs_pt"] = events.HTXS.Higgs_pt
+                    genVars["STXS_cat"] = events.HTXS.stage1_2_cat_pTjet30GeV
+
             elif "HToTauTau" in dataset:
                 genVars, signal_mask = match_H(events.GenPart, candidatefj, dau_pdgid=15)
                 self.add_selection(name="Signal", sel=signal_mask)
@@ -632,7 +634,7 @@ class HwwProcessor(processor.ProcessorABC):
         # hem-cleaning selection
         if self._year == "2018":
             hem_veto = ak.any(
-                ((goodjets.eta > -3.2) & (goodjets.eta < -1.3) & (goodjets.phi > -1.57) & (goodjets.phi < -0.87)),
+                ((jets.eta > -3.2) & (jets.eta < -1.3) & (jets.phi > -1.57) & (jets.phi < -0.87)),
                 -1,
             ) | ak.any(
                 (
@@ -669,7 +671,7 @@ class HwwProcessor(processor.ProcessorABC):
                     nPU=ak.to_numpy(events.Pileup.nPU),
                 )
 
-                add_pileupid_weights(self.weights[ch], self._year, self._yearmod, goodjets, events.GenJet, wp="L")
+                add_pileupid_weights(self.weights[ch], self._year, self._yearmod, jets, events.GenJet, wp="L")
 
                 if ch == "mu":
                     add_lepton_weight(self.weights[ch], candidatelep, self._year + self._yearmod, "muon")
@@ -693,7 +695,9 @@ class HwwProcessor(processor.ProcessorABC):
                     variables["top_reweighting"] = add_TopPtReweighting(self.weights[ch], tops.pt)
 
                 if self.isSignal:
-                    add_HiggsEW_kFactors(self.weights[ch], events.GenPart, dataset)
+                    ew_weight = add_HiggsEW_kFactors(events.GenPart, dataset)
+                    # save EW weights but do not apply by default
+                    variables["EW_weight"] = ew_weight
 
                 if self._systematics:
                     if self.isSignal or "TT" in dataset or "WJets" in dataset or "ST_" in dataset:
@@ -741,6 +745,11 @@ class HwwProcessor(processor.ProcessorABC):
 
                 # store the final weight per ch
                 variables[f"weight_{ch}"] = self.weights[ch].weight()
+
+                # store each weight (for debug)
+                # for key in self.weights[ch]._weights:
+                #    variables[f"{ch}_single_weight_{key}"] = self.weights[ch].partial_weight([key])
+
                 if self._systematics:
                     for systematic in self.weights[ch].variations:
                         variables[f"weight_{ch}_{systematic}"] = self.weights[ch].weight(modifier=systematic)
