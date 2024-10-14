@@ -480,6 +480,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                 )
 
     if add_fake:
+
         fake_SF = {
             "ele": 0.75,
             "mu": 1.0,
@@ -511,7 +512,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                                 Systematic="nominal",
                                 Region=region,
                                 mass_observable=df["rec_higgs_m"],
-                                weight=df["event_weight"],
+                                weight=df["nominal"],
                             )
                         else:
                             hists.fill(
@@ -519,7 +520,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                                 Systematic=variation,
                                 Region=region,
                                 mass_observable=df["rec_higgs_m"],
-                                weight=df["event_weight"],
+                                weight=df["nominal"],
                             )
 
     logging.info(hists)
