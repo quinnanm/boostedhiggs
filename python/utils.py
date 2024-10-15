@@ -183,7 +183,6 @@ plot_labels = {
     "Fake_FR_stat_Down": "Fake_FR_stat_Down",
     "Diboson": "VV",
     "WJetsLNu": r"W$(\ell\nu)$+jets",
-    "TTbar": r"$t\bar{t}$+jets",
     "SingleTop": r"Single T",
     "EWKvjets": "EWK VJets",
     "DYJets": r"Z$(\ell\ell)$+jets",
@@ -193,12 +192,14 @@ plot_labels = {
     "WJetsLNu_unmatched": r"W$(\ell\nu)$+jets unmatched",
     "WJetsLNu_matched": r"W$(\ell\nu)$+jets matched",
     # ttbar matched and unmatched
+    # "TTbar": r"$t\bar{t}$+jets",
+    "TTbar": r"$t\bar{t}$+jets (after $p_T$ reweighting)",
+    # "TTbar": r"$t\bar{t}$+jets (before $p_T$ reweighting)",
     "TTbar_allmatched": r"$t\bar{t}$+jets matched",
     "TTbar_unmatched": r"$t\bar{t}$+jets unmatched",
     "TTbar_LP": "TTbar_LP",
     "TTbar (2 gen quarks matched)": r"$t\bar{t}$+jets (2 gen quarks matched)",
-    "TTbar (other)": r"$t\bar{t}$+jets (other)",
-    # "TTbar": r"$t\bar{t}$+jets (after $p_T$ reweighting)",
+    # "TTbar (other)": r"$t\bar{t}$+jets (other)",
     # "TTbar_pt": r"$t\bar{t}$+jets",
 }
 
@@ -242,9 +243,8 @@ def get_axis(var, massbin=5):
         ),
         "nj": hist2.axis.Regular(40, 0, 10, name="var", label="number of jets outside candidate jet", overflow=True),
         "inclusive_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
-        "fj_ParT_score_finetuned": hist2.axis.Regular(25, 0.5, 1, name="var", label=r"$T_{HWW}$", overflow=True),
-        # "THWW": hist2.axis.Regular(25, 0, 1, name="var", label=r"$T_{HWW}$", overflow=True),
-        "THWW": hist2.axis.Regular(30, 0.75, 1, name="var", label=r"$T_{HWW}$", overflow=True),
+        "THWW": hist2.axis.Regular(25, 0, 1, name="var", label=r"$T_{HWW}$", overflow=True),
+        # "THWW": hist2.axis.Regular(30, 0.75, 1, name="var", label=r"$T_{HWW}$", overflow=True),
         "fj_ParT_inclusive_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"ParT-Finetuned score", overflow=True),
         "fj_ParT_all_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
         # AN
@@ -805,7 +805,7 @@ def plot_hists(
             else:
                 dax.set_ylim(0, a + 1)
                 dax.set_yticks([1])
-        ax.set_ylim(0, 1000000)
+
         hep.cms.lumitext("%.0f " % luminosity + r"fb$^{-1}$ (13 TeV)", ax=ax, fontsize=20)
         hep.cms.text("Work in Progress", ax=ax, fontsize=15)
 
