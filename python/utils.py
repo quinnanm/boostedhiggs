@@ -183,7 +183,6 @@ plot_labels = {
     "Fake_FR_stat_Down": "Fake_FR_stat_Down",
     "Diboson": "VV",
     "WJetsLNu": r"W$(\ell\nu)$+jets",
-    "TTbar": r"$t\bar{t}$+jets",
     "SingleTop": r"Single T",
     "EWKvjets": "EWK VJets",
     "DYJets": r"Z$(\ell\ell)$+jets",
@@ -193,12 +192,14 @@ plot_labels = {
     "WJetsLNu_unmatched": r"W$(\ell\nu)$+jets unmatched",
     "WJetsLNu_matched": r"W$(\ell\nu)$+jets matched",
     # ttbar matched and unmatched
+    # "TTbar": r"$t\bar{t}$+jets",
+    "TTbar": r"$t\bar{t}$+jets (after $p_T$ reweighting)",
+    # "TTbar": r"$t\bar{t}$+jets (before $p_T$ reweighting)",
     "TTbar_allmatched": r"$t\bar{t}$+jets matched",
     "TTbar_unmatched": r"$t\bar{t}$+jets unmatched",
     "TTbar_LP": "TTbar_LP",
     "TTbar (2 gen quarks matched)": r"$t\bar{t}$+jets (2 gen quarks matched)",
-    "TTbar (other)": r"$t\bar{t}$+jets (other)",
-    # "TTbar": r"$t\bar{t}$+jets (after $p_T$ reweighting)",
+    # "TTbar (other)": r"$t\bar{t}$+jets (other)",
     # "TTbar_pt": r"$t\bar{t}$+jets",
 }
 
@@ -242,9 +243,8 @@ def get_axis(var, massbin=5):
         ),
         "nj": hist2.axis.Regular(40, 0, 10, name="var", label="number of jets outside candidate jet", overflow=True),
         "inclusive_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
-        "fj_ParT_score_finetuned": hist2.axis.Regular(25, 0.5, 1, name="var", label=r"$T_{HWW}$", overflow=True),
         "THWW": hist2.axis.Regular(25, 0, 1, name="var", label=r"$T_{HWW}$", overflow=True),
-        # "THWW": hist2.axis.Regular(15, 0.75, 1, name="var", label=r"$T_{HWW}$", overflow=True),
+        # "THWW": hist2.axis.Regular(30, 0.75, 1, name="var", label=r"$T_{HWW}$", overflow=True),
         "fj_ParT_inclusive_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"ParT-Finetuned score", overflow=True),
         "fj_ParT_all_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
         # AN
@@ -254,6 +254,8 @@ def get_axis(var, massbin=5):
         ),
         "fj_pt": hist2.axis.Regular(30, 250, 600, name="var", label=r"Higgs candidate jet $p_T$ [GeV]", overflow=True),
         "lep_pt": hist2.axis.Regular(40, 30, 400, name="var", label=r"Lepton $p_T$ [GeV]", overflow=True),
+        "pt_ratio": hist2.axis.Regular(40, 0, 2, name="var", label=r"Lepton $p_T$ / Jet $p_T$", overflow=True),
+        "rho": hist2.axis.Regular(50, -1, -10, name="var", label=r"Rho", overflow=True),
         "lep_eta": hist2.axis.Regular(35, -2.5, 2.5, name="var", label=r"Lepton $\eta$", overflow=True),
         "NumFatjets": hist2.axis.Regular(5, 0.5, 5.5, name="var", label="Number of AK8 jets", overflow=True),
         "NumOtherJets": hist2.axis.Regular(
@@ -337,6 +339,7 @@ def plot_hists(
     plot_syst_unc=None,
     add_soverb=False,
     legend_ncol=2,
+    seperate_Fake_unc=False,
 ):
     # luminosity
     luminosity = 0
@@ -426,15 +429,34 @@ def plot_hists(
                 sax = None
                 dax = None
 
-        errps = {
-            "hatch": "////",
-            "facecolor": "none",
-            "lw": 0,
-            "color": "k",
-            "edgecolor": (0, 0, 0, 0.5),
-            "linewidth": 0,
-            "alpha": 0.4,
-        }
+        if seperate_Fake_unc:
+            errps = {
+                "hatch": "////",
+                "facecolor": "none",
+                "lw": 0,
+                "color": "k",
+                "edgecolor": (0, 0, 0, 0.5),
+                "linewidth": 0,
+                "alpha": 0.9,
+            }
+            errps_fake = {
+                "hatch": "////",
+                "facecolor": "tab:orange",
+                "lw": 3,
+                "color": "tab:orange",
+                "linewidth": 0,
+                "alpha": 0.5,
+            }
+        else:
+            errps = {
+                "hatch": "////",
+                "facecolor": "none",
+                "lw": 0,
+                "color": "k",
+                "edgecolor": (0, 0, 0, 0.5),
+                "linewidth": 0,
+                "alpha": 0.4,
+            }
 
         # sum all of the background and get the stat. and the syst. unc.
         if len(bkg) > 0:
@@ -516,9 +538,13 @@ def plot_hists(
                 unc_down = (tot_err_MC / tot_val) ** 2
 
                 if plot_Fake_unc and ("Fake" in h.axes["samples"]):
-                    # unc_lab += " + Fake"
-                    unc_up += (tot_err_Fake / tot_val) ** 2
-                    unc_down += (tot_err_Fake / tot_val) ** 2
+
+                    if seperate_Fake_unc:
+                        unc_fake_up = (tot_err_Fake / tot_val) ** 2
+                        unc_fake_down = (tot_err_Fake / tot_val) ** 2
+                    else:
+                        unc_up += (tot_err_Fake / tot_val) ** 2
+                        unc_down += (tot_err_Fake / tot_val) ** 2
 
                 if plot_syst_unc:
                     unc_lab += " + Syst."
@@ -534,6 +560,14 @@ def plot_hists(
                     **errps,
                     label=unc_lab,
                 )
+                if seperate_Fake_unc:
+                    rax.stairs(
+                        values=(1 + np.sqrt(unc_up)) + np.sqrt(unc_fake_up),
+                        baseline=(1 - np.sqrt(unc_up)) - np.sqrt(unc_fake_down),
+                        edges=tot.axes[0].edges,
+                        **errps_fake,
+                        label="Fake normalization unc.",
+                    )
 
                 rax.axhline(1, ls="--", color="k")
                 rax.set_ylim(0.2, 1.8)
@@ -560,9 +594,13 @@ def plot_hists(
             unc_down = tot_err_MC**2
 
             if plot_Fake_unc and ("Fake" in h.axes["samples"]):
-                # unc_lab += " + Fake"
-                unc_up += tot_err_Fake**2
-                unc_down += tot_err_Fake**2
+                if seperate_Fake_unc:
+                    unc_fake_up = (tot_err_Fake) ** 2
+                    unc_fake_down = (tot_err_Fake) ** 2
+
+                else:
+                    unc_up += tot_err_Fake**2
+                    unc_down += tot_err_Fake**2
 
             if plot_syst_unc:
                 unc_lab += " + Syst."
@@ -578,6 +616,15 @@ def plot_hists(
                 **errps,
                 label=unc_lab,
             )
+
+            if seperate_Fake_unc:
+                ax.stairs(
+                    values=(tot.values() + np.sqrt(unc_up)) + np.sqrt(unc_fake_up),
+                    baseline=(tot.values() - np.sqrt(unc_up)) - np.sqrt(unc_fake_down),
+                    edges=tot.axes[0].edges,
+                    **errps_fake,
+                    label="Fake normalization unc.",
+                )
 
         # plot the signal (times 10)
         if len(signal) > 0:

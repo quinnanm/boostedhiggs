@@ -393,3 +393,11 @@ wjetslep:
   - WJetsToLNu_HT-800To1200
   - WJetsToLNu_HT-1200To2500
   - WJetsToLNu_HT-2500ToInf
+signal:
+  - GluGluHToWWToLNuQQ_M-125_TuneCP5_13TeV_powheg_jhugen751_pythia8
+  - GluGluHToWW_Pt-200ToInf_M-125
+  - VBFHToWWToAny_M-125_TuneCP5_withDipoleRecoil
+  - HWminusJ_HToWW_M-125
+  - HWplusJ_HToWW_M-125
+  - HZJ_HToWW_M-125
+  - ttHToNonbb_M125

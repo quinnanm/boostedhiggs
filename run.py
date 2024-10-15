@@ -141,7 +141,7 @@ def main(args):
         p = ZllProcessor(year=year, yearmod=yearmod, output_location=f"./outfiles/{job_name}")
 
     else:
-        from boostedhiggs.trigger_efficiencies_processor import (
+        from boostedhiggs.trigger_efficiencies_processor1 import (
             TriggerEfficienciesProcessor,
         )
 
@@ -222,7 +222,7 @@ def main(args):
 
 if __name__ == "__main__":
     # e.g.
-    # noqa: python run.py --executor iterative --year 2017 --processor trigger --pfnano v2_2 --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele,mu --config samples_inclusive.yaml --key mc
+    # noqa: python run.py --executor iterative --year 2017 --processor trigger --pfnano v2_2 --n 100 --starti 0 --sample SingleElectron_Run2017C --local --channels ele --config samples_inclusive.yaml --key data
 
     # noqa: python run.py --year 2017 --processor hww --pfnano v2_2 --n 1 --starti 0 --sample GluGluHToWW_Pt-200ToInf_M-125 --local --channels ele --config samples_inclusive.yaml --key mc --executor iterative
 
