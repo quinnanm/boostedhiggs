@@ -99,6 +99,7 @@ regions_sel:
     "ggF95and500and20": (THWW>0.95) & (n_bjets_T==0) & ( (mjj<500) | (deta<2.0) ) & (rec_higgs_pt>250)
     "ggF95and1000and35": (THWW>0.95) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>250)
 
+
     # ### ParT vs ParT-Finetuned (no VBF and ggF categorization)
     # "ParT9999": (fj_ParT_score>0.9999) & (n_bjets_T==0)
     # "ParT9995": (fj_ParT_score>0.9995) & (n_bjets_T==0)
@@ -228,9 +229,9 @@ regions_sel:
     # "ggF88pt500toInf": (THWW>0.88) & (n_bjets_T==0) & ( (mjj<1000) | (deta<3.5) ) & (rec_higgs_pt>500)
 
 samples_dir:
-    "2018": ../eos/July18_hww_2018
-    "2017": ../eos/July18_hww_2017
-    "2016": ../eos/July18_hww_2016
-    "2016APV": ../eos/July18_hww_2016APV
+    "2018": ../eos/Oct10_hww_2018
+    "2017": ../eos/Oct10_hww_2017
+    "2016": ../eos/Oct10_hww_2016
+    "2016APV": ../eos/Oct10_hww_2016APV
 
 model_path: ../../weaver-core-dev/experiments_finetuning/v35_30/model.onnx
