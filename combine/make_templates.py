@@ -359,13 +359,13 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
         "mu": {
             "fj_mass": "fj_mass>40",
             "tagger>0.75": "THWW>0.75",
-            "jetvetomap": "jetvetomap==1",
+            # "jetvetomap": "jetvetomap==1",
             "lepmiso": "(lep_pt<55) | ( (lep_pt>=55) & (lep_misolation<0.8))",  # needed for the fakes
         },
         "ele": {
             "fj_mass": "fj_mass>40",
             "tagger>0.75": "THWW>0.75",
-            "jetvetomap": "jetvetomap==1",
+            # "jetvetomap": "jetvetomap==1",
         },
     }
 
@@ -417,6 +417,12 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
 
                 if len(data) == 0:
                     continue
+
+                if sample_to_use == "ggF":
+                    if "GluGluHToWWToLNuQQ_M-125_TuneCP5_13TeV_powheg_jhugen751_pythia8" in sample:
+                        data = data[data["fj_genH_pt"] < 200]
+                    else:
+                        data = data[data["fj_genH_pt"] >= 200]
 
                 # use hidNeurons to get the finetuned scores
                 data["THWW"] = get_finetuned_score(data, model_path)

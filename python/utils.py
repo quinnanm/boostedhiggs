@@ -20,6 +20,7 @@ warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 combine_samples_by_name = {
     "GluGluHToWW_Pt-200ToInf_M-125": "ggF",
+    "GluGluHToWWToLNuQQ_M-125_TuneCP5_13TeV_powheg_jhugen751_pythia8": "ggF",  # inclusive sample
     "VBFHToWWToAny_M-125_TuneCP5_withDipoleRecoil": "VBF",
     "ttHToNonbb_M125": "ttH",
     "HWminusJ_HToWW_M-125": "WH",
@@ -192,8 +193,8 @@ plot_labels = {
     "WJetsLNu_unmatched": r"W$(\ell\nu)$+jets unmatched",
     "WJetsLNu_matched": r"W$(\ell\nu)$+jets matched",
     # ttbar matched and unmatched
-    # "TTbar": r"$t\bar{t}$+jets",
-    "TTbar": r"$t\bar{t}$+jets (after $p_T$ reweighting)",
+    "TTbar": r"$t\bar{t}$+jets",
+    # "TTbar": r"$t\bar{t}$+jets (after $p_T$ reweighting)",
     # "TTbar": r"$t\bar{t}$+jets (before $p_T$ reweighting)",
     "TTbar_allmatched": r"$t\bar{t}$+jets matched",
     "TTbar_unmatched": r"$t\bar{t}$+jets unmatched",

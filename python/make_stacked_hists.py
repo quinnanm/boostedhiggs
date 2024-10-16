@@ -85,6 +85,12 @@ def make_events_dict(years, channels, samples_dir, samples, presel, THWW_path=No
                 if len(data) == 0:
                     continue
 
+                if sample_to_use == "ggF":
+                    if "GluGluHToWWToLNuQQ_M-125_TuneCP5_13TeV_powheg_jhugen751_pythia8" in sample:
+                        data = data[data["fj_genH_pt"] < 200]
+                    else:
+                        data = data[data["fj_genH_pt"] >= 200]
+
                 if "met_fj_dphi" in data.keys():
                     data["abs_met_fj_dphi"] = np.abs(data["met_fj_dphi"])
 
