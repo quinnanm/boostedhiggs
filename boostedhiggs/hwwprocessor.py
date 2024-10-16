@@ -36,9 +36,10 @@ from boostedhiggs.corrections import (
 )
 from boostedhiggs.utils import VScore, get_pid_mask, match_H, match_Top, match_V, sigs
 
+from .run_tagger_inference import runInferenceTriton
+
 # from boostedhiggs.utils import match_H_alljets
 
-from .run_tagger_inference import runInferenceTriton
 
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -585,40 +586,40 @@ class HwwProcessor(processor.ProcessorABC):
             pw_pass = self.pileup_cutoff(events, self._year, self._yearmod, cutoff=4)
             self.add_selection(name="PU_cutoff", sel=pw_pass)
 
-        for ch in self._channels:
+        # for ch in self._channels:
 
-            # trigger
-            if ch == "mu":
-                self.add_selection(
-                    name="Trigger",
-                    sel=((candidatelep.pt < 55) & trigger["mu_lowpt"]) | ((candidatelep.pt >= 55) & trigger["mu_highpt"]),
-                    channel=ch,
-                )
-            else:
-                self.add_selection(name="Trigger", sel=trigger[ch], channel=ch)
+        #     # trigger
+        #     if ch == "mu":
+        #         self.add_selection(
+        #             name="Trigger",
+        #             sel=((candidatelep.pt < 55) & trigger["mu_lowpt"]) | ((candidatelep.pt >= 55) & trigger["mu_highpt"]),
+        #             channel=ch,
+        #         )
+        #     else:
+        #         self.add_selection(name="Trigger", sel=trigger[ch], channel=ch)
 
-        self.add_selection(name="METFilters", sel=metfilters)
-        self.add_selection(name="OneLep", sel=(n_good_muons == 1) & (n_loose_electrons == 0), channel="mu")
-        self.add_selection(name="OneLep", sel=(n_loose_muons1 == 0) & (n_good_electrons == 1), channel="ele")
-        self.add_selection(name="NoTaus", sel=(n_loose_taus_mu == 0), channel="mu")
-        self.add_selection(name="NoTaus", sel=(n_loose_taus_ele == 0), channel="ele")
-        self.add_selection(name="AtLeastOneFatJet", sel=(NumFatjets >= 1))
+        # self.add_selection(name="METFilters", sel=metfilters)
+        # self.add_selection(name="OneLep", sel=(n_good_muons == 1) & (n_loose_electrons == 0), channel="mu")
+        # self.add_selection(name="OneLep", sel=(n_loose_muons1 == 0) & (n_good_electrons == 1), channel="ele")
+        # self.add_selection(name="NoTaus", sel=(n_loose_taus_mu == 0), channel="mu")
+        # self.add_selection(name="NoTaus", sel=(n_loose_taus_ele == 0), channel="ele")
+        # self.add_selection(name="AtLeastOneFatJet", sel=(NumFatjets >= 1))
 
-        fj_pt_sel = candidatefj.pt > 250
-        if self.isMC:  # make an OR of all the JECs
-            for k, v in self.jecs.items():
-                for var in ["up", "down"]:
-                    fj_pt_sel = fj_pt_sel | (candidatefj[v][var].pt > 250)
-        self.add_selection(name="CandidateJetpT", sel=(fj_pt_sel == 1))
+        # fj_pt_sel = candidatefj.pt > 250
+        # if self.isMC:  # make an OR of all the JECs
+        #     for k, v in self.jecs.items():
+        #         for var in ["up", "down"]:
+        #             fj_pt_sel = fj_pt_sel | (candidatefj[v][var].pt > 250)
+        # self.add_selection(name="CandidateJetpT", sel=(fj_pt_sel == 1))
 
-        self.add_selection(name="LepInJet", sel=(lep_fj_dr < 0.8))
-        self.add_selection(name="JetLepOverlap", sel=(lep_fj_dr > 0.03))
-        self.add_selection(name="dPhiJetMET", sel=(np.abs(met_fj_dphi) < 1.57))
+        # self.add_selection(name="LepInJet", sel=(lep_fj_dr < 0.8))
+        # self.add_selection(name="JetLepOverlap", sel=(lep_fj_dr > 0.03))
+        # self.add_selection(name="dPhiJetMET", sel=(np.abs(met_fj_dphi) < 1.57))
 
-        if self._fakevalidation:
-            self.add_selection(name="MET", sel=(met.pt < 20))
-        else:
-            self.add_selection(name="MET", sel=(met.pt > 20))
+        # if self._fakevalidation:
+        #     self.add_selection(name="MET", sel=(met.pt < 20))
+        # else:
+        #     self.add_selection(name="MET", sel=(met.pt > 20))
 
         # gen-level matching
         signal_mask = None
@@ -674,7 +675,7 @@ class HwwProcessor(processor.ProcessorABC):
                 | ((np.random.rand(len(events)) < 0.632) & self.isMC)
             ) & (hem_veto)
 
-            self.add_selection(name="HEMCleaning", sel=~hem_cleaning)
+            # self.add_selection(name="HEMCleaning", sel=~hem_cleaning)
 
         if self.isMC:
             for ch in self._channels:
