@@ -1,7 +1,7 @@
-# Datacard for <Channel (ggFpt500toInf) instance at 0x7fab13c7aeb0> generated on 2024-10-16 07:38:15.771897
+# Datacard for <Channel (ggFpt500toInf) instance at 0x7fc80cd55f40> generated on 2024-10-16 11:07:07.135605
 imax 1 # number of categories ('bins' but here we are using shape templates)
 jmax 12 # number of samples minus 1
-kmax 139 # number of nuisance parameters
+kmax 148 # number of nuisance parameters
 shapes * ggFpt500toInf testModel.root testModel:ggFpt500toInf_$PROCESS testModel:ggFpt500toInf_$PROCESS_$SYSTEMATIC
 bin ggFpt500toInf
 observation 172.000
@@ -32,9 +32,18 @@ CMS_HWW_boosted_btagSFlight_2018 lnN                                  1.0001    
 CMS_HWW_boosted_d1K_NLO lnN                                                -              -              -              -              -              -  0.9307/1.0841              -              -              -              -              -              -
 CMS_HWW_boosted_d2K_NLO lnN                                                -              -              -              -              -              -  0.9582/1.0567              -              -              -              -              -              -
 CMS_HWW_boosted_d3K_NLO lnN                                                -              -              -              -              -              -  0.9956/1.0192              -              -              -              -              -              -
-CMS_HWW_boosted_ele_identification lnN                                1.0092         1.0087         1.0086         1.0080         1.0113         1.0098         1.0111         1.0040         1.0128  0.9972/1.0120         1.0060         1.0085              -
-CMS_HWW_boosted_ele_reconstruction lnN                                1.0080         1.0072         1.0071         1.0065         1.0097         1.0093         1.0099         1.0038         1.0124         1.0072         1.0051         1.0080              -
-CMS_HWW_boosted_ele_trigger_stat_unc shape                            1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000              -
+CMS_HWW_boosted_ele_identification_2016 lnN                           1.0092         1.0087         1.0086         1.0080         1.0113         1.0098         1.0111         1.0040         1.0128  0.9972/1.0120         1.0060         1.0085              -
+CMS_HWW_boosted_ele_identification_2016APV lnN                        1.0092         1.0087         1.0086         1.0080         1.0113         1.0098         1.0111         1.0040         1.0128  0.9972/1.0120         1.0060         1.0085              -
+CMS_HWW_boosted_ele_identification_2017 lnN                           1.0092         1.0087         1.0086         1.0080         1.0113         1.0098         1.0111         1.0040         1.0128  0.9972/1.0120         1.0060         1.0085              -
+CMS_HWW_boosted_ele_identification_2018 lnN                           1.0092         1.0087         1.0086         1.0080         1.0113         1.0098         1.0111         1.0040         1.0128  0.9972/1.0120         1.0060         1.0085              -
+CMS_HWW_boosted_ele_reconstruction_2016 lnN                           1.0080         1.0072         1.0071         1.0065         1.0097         1.0093         1.0099         1.0038         1.0124         1.0072         1.0051         1.0080              -
+CMS_HWW_boosted_ele_reconstruction_2016APV lnN                        1.0080         1.0072         1.0071         1.0065         1.0097         1.0093         1.0099         1.0038         1.0124         1.0072         1.0051         1.0080              -
+CMS_HWW_boosted_ele_reconstruction_2017 lnN                           1.0080         1.0072         1.0071         1.0065         1.0097         1.0093         1.0099         1.0038         1.0124         1.0072         1.0051         1.0080              -
+CMS_HWW_boosted_ele_reconstruction_2018 lnN                           1.0080         1.0072         1.0071         1.0065         1.0097         1.0093         1.0099         1.0038         1.0124         1.0072         1.0051         1.0080              -
+CMS_HWW_boosted_ele_trigger_stat_unc_2016 shape                       1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000              -
+CMS_HWW_boosted_ele_trigger_stat_unc_2016APV shape                    1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000              -
+CMS_HWW_boosted_ele_trigger_stat_unc_2017 shape                       1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000              -
+CMS_HWW_boosted_ele_trigger_stat_unc_2018 shape                       1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000              -
 CMS_HWW_boosted_ele_trigger_syst_unc lnN                              1.0530         1.0530         1.0530         1.0530         1.0530         1.0530         1.0530         1.0530         1.0530         1.0530         1.0530         1.0530              -
 CMS_HWW_boosted_ggFpt500toInf_mcstat_bin0 shape                       1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000
 CMS_HWW_boosted_ggFpt500toInf_mcstat_bin1 shape                       1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000         1.0000
