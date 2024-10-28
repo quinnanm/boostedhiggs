@@ -159,11 +159,10 @@ color_by_sample = {
     # ttbar matched and unmatched
     "TTbar_allmatched": "tab:blue",
     "TTbar_unmatched": "lightskyblue",
-    "TTbar_LP": "lightskyblue",
-    "TTbar (2 gen quarks matched)": "tab:blue",
-    "TTbar (other)": "lightskyblue",
-    # new
-    "TTbar_pt": "tab:blue",
+    # ttbar LP
+    "TTbar_is_top_lq": "lightskyblue",
+    "TTbar_is_top_lqq": "darkblue",
+    "TTbar_others": "tab:blue",
 }
 
 plot_labels = {
@@ -196,12 +195,16 @@ plot_labels = {
     "TTbar": r"$t\bar{t}$+jets",
     # "TTbar": r"$t\bar{t}$+jets (after $p_T$ reweighting)",
     # "TTbar": r"$t\bar{t}$+jets (before $p_T$ reweighting)",
+    # "TTbar": r"$t\bar{t}$+jets (after Lund Plane reweighting)",
     "TTbar_allmatched": r"$t\bar{t}$+jets matched",
     "TTbar_unmatched": r"$t\bar{t}$+jets unmatched",
-    "TTbar_LP": "TTbar_LP",
-    "TTbar (2 gen quarks matched)": r"$t\bar{t}$+jets (2 gen quarks matched)",
-    # "TTbar (other)": r"$t\bar{t}$+jets (other)",
-    # "TTbar_pt": r"$t\bar{t}$+jets",
+    "TTbar_is_top_l": r"$t^{\ell}$",
+    "TTbar_is_top_lq": r"$t^{{\ell}q}$",
+    "TTbar_is_top_lqq": r"$t^{{\ell}qq}$",
+    "TTbar_is_top_lb": r"$t^{{\ell}b}$",
+    "TTbar_is_top_lbq": r"$t^{{\ell}bq}$",
+    "TTbar_is_top_lbqq": r"$t^{{\ell}bqq}$",
+    "TTbar_others": r"$t\bar{t}$+jets (other)",
 }
 
 label_by_ch = {"mu": "Muon", "ele": "Electron"}
@@ -244,8 +247,8 @@ def get_axis(var, massbin=5):
         ),
         "nj": hist2.axis.Regular(40, 0, 10, name="var", label="number of jets outside candidate jet", overflow=True),
         "inclusive_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
-        "THWW": hist2.axis.Regular(25, 0, 1, name="var", label=r"$T_{HWW}$", overflow=True),
-        # "THWW": hist2.axis.Regular(30, 0.75, 1, name="var", label=r"$T_{HWW}$", overflow=True),
+        # "THWW": hist2.axis.Regular(25, 0, 1, name="var", label=r"$T_{HWW}$", overflow=True),
+        "THWW": hist2.axis.Regular(10, 0.85, 1, name="var", label=r"$T_{HWW}$", overflow=True),
         "fj_ParT_inclusive_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"ParT-Finetuned score", overflow=True),
         "fj_ParT_all_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
         # AN
