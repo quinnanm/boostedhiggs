@@ -1120,7 +1120,10 @@ def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
         (3) pf_cands
     """
 
-    candidatefj = candidatefj - candidatelep_p4
+    try:
+        candidatefj = candidatefj - candidatelep_p4
+    except ValueError:
+        candidatefj = candidatefj
 
     lepVars, quarkVars, bquarksVars = getGenLepGenQuarks(dataset, events.GenPart)
 
