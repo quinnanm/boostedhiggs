@@ -1153,6 +1153,7 @@ def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
         for key, var in skim_vars.items()
     }
     gen_parts_eta_phi = np.array(np.dstack((Gen2qVars["Gen2qEta"], Gen2qVars["Gen2qPhi"])))
+    gen_parts_pt_mass = np.array(np.dstack((Gen2qVars["Gen2qPt"], Gen2qVars["Gen2qMass"])))
 
     if "TT" in dataset:
 
@@ -1238,4 +1239,4 @@ def getLPweights(dataset, events, candidatefj, fj_idx_lep, candidatelep_p4):
         )
     )
 
-    return pf_cands, gen_parts_eta_phi, ak8_jets, bgen_parts_eta_phi, genlep
+    return pf_cands, gen_parts_eta_phi, gen_parts_pt_mass, ak8_jets, bgen_parts_eta_phi, genlep
