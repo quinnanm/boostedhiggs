@@ -1,4 +1,14 @@
 bkgs = ["TTbar", "WJetsLNu", "SingleTop", "DYJets", "WZQQ", "Diboson", "EWKvjets"]
+ttbar_list = [
+    "TTbar_is_top_lq",
+    "TTbar_is_top_lqq",
+    "TTbar_others",
+    "TTbar_LP",
+    "TTbar_LP_is_top_lq",
+    "TTbar_LP_is_top_lqq",
+    "TTbar_LP_others",
+]
+bkgs += ttbar_list
 sigs = ["ggFpt200to300", "ggFpt300to450", "ggFpt450toInf", "ggF", "VBF", "WH", "ZH", "ttH"]
 
 samples = sigs + bkgs + ["Fake"]
@@ -25,12 +35,12 @@ def get_systematic_dict(years):
         # ISR/FSR
         "weight_PSFSR": (
             years,
-            sigs + ["TTbar", "WJetsLNu", "SingleTop"],
+            sigs + ["TTbar", "WJetsLNu", "SingleTop"] + ttbar_list,
             {"ele": "weight_ele_PSFSR", "mu": "weight_mu_PSFSR"},
         ),
         "weight_PSISR": (
             years,
-            sigs + ["TTbar", "WJetsLNu", "SingleTop"],
+            sigs + ["TTbar", "WJetsLNu", "SingleTop"] + ttbar_list,
             {"ele": "weight_ele_PSISR", "mu": "weight_mu_PSISR"},
         ),
         # systematics applied only on WJets & DYJets
@@ -113,7 +123,7 @@ def get_systematic_dict(years):
         ),
         "weight_TopPtReweight": (
             years,
-            ["TTbar"],
+            ["TTbar"] + ttbar_list,
             {"mu": "weight_mu_TopPtReweight", "ele": "weight_ele_TopPtReweight"},
         ),
     }
@@ -155,6 +165,16 @@ def get_systematic_dict(years):
             {"ele": "weight_btagSFbcCorrelated", "mu": "weight_btagSFbcCorrelated"},
         ),
     }
+
+    # LP syst. have a different treatment because they are not stored in the nominal
+    LP_systs_correlated = {}
+    sys_keys = ["sys", "prongs", "unclust", "distortion"]
+    for sys_key in sys_keys:
+        LP_systs_correlated[f"LP_weight_{sys_key}"] = (
+            years,
+            ["TTbar_LP", "TTbar_LP_is_top_lq", "TTbar_LP_is_top_lqq"],
+            {"ele": f"LP_weight_{sys_key}", "mu": f"LP_weight_{sys_key}"},
+        )
 
     BTAG_systs_uncorrelated = {}
     for year in years:
@@ -275,6 +295,7 @@ def get_systematic_dict(years):
         "common": {**COMMON_systs_correlated, **COMMON_systs_uncorrelated},
         "btag": {**BTAG_systs_correlated, **BTAG_systs_uncorrelated},
         "JEC": {**JEC_systs_correlated, **JEC_systs_uncorrelated},
+        "LP": {**LP_systs_correlated},
     }
 
     return SYST_DICT

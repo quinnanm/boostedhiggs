@@ -161,8 +161,12 @@ color_by_sample = {
     "TTbar_unmatched": "lightskyblue",
     # ttbar LP
     "TTbar_is_top_lq": "lightskyblue",
-    "TTbar_is_top_lqq": "darkblue",
-    "TTbar_others": "tab:blue",
+    "TTbar_is_top_lqq": "tab:blue",
+    "TTbar_others": "darkblue",
+    "TTbar_LP_is_top_lq": "lightskyblue",
+    "TTbar_LP_is_top_lqq": "tab:blue",
+    "TTbar_LP_others": "darkblue",
+    "TTbar_LP": "tab:blue",
 }
 
 plot_labels = {
@@ -192,12 +196,9 @@ plot_labels = {
     "WJetsLNu_unmatched": r"W$(\ell\nu)$+jets unmatched",
     "WJetsLNu_matched": r"W$(\ell\nu)$+jets matched",
     # ttbar matched and unmatched
-    "TTbar": r"$t\bar{t}$+jets",
-    # "TTbar": r"$t\bar{t}$+jets (after $p_T$ reweighting)",
-    # "TTbar": r"$t\bar{t}$+jets (before $p_T$ reweighting)",
-    # "TTbar": r"$t\bar{t}$+jets (after Lund Plane reweighting)",
     "TTbar_allmatched": r"$t\bar{t}$+jets matched",
     "TTbar_unmatched": r"$t\bar{t}$+jets unmatched",
+    "TTbar": r"$t\bar{t}$+jets",
     "TTbar_is_top_l": r"$t^{\ell}$",
     "TTbar_is_top_lq": r"$t^{{\ell}q}$",
     "TTbar_is_top_lqq": r"$t^{{\ell}qq}$",
@@ -205,6 +206,14 @@ plot_labels = {
     "TTbar_is_top_lbq": r"$t^{{\ell}bq}$",
     "TTbar_is_top_lbqq": r"$t^{{\ell}bqq}$",
     "TTbar_others": r"$t\bar{t}$+jets (other)",
+    "TTbar_LP": r"$t\bar{t}$+jets (after LP reweighting)",
+    "TTbar_LP_is_top_l": r"$t^{\ell}$ (after LP reweighting)",
+    "TTbar_LP_is_top_lq": r"$t^{{\ell}q}$ (after LP reweighting)",
+    "TTbar_LP_is_top_lqq": r"$t^{{\ell}qq}$ (after LP reweighting)",
+    "TTbar_LP_is_top_lb": r"$t^{{\ell}b}$ (after LP reweighting)",
+    "TTbar_LP_is_top_lbq": r"$t^{{\ell}bq}$ (after LP reweighting)",
+    "TTbar_LP_is_top_lbqq": r"$t^{{\ell}bqq}$ (after LP reweighting)",
+    "TTbar_LP_others": r"$t\bar{t}$+jets (other)",
 }
 
 label_by_ch = {"mu": "Muon", "ele": "Electron"}
@@ -248,7 +257,7 @@ def get_axis(var, massbin=5):
         "nj": hist2.axis.Regular(40, 0, 10, name="var", label="number of jets outside candidate jet", overflow=True),
         "inclusive_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
         # "THWW": hist2.axis.Regular(25, 0, 1, name="var", label=r"$T_{HWW}$", overflow=True),
-        "THWW": hist2.axis.Regular(10, 0.85, 1, name="var", label=r"$T_{HWW}$", overflow=True),
+        "THWW": hist2.axis.Regular(8, 0.9, 1, name="var", label=r"$T_{HWW}$", overflow=True),
         "fj_ParT_inclusive_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"ParT-Finetuned score", overflow=True),
         "fj_ParT_all_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
         # AN
@@ -576,6 +585,20 @@ def plot_hists(
                 rax.axhline(1, ls="--", color="k")
                 rax.set_ylim(0.2, 1.8)
 
+                # chi-square test
+                obs_ratio = data_val / tot_val  # Data/MC
+                exp_ratio = 1  # we want to test against Data/MC=1
+
+                msk = obs_ratio > exp_ratio  # if obs>exp then use sigma=unc_up else sigma=unc_down
+                sigma = np.where(msk, np.sqrt(unc_up), np.sqrt(unc_down))
+
+                chi_square = ((obs_ratio - exp_ratio) ** 2 / sigma**2).sum()
+
+                num_dof = len(obs_ratio) - 1  # num bins - 1
+                print(
+                    f"#bins: {len(obs_ratio)}, chi_square: {chi_square:.3f}, reduced_chi_square: {(chi_square/num_dof):.3f}"
+                )
+
         # plot the background
         if len(bkg) > 0:
 
@@ -754,13 +777,15 @@ def plot_hists(
                 title=text_,
                 ncol=legend_ncol,
                 fontsize=14,
+                loc="upper left",
             )
 
         _, a = ax.get_ylim()
         # if logy or ("isolation" in var) or ("lsf3" in var):
         if logy or ("isolation" in var) or ("lsf3" in var) or ("THWW" in var):
             ax.set_yscale("log")
-            ax.set_ylim(1e-1, a * 15.7)
+            # ax.set_ylim(1e-1, a * 15.7)
+            ax.set_ylim(1e-1, a * 105.7)
         else:
             ax.set_ylim(0, a * 1.7)
 

@@ -27,7 +27,7 @@ def initialize_syst_unc_hists(SYST_DICT, plot_config):
         # instantiate the up/down hist
         SYST_hists[var_to_plot]["up"], SYST_hists[var_to_plot]["down"] = {}, {}
 
-        for syst in {**SYST_DICT["common"], **SYST_DICT["btag"]}:
+        for syst in {**SYST_DICT["common"], **SYST_DICT["btag"], **SYST_DICT["LP"]}:
 
             # if "pileup" in syst:
             #     continue
@@ -73,9 +73,6 @@ def fill_syst_unc_hists(SYST_DICT, SYST_hists, year, ch, sample, var_to_plot, df
     # get the up/down
     for syst, (yrs, smpls, var) in SYST_DICT["common"].items():
 
-        # if "pileup" in syst:
-        #     continue
-
         if (sample in smpls) and (year in yrs) and (ch in var):
             up = df["xsecweight"] * df[var[ch] + "Up"]
             down = df["xsecweight"] * df[var[ch] + "Down"]
@@ -103,6 +100,29 @@ def fill_syst_unc_hists(SYST_DICT, SYST_hists, year, ch, sample, var_to_plot, df
         if (sample in smpls) and (year in yrs) and (ch in var):
             up = df["nominal"] * df[var[ch] + "Up"]
             down = df["nominal"] * df[var[ch] + "Down"]
+
+            SYST_hists[var_to_plot]["up"][syst].fill(
+                var=df[var_to_plot],
+                weight=up,
+            )
+            SYST_hists[var_to_plot]["down"][syst].fill(
+                var=df[var_to_plot],
+                weight=down,
+            )
+        else:
+            SYST_hists[var_to_plot]["up"][syst].fill(
+                var=df[var_to_plot],
+                weight=df["nominal"],
+            )
+            SYST_hists[var_to_plot]["down"][syst].fill(
+                var=df[var_to_plot],
+                weight=df["nominal"],
+            )
+
+    for syst, (yrs, smpls, var) in SYST_DICT["LP"].items():
+        if (sample in smpls) and (year in yrs) and (ch in var):
+            up = df[var[ch] + "_up"]
+            down = df[var[ch] + "_down"]
 
             SYST_hists[var_to_plot]["up"][syst].fill(
                 var=df[var_to_plot],

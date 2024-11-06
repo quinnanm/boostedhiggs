@@ -44,6 +44,11 @@ def fill_systematics(
     with open("trg_eff_SF.pkl", "rb") as f:
         TRIGGER_SF = pkl.load(f)
 
+    THWW_SF = {
+        "ggF": 0.948,
+        "VBF": 0.984,
+    }
+
     SYST_DICT = get_systematic_dict(years)
 
     for region, region_sel in regions_sel.items():  # e.g. pass, fail, top control region, etc.
@@ -80,6 +85,13 @@ def fill_systematics(
                         msk_eta = (abs(df["lep_eta"]) >= low_eta) & (abs(df["lep_eta"]) < high_eta)
 
                         nominal[msk_pt & msk_eta] *= TRIGGER_SF["UL" + year[2:].replace("APV", "")]["nominal"][i, j]
+
+            # apply THWW SF
+            if ("ggF" in sample_label) or (sample_label in ["ggF", "VBF", "WH", "ZH"]):
+                if "ggF" in region:
+                    nominal *= THWW_SF["ggF"]
+                else:
+                    nominal *= THWW_SF["VBF"]
 
         hists.fill(
             Sample=sample_label,
