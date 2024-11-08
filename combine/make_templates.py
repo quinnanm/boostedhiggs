@@ -47,6 +47,8 @@ def fill_systematics(
     THWW_SF = {
         "ggF": 0.948,
         "VBF": 0.984,
+        # "ggF": 0.967,
+        # "VBF": 0.967,
     }
 
     SYST_DICT = get_systematic_dict(years)
@@ -67,8 +69,8 @@ def fill_systematics(
             if "bjets" in region_sel:  # if there's a bjet selection, add btag SF to the nominal weight
                 nominal *= df["weight_btag"]
 
+            # apply trigger SF
             if ch == "ele":
-                # add trigger SF
                 ptbinning = [2000, 200, 120, 30]
                 etabinning = [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5]
 
@@ -134,6 +136,29 @@ def fill_systematics(
         hists.fill(
             Sample=sample_label,
             Systematic="trigger_ele_SF_down",
+            Region=region,
+            mass_observable=df["rec_higgs_m"],
+            weight=down,
+        )
+
+        # ------------------- EWK unc. -------------------
+        up, down = nominal.copy(), nominal.copy()
+        if sample_label in ["VBF", "WH", "ZH", "ttH"]:
+            msk = df["fj_genH_pt"] > 400
+
+            up = np.where(msk, nominal / df["EW_weight"], nominal)
+            down = np.where(msk, nominal * df["EW_weight"], nominal)
+
+        hists.fill(
+            Sample=sample_label,
+            Systematic="EW_up",
+            Region=region,
+            mass_observable=df["rec_higgs_m"],
+            weight=up,
+        )
+        hists.fill(
+            Sample=sample_label,
+            Systematic="EW_down",
             Region=region,
             mass_observable=df["rec_higgs_m"],
             weight=down,
@@ -373,11 +398,13 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
             "tagger>0.75": "THWW>0.75",
             # "jetvetomap": "jetvetomap==1",
             "lepmiso": "(lep_pt<55) | ( (lep_pt>=55) & (lep_misolation<0.8))",  # needed for the fakes
+            # "vveto": "VH_fj_VScore<0.8",
         },
         "ele": {
             "fj_mass": "fj_mass>40",
             "tagger>0.75": "THWW>0.75",
             # "jetvetomap": "jetvetomap==1",
+            # "vveto": "VH_fj_VScore<0.8",
         },
     }
 
