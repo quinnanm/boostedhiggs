@@ -286,15 +286,84 @@ def main(args):
     with open(f"{args.outdir}/hists_templates_{save_as}.pkl", "wb") as fp:
         pkl.dump(hists, fp)
 
+    if args.plot_unc:
+        # plotting
+        import matplotlib.pyplot as plt
+        import mplhep as hep
+
+        plt.style.use(hep.style.CMS)
+
+        # get lumi
+        with open("../fileset/luminosity.json") as f:
+            luminosity = json.load(f)
+
+        def get_lumi(years, channels):
+            lum_ = 0
+            for year in years:
+                lum = 0
+                for ch in channels:
+                    lum += luminosity[ch][year] / 1000.0
+
+                lum_ += lum / len(channels)
+            return round(lum_)
+
+        get_lumi(years, channels)
+
+        color_dict = {
+            "Nominal": "grey",
+            "Up": "blue",
+            "Down": "red",
+        }
+
+        label_dict = {
+            "nominal": "Nominal",
+            "up": "Up",
+            "down": "Down",
+        }
+
+        for region in regions_sel:
+
+            for sample in samples:
+
+                fig, ax = plt.subplots(figsize=(7, 7))
+
+                sum_envelope = {}
+                for variation in ["nominal", "up", "down"]:
+
+                    syst = variation if variation == "nominal" else f"weight_qcd_scale_{variation}"
+
+                    hep.histplot(
+                        hists[{"Sample": sample, "Region": region, "Systematic": syst}],
+                        ax=ax,
+                        linewidth=1,
+                        histtype="step",
+                        label=variation,
+                        flow="none",
+                        color=color_dict[label_dict[variation]],
+                    )
+
+                    sum_envelope[variation] = hists[{"Sample": sample, "Region": region, "Systematic": syst}].values().sum()
+
+                ax.legend(title=region + " (QCDScaleacc unc)")
+
+                ax.set_ylabel(f"{sample} events")
+
+                hep.cms.lumitext(str(get_lumi(years, channels)) + r" fb$^{-1}$ (13 TeV)", ax=ax, fontsize=20)
+                hep.cms.text("Work in Progress", ax=ax, fontsize=15)
+
+                plt.tight_layout()
+                plt.savefig(f"{args.outdir}/qcd_scale_{region}_{sample}.pdf")
+
 
 if __name__ == "__main__":
     # e.g.
-    # python qcd_scale_templates.py --years 2017 --channels mu,ele --outdir templates/qcd_scale
+    # python qcd_scale_templates.py --years 2017 --channels mu,ele --outdir templates/qcd_scale --plot-unc
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--years", dest="years", default="2017", help="years separated by commas")
     parser.add_argument("--channels", dest="channels", default="mu", help="channels separated by commas (e.g. mu,ele)")
     parser.add_argument("--outdir", dest="outdir", default="templates/test", type=str, help="path of the output")
+    parser.add_argument("--plot-unc", action="store_true")
 
     args = parser.parse_args()
 
