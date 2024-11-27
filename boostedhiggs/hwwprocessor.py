@@ -437,6 +437,7 @@ class HwwProcessor(processor.ProcessorABC):
         )
 
         dr_genlep_reco_lep = GenLep.delta_r(candidatelep_p4)
+        print("dr_genlep_reco_lep", dr_genlep_reco_lep)
 
         ######################
         # Store variables
