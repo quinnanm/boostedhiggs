@@ -421,8 +421,8 @@ class HwwProcessor(processor.ProcessorABC):
         msk_leptonic_taus = ~ak.any(leptonic_taus, axis=1)
 
         # gen lepton
-        genlep = events.GenParT[
-            get_pid_mask(events.GenParT, [ELE_PDGID, MU_PDGID], byall=False) * events.GenParT.hasFlags("isPrompt")
+        genlep = events.GenPart[
+            get_pid_mask(events.GenPart, [ELE_PDGID, MU_PDGID], byall=False) * events.GenPart.hasFlags("isPrompt")
         ]
 
         GenLep = ak.zip(
