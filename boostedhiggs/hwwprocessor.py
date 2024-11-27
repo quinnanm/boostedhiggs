@@ -422,7 +422,8 @@ class HwwProcessor(processor.ProcessorABC):
 
         # gen lepton
         genlep = events.GenPart[
-            get_pid_mask(events.GenPart, [ELE_PDGID, MU_PDGID], byall=False) * events.GenPart.hasFlags("isPrompt")
+            get_pid_mask(events.GenPart, [ELE_PDGID, MU_PDGID], byall=False)
+            * events.GenPart.hasFlags(["fromHardProcess", "isLastCopy", "isPrompt"])
         ]
 
         GenLep = ak.zip(
