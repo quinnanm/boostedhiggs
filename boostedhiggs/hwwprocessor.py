@@ -438,7 +438,7 @@ class HwwProcessor(processor.ProcessorABC):
 
         dr_genlep_reco_lep = GenLep.delta_r(candidatelep_p4)
 
-        print("dr_genlep_reco_lep", ak.drop_none(dr_genlep_reco_lep))
+        print("dr_genlep_reco_lep", dr_genlep_reco_lep[~ak.is_none(dr_genlep_reco_lep)])
 
         ######################
         # Store variables
