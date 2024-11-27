@@ -420,6 +420,24 @@ class HwwProcessor(processor.ProcessorABC):
         leptonic_taus = (loose_taus["decayMode"] == ELE_PDGID) | (loose_taus["decayMode"] == MU_PDGID)
         msk_leptonic_taus = ~ak.any(leptonic_taus, axis=1)
 
+        # gen lepton
+        genlep = events.GenParT[
+            get_pid_mask(events.GenParT, [ELE_PDGID, MU_PDGID], byall=False) * events.GenParT.hasFlags("isPrompt")
+        ]
+
+        GenLep = ak.zip(
+            {
+                "pt": genlep.pt,
+                "eta": genlep.eta,
+                "phi": genlep.phi,
+                "mass": genlep.mass,
+            },
+            with_name="PtEtaPhiMCandidate",
+            behavior=candidate.behavior,
+        )
+
+        dr_genlep_reco_lep = GenLep.delta_r(candidatelep_p4)
+
         ######################
         # Store variables
         ######################
