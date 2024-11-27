@@ -439,7 +439,10 @@ class HwwProcessor(processor.ProcessorABC):
 
         dr_genlep_reco_lep = GenLep.delta_r(candidatelep_p4)
 
+        genlep_idx = ak.argmin(GenLep.delta_r(candidatelep_p4), axis=1, keepdims=True)
+
         print("dr_genlep_reco_lep", dr_genlep_reco_lep[~ak.is_none(dr_genlep_reco_lep)])
+        print("genlep_idx", dr_genlep_reco_lep[genlep_idx])
 
         ######################
         # Store variables
