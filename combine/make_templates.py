@@ -47,8 +47,6 @@ def fill_systematics(
     THWW_SF = {
         "ggF": 0.948,
         "VBF": 0.984,
-        # "ggF": 0.967,
-        # "VBF": 0.967,
     }
 
     SYST_DICT = get_systematic_dict(years)
@@ -89,7 +87,7 @@ def fill_systematics(
                         nominal[msk_pt & msk_eta] *= TRIGGER_SF["UL" + year[2:].replace("APV", "")]["nominal"][i, j]
 
             # apply THWW SF
-            if ("ggF" in sample_label) or (sample_label in ["ggF", "VBF", "WH", "ZH"]):
+            if ("ggF" in sample_label) or (sample_label in ["ggF", "VBF", "WH", "ZH", "ttH"]):
                 if "ggF" in region:
                     nominal *= THWW_SF["ggF"]
                 else:
@@ -398,13 +396,13 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
             "tagger>0.75": "THWW>0.75",
             # "jetvetomap": "jetvetomap==1",
             "lepmiso": "(lep_pt<55) | ( (lep_pt>=55) & (lep_misolation<0.8))",  # needed for the fakes
-            # "vveto": "VH_fj_VScore<0.8",
+            # "vveto": "VH_fj_VScore<0.9",
         },
         "ele": {
             "fj_mass": "fj_mass>40",
             "tagger>0.75": "THWW>0.75",
             # "jetvetomap": "jetvetomap==1",
-            # "vveto": "VH_fj_VScore<0.8",
+            # "vveto": "VH_fj_VScore<0.9",
         },
     }
 
