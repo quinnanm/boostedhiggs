@@ -442,10 +442,6 @@ class HwwProcessor(processor.ProcessorABC):
         genlep_idx = ak.argmin(dR_genlep_recolep, axis=1, keepdims=True)
         dR_genlep_recolep = ak.firsts(dR_genlep_recolep[genlep_idx])
 
-        # get stxs var
-        stxs = events.HTXS.stage1_2_cat_pTjet30GeV % 100
-        mode = events.HTXS.stage1_2_cat_pTjet30GeV / 100
-
         ######################
         # Store variables
         ######################
@@ -506,8 +502,6 @@ class HwwProcessor(processor.ProcessorABC):
             "loose_lep1_pt": ak.firsts(muons[loose_muons1][ak.argsort(muons[loose_muons1].pt, ascending=False)]).pt,
             "msk_leptonic_taus": msk_leptonic_taus,
             "dR_genlep_recolep": dR_genlep_recolep,
-            "stxs": stxs,
-            "stxs_mode": mode,
         }
 
         # store the genweight as a column
@@ -722,6 +716,17 @@ class HwwProcessor(processor.ProcessorABC):
                 variables["weight_ewkcorr"] = ewk_corr
                 variables["weight_qcdcorr"] = qcd_corr
                 variables["weight_altqcdcorr"] = alt_qcd_corr
+
+                if (
+                    ("GluGluHToWWToLNuQQ_M-125_TuneCP5_13TeV_powheg_jhugen751_pythia8" in dataset)
+                    or ("ttHToNonbb_M125" in dataset)
+                    or ("HZJ_HToWW_M-125" in dataset)
+                    or ("HWplusJ_HToWW_M-125" in dataset)
+                    or ("HWminusJ_HToWW_M-125" in dataset)
+                ):
+                    # get stxs var
+                    variables["stxs"] = events.HTXS.stage1_2_cat_pTjet30GeV % 100
+                    variables["stxs_mode"] = events.HTXS.stage1_2_cat_pTjet30GeV / 100
 
                 # add top_reweighting
                 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopPtReweighting
