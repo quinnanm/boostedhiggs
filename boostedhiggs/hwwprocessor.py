@@ -442,6 +442,10 @@ class HwwProcessor(processor.ProcessorABC):
         genlep_idx = ak.argmin(dR_genlep_recolep, axis=1, keepdims=True)
         dR_genlep_recolep = ak.firsts(dR_genlep_recolep[genlep_idx])
 
+        # get stxs var
+        stxs = events.HTXS.stage1_2_cat_pTjet30GeV % 100
+        mode = events.HTXS.stage1_2_cat_pTjet30GeV / 100
+
         ######################
         # Store variables
         ######################
@@ -502,6 +506,8 @@ class HwwProcessor(processor.ProcessorABC):
             "loose_lep1_pt": ak.firsts(muons[loose_muons1][ak.argsort(muons[loose_muons1].pt, ascending=False)]).pt,
             "msk_leptonic_taus": msk_leptonic_taus,
             "dR_genlep_recolep": dR_genlep_recolep,
+            "stxs": stxs,
+            "stxs_mode": mode,
         }
 
         # store the genweight as a column
