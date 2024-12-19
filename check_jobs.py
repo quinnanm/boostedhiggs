@@ -13,12 +13,13 @@ from condor.file_utils import loadFiles
 
 
 def main(args):
-    # username = os.environ["USER"]
 
-    # condordir = "/uscms/home/cmantill/nobackup/hww/boostedhiggs/condor/"
-    condordir = "condor/"
-    homedir = f"/store/user/{args.username}/boostedhiggs/"
-    outdir = "/eos/uscms/" + homedir + args.tag + "_" + args.year + "/"
+    if args.username == "cmantill":
+        condordir = "/uscms/home/cmantill/nobackup/hww/boostedhiggs/condor/"
+        outdir = "/eos/uscms/store/user/cmantill/boostedhiggs/" + args.tag + "_" + args.year + "/"
+    else:
+        condordir = "/uscms/home/fmokhtar/nobackup/boostedhiggs/condor/"
+        outdir = "/eos/uscms/store/user/fmokhtar/boostedhiggs/" + args.tag + "_" + args.year + "/"
 
     # check only specific samples
     slist = args.slist.split(",") if args.slist is not None else None
@@ -113,7 +114,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--username",
         dest="username",
-        default="cmantill",
+        default="fmokhtar",
         help="user who submitted the jobs",
         type=str,
     )
