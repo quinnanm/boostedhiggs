@@ -420,28 +420,6 @@ class HwwProcessor(processor.ProcessorABC):
         leptonic_taus = (loose_taus["decayMode"] == ELE_PDGID) | (loose_taus["decayMode"] == MU_PDGID)
         msk_leptonic_taus = ~ak.any(leptonic_taus, axis=1)
 
-        # get the dR(genlep, recolep) to check the matching
-        genlep = events.GenPart[
-            get_pid_mask(events.GenPart, [ELE_PDGID, MU_PDGID], byall=False)
-            * events.GenPart.hasFlags(["fromHardProcess", "isLastCopy", "isPrompt"])
-        ]
-
-        GenLep = ak.zip(
-            {
-                "pt": genlep.pt,
-                "eta": genlep.eta,
-                "phi": genlep.phi,
-                "mass": genlep.mass,
-            },
-            with_name="PtEtaPhiMCandidate",
-            behavior=candidate.behavior,
-        )
-
-        # get the dR between the recolep and the genlep that is closest to the reco lep
-        dR_genlep_recolep = GenLep.delta_r(candidatelep_p4)
-        genlep_idx = ak.argmin(dR_genlep_recolep, axis=1, keepdims=True)
-        dR_genlep_recolep = ak.firsts(dR_genlep_recolep[genlep_idx])
-
         ######################
         # Store variables
         ######################
@@ -501,8 +479,32 @@ class HwwProcessor(processor.ProcessorABC):
             ).miniPFRelIso_all,
             "loose_lep1_pt": ak.firsts(muons[loose_muons1][ak.argsort(muons[loose_muons1].pt, ascending=False)]).pt,
             "msk_leptonic_taus": msk_leptonic_taus,
-            "dR_genlep_recolep": dR_genlep_recolep,
         }
+
+        # get the dR(genlep, recolep) to check the matching
+        if self.isMC:
+            genlep = events.GenPart[
+                get_pid_mask(events.GenPart, [ELE_PDGID, MU_PDGID], byall=False)
+                * events.GenPart.hasFlags(["fromHardProcess", "isLastCopy", "isPrompt"])
+            ]
+
+            GenLep = ak.zip(
+                {
+                    "pt": genlep.pt,
+                    "eta": genlep.eta,
+                    "phi": genlep.phi,
+                    "mass": genlep.mass,
+                },
+                with_name="PtEtaPhiMCandidate",
+                behavior=candidate.behavior,
+            )
+
+            # get the dR between the recolep and the genlep that is closest to the reco lep
+            dR_genlep_recolep = GenLep.delta_r(candidatelep_p4)
+            genlep_idx = ak.argmin(dR_genlep_recolep, axis=1, keepdims=True)
+            dR_genlep_recolep = ak.firsts(dR_genlep_recolep[genlep_idx])
+
+            variables["dR_genlep_recolep"] = dR_genlep_recolep
 
         # store the genweight as a column
         for ch in self._channels:
