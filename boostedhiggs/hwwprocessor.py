@@ -719,17 +719,6 @@ class HwwProcessor(processor.ProcessorABC):
                 variables["weight_qcdcorr"] = qcd_corr
                 variables["weight_altqcdcorr"] = alt_qcd_corr
 
-                if (
-                    ("GluGluHToWWToLNuQQ_M-125_TuneCP5_13TeV_powheg_jhugen751_pythia8" in dataset)
-                    or ("ttHToNonbb_M125" in dataset)
-                    or ("HZJ_HToWW_M-125" in dataset)
-                    or ("HWplusJ_HToWW_M-125" in dataset)
-                    or ("HWminusJ_HToWW_M-125" in dataset)
-                ):
-                    # get stxs var
-                    variables["stxs"] = events.HTXS.stage1_2_cat_pTjet30GeV % 100
-                    variables["stxs_mode"] = events.HTXS.stage1_2_cat_pTjet30GeV / 100
-
                 # add top_reweighting
                 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopPtReweighting
                 if "TT" in dataset:
