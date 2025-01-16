@@ -394,15 +394,11 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
         "mu": {
             "fj_mass": "fj_mass>40",
             "tagger>0.75": "THWW>0.75",
-            # "jetvetomap": "jetvetomap==1",
             "lepmiso": "(lep_pt<55) | ( (lep_pt>=55) & (lep_misolation<0.8))",  # needed for the fakes
-            # "vveto": "VH_fj_VScore<0.9",
         },
         "ele": {
             "fj_mass": "fj_mass>40",
             "tagger>0.75": "THWW>0.75",
-            # "jetvetomap": "jetvetomap==1",
-            # "vveto": "VH_fj_VScore<0.9",
         },
     }
 
@@ -413,7 +409,8 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
         hist2.axis.StrCategory([], name="Systematic", growth=True),
         hist2.axis.StrCategory([], name="Region", growth=True),
         hist2.axis.Variable(
-            list(range(55, 255, mass_binning)),
+            # list(range(55, 255, mass_binning)),
+            list(range(75, 255, mass_binning)),
             name="mass_observable",
             label=r"Higgs reconstructed mass [GeV]",
             overflow=True,
@@ -429,6 +426,9 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                 luminosity = json.load(f)[ch][year]
 
             for sample in os.listdir(samples_dir[year]):
+
+                if "Rivet" in sample:
+                    continue
 
                 sample_to_use = get_common_sample_name(sample)
 
@@ -471,6 +471,10 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                 for selection in presel[ch]:
                     logging.info(f"Applying {selection} selection on {len(data)} events")
                     data = data.query(presel[ch][selection])
+
+                # apply genlep recolep matching
+                if not is_data:
+                    data = data[data["dR_genlep_recolep"] < 0.005]
 
                 # get the xsecweight
                 xsecweight, sumgenweights, sumpdfweights, sumscaleweights = get_xsecweight(

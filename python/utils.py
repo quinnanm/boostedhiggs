@@ -18,10 +18,22 @@ plt.style.use(hep.style.CMS)
 warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 
+# df = 1
+
+# mapping_dict = {
+#     "mjj350-700": (df["VBF"]["lep"]["STXS_finecat"] % 100 == 17) | (df["VBF"]["lep"]["STXS_finecat"] % 100 == 18),
+#     "mjj700-1000": (df["VBF"]["lep"]["STXS_finecat"] % 100 == 19) | (df["VBF"]["lep"]["STXS_finecat"] % 100 == 20),
+#     "mjj1000-1500": (df["VBF"]["lep"]["STXS_finecat"] % 100 == 21) | (df["VBF"]["lep"]["STXS_finecat"] % 100 == 22),
+#     "mjj1500plus": (df["VBF"]["lep"]["STXS_finecat"] % 100 == 23) | (df["VBF"]["lep"]["STXS_finecat"] % 100 == 24),
+# }
+
+
 combine_samples_by_name = {
     "GluGluHToWW_Pt-200ToInf_M-125": "ggF",
+    "GluGluHToWW_Pt-200ToInf_M-125_Rivet": "ggF",
     "GluGluHToWWToLNuQQ_M-125_TuneCP5_13TeV_powheg_jhugen751_pythia8": "ggF",  # inclusive sample
     "VBFHToWWToAny_M-125_TuneCP5_withDipoleRecoil": "VBF",
+    "VBFHToWWToAny_M-125_TuneCP5_withDipoleRecoil_Rivet": "VBF",
     "ttHToNonbb_M125": "ttH",
     "HWminusJ_HToWW_M-125": "WH",
     "HWplusJ_HToWW_M-125": "WH",
@@ -221,6 +233,9 @@ label_by_ch = {"mu": "Muon", "ele": "Electron"}
 
 def get_axis(var, massbin=5):
     axis_dict = {
+        "dR_genlep_recolep": hist2.axis.Regular(
+            35, 0, 0.02, name="var", label=r"$\Delta R(\ell_{gen}, \ell_{reco})$", overflow=True
+        ),
         "Zmass": hist2.axis.Regular(40, 30, 450, name="var", label=r"Zmass [GeV]", overflow=True),
         "fj_bjets_ophem": hist2.axis.Regular(35, 0, 1, name="var", label=r"max btagFlavB (opphem)", overflow=True),
         "fj_bjets": hist2.axis.Regular(35, 0, 1, name="var", label=r"max btagFlavB", overflow=True),
@@ -727,7 +742,8 @@ def plot_hists(
                     )
 
         ax.set_ylabel("Events")
-        ax.set_xlabel("")  # because the bottom plot will have the label
+        if "Data" in samples:
+            ax.set_xlabel("")  # because the bottom plot will have the label
 
         if rax is not None:
             rax.set_ylabel("Ratio", fontsize=20, labelpad=15)

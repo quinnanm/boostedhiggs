@@ -62,6 +62,9 @@ def make_events_dict(years, channels, samples_dir, samples, presel, THWW_path=No
 
             for sample in os.listdir(samples_dir[year]):
 
+                if "Rivet" in sample:
+                    continue
+
                 # get a combined label to combine samples of the same process
                 sample_to_use = utils.get_common_sample_name(sample)
 
