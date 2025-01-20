@@ -10,7 +10,7 @@
 # 4) Expected significance (--significance / -s)
 # 5) Fit diagnostics (--dfit / -d)
 # 6) GoF on data (--gofdata / -g)
-# 7) GoF on toys (--goftoys / -t),
+# 7) GoF on toys (--unfolding / -t),
 # 8) Impacts: initial fit (--impactsi / -i), per-nuisance fits (--impactsf $nuisance), collect (--impactsc $nuisances)
 # 9) Bias test: run a bias test on toys (using post-fit nuisances) with expected signal strength
 #    given by --bias X.
@@ -33,7 +33,7 @@ significance=0
 dfit=0
 dfit_asimov=0
 gofdata=0
-goftoys=0
+unfolding=0
 impactsi=0
 impactsf=0
 impactsc=0
@@ -43,7 +43,7 @@ bias=-1
 mintol=0.5 # --cminDefaultMinimizerTolerance
 # maxcalls=1000000000  # --X-rtd MINIMIZER_MaxCalls
 
-options=$(getopt -o "wblsdrgti" --long "workspace,bfit,limits,significance,dfit,dfitasimov,resonant,gofdata,goftoys,impactsi,impactsf:,impactsc:,bias:,seed:,numtoys:,mintol:" -- "$@")
+options=$(getopt -o "wblsdrgti" --long "workspace,bfit,limits,significance,dfit,dfitasimov,resonant,gofdata,unfolding,impactsi,impactsf:,impactsc:,bias:,seed:,numtoys:,mintol:" -- "$@")
 eval set -- "$options"
 
 while true; do
@@ -69,8 +69,8 @@ while true; do
         -g|--gofdata)
             gofdata=1
             ;;
-        -t|--goftoys)
-            goftoys=1
+        -t|--unfolding)
+            unfolding=1
             ;;
         -i|--impactsi)
             impactsi=1
@@ -115,7 +115,7 @@ while true; do
 done
 
 echo "Arguments: workspace=$workspace bfit=$bfit limits=$limits \
-significance=$significance dfit=$dfit gofdata=$gofdata goftoys=$goftoys \
+significance=$significance dfit=$dfit gofdata=$gofdata unfolding=$unfolding \
 seed=$seed numtoys=$numtoys"
 
 
@@ -128,7 +128,8 @@ seed=$seed numtoys=$numtoys"
 ####################################################################################################
 
 dataset=data_obs
-cards_dir="templates/v11/datacards"
+# cards_dir="templates/v11/datacards"
+cards_dir="templates/v11/datacards_unfolding"
 cp ${cards_dir}/testModel.root testModel.root # TODO: avoid this
 CMS_PARAMS_LABEL="CMS_HWW_boosted"
 
@@ -165,28 +166,28 @@ cr2="WJetsCR"
 ccargs+=" CR1=${cards_dir}/${cr1}.txt CR2=${cards_dir}/${cr2}.txt"
 
 
-if [ $workspace = 1 ]; then
-    echo "Combining cards:"
-    for file in $ccargs; do
-    echo "  ${file##*/}"
-    done
-    echo "-------------------------"
-    combineCards.py $ccargs > $combined_datacard
+# if [ $workspace = 1 ]; then
+#     echo "Combining cards:"
+#     for file in $ccargs; do
+#     echo "  ${file##*/}"
+#     done
+#     echo "-------------------------"
+#     combineCards.py $ccargs > $combined_datacard
 
-    echo "Running text2workspace"
+#     echo "Running text2workspace"
 
-    # single POI
-    text2workspace.py $combined_datacard -o $ws 2>&1 | tee $logsdir/text2workspace.txt
+#     # single POI
+#     text2workspace.py $combined_datacard -o $ws 2>&1 | tee $logsdir/text2workspace.txt
 
-    # seperate POIs (to make Table 30 in v11)
-    # text2workspace.py $combined_datacard -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel --PO verbose --PO 'map=.*/ggH_hww:r_ggH_hww[1,0,10]' --PO 'map=.*/qqH_hww:r_qqH_hww[1,0,10]' --PO 'map=.*/WH_hww:r_WH_hww[1,0,10]' --PO 'map=.*/ZH_hww:r_ZH_hww[1,0,10]' --PO 'map=.*/ttH_hww:r_ttH_hww[1,0,10]' -o $ws 2>&1
+#     # seperate POIs (to make Table 30 in v11)
+#     # text2workspace.py $combined_datacard -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel --PO verbose --PO 'map=.*/ggH_hww:r_ggH_hww[1,0,10]' --PO 'map=.*/qqH_hww:r_qqH_hww[1,0,10]' --PO 'map=.*/WH_hww:r_WH_hww[1,0,10]' --PO 'map=.*/ZH_hww:r_ZH_hww[1,0,10]' --PO 'map=.*/ttH_hww:r_ttH_hww[1,0,10]' -o $ws 2>&1
 
-else
-    if [ ! -f "$ws" ]; then
-        echo "Workspace doesn't exist! Use the -w|--workspace option to make workspace first"
-        exit 1
-    fi
-fi
+# else
+#     if [ ! -f "$ws" ]; then
+#         echo "Workspace doesn't exist! Use the -w|--workspace option to make workspace first"
+#         exit 1
+#     fi
+# fi
 
 
 if [ $significance = 1 ]; then
@@ -261,7 +262,7 @@ if [ $gofdata = 1 ]; then
 fi
 
 
-if [ $goftoys = 1 ]; then
+if [ $unfolding = 1 ]; then
     echo "Combining cards:"
     for file in $ccargs; do
     echo "  ${file##*/}"
@@ -269,6 +270,8 @@ if [ $goftoys = 1 ]; then
     echo "-------------------------"
     combineCards.py $ccargs > $combined_datacard
 
+    # must use datacards_unfolding in cards_dir
+    # must comment the workspace part above
 
     text2workspace.py $combined_datacard -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel --PO verbose --PO 'map=.*/ggH_hww_200_300:r_ggH_pt200_300[1,-10,10]' --PO 'map=.*/ggH_hww_300_450:r_ggH_pt300_450[1,-10,10]' --PO 'map=.*/ggH_hww_450_Inf:r_ggH_pt450_inf[1,-10,10]' --PO 'map=.*/qqH_hww:r_qqH_hww[1,-10,10]' --PO 'map=.*/WH_hww:r_WH_hww[1,-10,10]' --PO 'map=.*/ZH_hww:r_ZH_hww[1,-10,10]' --PO 'map=.*/ttH_hww:r_ttH_hww[1,-10,10]' -o $ws 2>&1 | tee $logsdir/text2workspace.txt
 
