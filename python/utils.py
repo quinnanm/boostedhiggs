@@ -271,8 +271,8 @@ def get_axis(var, massbin=5):
         ),
         "nj": hist2.axis.Regular(40, 0, 10, name="var", label="number of jets outside candidate jet", overflow=True),
         "inclusive_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
-        # "THWW": hist2.axis.Regular(25, 0, 1, name="var", label=r"$T_{HWW}$", overflow=True),
-        "THWW": hist2.axis.Regular(8, 0.9, 1, name="var", label=r"$T_{HWW}$", overflow=True),
+        "THWW": hist2.axis.Regular(25, 0, 1, name="var", label=r"$T_{HWW}$", overflow=True),
+        # "THWW": hist2.axis.Regular(8, 0.9, 1, name="var", label=r"$T_{HWW}$", overflow=True),
         "fj_ParT_inclusive_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"ParT-Finetuned score", overflow=True),
         "fj_ParT_all_score": hist2.axis.Regular(35, 0, 1, name="var", label=r"tagger score", overflow=True),
         # AN
@@ -306,7 +306,7 @@ def get_axis(var, massbin=5):
         "ht": hist2.axis.Regular(30, 400, 1400, name="var", label=r"ht [GeV]", overflow=True),
         "rec_W_qq_m": hist2.axis.Regular(40, 0, 160, name="var", label=r"Reconstructed $W_{qq}$ mass [GeV]", overflow=True),
         "rec_higgs_m": hist2.axis.Variable(
-            list(range(45, 255, massbin)), name="var", label=r"Higgs reconstructed mass [GeV]", overflow=True
+            list(range(65, 255, massbin)), name="var", label=r"Higgs reconstructed mass [GeV]", overflow=True
         ),
         "rec_W_lnu_m": hist2.axis.Regular(
             40, 0, 160, name="var", label=r"Reconstructed $W_{\ell \nu}$ mass [GeV]", overflow=True
