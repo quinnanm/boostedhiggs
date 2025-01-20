@@ -526,12 +526,12 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                         )
                 elif sample_to_use == "VBF":
                     stxs_list = [
-                        "mjj1000_inf",
+                        "mjj1000toInf",
                     ]
 
                     for stxs_bin in stxs_list:
                         df1 = data.copy()
-                        if stxs_bin == "mjj1000_inf":
+                        if stxs_bin == "mjj1000toInf":
                             msk_gen = (
                                 (df1["STXS_finecat"] % 100 == 21)
                                 | (df1["STXS_finecat"] % 100 == 22)
