@@ -128,8 +128,8 @@ seed=$seed numtoys=$numtoys"
 ####################################################################################################
 
 dataset=data_obs
-# cards_dir="templates/v11/datacards"
-cards_dir="templates/v11/datacards_unfolding"
+cards_dir="templates/v11/datacards"
+# cards_dir="templates/v11/datacards_unfolding"
 cp ${cards_dir}/testModel.root testModel.root # TODO: avoid this
 CMS_PARAMS_LABEL="CMS_HWW_boosted"
 
@@ -166,28 +166,28 @@ cr2="WJetsCR"
 ccargs+=" CR1=${cards_dir}/${cr1}.txt CR2=${cards_dir}/${cr2}.txt"
 
 
-# if [ $workspace = 1 ]; then
-#     echo "Combining cards:"
-#     for file in $ccargs; do
-#     echo "  ${file##*/}"
-#     done
-#     echo "-------------------------"
-#     combineCards.py $ccargs > $combined_datacard
+if [ $workspace = 1 ]; then
+    echo "Combining cards:"
+    for file in $ccargs; do
+    echo "  ${file##*/}"
+    done
+    echo "-------------------------"
+    combineCards.py $ccargs > $combined_datacard
 
-#     echo "Running text2workspace"
+    echo "Running text2workspace"
 
-#     # single POI
-#     text2workspace.py $combined_datacard -o $ws 2>&1 | tee $logsdir/text2workspace.txt
+    # single POI
+    text2workspace.py $combined_datacard -o $ws 2>&1 | tee $logsdir/text2workspace.txt
 
-#     # seperate POIs (to make Table 30 in v11)
-#     # text2workspace.py $combined_datacard -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel --PO verbose --PO 'map=.*/ggH_hww:r_ggH_hww[1,0,10]' --PO 'map=.*/qqH_hww:r_qqH_hww[1,0,10]' --PO 'map=.*/WH_hww:r_WH_hww[1,0,10]' --PO 'map=.*/ZH_hww:r_ZH_hww[1,0,10]' --PO 'map=.*/ttH_hww:r_ttH_hww[1,0,10]' -o $ws 2>&1
+    # seperate POIs (to make Table 30 in v11)
+    # text2workspace.py $combined_datacard -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel --PO verbose --PO 'map=.*/ggH_hww:r_ggH_hww[1,0,10]' --PO 'map=.*/qqH_hww:r_qqH_hww[1,0,10]' --PO 'map=.*/WH_hww:r_WH_hww[1,0,10]' --PO 'map=.*/ZH_hww:r_ZH_hww[1,0,10]' --PO 'map=.*/ttH_hww:r_ttH_hww[1,0,10]' -o $ws 2>&1
 
-# else
-#     if [ ! -f "$ws" ]; then
-#         echo "Workspace doesn't exist! Use the -w|--workspace option to make workspace first"
-#         exit 1
-#     fi
-# fi
+else
+    if [ ! -f "$ws" ]; then
+        echo "Workspace doesn't exist! Use the -w|--workspace option to make workspace first"
+        exit 1
+    fi
+fi
 
 
 if [ $significance = 1 ]; then
@@ -262,28 +262,28 @@ if [ $gofdata = 1 ]; then
 fi
 
 
-if [ $unfolding = 1 ]; then
-    echo "Combining cards:"
-    for file in $ccargs; do
-    echo "  ${file##*/}"
-    done
-    echo "-------------------------"
-    combineCards.py $ccargs > $combined_datacard
+# if [ $unfolding = 1 ]; then
+#     echo "Combining cards:"
+#     for file in $ccargs; do
+#     echo "  ${file##*/}"
+#     done
+#     echo "-------------------------"
+#     combineCards.py $ccargs > $combined_datacard
 
-    # must use datacards_unfolding in cards_dir
-    # must comment the workspace part above
+#     # must use datacards_unfolding in cards_dir
+#     # must comment the workspace part above
 
-    text2workspace.py $combined_datacard -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel --PO verbose --PO 'map=.*/ggH_hww_200_300:r_ggH_pt200_300[1,-10,10]' --PO 'map=.*/ggH_hww_300_450:r_ggH_pt300_450[1,-10,10]' --PO 'map=.*/ggH_hww_450_Inf:r_ggH_pt450_inf[1,-10,10]' --PO 'map=.*/qqH_hww:r_qqH_hww[1,-10,10]' --PO 'map=.*/WH_hww:r_WH_hww[1,-10,10]' --PO 'map=.*/ZH_hww:r_ZH_hww[1,-10,10]' --PO 'map=.*/ttH_hww:r_ttH_hww[1,-10,10]' -o $ws 2>&1 | tee $logsdir/text2workspace.txt
+#     text2workspace.py $combined_datacard -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel --PO verbose --PO 'map=.*/ggH_hww_200_300:r_ggH_pt200_300[1,-10,10]' --PO 'map=.*/ggH_hww_300_450:r_ggH_pt300_450[1,-10,10]' --PO 'map=.*/ggH_hww_450_Inf:r_ggH_pt450_inf[1,-10,10]' --PO 'map=.*/qqH_hww:r_qqH_hww[1,-10,10]' --PO 'map=.*/WH_hww:r_WH_hww[1,-10,10]' --PO 'map=.*/ZH_hww:r_ZH_hww[1,-10,10]' --PO 'map=.*/ttH_hww:r_ttH_hww[1,-10,10]' -o $ws 2>&1 | tee $logsdir/text2workspace.txt
 
-    combine -M MultiDimFit --algo singles -d $ws -t -1 --setParameters r_ggH_pt200_300=1,r_ggH_pt300_450=1,r_ggH_pt450_inf=1,r_qqH_hww=1,r_WH_hww=1,r_ZH_hww=1,r_ttH_hww=1 --freezeParameters r_WH_hww,r_ZH_hww,r_ttH_hww
+#     combine -M MultiDimFit --algo singles -d $ws -t -1 --setParameters r_ggH_pt200_300=1,r_ggH_pt300_450=1,r_ggH_pt450_inf=1,r_qqH_hww=1,r_WH_hww=1,r_ZH_hww=1,r_ttH_hww=1 --freezeParameters r_WH_hww,r_ZH_hww,r_ttH_hww
 
-    # --- MultiDimFit ---
-    # best fit parameter values and profile-likelihood uncertainties: 
-    # r_ggH_pt200_300 :    +1.000   -1.000/+4.796 (68%)
-    # r_ggH_pt300_450 :    +1.000   -1.000/+1.916 (68%)
-    # r_ggH_pt450_inf :    +1.000   -1.000/+2.523 (68%)
-    #         r_qqH_hww :    +1.000   -0.990/+1.255 (68%)
-    #         r_WH_hww :    +1.000   +0.000/+0.000 (68%)
-    #         r_ZH_hww :    +1.000   +0.000/+0.000 (68%)
-    #         r_ttH_hww :    +1.000   +0.000/+0.000 (68%)
-fi
+#     # --- MultiDimFit ---
+#     # best fit parameter values and profile-likelihood uncertainties: 
+#     # r_ggH_pt200_300 :    +1.000   -1.000/+4.796 (68%)
+#     # r_ggH_pt300_450 :    +1.000   -1.000/+1.916 (68%)
+#     # r_ggH_pt450_inf :    +1.000   -1.000/+2.523 (68%)
+#     #         r_qqH_hww :    +1.000   -0.990/+1.255 (68%)
+#     #         r_WH_hww :    +1.000   +0.000/+0.000 (68%)
+#     #         r_ZH_hww :    +1.000   +0.000/+0.000 (68%)
+#     #         r_ttH_hww :    +1.000   +0.000/+0.000 (68%)
+# fi
