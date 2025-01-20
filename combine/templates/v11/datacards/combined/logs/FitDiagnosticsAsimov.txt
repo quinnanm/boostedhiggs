@@ -5,5 +5,5 @@
 [WARNING]: Unable to determine uncertainties on all fit parameters in s+b fit. Caution: by passing --ignoreCovWarning the shapes and uncertainties will be stored as configured via the command line despite this issue. Have a look at https://cms-analysis.github.io/HiggsAnalysis-CombinedLimit/part3/nonstandard/#fit-parameter-uncertainties for more information.
 
  --- FitDiagnostics ---
-Best fit r: 1  -0.570831/+0.862267  (68% CL)
-Done in 0.30 min (cpu), 0.31 min (real)
+Best fit r: 1  -0.565931/+0.854464  (68% CL)
+Done in 0.31 min (cpu), 0.32 min (real)
