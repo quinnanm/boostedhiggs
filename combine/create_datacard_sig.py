@@ -19,7 +19,8 @@ import warnings
 
 import pandas as pd
 import rhalphalib as rl
-from utils import bkgs, get_template, labels, load_templates, sigs
+from systematics import bkgs, sigs
+from utils import get_template, labels, load_templates
 
 rl.ParametericSample.PreferRooParametricHist = True
 logging.basicConfig(level=logging.INFO)
@@ -57,6 +58,9 @@ def create_datacard(hists_templates, add_ttbar_constraint=True, add_wjets_constr
 
         for sName in sigs + bkgs:
 
+            if sName in ["ggFpt200to300", "ggFpt300to450", "ggFpt450toInf"]:  # skip stxs processes
+                continue
+
             templ = get_template(hists_templates, sName, ChName)
             if templ == 0:
                 continue
@@ -69,23 +73,12 @@ def create_datacard(hists_templates, add_ttbar_constraint=True, add_wjets_constr
         sName = "Fake"
         templ = get_template(hists_templates, sName, ChName)
         if templ == 0:
-            continue
+            sample = rl.TemplateSample(ch.name + "_" + labels[sName], rl.Sample.BACKGROUND, templ)
 
-        sample = rl.TemplateSample(ch.name + "_" + labels[sName], rl.Sample.BACKGROUND, templ)
+            # add Fake unc.
+            sample.setParamEffect(rl.NuisanceParameter("Fake_rate_unc", "lnN"), 1.25)
 
-        # add Fake unc.
-        sample.setParamEffect(rl.NuisanceParameter("Fake_rate_unc", "lnN"), 1.5)
-
-        for sys_name in ["FR_stat", "EWK_SF"]:
-            sys_value = rl.NuisanceParameter(sys_name, "shape")
-            syst_up = hists_templates[{"Sample": "Fake", "Region": ChName, "Systematic": sys_name + "_Up"}].values()
-            syst_do = hists_templates[{"Sample": "Fake", "Region": ChName, "Systematic": sys_name + "_Down"}].values()
-            nominal = hists_templates[{"Sample": "Fake", "Region": ChName, "Systematic": "nominal"}].values()
-
-            nominal[nominal == 0] = 1  # to avoid invalid value encountered in true_divide in "syst_up/nominal"
-            sample.setParamEffect(sys_value, (syst_up / nominal), (syst_do / nominal))
-
-        ch.addSample(sample)
+            ch.addSample(sample)
 
         # add data
         data_obs = get_template(hists_templates, "Data", ChName)

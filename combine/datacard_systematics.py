@@ -3,6 +3,7 @@ from __future__ import division, print_function
 import json
 import logging
 import warnings
+from lib2to3.fixes.fix_operator import invocation
 from typing import List
 
 import pandas as pd
@@ -78,7 +79,7 @@ def systs_not_from_parquets(years: List[str], lep_channels: List[str]):
             None,
         )
 
-    # mini-isolation
+    # mini-invocation
     systs_dict["all_samples"]["miniisolation_SF_unc"] = rl.NuisanceParameter(
         f"{CMS_PARAMS_LABEL}_miniisolation_SF_unc", "lnN"
     )
@@ -91,16 +92,11 @@ def systs_not_from_parquets(years: List[str], lep_channels: List[str]):
     for sample in samples:
         systs_dict[sample], systs_dict_values[sample] = {}, {}
 
-    n = rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_taggereff", "lnN")
-    m = rl.NuisanceParameter("BR_hww", "lnN")
+    n_br = rl.NuisanceParameter("BR_hww", "lnN")
     for sample in sigs:
         # branching ratio systematics
-        systs_dict[sample]["BR_hww"] = m
+        systs_dict[sample]["BR_hww"] = n_br
         systs_dict_values[sample]["BR_hww"] = (1.0153, 0.9848)
-
-        # tagger eff
-        systs_dict[sample]["taggereff"] = n
-        systs_dict_values[sample]["taggereff"] = (1.27, None)
 
     ############################################
     ############################################
@@ -108,12 +104,10 @@ def systs_not_from_parquets(years: List[str], lep_channels: List[str]):
     # Theory Systematics. (convention: https://gitlab.cern.ch/hh/naming-conventions#theory-uncertainties)
 
     # PDF
-    n = rl.NuisanceParameter("pdf_Higgs_ggH", "lnN")
-    systs_dict["ggF"]["pdf_Higgs_ggH"] = n
+    systs_dict["ggF"]["pdf_Higgs_ggH"] = rl.NuisanceParameter("pdf_Higgs_ggH", "lnN")
     systs_dict_values["ggF"]["pdf_Higgs_ggH"] = (1.019, None)
 
-    n = rl.NuisanceParameter("pdf_Higgs_qqH", "lnN")
-    systs_dict["VBF"]["pdf_Higgs_qqH"] = n
+    systs_dict["VBF"]["pdf_Higgs_qqH"] = rl.NuisanceParameter("pdf_Higgs_qqH", "lnN")
     systs_dict_values["VBF"]["pdf_Higgs_qqH"] = (1.021, None)
 
     n = rl.NuisanceParameter("pdf_Higgs_ttH", "lnN")
@@ -184,6 +178,10 @@ def systs_from_parquets(years):
         rl.NuisanceParameter("CMS_pileup_id", "shape"): (
             "weight_pileup_id",
             sigs + bkgs,
+        ),
+        rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_EW_unc", "lnN"): (
+            "EW",
+            ["VBF", "WH", "ZH", "ttH"],
         ),
         # ISR systematics
         rl.NuisanceParameter("ps_isr_ggH", "shape"): (
@@ -297,21 +295,8 @@ def systs_from_parquets(years):
             "weight_mu_trigger_noniso",
             sigs + bkgs,
         ),
-        rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_identification_stat", "lnN"): (
-            "weight_mu_id_stat",
-            sigs + bkgs,
-        ),
         rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_identification_syst", "lnN"): (
             "weight_mu_id_syst",
-            sigs + bkgs,
-        ),
-        # systematics for electron channel
-        rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_identification", "lnN"): (
-            "weight_ele_id",
-            sigs + bkgs,
-        ),
-        rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_reconstruction", "lnN"): (
-            "weight_ele_reco",
             sigs + bkgs,
         ),
         # PDF acceptance
@@ -384,11 +369,6 @@ def systs_from_parquets(years):
             "weight_TopPtReweight",
             ["TTbar"],
         ),
-        # trigger SF
-        rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_trigger_stat_unc", "shape"): (
-            "trigger_ele_SF",
-            sigs + bkgs,
-        ),
     }
 
     SYSTEMATICS_uncorrelated = {}
@@ -398,6 +378,24 @@ def systs_from_parquets(years):
             **{
                 rl.NuisanceParameter(f"CMS_pileup_{year}", "shape"): (
                     f"weight_pileup_{year}",
+                    sigs + bkgs,
+                ),
+                rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_mu_identification_stat_{year}", "lnN"): (
+                    "weight_mu_id_stat",
+                    sigs + bkgs,
+                ),
+                # systematics for electron channel
+                rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_identification_{year}", "lnN"): (
+                    "weight_ele_id",
+                    sigs + bkgs,
+                ),
+                rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_reconstruction_{year}", "lnN"): (
+                    "weight_ele_reco",
+                    sigs + bkgs,
+                ),
+                # trigger SF
+                rl.NuisanceParameter(f"{CMS_PARAMS_LABEL}_ele_trigger_stat_unc_{year}", "shape"): (
+                    "trigger_ele_SF",
                     sigs + bkgs,
                 ),
             },
@@ -412,6 +410,7 @@ def systs_from_parquets(years):
                     ),
                 },
             }
+
     # ------------------- btag systematics -------------------
 
     # systematics correlated across all years

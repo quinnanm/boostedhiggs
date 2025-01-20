@@ -1,4 +1,4 @@
-bkgs = ["TTbar", "WJetsLNu", "SingleTop", "DYJets", "WZQQ", "Diboson", "EWKvjets"]
+bkgs = ["TTbar", "WJetsLNu", "SingleTop", "DYJets", "Diboson", "EWKvjets"]
 ttbar_list = [
     "TTbar_is_top_lq",
     "TTbar_is_top_lqq",
@@ -8,7 +8,7 @@ ttbar_list = [
     "TTbar_LP_is_top_lqq",
     "TTbar_LP_others",
 ]
-bkgs += ttbar_list
+# bkgs += ttbar_list
 sigs = ["ggFpt200to300", "ggFpt300to450", "ggFpt450toInf", "ggF", "VBF", "WH", "ZH", "ttH"]
 
 samples = sigs + bkgs + ["Fake"]

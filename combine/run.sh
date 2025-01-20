@@ -128,7 +128,7 @@ seed=$seed numtoys=$numtoys"
 ####################################################################################################
 
 dataset=data_obs
-cards_dir="templates/v6/datacards"
+cards_dir="templates/v11/datacards"
 cp ${cards_dir}/testModel.root testModel.root # TODO: avoid this
 CMS_PARAMS_LABEL="CMS_HWW_boosted"
 
@@ -151,18 +151,14 @@ chmod +x ${logsdir}
 combined_datacard=${outdir}/combined.txt
 ws=${outdir}/workspace.root
 
-# # ADD REGIONS
+# ADD REGIONS
 sr1="VBF"
 sr2="ggFpt250to350"
 sr3="ggFpt350to500"
 sr4="ggFpt500toInf"
 ccargs="SR1=${cards_dir}/${sr1}.txt SR2=${cards_dir}/${sr2}.txt SR3=${cards_dir}/${sr3}.txt SR4=${cards_dir}/${sr4}.txt"
-
-# sr4="ggFpt450to650"
-# sr5="ggFpt650toInf"
-# ccargs="SR1=${cards_dir}/${sr1}.txt SR2=${cards_dir}/${sr2}.txt SR3=${cards_dir}/${sr3}.txt SR4=${cards_dir}/${sr4}.txt SR5=${cards_dir}/${sr5}.txt"
-
-# ccargs="SR1=${cards_dir}/${sr1}.txt SR3=${cards_dir}/${sr3}.txt SR4=${cards_dir}/${sr4}.txt SR5=${cards_dir}/${sr5}.txt"
+# ccargs="SR1=${cards_dir}/${sr1}.txt"
+# ccargs="SR2=${cards_dir}/${sr2}.txt SR3=${cards_dir}/${sr3}.txt SR4=${cards_dir}/${sr4}.txt"
 
 cr1="TopCR"
 cr2="WJetsCR"
@@ -182,8 +178,8 @@ if [ $workspace = 1 ]; then
     # single POI
     text2workspace.py $combined_datacard -o $ws 2>&1 | tee $logsdir/text2workspace.txt
 
-    # seperate POIs
-    # text2workspace.py $combined_datacard -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel --PO verbose --PO 'map=.*/ggF:r_ggF[1,0,10]' --PO 'map=.*/VBF:r_VBF[1,0,10]' --PO 'map=.*/WH:r_WH[1,0,10]' --PO 'map=.*/ZH:r_ZH[1,0,10]' --PO 'map=.*/ttH:r_ttH[1,0,10]' -o $ws 2>&1 | tee $logsdir/text2workspace.txt
+    # seperate POIs (to make Table 30 in v11)
+    # text2workspace.py $combined_datacard -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel --PO verbose --PO 'map=.*/ggH_hww:r_ggH_hww[1,0,10]' --PO 'map=.*/qqH_hww:r_qqH_hww[1,0,10]' --PO 'map=.*/WH_hww:r_WH_hww[1,0,10]' --PO 'map=.*/ZH_hww:r_ZH_hww[1,0,10]' --PO 'map=.*/ttH_hww:r_ttH_hww[1,0,10]' -o $ws 2>&1
 
 else
     if [ ! -f "$ws" ]; then
@@ -199,13 +195,9 @@ if [ $significance = 1 ]; then
     # single POI
     combine -M Significance -d $ws -m 125 --expectSignal=1 --rMin -1 --rMax 5 -t -1
 
-    # seperate POIs
-    # ggF
-    # combine -M Significance -d $ws -t -1 --setParameters r_ggF=1,r_VBF=1,r_WH=1,r_ZH=1,r_ttH=1 --redefineSignalPOIs r_ggF --freezeParameters r_VBF,r_WH,r_ZH,r_ttH
-
-    # VBF
-    # combine -M Significance -d $ws -t -1 --setParameters r_ggF=1,r_VBF=1,r_WH=1,r_ZH=1,r_ttH=1 --redefineSignalPOIs r_VBF --freezeParameters r_ggF,r_WH,r_ZH,r_ttH
-
+    # seperate POIs (to make Table 30 in v11 of AN: uncomment either next line for VBF and the one after for ggF)
+    # combine -M Significance -d $ws -t -1 --redefineSignalPOIs r_qqH_hww --setParameters r_ggH_hww=1,r_qqH_hww=1,r_WH_hww=1,r_ZH_hww=1,r_ttH_hww=1 --freezeParameters r_WH_hww,r_ZH_hww,r_ttH_hww
+    # combine -M Significance -d $ws -t -1 --redefineSignalPOIs r_ggH_hww --setParameters r_ggH_hww=1,r_qqH_hww=1,r_WH_hww=1,r_ZH_hww=1,r_ttH_hww=1 --freezeParameters r_WH_hww,r_ZH_hww,r_ttH_hww
 
 fi
 
@@ -221,24 +213,16 @@ if [ $dfit_asimov = 1 ]; then
 
     echo "Fit Diagnostics Asimov"
     combine -M FitDiagnostics -m 125 -d $ws \
-    -t -1 --expectSignal=1 --saveWorkspace --saveToys -n Asimov --ignoreCovWarning \
+    -t -1 --expectSignal=1 --saveWorkspace -n Asimov --ignoreCovWarning \
     --saveShapes --saveNormalizations --saveWithUncertainties --saveOverallShapes 2>&1 | tee $logsdir/FitDiagnosticsAsimov.txt
 
     # w frequentist toys mean prefit data
     # w/o frequentist toys mean prefit asimov
 
-
-
     # echo "Fit Diagnostics Asimov"
     # combine -M FitDiagnostics -m 125 -d $ws \
     # -t -1 --setParameters r_ggF=1,r_VBF=1,r_VH=1,r_ttH=1 --saveWorkspace --saveToys -n Asimov --ignoreCovWarning \
     # --saveShapes --saveNormalizations --saveWithUncertainties --saveOverallShapes 2>&1 | tee $logsdir/FitDiagnosticsAsimov.txt
-
-
-
-
-
-
     # python diffNuisances.py fitDiagnosticsAsimov.root --abs
 fi
 
@@ -266,12 +250,37 @@ if [ $impactsi = 1 ]; then
 fi
 
 
-if [ $goftoys = 1 ]; then
-    echo "GoF on toys"
-    combine -M GoodnessOfFit -d $ws --algo=saturated -t 100 -s 1 -m 125 -n Toys
-fi
+# if [ $goftoys = 1 ]; then
+#     echo "GoF on toys"
+#     combine -M GoodnessOfFit -d $ws --algo=saturated -t 100 -s 1 -m 125 -n Toys
+# fi
 
 if [ $gofdata = 1 ]; then
     echo "GoF on data"
     combine -M GoodnessOfFit -d $ws --algo=saturated -s 1 -m 125 -n Observed
+fi
+
+
+if [ $goftoys = 1 ]; then
+    echo "Combining cards:"
+    for file in $ccargs; do
+    echo "  ${file##*/}"
+    done
+    echo "-------------------------"
+    combineCards.py $ccargs > $combined_datacard
+
+
+    text2workspace.py $combined_datacard -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel --PO verbose --PO 'map=.*/ggH_hww_200_300:r_ggH_pt200_300[1,-10,10]' --PO 'map=.*/ggH_hww_300_450:r_ggH_pt300_450[1,-10,10]' --PO 'map=.*/ggH_hww_450_Inf:r_ggH_pt450_inf[1,-10,10]' --PO 'map=.*/qqH_hww:r_qqH_hww[1,-10,10]' --PO 'map=.*/WH_hww:r_WH_hww[1,-10,10]' --PO 'map=.*/ZH_hww:r_ZH_hww[1,-10,10]' --PO 'map=.*/ttH_hww:r_ttH_hww[1,-10,10]' -o $ws 2>&1 | tee $logsdir/text2workspace.txt
+
+    combine -M MultiDimFit --algo singles -d $ws -t -1 --setParameters r_ggH_pt200_300=1,r_ggH_pt300_450=1,r_ggH_pt450_inf=1,r_qqH_hww=1,r_WH_hww=1,r_ZH_hww=1,r_ttH_hww=1 --freezeParameters r_WH_hww,r_ZH_hww,r_ttH_hww
+
+    # --- MultiDimFit ---
+    # best fit parameter values and profile-likelihood uncertainties: 
+    # r_ggH_pt200_300 :    +1.000   -1.000/+4.796 (68%)
+    # r_ggH_pt300_450 :    +1.000   -1.000/+1.916 (68%)
+    # r_ggH_pt450_inf :    +1.000   -1.000/+2.523 (68%)
+    #         r_qqH_hww :    +1.000   -0.990/+1.255 (68%)
+    #         r_WH_hww :    +1.000   +0.000/+0.000 (68%)
+    #         r_ZH_hww :    +1.000   +0.000/+0.000 (68%)
+    #         r_ttH_hww :    +1.000   +0.000/+0.000 (68%)
 fi
