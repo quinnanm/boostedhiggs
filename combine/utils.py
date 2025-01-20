@@ -15,15 +15,18 @@ warnings.filterwarnings("ignore", message="Found duplicate branch ")
 
 combine_samples_by_name = {
     "GluGluHToWW_Pt-200ToInf_M-125": "ggF",
+    "GluGluHToWW_Pt-200ToInf_M-125_Rivet": "ggF",
     "GluGluHToWWToLNuQQ_M-125_TuneCP5_13TeV_powheg_jhugen751_pythia8": "ggF",  # inclusive sample
     "VBFHToWWToAny_M-125_TuneCP5_withDipoleRecoil": "VBF",
+    "VBFHToWWToAny_M-125_TuneCP5_withDipoleRecoil_Rivet": "VBF",
     "ttHToNonbb_M125": "ttH",
     "HWminusJ_HToWW_M-125": "WH",
     "HWplusJ_HToWW_M-125": "WH",
     "HZJ_HToWW_M-125": "ZH",
-    "GluGluZH_HToWW_M-125_TuneCP5_13TeV-powheg-pythia8": "ZH",  # TODO: skip
+    "GluGluZH_HToWW_M-125_TuneCP5_13TeV-powheg-pythia8": "ZH",
     "GluGluHToTauTau": "HTauTau",
 }
+
 
 combine_samples = {
     # data
