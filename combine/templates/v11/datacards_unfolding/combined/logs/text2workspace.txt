@@ -30,7 +30,6 @@ Will scale  SR1/fake  by  1
 Will scale  SR2/qqH_hww_mjj_1000_Inf  by  r_qqH_mjj_1000_inf
 Will scale  SR2/ggH_hww_200_300  by  r_ggH_pt200_300
 Will scale  SR2/ggH_hww_300_450  by  r_ggH_pt300_450
-Will scale  SR2/ggH_hww_450_Inf  by  r_ggH_pt450_inf
 Will scale  SR2/WH_hww  by  r_WH_hww
 Will scale  SR2/ZH_hww  by  r_ZH_hww
 Will scale  SR2/ttH_hww  by  r_ttH_hww
@@ -113,7 +112,6 @@ Will scale  SR1/fake  by  1
 Will scale  SR2/qqH_hww_mjj_1000_Inf  by  r_qqH_mjj_1000_inf
 Will scale  SR2/ggH_hww_200_300  by  r_ggH_pt200_300
 Will scale  SR2/ggH_hww_300_450  by  r_ggH_pt300_450
-Will scale  SR2/ggH_hww_450_Inf  by  r_ggH_pt450_inf
 Will scale  SR2/WH_hww  by  r_WH_hww
 Will scale  SR2/ZH_hww  by  r_ZH_hww
 Will scale  SR2/ttH_hww  by  r_ttH_hww
