@@ -499,7 +499,7 @@ def get_templates(years, channels, samples, samples_dir, regions_sel, model_path
                             msk_gen = (df1["STXS_finecat"] % 100 == 1) | (df1["STXS_finecat"] % 100 == 5)
                         elif stxs_bin == "ggFpt300to450":
                             msk_gen = (df1["STXS_finecat"] % 100 == 2) | (df1["STXS_finecat"] % 100 == 6)
-                        elif stxs_bin == "ggFpt300to450":
+                        elif stxs_bin == "ggFpt450toInf":
                             msk_gen = (
                                 (df1["STXS_finecat"] % 100 == 3)
                                 | (df1["STXS_finecat"] % 100 == 7)
