@@ -364,11 +364,12 @@ class HwwProcessor(processor.ProcessorABC):
             & (abs(jets.eta) < 5.0)
             & jets.isTight
             & ((jets.pt >= 50) | ((jets.pt < 50) & (jets.puId & 2) == 2))
-            # & (jets.chEmEF + jets.neEmEF < 0.9)  # neutral and charged energy fraction
+            & (jets.chEmEF + jets.neEmEF < 0.9)  # neutral and charged energy fraction
         )
         jets = jets[jet_selector]
         jet_veto_map, cut_jetveto = get_JetVetoMap(jets, self._year)
-        jets = jets[(jets.pt > 30) & jet_veto_map]
+        # jets = jets[(jets.pt > 30) & jet_veto_map]
+        jets = jets[(jets.pt > 30)]
 
         ak4_outside_ak8_selector = jets.delta_r(candidatefj) > 0.8
         ak4_outside_ak8 = jets[ak4_outside_ak8_selector]
