@@ -366,7 +366,8 @@ class HwwProcessor(processor.ProcessorABC):
             & ((jets.pt >= 50) | ((jets.pt < 50) & (jets.puId & 2) == 2))
             & (jets.chEmEF + jets.neEmEF < 0.9)  # neutral and charged energy fraction
         )
-        jets = jets[jet_selector]
+
+        # jets = jets[jet_selector]
         jet_veto_map, cut_jetveto = get_JetVetoMap(jets, self._year)
         # jets = jets[(jets.pt > 30) & jet_veto_map]
         # jets = jets[(jets.pt > 30)]
