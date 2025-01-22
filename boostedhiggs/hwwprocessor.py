@@ -364,12 +364,11 @@ class HwwProcessor(processor.ProcessorABC):
             & (abs(jets.eta) < 5.0)
             & jets.isTight
             & ((jets.pt >= 50) | ((jets.pt < 50) & (jets.puId & 2) == 2))
-            # & (jets.chEmEF + jets.neEmEF < 0.9)  # neutral and charged energy fraction
+            & (jets.chEmEF + jets.neEmEF < 0.9)  # neutral and charged energy fraction
         )
         jets = jets[jet_selector]
-        # jet_veto_map, cut_jetveto = get_JetVetoMap(jets, self._year)
-        # jets = jets[(jets.pt > 30) & jet_veto_map]
-        jets = jets[(jets.pt > 30)]
+        jet_veto_map, cut_jetveto = get_JetVetoMap(jets, self._year)
+        jets = jets[(jets.pt > 30) & jet_veto_map]
 
         ak4_outside_ak8_selector = jets.delta_r(candidatefj) > 0.8
         ak4_outside_ak8 = jets[ak4_outside_ak8_selector]
@@ -425,9 +424,6 @@ class HwwProcessor(processor.ProcessorABC):
         # Store variables
         ######################
 
-        jet_veto_map, cut_jetveto = get_JetVetoMap(jets, self._year)
-        jet_veto_map_noak8, cut_jetveto_noak8 = get_JetVetoMap(ak4_outside_ak8, self._year)
-
         variables = {
             # candidatefj
             "fj_lsf3": candidatefj.lsf3,
@@ -476,24 +472,13 @@ class HwwProcessor(processor.ProcessorABC):
             "VH_fj_eta": VH_fj.eta,
             "VH_fj_VScore": VScore(VH_fj),
             # add jetveto as optional selection
-            # "jetvetomap": cut_jetveto,
+            "jetvetomap": cut_jetveto,
             # added on October 9th
             "loose_lep1_miso": ak.firsts(
                 muons[loose_muons1][ak.argsort(muons[loose_muons1].pt, ascending=False)]
             ).miniPFRelIso_all,
             "loose_lep1_pt": ak.firsts(muons[loose_muons1][ak.argsort(muons[loose_muons1].pt, ascending=False)]).pt,
             "msk_leptonic_taus": msk_leptonic_taus,
-            # jetvetomaps tests
-            "njets": ak.fill_none(ak.num(jets), 0),
-            "njets_noak8": ak.fill_none(ak.num(ak4_outside_ak8), 0),
-            "njets_jetvetomap": ak.fill_none(ak.num(jets[jet_veto_map]), 0),
-            "njets_noak8_jetvetomap": ak.fill_none(ak.num(ak4_outside_ak8[jet_veto_map_noak8]), 0),
-            # "njets_eventvetomap": ak.num(jets[cut_jetveto]),
-            # "njets_noak8_eventvetomap": ak.num(ak4_outside_ak8[cut_jetveto_noak8]),
-            # "jetvetomap": jet_veto_map,
-            # "jetvetomap_noak8": jet_veto_map_noak8,
-            # "eventvetomap": cut_jetveto,
-            # "eventvetomap_noak8": cut_jetveto_noak8,
         }
 
         # get the dR(genlep, recolep) to check the matching
