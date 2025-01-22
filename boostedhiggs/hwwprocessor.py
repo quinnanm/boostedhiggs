@@ -485,7 +485,7 @@ class HwwProcessor(processor.ProcessorABC):
             "msk_leptonic_taus": msk_leptonic_taus,
             # jetvetomaps tests
             "njets": ak.fill_none(ak.num(jets), 0),
-            # "njets_noak8": ak.fill_none(ak.num(ak4_outside_ak8), 0),
+            "njets_noak8": ak.fill_none(ak.num(ak4_outside_ak8), 0),
             # "njets_jetvetomap": ak.fill_none(ak.num(jets[jet_veto_map]), 0),
             # "njets_noak8_jetvetomap": ak.fill_none(ak.num(ak4_outside_ak8[jet_veto_map_noak8]), 0),
             # "njets_eventvetomap": ak.num(jets[cut_jetveto]),
