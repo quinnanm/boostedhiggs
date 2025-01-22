@@ -426,7 +426,7 @@ class HwwProcessor(processor.ProcessorABC):
         ######################
 
         jet_veto_map, cut_jetveto = get_JetVetoMap(jets, self._year)
-        jet_veto_map_noak8, cut_jetveto_noak8 = get_JetVetoMap(jets, self._year)
+        jet_veto_map_noak8, cut_jetveto_noak8 = get_JetVetoMap(ak4_outside_ak8, self._year)
 
         variables = {
             # candidatefj
