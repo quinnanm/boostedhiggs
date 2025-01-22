@@ -488,12 +488,12 @@ class HwwProcessor(processor.ProcessorABC):
             "njets_noak8": ak.num(ak4_outside_ak8),
             "njets_jetvetomap": ak.num(jets[jet_veto_map]),
             "njets_noak8_jetvetomap": ak.num(ak4_outside_ak8[jet_veto_map_noak8]),
-            "njets_eventvetomap": ak.num(jets[cut_jetveto]),
-            "njets_noak8_eventvetomap": ak.num(ak4_outside_ak8[cut_jetveto_noak8]),
+            # "njets_eventvetomap": ak.num(jets[cut_jetveto]),
+            # "njets_noak8_eventvetomap": ak.num(ak4_outside_ak8[cut_jetveto_noak8]),
             "jetvetomap": jet_veto_map,
             "jetvetomap_noak8": jet_veto_map_noak8,
-            "eventvetomap": cut_jetveto,
-            "eventvetomap_noak8": cut_jetveto_noak8,
+            # "eventvetomap": cut_jetveto,
+            # "eventvetomap_noak8": cut_jetveto_noak8,
         }
 
         # get the dR(genlep, recolep) to check the matching
