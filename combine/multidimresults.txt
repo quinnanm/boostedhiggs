@@ -1,0 +1,23 @@
+ <<< Combine >>> 
+ <<< v10.0.2 >>>
+>>> Random number generator seed is 123456
+>>> Method used is MultiDimFit
+Set Default Value of Parameter r_ggH_pt200_300 To : 1
+Set Default Value of Parameter r_ggH_pt300_450 To : 1
+Set Default Value of Parameter r_ggH_pt450_inf To : 1
+Set Default Value of Parameter r_qqH_hww_mjj_1000_Inf To : 1
+Set Default Value of Parameter r_WH_hww To : 1
+Set Default Value of Parameter r_ZH_hww To : 1
+Set Default Value of Parameter r_ttH_hww To : 1
+Doing initial fit: 
+
+ --- MultiDimFit ---
+best fit parameter values and profile-likelihood uncertainties: 
+          r_ggH_pt200_300 :    +1.000   -4.700/+5.412 (68%)
+          r_ggH_pt300_450 :    +1.000   -1.846/+2.473 (68%)
+          r_ggH_pt450_inf :    +1.000   -2.332/+3.010 (68%)
+   r_qqH_hww_mjj_1000_Inf :    +1.000   -0.807/+1.078 (68%)
+                 r_WH_hww :    +1.000   +0.000/+0.000 (68%)
+                 r_ZH_hww :    +1.000   +0.000/+0.000 (68%)
+                r_ttH_hww :    +1.000   +0.000/+0.000 (68%)
+Done in 0.13 min (cpu), 0.13 min (real)

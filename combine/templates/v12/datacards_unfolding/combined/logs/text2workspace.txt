@@ -4,8 +4,8 @@ Will create a POI  r_ggH_pt300_450  with factory  r_ggH_pt300_450[1,-10,10]
 Mapping  r_ggH_pt300_450  to  ['.*/ggH_hww_300_450']  patterns
 Will create a POI  r_ggH_pt450_inf  with factory  r_ggH_pt450_inf[1,-10,10]
 Mapping  r_ggH_pt450_inf  to  ['.*/ggH_hww_450_Inf']  patterns
-Will create a POI  r_qqH_mjj_1000_inf  with factory  r_qqH_mjj_1000_inf[1,-10,10]
-Mapping  r_qqH_mjj_1000_inf  to  ['.*/qqH_hww_mjj_1000_Inf']  patterns
+Will create a POI  r_qqH_hww_mjj_1000_Inf  with factory  r_qqH_hww_mjj_1000_Inf[1,-10,10]
+Mapping  r_qqH_hww_mjj_1000_Inf  to  ['.*/qqH_hww_mjj_1000_Inf']  patterns
 Will create a POI  r_WH_hww  with factory  r_WH_hww[1,-10,10]
 Mapping  r_WH_hww  to  ['.*/WH_hww']  patterns
 Will create a POI  r_ZH_hww  with factory  r_ZH_hww[1,-10,10]
@@ -13,7 +13,7 @@ Mapping  r_ZH_hww  to  ['.*/ZH_hww']  patterns
 Will create a POI  r_ttH_hww  with factory  r_ttH_hww[1,-10,10]
 Mapping  r_ttH_hww  to  ['.*/ttH_hww']  patterns
 MH (not there before) will be assumed to be 0
-Will scale  SR1/qqH_hww_mjj_1000_Inf  by  r_qqH_mjj_1000_inf
+Will scale  SR1/qqH_hww_mjj_1000_Inf  by  r_qqH_hww_mjj_1000_Inf
 Will scale  SR1/ggH_hww_200_300  by  r_ggH_pt200_300
 Will scale  SR1/ggH_hww_300_450  by  r_ggH_pt300_450
 Will scale  SR1/ggH_hww_450_Inf  by  r_ggH_pt450_inf
@@ -27,7 +27,7 @@ Will scale  SR1/zjets  by  1
 Will scale  SR1/diboson  by  1
 Will scale  SR1/ewkvjets  by  1
 Will scale  SR1/fake  by  1
-Will scale  SR2/qqH_hww_mjj_1000_Inf  by  r_qqH_mjj_1000_inf
+Will scale  SR2/qqH_hww_mjj_1000_Inf  by  r_qqH_hww_mjj_1000_Inf
 Will scale  SR2/ggH_hww_200_300  by  r_ggH_pt200_300
 Will scale  SR2/ggH_hww_300_450  by  r_ggH_pt300_450
 Will scale  SR2/WH_hww  by  r_WH_hww
@@ -40,7 +40,7 @@ Will scale  SR2/zjets  by  1
 Will scale  SR2/diboson  by  1
 Will scale  SR2/ewkvjets  by  1
 Will scale  SR2/fake  by  1
-Will scale  SR3/qqH_hww_mjj_1000_Inf  by  r_qqH_mjj_1000_inf
+Will scale  SR3/qqH_hww_mjj_1000_Inf  by  r_qqH_hww_mjj_1000_Inf
 Will scale  SR3/ggH_hww_200_300  by  r_ggH_pt200_300
 Will scale  SR3/ggH_hww_300_450  by  r_ggH_pt300_450
 Will scale  SR3/ggH_hww_450_Inf  by  r_ggH_pt450_inf
@@ -54,7 +54,7 @@ Will scale  SR3/zjets  by  1
 Will scale  SR3/diboson  by  1
 Will scale  SR3/ewkvjets  by  1
 Will scale  SR3/fake  by  1
-Will scale  SR4/qqH_hww_mjj_1000_Inf  by  r_qqH_mjj_1000_inf
+Will scale  SR4/qqH_hww_mjj_1000_Inf  by  r_qqH_hww_mjj_1000_Inf
 Will scale  SR4/ggH_hww_300_450  by  r_ggH_pt300_450
 Will scale  SR4/ggH_hww_450_Inf  by  r_ggH_pt450_inf
 Will scale  SR4/WH_hww  by  r_WH_hww
@@ -67,7 +67,7 @@ Will scale  SR4/zjets  by  1
 Will scale  SR4/diboson  by  1
 Will scale  SR4/ewkvjets  by  1
 Will scale  SR4/fake  by  1
-Will scale  CR1/qqH_hww_mjj_1000_Inf  by  r_qqH_mjj_1000_inf
+Will scale  CR1/qqH_hww_mjj_1000_Inf  by  r_qqH_hww_mjj_1000_Inf
 Will scale  CR1/ggH_hww_200_300  by  r_ggH_pt200_300
 Will scale  CR1/ggH_hww_300_450  by  r_ggH_pt300_450
 Will scale  CR1/ggH_hww_450_Inf  by  r_ggH_pt450_inf
@@ -81,7 +81,7 @@ Will scale  CR1/zjets  by  1
 Will scale  CR1/diboson  by  1
 Will scale  CR1/ewkvjets  by  1
 Will scale  CR1/fake  by  1
-Will scale  CR2/qqH_hww_mjj_1000_Inf  by  r_qqH_mjj_1000_inf
+Will scale  CR2/qqH_hww_mjj_1000_Inf  by  r_qqH_hww_mjj_1000_Inf
 Will scale  CR2/ggH_hww_200_300  by  r_ggH_pt200_300
 Will scale  CR2/ggH_hww_300_450  by  r_ggH_pt300_450
 Will scale  CR2/ggH_hww_450_Inf  by  r_ggH_pt450_inf
@@ -95,7 +95,7 @@ Will scale  CR2/zjets  by  1
 Will scale  CR2/diboson  by  1
 Will scale  CR2/ewkvjets  by  1
 Will scale  CR2/fake  by  1
-Will scale  SR1/qqH_hww_mjj_1000_Inf  by  r_qqH_mjj_1000_inf
+Will scale  SR1/qqH_hww_mjj_1000_Inf  by  r_qqH_hww_mjj_1000_Inf
 Will scale  SR1/ggH_hww_200_300  by  r_ggH_pt200_300
 Will scale  SR1/ggH_hww_300_450  by  r_ggH_pt300_450
 Will scale  SR1/ggH_hww_450_Inf  by  r_ggH_pt450_inf
@@ -109,7 +109,7 @@ Will scale  SR1/zjets  by  1
 Will scale  SR1/diboson  by  1
 Will scale  SR1/ewkvjets  by  1
 Will scale  SR1/fake  by  1
-Will scale  SR2/qqH_hww_mjj_1000_Inf  by  r_qqH_mjj_1000_inf
+Will scale  SR2/qqH_hww_mjj_1000_Inf  by  r_qqH_hww_mjj_1000_Inf
 Will scale  SR2/ggH_hww_200_300  by  r_ggH_pt200_300
 Will scale  SR2/ggH_hww_300_450  by  r_ggH_pt300_450
 Will scale  SR2/WH_hww  by  r_WH_hww
@@ -122,7 +122,7 @@ Will scale  SR2/zjets  by  1
 Will scale  SR2/diboson  by  1
 Will scale  SR2/ewkvjets  by  1
 Will scale  SR2/fake  by  1
-Will scale  SR3/qqH_hww_mjj_1000_Inf  by  r_qqH_mjj_1000_inf
+Will scale  SR3/qqH_hww_mjj_1000_Inf  by  r_qqH_hww_mjj_1000_Inf
 Will scale  SR3/ggH_hww_200_300  by  r_ggH_pt200_300
 Will scale  SR3/ggH_hww_300_450  by  r_ggH_pt300_450
 Will scale  SR3/ggH_hww_450_Inf  by  r_ggH_pt450_inf
@@ -136,7 +136,7 @@ Will scale  SR3/zjets  by  1
 Will scale  SR3/diboson  by  1
 Will scale  SR3/ewkvjets  by  1
 Will scale  SR3/fake  by  1
-Will scale  SR4/qqH_hww_mjj_1000_Inf  by  r_qqH_mjj_1000_inf
+Will scale  SR4/qqH_hww_mjj_1000_Inf  by  r_qqH_hww_mjj_1000_Inf
 Will scale  SR4/ggH_hww_300_450  by  r_ggH_pt300_450
 Will scale  SR4/ggH_hww_450_Inf  by  r_ggH_pt450_inf
 Will scale  SR4/WH_hww  by  r_WH_hww
@@ -149,7 +149,7 @@ Will scale  SR4/zjets  by  1
 Will scale  SR4/diboson  by  1
 Will scale  SR4/ewkvjets  by  1
 Will scale  SR4/fake  by  1
-Will scale  CR1/qqH_hww_mjj_1000_Inf  by  r_qqH_mjj_1000_inf
+Will scale  CR1/qqH_hww_mjj_1000_Inf  by  r_qqH_hww_mjj_1000_Inf
 Will scale  CR1/ggH_hww_200_300  by  r_ggH_pt200_300
 Will scale  CR1/ggH_hww_300_450  by  r_ggH_pt300_450
 Will scale  CR1/ggH_hww_450_Inf  by  r_ggH_pt450_inf
@@ -163,7 +163,7 @@ Will scale  CR1/zjets  by  1
 Will scale  CR1/diboson  by  1
 Will scale  CR1/ewkvjets  by  1
 Will scale  CR1/fake  by  1
-Will scale  CR2/qqH_hww_mjj_1000_Inf  by  r_qqH_mjj_1000_inf
+Will scale  CR2/qqH_hww_mjj_1000_Inf  by  r_qqH_hww_mjj_1000_Inf
 Will scale  CR2/ggH_hww_200_300  by  r_ggH_pt200_300
 Will scale  CR2/ggH_hww_300_450  by  r_ggH_pt300_450
 Will scale  CR2/ggH_hww_450_Inf  by  r_ggH_pt450_inf
