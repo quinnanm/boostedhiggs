@@ -4,7 +4,7 @@
 void stxs()
 {
 //=========Macro generated from canvas: stxs/stxs
-//=========  (Tue Feb 18 20:31:10 2025) by ROOT version 6.30/07
+//=========  (Tue Feb 18 21:10:34 2025) by ROOT version 6.30/07
    TCanvas *stxs = new TCanvas("stxs", "stxs",0,0,800,600);
    gStyle->SetOptStat(0);
    stxs->SetHighLightColor(2);
@@ -553,7 +553,7 @@ void stxs()
    dummy4__4->Draw("");
    
    Double_t Graph0_fx3010[1] = { 3 };
-   Double_t Graph0_fy3010[1] = { 3 };
+   Double_t Graph0_fy3010[1] = { 1 };
    Double_t Graph0_felx3010[1] = { 0.5 };
    Double_t Graph0_fely3010[1] = { 0.9788 };
    Double_t Graph0_fehx3010[1] = { 0.5 };
@@ -567,8 +567,8 @@ void stxs()
    grae->SetMarkerColor(94);
    
    TH1F *Graph_Graph03010 = new TH1F("Graph_Graph03010","Graph",100,2.4,3.6);
-   Graph_Graph03010->SetMinimum(1.82118);
-   Graph_Graph03010->SetMaximum(4.22142);
+   Graph_Graph03010->SetMinimum(0.01908);
+   Graph_Graph03010->SetMaximum(2.22142);
    Graph_Graph03010->SetDirectory(nullptr);
    Graph_Graph03010->SetStats(0);
 
@@ -587,7 +587,7 @@ void stxs()
    grae->Draw("2");
    
    Double_t Graph0_fx3011[1] = { 3 };
-   Double_t Graph0_fy3011[1] = { 3 };
+   Double_t Graph0_fy3011[1] = { 1 };
    Double_t Graph0_felx3011[1] = { 0.5 };
    Double_t Graph0_fely3011[1] = { 0.9788 };
    Double_t Graph0_fehx3011[1] = { 0.5 };
@@ -601,8 +601,8 @@ void stxs()
    grae->SetMarkerColor(94);
    
    TH1F *Graph_Graph03011 = new TH1F("Graph_Graph03011","Graph",100,2.4,3.6);
-   Graph_Graph03011->SetMinimum(1.82118);
-   Graph_Graph03011->SetMaximum(4.22142);
+   Graph_Graph03011->SetMinimum(0.01908);
+   Graph_Graph03011->SetMaximum(2.22142);
    Graph_Graph03011->SetDirectory(nullptr);
    Graph_Graph03011->SetStats(0);
 

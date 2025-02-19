@@ -411,7 +411,11 @@ class UnfoldingPlot:
                 vbf_rcenter += [poival[0]]
                 vbf_rdo += [-1.0*poival[1]]
                 vbf_rup += [poival[2]]
-                
+
+        print('vbf vals')
+        print(vbf_rcenter)
+        print(vbf_rdo)
+        print(vbf_rup)
         x = np.linspace(0,3,4)
         w = np.zeros(len(x))
         print(poival[0])
@@ -446,8 +450,9 @@ class UnfoldingPlot:
         print(vbf_smdoerrs)
         g4  = rt.TGraphAsymmErrors(1, #points (1 for vbf)
                                    np.array(x2, dtype='float64'), #x values
-                                   np.array(x, dtype='float64'), #y values
-                                   np.array(w2, dtype='float64'), #x up error=0
+                                   np.ones(1, dtype='float64'), #y values
+                                   # np.array(x, dtype='float64'), #y values #wrong, sets default to 3
+                                   np.array(w2, dtype='float64'), #x up error=0 
                                    np.array(w2, dtype='float64'), #x down error=0
                                    np.array(vbf_smdoerrs, dtype='float64'),#y down errors 
                                    np.array(vbf_smuperrs, dtype='float64') #y up errors 
