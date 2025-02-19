@@ -5,7 +5,7 @@
 
 
 # Default value for cards_dir
-cards_dir="templates/v12/datacards_unfolding"
+cards_dir="templates/v13/datacards_unfolding"
 
 # Parse the --cardsdir argument
 while [[ "$#" -gt 0 ]]; do
@@ -84,8 +84,10 @@ echo "Running multidimfit"
 # combine -M MultiDimFit --algo singles -d $ws -t -1 --setParameters r_ggH_pt200_300=1,r_ggH_pt300_450=1,r_ggH_pt450_inf=1,r_qqH_hww_mjj_1000_Inf=1,r_WH_hww=1,r_ZH_hww=1,r_ttH_hww=1 --freezeParameters r_WH_hww,r_ZH_hww,r_ttH_hww,pdf_Higgs_WH,pdf_Higgs_ZH,pdf_Higgs_qqH,pdf_Higgs_ttH,alpha_s,QCDscale_WH,QCDscale_WH_ACCEPT_CMS_HWW_boosted,QCDscale_ZH,QCDscale_ZH_ACCEPT_CMS_HWW_boosted,QCDscale_qqH,QCDscale_qqH_ACCEPT_CMS_HWW_boosted,QCDscale_singletop_ACCEPT_CMS_HWW_boosted,QCDscale_ttH,QCDscale_ttH_ACCEPT_CMS_HWW_boosted,QCDscale_wjets_ACCEPT_CMS_HWW_boosted>multidimresults.txt
 
 #unfolding updated uncertainties
-combine -M MultiDimFit --algo singles -d $ws -t -1 --setParameters r_ggH_pt200_300=1,r_ggH_pt300_450=1,r_ggH_pt450_inf=1,r_qqH_hww_mjj_1000_Inf=1,r_WH_hww=1,r_ZH_hww=1,r_ttH_hww=1 --freezeParameters r_WH_hww,r_ZH_hww,r_ttH_hww,pdf_Higgs_WH,pdf_Higgs_ZH,pdf_Higgs_ttH,ps_fsr_WH,ps_fsr_ZH,ps_fsr_singletop,ps_fsr_ttH,ps_fsr_ttbar,ps_fsr_wjets,ps_isr_WH,ps_isr_ZH,ps_isr_singletop,ps_isr_ttH,ps_isr_ttbar,ps_isr_wjets,PDF_WH_ACCEPT_CMS_HWW_boosted,PDF_ZH_ACCEPT_CMS_HWW_boosted,PDF_ttH_ACCEPT_CMS_HWW_boosted,PDF_ttbar_ACCEPT_CMS_HWW_boosted,PDF_wjets_ACCEPT_CMS_HWW_boosted,QCDscale_WH,QCDscale_WH_ACCEPT_CMS_HWW_boosted,QCDscale_ZH,QCDscale_ZH_ACCEPT_CMS_HWW_boosted,QCDscale_singletop_ACCEPT_CMS_HWW_boosted,QCDscale_ttH,QCDscale_ttH_ACCEPT_CMS_HWW_boosted,QCDscale_wjets_ACCEPT_CMS_HWW_boosted,alpha_s>multidimresults.txt
+# combine -M MultiDimFit --algo singles -d $ws -t -1 --setParameters r_ggH_pt200_300=1,r_ggH_pt300_450=1,r_ggH_pt450_inf=1,r_qqH_hww_mjj_1000_Inf=1,r_WH_hww=1,r_ZH_hww=1,r_ttH_hww=1 --freezeParameters r_WH_hww,r_ZH_hww,r_ttH_hww,pdf_Higgs_WH,pdf_Higgs_ZH,pdf_Higgs_ttH,ps_fsr_WH,ps_fsr_ZH,ps_fsr_singletop,ps_fsr_ttH,ps_fsr_ttbar,ps_fsr_wjets,ps_isr_WH,ps_isr_ZH,ps_isr_singletop,ps_isr_ttH,ps_isr_ttbar,ps_isr_wjets,PDF_WH_ACCEPT_CMS_HWW_boosted,PDF_ZH_ACCEPT_CMS_HWW_boosted,PDF_ttH_ACCEPT_CMS_HWW_boosted,PDF_ttbar_ACCEPT_CMS_HWW_boosted,PDF_wjets_ACCEPT_CMS_HWW_boosted,QCDscale_WH,QCDscale_WH_ACCEPT_CMS_HWW_boosted,QCDscale_ZH,QCDscale_ZH_ACCEPT_CMS_HWW_boosted,QCDscale_singletop_ACCEPT_CMS_HWW_boosted,QCDscale_ttH,QCDscale_ttH_ACCEPT_CMS_HWW_boosted,QCDscale_wjets_ACCEPT_CMS_HWW_boosted,alpha_s>multidimresults.txt
 
+#unblinded v13 
+combine -M MultiDimFit --algo singles -d $ws --setParameters r_ggH_pt200_300=1,r_ggH_pt300_450=1,r_ggH_pt450_inf=1,r_qqH_hww_mjj_1000_Inf=1,r_WH_hww=1,r_ZH_hww=1,r_ttH_hww=1 --freezeParameters r_WH_hww,r_ZH_hww,r_ttH_hww,alpha_s,QCDscale_qqH_mjj1000toInf,QCDscale_ggH_pt200to300,QCDscale_ggH_pt300to450,QCDscale_ggH_pt450toInf,pdf_Higgs_qqH_mjj1000toInf,pdf_Higgs_ggH_pt450toInf,pdf_Higgs_ggH_pt300to450,pdf_Higgs_ggH_pt200to300,ps_isr_ggH_pt200to300,ps_isr_ggH_pt300to450,ps_isr_ggH_pt450toInf,ps_isr_qqH_mjj1000toInf,ps_fsr_ggH_pt200to300,ps_fsr_ggH_pt300to450,ps_fsr_ggH_pt450toInf,ps_fsr_qqH_mjj1000toInf>multidimresults.txt
 
 echo "Multidimfit results saved to multidimresults.txt"
 

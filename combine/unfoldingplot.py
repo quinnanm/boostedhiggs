@@ -14,7 +14,7 @@ POIList = {'ggF': ['r_ggH_pt200_300', 'r_ggH_pt300_450', 'r_ggH_pt450_inf'],
 
 class UnfoldingPlot:
 
-    def __init__(self, combinecards='templates/v12/datacards_unfolding', poilist=POIList):
+    def __init__(self, combinecards='templates/v13/datacards_unfolding', poilist=POIList):
 
         self.cards_dir = combinecards
         self.multidimresults = "multidimresults.txt"
