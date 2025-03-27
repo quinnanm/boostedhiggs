@@ -16,7 +16,6 @@ lumi = [16809.96, 19492.72, 41476.02, 59816.23]
 tot_vbf = 0
 totxsec_vbf = 0.0
 
-
 #VBF #######################
 for i,year in enumerate(years):
 
