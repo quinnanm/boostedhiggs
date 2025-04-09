@@ -34,6 +34,16 @@ sgw_pass_ggf_200_300 = [0,0,0,0]
 sgw_pass_ggf_300_450 = [0,0,0,0]
 sgw_pass_ggf_450_inf = [0,0,0,0]
 
+#uncertainties
+#QCDscale
+scnames = ['weight_scale0', 'weight_scale1', 'weight_scale3', 'weight_scale5', 'weight_scale7', 'weight_scale8', 'weight_scale4']
+scl_tot_vbf = {name: [0, 0, 0, 0] for name in scnames}
+scl_reco_vbf = {name: [0, 0, 0, 0] for name in scnames}
+
+scl_tot_ggf = {name: [0, 0, 0, 0] for name in scnames}
+scl_reco_ggf_200_300 = {name: [0, 0, 0, 0] for name in scnames}
+scl_reco_ggf_300_450 = {name: [0, 0, 0, 0] for name in scnames}
+scl_reco_ggf_450_inf = {name: [0, 0, 0, 0] for name in scnames}
 
 #VBF #######################
 for i,year in enumerate(years):
@@ -51,32 +61,29 @@ for i,year in enumerate(years):
             df = pd.read_parquet(filepath)
             num_events = len(df)
             total_events += num_events
-            # print(len(df['STXS_finecat']))
-            # print(df.columns.tolist())
-            # events_finecat = df[(df['fj_genH_pt'] >= 450)]
-            # print(df['STXS_finecat']%100)
             #from https://github.com/farakiko/boostedhiggs/blob/main/binder/STXS.ipynb
             events_finecat = df[((df['STXS_finecat']%100 == 21) | (df['STXS_finecat']%100 == 22) | (df['STXS_finecat']%100 == 23) | (df['STXS_finecat']%100 == 24)) ]
-            # print(events_finecat['weight_ele_genweight'])
             passsum = events_finecat['weight_ele_genweight'].sum()
-            # print(f"pass sum: {passsum}")
-            # print(len(events_finecat))
             totsum = df['weight_ele_genweight'].sum()
-            # print(f"tot sum: {totsum}")
             sgw_pass_vbf[i] += float(passsum)
             sgw_tot_vbf[i] += float(totsum)
             
+            #uncertainty sums
+            for name in scnames:
+                scsum = df[name].sum()
+                events_reco = df[((df['mjj']>1000) & (df['deta']>3.5) & (df['NumOtherJets']>=2)) ]
+                scsum_reco = events_reco[name].sum()
+
+                scl_tot_vbf[name][i] += float(scsum)
+                scl_reco_vbf[name][i] += float(scsum_reco)
+                
         elif filename.endswith('.pkl'):
             with open(filepath, 'rb') as pklfile:
                 data = pickle.load(pklfile)
                 # print(list(data['VBFHToWWToAny_M-125_TuneCP5_withDipoleRecoil_Rivet'][year].keys()))
                 sumgenweight = data['VBFHToWWToAny_M-125_TuneCP5_withDipoleRecoil_Rivet'][year]['sumgenweight']                
-                #events_200_300 = df[(df['fj_genH_pt'] >= 200) & (df['fj_genH_pt'] < 300)]
-                # print('sumgenweight:')
-                # print(sumgenweight)
-                # print('dummy')
-                # print(data['VBFHToWWToAny_M-125_TuneCP5_withDipoleRecoil_Rivet'][year]['cutflows']['mu']['dummy'])
-                # sgw_tot_vbf[i] += float(sumgenweight)
+                # print(f"sumgenweight: {sumgenweight}")
+
 
     #calc xsec
     xsec_vbf = 0.0
@@ -84,9 +91,6 @@ for i,year in enumerate(years):
     #xsec from here https://github.com/farakiko/boostedhiggs/blob/main/fileset/xsec_pfnano.json
     if total_events>0:
         xsec_vbf = (sgw_pass_vbf[i] / sgw_tot_vbf[i] ) * lumi[i] * xsecs['vbf']
-        # xsec_vbf = (weight_sum/(lumi[i]*total_events))*0.8082134
-        # nev_vbf = (total_events*0.8082134*lumi[i])/weight_sum
-        # xsec_vbf = nev_vbf/lumi[i]
     else:
         print("WARNING: NO EVENTS")
                 
@@ -100,11 +104,20 @@ for i,year in enumerate(years):
     print(f"VBF xsec: {xsec_vbf}")
     print('----------------------------------------')
 
+print("==================TOTALS===========================")
+print(f"years: {years}")
 print(f"sgw_pass_vbf: {sgw_pass_vbf}")
 print(f"sgw_tot_vbf: {sgw_tot_vbf}")
 totxsec_vbf = (sum(sgw_pass_vbf) / sum(sgw_tot_vbf) )* sum(lumi) * xsecs['vbf']
 print(f"VBF TOTAL xsec: {totxsec_vbf}")
 
+print("----------UNCERTAINTIES----------")
+print(f"scl_tot_vbf:")
+for name, array in scl_tot_vbf.items():
+    print(f"{name}: {array}")
+print(f"scl_reco_vbf:")
+for name, array in scl_reco_vbf.items():
+    print(f"{name}: {array}")
 
 #GGF ########################
 # r_ggH_pt200_300
@@ -137,6 +150,24 @@ for i,year in enumerate(years):
             sgw_pass_ggf_300_450[i] += float(passsum_300_450)
             sgw_pass_ggf_450_inf[i] += float(passsum_450_inf)
             sgw_tot_ggf[i] += float(totsum)
+
+            #uncertainty sums
+            for name in scnames:
+                scsum = df[name].sum()
+
+                events_reco_200_300 = df[(((df['mjj']<1000) | (df['deta']<3.5) | (df['NumOtherJets']<2)) & ((df['rec_higgs_pt']>250) & (df['rec_higgs_pt']<350)))]
+                events_reco_300_450 = df[(((df['mjj']<1000) | (df['deta']<3.5) | (df['NumOtherJets']<2)) & ((df['rec_higgs_pt']>350) & (df['rec_higgs_pt']<500)))]
+                events_reco_450_inf = df[(((df['mjj']<1000) | (df['deta']<3.5) | (df['NumOtherJets']<2)) & ((df['rec_higgs_pt']>500) & (df['rec_higgs_pt']<2500)))]
+                scsum_reco_200_300 = events_reco_200_300[name].sum()
+                scsum_reco_300_450 = events_reco_300_450[name].sum()
+                scsum_reco_450_inf = events_reco_450_inf[name].sum()
+
+                
+                scl_tot_ggf[name][i] += float(scsum)
+                scl_reco_ggf_200_300[name][i] += float(scsum_reco_200_300)
+                scl_reco_ggf_300_450[name][i] += float(scsum_reco_300_450)
+                scl_reco_ggf_450_inf[name][i] += float(scsum_reco_450_inf)
+
             
         elif filename.endswith('.pkl'):
             with open(filepath, 'rb') as pklfile:
@@ -169,9 +200,25 @@ totxsec_ggf_200_300 = (sum(sgw_pass_ggf_200_300) / sum(sgw_tot_ggf) )* sum(lumi)
 totxsec_ggf_300_450 = (sum(sgw_pass_ggf_300_450) / sum(sgw_tot_ggf) )* sum(lumi) * xsecs['ggf']
 totxsec_ggf_450_inf = (sum(sgw_pass_ggf_450_inf) / sum(sgw_tot_ggf) )* sum(lumi) * xsecs['ggf']
 
+print("==================TOTALS===========================")
+print(f"years: {years}")
 print(f"GGF TOTAL xsec 200_300: {totxsec_ggf_200_300}")
 print(f"GGF TOTAL xsec 300_450: {totxsec_ggf_300_450}")
 print(f"GGF TOTAL xsec 450_inf: {totxsec_ggf_450_inf}")
+
+print("----------UNCERTAINTIES----------")
+print(f"scl_tot_ggf:")
+for name, array in scl_tot_ggf.items():
+    print(f"{name}: {array}")
+print(f"scl_reco_ggf_200_300:")
+for name, array in scl_reco_ggf_200_300.items():
+    print(f"{name}: {array}")
+print(f"scl_reco_ggf_300_450:")
+for name, array in scl_reco_ggf_300_450.items():
+    print(f"{name}: {array}")
+print(f"scl_reco_ggf_450_inf:")
+for name, array in scl_reco_ggf_450_inf.items():
+    print(f"{name}: {array}")
 
 
 
