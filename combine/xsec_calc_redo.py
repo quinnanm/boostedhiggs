@@ -136,7 +136,7 @@ for i,year in enumerate(years):
         if filename.endswith('ele.parquet'):
            # print(filename)
             df = pd.read_parquet(filepath)
-
+            # print(list(df.columns))
             events_200_300 = df[((df['STXS_finecat']%100 == 1) | (df['STXS_finecat']%100 == 5))]
             events_300_450 = df[((df['STXS_finecat']%100 == 2) | (df['STXS_finecat']%100 == 6))]
             events_450_inf = df[((df['STXS_finecat']%100 == 3) | (df['STXS_finecat']%100 == 4) | (df['STXS_finecat']%100 == 7) | (df['STXS_finecat']%100 == 8))]
