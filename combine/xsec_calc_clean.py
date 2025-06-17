@@ -91,7 +91,12 @@ def selectdf(df, sel, proc):
         'ggf3': [3, 4, 7, 8]
     }
     base_mask = (df['STXS_finecat'] % 100).isin(stxs_map[base_proc])
-
+    # Apply extra cut based on variant, does nothing to vbf 
+    if variant == 'a':
+        base_mask &= df['fj_genH_pt'] >= 200
+    elif variant == 'b':
+        base_mask &= df['fj_genH_pt'] < 200
+    
     if sel == 'gen':
         newdf = df[base_mask]  
     elif sel == 'reco':
@@ -108,14 +113,8 @@ def selectdf(df, sel, proc):
                 mask &= (df['rec_higgs_pt'] > 350) & (df['rec_higgs_pt'] < 500)
             elif base_proc == 'ggf3':
                 mask &= (df['rec_higgs_pt'] > 500) & (df['rec_higgs_pt'] < 2500)
-        # Apply extra cut based on variant, does nothing to vbf 
-        if variant == 'a':
-            mask &= df['fj_genH_pt'] < 200
-        elif variant == 'b':
-            mask &= df['fj_genH_pt'] >= 200
         newdf = df[mask]
-    else:
-        raise ValueError(f"Unknown proc: {proc}")
+    
     return newdf
 
 #compute total cross section
