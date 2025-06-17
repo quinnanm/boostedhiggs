@@ -2,3 +2,38 @@
  <<< v10.0.2 >>>
 >>> Random number generator seed is 123456
 >>> Method used is MultiDimFit
+Set Default Value of Parameter r_ggH_pt200_300 To : 1
+Set Default Value of Parameter r_ggH_pt300_450 To : 1
+Set Default Value of Parameter r_ggH_pt450_inf To : 1
+Set Default Value of Parameter r_qqH_hww_mjj_1000_Inf To : 1
+Set Default Value of Parameter r_WH_hww To : 1
+Set Default Value of Parameter r_ZH_hww To : 1
+Set Default Value of Parameter r_ttH_hww To : 1
+WARNING: cannot freeze nuisance parameter QCDscale_qqH_mjj1000toInf if it doesn't exist!
+WARNING: cannot freeze nuisance parameter QCDscale_ggH_pt200to300 if it doesn't exist!
+WARNING: cannot freeze nuisance parameter QCDscale_ggH_pt300to450 if it doesn't exist!
+WARNING: cannot freeze nuisance parameter QCDscale_ggH_pt450toInf if it doesn't exist!
+WARNING: cannot freeze nuisance parameter pdf_Higgs_qqH_mjj1000toInf if it doesn't exist!
+WARNING: cannot freeze nuisance parameter pdf_Higgs_ggH_pt450toInf if it doesn't exist!
+WARNING: cannot freeze nuisance parameter pdf_Higgs_ggH_pt300to450 if it doesn't exist!
+WARNING: cannot freeze nuisance parameter pdf_Higgs_ggH_pt200to300 if it doesn't exist!
+WARNING: cannot freeze nuisance parameter ps_isr_ggH_pt200to300 if it doesn't exist!
+WARNING: cannot freeze nuisance parameter ps_isr_ggH_pt300to450 if it doesn't exist!
+WARNING: cannot freeze nuisance parameter ps_isr_ggH_pt450toInf if it doesn't exist!
+WARNING: cannot freeze nuisance parameter ps_isr_qqH_mjj1000toInf if it doesn't exist!
+WARNING: cannot freeze nuisance parameter ps_fsr_ggH_pt200to300 if it doesn't exist!
+WARNING: cannot freeze nuisance parameter ps_fsr_ggH_pt300to450 if it doesn't exist!
+WARNING: cannot freeze nuisance parameter ps_fsr_ggH_pt450toInf if it doesn't exist!
+WARNING: cannot freeze nuisance parameter ps_fsr_qqH_mjj1000toInf if it doesn't exist!
+Doing initial fit: 
+
+ --- MultiDimFit ---
+best fit parameter values and profile-likelihood uncertainties: 
+          r_ggH_pt200_300 :    +0.926   -5.125/+9.074 (68%)
+          r_ggH_pt300_450 :    -1.675   -2.630/+2.183 (68%)
+          r_ggH_pt450_inf :    -0.356   -2.935/+3.142 (68%)
+   r_qqH_hww_mjj_1000_Inf :    +1.548   -0.779/+1.164 (68%)
+                 r_WH_hww :    +1.000   +0.000/+0.000 (68%)
+                 r_ZH_hww :    +1.000   +0.000/+0.000 (68%)
+                r_ttH_hww :    +1.000   +0.000/+0.000 (68%)
+Done in 0.19 min (cpu), 0.19 min (real)

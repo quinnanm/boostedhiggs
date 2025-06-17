@@ -19,7 +19,7 @@ class UnfoldingPlot:
         self.cards_dir = combinecards
         self.multidimresults = "multidimresults.txt"
         self.poilist = poilist
-        self.xsecfile = "./xsecs.json"
+        self.xsecfile = "./xsecs_new.json"
         
         #run the fit if needed
         print('combine cards directory: '+combinecards)
@@ -186,7 +186,7 @@ class UnfoldingPlot:
         h1.GetYaxis().SetTitleSize(textsize1)
         h1.GetYaxis().SetLabelSize(textsize1)
         h1.GetYaxis().SetTitleOffset(2*pad1.GetAbsHNDC())
-        h1.GetYaxis().SetRangeUser(0.01, 10000)
+        h1.GetYaxis().SetRangeUser(0.01, 10000000)
         h1.GetXaxis().SetTitle("p_{T}^{H} [GeV]")
         h1.GetXaxis().CenterTitle(True)
         h1.GetXaxis().SetTitleOffset(2.5*pad1.GetAbsHNDC())
@@ -268,7 +268,7 @@ class UnfoldingPlot:
         h2.GetXaxis().SetTitle("m_{jj}^{gen} [GeV]")
         h2.GetXaxis().CenterTitle(True)
         h2.GetXaxis().SetTitleOffset(2.5*pad3.GetAbsHNDC())
-        h2.GetYaxis().SetRangeUser(0.01, 10000)
+        h2.GetYaxis().SetRangeUser(0.01, 10000000)
         h2.GetYaxis().SetTitleSize(0)
         h2.GetYaxis().SetLabelSize(0)
         h2.Draw()

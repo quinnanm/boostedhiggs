@@ -4,7 +4,7 @@
 void stxs()
 {
 //=========Macro generated from canvas: stxs/stxs
-//=========  (Tue Feb 18 21:10:34 2025) by ROOT version 6.30/07
+//=========  (Tue Jun 17 10:09:22 2025) by ROOT version 6.30/07
    TCanvas *stxs = new TCanvas("stxs", "stxs",0,0,800,600);
    gStyle->SetOptStat(0);
    stxs->SetHighLightColor(2);
@@ -18,7 +18,7 @@ void stxs()
    TPad *pad1__0 = new TPad("pad1", "pad1",0,0.4,0.6,1);
    pad1__0->Draw();
    pad1__0->cd();
-   pad1__0->Range(-1.042169,-2.352941,2.572289,4.705882);
+   pad1__0->Range(-1.042169,-2.529412,2.572289,8.058824);
    pad1__0->SetFillColor(0);
    pad1__0->SetBorderMode(0);
    pad1__0->SetBorderSize(2);
@@ -31,7 +31,7 @@ void stxs()
    
    TH1D *dummy1__1 = new TH1D("dummy1__1","",3,-0.5,2.5);
    dummy1__1->SetMinimum(0.01);
-   dummy1__1->SetMaximum(10000);
+   dummy1__1->SetMaximum(1e+07);
    dummy1__1->SetEntries(3);
    dummy1__1->SetStats(0);
    dummy1__1->SetLineColor(0);
@@ -58,11 +58,11 @@ void stxs()
    dummy1__1->Draw("");
    
    Double_t Graph0_fx3001[3] = { 0, 1, 2 };
-   Double_t Graph0_fy3001[3] = { 128.8848, 40.74342, 7.040057 };
+   Double_t Graph0_fy3001[3] = { 14716.46, 4444.722, 896.4965 };
    Double_t Graph0_felx3001[3] = { 0.5, 0.5, 0.5 };
-   Double_t Graph0_fely3001[3] = { 122.3632, 38.68181, 6.68383 };
+   Double_t Graph0_fely3001[3] = { 13971.8, 4219.819, 851.1338 };
    Double_t Graph0_fehx3001[3] = { 0.5, 0.5, 0.5 };
-   Double_t Graph0_fehy3001[3] = { 135.4063, 42.80504, 7.396284 };
+   Double_t Graph0_fehy3001[3] = { 15461.11, 4669.625, 941.8592 };
    TGraphAsymmErrors *grae = new TGraphAsymmErrors(3,Graph0_fx3001,Graph0_fy3001,Graph0_felx3001,Graph0_fehx3001,Graph0_fely3001,Graph0_fehy3001);
    grae->SetName("Graph0");
    grae->SetTitle("Graph");
@@ -71,8 +71,8 @@ void stxs()
    grae->SetLineColor(4);
    
    TH1F *Graph_Graph03001 = new TH1F("Graph_Graph03001","Graph",100,-0.8,2.8);
-   Graph_Graph03001->SetMinimum(0.3206042);
-   Graph_Graph03001->SetMaximum(290.6846);
+   Graph_Graph03001->SetMinimum(40.82645);
+   Graph_Graph03001->SetMaximum(33190.79);
    Graph_Graph03001->SetDirectory(nullptr);
    Graph_Graph03001->SetStats(0);
 
@@ -93,11 +93,11 @@ void stxs()
    grae->Draw("2");
    
    Double_t Graph0_fx3002[3] = { 0, 1, 2 };
-   Double_t Graph0_fy3002[3] = { 128.8848, 40.74342, 7.040057 };
+   Double_t Graph0_fy3002[3] = { 14716.46, 4444.722, 896.4965 };
    Double_t Graph0_felx3002[3] = { 0.5, 0.5, 0.5 };
-   Double_t Graph0_fely3002[3] = { 122.3632, 38.68181, 6.68383 };
+   Double_t Graph0_fely3002[3] = { 13971.8, 4219.819, 851.1338 };
    Double_t Graph0_fehx3002[3] = { 0.5, 0.5, 0.5 };
-   Double_t Graph0_fehy3002[3] = { 135.4063, 42.80504, 7.396284 };
+   Double_t Graph0_fehy3002[3] = { 15461.11, 4669.625, 941.8592 };
    grae = new TGraphAsymmErrors(3,Graph0_fx3002,Graph0_fy3002,Graph0_felx3002,Graph0_fehx3002,Graph0_fely3002,Graph0_fehy3002);
    grae->SetName("Graph0");
    grae->SetTitle("Graph");
@@ -106,8 +106,8 @@ void stxs()
    grae->SetLineColor(4);
    
    TH1F *Graph_Graph03002 = new TH1F("Graph_Graph03002","Graph",100,-0.8,2.8);
-   Graph_Graph03002->SetMinimum(0.3206042);
-   Graph_Graph03002->SetMaximum(290.6846);
+   Graph_Graph03002->SetMinimum(40.82645);
+   Graph_Graph03002->SetMaximum(33190.79);
    Graph_Graph03002->SetDirectory(nullptr);
    Graph_Graph03002->SetStats(0);
 
@@ -126,11 +126,11 @@ void stxs()
    grae->Draw("pe");
    
    Double_t Graph1_fx3003[3] = { 0, 1, 2 };
-   Double_t Graph1_fy3003[3] = { -81.32629, -82.54618, 0.8096066 };
+   Double_t Graph1_fy3003[3] = { 13627.44, -7444.909, -319.1528 };
    Double_t Graph1_felx3003[3] = { 0, 0, 0 };
-   Double_t Graph1_fely3003[3] = { 590.2922, 114.0816, 18.22671 };
+   Double_t Graph1_fely3003[3] = { 75421.84, 11689.62, 2631.217 };
    Double_t Graph1_fehx3003[3] = { 0, 0, 0 };
-   Double_t Graph1_fehy3003[3] = { 733.2255, 90.49114, 21.38769 };
+   Double_t Graph1_fehy3003[3] = { 133537.1, 9702.827, 2816.792 };
    grae = new TGraphAsymmErrors(3,Graph1_fx3003,Graph1_fy3003,Graph1_felx3003,Graph1_fehx3003,Graph1_fely3003,Graph1_fehy3003);
    grae->SetName("Graph1");
    grae->SetTitle("Graph");
@@ -139,8 +139,8 @@ void stxs()
    grae->SetMarkerStyle(20);
    
    TH1F *Graph_Graph13003 = new TH1F("Graph_Graph13003","Graph",100,0,2.2);
-   Graph_Graph13003->SetMinimum(0.7253437);
-   Graph_Graph13003->SetMaximum(725.3437);
+   Graph_Graph13003->SetMinimum(162.6255);
+   Graph_Graph13003->SetMaximum(162625.5);
    Graph_Graph13003->SetDirectory(nullptr);
    Graph_Graph13003->SetStats(0);
 
@@ -324,11 +324,11 @@ void stxs()
    grae->Draw("pe");
    
    Double_t Graph1_fx3006[3] = { 0, 1, 2 };
-   Double_t Graph1_fy3006[3] = { -0.631, -2.026, 0.115 };
+   Double_t Graph1_fy3006[3] = { 0.926, -1.675, -0.356 };
    Double_t Graph1_felx3006[3] = { 0, 0, 0 };
-   Double_t Graph1_fely3006[3] = { 4.58, 2.8, 2.589 };
+   Double_t Graph1_fely3006[3] = { 5.125, 2.63, 2.935 };
    Double_t Graph1_fehx3006[3] = { 0, 0, 0 };
-   Double_t Graph1_fehy3006[3] = { 5.689, 2.221, 3.038 };
+   Double_t Graph1_fehy3006[3] = { 9.074, 2.183, 3.142 };
    grae = new TGraphAsymmErrors(3,Graph1_fx3006,Graph1_fy3006,Graph1_felx3006,Graph1_fehx3006,Graph1_fely3006,Graph1_fehy3006);
    grae->SetName("Graph1");
    grae->SetTitle("Graph");
@@ -337,8 +337,8 @@ void stxs()
    grae->SetMarkerStyle(20);
    
    TH1F *Graph_Graph13006 = new TH1F("Graph_Graph13006","Graph",100,0,2.2);
-   Graph_Graph13006->SetMinimum(-6.2379);
-   Graph_Graph13006->SetMaximum(6.0849);
+   Graph_Graph13006->SetMinimum(-5.7355);
+   Graph_Graph13006->SetMaximum(11.4305);
    Graph_Graph13006->SetDirectory(nullptr);
    Graph_Graph13006->SetStats(0);
 
@@ -362,7 +362,7 @@ void stxs()
    TPad *pad3__2 = new TPad("pad3", "pad3",0.6,0.4,1,1);
    pad3__2->Draw();
    pad3__2->cd();
-   pad3__2->Range(2.475904,-2.352941,3.680723,4.705882);
+   pad3__2->Range(2.475904,-2.529412,3.680723,8.058824);
    pad3__2->SetFillColor(0);
    pad3__2->SetBorderMode(0);
    pad3__2->SetBorderSize(2);
@@ -375,7 +375,7 @@ void stxs()
    
    TH1D *dummy2__3 = new TH1D("dummy2__3","",1,2.5,3.5);
    dummy2__3->SetMinimum(0.01);
-   dummy2__3->SetMaximum(10000);
+   dummy2__3->SetMaximum(1e+07);
    dummy2__3->SetEntries(1);
    dummy2__3->SetStats(0);
    dummy2__3->SetLineColor(0);
@@ -399,11 +399,11 @@ void stxs()
    dummy2__3->Draw("");
    
    Double_t Graph0_fx3007[1] = { 3 };
-   Double_t Graph0_fy3007[1] = { 100.8066 };
+   Double_t Graph0_fy3007[1] = { 2423.131 };
    Double_t Graph0_felx3007[1] = { 0.5 };
-   Double_t Graph0_fely3007[1] = { 98.66949 };
+   Double_t Graph0_fely3007[1] = { 2371.76 };
    Double_t Graph0_fehx3007[1] = { 0.5 };
-   Double_t Graph0_fehy3007[1] = { 102.9638 };
+   Double_t Graph0_fehy3007[1] = { 2474.986 };
    grae = new TGraphAsymmErrors(1,Graph0_fx3007,Graph0_fy3007,Graph0_felx3007,Graph0_fehx3007,Graph0_fely3007,Graph0_fehy3007);
    grae->SetName("Graph0");
    grae->SetTitle("Graph");
@@ -413,8 +413,8 @@ void stxs()
    grae->SetMarkerColor(94);
    
    TH1F *Graph_Graph03007 = new TH1F("Graph_Graph03007","Graph",100,2.4,3.6);
-   Graph_Graph03007->SetMinimum(1.92339);
-   Graph_Graph03007->SetMaximum(223.9338);
+   Graph_Graph03007->SetMinimum(46.23334);
+   Graph_Graph03007->SetMaximum(5382.791);
    Graph_Graph03007->SetDirectory(nullptr);
    Graph_Graph03007->SetStats(0);
 
@@ -433,11 +433,11 @@ void stxs()
    grae->Draw("2");
    
    Double_t Graph0_fx3008[1] = { 3 };
-   Double_t Graph0_fy3008[1] = { 100.8066 };
+   Double_t Graph0_fy3008[1] = { 2423.131 };
    Double_t Graph0_felx3008[1] = { 0.5 };
-   Double_t Graph0_fely3008[1] = { 98.66949 };
+   Double_t Graph0_fely3008[1] = { 2371.76 };
    Double_t Graph0_fehx3008[1] = { 0.5 };
-   Double_t Graph0_fehy3008[1] = { 102.9638 };
+   Double_t Graph0_fehy3008[1] = { 2474.986 };
    grae = new TGraphAsymmErrors(1,Graph0_fx3008,Graph0_fy3008,Graph0_felx3008,Graph0_fehx3008,Graph0_fely3008,Graph0_fehy3008);
    grae->SetName("Graph0");
    grae->SetTitle("Graph");
@@ -447,8 +447,8 @@ void stxs()
    grae->SetMarkerColor(94);
    
    TH1F *Graph_Graph03008 = new TH1F("Graph_Graph03008","Graph",100,2.4,3.6);
-   Graph_Graph03008->SetMinimum(1.92339);
-   Graph_Graph03008->SetMaximum(223.9338);
+   Graph_Graph03008->SetMinimum(46.23334);
+   Graph_Graph03008->SetMaximum(5382.791);
    Graph_Graph03008->SetDirectory(nullptr);
    Graph_Graph03008->SetStats(0);
 
@@ -467,11 +467,11 @@ void stxs()
    grae->Draw("pe");
    
    Double_t Graph1_fx3009[1] = { 3 };
-   Double_t Graph1_fy3009[1] = { 160.8873 };
+   Double_t Graph1_fy3009[1] = { 3751.007 };
    Double_t Graph1_felx3009[1] = { 0 };
-   Double_t Graph1_fely3009[1] = { 80.04043 };
+   Double_t Graph1_fely3009[1] = { 1887.619 };
    Double_t Graph1_fehx3009[1] = { 0 };
-   Double_t Graph1_fehy3009[1] = { 117.8429 };
+   Double_t Graph1_fehy3009[1] = { 2820.524 };
    grae = new TGraphAsymmErrors(1,Graph1_fx3009,Graph1_fy3009,Graph1_felx3009,Graph1_fehx3009,Graph1_fely3009,Graph1_fehy3009);
    grae->SetName("Graph1");
    grae->SetTitle("Graph");
@@ -480,8 +480,8 @@ void stxs()
    grae->SetMarkerStyle(20);
    
    TH1F *Graph_Graph13009 = new TH1F("Graph_Graph13009","Graph",100,2.9,4.1);
-   Graph_Graph13009->SetMinimum(61.05855);
-   Graph_Graph13009->SetMaximum(298.5185);
+   Graph_Graph13009->SetMinimum(1392.573);
+   Graph_Graph13009->SetMaximum(7042.345);
    Graph_Graph13009->SetDirectory(nullptr);
    Graph_Graph13009->SetStats(0);
 
@@ -621,11 +621,11 @@ void stxs()
    grae->Draw("pe");
    
    Double_t Graph1_fx3012[1] = { 3 };
-   Double_t Graph1_fy3012[1] = { 1.596 };
+   Double_t Graph1_fy3012[1] = { 1.548 };
    Double_t Graph1_felx3012[1] = { 0 };
-   Double_t Graph1_fely3012[1] = { 0.794 };
+   Double_t Graph1_fely3012[1] = { 0.779 };
    Double_t Graph1_fehx3012[1] = { 0 };
-   Double_t Graph1_fehy3012[1] = { 1.169 };
+   Double_t Graph1_fehy3012[1] = { 1.164 };
    grae = new TGraphAsymmErrors(1,Graph1_fx3012,Graph1_fy3012,Graph1_felx3012,Graph1_fehx3012,Graph1_fely3012,Graph1_fehy3012);
    grae->SetName("Graph1");
    grae->SetTitle("Graph");
@@ -634,8 +634,8 @@ void stxs()
    grae->SetMarkerStyle(20);
    
    TH1F *Graph_Graph13012 = new TH1F("Graph_Graph13012","Graph",100,2.9,4.1);
-   Graph_Graph13012->SetMinimum(0.6057);
-   Graph_Graph13012->SetMaximum(2.9613);
+   Graph_Graph13012->SetMinimum(0.5747);
+   Graph_Graph13012->SetMaximum(2.9063);
    Graph_Graph13012->SetDirectory(nullptr);
    Graph_Graph13012->SetStats(0);
 
