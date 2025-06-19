@@ -9,12 +9,14 @@ import pandas as pd
 import os
 import pickle
 import copy
+import math
 
 homedir =  '/eos/uscms/store/user/fmokhtar/boostedhiggs/Jun13_hww_stxs_'
 years = ['2016','2016APV','2017','2018']
 lumi = [16809.96, 19492.72, 41476.02, 59816.23]
 xsecs = {'vbf': 0.8082134, 'ggf1a': 0.10078092000000001, 'ggf1b': 4.498172726490241, 'ggf2a': 0.10078092000000001, 'ggf2b': 4.498172726490241, 'ggf3a': 0.10078092000000001, 'ggf3b': 4.498172726490241}
-procs = ['vbf', 'ggf1a', 'ggf1b', 'ggf2a', 'ggf2b', 'ggf3a', 'ggf3b'] 
+#procs = ['vbf', 'ggf1a', 'ggf1b', 'ggf2a', 'ggf2b', 'ggf3a', 'ggf3b'] #ggfb is zero
+procs = ['vbf', 'ggf1a', 'ggf2a','ggf3a'] 
 #ggf1: ggf_200_300 ggf2: ggf_300_450 ggf3: ggf_450_inf
 # ggf a = GluGluHToWW_Pt-200ToInf_M-125_Rivet
 # ggf b = GluGluHToWWToLNuQQ_M-125_TuneCP5_13TeV_powheg_jhugen751_pythia8
@@ -25,6 +27,7 @@ ggfb_dir = 'GluGluHToWWToLNuQQ_M-125_TuneCP5_13TeV_powheg_jhugen751_pythia8'
 #sumgenweights
 sgw_tot = {proc: [0, 0, 0, 0] for proc in procs}
 sgw_pass = {proc: [0, 0, 0, 0] for proc in procs}
+sgw_reco = {proc: [0, 0, 0, 0] for proc in procs}
 totxsec = {proc: 0.0 for proc in procs}
 #pklsumgenweight = {proc: 0.0 for proc in procs} #for debugging
 pklsumgenweight = {proc: [0, 0, 0, 0] for proc in procs} #for debugging
@@ -184,7 +187,11 @@ def compute_ps_systs(lep='mu'):
             print(f'ps_reco: {sum(ps_reco[proc][name])}')
             print(f'ps_pass: {sum(ps_pass[proc][name])}')
             print(f'totsyst_ps: {totsyst_ps[proc][name]}')
+        print(f"tot ps up: {math.sqrt((totsyst_ps[proc]['PSISRUp'])**2 + (totsyst_ps[proc]['PSFSRUp'])**2)}")
+        print(f"tot ps down: {math.sqrt((totsyst_ps[proc]['PSISRDown'])**2 + (totsyst_ps[proc]['PSFSRDown'])**2)}")
+
         print('----------------------------------------')
+
 
 #qcd scale systematics
 #up/down variations computed per year        
@@ -195,28 +202,99 @@ def compute_scale_systs(lep='mu'):
             procfull = getprocpath(proc) #full name of sample
             tot_scsums_pass = {name: 0.0 for name in scnames} #dictionary to hold the total sums per weight per year 
             tot_scsums_reco = {name: 0.0 for name in scnames}
+            scweights_gen = {name: [] for name in scnames} 
+            scweights_reco = {name: [] for name in scnames} 
+            nominal_gen = []
+            nominal_reco = []
             print(f"year: {year}, process: {proc} file: {procfull}")
             filelist = getfilelist(proc, year, endstr)
+            #for first loop around get the sums  
             for filepath in filelist:
                 events = pd.read_parquet(filepath)
                 events_gen = selectdf(events, 'gen', proc)
                 events_reco = selectdf(events, 'reco', proc)
-                sels = ['pass', 'reco']
-                #get sums of scale weights per year
-                for sel in sels:
-                    for weight in scnames:
-                        if sel == 'pass':
-                            scsum = events_gen[weight].sum()
-                            tot_scsums_pass[weight] += float(scsum)
-                        elif sel == 'reco':
-                            scsum = events_reco[weight].sum()
-                            tot_scsums_reco[weight] += float(scsum)
-                            
+                #get sums of scale weights per year over all samples                
+                #compute gen sumgenweight if not computed yet
+                sgwname = 'weight_'+lep+'_genweight'
+                if (sgw_pass[proc][i]==0):
+                    passsum = events_gen[sgwname].sum()
+                    sgw_pass[proc][i] += float(passsum)
+                #compute reco sumgenweight
+                if (sgw_reco[proc][i]==0):
+                    recosum = events_reco[sgwname].sum()
+                    sgw_reco[proc][i] += float(recosum)
+                #get sums of scale weights per year over all samples 
+                for weight in scnames:
+                    #gen first
+                    scsum_gen = events_gen[weight].sum()
+                    tot_scsums_pass[weight] += float(scsum_gen)
+                    #then reco
+                    scsum_reco = events_reco[weight].sum()
+                    tot_scsums_reco[weight] += float(scsum_reco)
+                    #then save arrays of all weights in samples by appending the dataframes
+                    scweights_gen[weight].append(events_gen[weight])
+                    scweights_reco[weight].append(events_reco[weight])             
+                #nominal arrays  #nominal = df[f"weight_{ch}"] * xsecweight
+                nominal_gen.append(events_gen[f"weight_{lep}"]*xsecs[proc])
+                nominal_reco.append(events_reco[f"weight_{lep}"]*xsecs[proc])
+                
             
+            #out of file loop, time to compute things looping over each scweight
+            #first flatten the df arrays
+            for weight in scnames:
+                scweights_gen[weight] = pd.concat(scweights_gen[weight]).values
+                scweights_reco[weight] = pd.concat(scweights_reco[weight]).values
+            nominal_gen = pd.concat(nominal_gen).values
+            nominal_reco = pd.concat(nominal_reco).values
+            
+            #now to compute
+            allscweights_gen = []
+            allscweights_reco = []
+            central_gen = None
+            central_reco = None
+            for weight in scnames:
+                R_pass = tot_scsums_pass[weight]/sgw_pass[proc][i]
+                R_reco = tot_scsums_reco[weight]/sgw_reco[proc][i]
+                wi_gen = scweights_gen[weight] * nominal_gen/R_pass 
+                wi_reco = scweights_reco[weight] * nominal_reco/R_reco
+                if weight == 'weight_scale4':
+                    central_gen = wi_gen
+                    central_reco = wi_reco
+                else:
+                    allscweights_gen.append(wi_gen)
+                    allscweights_reco.append(wi_reco)
+            
+            allscweights_gen = np.swapaxes(np.array(allscweights_gen), 0, 1)
+            allscweights_reco = np.swapaxes(np.array(allscweights_reco), 0, 1)
+            scaleup_gen = nominal_gen * np.max(allscweights_gen,axis=1) / central_gen
+            scaledown_gen = nominal_gen * np.min(allscweights_gen,axis=1) / central_gen
+            scaleup_reco = nominal_reco * np.max(allscweights_reco,axis=1) / central_reco
+            scaledown_reco = nominal_reco * np.min(allscweights_reco,axis=1) / central_reco
+            #save up and down scale weight sums
+            sc_pass[proc]['Up'][i] += scaleup_gen.sum()
+            sc_pass[proc]['Down'][i] += scaledown_gen.sum()
+            sc_reco[proc]['Up'][i] += scaleup_reco.sum()
+            sc_reco[proc]['Down'][i] += scaledown_reco.sum()
+
+        #compute total systematic uncertainty for the process by summing weights per process over all years
+        print('----------------------------------------')
+        for name in ['Up', 'Down']:
+            totsyst_scale[proc][name] = sum(sc_reco[proc][name])/sum(sc_pass[proc][name])
+            print(f'sc_reco {name}: {sum(sc_reco[proc][name])}')
+            print(f'sc_pass {name}: {sum(sc_pass[proc][name])}')
+            print(f'totsyst_scale {name}: {totsyst_scale[proc][name]}')
+        print('----------------------------------------')
+
+
+
+                            
+    #nominal = df[f"weight_{ch}"] * xsecweight
+    #nominal is an array of the weights in that particular df/parquet file for that sample        
+    #why do we multipy by nominal 2x?
 
 ###### execute
-compute_xsec(debug=False)
+#compute_xsec(debug=False)
 #compute_ps_systs()
-#compute_scale_systs()
+compute_scale_systs()
 
                     
