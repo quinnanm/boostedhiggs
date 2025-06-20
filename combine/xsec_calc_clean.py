@@ -49,6 +49,16 @@ sc_reco = {proc: copy.deepcopy(sysdict_template) for proc in procs}
 systot_template = {'Up': 0.0, 'Down': 0.0}
 totsyst_scale = {proc: copy.deepcopy(systot_template) for proc in procs}
 
+#pdf and alphas weights
+pdfnames = [f"weight_pdf{i}" for i in range(100)] #all pdf weights from 0 to 102
+alsnames = ['weight_pdf101', 'weight_pdf102'] #the last 2 pdf weights
+pdf_pass = {proc: copy.deepcopy(sysdict_template) for proc in procs}
+pdf_reco = {proc: copy.deepcopy(sysdict_template) for proc in procs}
+totsyst_pdf = {proc: copy.deepcopy(systot_template) for proc in procs}
+als_pass = {proc: copy.deepcopy(sysdict_template) for proc in procs}
+als_reco = {proc: copy.deepcopy(sysdict_template) for proc in procs}
+totsyst_als = {proc: copy.deepcopy(systot_template) for proc in procs}
+
 def calcxsec(sumweightspass, sumweightstotal, lum, xs):
     calc = (sumweightspass / sumweightstotal ) * lum * xs
     #print(calc)
@@ -285,16 +295,129 @@ def compute_scale_systs(lep='mu'):
             print(f'totsyst_scale {name}: {totsyst_scale[proc][name]}')
         print('----------------------------------------')
 
+def compute_pdf_systs(lep='mu', typ='pdf'):
+    #typ is pdf or als
+    endstr = lep+'.parquet'
+    if typ == 'pdf':
+        sysnames = pdfnames
+    elif typ == 'als': 
+        sysnames = alsnames
+    for proc in procs:
+        for i,year in enumerate(years):
+            procfull = getprocpath(proc) #full name of sample
+            #pdf
+            tot_pdfsums_pass = {name: 0.0 for name in sysnames} #dictionary to hold the total sums per weight per year 
+            tot_pdfsums_reco = {name: 0.0 for name in sysnames}
+            pdfweights_gen = {name: [] for name in sysnames} 
+            pdfweights_reco = {name: [] for name in sysnames} 
+            nominal_gen = []
+            nominal_reco = []
+            print(f"year: {year}, process: {proc} file: {procfull}")
+            filelist = getfilelist(proc, year, endstr)
+            #for first loop around get the sums  
+            for filepath in filelist:
+                events = pd.read_parquet(filepath)
+                events_gen = selectdf(events, 'gen', proc)
+                events_reco = selectdf(events, 'reco', proc)
+                #get sums of scale weights per year over all samples                
+                #compute gen sumgenweight if not computed yet
+                sgwname = 'weight_'+lep+'_genweight'
+                if (sgw_pass[proc][i]==0):
+                    passsum = events_gen[sgwname].sum()
+                    sgw_pass[proc][i] += float(passsum)
+                #compute reco sumgenweight
+                if (sgw_reco[proc][i]==0):
+                    recosum = events_reco[sgwname].sum()
+                    sgw_reco[proc][i] += float(recosum)
+                #get sums of scale weights per year over all samples 
+                for weight in sysnames:
+                    pdfsum_gen = events_gen[weight].sum()
+                    pdfsum_reco = events_reco[weight].sum()
+                    tot_pdfsums_pass[weight] += float(pdfsum_gen)                       
+                    tot_pdfsums_reco[weight] += float(pdfsum_reco)
+                    pdfweights_gen[weight].append(events_gen[weight])
+                    pdfweights_reco[weight].append(events_reco[weight])          
+                #nominal arrays  #nominal = df[f"weight_{ch}"] * xsecweight
+                nominal_gen.append(events_gen[f"weight_{lep}"]*xsecs[proc])
+                nominal_reco.append(events_reco[f"weight_{lep}"]*xsecs[proc])     
+                     
+            #out of file loop, time to compute things looping over each weight
+            #first flatten the df arrays
+            for weight in sysnames:                    
+                pdfweights_gen[weight] = pd.concat(pdfweights_gen[weight]).values
+                pdfweights_reco[weight] = pd.concat(pdfweights_reco[weight]).values
+            nominal_gen = pd.concat(nominal_gen).values
+            nominal_reco = pd.concat(nominal_reco).values
 
+            #now to compute
+            allpdfweights_gen = []
+            allpdfweights_reco = []
+            for weight in sysnames:
+                R_pass = tot_pdfsums_pass[weight]/sgw_pass[proc][i]
+                R_reco = tot_pdfsums_reco[weight]/sgw_reco[proc][i]
+                wi_gen = pdfweights_gen[weight] * nominal_gen/R_pass 
+                wi_reco = pdfweights_reco[weight] * nominal_reco/R_reco
+                allpdfweights_gen.append(wi_gen)
+                allpdfweights_reco.append(wi_reco)
+            allpdfweights_gen = np.swapaxes(np.array(allpdfweights_gen), 0, 1)
+            allpdfweights_reco = np.swapaxes(np.array(allpdfweights_reco), 0, 1)
 
-                            
-    #nominal = df[f"weight_{ch}"] * xsecweight
-    #nominal is an array of the weights in that particular df/parquet file for that sample        
-    #why do we multipy by nominal 2x?
+            #now compute and save the up and down variations
+            if typ=='pdf':
+                absunc_pdf_gen = np.linalg.norm(allpdfweights_gen- nominal_gen[:, np.newaxis], axis=1)
+                absunc_pdf_reco = np.linalg.norm(allpdfweights_reco- nominal_reco[:, np.newaxis], axis=1)
+                #relunc_pdf_gen = np.clip(absunc_pdf_gen / nominal_gen, 0, 1)
+                #relunc_pdf_reco = np.clip(absunc_pdf_reco / nominal_reco, 0, 1)
+                pdfup_gen = nominal_gen + absunc_pdf_gen
+                pdfdown_gen = nominal_gen - absunc_pdf_gen
+                pdfup_reco = nominal_reco + absunc_pdf_reco
+                pdfdown_reco = nominal_reco - absunc_pdf_reco
+                #save up and down pdf weight sums
+                pdf_pass[proc]['Up'][i] += pdfup_gen.sum()
+                pdf_pass[proc]['Down'][i] += pdfdown_gen.sum()
+                pdf_reco[proc]['Up'][i] += pdfup_reco.sum()
+                pdf_reco[proc]['Down'][i] += pdfdown_reco.sum()
+            elif typ=='als': #compute as envelope instead
+                var_up_gen = allpdfweights_gen[:, 0]
+                var_down_gen = allpdfweights_gen[:, 1]
+                var_up_reco = allpdfweights_reco[:, 0]
+                var_down_reco = allpdfweights_reco[:, 1]
+                max_var_gen = np.maximum.reduce([var_up_gen, var_down_gen, nominal_gen])
+                min_var_gen = np.minimum.reduce([var_up_gen, var_down_gen, nominal_gen])
+                max_var_reco = np.maximum.reduce([var_up_reco, var_down_reco, nominal_reco])
+                min_var_reco = np.minimum.reduce([var_up_reco, var_down_reco, nominal_reco])
+                pdfup_gen = max_var_gen
+                pdfdown_gen = min_var_gen
+                pdfup_reco = max_var_reco
+                pdfdown_reco = min_var_reco
+                als_pass[proc]['Up'][i] += pdfup_gen.sum()
+                als_pass[proc]['Down'][i] += pdfdown_gen.sum()
+                als_reco[proc]['Up'][i] += pdfup_reco.sum()
+                als_reco[proc]['Down'][i] += pdfdown_reco.sum()
+            
+        #compute total systematic uncertainty for the process by summing weights per process over all years
+        print('----------------------------------------')
+        for name in ['Up', 'Down']:
+            if typ=='pdf':
+                print('pdf')
+                totsyst_pdf[proc][name] = sum(pdf_reco[proc][name])/sum(pdf_pass[proc][name])
+                print(f'pdf_reco {name}: {sum(pdf_reco[proc][name])}')
+                print(f'pdf_pass {name}: {sum(pdf_pass[proc][name])}')
+                print(f'totsyst_pdf {name}: {totsyst_pdf[proc][name]}')
+            elif typ=='als':
+                print('als')
+                totsyst_als[proc][name] = sum(als_reco[proc][name])/sum(als_pass[proc][name])
+                print(f'als_reco {name}: {sum(als_reco[proc][name])}')
+                print(f'als_pass {name}: {sum(als_pass[proc][name])}')
+                print(f'totsyst_als {name}: {totsyst_als[proc][name]}')
+        print('----------------------------------------')
+
 
 ###### execute
 #compute_xsec(debug=False)
 #compute_ps_systs()
-compute_scale_systs()
+#compute_scale_systs()
+compute_pdf_systs(typ='pdf')
+compute_pdf_systs(typ='als')
 
                     
