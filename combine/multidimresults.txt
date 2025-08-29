@@ -29,11 +29,11 @@ Doing initial fit:
 
  --- MultiDimFit ---
 best fit parameter values and profile-likelihood uncertainties: 
-          r_ggH_pt200_300 :    +0.926   -5.125/+9.074 (68%)
-          r_ggH_pt300_450 :    -1.675   -2.630/+2.183 (68%)
-          r_ggH_pt450_inf :    -0.356   -2.935/+3.142 (68%)
-   r_qqH_hww_mjj_1000_Inf :    +1.548   -0.779/+1.164 (68%)
+          r_ggH_pt200_300 :    -5.998   -4.002/+4.398 (68%)
+          r_ggH_pt300_450 :    -1.703   -1.997/+1.888 (68%)
+          r_ggH_pt450_inf :    -1.875   -2.498/+2.454 (68%)
+   r_qqH_hww_mjj_1000_Inf :    +0.228   -0.843/+0.968 (68%)
                  r_WH_hww :    +1.000   +0.000/+0.000 (68%)
                  r_ZH_hww :    +1.000   +0.000/+0.000 (68%)
                 r_ttH_hww :    +1.000   +0.000/+0.000 (68%)
-Done in 0.19 min (cpu), 0.20 min (real)
+Done in 0.14 min (cpu), 0.14 min (real)

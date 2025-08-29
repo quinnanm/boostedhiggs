@@ -1,14 +1,14 @@
-Combination of SR1=templates/v17//datacards_unfolding/VBF.txt  SR2=templates/v17//datacards_unfolding/ggFpt250to350.txt  SR3=templates/v17//datacards_unfolding/ggFpt350to500.txt  SR4=templates/v17//datacards_unfolding/ggFpt500toInf.txt  CR1=templates/v17//datacards_unfolding/TopCR.txt  CR2=templates/v17//datacards_unfolding/WJetsCR.txt
+Combination of SR1=templates/v17/datacards_unfolding/VBF.txt  SR2=templates/v17/datacards_unfolding/ggFpt250to350.txt  SR3=templates/v17/datacards_unfolding/ggFpt350to500.txt  SR4=templates/v17/datacards_unfolding/ggFpt500toInf.txt  CR1=templates/v17/datacards_unfolding/TopCR.txt  CR2=templates/v17/datacards_unfolding/WJetsCR.txt
 imax 6 number of bins
 jmax 13 number of processes minus 1
 kmax 181 number of nuisance parameters
 ----------------------------------------------------------------------------------------------------------------------------------
-shapes *    CR1  templates/v17//datacards_unfolding/testModel.root testModel:TopCR_$PROCESS testModel:TopCR_$PROCESS_$SYSTEMATIC
-shapes *    CR2  templates/v17//datacards_unfolding/testModel.root testModel:WJetsCR_$PROCESS testModel:WJetsCR_$PROCESS_$SYSTEMATIC
-shapes *    SR1  templates/v17//datacards_unfolding/testModel.root testModel:VBF_$PROCESS testModel:VBF_$PROCESS_$SYSTEMATIC
-shapes *    SR2  templates/v17//datacards_unfolding/testModel.root testModel:ggFpt250to350_$PROCESS testModel:ggFpt250to350_$PROCESS_$SYSTEMATIC
-shapes *    SR3  templates/v17//datacards_unfolding/testModel.root testModel:ggFpt350to500_$PROCESS testModel:ggFpt350to500_$PROCESS_$SYSTEMATIC
-shapes *    SR4  templates/v17//datacards_unfolding/testModel.root testModel:ggFpt500toInf_$PROCESS testModel:ggFpt500toInf_$PROCESS_$SYSTEMATIC
+shapes *    CR1  templates/v17/datacards_unfolding/testModel.root testModel:TopCR_$PROCESS testModel:TopCR_$PROCESS_$SYSTEMATIC
+shapes *    CR2  templates/v17/datacards_unfolding/testModel.root testModel:WJetsCR_$PROCESS testModel:WJetsCR_$PROCESS_$SYSTEMATIC
+shapes *    SR1  templates/v17/datacards_unfolding/testModel.root testModel:VBF_$PROCESS testModel:VBF_$PROCESS_$SYSTEMATIC
+shapes *    SR2  templates/v17/datacards_unfolding/testModel.root testModel:ggFpt250to350_$PROCESS testModel:ggFpt250to350_$PROCESS_$SYSTEMATIC
+shapes *    SR3  templates/v17/datacards_unfolding/testModel.root testModel:ggFpt350to500_$PROCESS testModel:ggFpt350to500_$PROCESS_$SYSTEMATIC
+shapes *    SR4  templates/v17/datacards_unfolding/testModel.root testModel:ggFpt500toInf_$PROCESS testModel:ggFpt500toInf_$PROCESS_$SYSTEMATIC
 ----------------------------------------------------------------------------------------------------------------------------------
 bin          SR1            SR2            SR3            SR4            CR1            CR2          
 observation  31             164            310            162            390            6103         

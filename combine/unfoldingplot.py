@@ -14,7 +14,7 @@ POIList = {'ggF': ['r_ggH_pt200_300', 'r_ggH_pt300_450', 'r_ggH_pt450_inf'],
 
 class UnfoldingPlot:
 
-    def __init__(self, combinecards='templates/v14/datacards_unfolding', poilist=POIList):
+    def __init__(self, combinecards='templates/v17/datacards_unfolding', poilist=POIList):
 
         self.cards_dir = combinecards
         self.multidimresults = "multidimresults.txt"
@@ -379,6 +379,8 @@ class UnfoldingPlot:
         vbf_smdoerrs = []
         vbf_smuperrs = []
         for key, smval in self.smvals.items():
+            print('smvals!!!!')
+            print(smval)
             if 'ggH' in key:
                 ggf_smdoerrs += [smval[1]] #down
                 ggf_smuperrs += [smval[2]] #up
@@ -386,6 +388,7 @@ class UnfoldingPlot:
                 vbf_smdoerrs += [smval[1]] #down
                 vbf_smuperrs += [smval[2]] #up
 
+        print(ggf_smdoerrs)
         g3 = rt.TGraphAsymmErrors(3,x1,np.ones(3),w1,w1,np.array(ggf_smdoerrs),np.array(ggf_smuperrs))
         g3.SetFillColor(4)
         g3.SetFillStyle(3003)
@@ -411,7 +414,12 @@ class UnfoldingPlot:
                 vbf_rcenter += [poival[0]]
                 vbf_rdo += [-1.0*poival[1]]
                 vbf_rup += [poival[2]]
+  
 
+        print('ggf vales')
+        print(ggf_rcenter)
+        print(ggf_rdo)
+        print(ggf_rup)
         print('vbf vals')
         print(vbf_rcenter)
         print(vbf_rdo)

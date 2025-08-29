@@ -216,7 +216,7 @@ def compute_ps_systs(lep='mu'):
             print(f'ps_reco: {sum(ps_reco[proc][name])}')
             print(f'ps_pass: {sum(ps_pass[proc][name])}')
             print(f'nominal acc: {acc_nom:.6f}')
-            print(f"{name}: raw acc = {raw_acc:.6f}, shift = {totsyst_ps[proc][name]:.6f}")
+            print(f"{name}: raw acc = {raw_acc:.6f}, shift = {totsyst_ps[proc][name]:.10f}")
         print(f"tot ps up: {math.sqrt((totsyst_ps[proc]['PSISRUp'])**2 + (totsyst_ps[proc]['PSFSRUp'])**2)}")
         print(f"tot ps down: {math.sqrt((totsyst_ps[proc]['PSISRDown'])**2 + (totsyst_ps[proc]['PSFSRDown'])**2)}")
 
@@ -359,8 +359,8 @@ def compute_scale_systs(lep='mu'):
         print('----------RELATIVE TO NOMINAL WEIGHT----------------')
         #print(f"[{proc}] nominal acc = {acc_nom:.6f}, acc_up = {acc_up:.6f}, acc_dn = {acc_dn:.6f}")
         print(f"[{proc}] central acc (scale4) = {acc_central:.6f} | up = {acc_up:.6f} | dn = {acc_dn:.6f}")
-        print(f"[{proc}] Final scale syst Up   = {totsyst_scale[proc]['Up']:.6f}")
-        print(f"[{proc}] Final scale syst Down = {totsyst_scale[proc]['Down']:.6f}")
+        print(f"[{proc}] Final scale syst Up   = {totsyst_scale[proc]['Up']:.10f}")
+        print(f"[{proc}] Final scale syst Down = {totsyst_scale[proc]['Down']:.10f}")
         print('----------------------------------------')
 
         # store the shift relative to central weight acceptance weight_scale4
@@ -371,8 +371,8 @@ def compute_scale_systs(lep='mu'):
         print('----------RELATIVE TO CENTRAL WEIGHT4----------------')
         #print(f"[{proc}] nominal acc = {acc_nom:.6f}, acc_up = {acc_up:.6f}, acc_dn = {acc_dn:.6f}")
         print(f"[{proc}] central acc (scale4) = {acc_central:.6f} | up = {acc_up:.6f} | dn = {acc_dn:.6f}")
-        print(f"[{proc}] Final scale syst Up   = {totsyst_scale[proc]['Up']:.6f}")
-        print(f"[{proc}] Final scale syst Down = {totsyst_scale[proc]['Down']:.6f}")
+        print(f"[{proc}] Final scale syst Up   = {totsyst_scale[proc]['Up']:.10f}")
+        print(f"[{proc}] Final scale syst Down = {totsyst_scale[proc]['Down']:.10f}")
         print('----------------------------------------')
 
 
@@ -546,21 +546,21 @@ def compute_pdf_systs(lep='mu', typ='pdf'):
                 print(f'pdf_reco {name}: {sum(pdf_reco[proc][name])}')
                 print(f'pdf_pass {name}: {sum(pdf_pass[proc][name])}')
                 print(f'nominal acc: {acc_nom:.6f}')
-                print(f'PDF {name}: raw acc = {raw_acc:.6f}, shift = {shift:.6f}')
+                print(f'PDF {name}: raw acc = {raw_acc:.6f}, shift = {shift:.10f}')
             elif typ=='als':
                 totsyst_als[proc][name] = shift
                 print(f'als_reco {name}: {sum(als_reco[proc][name])}')
                 print(f'als_pass {name}: {sum(als_pass[proc][name])}')
                 print(f'nominal acc: {acc_nom:.6f}')
-                print(f'als  {name}: raw acc = {raw_acc:.6f}, shift = {shift:.6f}')
+                print(f'als  {name}: raw acc = {raw_acc:.6f}, shift = {shift:.10f}')
         print('----------------------------------------')
 
 
 ###### execute
-#compute_xsec(debug=False)
+compute_xsec(debug=False)
 #compute_ps_systs()
 #compute_scale_systs()
-compute_pdf_systs(typ='pdf')
+#compute_pdf_systs(typ='pdf')
 #compute_pdf_systs(typ='als')
 
                     
