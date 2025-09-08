@@ -113,7 +113,8 @@ class UnfoldingPlot:
         if not os.path.isfile(self.multidimresults) or rerun:
             print(f"creating xsecs json file {self.xsecsfile} from datacards {self.cards_dir}...")
 
-    def makeplot(self, showplot=False, verbose=True):
+    def makeplot(self, showplot=False, verbose=True,
+                top_logy=False, top_yrange=None, ratio_yrange=None):
         import ROOT as rt
         import numpy as np
 
@@ -141,6 +142,11 @@ class UnfoldingPlot:
         pad3.SetLeftMargin(0.02);  pad4.SetLeftMargin(0.02)
 
         for p in (pad1,pad2,pad3,pad4): p.Draw()
+
+        # optional log y on the top pads
+        if top_logy:
+            pad1.SetLogy()
+            pad3.SetLogy()
 
         textsize1 = 19/(pad1.GetWh()*pad1.GetAbsHNDC())
         textsize2 = 1.5*textsize1
@@ -186,7 +192,7 @@ class UnfoldingPlot:
             vbf_y.append(nom); vbf_eyl.append(abs(d_err)); vbf_eyh.append(abs(u_err))
 
         # ========== TOP pads (absolute σ) ==========
-        # shared y-range: y_max fixed to 0.5
+        # Original behavior: fixed ymax=0.5 and compute ymin from content.
         def y_min_with_margin(values, eyl, eyh, ymax=0.5, margin=0.10):
             lows = [v - lo for v, lo in zip(values, eyl)]
             lo = min(lows)
@@ -196,7 +202,15 @@ class UnfoldingPlot:
         all_vals = ggf_sm_y + ggf_y + vbf_sm_y + vbf_y
         all_eyl  = ggf_sm_eyl + ggf_eyl + vbf_sm_eyl + vbf_eyl
         all_eyh  = ggf_sm_eyh + ggf_eyh + vbf_sm_eyh + vbf_eyh
-        ylo, yhi = y_min_with_margin(all_vals, all_eyl, all_eyh, ymax=0.5, margin=0.10)
+
+        if top_yrange is None:
+            ylo, yhi = y_min_with_margin(all_vals, all_eyl, all_eyh, ymax=0.5, margin=0.10)
+        else:
+            ylo, yhi = top_yrange
+
+        # if log scale requested but ymin ≤ 0, lift it slightly
+        if top_logy and ylo <= 0:
+            ylo = max(1e-6, ylo + 1e-6)
 
         # ggF axis (left)
         pad1.cd()
@@ -275,22 +289,27 @@ class UnfoldingPlot:
         vbf_ratio_eyl = np.array([max(0.0, 1.0 - self.smvals[k][1]) for k in vbf_keys], dtype='float64')
         vbf_ratio_eyh = np.array([max(0.0, self.smvals[k][2] - 1.0) for k in vbf_keys], dtype='float64')
 
-        # Observed μ from poivals: [μ_nom, μ_down, μ_up]
+        # Observed μ from poivals: [μ_nom, μ_down, μ_up] (down/up stored as magnitudes)
         ggf_mu_y   = np.array([self.poivals[k][0] for k in ggf_keys], dtype='float64')
-        ggf_mu_eyl = np.array([abs(self.poivals[k][1]) for k in ggf_keys], dtype='float64')  # |-Δμ_down|
-        ggf_mu_eyh = np.array([abs(self.poivals[k][2]) for k in ggf_keys], dtype='float64')  # |+Δμ_up|
+        ggf_mu_eyl = np.array([abs(self.poivals[k][1]) for k in ggf_keys], dtype='float64')
+        ggf_mu_eyh = np.array([abs(self.poivals[k][2]) for k in ggf_keys], dtype='float64')
 
         vbf_mu_y   = np.array([self.poivals[k][0] for k in vbf_keys], dtype='float64')
         vbf_mu_eyl = np.array([abs(self.poivals[k][1]) for k in vbf_keys], dtype='float64')
         vbf_mu_eyh = np.array([abs(self.poivals[k][2]) for k in vbf_keys], dtype='float64')
-        # symmetric y-range around 1 for ratios
+
+        # Original behavior: auto symmetric range around 1
         def ratio_range():
             lows  = list(ggf_ratio_y - ggf_ratio_eyl) + list(vbf_ratio_y - vbf_ratio_eyl) + list(ggf_mu_y - ggf_mu_eyl) + list(vbf_mu_y - vbf_mu_eyl)
             highs = list(ggf_ratio_y + ggf_ratio_eyh) + list(vbf_ratio_y + vbf_ratio_eyh) + list(ggf_mu_y + ggf_mu_eyh) + list(vbf_mu_y + vbf_mu_eyh)
             lo, hi = min(lows), max(highs)
             R = max(abs(1.0 - lo), abs(hi - 1.0))
             return 1.0 - 1.1*R, 1.0 + 1.1*R
-        rlo, rhi = ratio_range()
+
+        if ratio_yrange is None:
+            rlo, rhi = ratio_range()
+        else:
+            rlo, rhi = ratio_yrange
 
         pad2.cd()
         h3 = rt.TH1D("h_rat_ggf","",3,-0.5,2.5)
@@ -343,4 +362,6 @@ if __name__ == "__main__":
 
     #generate the plot
     print('creating the plot...')
-    up.makeplot()
+    #up.makeplot()
+    # up.makeplot(top_logy=True, top_yrange=(1.0, 10000.0), ratio_yrange=(-5.0, 15.0))
+    up.makeplot(top_logy=False, top_yrange=(-3000.0, 2000.0), ratio_yrange=(-10.0, 10.0))

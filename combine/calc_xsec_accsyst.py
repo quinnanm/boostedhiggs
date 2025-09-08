@@ -14,7 +14,10 @@ import math
 homedir =  '/eos/uscms/store/user/fmokhtar/boostedhiggs/Jun13_hww_stxs_'
 years = ['2016','2016APV','2017','2018']
 lumi = {'2016':16809.96, '2016APV':19492.72, '2017':41476.02, '2018':59816.23}
-genxsecs = {'vbf': 0.8082134, 'ggf1': 0.10078092000000001, 'ggf2': 0.10078092000000001, 'ggf3': 0.10078092000000001}
+#xsecs sans BR
+#ggf gen xsec found here: https://github.com/farakiko/boostedhiggs/blob/main/fileset/xsec.py#L45
+#vbf gen xsec found here: https://github.com/farakiko/boostedhiggs/blob/main/fileset/xsec.py#L70
+genxsecs = {'vbf': 3.782, 'ggf1':  0.4716, 'ggf2':  0.4716, 'ggf3':  0.4716}
 procs = ['vbf', 'ggf1', 'ggf2','ggf3'] 
 #ggf1: ggf_200_300 ggf2: ggf_300_450 ggf3: ggf_450_inf
 vbf_dir = 'VBFHToWWToAny_M-125_TuneCP5_withDipoleRecoil_Rivet'
@@ -170,7 +173,7 @@ def compute_xsec_gen(lep='mu', debug=False):
 #compute ps uncertainties
 def compute_ps_acceptance(lep='mu', debug=False):
     """
-    Parton-shower ISR/FSR relative acceptances (PS weights are MULTIPLICATIVE).
+    Parton-shower ISR/FSR relative acceptances (PS weights are ABSOLUTE).
       A_nom  = sum(base)_reco / sum(base)_gen
       A_var  = sum(base*PSvar)_reco / sum(base*PSvar)_gen
       rel    = A_var / A_nom
@@ -209,7 +212,8 @@ def compute_ps_acceptance(lep='mu', debug=False):
                     raise RuntimeError(f"{base_col} missing in {fp}")
                 for c in ps_cols.values():
                     if c not in df:
-                        df[c] = 1.0  # factor default = no change
+                        df[c] = df[base_col]  # absolute convention: nominal = base weight
+                        #df[c] = 1.0  # multiplicative factor weights = no change
 
                 # selections
                 df_gen  = selectdf(df,  'gen',  proc)
@@ -218,9 +222,14 @@ def compute_ps_acceptance(lep='mu', debug=False):
                 S[year][proc]['nom']['gen']  += df_gen[base_col].sum()
                 S[year][proc]['nom']['reco'] += df_reco[base_col].sum()
                 # variations: multiply base by factor
+                #note: absolute not multiplicative weights
                 for tag, col in ps_cols.items():
-                    S[year][proc][tag]['gen']  += (df_gen[base_col]  * df_gen[col]).sum()
-                    S[year][proc][tag]['reco'] += (df_reco[base_col] * df_reco[col]).sum()
+                    S[year][proc][tag]['gen']  += df_gen[col].sum()
+                    S[year][proc][tag]['reco'] += df_reco[col].sum()
+                #absolute weights, not multiplicative (not used)
+                #for tag, col in ps_cols.items():
+                    #S[year][proc][tag]['gen']  += (df_gen[base_col]  * df_gen[col]).sum()
+                    #S[year][proc][tag]['reco'] += (df_reco[base_col] * df_reco[col]).sum()
 
     def finalize(Syproc):
         eps = 1e-12
@@ -492,13 +501,16 @@ def compute_pdf_alphas_acceptance(lep='mu', debug=False):
 
 def _bracket_to_deltas(rel_up, rel_down):
     """
-    Convert a pair of relative factors (e.g. 1.003, 0.997) to
-    symmetric deltas around 1, enforcing DOWN ≤ 1 ≤ UP.
-    Returns (delta_up, delta_down), where final kappas are 1±delta.
+    Turn two relative factors (could be both <1, both >1, or straddling 1)
+    into one-sided deltas suitable for quadrature combination across sources.
+
+    Returns (delta_up, delta_down) with:
+      delta_up  = max(0, rel_up - 1, rel_down - 1)
+      delta_down= max(0, 1 - rel_up, 1 - rel_down)
     """
-    lo = min(rel_up, rel_down)
-    hi = max(rel_up, rel_down)
-    return abs(hi - 1.0), abs(1.0 - lo)
+    du = max(0.0, rel_up - 1.0,  rel_down - 1.0)
+    dd = max(0.0, 1.0 - rel_up, 1.0 - rel_down)
+    return du, dd
 
 #for computing the final combined uncertainties
 def build_acceptance_systematics(ps_combined, sc_combined, pdf_combined, procs):
