@@ -20,4 +20,4 @@ best fit parameter values and profile-likelihood uncertainties:
                  r_WH_hww :    +1.000   +0.000/+0.000 (68%)
                  r_ZH_hww :    +1.000   +0.000/+0.000 (68%)
                 r_ttH_hww :    +1.000   +0.000/+0.000 (68%)
-Done in 0.15 min (cpu), 0.15 min (real)
+Done in 0.14 min (cpu), 0.14 min (real)

@@ -4,7 +4,7 @@
 void stxs()
 {
 //=========Macro generated from canvas: stxs/stxs
-//=========  (Mon Sep  8 17:15:17 2025) by ROOT version 6.30/07
+//=========  (Thu Sep 25 18:29:56 2025) by ROOT version 6.30/07
    TCanvas *stxs = new TCanvas("stxs", "stxs",0,0,800,600);
    gStyle->SetOptStat(0);
    stxs->SetHighLightColor(2);
@@ -155,18 +155,12 @@ void stxs()
    grae->SetHistogram(Graph_Graph13003);
    
    grae->Draw("pe ");
-   TLatex *   tex = new TLatex(0.17,0.92,"CMS");
+   TLatex *   tex = new TLatex(0.2,0.82,"CMS");
    tex->SetNDC();
-   tex->SetTextSize(0.0553613);
+   tex->SetTextSize(0.08304196);
    tex->SetLineWidth(2);
    tex->Draw();
-      tex = new TLatex(0.26,0.92,"H(WW)");
-   tex->SetNDC();
-   tex->SetTextFont(42);
-   tex->SetTextSize(0.0553613);
-   tex->SetLineWidth(2);
-   tex->Draw();
-      tex = new TLatex(0.2,0.82,"ggF");
+      tex = new TLatex(0.2,0.75,"ggF");
    tex->SetNDC();
    tex->SetTextFont(42);
    tex->SetTextSize(0.0553613);
@@ -210,15 +204,9 @@ void stxs()
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
    leg->Draw();
-      tex = new TLatex(0.17,0.92,"CMS");
+      tex = new TLatex(0.2,0.82,"CMS");
    tex->SetNDC();
-   tex->SetTextSize(0.0553613);
-   tex->SetLineWidth(2);
-   tex->Draw();
-      tex = new TLatex(0.26,0.92,"H(WW)");
-   tex->SetNDC();
-   tex->SetTextFont(42);
-   tex->SetTextSize(0.0553613);
+   tex->SetTextSize(0.08304196);
    tex->SetLineWidth(2);
    tex->Draw();
    
@@ -266,7 +254,7 @@ void stxs()
    TPad *pad2__1 = new TPad("pad2", "pad2",0,0,0.6,0.4);
    pad2__1->Draw();
    pad2__1->cd();
-   pad2__1->Range(-1.042169,-18.57155,2.572289,10.00029);
+   pad2__1->Range(-1.042169,-20.42871,2.572289,11.00031);
    pad2__1->SetFillColor(0);
    pad2__1->SetBorderMode(0);
    pad2__1->SetBorderSize(2);
@@ -278,8 +266,8 @@ void stxs()
    pad2__1->SetFrameBorderMode(0);
    
    TH1D *h_rat_ggf__2 = new TH1D("h_rat_ggf__2","",3,-0.5,2.5);
-   h_rat_ggf__2->SetMinimum(-10);
-   h_rat_ggf__2->SetMaximum(10);
+   h_rat_ggf__2->SetMinimum(-11);
+   h_rat_ggf__2->SetMaximum(11);
    h_rat_ggf__2->SetStats(0);
 
    ci = TColor::GetColor("#000099");
@@ -547,7 +535,7 @@ void stxs()
    tex->SetTextSize(0.0553613);
    tex->SetLineWidth(2);
    tex->Draw();
-      tex = new TLatex(0.08,0.82,"VBF");
+      tex = new TLatex(0.08,0.75,"VBF");
    tex->SetNDC();
    tex->SetTextFont(42);
    tex->SetTextSize(0.0553613);
@@ -559,7 +547,7 @@ void stxs()
    tex->SetTextSize(0.0553613);
    tex->SetLineWidth(2);
    tex->Draw();
-      tex = new TLatex(0.08,0.82,"VBF");
+      tex = new TLatex(0.08,0.75,"VBF");
    tex->SetNDC();
    tex->SetTextFont(42);
    tex->SetTextSize(0.0553613);
@@ -572,7 +560,7 @@ void stxs()
    TPad *pad4__3 = new TPad("pad4", "pad4",0.6,0,1,0.4);
    pad4__3->Draw();
    pad4__3->cd();
-   pad4__3->Range(2.475904,-18.57155,3.680723,10.00029);
+   pad4__3->Range(2.475904,-20.42871,3.680723,11.00031);
    pad4__3->SetFillColor(0);
    pad4__3->SetBorderMode(0);
    pad4__3->SetBorderSize(2);
@@ -584,8 +572,8 @@ void stxs()
    pad4__3->SetFrameBorderMode(0);
    
    TH1D *h_rat_vbf__4 = new TH1D("h_rat_vbf__4","",1,2.5,3.5);
-   h_rat_vbf__4->SetMinimum(-10);
-   h_rat_vbf__4->SetMaximum(10);
+   h_rat_vbf__4->SetMinimum(-11);
+   h_rat_vbf__4->SetMaximum(11);
    h_rat_vbf__4->SetStats(0);
 
    ci = TColor::GetColor("#000099");

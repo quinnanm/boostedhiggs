@@ -24,7 +24,7 @@ class UnfoldingPlot:
         #run the fit if needed
         print('combine cards directory: '+combinecards)
         print('getting multidimfit results...')
-        self.runfit(rerunfit=True)
+        self.runfit(rerunfit=False)
         self.poivals = self.parsemultidimresult(self.poilist)
 
         #get the SM cross sections and calculate unfolded differential ones
@@ -154,10 +154,11 @@ class UnfoldingPlot:
 
         lumi = 138
         tag1 = rt.TLatex(0.46, 0.92, "%.0f fb^{-1} (13 TeV)" % lumi); tag1.SetNDC(); tag1.SetTextFont(42)
-        tag2 = rt.TLatex(0.17, 0.92, "CMS");                           tag2.SetNDC(); tag2.SetTextFont(62)
-        tag3 = rt.TLatex(0.26, 0.92, "H(WW)");                         tag3.SetNDC(); tag3.SetTextFont(42)
-        tag4 = rt.TLatex(0.20, 0.82, "ggF");                           tag4.SetNDC(); tag4.SetTextFont(42)
-        tag5 = rt.TLatex(0.08, 0.82, "VBF");                           tag5.SetNDC(); tag5.SetTextFont(42)
+        tag2 = rt.TLatex(0.20, 0.82, "CMS"); tag2.SetNDC(); tag2.SetTextFont(62)
+        # tag2 = rt.TLatex(0.17, 0.92, "CMS"); tag2.SetNDC(); tag2.SetTextFont(62)
+        #tag3 = rt.TLatex(0.26, 0.92, "H(WW)");                         tag3.SetNDC(); tag3.SetTextFont(42)
+        tag4 = rt.TLatex(0.20, 0.75, "ggF"); tag4.SetNDC(); tag4.SetTextFont(42)
+        tag5 = rt.TLatex(0.08, 0.75, "VBF"); tag5.SetNDC(); tag5.SetTextFont(42)
 
         def set_bin_labels(h, labels):
             ax = h.GetXaxis()
@@ -250,8 +251,8 @@ class UnfoldingPlot:
         gggf.SetMarkerColor(1); gggf.SetMarkerStyle(20); gggf.SetLineColor(1); gggf.SetLineWidth(3)
         gggf.Draw("pe same")
 
-        tag2.SetTextSize(textsize1); tag2.Draw()
-        tag3.SetTextSize(textsize1); tag3.Draw()
+        tag2.SetTextSize(textsize2); tag2.Draw()
+        # tag3.SetTextSize(textsize1); tag3.Draw()
         tag4.SetTextSize(textsize1); tag4.Draw()
 
         pad3.cd()
@@ -345,7 +346,7 @@ class UnfoldingPlot:
         grat2.SetMarkerColor(1); grat2.SetMarkerStyle(20); grat2.SetLineColor(1); grat2.SetLineWidth(3)
         grat2.Draw("pe same")
 
-        pad1.cd(); tag2.SetTextSize(textsize1); tag2.Draw(); tag3.SetTextSize(textsize1); tag3.Draw()
+        pad1.cd(); tag2.SetTextSize(textsize2); tag2.Draw(); #tag3.SetTextSize(textsize1); tag3.Draw()
         pad3.cd(); tag1.SetTextSize(textsize3); tag1.Draw(); tag5.SetTextSize(textsize3); tag5.Draw()
         pad1.cd(); leg.Draw("same")
 
@@ -364,4 +365,4 @@ if __name__ == "__main__":
     print('creating the plot...')
     #up.makeplot()
     # up.makeplot(top_logy=True, top_yrange=(1.0, 10000.0), ratio_yrange=(-5.0, 15.0))
-    up.makeplot(top_logy=False, top_yrange=(-3000.0, 2000.0), ratio_yrange=(-10.0, 10.0))
+    up.makeplot(top_logy=False, top_yrange=(-3000.0, 2000.0), ratio_yrange=(-11, 11))
