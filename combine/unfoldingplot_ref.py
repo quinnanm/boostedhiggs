@@ -364,5 +364,5 @@ if __name__ == "__main__":
     #generate the plot
     print('creating the plot...')
     #up.makeplot()
-    # up.makeplot(top_logy=True, top_yrange=(1.0, 10000.0), ratio_yrange=(-5.0, 15.0))
-    up.makeplot(top_logy=False, top_yrange=(-3000.0, 2000.0), ratio_yrange=(-11, 11))
+    up.makeplot(top_logy=True, top_yrange=(1.0, 10000.0), ratio_yrange=(-5.0, 15.0))
+    # up.makeplot(top_logy=False, top_yrange=(-3000.0, 2000.0), ratio_yrange=(-11, 11))
