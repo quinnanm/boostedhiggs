@@ -14,7 +14,7 @@ POIList = {'ggF': ['r_ggH_pt200_300', 'r_ggH_pt300_450', 'r_ggH_pt450_inf'],
 
 class UnfoldingPlot:
 
-    def __init__(self, combinecards='templates/v17/datacards_unfolding', poilist=POIList):
+    def __init__(self, combinecards='templates/v19/datacards_unfolding', poilist=POIList):
 
         self.cards_dir = combinecards
         self.multidimresults = "multidimresults.txt"
@@ -24,7 +24,7 @@ class UnfoldingPlot:
         #run the fit if needed
         print('combine cards directory: '+combinecards)
         print('getting multidimfit results...')
-        self.runfit(rerunfit=False)
+        self.runfit(rerunfit=True)
         self.poivals = self.parsemultidimresult(self.poilist)
 
         #get the SM cross sections and calculate unfolded differential ones
@@ -364,5 +364,5 @@ if __name__ == "__main__":
     #generate the plot
     print('creating the plot...')
     #up.makeplot()
-    up.makeplot(top_logy=True, top_yrange=(1.0, 10000.0), ratio_yrange=(-5.0, 15.0))
-    # up.makeplot(top_logy=False, top_yrange=(-3000.0, 2000.0), ratio_yrange=(-11, 11))
+    # up.makeplot(top_logy=True, top_yrange=(1.0, 10000.0), ratio_yrange=(-5.0, 15.0))
+    up.makeplot(top_logy=False, top_yrange=(-3000.0, 2000.0), ratio_yrange=(-11, 11))

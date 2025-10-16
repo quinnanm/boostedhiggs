@@ -5,7 +5,7 @@
 
 
 # Default value for cards_dir
-cards_dir="templates/v17/datacards_unfolding"
+cards_dir="templates/v19/datacards_unfolding"
 
 # Parse the --cardsdir argument
 while [[ "$#" -gt 0 ]]; do
